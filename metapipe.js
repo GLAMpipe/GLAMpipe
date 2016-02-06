@@ -13,6 +13,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 // load stock nodes ===================================================
 metapipe.initNodes();
+metapipe.initDB();
 
 // routes =============================================================
 require('./app/routes.js')(app, metapipe);

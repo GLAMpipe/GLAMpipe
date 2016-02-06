@@ -5,6 +5,21 @@ var mongoquery 	= require("../app/mongo-query.js");
 var exports 	= module.exports = {};
 
 
+exports.initDB = function () {
+	mongoquery.findOne({},"metapipe", function(data) { 
+		if(data) {
+			console.log("DB: project counter exists");
+		} else {
+			console.log("DB: creating project counter");
+			mongoquery.insert("metapipe", {"project_count":0}, function(result) {
+				if(result.error)
+					console.log("ERROR: could not create project counter!");
+				return;
+			});
+		}
+	});
+}
+
 
 exports.createProject = function (title, res) {
 	console.log("creating project", title);
