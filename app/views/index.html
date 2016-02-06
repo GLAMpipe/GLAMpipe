@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>METAPIPE</title>
+
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/knockout.js"></script>
+<link rel="stylesheet" type="text/css" href="css/js-graph-it.css" />
+<link rel="stylesheet" type="text/css" href="css/sf-homepage.css" />
+<style>
+	
+</style>
+<script>
+
+	var BetterListModel = function () {
+		var self = this;
+		this.itemToAdd = ko.observable("");
+		this.allItems = ko.observableArray(); // Initial items
+		this.loadItems = function () {
+			$.getJSON("/get/projects", function(data) { 
+				// Now use this data to update your view models, 
+				// and Knockout will update your UI automatically 
+				for(var i = 0; i< data.length; i++) {
+					self.allItems.push(data[i]);
+				}
+				
+				//alert(self.allItems()[0].title);
+			})
+		}
+		
+	 
+		this.addItem = function () {
+			if ((this.itemToAdd() != ""))  {// Prevent blanks 
+				var data = {'title':self.itemToAdd()};
+				$.post("/create/project", data, function(returnedData) {
+					// This callback is executed if the post was successful  
+					self.itemToAdd(""); // Clear the text box 
+					self.allItems([]);
+					self.loadItems();
+				});
+			}
+		};
+	 
+		this.removeSelected = function () {
+			this.allItems.removeAll(this.selectedItems());
+			this.selectedItems([]); // Clear selection
+		};
+	 
+		this.sortItems = function() {
+			this.allItems.sort();
+		};
+	};
+
+	function onLoad()
+	{
+		var projects = new BetterListModel();
+		ko.applyBindings(projects);
+		projects.loadItems();
+		
+	}
+		
+	
+</script>
+</head>
+<body onload="onLoad();">
+
+	<h1>METAPIPE</h1>
+	<div id="node_bar" class="selected">
+		<h2 class="selected">Create project</h2>
+		<form data-bind="submit:addItem">
+			Add project: <input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
+			<button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
+		</form>
+	</div>
+
+	<div>
+		<h2>Projects</h2>
+		<ul data-bind="foreach: allItems">
+			<li>
+				<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
+			</li>
+		</ul>
+	</div>
+	</body>
+</html>

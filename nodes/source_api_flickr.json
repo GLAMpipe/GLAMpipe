@@ -1,0 +1,15 @@
+{
+	"nodeid": "source_api_flickr",
+	"type": "source",
+	"subtype": "API",
+	"title": "Flickr import (NOT IMPLEMENTED)",
+	"description": "Import from Flickr (requires an API key)",
+	"params_view": "<div id=\"upload\" title=\"Upload file\"> <form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\"> <label>title (collection name)</label><input type=\"text\" name=\"title\" id=\"nodetitle\" required /> \n<label>data description</label>\n<textarea name=\"data_description\" />\n<label>Flickr API key </label><input type=\"text\" name=\"apikey\" id=\"apikey\" required />\n<input name=\"target\" value=\"item\" hidden/> \n<label>Album </label><input type=\"text\" name=\"album\" id=\"album\" required /> </br></br></br></br><input type=\"submit\" value=\"Fetch data and create source node\" class=\"submit\" /> </form> <div class=\"loading\">Loading...</div> <div id=\"message\"></div> </div>",
+	"settings_view": "<div id=\"upload\" title=\"Upload file\"> <form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\"> <label>title (collection name)</label><input type=\"text\" name=\"title\" id=\"nodetitle\" required /> \n<label>data description</label>\n<textarea name=\"data_description\" />\n<label>Flickr API key </label><input type=\"text\" name=\"apikey\" id=\"apikey\" required />\n<input name=\"target\" value=\"item\" hidden/> \n<label>Album </label><input type=\"text\" name=\"album\" id=\"album\" required /> </br></br></br></br><input type=\"submit\" value=\"Fetch data and create source node\" class=\"submit\" /> </form> <div class=\"loading\">Loading...</div> <div id=\"message\"></div> </div>",
+	"data_view": "<h1>data view not created!</h1><p>This means that something went wrong...</p>",
+	"type_desc": "With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API.",
+	"collection":"",
+	"x":80,
+	"y":80,
+	"in":""
+}

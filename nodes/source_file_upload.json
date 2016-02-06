@@ -1,0 +1,13 @@
+{
+	"nodeid": "source_file_upload",
+	"type": "source",
+	"subtype": "file",
+	"title": "Upload",
+	"description": "import file (xml, csv, tsv or json)",
+	"params_view": "<label>Select your file (csv, tsv, xml or json) </label><input type=\"file\" name=\"file\" id=\"file\" required /> ",
+	"settings_view":"no settings",
+	"data_view": "<h1>data view not created!</h1><p>This means that something went wrong...</p>",
+	"type_desc": "With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API."
+
+
+}

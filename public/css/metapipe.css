@@ -1,0 +1,223 @@
+h2, h3 {
+	background-color: grey;
+	padding:5px;
+	color:white;
+}
+
+p {
+	padding:5px;
+}
+
+input, textarea {
+	width:90%;
+}
+input[type='checkbox'] { 
+	width:20px;
+	}
+	
+#node_bar {
+	border: 1px solid black;
+	padding:10px;
+}
+
+#node_bar button {
+	display:block;
+	margin-top:20px;
+}
+
+
+#node_bar .description {
+	margin-bottom:20px;
+	margin-top:10px;
+}
+
+#node_bar .params {
+	margin-bottom:20px;
+	padding:10px;
+	border: 1px solid black;
+}
+
+#node_bar .settings {
+	margin-bottom:20px;
+	padding:10px;
+	border: 1px solid black;
+}
+
+#node_bar .subhead {
+	background-color: #7AA3F2;
+	color:white;
+	padding:5px;
+}
+
+#node_bar table td {
+	border: 0px solid black;
+	padding:1px;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+#node_bar label {
+	font-weight: bold;
+}
+
+#result table {
+	border: 1px solid black;
+	width:100%;
+	padding:10px;
+}
+
+#result table tr td{
+	border-top: 1px solid black;
+}
+
+
+.selected h2{
+	background-color: #2A62CC;
+}
+
+#node_settings {
+	float:right;
+	width:350px;
+	height:100%;
+	background-color: white;
+}
+
+.node_info {
+	margin-bottom:10px;
+	background-color: white;
+}
+
+#node_msg {
+	padding:20px;
+	border: 1px solid black;
+}
+
+.busy {
+	background-color: red;
+}
+
+.done {
+	background-color: #A0CF99;
+}
+
+#node_creator {
+	position:absolute;
+	top:0px;
+	right:0px;
+
+	z-index:100000;
+	padding:20px;
+	background-color: white;
+	width:550px;
+	border: 1px solid black;
+	font-size:14px;;
+}
+
+#node_creator label, #node_creator div {
+	margin-top:10px;
+	display:block;
+	
+}
+
+#node_creator label {
+	font-weight:bold;
+}
+
+#node_creator .node_types div {
+	margin-left:20px;
+}
+
+#node_creator .settings {
+	border: 1px solid black;
+	border-left: 4px solid black;
+}
+
+#node_creator .settings .submit {
+	background-color: #649834;
+	color:white;
+}
+
+#node_creator button {
+	float:right;
+}
+
+.button {
+	//font-family: 'Lobster', sans-serif;
+  background: #47666A;
+  -moz-border-radius: 5px;
+  border-radius: 0px 0px 0px 10px;
+  color: #ffffff;
+  font-size: 1em;
+  padding: 5px 10px 5px 10px;
+  text-decoration: none;
+
+  width:120px;
+  margin-top:1px;
+  margin-right:1px;
+}
+
+
+
+.export h2{
+	background-color: #AE6B6B;
+}
+
+.cluster h2{
+	background-color: #BA8D32;
+}
+.cluster h3{
+	background-color: #B9A276;
+}
+
+
+.source h2{
+	background-color: #1885C0;
+}
+.source h3{
+	background-color: #699FBC;
+}
+
+.lookup h2 {
+	background-color:#649834;
+}
+
+.collection h2 {
+	background-color: #1885C0;
+}
+
+
+
+ table td {
+	border: 1px solid black;
+	padding:5px;
+}
+
+.delete_icon {
+	float:right;
+	width:30px;
+	height:28px;
+	font-size: 20px;
+	text-align: center;
+	vertical-align: middle;
+	background-color: #AE6B6B;
+	
+}
+
+.delete {
+	float:right;
+	width:80px;
+}
+
+.delete_confirm {
+	padding:10px;
+}
+
+.good {
+	background-color: #81C981;
+}
+
+.warning {
+	background-color: #EFB134;
+}

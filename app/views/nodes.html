@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>METAPIPE</title>
+<script type="text/javascript" src="../js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="../js/knockout.js"></script>
+<link rel="stylesheet" type="text/css" href="../css/js-graph-it.css" />
+<link rel="stylesheet" type="text/css" href="../css/sf-homepage.css" />
+<link rel="stylesheet" type="text/css" href="../css/metapipe.css" />
+<style>
+	
+</style>
+
+
+<script>
+	// http://jsfiddle.net/85afB/1/   KATSO TÄMÄ
+	// http://gojs.net/latest/index.html
+	// jointjs
+ko.bindingHandlers.inline = {
+    init: function(element, valueAccessor) {
+        var span = $(element);
+        var input = $('<input />',{'type': 'text', 'style' : 'display:none'});
+        span.after(input);
+        
+        ko.applyBindingsToNode(input.get(0), { value: valueAccessor()});
+        ko.applyBindingsToNode(span.get(0), { text: valueAccessor()});
+        
+        span.click(function(){
+            input.width(span.width());
+            span.hide();
+            input.show();
+            input.focus();
+        });
+        
+        input.blur(function() { 
+            span.show();
+            input.hide();
+        });
+        
+        input.keypress(function(e){
+            if(e.keyCode == 13){
+               span.show();
+               input.hide();
+           }; 
+        });
+    }
+};
+	
+	var collection_id = "kartverket_source";
+	var nodeList = function () {
+		var self = this;
+		this.params = {
+			skip:function() {return "?skip="+this.skip_value;}, 
+			skip_value: 0, 
+			skip_func: function (val) {
+				this.skip_value = this.skip_value + val;
+				if (this.skip_value <= 0)
+					this.skip_value = 0;
+				},
+			sort:""
+		};
+
+		this.collection = ko.observableArray(); // Initial items
+		this.loadNodes = function (nodesModel) {
+			$.getJSON("/get/nodes/", function(data) { 
+				// Now use this data to update your view models, 
+				// and Knockout will update your UI automatically 
+				self.collection([]);
+				for(var i = 0; i< data.length; i++) {
+					var d = data[i];
+					self.collection.push(data[i]);
+				}
+				//alert(self.collection()[0].title);
+			})
+		}
+	 
+		
+		
+		this.removeSelected = function () {
+			this.collection.removeAll(this.selectedItems());
+			this.selectedItems([]); // Clear selection
+		};
+	 
+		this.sortItems = function() {
+			this.collection.sort();
+		};
+        
+        this.nextPage = function() {
+            this.params.skip_func(50);
+            this.loadNodes();
+        };
+
+        this.prevPage = function() {
+            this.params.skip_func(-50);
+            this.loadNodes();
+        };
+        
+        this.sort = function (data, event) {
+			this.params.sort = '&sort=' + event.target.id;
+			this.collection([]);
+			this.params.skip_value = 0;
+			this.loadNodes();
+		};
+	};
+	
+
+
+	function onLoad() {
+
+		var nodes = new nodeList();
+		ko.applyBindings(nodes);
+		nodes.loadNodes(nodes);
+		
+	}
+
+function getURLParameter(name) {
+  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+}
+
+</script>
+</head>
+<body onload="onLoad();">
+
+	<h1>PROJECT: [[project]]</h1>
+	<button data-bind="click: prevPage">prev</button>
+	<button data-bind="click: nextPage">next</button>
+	
+	<div id="node_bar" class="selected">
+		<h2 class="selected">TOOLS</h2>
+	</div>
+
+	<div>
+		<table>
+			<thead>
+				<tr><th id="author" data-bind="click: sort">Author</th><th id="mapname"data-bind="click: sort">Mapname</th><th>Institution</th></tr>
+			</thead>
+			<tbody data-bind="foreach: collection">
+				<tr>
+					<td><span data-bind="inline: author"></span></td>
+					<td data-bind="text: mapname"></td>
+					<td data-bind="text: institution"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	</body>
+</html>

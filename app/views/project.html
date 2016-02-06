@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>METAPIPE</title>
+<script type="text/javascript" src="/js/js-graph-it.js"></script>
+<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/js/knockout.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/js-graph-it.css" />
+<link rel="stylesheet" type="text/css" href="/css/sf-homepage.css" />
+<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
+<style>
+	
+</style>
+
+
+<script>
+	
+	function stopDragListener (ele) {
+		var data = {'id': ele.id, 'x':ele.style.left, 'y':ele.style.top};
+		$.post("/set/node/position", data, function(returnedData) {});
+	}
+
+	var nodeList = function () {
+		var self = this;
+		this.currentProject = "";
+		this.currentNode = "";
+		this.currentCollection = "";
+		this.projectNodes = ko.observableArray(); 
+		this.add_node = function (data, event) {
+			var ele = $(event.target);
+			var data = {'input': ele.data('id')};
+			$.post("/create/node", data, function(returnedData) {
+				// This callback is executed if the post was successful  
+				console.log('created node');
+			});
+		}
+
+		this.selectNode = function (data, event) {
+			var obj = $(event.target);
+			var node_settings_html = 
+				'<div id="node_bar" class="selected">' + 
+				'	<h2>' +data.title+": " +data.data_title+ '</h2>' +
+				'	<div class="description">'+data.description+'</div>' +
+				'	<h3 class="subhead">params</h3>' +
+				'	<div class="params">' +
+						self.nodeParams(data) +
+				'	</div>' +
+				'	<h3 class="subhead">settings</h3>' +
+				'	<div class="settings">' +
+						data.settings_view +
+				'	</div>' +	
+				'	<button id="'+data._id+'" class="run">run this node!</button>' +
+				'</div>';
+			$('#node_bar').replaceWith(node_settings_html);
+			self.setSettingsValues(data);
+		}
+		
+		this.nodeParams = function (data) {
+			var html = "<table>";
+			for(var prop in data.params) {
+				html += "<tr><td>params."+prop+"</td><td> = " + data.params[prop] + "</td></tr>";
+			}
+			html += "</table>";
+			return html;
+		}
+		
+		this.setSettingsValues = function (data) {
+			for(var prop in data.settings) {
+				if(typeof data.settings[prop] == "boolean")
+					$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+				else
+					$("input[name='"+prop+"']").val(data.settings[prop]);
+			}
+		}
+		
+		this.loadProject = function (nodesModel) {
+			$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
+				var data = project.nodes;
+				if(typeof data !== "undefined") { 
+					for(var i = 0; i< data.length; i++) {
+						var d = data[i];
+						self.projectNodes.push(data[i]);
+					}
+				}
+				$("#project_title").text(project.title);
+				resizeCanvas();
+				initPageObjects();
+				
+			})
+		}
+
+
+		this.collection = ko.observableArray(); // Initial items
+		
+		this.loadNodes = function (nodesModel) {
+			$.getJSON("/get/nodes", function(data) { 
+				for(var i = 0; i< data.length; i++) {
+					var d = data[i];
+					self.collection.push(data[i]);
+				}
+			})
+		}
+
+
+		this.openNodeTypes = function(data, event) {
+			var obj = $(event.target);
+			// close all tabs
+			obj.parent().parent().find(".node_types").hide();
+			obj.parent().parent().find(".settings").hide();
+			// open current tab
+			obj.parent().find(".node_types").show();
+		}
+
+
+		this.openNodeParams = function(data, event) {
+			var obj = $(event.target);
+			var settings = obj.parent().find(".params");
+			// add settings html only at first run
+			if(settings.children().length == 0) {
+				var div = $("<div class=\"params\"></div>");
+				var nameInput = $("<label>title</label><input name=\"title\" required/>");
+				var descInput = $("<label>description</label><textarea name=\"description\"/>");
+				settings.append(div);
+				
+				if(data.type == "source") {
+					var form = $("<form data-nodeid=\""+data.nodeid+"\" id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">");
+					var submit = $("<input type=\"submit\" value=\"upload and create source node\" class=\"submit\" />");
+					div.append(form);
+					form.append(nameInput);
+					form.append(descInput);
+					form.append(data.params);
+					form.append(submit);
+				} else {
+					div.append(nameInput);
+					div.append(descInput);
+					div.append(data.params);
+					settings.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createnode\">Create node</button>");
+				}
+			}
+			
+			if(settings.is(":visible")) {
+				$(".settings").hide();
+			} else {
+				$(".settings").hide();
+				settings.show();
+			}
+		}
+
+
+		this.openCreator = function(data, event) {
+			var obj = $(event.target);
+			$("#node_creator > div").show();
+			$("#node_creator > .source").hide();
+			//$("#node_creator > .source").hide();
+			$("#node_creator").show();
+			self.currentNode = obj.parent().attr("id");
+			self.currentCollection = obj.parent().data("collection");
+			
+		}
+
+		this.openSourceCreator = function(data, event) {
+			var obj = $(event.target);
+			$("#node_creator").show();
+			$("#node_creator > div").hide();
+			$("#node_creator > .source").show();
+		}
+
+		this.closeCreator = function(data, event) {
+			$("#node_creator").hide();
+		}
+
+		this.removeSelected = function () {
+			this.allNodes.removeAll(this.selectedItems());
+			this.selectedItems([]); // Clear selection
+		};
+	 
+		this.sortItems = function() {
+			this.allNodes.sort();
+		};
+		
+		// connector class (css)
+		this.connect = function (data) {
+			return "connector " + data.in + " " + data._id + " down_start";
+		};
+		
+		this.deleteNodeConfirm = function (data, event) {
+			var obj = $(event.target);
+			obj.parent().find(".delete_confirm").show();
+		}
+		
+		this.cancelDeleteNode = function (data, event) {
+			var obj = $(event.target);
+			obj.parent().parent().find(".delete_confirm").hide();
+		}
+		
+		this.reallyDeleteNode = function (data, event) {
+			
+			var params = {node:data._id, project:self.currentProject};
+			$.post("/delete/node/", params, function(data) {
+				console.log('node deleted');
+				if(data.error)
+					alert(data.error);
+				self.reloadProject();
+			});
+		}
+		
+		this.reloadProject = function () {
+			self.projectNodes.removeAll();
+			$("#mainCanvas").empty();
+			self.loadProject();
+		}
+	};
+
+	function runNode(params, node_id) {
+		$("#node_msg").text("running...");
+		$("#node_msg").removeClass("done");
+		$("#node_msg").addClass("busy");
+		$.post("/run/node/" + node_id, params, function(data) {
+			console.log('node executed');
+			if(data.error)
+				alert(data.error);
+
+			$("#node_msg").html("<div>msg: " + data.msg + "</div>");
+			$("#node_msg").append("<div>count: " + data.count + "</div>");
+			$("#node_msg").append("<div>status: " + data.status + "</div>");
+			$("#node_msg").removeClass("busy");
+			$("#node_msg").addClass("done");
+		});
+	}
+
+	function onLoad() {
+
+		var path = window.location.pathname.split("/");
+		resizeCanvas();
+		$('.loading').hide();
+		$("#node_creator").hide();
+		var nodes = new nodeList();
+		nodes.currentProject = path[path.length - 1];
+		ko.applyBindings(nodes);
+		nodes.loadNodes(nodes);
+		nodes.loadProject(nodes);
+
+		nodes.genSettings = ko.pureComputed(function() {
+			return this.par;
+		},nodes);
+
+		$(document).on('click','.run', function(e) {
+			 
+			var map = {};
+			// read input from settings
+			$("input").each(function() {
+				map[$(this).attr("name")] = $(this).val();
+			});
+			// and run
+			runNode(map, this.id);
+			e.preventDefault();
+		});	
+
+		// handler for file upload node creation
+		$(document).on('submit', "#uploadfile", function(e) {
+
+			var params = {};
+			var obj = $(e.target);
+			$("#message").empty(); 
+			$('.loading').show();
+			
+			// read params
+			obj.find("input,textarea, select").not("input[type=button],input[type=submit]").each(function(){
+				params[$(this).attr("name")] = $(this).val(); 
+			});
+			e.preventDefault();
+			var obj = $(e.target);
+			var nodeId = obj.data("nodeid");
+			var fd = new FormData(this);
+			fd.append("project",nodes.currentProject);
+			
+			// upload file 
+			$.ajax({
+				url: "/upload/file",
+				type: "POST",
+				dataType: "json",
+				data:  fd,
+				contentType: false, 
+				cache: false,
+				processData:false,
+				success: function(data)
+				{
+					if (data.error) {
+						alert(data.error);
+						$('#loading').hide();
+					} else {
+						// create actual node
+						data.params = JSON.stringify(params);
+						data.nodeid = nodeId;
+						$.post("/create/source/node", data, function(returnedData) {
+							console.log('created node');
+							$("#node_creator").hide();
+							nodes.reloadProject();
+						});
+					}
+				}	        
+		   });
+		});
+
+
+
+		// handler for normal node creation
+		$(document).on('click', ".createnode", function(e) {
+			var data = {};
+			var params = {};
+			var obj = $(e.target);
+			
+			// read params
+			obj.parent().find("input,textarea, select").not("input[type=button]").each(function(){
+				params[$(this).attr("name")] = $(this).val(); 
+			});
+			data.params = JSON.stringify(params);
+			
+			var nodeId = obj.data("nodeid");
+			$("#message").empty(); 
+			data.project = nodes.currentProject;
+			data.nodeid = nodeId;
+			data.input_node = nodes.currentNode; 
+			data.collection = nodes.currentCollection; 
+			console.log(data);
+
+			$.post("/create/node", data, function(returnedData) {
+				console.log('created node');
+				$("#node_creator").hide();
+				nodes.reloadProject();
+			});
+			e.preventDefault();
+		});
+
+	}
+		
+	/**
+	 * Resizes the main canvas to the maximum visible height.
+	 */
+	function resizeCanvas()
+	{
+		var divElement = document.getElementById("mainCanvas");
+		var screenHeight = window.innerHeight || document.body.offsetHeight;
+		divElement.style.height = (screenHeight - 16) + "px";
+	}
+	
+		
+	function getURLParameter(name) {
+	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
+	}
+
+</script>
+
+<script type="text/html" id="node-template">
+	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block draggable" style="width:250px;"> 
+		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
+		<h2 data-bind="click:$root.selectNode, text:params.title"></h2> 
+		
+		<div class="delete_confirm" style="display:none">
+			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
+			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
+		</div>
+		
+	   <div class="node_info"> 
+			<p data-bind="html:params.description"></p> 
+			<a data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
+		</div> 
+		<button data-bind="click: $root.openCreator" class="add_node">add node</button> 
+		
+	</div>
+
+	 <!-- ko if: input_node != '' -->
+	<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' down_start'">
+		<img class="connector-end" src="../arrow.gif">
+	</div>
+	<!-- /ko -->
+</script>
+
+</head>
+<body onload="onLoad();">
+
+	<a href="/">back to projects</a>
+	<h1 id="project_title"></h1>
+	<button data-bind="click: openSourceCreator" class="add_node" >add source</button>
+	<div id="node_settings">
+		<div id="node_bar" class="selected">
+			<h2 class="selected">Select node</h2>
+		</div>
+		<div id="node_msg" class="done">status</div>
+	</div>
+	
+	
+	<div id="mainCanvas" class="canvas" data-bind="template: { name: 'node-template', foreach: projectNodes }"> 
+
+	</div>
+	
+	
+	<div id="node_creator">
+		<button data-bind="click:closeCreator">close</button>
+		<h1>Choose node type</h1>
+		<!-- ko foreach: collection -->
+		<div data-bind="attr:{id:_id.type + '_node', class:_id.type}">
+			<h2 data-bind="text: _id.type,click:$parent.openNodeTypes"></h2>
+			<p data-bind="html:_id.description"></p>
+			<div data-bind="foreach: subtypes" class="node_types" style="display:none">
+				<div data-bind="attr:{id:sub.subtype + '_node', class:sub.subtype}">
+					<h3 data-bind="text: sub.subtype"></h3>
+					<div class="node_types" >
+						<ul data-bind="foreach: nodes" class="node_types">
+							<li data-bind="text:title, click:$root.openNodeParams"></li>
+							<div class="params"></div>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /ko -->
+	</div>
+	</body>
+</html>
