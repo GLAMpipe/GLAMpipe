@@ -12,6 +12,7 @@ newborn
 You'll need git, mongodb, npm and nodejs.
 ```
 git clone https://github.com/artturimatias/metapipe.git
+cd metapipe
 npm install
 nodejs metapipe.js
 ```
