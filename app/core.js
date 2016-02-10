@@ -1,10 +1,15 @@
 var multer 		= require("multer");
 var mongojs = require('mongojs');
 var async = require("async");
+const vm = require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var exports 	= module.exports = {};
 
-
+/**
+ * Create metapipe collection on start up
+ * - "metapipe" is only collection that must exist
+ * - makes sure that "project_count" exists
+ */
 exports.initDB = function () {
 	mongoquery.findOne({},"metapipe", function(data) { 
 		if(data) {
@@ -90,7 +95,19 @@ exports.getNodeSettings = function (node_id, res) {
 	mongoquery.findOneById(node_id, "nodes", function(data) { res.json(data) });
 }
 
-
+/**
+ * run project node based on node type
+ * CLUSTER
+ * - executes metapipe.cluster function
+ * SOURCE - API
+ * - for API node, calls metapipe.callAPI 
+ * - executes script in node's scripts.run
+ * SOURCE -FILE
+ * - calls metapipe.importFile 
+ * - executes script in node's scripts.run 
+ * DEFAULT
+ * - applies node's scripts.run to each record
+ */ 
 exports.runNode = function (req, res) {
 	console.log('Running node:', req.params.id);
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "projects", function(project) {
@@ -101,10 +118,11 @@ exports.runNode = function (req, res) {
 		var index = indexByKeyValue(project.nodes, "_id", req.params.id);
 		var node = project.nodes[index];
 		node.settings = req.body;
+		node.project = project._id;
 
 		switch (node.type) {
 			case "cluster":
-				console.log("CLUSTER NODE");
+				console.log("RUNNING CLUSTER NODE");
 				var cluster_params = {
 					collection: 'kartverket_source',
 					field: 'data',
@@ -116,8 +134,52 @@ exports.runNode = function (req, res) {
 				}
 				mongoquery.cluster(cluster_params);
 			break;
+			
+			
+			case "source":
+				
+				var callback = function(data) {
+					
+					// context for node scripts
+					var sandbox = {
+						context: {
+							node: node,
+							console:console,
+							data:data
+						},
+						out: {
+							value:"",
+							msg:""
+						}
+					};
+
+					// let node pick the data it wants from result
+					vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
+					// empty collection
+					mongoquery.empty(node.collection, {}, function() {
+						// insert
+						mongoquery.insert(node.collection, sandbox.out.value, function() {
+							console.log("DONE SOURCE LOAD");
+							vm.runInNewContext(node.scripts.after_run, sandbox, "node.script.after_run");
+							//generate view and do *not* wait it to complete
+							exports.generateView(node, function(msg) {
+								console.log("VIEW:", msg);
+							})
+							res.json({msg:sandbox.out.msg, count:sandbox.out.value.length, status:"ok"})
+						});
+					});
+				}
+				if(node.subtype === "API") {
+					exports.callAPI(node, callback);
+				} else {
+					exports.importFile(node, callback);
+				}
+				
+			break;
+			
+			
 			default:
-				if(typeof(node.func) !== "undefined") {
+				if(typeof(node.scripts.run) !== "undefined") {
 					exports.applyFuncForEach(node, function(error, count) {
 						if(error) {
 							res.json({"error": error});
@@ -143,7 +205,35 @@ function getPrevNode(project, node) {
 	}
 }
 
+/**
+ * Generats data view for project node
+ * - if views.data_static is defined in node, then copy that to views.data
+ * - otherwise generate view based on kyes in first record
+ * */
+exports.generateView = function (node, callback) {
+	
+	if(typeof node.views.data == "undefined" || node.views.data == "" ) {
+		if(node.views.data_static) {
+			mongoquery.editProjectNode(node._id, {"views.data":node.views.data_static}, function() {
+				return callback("using static");
+			})
+		} else {
+			generateView(node, function(view) {
+				mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
+				return callback("using dynamic");
+				})
+			}) 
+		}
+	} else {
+		callback("exists");
+	}
+}
 
+
+
+/**
+ * updates project nodes x and y
+*/ 
 exports.setNodePosition = function (params, res) {
 
 	var xx = params.x.replace(/px/,"");
@@ -155,75 +245,94 @@ exports.setNodePosition = function (params, res) {
 	);
 }
 
-
+/**
+ * Create default project node
+ * - adds params defined by user to the stock node
+ * - saves result to project record (under "nodes")
+ */
+ 
 exports.createNode = function (nodeParams, res) {
 
 	console.log("nEW", mongojs.ObjectId());
 	console.log("nodeparams:", nodeParams);
-	// generate view
-	//generateView(nodeParams, function(view) {
-		// copy node to project with its settings
-		mongoquery.findOne({"nodeid":nodeParams.nodeid}, "nodes", function(node) {
-			if(node) {
-				node.input_node = nodeParams.input_node;
-				node.params = JSON.parse(nodeParams.params);
-				node.collection = nodeParams.collection;
-				node.x = "0";
-				node.y = "0";
-				node._id = mongojs.ObjectId();
-				//node.collection = nodeParams.collection;
-				mongoquery.update("projects",
-					{_id:mongojs.ObjectId(nodeParams.project)},
-					{$push:{nodes: node}},
-					function() {
-						res.json({"status": "node created"})
-				})
-			} else {
-				console.log("ERROR: node not found");
-			}
-		});
-	//});
+	// copy node to project with its settings
+	mongoquery.findOne({"nodeid":nodeParams.nodeid}, "nodes", function(node) {
+		if(node) {
+			node.input_node = nodeParams.input_node;
+			node.params = nodeParams.params;
+			node.collection = nodeParams.collection;
+			node.x = "0";
+			node.y = "0";
+			node._id = mongojs.ObjectId();
+			console.log(node);
+			mongoquery.update("projects",
+				{_id:mongojs.ObjectId(nodeParams.project)},
+				{$push:{nodes: node}},
+				function() {
+					res.json({"status": "node created"})
+			})
+		} else {
+			console.log("ERROR: node not found");
+		}
+	});
 }
 
-exports.createSourceNode = function (nodeParams, res) {
+/**
+ * Create source project node
+ * - adds params defined by user to the stock node
+ * - creates collection name
+ * - saves result to project record (under "nodes")
+ */
+exports.createSourceNode = function (nodeRequest, res) {
 
 	console.log("nEW", mongojs.ObjectId());
-	console.log(nodeParams);
+	
+	// if we do not have collection name, then create it
+	if(!nodeRequest.collection) {
+		mongoquery.findOneById(nodeRequest.project, "projects", function(data) {
+			nodeRequest.collection = data.prefix + nodeRequest.params.title;
+			initNode(nodeRequest, res);
+		});
+	} else {
+		initNode(nodeRequest, res);
+	}
+}
+
+function initNode (nodeRequest, res) {
 	// generate view
-	generateView(nodeParams, function(view) {
+	//generateView(nodeRequest, function(view) {
 		// copy node to project with its settings
-		mongoquery.findOne({"nodeid":nodeParams.nodeid}, "nodes", function(node) {
+		mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "nodes", function(node) {
 			if(node) {
-				node.data_view = view;
 				node.input_node = "";
-				node.params = JSON.parse(nodeParams.params);
-				node.data_description = nodeParams.data_description;
-				node.data_title = nodeParams.title;
-				node.collection = nodeParams.collection;
+				node.params = nodeRequest.params;
+				node.collection = nodeRequest.collection;
 				node.x = "0";
 				node.y = "0";
 				node._id = mongojs.ObjectId();
 				mongoquery.update("projects",
-					{_id:mongojs.ObjectId(nodeParams.project)},
+					{_id:mongojs.ObjectId(nodeRequest.project)},
 					{$push:{nodes: node}},
 					function(error) {
-						if(error)
+						if(error) {
 							console.log(error);
+						}
+						console.log("node created");
 						res.json({"status": "node created"})
 				})
 			} else {
-				console.log("node " + nodeParams.nodeid + " not found!");
-				res.json({"error": "node " + nodeParams.nodeid + " not found"})
+				console.log("node " + nodeRequest.nodeid + " not found!");
+				res.json({"error": "node " + nodeRequest.nodeid + " not found"})
 			}
 		});
-	});
-	//mongoquery.insert ("nodes", node, function(data) {
-		//res.json({"status": "node created"});
 	//});
 }
 
-
-
+/**
+ * Delete project node
+ * - removes node
+ * - if source or cluster node, then also removes collection
+ */
 exports.deleteNode = function (params, res) {
 
 	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "projects", function(project) {
@@ -268,6 +377,10 @@ function inputNode(node, nodes) {
 	return false;
 }
 
+/**
+ * Get paged collection data
+ * - gives records between skip and skip + limit
+ */
 exports.getCollection = function (req, res) {
 
 	var limit = parseInt(req.query.limit);
@@ -319,7 +432,10 @@ exports.nodeView = function  (nodeId, cb) {
 	});
 }
 
-
+/**
+ * Generate collection view page
+ * - combines base view html (view.html) to node's data view (views.data)
+ */
 exports.viewCollection = function  (collectionName, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
@@ -334,8 +450,54 @@ exports.viewCollection = function  (collectionName, cb) {
 }
 
 
-exports.importFile = function (req, res ) {
+exports.uploadFile = function (req, res ) {
+	
 	switch (req.file.mimetype) {
+		case "text/xml":
+			console.log("File type: XML");
+			return res.json({"error":"XML import not implemented yet!"});
+		break;
+		
+		case "application/json":
+			console.log("File type: JSON");
+			return res.json({"error":"JSON import not implemented yet!"});
+		break;
+		
+		case "text/tab-separated-values":
+			console.log("File type: tab separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		case "text/csv":
+			console.log("File type: comma separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		default:
+			console.log("File type: unidentified!");
+			return res.json({"error":"File type unidentified!"});
+	}
+}
+
+
+exports.importFile = function (node, callback) {
+	switch (node.params.mimetype) {
 		case "text/xml":
 			console.log("File type: XML");
 			return res.json({"error":"XML import not implemented yet!"});
@@ -346,36 +508,71 @@ exports.importFile = function (req, res ) {
 		break;
 		case "text/tab-separated-values":
 			console.log("File type: tab separated values");
-			importTSV("tsv", req, res, function(collection) {
-				return res.json({
-					"status": "ok",
-					filename:req.file.filename,
-					title: req.body.title,
-					nodeid: req.body.nodeid,
-					project: req.body.project,
-					collection: collection,
-					data_description: req.body.data_description
-				}
-			)})
+			importTSV("tsv", node, function(data) {
+				callback(data);
+			})
 		break;
 		case "text/csv":
 			console.log("File type: comma separated values");
-			importTSV("csv", req, res, function(collection) {
-				return res.json({
-					"status": "ok",
-					filename:req.file.filename,
-					title: req.body.title,
-					nodeid: req.body.nodeid,
-					project: req.body.project,
-					collection: collection,
-					data_description: req.body.data_description
-				}
-			)})
+			importTSV("csv", node, function(data) {
+				callback(data);
+			})
 		break;
 		default:
 			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified!"});
+			//return res.json({"error":"File type unidentified!"});
+			return;
 	}
+}
+
+/**
+ * Make an external API request
+ * - called from runNode 
+ * - asks for url from node (node.scripts.url > sandbox.out.url)
+ * - makes request and return result
+ */
+exports.callAPI = function (node, callback) {
+	var request = require("request");
+
+	 var options = {
+		url: "",
+		method: 'GET',
+		json: true
+	};
+
+	// sandbox for node script
+	var sandbox = {
+		context: {
+			node:node
+		},
+		out: {
+			url:""
+		}
+	}
+	
+	try {
+		vm.runInNewContext(node.scripts.url, sandbox);
+		options.url = sandbox.out.url;
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("Syntax error in url function!");
+		} else {
+			console.log("Error in url function!",e);
+		}
+		callback("Error in node function!", 0);
+		return;
+	}
+
+	request(options, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			console.log(body); 
+			callback(body);
+		} else {
+			console.log(error);
+			callback();
+			return;
+		}
+	});
 }
 
 
@@ -398,7 +595,11 @@ exports.applyFunc = function (func, params, callback) {
 	});
 }
 
-
+/**
+ * Apply node script to records
+ * - applies node function (scripts.run) to a certain field of all records
+ * - writes result to user defined field
+ */
 // applies a user defined function to a certain field of all records
 exports.applyFuncForEach = function (node, callback) {
 	var count = 0;
@@ -418,7 +619,18 @@ exports.applyFuncForEach = function (node, callback) {
 			//console.log("old value: ",doc[node.params.field]);
 			if(typeof(doc[node.params.field]) !== "undefined") {
 				try {
-					eval(node.func); 
+					// sandbox for node script
+					var sandbox = {
+						context: {
+							node:node,
+							doc:doc
+						},
+						out: {
+							value:""
+						}
+					}
+					vm.runInNewContext(node.scripts.run, sandbox);
+					
 				} catch (e) {
 					if (e instanceof SyntaxError) {
 						console.log("Syntax error in node function!");
@@ -430,7 +642,7 @@ exports.applyFuncForEach = function (node, callback) {
 				}
 				//console.log("new value: ", value);
 				var setter = {};
-				setter[node.params.field + node.params.suffix] = value;
+				setter[node.params.field + node.params.suffix] = sandbox.out.value;
 				mongoquery.update(node.collection, {_id:doc._id},{$set:setter}, next);
 				count++;
 			} else {
@@ -461,13 +673,13 @@ function importXML(file) {
 }
 
 
-function importTSV (mode, req, res, cb) {
+function importTSV (mode, node, cb) {
 	
 	var streamCSV = require("node-stream-csv");
 
 	var records = [];
 	streamCSV({
-		filename: "uploads/" + req.file.filename,
+		filename: "uploads/" + node.params.filename,
 		mode: mode,
 		dontguess: true },
 		function onEveryRecord (record) {
@@ -476,7 +688,7 @@ function importTSV (mode, req, res, cb) {
 			for(var prop in record) {
 
 				if (record.hasOwnProperty(prop)) {
-					// clean key names (remove -. and convert spaces to underscores)
+					// clean up key names (remove -. and convert spaces to underscores)
 					prop_trimmed = prop.trim();
 					prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');
 					if(prop != prop_clean) {
@@ -494,21 +706,8 @@ function importTSV (mode, req, res, cb) {
 				records.push(record);
 		},
 		function onReady () {
-			writeJSON2File(req.file.filename, records, function write2DB (err) {
-				if (err) {
-					console.error('Crap happens');
-					res.json({"error": err});
-				} else {
-					// get project prefix for collection name and import to db
-					mongoquery.findOneById(req.body.project, "projects", function(data) {
-						var collection = data.prefix + req.body.title;
-						importJSON(req.file.filename, collection,  res, cb);
-					});
-				}
-
-
-			}
-		)}
+			cb(records);
+		}
 	);
 }
 
@@ -536,8 +735,8 @@ function importJSON(filename, collection, res, cb) {
 			return console.log(err);
 		}
 		var json = JSON.parse(data);
-		mongoquery.save(collection, json, function() {});
-		cb(collection);
+		mongoquery.save(collection, json, function() {cb(collection);});
+		
 
 
 	});
@@ -559,10 +758,10 @@ function writeJSON2File (filename, records, callback) {
 
 
 
-function generateView(nodeParams, callback) {
+function generateView(node, callback) {
 	// read one record and extract field names
 	// NOTE: this assumes that every record has all field names
-	mongoquery.findOne({}, nodeParams.collection, function(data) {
+	mongoquery.findOne({}, node.collection, function(data) {
 
 		var html = ''
 			+ '<button data-bind="click: prevPage">prev</button>'
@@ -611,7 +810,7 @@ function createCollectionView(data, collectionName, callback) {
 		data = data.replace(/\[\[project\]\]/, project.title);
 
 		// insert node's html view to view.html
-		data = data.replace(/\[\[html\]\]/, project.nodes[index].data_view);
+		data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
 		callback(data);
 	});
 }
@@ -621,8 +820,8 @@ function createNodeView(data, nodeId, callback) {
 		var index = indexByKeyValue(project.nodes, "_id", nodeId);
 		data = data.replace(/\[\[project\]\]/, project.title);
 		data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
-		// insert node's html view to view.html
-		data = data.replace(/\[\[html\]\]/, project.nodes[index].data_view);
+		// insert node's data view to view.html
+		data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
 		callback(data);
 	});
 }

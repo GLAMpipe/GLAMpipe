@@ -49,7 +49,7 @@
 				'	</div>' +
 				'	<h3 class="subhead">settings</h3>' +
 				'	<div class="settings">' +
-						data.settings_view +
+						data.views.settings +
 				'	</div>' +	
 				'	<button id="'+data._id+'" class="run">run this node!</button>' +
 				'</div>';
@@ -98,6 +98,13 @@
 			$.getJSON("/get/nodes", function(data) { 
 				for(var i = 0; i< data.length; i++) {
 					var d = data[i];
+					console.log(data[i]);
+					for(var j = 0; j < data[i].subtypes.length; j++) {
+						for(var k = 0; k < data[i].subtypes[j].nodes.length; k++) {
+							data[i].subtypes[j].nodes[k].params = self.generateParams(data[i].subtypes[j].nodes[k]);
+						}
+					}
+					
 					self.collection.push(data[i]);
 				}
 			})
@@ -116,38 +123,45 @@
 
 		this.openNodeParams = function(data, event) {
 			var obj = $(event.target);
-			var settings = obj.parent().find(".params");
-			// add settings html only at first run
-			if(settings.children().length == 0) {
-				var div = $("<div class=\"params\"></div>");
-				var nameInput = $("<label>title</label><input name=\"title\" required/>");
-				var descInput = $("<label>description</label><textarea name=\"description\"/>");
-				settings.append(div);
-				
-				if(data.type == "source") {
+			var params = obj.parent().find(".params");
+			
+			if(params.is(":visible")) {
+				$(".params").hide();
+			} else {
+				$(".params").hide();
+				params.show();
+			}
+		}
+
+		this.generateParams = function (data) {
+			var div = $("<div class=\"params\"></div>");
+			var nameInput = $("<label>title</label><input name=\"title\" value='"+data.title+"'required/>");
+			var descInput = $("<label>description</label><textarea name=\"description\">"+data.description+"</textarea>");
+			//params.append(div);
+			
+			if(data.type == "source") {
+				if(data.subtype == "API") {
+					div.append(nameInput);
+					div.append(descInput);
+					div.append(data.views.params);
+					div.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createAPInode\">Create node</button>");
+				} else {
 					var form = $("<form data-nodeid=\""+data.nodeid+"\" id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">");
 					var submit = $("<input type=\"submit\" value=\"upload and create source node\" class=\"submit\" />");
 					div.append(form);
 					form.append(nameInput);
 					form.append(descInput);
-					form.append(data.params);
+					form.append(data.views.params);
 					form.append(submit);
-				} else {
-					div.append(nameInput);
-					div.append(descInput);
-					div.append(data.params);
-					settings.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createnode\">Create node</button>");
 				}
-			}
-			
-			if(settings.is(":visible")) {
-				$(".settings").hide();
 			} else {
-				$(".settings").hide();
-				settings.show();
+				div.append(nameInput);
+				div.append(descInput);
+				div.append(data.views.params);
+				div.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createnode\">Create node</button>");
 			}
+			return div.prop('outerHTML');
 		}
-
 
 		this.openCreator = function(data, event) {
 			var obj = $(event.target);
@@ -235,7 +249,9 @@
 		var path = window.location.pathname.split("/");
 		resizeCanvas();
 		$('.loading').hide();
+		$(".params").hide();
 		$("#node_creator").hide();
+		
 		var nodes = new nodeList();
 		nodes.currentProject = path[path.length - 1];
 		ko.applyBindings(nodes);
@@ -292,7 +308,9 @@
 						$('#loading').hide();
 					} else {
 						// create actual node
-						data.params = JSON.stringify(params);
+						data.params = params;
+						data.params.filename = data.filename;
+						data.params.mimetype = data.mimetype;
 						data.nodeid = nodeId;
 						$.post("/create/source/node", data, function(returnedData) {
 							console.log('created node');
@@ -304,7 +322,31 @@
 		   });
 		});
 
+		// handler for API node creation
+		$(document).on('click', ".createAPInode", function(e) {
+			var data = {};
+			var params = {};
+			var obj = $(e.target);
+			
+			// read params
+			obj.parent().find("input,textarea, select").not("input[type=button]").each(function(){
+				params[$(this).attr("name")] = $(this).val(); 
+			});
+			
+			data.params = params;
+			data.nodeid = obj.data("nodeid");
+			data.project = nodes.currentProject;
+			
+			$("#message").empty(); 
+			console.log(data);
 
+			$.post("/create/source/node", data, function(returnedData) {
+				console.log('created node');
+				$("#node_creator").hide();
+				nodes.reloadProject();
+			});
+			e.preventDefault();
+		});
 
 		// handler for normal node creation
 		$(document).on('click', ".createnode", function(e) {
@@ -316,14 +358,14 @@
 			obj.parent().find("input,textarea, select").not("input[type=button]").each(function(){
 				params[$(this).attr("name")] = $(this).val(); 
 			});
-			data.params = JSON.stringify(params);
 			
-			var nodeId = obj.data("nodeid");
-			$("#message").empty(); 
+			data.params = params;
+			data.nodeid= obj.data("nodeid");
 			data.project = nodes.currentProject;
-			data.nodeid = nodeId;
 			data.input_node = nodes.currentNode; 
 			data.collection = nodes.currentCollection; 
+			
+			$("#message").empty();
 			console.log(data);
 
 			$.post("/create/node", data, function(returnedData) {
@@ -409,8 +451,11 @@
 					<h3 data-bind="text: sub.subtype"></h3>
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
-							<li data-bind="text:title, click:$root.openNodeParams"></li>
-							<div class="params"></div>
+							<li>
+								<div data-bind="text:title, click:$root.openNodeParams"></div>
+								<div data-bind="html:params" class="params"></div>
+							</li>
+							
 						</ul>
 					</div>
 				</div>

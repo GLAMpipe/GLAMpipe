@@ -1,17 +1,16 @@
 {
 	"nodeid": "transform_field_split",
+	"title": "Split",
 	"type": "transform",
 	"subtype": "split",
-	"title": "Split",
 	"description": "Split field to an array.",
-	"func": "value = doc[node.params.field].split(node.settings.separator); ",
-	"msg": "Done splitting!",
-	"params_view": "<label>in field:</label> <input name=\"field\"/><label>output field suffix:</label> <input name=\"suffix\"/ value=\"_splitted\">",
-	"settings_view":"<label>separator:</label> <input name=\"separator\"/><div>options</div><input type=\"checkbox\" name=\"trim\" value=\"trim\" checked /> trim result",
-	"data_view": "<h1>data view not created!</h1><p>Not implemented yet...</p>",
 	"type_desc": "Transform node is used to modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
-	"collection":"",
-	"x": "330",
-	"y": "178",
-	"in":""
+	"scripts": {
+		"run": "out.value = context.doc[context.node.params.field].split(context.node.settings.separator);"
+	},
+	
+	"views": {
+		"params":"<label>in field:</label> <input name=\"field\"/><label>output field suffix:</label> <input name=\"suffix\"/ value=\"_splitted\">",
+		"settings":"<label>separator:</label> <input name=\"separator\"/><div>options</div><input type=\"checkbox\" name=\"trim\" value=\"trim\" checked /> trim result"
+	}
 }

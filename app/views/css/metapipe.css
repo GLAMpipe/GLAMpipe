@@ -76,7 +76,12 @@ input, textarea {
 }
 
 #node_creator .node_types div {
-	margin-left:20px;
+	margin-left:0px;
+}
+
+#node_creator .node_types > li > div {
+	border: 1px solid black;
+	border-left: 4px solid black;
 }
 
 #node_creator .settings {
@@ -88,6 +93,8 @@ input, textarea {
 	background-color: #649834;
 	color:white;
 }
+
+
 
 #node_creator button {
 	float:right;

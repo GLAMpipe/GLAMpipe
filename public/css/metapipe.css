@@ -118,7 +118,6 @@ input[type='checkbox'] {
 #node_creator label, #node_creator div {
 	margin-top:10px;
 	display:block;
-	
 }
 
 #node_creator label {
@@ -126,15 +125,22 @@ input[type='checkbox'] {
 }
 
 #node_creator .node_types div {
-	margin-left:20px;
+	margin-left:10px;
 }
 
-#node_creator .settings {
-	border: 1px solid black;
-	border-left: 4px solid black;
+#node_creator .node_types > li > div:first-of-type {
+	background-color: white;
+	font-weight:bold;
+	cursor:pointer;
+	padding:2px;
 }
 
-#node_creator .settings .submit {
+#node_creator .params {
+
+	padding:5px;
+}
+
+#node_creator .params .submit {
 	background-color: #649834;
 	color:white;
 }
@@ -164,6 +170,11 @@ input[type='checkbox'] {
 	background-color: #AE6B6B;
 }
 
+.export h3{
+	background-color: #AE6B6B;
+}
+
+
 .cluster h2{
 	background-color: #BA8D32;
 }
@@ -179,8 +190,22 @@ input[type='checkbox'] {
 	background-color: #699FBC;
 }
 
+
 .lookup h2 {
 	background-color:#649834;
+}
+
+.lookup h3 {
+	background-color:#9DC37A;
+}
+
+
+.transform h2 {
+	background-color:#BDA14F;
+}
+
+.transform h3 {
+	background-color:#D5B34F;
 }
 
 .collection h2 {

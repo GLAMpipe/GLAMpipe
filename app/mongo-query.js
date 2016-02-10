@@ -168,6 +168,14 @@ exports.drop = function (collectionname, callback) {
 }
 
 
+exports.empty = function (collectionname, doc, callback) {
+	var collection = db.collection(collectionname);
+	collection.remove(doc, function () {
+		console.log('emptied', collectionname);
+		callback();
+	});
+}
+
 
 exports.nodes = function (callback) {
 
@@ -182,10 +190,8 @@ exports.nodes = function (callback) {
 			type:"$type",
 			subtype:"$subtype",
 			description: "$description",
-			settings_view:"$settings_view",
+			views:"$views",
 			settings:"$settings",
-			params:"$params",
-			params:"$params_view",
 			id:"$_id"
 			}}}},
 		// group by main type
@@ -211,7 +217,7 @@ exports.editProjectNode = function (doc_id, params, callback) {
 	var collection = db.collection('projects');
 	var setter = {};
 	setter.$set = createParamsObject("nodes", params);
-	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {callback();} )
+	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {callback(err,data);} )
 
 }
 
