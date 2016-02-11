@@ -139,7 +139,6 @@ exports.runNode = function (req, res) {
 			case "source":
 				
 				var callback = function(data) {
-					
 					// context for node scripts
 					var sandbox = {
 						context: {
@@ -169,9 +168,10 @@ exports.runNode = function (req, res) {
 						});
 					});
 				}
+				
 				if(node.subtype === "API") {
 					exports.callAPI(node, callback);
-				} else {
+				} else if (node.subtype === "source") {
 					exports.importFile(node, callback);
 				}
 				
@@ -261,6 +261,9 @@ exports.createNode = function (nodeParams, res) {
 			node.input_node = nodeParams.input_node;
 			node.params = nodeParams.params;
 			node.collection = nodeParams.collection;
+			// copy static data view to project node if defined
+			if(typeof node.views.data_static !== "undefined")
+				node.views.data = node.views.data_static;
 			node.x = "0";
 			node.y = "0";
 			node._id = mongojs.ObjectId();
@@ -599,52 +602,41 @@ exports.applyFunc = function (func, params, callback) {
  * Apply node script to records
  * - applies node function (scripts.run) to a certain field of all records
  * - writes result to user defined field
+ * - data in and out goes through "sandbox"
  */
-// applies a user defined function to a certain field of all records
 exports.applyFuncForEach = function (node, callback) {
 	var count = 0;
 	
-	//db.getCollectionNames(callback)
 	if(typeof node.collection  === "undefined") {
 		console.log("ERROR: collection not found");
-		callback();
+		callback("ERROR: collection not found");
 		return;
 	}
-	
+
 	mongoquery.find2({}, node.collection, function (err, doc) {
 		console.log("documents found:", doc.length);
-		console.log(node.settings);
+		console.log(node.params);
+		
 		async.eachSeries(doc, function iterator(doc, next) {
-			var value = "";
-			//console.log("old value: ",doc[node.params.field]);
 			if(typeof(doc[node.params.field]) !== "undefined") {
-				try {
-					// sandbox for node script
-					var sandbox = {
-						context: {
-							node:node,
-							doc:doc
-						},
-						out: {
-							value:""
-						}
-					}
-					vm.runInNewContext(node.scripts.run, sandbox);
-					
-				} catch (e) {
-					if (e instanceof SyntaxError) {
-						console.log("Syntax error in node function!");
-					} else {
-						console.log("Error in node function!");
-					}
-					callback("Error in node function!", count);
-					return;
+				
+				// callback for updating record
+				var onNodeScript = function (sandbox) {
+					var setter = {};
+					setter[node.params.field + node.params.suffix] = sandbox.out.value;
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+					count++;
 				}
-				//console.log("new value: ", value);
-				var setter = {};
-				setter[node.params.field + node.params.suffix] = sandbox.out.value;
-				mongoquery.update(node.collection, {_id:doc._id},{$set:setter}, next);
-				count++;
+				
+				if(node.type === "lookup") {
+					callAPISerial (doc, node, onNodeScript, callback);
+				} else if (node.type === "transform") {
+					runSyncNode (doc, node, onNodeScript, callback);
+				} else {
+					callback("ERROR: node type not recognised!", 0);
+				}
+				
+
 			} else {
 				console.log("not found");
 				next();
@@ -652,8 +644,10 @@ exports.applyFuncForEach = function (node, callback) {
 		}, function done() {
 			callback(null, count);
 		});
+		
 	}); 
 }
+
 
 
 exports.readDir = function (dirname, onFileList, onError) {
@@ -857,4 +851,95 @@ function readFiles(dirname, onFileContent, onError) {
 	});
 }
 
+/**
+ * Execute node script (except for source nodes)
+ */ 
+function runSyncNode (doc, node, onScript, onError) {
+	
+	// sandbox for node script
+	var sandbox = {
+		context: {
+			node:node,
+			doc:doc
+		},
+		out: {
+			value:""
+		}
+	}
+	
+	try {
+		vm.runInNewContext(node.scripts.run, sandbox, "node.scripts.run");
+		onScript(sandbox);
+		
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("Syntax error in node function!", e);
+		} else {
+			console.log("Error in node function!", e);
+		}
+		onError("Error in node function!\n" + e, count);
+		return;
+	}
+}
 
+/**
+ * Make HTTP request in the record context
+ */ 
+function callAPISerial (doc, node, onScript, onError) {
+
+	var request = require("request");
+
+	 var options = {
+		url: "",
+		method: 'GET',
+		json: true
+	};
+
+
+	// sandbox for node script
+	var sandbox = {
+		context: {
+			node:node,
+			doc:doc
+		},
+		out: {
+			url:"",
+			value:""
+		}
+	}
+	
+
+	var onRequest = function(data) {
+		sandbox.context.data = data;
+		// let node pick the data it wants from result
+		vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
+		onScript(sandbox);
+	}
+
+	
+	try {
+		vm.runInNewContext(node.scripts.url, sandbox);
+		options.url = sandbox.out.url;
+		console.log(options.url);
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("Syntax error in url function!");
+		} else {
+			console.log("Error in url function!",e);
+		}
+		onError("Error in node function!", 0);
+		return;
+	}
+
+	// make actual HTTP request
+	request(options, function (error, response, body) {
+		if (!error && response.statusCode == 200) {
+			onRequest(body);
+		} else {
+			console.log(error);
+			onError(error);
+			return;
+		}
+	});
+
+}

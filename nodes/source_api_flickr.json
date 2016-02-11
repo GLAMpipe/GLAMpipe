@@ -3,6 +3,7 @@
 	"type": "source",
 	"subtype": "API",
 	"title": "Flickr import",
+	"usage":"",
 	"description": "Import from Flickr (requires an API key)",
 	"type_desc": "With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API.",
 	
@@ -15,6 +16,7 @@
 	},
 	
 	"views": {
+		"data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n<div id=\"node_bar\" class=\"selected\">\n<h2 class=\"selected\">Flickr data set</h2>\n</div>\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" >title</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n\n<! -- show image if image URLs node is run -->\n<!-- ko if: $data.hasOwnProperty(\"id_photo_sizes\") -->\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<!-- /ko -->\n\n<td data-bind=\"text: title\"></td>\n\n<! -- show details if image details node is run -->\n<!-- ko if: $data.hasOwnProperty(\"id_photo_details\") -->\n<td data-bind=\"text: id_photo_details.description._content\"></td>\n<!-- /ko -->\n </tr>\n </tbody>\n </table>\n</div>\n",
 		"params":"<label>Flickr API key </label><input type=\"text\" name=\"apikey\" id=\"apikey\" required /><label>Album ID</label><input type=\"text\" name=\"album\" id=\"album\" required />",
 		"settings":"no settings"
 	}

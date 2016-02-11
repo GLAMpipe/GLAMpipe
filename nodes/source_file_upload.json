@@ -14,7 +14,6 @@
 	},
 	
 	"views": {
-		"data":"<h1>data view not created!</h1><p>You must run node first!</p>",
 		"params":"<label>Select your file (csv, tsv, xml or json) </label><input type=\"file\" name=\"file\" id=\"file\" required /> ",
 		"settings":"no settings"
 	}
