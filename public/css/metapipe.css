@@ -89,6 +89,21 @@ input[type='checkbox'] {
 	background-color: white;
 }
 
+.node_info .description{
+	margin-bottom:10px;
+}
+
+.node_info .view_button {
+	background-color: green;
+	color:white;
+	padding:2px;
+	margin-bottom:10px;
+}
+
+.block .add_node {
+	float:right;
+}
+
 #node_msg {
 	padding:20px;
 	border: 1px solid black;
@@ -245,4 +260,13 @@ input[type='checkbox'] {
 
 .warning {
 	background-color: #EFB134;
+}
+
+#mainCanvas .selected {
+	border: 5px solid orange;
+}
+
+
+.strong {
+	font-weight:bold;
 }

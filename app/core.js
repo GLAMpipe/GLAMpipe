@@ -100,7 +100,7 @@ exports.getNodeSettings = function (node_id, res) {
  * CLUSTER
  * - executes metapipe.cluster function
  * SOURCE - API
- * - for API node, calls metapipe.callAPI 
+ * - calls metapipe.callAPI 
  * - executes script in node's scripts.run
  * SOURCE -FILE
  * - calls metapipe.importFile 
@@ -137,7 +137,7 @@ exports.runNode = function (req, res) {
 			
 			
 			case "source":
-				
+				console.log("RUNNING SOURCE NODE");
 				var callback = function(data) {
 					// context for node scripts
 					var sandbox = {
@@ -171,7 +171,7 @@ exports.runNode = function (req, res) {
 				
 				if(node.subtype === "API") {
 					exports.callAPI(node, callback);
-				} else if (node.subtype === "source") {
+				} else if (node.subtype === "file") {
 					exports.importFile(node, callback);
 				}
 				
@@ -804,7 +804,11 @@ function createCollectionView(data, collectionName, callback) {
 		data = data.replace(/\[\[project\]\]/, project.title);
 
 		// insert node's html view to view.html
-		data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+		if(typeof project.nodes[index].views.data === "undefined")
+			data = data.replace(/\[\[html\]\]/, '<h2>View not created</h2>Run node first!');
+		else
+			data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+		
 		callback(data);
 	});
 }
@@ -815,7 +819,11 @@ function createNodeView(data, nodeId, callback) {
 		data = data.replace(/\[\[project\]\]/, project.title);
 		data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
 		// insert node's data view to view.html
-		data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+		if(typeof project.nodes[index].views.data === "undefined")
+			data = data.replace(/\[\[html\]\]/, '<h2>View not created</h2>Run node first!');
+		else
+			data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+			
 		callback(data);
 	});
 }

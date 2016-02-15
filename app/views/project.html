@@ -41,8 +41,8 @@
 			var obj = $(event.target);
 			var node_settings_html = 
 				'<div id="node_bar" class="selected">' + 
-				'	<h2>' +data.title+": " +data.data_title+ '</h2>' +
-				'	<div class="description">'+data.description+'</div>' +
+				'	<h2>' +data.title+": " +data.params.title+ '</h2>' +
+				'	<div class="description">'+data.params.description+'</div>' +
 				'	<h3 class="subhead">params</h3>' +
 				'	<div class="params">' +
 						self.nodeParams(data) +
@@ -54,16 +54,23 @@
 				'	<button id="'+data._id+'" class="run">run this node!</button>' +
 				'</div>';
 			$('#node_bar').replaceWith(node_settings_html);
+			$("#mainCanvas .block").removeClass("selected");
+			obj.parent().addClass("selected");
 			self.setSettingsValues(data);
 		}
 		
 		this.nodeParams = function (data) {
 			var html = "<table>";
 			for(var prop in data.params) {
-				html += "<tr><td>params."+prop+"</td><td> = " + data.params[prop] + "</td></tr>";
+				html += "<tr><td class='strong'>params."+prop+"</td></tr><tr><td>" + data.params[prop] + "</td></tr>";
 			}
 			html += "</table>";
 			return html;
+		}
+		
+		this.resetSettings = function () {
+			node_settings_html = '<div id="node_bar" class="selected"><h2>Select node</h2></div>';
+			$('#node_bar').replaceWith(node_settings_html);
 		}
 		
 		this.setSettingsValues = function (data) {
@@ -216,6 +223,7 @@
 				console.log('node deleted');
 				if(data.error)
 					alert(data.error);
+				self.resetSettings();
 				self.reloadProject();
 			});
 		}
@@ -406,9 +414,10 @@
 		</div>
 		
 	   <div class="node_info"> 
-			<p data-bind="html:params.description"></p> 
-			<a data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
-		</div> 
+			<p class="description" data-bind="html:params.description"></p> 
+			<a class="view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
+		</div>
+		
 		<button data-bind="click: $root.openCreator" class="add_node">add node</button> 
 		
 	</div>

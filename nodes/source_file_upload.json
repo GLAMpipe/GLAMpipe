@@ -9,8 +9,8 @@
 
 	"scripts": {
 		"before_run":"console.log('running', node.title);",
-		"run":"return data;",
-		"after_run":"return 'Data imported'"
+		"run":"out.value = context.data;",
+		"after_run":"out.msg = 'Data imported'"
 	},
 	
 	"views": {
