@@ -5,7 +5,6 @@
 	"title": "Flickr import",
 	"usage":"",
 	"description": "Import from Flickr (requires an API key)",
-	"type_desc": "With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API.",
 	
 	"scripts": {
 		"url":"var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos'; var format = '&format=json&nojsoncallback=?'; out.url = base_url + '&photoset_id=' + context.node.params.album + format + '&api_key=' + context.node.params.apikey",

@@ -181,28 +181,40 @@ input[type='checkbox'] {
 
 
 
-.export h2{
+.export h2 {
 	background-color: #AE6B6B;
 }
 
-.export h3{
-	background-color: #AE6B6B;
+.export h3 {
+	background-color: #E18F8F;
+}
+
+.export .params {
+	background-color: #F2DCDC;
 }
 
 
-.cluster h2{
+.cluster h2 {
 	background-color: #BA8D32;
 }
-.cluster h3{
+.cluster h3 {
 	background-color: #B9A276;
 }
 
+.cluster .params {
+	background-color: #D4E5EF;
+}
 
-.source h2{
+
+.source h2 {
 	background-color: #1885C0;
 }
-.source h3{
+.source h3 {
 	background-color: #699FBC;
+}
+
+.source .params {
+	background-color: #D4E5EF;
 }
 
 
@@ -214,6 +226,10 @@ input[type='checkbox'] {
 	background-color:#9DC37A;
 }
 
+.lookup .params {
+	background-color: #D5F0BB;
+}
+
 
 .transform h2 {
 	background-color:#BDA14F;
@@ -222,6 +238,11 @@ input[type='checkbox'] {
 .transform h3 {
 	background-color:#D5B34F;
 }
+
+.transform .params {
+	background-color: #F6F4C5;
+}
+
 
 .collection h2 {
 	background-color: #1885C0;

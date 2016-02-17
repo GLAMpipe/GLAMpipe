@@ -17,6 +17,8 @@
 
 <script>
 	
+	var nodes = null;
+	
 	function stopDragListener (ele) {
 		var data = {'id': ele.id, 'x':ele.style.left, 'y':ele.style.top};
 		$.post("/set/node/position", data, function(returnedData) {});
@@ -39,6 +41,12 @@
 
 		this.selectNode = function (data, event) {
 			var obj = $(event.target);
+			
+			if(typeof data.params.collection !== "undefined")
+				self.currentCollection = data.params.collection
+			else
+				self.currentCollection = "";
+				
 			var node_settings_html = 
 				'<div id="node_bar" class="selected">' + 
 				'	<h2>' +data.title+": " +data.params.title+ '</h2>' +
@@ -142,8 +150,8 @@
 
 		this.generateParams = function (data) {
 			var div = $("<div class=\"params\"></div>");
-			var nameInput = $("<label>title</label><input name=\"title\" value='"+data.title+"'required/>");
-			var descInput = $("<label>description</label><textarea name=\"description\">"+data.description+"</textarea>");
+			var nameInput = $("<label>node title</label><input name=\"title\" value='"+data.title+"'required/>");
+			var descInput = $("<label>node description</label><textarea name=\"description\"></textarea>");
 			//params.append(div);
 			
 			if(data.type == "source") {
@@ -260,7 +268,7 @@
 		$(".params").hide();
 		$("#node_creator").hide();
 		
-		var nodes = new nodeList();
+		nodes = new nodeList();
 		nodes.currentProject = path[path.length - 1];
 		ko.applyBindings(nodes);
 		nodes.loadNodes(nodes);
@@ -462,6 +470,7 @@
 						<ul data-bind="foreach: nodes" class="node_types">
 							<li>
 								<div data-bind="text:title, click:$root.openNodeParams"></div>
+								<div data-bind="text:description"></div>
 								<div data-bind="html:params" class="params"></div>
 							</li>
 							

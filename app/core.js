@@ -46,26 +46,68 @@ exports.createProject = function (title, res) {
 }
 
 
+/**
+ * load stock nodes
+ * - reads .json files from "nodes" directory
+ * - combines with descriptions from "node_type_descriptions.json"
+ * - inserts nodes to "nodes" collection
+ */
+
 exports.initNodes = function () {
 	console.log("Loading node files...");
 	var data = {};
 	mongoquery.drop("nodes", function() {
-		readFiles('nodes/', function(filename, content) {
-			console.log(filename + " loaded");
-			try {
-				var parsed = JSON.parse(content);
-				mongoquery.insert("nodes",parsed , function(error) {
-					if(error.length) {
-						console.log(error);
-					}
-				})
-			} catch(e) {
-				console.log("ERROR: JSON is malformed in", filename);
-			}
 
-		}, function(error) {
-			console.log(error);
+		fs = require('fs')
+		// read first node type descriptions
+		fs.readFile("config/node_type_descriptions.json", 'utf8', function (err, data) {
+			if(err)
+				console.log("ERROR: node type descriptions not found!");
+			else 
+				var descriptions = JSON.parse(data);
+				
+			readFiles('nodes/', function(filename, content) {
+				
+				try {
+					var node = JSON.parse(content);
+					node.type_desc = descriptions[node.type];
+					
+					// join "pretty" settings
+					if(node.views.settings instanceof Array)
+						node.views.settings = node.views.settings.join("");	
+						
+					// join "pretty" params
+					if(node.views.params instanceof Array)
+						node.views.params = node.views.params.join("");	
+						
+					// join "pretty" before_run script
+					if(node.scripts.before_run instanceof Array)
+						node.scripts.before_run = node.scripts.before_run.join("");
+						
+					// join "pretty" run script
+					if(node.scripts.run instanceof Array)
+						node.scripts.run = node.scripts.run.join("");
+						
+					// join "pretty" after_run script
+					if(node.scripts.after_run instanceof Array)
+						node.scripts.after_run = node.scripts.after_run.join("");
+						
+					mongoquery.insert("nodes",node , function(error) {
+						if(error.length) {
+							console.log(error);
+						} else {
+							console.log("NODE: " + filename + " loaded");
+						}
+					})
+				} catch(e) {
+					console.log("ERROR: JSON is malformed in", filename);
+				}
+
+			}, function(error) {
+				console.log(error);
+			});
 		});
+
 	});
 }
 
@@ -139,6 +181,7 @@ exports.runNode = function (req, res) {
 			case "source":
 				console.log("RUNNING SOURCE NODE");
 				var callback = function(data) {
+					
 					// context for node scripts
 					var sandbox = {
 						context: {
@@ -178,9 +221,75 @@ exports.runNode = function (req, res) {
 			break;
 			
 			
+			case "export":
+				console.log("RUNNING EXPORT NODE");
+				var callback = function() {
+					
+					// context for node scripts
+					var sandbox = {
+						context: {
+							node: node,
+							console:console
+						},
+						out: {
+							arr: [],
+							msg: ""
+						}
+					};
+
+					// let node pick the data it wants from result
+					//vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
+					// find everything
+					var count = 0;
+					var output = [];
+					mongoquery.find2({}, node.collection, function(err, doc) {
+						console.log("documents found:", doc.length);
+						console.log(node.params);
+						vm.runInNewContext(node.scripts.before_run, sandbox,"node.scripts.before_run");
+						
+						async.eachSeries(doc, function iterator(doc, next) {
+							sandbox.context.data = doc;
+							
+							try {
+								vm.runInNewContext(node.scripts.run, sandbox,"node.scripts.run");
+							} catch (e) {
+								if (e instanceof SyntaxError) {
+									console.log("ERROR: syntax error in node", e);
+								} else {
+									console.log(e);
+								}
+							}
+							//output.push(sandbox.out.value)
+							console.log(count);
+							count++;
+							next();
+						}, function done() {
+							vm.runInNewContext(node.scripts.after_run, sandbox,"node.scripts.after_run");
+							//callback(null, count);
+							var fs = require('fs');
+							fs.writeFile("output/"+ node.settings.filename, sandbox.out.arr.join(""), function(err) {
+								if(err) {
+									return console.log(err);
+								}
+
+								console.log("The file was saved!");
+								res.json({msg:sandbox.out.msg, count:count, status:"ok"})
+							});
+							console.log("DONE");
+						});
+					});
+				}
+				
+				if(node.subtype === "xml") {
+					callback();
+				} else if (node.subtype === "file") {
+					exports.importFile(node, callback);
+				}
+			break;
+			
 			default:
 				if(typeof(node.scripts.run) !== "undefined") {
-					exports.applyFuncForEach(node, function(error, count) {
+					exports.applyFuncForEachAndUpdate(node, function(error, count) {
 						if(error) {
 							res.json({"error": error});
 							return;
@@ -261,9 +370,11 @@ exports.createNode = function (nodeParams, res) {
 			node.input_node = nodeParams.input_node;
 			node.params = nodeParams.params;
 			node.collection = nodeParams.collection;
+			node.params.collection = nodeParams.collection;
 			// copy static data view to project node if defined
 			if(typeof node.views.data_static !== "undefined")
 				node.views.data = node.views.data_static;
+				
 			node.x = "0";
 			node.y = "0";
 			node._id = mongojs.ObjectId();
@@ -294,6 +405,7 @@ exports.createSourceNode = function (nodeRequest, res) {
 	if(!nodeRequest.collection) {
 		mongoquery.findOneById(nodeRequest.project, "projects", function(data) {
 			nodeRequest.collection = data.prefix + nodeRequest.params.title;
+			nodeRequest.params.collection = nodeRequest.collection;
 			initNode(nodeRequest, res);
 		});
 	} else {
@@ -604,7 +716,51 @@ exports.applyFunc = function (func, params, callback) {
  * - writes result to user defined field
  * - data in and out goes through "sandbox"
  */
-exports.applyFuncForEach = function (node, callback) {
+exports.exportXML = function (node, callback) {
+	var count = 0;
+	
+	if(typeof node.collection  === "undefined") {
+		console.log("ERROR: collection not found");
+		callback("ERROR: collection not found");
+		return;
+	}
+	
+	var onDoc = function (doc) {
+		console.log(doc.WD);
+		console.log(node.settings.WD);
+		vm.runInNewContext(node.scripts.run, sandbox, "node.script.run");
+	}
+	
+	var onError = function (error) {
+		console.log(error);
+	}
+	
+	var onDone = function() {
+		callback();
+	}
+	
+	mongoquery.find2({}, node.collection, function (err, doc) {
+		console.log("documents found:", doc.length);
+		console.log(node.params);
+		
+		async.eachSeries(doc, function iterator(doc, next) {
+			onDoc(doc);
+			next();
+		}, function done() {
+			callback(null, count);
+		});
+		
+	}); 
+}
+
+
+/**
+ * Apply node script to records
+ * - applies node function (scripts.run) to a certain field of all records
+ * - writes result to user defined field
+ * - data in and out goes through "sandbox"
+ */
+exports.applyFuncForEachAndUpdate = function (node, callback) {
 	var count = 0;
 	
 	if(typeof node.collection  === "undefined") {
@@ -638,7 +794,7 @@ exports.applyFuncForEach = function (node, callback) {
 				
 
 			} else {
-				console.log("not found");
+				console.log("ERROR: params.field not found");
 				next();
 			}
 		}, function done() {

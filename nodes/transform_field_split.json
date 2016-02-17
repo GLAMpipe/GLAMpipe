@@ -4,7 +4,6 @@
 	"type": "transform",
 	"subtype": "split",
 	"description": "Split field to an array.",
-	"type_desc": "Transform node is used to modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
 	"scripts": {
 		"run": "out.value = context.doc[context.node.params.field].split(context.node.settings.separator);"
 	},

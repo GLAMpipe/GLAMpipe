@@ -1,0 +1,56 @@
+{
+    "nodeid": "export_xml_basic",
+    "type": "export",
+    "subtype": "xml",
+    "title": "Export XML (simple)",
+    "description": "Export collection as XML file. Very simple version.",
+
+
+    "scripts": {
+        "before_run":"out.arr.push('<root>')",
+        "run": [
+                "var str = '';",
+                "var record_tag = context.node.settings.root;",
+                "var tag_open = ' <' + record_tag + '>\\n';",
+                "var tag_close = ' </' + record_tag + '>\\n';",
+                
+                "for(f in context.data) {",
+                "   var tag = context.node.settings['_mapkey_' + f];",
+                "   if(tag != '')",
+                "       str += '    <'+tag+'>' + f + '</'+tag+'>\\n'",
+                "};",
+
+                "out.arr.push( tag_open + str + tag_close);"
+                ],
+        "after_run":[
+                    "out.arr.push('</root>');",
+                    "out.msg = 'Export done to \"metapipe/output/' + context.node.settings.filename + '\"';"
+                    ]
+    },
+    
+    "views": {
+        "params":"",
+        "settings":[
+                    "<label>record element name </label><input name=\"root\" value=\"record\"/>",
+                    "<label>file name</label><input name=\"filename\"/>",
+                    "<h3>mapping</h3>",
+                    "<label>Select mapping </label>",
+                    "<button id=\"map_basic_fetch\" class=\"fetch_record\">fetch</button>",
+                    "<script>",
+                    "   $(\"#map_basic_fetch\").click(function(e){",
+                    "       var obj=$(e.target);",
+                    "       var url=\"/get/collection/\"+nodes.currentCollection+\"?skip=0&limit=1\";",
+                    "       $.getJSON(url, function(data){",
+                    "           var rec=data[0];",
+                    "           var table=$('<table><th>current name</th><th>new name</th></table>');",
+                    "           for(var f in rec){",
+                    "               var field=$('<tr><td>' +f+ '</td><td><input name=\"_mapkey_'+f+'\"/></td></tr>');",
+                    "               table.append(field);",
+                    "           }",
+                    "           obj.parent().append(table);",
+                    "       })",
+                    "   });",
+                    "   </script>"
+                    ]
+    }
+}

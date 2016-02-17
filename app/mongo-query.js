@@ -113,7 +113,7 @@ exports.insert = function (collectionname, doc, callback) {
 			console.log(err);
 			callback({'error':err})
 		} else {
-			console.log('inserted to', collectionname);
+			//console.log('inserted to', collectionname);
 			callback({});
 		}
 	}); 
@@ -150,7 +150,10 @@ exports.update = function (collectionname, query, doc, callback) {
 	}); 
 }
 
-
+exports.foreach = function (collectionname, func) {
+	var collection = db.collection(collectionname);
+	collection.foreach({}, func);
+}
 
 exports.save = function (collectionname, doc, callback) {
 	var collection = db.collection(collectionname);
