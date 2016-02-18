@@ -36,7 +36,8 @@ exports.createProject = function (title, res) {
 			short = short.replace(" ","_");
 			var project = {
 				"title": title, 
-				"prefix": short + "_p" + meta.project_count + "_"
+				"prefix": "p" + meta.project_count + "_" + short,
+				"collection_count": 0
 				};
 			mongoquery.insertProject (project, function(data) {
 				res.json({"status": "project created"});
@@ -404,9 +405,11 @@ exports.createSourceNode = function (nodeRequest, res) {
 	// if we do not have collection name, then create it
 	if(!nodeRequest.collection) {
 		mongoquery.findOneById(nodeRequest.project, "projects", function(data) {
-			nodeRequest.collection = data.prefix + nodeRequest.params.title;
+			nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" +nodeRequest.params.title;
 			nodeRequest.params.collection = nodeRequest.collection;
-			initNode(nodeRequest, res);
+			mongoquery.update("projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1} }, function() {
+				initNode(nodeRequest, res);
+			})
 		});
 	} else {
 		initNode(nodeRequest, res);
@@ -414,33 +417,31 @@ exports.createSourceNode = function (nodeRequest, res) {
 }
 
 function initNode (nodeRequest, res) {
-	// generate view
-	//generateView(nodeRequest, function(view) {
-		// copy node to project with its settings
-		mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "nodes", function(node) {
-			if(node) {
-				node.input_node = "";
-				node.params = nodeRequest.params;
-				node.collection = nodeRequest.collection;
-				node.x = "0";
-				node.y = "0";
-				node._id = mongojs.ObjectId();
-				mongoquery.update("projects",
-					{_id:mongojs.ObjectId(nodeRequest.project)},
-					{$push:{nodes: node}},
-					function(error) {
-						if(error) {
-							console.log(error);
-						}
-						console.log("node created");
-						res.json({"status": "node created"})
-				})
-			} else {
-				console.log("node " + nodeRequest.nodeid + " not found!");
-				res.json({"error": "node " + nodeRequest.nodeid + " not found"})
-			}
-		});
-	//});
+	
+	// copy node to project with its settings
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "nodes", function(node) {
+		if(node) {
+			node.input_node = "";
+			node.params = nodeRequest.params;
+			node.collection = nodeRequest.collection;
+			node.x = "0";
+			node.y = "0";
+			node._id = mongojs.ObjectId();
+			mongoquery.update("projects",
+				{_id:mongojs.ObjectId(nodeRequest.project)},
+				{$push:{nodes: node}},
+				function(error) {
+					if(error) {
+						console.log(error);
+					}
+					console.log("node created");
+					res.json({"status": "node created"})
+			})
+		} else {
+			console.log("node " + nodeRequest.nodeid + " not found!");
+			res.json({"error": "node " + nodeRequest.nodeid + " not found"})
+		}
+	});
 }
 
 /**
@@ -472,9 +473,9 @@ exports.deleteNode = function (params, res) {
 				{$pull:{nodes: {_id:mongojs.ObjectId(params.node)}}},
 				function() {
 					res.json({"status": "node deleted"});
-					// if node is source or cluster, then also remove its collection
 					
-			})
+				}
+			)
 		} else {
 			console.log("ERROR: project not found");
 			return res.json({"error": "project not found (should not happen)"});
