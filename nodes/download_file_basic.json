@@ -1,0 +1,25 @@
+{
+    "nodeid": "download_basic_file",
+    "type": "download",
+    "subtype": "basic",
+    "title": "file",
+    "description": "Download file from URL.",
+
+
+    "scripts": {
+        "before_run":"out.arr.push('<root>')",
+        "run": [
+                "out.value = context.data[context.node.params.field]"
+                ],
+        "after_run":"context.console.log('downloaded');"
+    },
+    
+    "views": {
+        "params":[
+                    "<label>input field</label><input name=\"field\"/>"
+                    ],
+        "settings": [
+                    "no settings"
+                    ]
+    }
+}

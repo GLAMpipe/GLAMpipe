@@ -1,0 +1,36 @@
+{
+    "nodeid": "download_flickr_image",
+    "type": "download",
+    "subtype": "Flickr",
+    "title": "images",
+    "description": "Downloads images from Flickr URL based on getSizes API-call.",
+
+
+    "scripts": {
+        "before_run":"",
+        "run": [
+                "var size = context.node.params.size;",
+                "var url = context.data.id_photo_sizes.size[size].source;",
+                "out.url = url;",
+                "var splitted = url.split('/');",
+                "out.file = context.node.dir + '/' + splitted[splitted.length - 1];",
+                "context.console.log(out.value);"
+                ],
+        "after_run":"",
+        "finnish":"context.console.log('downloaded');out.msg = 'Images downloaded!'"
+    },
+    
+    "views": {
+        "params":[
+                    "<label>Choose image size</label>",
+                    "<select name=\"size\">",
+                    "    <option value='3'>small</option>",
+                    "    <option value='5'>medium</option>",
+                    "    <option value='7'>original</option>",
+                    "</select>"
+                    ],
+        "settings": [
+                    "no settings"
+                    ]
+    }
+}

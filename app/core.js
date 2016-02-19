@@ -5,6 +5,8 @@ const vm = require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var exports 	= module.exports = {};
 
+var positionOffset = 20;
+
 /**
  * Create metapipe collection on start up
  * - "metapipe" is only collection that must exist
@@ -29,18 +31,30 @@ exports.initDB = function () {
 exports.createProject = function (title, res) {
 	console.log("creating project", title);
 
-	// update project count and create project
-	mongoquery.update("metapipe",{}, {$inc: { project_count: 1} }, function() {
-		mongoquery.findOne({}, "metapipe", function(meta) {
-			var short = title.substring(0,8);
-			short = short.replace(" ","_");
-			var project = {
-				"title": title, 
-				"prefix": "p" + meta.project_count + "_" + short,
-				"collection_count": 0
-				};
-			mongoquery.insertProject (project, function(data) {
-				res.json({"status": "project created"});
+	var title_dir = title.replace(/ /g,"_");
+	// create output/project_name directory 
+	fs.mkdir("output/" + title_dir, function(err) {
+		if(err) {
+			if(err.code === "EEXIST")
+				console.log("Project directory exists");
+			res.json({"status": "error in output directory creation!"});
+			return;
+		}
+		// update project count and create project
+		mongoquery.update("metapipe",{}, {$inc: { project_count: 1} }, function() {
+			mongoquery.findOne({}, "metapipe", function(meta) {
+				var short = title.substring(0,8);
+				short = short.replace(/ /g,"_");
+				var project = {
+					"title": title,
+					"dir": title_dir,
+					"prefix": "p" + meta.project_count + "_" + short,
+					"collection_count": 0
+					};
+				mongoquery.insertProject (project, function(data) {
+					console.log("project \"" + title + "\" created!");
+					res.json({"status": "project created"});
+				});
 			});
 		});
 	});
@@ -67,7 +81,7 @@ exports.initNodes = function () {
 			else 
 				var descriptions = JSON.parse(data);
 				
-			readFiles('nodes/', function(filename, content) {
+			readFiles('nodes/', function(filename, content, next) {
 				
 				try {
 					var node = JSON.parse(content);
@@ -98,13 +112,15 @@ exports.initNodes = function () {
 							console.log(error);
 						} else {
 							console.log("NODE: " + filename + " loaded");
+							next();
 						}
 					})
 				} catch(e) {
 					console.log("ERROR: JSON is malformed in", filename);
+					next(); // continue anyway
 				}
 
-			}, function(error) {
+			}, function onError (error) {
 				console.log(error);
 			});
 		});
@@ -162,6 +178,7 @@ exports.runNode = function (req, res) {
 		var node = project.nodes[index];
 		node.settings = req.body;
 		node.project = project._id;
+		node.dir = project.dir;
 
 		switch (node.type) {
 			case "cluster":
@@ -238,16 +255,15 @@ exports.runNode = function (req, res) {
 						}
 					};
 
-					// let node pick the data it wants from result
-					//vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
-					// find everything
 					var count = 0;
 					var output = [];
+					// find everything
 					mongoquery.find2({}, node.collection, function(err, doc) {
 						console.log("documents found:", doc.length);
 						console.log(node.params);
 						vm.runInNewContext(node.scripts.before_run, sandbox,"node.scripts.before_run");
 						
+						// run node once per record
 						async.eachSeries(doc, function iterator(doc, next) {
 							sandbox.context.data = doc;
 							
@@ -287,7 +303,61 @@ exports.runNode = function (req, res) {
 					exports.importFile(node, callback);
 				}
 			break;
-			
+
+
+			case "download":
+				console.log("RUNNING DOWNLOAD NODE");
+				var callback = function() {
+					
+					// context for node scripts
+					var sandbox = {
+						context: {
+							node: node,
+							console:console
+						},
+						out: {
+							url: "",
+							file:"",
+							msg: ""
+						}
+					};
+
+					var count = 0;
+					var output = [];
+					// find everything
+					mongoquery.find2({}, node.collection, function(err, doc) {
+						console.log("documents found:", doc.length);
+						console.log(node.params);
+						vm.runInNewContext(node.scripts.before_run, sandbox,"node.scripts.before_run");
+						
+						// run node once per record
+						async.eachSeries(doc, function iterator(doc, next) {
+							sandbox.context.data = doc;
+							sandbox = executeNodeScript(node.scripts.run, sandbox, "node.scripts.run");
+							if(sandbox.error) {
+								res.json({msg:"error in node script!", count:count, status:"error!"});
+								return;
+							}
+							
+							exports.downloadFile(sandbox.out.url, sandbox.out.file, function() {
+								next();
+							})
+							count++;
+						
+						}, function done() {
+							vm.runInNewContext(node.scripts.finnish, sandbox,"node.scripts.finnish");
+
+							console.log("DONE");
+							res.json({msg:sandbox.out.msg, count:count, status:"ok"})
+						});
+					});
+				}
+				
+
+				callback();
+			break;
+
+
 			default:
 				if(typeof(node.scripts.run) !== "undefined") {
 					exports.applyFuncForEachAndUpdate(node, function(error, count) {
@@ -296,7 +366,7 @@ exports.runNode = function (req, res) {
 							return;
 						}
 						console.log("DONE apply:", count);
-						res.json({msg:node.msg, count:count, status:"ok"})
+						res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 					});
 				} else {
 					console.log("No user defined function found!");
@@ -305,6 +375,23 @@ exports.runNode = function (req, res) {
 		}
 		
 	});
+}
+
+
+function executeNodeScript(script, sandbox, script_name) {
+	
+	try {
+		vm.runInNewContext(script, sandbox, script_name);
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("ERROR: syntax error in node", e);
+			sandbox.error = "syntax error in node:" + e;
+		} else {
+			console.log(e);
+			sandbox.error = e;
+		}
+	}
+	return sandbox;
 }
 
 function getPrevNode(project, node) {
@@ -376,8 +463,8 @@ exports.createNode = function (nodeParams, res) {
 			if(typeof node.views.data_static !== "undefined")
 				node.views.data = node.views.data_static;
 				
-			node.x = "0";
-			node.y = "0";
+			node.x = parseInt(nodeParams.position.left) + positionOffset;
+			node.y = parseInt(nodeParams.position.top) + positionOffset;
 			node._id = mongojs.ObjectId();
 			console.log(node);
 			mongoquery.update("projects",
@@ -819,6 +906,46 @@ exports.readDir = function (dirname, onFileList, onError) {
 }
 
 
+exports.downloadFile = function (url, dest, cb ) {
+	var fs = require("fs");
+	var request = require("request")
+	
+	var file = fs.createWriteStream("output/" + dest);
+	var sendReq = request.get(url);
+
+	// verify response code
+	sendReq.on('response', function(response) {
+		if (response.statusCode !== 200) {
+			return cb('Response status was ' + response.statusCode);
+		}
+	});
+
+	// check for request errors
+	sendReq.on('error', function (err) {
+		fs.unlink(dest);
+
+		if (cb) {
+			return cb(err.message);
+		}
+	});
+
+	sendReq.pipe(file);
+
+	file.on('finish', function() {
+		file.close(cb);  // close() is async, call cb after close completes.
+	});
+
+	file.on('error', function(err) { // Handle errors
+		fs.unlink(dest); // Delete the file async. (But we don't check the result)
+		console.log(err);
+
+		if (cb) {
+			return cb(err.message);
+		}
+	});
+
+}
+
 function importXML(file) {
 	
 }
@@ -1004,17 +1131,22 @@ function readFiles(dirname, onFileContent, onError) {
 			onError(err);
 			return;
 		}
-		filenames.forEach(function(filename) {
+
+		async.eachSeries(filenames, function iterator(filename, next) {
 			fs.readFile(dirname + filename, 'utf-8', function(err, content) {
 				if (err) {
 					onError(err);
 					return;
 				}
-				onFileContent(filename, content);
+				onFileContent(filename, content, next);
 			});
+		}, function done() {
+			console.log("Node init done!");
 		});
+
 	});
 }
+
 
 /**
  * Execute node script (except for source nodes)

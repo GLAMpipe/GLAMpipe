@@ -32,14 +32,21 @@
 		
 	 
 		this.addItem = function () {
+			var match = ko.utils.arrayFirst(self.allItems(), function(item) {
+				return self.itemToAdd() === item.title;
+			});
+			
 			if ((this.itemToAdd() != ""))  {// Prevent blanks 
-				var data = {'title':self.itemToAdd()};
-				$.post("/create/project", data, function(returnedData) {
-					// This callback is executed if the post was successful  
-					self.itemToAdd(""); // Clear the text box 
-					self.allItems([]);
-					self.loadItems();
-				});
+				if(match) {
+					alert("Project title \"" + self.itemToAdd() + "\" exists!");
+				} else {
+					var data = {'title':self.itemToAdd()};
+					$.post("/create/project", data, function(returnedData) {
+						self.itemToAdd(""); // Clear the text box 
+						self.allItems([]);
+						self.loadItems();
+					});
+				}
 			}
 		};
 	 

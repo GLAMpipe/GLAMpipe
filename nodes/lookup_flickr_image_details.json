@@ -1,6 +1,6 @@
 {
 	"nodeid": "lookup_flickr_image_details",
-	"title": "Flickr image details",
+	"title": "info",
 	"type": "lookup",
 	"subtype": "Flickr",
 	"description": "Fetch image data (requires an API key)",

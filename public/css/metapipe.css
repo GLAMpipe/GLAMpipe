@@ -89,8 +89,12 @@ input[type='checkbox'] {
 	background-color: white;
 }
 
-.node_info .description{
+.node_info .description, .node_info .params_description{
 	margin-bottom:10px;
+}
+
+.node_info .description{
+	background-color: #E0E0E0;
 }
 
 .node_info .view_button {
@@ -241,6 +245,19 @@ input[type='checkbox'] {
 
 .transform .params {
 	background-color: #F6F4C5;
+}
+
+
+.download h2 {
+	background-color:#6153AA;
+}
+
+.download h3 {
+	background-color:#9686E9;
+}
+
+.download .params {
+	background-color: #E0DAFF;
 }
 
 

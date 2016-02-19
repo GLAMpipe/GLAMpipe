@@ -1,6 +1,6 @@
 {
 	"nodeid": "lookup_flickr_image_sizes",
-	"title": "Flickr image URLs",
+	"title": "getSizes",
 	"type": "lookup",
 	"subtype": "Flickr",
 	"description": "Fetch image URLs for different sizes (requires an API key)",

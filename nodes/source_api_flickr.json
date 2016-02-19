@@ -2,7 +2,7 @@
 	"nodeid": "source_api_flickr",
 	"type": "source",
 	"subtype": "API",
-	"title": "Flickr import",
+	"title": "Flickr",
 	"usage":"",
 	"description": "Import from Flickr (requires an API key)",
 	

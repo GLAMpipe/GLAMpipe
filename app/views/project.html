@@ -29,6 +29,7 @@
 		this.currentProject = "";
 		this.currentNode = "";
 		this.currentCollection = "";
+		this.currentNodePosition = {};
 		this.projectNodes = ko.observableArray(); 
 		this.add_node = function (data, event) {
 			var ele = $(event.target);
@@ -186,7 +187,7 @@
 			$("#node_creator").show();
 			self.currentNode = obj.parent().attr("id");
 			self.currentCollection = obj.parent().data("collection");
-			
+			self.currentNodePosition = obj.parent().position();
 		}
 
 		this.openSourceCreator = function(data, event) {
@@ -380,6 +381,8 @@
 			data.project = nodes.currentProject;
 			data.input_node = nodes.currentNode; 
 			data.collection = nodes.currentCollection; 
+			// send also x and y so that new node can be positioned close
+			data.position = nodes.currentNodePosition;
 			
 			$("#message").empty();
 			console.log(data);
@@ -414,7 +417,7 @@
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block draggable" style="width:250px;"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, text:params.title"></h2> 
+		<h2 data-bind="click:$root.selectNode, text:type + ':' + subtype + ':' + title"></h2> 
 		
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
@@ -422,7 +425,8 @@
 		</div>
 		
 	   <div class="node_info"> 
-			<p class="description" data-bind="html:params.description"></p> 
+		   <p class="description" data-bind="html:description"></p> 
+			<p class="params_description" data-bind="html:params.description"></p> 
 			<a class="view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
 		</div>
 		
