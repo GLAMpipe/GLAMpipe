@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/js/js-graph-it.js"></script>
 <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="/js/knockout.js"></script>
+<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/js-graph-it.css" />
 <link rel="stylesheet" type="text/css" href="/css/sf-homepage.css" />
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
@@ -103,6 +104,7 @@
 				$("#project_title").text(project.title);
 				resizeCanvas();
 				initPageObjects();
+				resizeInnerDiv();
 				
 			})
 		}
@@ -264,7 +266,8 @@
 	function onLoad() {
 
 		var path = window.location.pathname.split("/");
-		resizeCanvas();
+		//resizeCanvas();
+		//initPageObjects();
 		$('.loading').hide();
 		$(".params").hide();
 		$("#node_creator").hide();
@@ -279,8 +282,15 @@
 			return this.par;
 		},nodes);
 
+		$( window ).resize(function() {
+		  resizeCanvas();
+		  resizeInnerDiv();
+		  console.log("resize event");
+		});
+
 		$(document).on('click','.run', function(e) {
-			 
+			
+			$("#console").empty(); 
 			var map = {};
 			// read input from settings
 			$("input").each(function() {
@@ -395,6 +405,28 @@
 			e.preventDefault();
 		});
 
+		// websocket stuff
+		var socket = io.connect('http://localhost');
+		socket.on('news', function (data) {
+			console.log(data);
+			$("#console").append(data + "</br>");
+			tailScroll() 
+		  });
+
+		socket.on('error', function (data) {
+			console.log(data);
+			$("#console").append("<div class=\"bad\">" + data + "</div>");
+		  });
+
+		socket.on('finish', function (data) {
+			console.log(data);
+			$("#console").append("<div class=\"good\">" + data + "</div>");
+		  });
+
+		$(window).on('beforeunload', function(){
+			socket.close();
+		});
+
 	}
 		
 	/**
@@ -404,20 +436,37 @@
 	{
 		var divElement = document.getElementById("mainCanvas");
 		var screenHeight = window.innerHeight || document.body.offsetHeight;
-		divElement.style.height = (screenHeight - 16) + "px";
+		divElement.style.height = (screenHeight - 60) + "px";
 	}
-	
+
+	function resizeInnerDiv () {
+		var div = document.getElementById("mainCanvas_innerDiv");
+		var screenHeight = window.innerHeight || document.body.offsetHeight;
+		var screenWidth = window.innerWidth || document.body.offsetWidth;
+		div.style.height = (screenHeight - 70) + "px";
+		div.style.width = (screenWidth - 390) + "px";
+	}
 		
 	function getURLParameter(name) {
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	}
+
+	// console effect from here: http://jsfiddle.net/manuel/zejCD/1/
+	function tailScroll() {
+		var height = $("#console").get(0).scrollHeight;
+		$("#console").animate({
+			scrollTop: height
+		}, 500);
+	}
+
+
 
 </script>
 
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block draggable" style="width:250px;"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, text:type + ':' + subtype + ':' + title"></h2> 
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + subtype + ' ' + title"></h2> 
 		
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
@@ -444,19 +493,24 @@
 </head>
 <body onload="onLoad();">
 
-	<a href="/">back to projects</a>
-	<h1 id="project_title"></h1>
-	<button data-bind="click: openSourceCreator" class="add_node" >add source</button>
+
+	<div id="console"></div>
+	<div class="project_header">
+		<h1 class="inline_header"><a href="/" title="back to projects">projects:</a></h1>
+		<h1 class="inline_header" id="project_title"></h1>
+		<button data-bind="click: openSourceCreator" class="add_source" >add source</button>
+	</div>
+
 	<div id="node_settings">
 		<div id="node_bar" class="selected">
 			<h2 class="selected">Select node</h2>
 		</div>
-		<div id="node_msg" class="done">status</div>
+		<div id="node_msg" class="done"></div>
 	</div>
 	
 	
 	<div id="mainCanvas" class="canvas" data-bind="template: { name: 'node-template', foreach: projectNodes }"> 
-
+		
 	</div>
 	
 	
@@ -485,5 +539,6 @@
 		</div>
 		<!-- /ko -->
 	</div>
-	</body>
+	<div class="self_advertise">-MetaPipe-</div>
+</body>
 </html>

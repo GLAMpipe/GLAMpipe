@@ -1,7 +1,25 @@
 h2, h3 {
-	background-color: grey;
 	padding:5px;
 	color:white;
+}
+
+a:link {
+    color: #395D5A;
+}
+
+/* visited link */
+a:visited {
+    color: #395D5A;
+}
+
+/* mouse over link */
+a:hover {
+    color: white;
+}
+
+/* selected link */
+a:active {
+    color: white;
 }
 
 p {
@@ -15,16 +33,37 @@ input[type='checkbox'] {
 	width:20px;
 	}
 	
+
+
+button {
+    background-color: #99B4B2;
+    border-radius:2px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    border:none;
+    
+}
+
+button:hover {
+	background-color: #395D5A;
+}
+
+button.run {
+	border: 1px solid #5C5C5C;
+	font-weight:bold;
+}
+
 #node_bar {
-	border: 1px solid black;
 	padding:10px;
+	background-color:#99B4B2;
+	color:white;
 }
 
 #node_bar button {
 	display:block;
 	margin-top:20px;
 }
-
 
 #node_bar .description {
 	margin-bottom:20px;
@@ -39,8 +78,10 @@ input[type='checkbox'] {
 
 #node_bar .settings {
 	margin-bottom:20px;
+	color:black;
 	padding:10px;
 	border: 1px solid black;
+	background-color:white;
 }
 
 #node_bar .subhead {
@@ -74,14 +115,15 @@ input[type='checkbox'] {
 
 
 .selected h2{
-	background-color: #2A62CC;
+
+	border-bottom: 1px solid black;
 }
 
 #node_settings {
 	float:right;
 	width:350px;
 	height:100%;
-	background-color: white;
+	background-color: #99B4B2;
 }
 
 .node_info {
@@ -98,10 +140,14 @@ input[type='checkbox'] {
 }
 
 .node_info .view_button {
-	background-color: green;
+	background-color: #99B4B2;
 	color:white;
 	padding:2px;
 	margin-bottom:10px;
+}
+
+.node_info .view_button:hover {
+	background-color: #395D5A;
 }
 
 .block .add_node {
@@ -110,7 +156,6 @@ input[type='checkbox'] {
 
 #node_msg {
 	padding:20px;
-	border: 1px solid black;
 }
 
 .busy {
@@ -118,7 +163,7 @@ input[type='checkbox'] {
 }
 
 .done {
-	background-color: #A0CF99;
+
 }
 
 #node_creator {
@@ -182,6 +227,7 @@ input[type='checkbox'] {
   margin-top:1px;
   margin-right:1px;
 }
+
 
 
 
@@ -272,6 +318,19 @@ input[type='checkbox'] {
 	padding:5px;
 }
 
+#console {
+	position:fixed;
+	padding:10px;
+	padding-top:60px;
+	top:0px;
+	height:100%;
+	width:100%;
+	color:white;
+	z-index:-1;
+	background-color:#BFCCCB;
+	
+}
+
 .delete_icon {
 	float:right;
 	width:30px;
@@ -292,19 +351,72 @@ input[type='checkbox'] {
 	padding:10px;
 }
 
-.good {
-	background-color: #81C981;
-}
 
 .warning {
 	background-color: #EFB134;
 }
 
+#mainCanvas {
+	background-color : transparent;
+}
+
+#mainCanvas .block {
+	opacity: 1.0;
+	background-color : #99B4B2;
+	box-shadow: 10px 10px 5px #888888;
+	border-radius: 5px 0px 0px 15px;
+}
+
+#mainCanvas .block h2{
+	border-radius: 5px 0px 0px 0px;
+}
+
+
 #mainCanvas .selected {
 	border: 5px solid orange;
 }
 
+.inline_header {
+	display:inline;
+}
+
+.project_header {
+	background-color:#99B4B2;
+	padding:10px;
+	color:white;
+}
+
+.add_source {
+	float:right;
+	background-color:#395D5A;
+}
 
 .strong {
 	font-weight:bold;
+}
+
+.good {
+	background-color: #81C981;
+}
+
+.bad {
+	background-color:red;
+}
+
+.self_advertise {
+	position:fixed;
+	top:0;
+	width:auto;
+	right:0px;
+	left:0px;
+	letter-spacing: 6px;
+	text-align:center;
+	font-size: 34px;
+	font-weight:bold;
+	font-family:arial;
+	color:#99B4B2;
+	padding-top:10px;
+	margin-left:300px;
+	margin-right:300px;
+	text-shadow: 1px 1px 1px #3B5654;
 }

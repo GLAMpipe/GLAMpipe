@@ -27,6 +27,13 @@ exports.find2 = function (query, collectionname, callback) {
 	});   
 }
 
+exports.findCursor = function (query, collectionname) {
+
+	var collection = db.collection(collectionname);
+	return collection.find(query);
+}
+
+
 exports.find = function (query, collectionname, callback) {
 
 	var collection = db.collection(collectionname);
@@ -265,6 +272,10 @@ exports.dropCollection = function (collectionName, callback) {
 	collection.drop(function (err) {
 		callback(err);
 	});
+}
+
+exports.markNodeAsExecuted = function (node) {
+	
 }
 
 // creates an object for mongoquery array update wiht positional operator ($)

@@ -1,7 +1,7 @@
 
 
 
-module.exports = function(app, metapipe) {
+module.exports = function(app, metapipe, io) {
 	var multer 		= require("multer");
 	var upload 		= multer({ dest: 'uploads/' });
 	var path 		= require('path');
@@ -65,7 +65,8 @@ module.exports = function(app, metapipe) {
 	});
 
 	app.post('/run/node/:id', function (req, res) {
-		metapipe.runNode(req, res);
+		metapipe.runNode(req, res, io);
+		res.json({status:"started"});
 	});
 
 

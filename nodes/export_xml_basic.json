@@ -7,23 +7,31 @@
 
 
     "scripts": {
-        "before_run":"out.arr.push('<root>')",
+        "before_run":"out.value = '<root>\\n'",
         "run": [
                 "var str = '';",
                 "var record_tag = context.node.settings.root;",
                 "var tag_open = ' <' + record_tag + '>\\n';",
                 "var tag_close = ' </' + record_tag + '>\\n';",
-                
-                "for(f in context.data) {",
+                "for(f in context.doc) {",
                 "   var tag = context.node.settings['_mapkey_' + f];",
-                "   if(tag != '')",
-                "       str += '    <'+tag+'>' + f + '</'+tag+'>\\n'",
+                "   if(tag != '') {",
+                "       if(typeof context.doc[f] === \"object\" && f != \"_id\") {",
+                "           str += '    <'+tag+'>\\n';",
+                "           for(g in context.doc[f]) {",
+                "               str += '        <'+g+'>' + context.doc[f][g] + '</'+g+'>\\n';",
+                "           }",
+                "           str += '    </'+tag+'>\\n';",
+                "       } else {",
+                "           str += '    <'+tag+'>' + context.doc[f] + '</'+tag+'>\\n'",
+                "       }",
+                "   }",
                 "};",
 
-                "out.arr.push( tag_open + str + tag_close);"
+                "out.value = tag_open + str + tag_close;"
                 ],
         "after_run":[
-                    "out.arr.push('</root>');",
+                    "out.value = '</root>';",
                     "out.msg = 'Export done to \"metapipe/output/' + context.node.settings.filename + '\"';"
                     ]
     },
@@ -35,7 +43,8 @@
                     "<label>file name</label><input name=\"filename\"/>",
                     "<h3>mapping</h3>",
                     "<label>Select mapping </label>",
-                    "<button id=\"xml_basic_fetch\" class=\"fetch_record\">fetch</button>",
+                    "<button id=\"xml_basic_fetch\" class=\"fetch_record\">fetch fields</button>",
+                    "<button id=\"xml_basic_copy\" class=\"fetch_record\">copy fields</button>",
                     "<script>",
                     "   $(\"#xml_basic_fetch\").click(function(e){",
                     "       var obj=$(e.target);",
@@ -44,11 +53,22 @@
                     "           var rec=data[0];",
                     "           var table=$('<table><th>current name</th><th>new name</th></table>');",
                     "           for(var f in rec){",
-                    "               var field=$('<tr><td>' +f+ '</td><td><input name=\"_mapkey_'+f+'\"/></td></tr>');",
+                    "               if(typeof rec[f] === \"object\" && f != \"_id\") {",
+                    "                   var field=$('<tr><td>' +f+ '</td><td><input name=\"_mapkey_'+f+'\"/>A</td></tr>');",
+                    "               } else {",
+                    "                   var field=$('<tr><td>' +f+ '</td><td><input name=\"_mapkey_'+f+'\"/></td></tr>');",
+                    "               }",
                     "               table.append(field);",
                     "           }",
                     "           obj.parent().append(table);",
                     "       })",
+                    "   });",
+                    "   $(\"#xml_basic_copy\").click(function(e){",
+                    "       var obj=$(e.target);",
+                    "       obj.parent().find(\"table tr\").each(function(index) {",
+                    "           var field = $( this ).find(\"td\").text();",
+                    "           $( this ).find(\"input\").val(field);",
+                    "       });",
                     "   });",
                     "   </script>"
                     ]
