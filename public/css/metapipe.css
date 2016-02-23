@@ -318,6 +318,10 @@ button.run {
 	padding:5px;
 }
 
+html { 
+
+}
+
 #console {
 	position:fixed;
 	padding:10px;
@@ -328,7 +332,6 @@ button.run {
 	color:white;
 	z-index:-1;
 	background-color:#BFCCCB;
-	
 }
 
 .delete_icon {

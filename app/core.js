@@ -239,7 +239,7 @@ exports.runNode = function (req, res, io) {
 							exports.generateView(node, function(msg) {
 								console.log("VIEW:", msg);
 							})
-							res.json({msg:sandbox.out.msg, count:sandbox.out.value.length, status:"ok"})
+							//res.json({msg:sandbox.out.msg, count:sandbox.out.value.length, status:"ok"})
 						});
 					});
 				}
@@ -357,7 +357,7 @@ exports.runNode = function (req, res, io) {
 					}, function done() {
 						vm.runInNewContext(node.scripts.after_run, sandbox,"node.scripts.after_run");
 						console.log("DONE");
-						res.json({msg:sandbox.out.msg, count:count, status:"ok"})
+						//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 					});
 					
 				}); 
@@ -382,7 +382,7 @@ exports.runNode = function (req, res, io) {
 							sandbox.context.data = doc;
 							sandbox = executeNodeScript(node.scripts.run, sandbox, "node.scripts.run");
 							if(sandbox.error) {
-								res.json({msg:"error in node script!", count:count, status:"error!"});
+								//res.json({msg:"error in node script!", count:count, status:"error!"});
 								return;
 							}
 							
@@ -395,13 +395,13 @@ exports.runNode = function (req, res, io) {
 							vm.runInNewContext(node.scripts.finnish, sandbox,"node.scripts.finnish");
 
 							console.log("DONE");
-							res.json({msg:sandbox.out.msg, count:count, status:"ok"})
+							//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 						});
 					});
 				}
 				
-
 				callback();
+				
 			break;
 			
 
@@ -422,7 +422,7 @@ exports.runNode = function (req, res, io) {
 						if(doc == null) {
 							//vm.runInNewContext(node.scripts.finnish, sandbox,"node.scripts.finnish");
 							console.log("DONE");
-							res.json({msg:sandbox.out.msg, count:count, status:"ok"});
+							//res.json({msg:sandbox.out.msg, count:count, status:"ok"});
 							return;
 						}
 						sandbox.context.doc = doc;
@@ -445,15 +445,15 @@ exports.runNode = function (req, res, io) {
 				if(typeof(node.scripts.run) !== "undefined") {
 					exports.applyFuncForEachAndUpdate(node, function(error, count) {
 						if(error) {
-							res.json({"error": error});
+							//res.json({"error": error});
 							return;
 						}
 						console.log("DONE apply:", count);
-						res.json({msg:sandbox.out.msg, count:count, status:"ok"})
+						//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 					});
 				} else {
 					console.log("No user defined function found!");
-					res.json({"error":"No user defined function found!"});
+					//res.json({"error":"No user defined function found!"});
 				}
 		}
 		
