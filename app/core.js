@@ -113,7 +113,7 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("metapipe",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "metapipe", function(meta) {
-				var short = title.substring(0,12).toLowerCase();
+				var short = title.substring(0,16).toLowerCase();
 				short = short.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -239,6 +239,7 @@ exports.runNode = function (req, res, io) {
 							exports.generateView(node, function(msg) {
 								console.log("VIEW:", msg);
 							})
+							io.sockets.emit("finish", sandbox.out.msg);
 							//res.json({msg:sandbox.out.msg, count:sandbox.out.value.length, status:"ok"})
 						});
 					});
@@ -296,7 +297,7 @@ exports.runNode = function (req, res, io) {
 						wstream.write(sandbox.out.value)
 
 						count++;
-						if(count % 100 == 0) {
+						if(count % 10 == 0) {
 							io.sockets.emit("news",node.type.toUpperCase() + ': processed ' + count);
 							console.log(node.type.toUpperCase() + ': processed',count);
 							
@@ -340,8 +341,12 @@ exports.runNode = function (req, res, io) {
 						if(typeof(doc[node.params.field]) !== "undefined") {
 							
 							sandbox.context.doc = doc;
+							sandbox.out.progress = "";
 							// callback for updating record
 							var onNodeScript = function (sandbox) {
+								io.sockets.emit("news",sandbox.out.url);
+								if(sandbox.out.progress != "")
+									io.sockets.emit("progress",sandbox.out.progress)
 								var setter = {};
 								setter[node.params.field + node.params.suffix] = sandbox.out.value;
 								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
@@ -356,8 +361,8 @@ exports.runNode = function (req, res, io) {
 						}
 					}, function done() {
 						vm.runInNewContext(node.scripts.after_run, sandbox,"node.scripts.after_run");
+						io.sockets.emit("finish",sandbox.out.msg);
 						console.log("DONE");
-						//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 					});
 					
 				}); 
@@ -380,12 +385,14 @@ exports.runNode = function (req, res, io) {
 						// run node once per record
 						async.eachSeries(doc, function iterator(doc, next) {
 							sandbox.context.data = doc;
-							sandbox = executeNodeScript(node.scripts.run, sandbox, "node.scripts.run");
+							executeNodeScript(node.scripts.run, sandbox, "node.scripts.run");
 							if(sandbox.error) {
 								//res.json({msg:"error in node script!", count:count, status:"error!"});
 								return;
 							}
-							
+							if(sandbox.out.progress != "")
+								io.sockets.emit("progress",sandbox.out.progress)
+								
 							exports.downloadFile(node, sandbox, function() {
 								next();
 							})
@@ -393,9 +400,8 @@ exports.runNode = function (req, res, io) {
 						
 						}, function done() {
 							vm.runInNewContext(node.scripts.finnish, sandbox,"node.scripts.finnish");
-
+							io.sockets.emit("finish",sandbox.out.msg);
 							console.log("DONE");
-							//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 						});
 					});
 				}
@@ -1284,11 +1290,10 @@ function callAPISerial (sandbox, node, onScript, onError) {
 		vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
 		onScript(sandbox);
 	}
-
-	console.log(node.scripts.url);
 	
 	try {
 		vm.runInNewContext(node.scripts.url, sandbox);
+		console.log(sandbox.out.url);
 		options.url = sandbox.out.url;
 	} catch (e) {
 		if (e instanceof SyntaxError) {

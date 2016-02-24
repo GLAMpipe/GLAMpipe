@@ -9,6 +9,7 @@
 <script type="text/javascript" src="js/knockout.js"></script>
 <link rel="stylesheet" type="text/css" href="css/js-graph-it.css" />
 <link rel="stylesheet" type="text/css" href="css/sf-homepage.css" />
+<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
 <style>
 	
 </style>
@@ -73,7 +74,10 @@
 </head>
 <body onload="onLoad();">
 
-	<h1>METAPIPE</h1>
+	<div class="project_header">
+		<h1 class="inline_header"><a href="/" title="back to projects">MetaPipe Projects</a></h1>
+		<h1 class="inline_header" id="project_title"></h1>
+	</div>
 	<div id="node_bar" class="selected">
 		<h2 class="selected">Create project</h2>
 		<form data-bind="submit:addItem">

@@ -408,8 +408,14 @@
 		// websocket stuff
 		var socket = io.connect('http://localhost');
 		socket.on('news', function (data) {
-			console.log(data);
+			//console.log(data);
 			$("#console").append(data + "</br>");
+			tailScroll() 
+		  });
+
+		socket.on('progress', function (data) {
+			//console.log(data);
+			$("#console").append("<div class=\"progress\">" + data + "</div>");
 			tailScroll() 
 		  });
 
@@ -426,6 +432,13 @@
 		$(window).on('beforeunload', function(){
 			socket.close();
 		});
+
+		$(document).on('click','#addline', function(e) {
+			
+			$("#console").append("<div class=\"good\">test line for testing</div>");
+			$("#console").css('z-index', 3000000);
+
+		});	
 
 	}
 		
@@ -453,10 +466,10 @@
 
 	// console effect from here: http://jsfiddle.net/manuel/zejCD/1/
 	function tailScroll() {
-		var height = $("#console").get(0).scrollHeight;
+		var height = $("#console").get(0).scrollHeight -260;
 		$("#console").animate({
 			scrollTop: height
-		}, 500);
+		}, 50);
 	}
 
 
@@ -540,5 +553,6 @@
 		<!-- /ko -->
 	</div>
 	<div class="self_advertise">-MetaPipe-</div>
+	<footer><button id="addline">add line</button></footer>
 </body>
 </html>

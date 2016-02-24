@@ -1,3 +1,7 @@
+body {
+	background-color:#BFCCCB;
+}
+
 h2, h3 {
 	padding:5px;
 	color:white;
@@ -324,14 +328,21 @@ html {
 
 #console {
 	position:fixed;
+	top:60px;
 	padding:10px;
 	padding-top:60px;
 	top:0px;
-	height:100%;
-	width:100%;
+	height:auto;
+	bottom:60px;
+	width:550px;
 	color:white;
 	z-index:-1;
+	overflow:hidden;
 	background-color:#BFCCCB;
+}
+
+#console img {
+	opacity:0.5;
 }
 
 .delete_icon {
@@ -399,11 +410,16 @@ html {
 }
 
 .good {
-	background-color: #81C981;
+	background:transparent linear-gradient(to right, rgba(16, 134, 17, 0.93) 0%, rgba(252, 252, 252, 0.04) 45%, rgba(252, 252, 252, 0) 100%) repeat scroll 0% 0%;
 }
 
 .bad {
-	background-color:red;
+	background:transparent linear-gradient(to right, rgba(255, 0, 0, 1.0) 0%, rgba(252, 252, 252, 0.04) 45%, rgba(252, 252, 252, 0) 100%) repeat scroll 0% 0%;
+
+}
+
+.progress {
+	color:black;
 }
 
 .self_advertise {
@@ -418,7 +434,7 @@ html {
 	font-weight:bold;
 	font-family:arial;
 	color:#99B4B2;
-	padding-top:10px;
+	padding-top:6px;
 	margin-left:300px;
 	margin-right:300px;
 	text-shadow: 1px 1px 1px #3B5654;
