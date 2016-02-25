@@ -1,0 +1,36 @@
+{
+    "nodeid": "source_API_mapwarper",
+    "title": "Map Warper",
+    "type": "source",
+    "subtype": "API",
+    "description": "Fetch all maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
+
+    "scripts": {
+        "hello": "out.msg = \"<h2>Hello, You just added a warper node!</h2> \" ",
+        "bye": "out.msg = \"Deleted me! I'll take collection \" + context.node.params.collection + \" with me. Bye!\" ",
+        "url":"out.url = context.node.params.warper + '/maps.json';",
+        
+        "init":"context.console.log('running', context.node.title);",
+        "run":[
+            "if(context.data.stat != 'fail') {",
+            "   out.value = context.data;",
+            "}",
+            "out.progress = 'working on page ' + context.data.current_page +'/' + context.data.total_pages;"
+            ],
+        "finish":"out.msg = 'Map data fetched from ' + context.node.params.warper"
+    },
+    
+    "views": {
+        "data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" data-bind=\"click: sort\">title</th>\n<th id=\"description\" >description</th>\n<th id=\"link\" >link</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<td data-bind=\"text: title\"></td>\n\n </tr>\n </tbody>\n </table>\n</div>\n",
+        "params":[
+                    "<label>Choose warper</label>",
+                    "<select name=\"warper\">",
+                    "    <option value='http://warper.wmflabs.org/'>warper.wmflabs.org</option>",
+                    "    <option value='http://mapwarper.net/'>mapwarper.net</option>",
+                    "    <option value='http://maps.nypl.org/warper/'>maps.nypl.org/warper</option>",
+                    "</select>"
+                 ],
+        "settings":"no settings"
+    }
+
+}

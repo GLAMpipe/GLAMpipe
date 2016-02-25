@@ -7,11 +7,13 @@
 
 
     "scripts": {
-        "before_run":"out.arr.push('<root>')",
+		"hello": "out.msg = \"You added a download node \" ",
+        "bye": "out.msg = \"Deleted donwload node. Downloaded files will remain. Bye!\" ",
+        "init":"out.arr.push('<root>')",
         "run": [
                 "out.value = context.data[context.node.params.field]"
                 ],
-        "after_run":"context.console.log('downloaded');"
+        "finish":"context.console.log('downloaded');"
     },
     
     "views": {

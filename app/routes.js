@@ -49,15 +49,15 @@ module.exports = function(app, metapipe, io) {
 	});
 
 	app.post('/create/node', function (req, res) {
-		metapipe.createNode(req.body, res);
+		metapipe.createNode(req.body, res, io);
 	});
 
 	app.post('/create/source/node', function (req, res) {
-		metapipe.createSourceNode(req.body, res);
+		metapipe.createSourceNode(req.body, res, io);
 	});
 
 	app.post('/delete/node', function (req, res) {
-		metapipe.deleteNode(req.body, res);
+		metapipe.deleteNode(req.body, res, io);
 	});
 
 	app.post('/set/node/position', function (req, res) {

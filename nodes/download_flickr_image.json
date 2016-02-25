@@ -7,7 +7,7 @@
 
 
     "scripts": {
-        "before_run":"",
+        "init":"",
         "run": [
                 "var size = context.node.params.size;",
                 "var url = context.data.id_photo_sizes.size[size].source;",
@@ -17,8 +17,7 @@
                 "context.console.log(out.value);",
                 "out.progress = url"
                 ],
-        "after_run":"",
-        "finnish":"context.console.log('downloaded');out.msg = 'Images downloaded!'"
+        "finish":"context.console.log('downloaded');out.msg = 'Images downloaded!'"
     },
     
     "views": {

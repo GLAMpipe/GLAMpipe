@@ -7,7 +7,9 @@
 
 
     "scripts": {
-        "before_run":"out.value = '<root>\\n'",
+        "hello": "out.msg = \"You added a XML export node \"; context.node.title = context.node.params.file; ",
+        "bye": "out.msg = \"Deleted XML export node. Bye!\" ",
+        "init":"out.value = '<root>\\n';",
         "run": [
                 "var str = '';",
                 "var record_tag = context.node.settings.root;",
@@ -28,19 +30,23 @@
                 "   }",
                 "};",
 
-                "out.value = tag_open + str + tag_close;"
+                "out.value = tag_open + str + tag_close;",
+
+                "if(context.count % 100 == 0) ",
+				"    out.progress = context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count;",
+				"else ",
+				"    out.progress = '';"
                 ],
-        "after_run":[
+        "finish":[
                     "out.value = '</root>';",
-                    "out.msg = 'Export done to \"metapipe/output/' + context.node.settings.filename + '\"';"
+                    "out.msg = 'Export done to \"metapipe/output/' + context.node.params.filename + '\"';"
                     ]
     },
     
     "views": {
-        "params":"",
+        "params":"<label>file name</label><input name=\"file\"/>",
         "settings":[
                     "<label>record element name </label><input name=\"root\" value=\"record\"/>",
-                    "<label>file name</label><input name=\"filename\"/>",
                     "<h3>mapping</h3>",
                     "<label>Select mapping </label>",
                     "<button id=\"xml_basic_fetch\" class=\"fetch_record\">fetch fields</button>",

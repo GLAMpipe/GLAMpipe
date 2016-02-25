@@ -7,11 +7,18 @@
 	"description": "Import from Flickr (requires an API key)",
 	
 	"scripts": {
-		"url":"var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos'; var format = '&format=json&nojsoncallback=?'; out.url = base_url + '&photoset_id=' + context.node.params.album + format + '&api_key=' + context.node.params.apikey",
+		"hello": "out.msg = \"You added a Flickr import node \" ",
+        "bye": "out.msg = \"Deleted Flickr import node. Collection \" + context.node.params.collection + \" is deleted too. Bye!\" ",
 		
-		"before_run":"context.console.log('running ' + context.node.title);",
+		"init":	[
+				"context.console.log('running ' + context.node.title);",
+				"var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos';",
+				"var format = '&format=json&nojsoncallback=?';",
+				"out.url = base_url + '&photoset_id=' + context.node.params.album + format + '&api_key=' + context.node.params.apikey;",
+				"out.msg = out.url"
+				],
 		"run":"out.value = context.data.photoset.photo;",
-		"after_run":"out.msg = 'Flickr images fetched'"
+		"finish":"out.msg = 'Flickr images fetched'"
 	},
 	
 	"views": {

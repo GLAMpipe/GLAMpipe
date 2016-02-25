@@ -254,12 +254,6 @@
 			console.log('node executed');
 			if(data.error)
 				alert(data.error);
-
-			$("#node_msg").html("<div>msg: " + data.msg + "</div>");
-			$("#node_msg").append("<div>count: " + data.count + "</div>");
-			$("#node_msg").append("<div>status: " + data.status + "</div>");
-			$("#node_msg").removeClass("busy");
-			$("#node_msg").addClass("done");
 		});
 	}
 
@@ -290,7 +284,7 @@
 
 		$(document).on('click','.run', function(e) {
 			
-			$("#console").empty(); 
+			//$("#console").empty(); 
 			var map = {};
 			// read input from settings
 			$("input").each(function() {
@@ -407,6 +401,13 @@
 
 		// websocket stuff
 		var socket = io.connect('http://localhost');
+
+		socket.on('hello', function (data) {
+			$("#console").append(data + "</br>");
+			tailScroll() 
+		  });
+
+		
 		socket.on('news', function (data) {
 			//console.log(data);
 			$("#console").append(data + "</br>");
@@ -422,11 +423,15 @@
 		socket.on('error', function (data) {
 			console.log(data);
 			$("#console").append("<div class=\"bad\">" + data + "</div>");
+			tailScroll() 
 		  });
 
 		socket.on('finish', function (data) {
-			console.log(data);
 			$("#console").append("<div class=\"good\">" + data + "</div>");
+			tailScroll(); 
+			$("#node_msg").removeClass("busy");
+			$("#node_msg").addClass("done");
+			$("#node_msg").html("");
 		  });
 
 		$(window).on('beforeunload', function(){
@@ -479,7 +484,7 @@
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block draggable" style="width:250px;"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + subtype + ' ' + title"></h2> 
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title"></h2> 
 		
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
@@ -541,7 +546,7 @@
 						<ul data-bind="foreach: nodes" class="node_types">
 							<li>
 								<div data-bind="text:title, click:$root.openNodeParams"></div>
-								<div data-bind="text:description"></div>
+								<div data-bind="html:description"></div>
 								<div data-bind="html:params" class="params"></div>
 							</li>
 							
