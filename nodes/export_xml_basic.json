@@ -7,8 +7,8 @@
 
 
     "scripts": {
-        "hello": "out.msg = \"You added a XML export node \"; context.node.title = context.node.params.file; ",
-        "bye": "out.msg = \"Deleted XML export node. Bye!\" ",
+        "hello": "out.say('news', 'You added a XML export node'); context.node.title = context.node.params.file; ",
+        "bye": "out.say('news', 'Deleted XML export node. Bye!'); ",
         "init":"out.value = '<root>\\n';",
         "run": [
                 "var str = '';",
@@ -32,14 +32,12 @@
 
                 "out.value = tag_open + str + tag_close;",
 
-                "if(context.count % 100 == 0) ",
-				"    out.progress = context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count;",
-				"else ",
-				"    out.progress = '';"
+                "if(parseInt(context.count) % 100 == 0) ",
+				"    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);"
                 ],
         "finish":[
                     "out.value = '</root>';",
-                    "out.msg = 'Export done to \"metapipe/output/' + context.node.params.filename + '\"';"
+                    "out.say('finish','Export done to \"metapipe/output/' + context.node.params.filename + '\"');"
                     ]
     },
     

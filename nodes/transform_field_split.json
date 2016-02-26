@@ -5,9 +5,11 @@
 	"subtype": "split",
 	"description": "Split field to an array.",
 	"scripts": {
-		"hello": "out.msg = \"You added a Split node \" ",
-        "bye": "out.msg = \"Deleted Split node. Bye!\" ",
-		"run": "out.value = context.doc[context.node.params.field].split(context.node.settings.separator);"
+		"hello": "out.say('news', 'You added a Split node'); ",
+        "bye": "out.say('news', 'Deleted Split node. Bye!'); ",
+        "init":"out.say('progress', 'Starting Splitting...');",
+		"run": "out.value = context.doc[context.node.params.field].split(context.node.settings.separator);",
+		"finish": "out.say('finish', 'Split done!');"
 	},
 	
 	"views": {
