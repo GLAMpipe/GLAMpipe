@@ -15,9 +15,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 })); 
 
-// load stock nodes ===================================================
-metapipe.initNodes();
-metapipe.initDB();
+// init db and load stock nodes ===================================================
+metapipe.initDB(function () {
+	metapipe.initNodes();
+	});
 
 // routes =============================================================
 require('./app/routes.js')(app, metapipe, io);

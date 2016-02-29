@@ -1,4 +1,5 @@
 {
+	"collection": "Collection node creates the data holder (collection) for your data. This is the first node to add.",
 	"source":"With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API.",
 	"transform":"Transform node is used to modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
 	"lookup":"Lookup nodes can fetch data from metapipe collections or from external APIs.",

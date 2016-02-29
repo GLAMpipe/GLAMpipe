@@ -13,16 +13,18 @@ var positionOffset = 20;
  * - "metapipe" is only collection that must exist
  * - makes sure that "project_count" exists
  */
-exports.initDB = function () {
-	mongoquery.findOne({},"metapipe", function(data) { 
+exports.initDB = function (callback) {
+	mongoquery.findOne({},"mp_settings", function(data) { 
 		if(data) {
-			console.log("DB: project counter exists");
+			console.log("DB: mp_settings exists");
+			callback();
 		} else {
 			console.log("DB: creating project counter");
-			mongoquery.insert("metapipe", {"project_count":0}, function(result) {
+			mongoquery.insert("mp_settings", {"project_count":0}, function(result) {
 				if(result.error)
 					console.log("ERROR: could not create project counter!");
-				return;
+				else 
+					callback();
 			});
 		}
 	});
@@ -33,13 +35,13 @@ exports.initDB = function () {
  * load stock nodes
  * - reads .json files from "nodes" directory
  * - combines with descriptions from "node_type_descriptions.json"
- * - inserts nodes to "nodes" collection
+ * - inserts nodes to "mp_nodes" collection
  */
 
 exports.initNodes = function () {
 	console.log("Loading node files...");
 	var data = {};
-	mongoquery.drop("nodes", function() {
+	mongoquery.drop("mp_nodes", function() {
 
 		fs = require('fs')
 		// read first node type descriptions
@@ -87,7 +89,7 @@ exports.initNodes = function () {
 					if(node.scripts.finish instanceof Array)
 						node.scripts.finish = node.scripts.finish.join("");
 						
-					mongoquery.insert("nodes",node , function(error) {
+					mongoquery.insert("mp_nodes",node , function(error) {
 						if(error.length) {
 							console.log(error);
 						} else {
@@ -123,8 +125,8 @@ exports.createProject = function (title, res) {
 			return;
 		}
 		// update project count and create project
-		mongoquery.update("metapipe",{}, {$inc: { project_count: 1} }, function() {
-			mongoquery.findOne({}, "metapipe", function(meta) {
+		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
+			mongoquery.findOne({}, "mp_settings", function(meta) {
 				var short = title.substring(0,16).toLowerCase();
 				short = short.replace(/ /g,"_");
 				var project = {
@@ -152,7 +154,7 @@ exports.getProjects = function  (res) {
 
 
 exports.getProject = function (doc_id, res) {
-	mongoquery.findOneById(doc_id, "projects", function(data) { res.json(data) });
+	mongoquery.findOneById(doc_id, "mp_projects", function(data) { res.json(data) });
 }
 
 
@@ -163,12 +165,12 @@ exports.getNodes = function (res) {
 
 
 exports.getProjectNodes = function (project, res) {
-	mongoquery.findOneById(project, "projects", function(data) { res.json(data) });
+	mongoquery.findOneById(project, "mp_projects", function(data) { res.json(data) });
 }
 
 
 exports.getNodeSettings = function (node_id, res) {
-	mongoquery.findOneById(node_id, "nodes", function(data) { res.json(data) });
+	mongoquery.findOneById(node_id, "mp_nodes", function(data) { res.json(data) });
 }
 
 /**
@@ -188,7 +190,7 @@ exports.runNode = function (req, res, io) {
 	console.log('Running node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 	
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "projects", function(project) {
+	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
 		if(!project) {
 			res.json({"error":"Node not found!"});
 			return;
@@ -284,10 +286,9 @@ exports.runNode = function (req, res, io) {
 							}
 						)};
 
-						// empty collection and start query loop
-						mongoquery.empty(node.collection, {}, function() {
-							requestLoop();
-						});
+						// start query loop
+						requestLoop();
+						
 					break;
 					
 					
@@ -338,24 +339,25 @@ exports.runNode = function (req, res, io) {
 				var filePath = path.join("output", node.dir, node.params.file);
 				var wstream = fs.createWriteStream(filePath);
 				
-				runNodeScriptInContext("init", node, sandbox, io);
-				wstream.write(sandbox.out.value);
+
 	
 				// find everything
 				mongoquery.find2({}, node.collection, function (err, doc) {
+					
 					// tell node how many records was found
 					sandbox.context.doc_count = doc.length;
+					runNodeScriptInContext("init", node, sandbox, io);
+					wstream.write(sandbox.out.value);
 
 					// TODO: there is really no need to async here
 					async.eachSeries(doc, function iterator(doc, next) {
-						sandbox.context.count++;
 						sandbox.context.doc = doc;
+						sandbox.context.count++;
 						runNodeScriptInContext("run", node, sandbox, io);
 						wstream.write(sandbox.out.value)
 						next();
 						
 					}, function done() {
-						//finish.runInNewContext(sandbox);
 						runNodeScriptInContext("finish", node, sandbox, io);
 						wstream.write(sandbox.out.value);
 						wstream.end();
@@ -378,19 +380,24 @@ exports.runNode = function (req, res, io) {
 				
 				// find everything
 				mongoquery.find2({}, node.collection, function (err, doc) {
+					
+					sandbox.context.doc_count = doc.length;
 					runNodeScriptInContext("init", node, sandbox, io);
+					
 					async.eachSeries(doc, function iterator(doc, next) {
-
+						
 						sandbox.context.doc = doc;
+						sandbox.context.count++;
+						// get URL for request from node
+						runNodeScriptInContext("url", node, sandbox, io);
+						
 						// callback for updating record
 						var onNodeScript = function (sandbox) {
 							var setter = {};
 							setter[node.params.field + node.params.suffix] = sandbox.out.value;
 							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 						}
-						
-						// get URL for request from node
-						runNodeScriptInContext("url", node, sandbox, io);
+
 						callAPISerial (sandbox, node, onNodeScript, onError);
 
 					}, function done() {
@@ -405,13 +412,17 @@ exports.runNode = function (req, res, io) {
 				
 				var callback = function() {
 					
+					
 					// find everything
 					mongoquery.find2({}, node.collection, function(err, doc) {
+						sandbox.context.doc_count = doc.length;
 						runNodeScriptInContext("init", node, sandbox, io);
 						
 						// run node once per record
 						async.eachSeries(doc, function iterator(doc, next) {
-							sandbox.context.data = doc;
+							
+							sandbox.context.doc = doc;
+							sandbox.context.count++;
 							runNodeScriptInContext("run", node, sandbox, io);
 							exports.downloadFile(node, sandbox, function() {
 								next();
@@ -432,12 +443,14 @@ exports.runNode = function (req, res, io) {
 				
 				// find everything
 				mongoquery.find2({}, node.collection, function(err, doc) {
+					sandbox.context.doc_count = doc.length;
 					runNodeScriptInContext("init", node, sandbox, io);
 					
 					// run node once per record
 					async.eachSeries(doc, function iterator(doc, next) {
 
 						sandbox.context.doc = doc;
+						sandbox.context.count++;
 						runNodeScriptInContext("run", node, sandbox, io);
 
 						var setter = {};
@@ -509,7 +522,7 @@ exports.generateView = function (node, callback) {
 				return callback("using static");
 			})
 		} else {
-			generateView(node, function(view) {
+			generateDynamicView(node, function(view) {
 				mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
 				return callback("using dynamic");
 				})
@@ -520,63 +533,6 @@ exports.generateView = function (node, callback) {
 	}
 }
 
-
-
-/**
- * updates project nodes x and y
-*/ 
-exports.setNodePosition = function (params, res) {
-
-	var xx = params.x.replace(/px/,"");
-	var yy = params.y.replace(/px/,"");
-	mongoquery.editProjectNode(params.id, {"x": xx, "y": yy},
-		function() {
-			res.json({"status":"node position updated"});
-		}
-	);
-}
-
-/**
- * Create default project node
- * - adds params defined by user to the stock node
- * - saves result to project record (under "nodes")
- */
- 
-exports.createNode = function (nodeRequest, res, io) {
-
-	console.log("nEW", mongojs.ObjectId());
-	console.log("nodeparams:", nodeRequest);
-	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "nodes", function(node) {
-		if(node) {
-			node.input_node = nodeRequest.input_node;
-			node.params = nodeRequest.params;
-			node.collection = nodeRequest.collection;
-			node.params.collection = nodeRequest.collection;
-			
-			// copy static data view to project node's view if defined
-			if(typeof node.views.data_static !== "undefined")
-				node.views.data = node.views.data_static;
-			
-			// let's place node near parent node	
-			node.x = parseInt(nodeRequest.position.left) + positionOffset;
-			node.y = parseInt(nodeRequest.position.top) + positionOffset;
-			
-			runNodeScript("hello", node, nodeRequest, io);
-			
-			node._id = mongojs.ObjectId();
-			//console.log(node);
-			mongoquery.update("projects",
-				{_id:mongojs.ObjectId(nodeRequest.project)},
-				{$push:{nodes: node}},
-				function() {
-					res.json({"status": "node created"})
-			})
-		} else {
-			console.log("ERROR: node not found");
-		}
-	});
-}
 
 
 /**
@@ -611,34 +567,89 @@ function runNodeScriptInContext (script, node, sandbox, io) {
 	}
 }
 
+
+/**
+ * updates project nodes x and y
+*/ 
+exports.setNodePosition = function (params, res) {
+
+	var xx = params.x.replace(/px/,"");
+	var yy = params.y.replace(/px/,"");
+	mongoquery.editProjectNode(params.id, {"x": xx, "y": yy},
+		function() {
+			res.json({"status":"node position updated"});
+		}
+	);
+}
+
+/**
+ * Create default project node
+ * - adds params defined by user to the stock node
+ * - saves result to project record (under "nodes")
+ */
+ 
+exports.createNode = function (nodeRequest, res, io) {
+
+	console.log("nEW", mongojs.ObjectId());
+	console.log("nodeparams:", nodeRequest);
+	// copy node to project with its settings
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
+		if(node) {
+			node.input_node = nodeRequest.input_node;
+			node.params = nodeRequest.params;
+			node.collection = nodeRequest.collection;
+			node.params.collection = nodeRequest.collection;
+			
+			// copy static data view to project node's view if defined
+			if(typeof node.views.data_static !== "undefined")
+				node.views.data = node.views.data_static;
+			
+			// let's place node near parent node	
+			node.x = parseInt(nodeRequest.position.left) + positionOffset;
+			node.y = parseInt(nodeRequest.position.top) + positionOffset;
+			
+			runNodeScript("hello", node, nodeRequest, io);
+			
+			node._id = mongojs.ObjectId();
+			//console.log(node);
+			mongoquery.update("mp_projects",
+				{_id:mongojs.ObjectId(nodeRequest.project)},
+				{$push:{nodes: node}},
+				function() {
+					res.json({"status": "node created"})
+			})
+		} else {
+			console.log("ERROR: node not found");
+		}
+	});
+}
+
+
+
 /**
  * Create source project node
  * - adds params defined by user to the stock node
  * - creates collection name
  * - saves result to project record (under "nodes")
  */
-exports.createSourceNode = function (nodeRequest, res, io) {
+exports.createCollectionNode = function (nodeRequest, res, io) {
 
-	console.log("nEW", mongojs.ObjectId());
-	
-	// if we do not have collection name, then create it
-	if(!nodeRequest.collection) {
-		mongoquery.findOneById(nodeRequest.project, "projects", function(data) {
-			nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" +nodeRequest.params.title;
-			nodeRequest.params.collection = nodeRequest.collection;
-			mongoquery.update("projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1} }, function() {
+	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(data) {
+		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" +nodeRequest.params.title;
+		nodeRequest.params.collection = nodeRequest.collection;
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1} }, function() {
+			mongoquery.createCollection(nodeRequest.collection, function () {
 				initNode(nodeRequest, res, io);
-			})
-		});
-	} else {
-		initNode(nodeRequest, res, io);
-	}
+			});
+		})
+	});
+
 }
 
 function initNode (nodeRequest, res, io) {
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "nodes", function(node) {
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
 		if(node) {
 			node.input_node = "";
 			node.params = nodeRequest.params;
@@ -649,14 +660,14 @@ function initNode (nodeRequest, res, io) {
 			runNodeScript("hello", node, nodeRequest, io);
 			
 			node._id = mongojs.ObjectId();
-			mongoquery.update("projects",
+			mongoquery.update("mp_projects",
 				{_id:mongojs.ObjectId(nodeRequest.project)},
 				{$push:{nodes: node}},
 				function(error) {
 					if(error) {
 						console.log(error);
 					}
-					mongoquery.update("projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
+					mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
 						console.log("node created");
 						res.json({"status": "node created"})
 					});
@@ -675,7 +686,7 @@ function initNode (nodeRequest, res, io) {
  */
 exports.deleteNode = function (params, res, io) {
 
-	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "projects", function(project) {
+	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", params.node);
 			var node = project.nodes[index];
@@ -688,7 +699,7 @@ exports.deleteNode = function (params, res, io) {
 			runNodeScript("bye", node, null, io);
 			
 			// if node is source or cluster node, then also remove its collection
-			if(node.type == "source" || node.type == "cluster") {
+			if(node.type == "collection") {
 				mongoquery.dropCollection(node.collection, function (error) {
 					if(error)
 						console.log(error);
@@ -696,7 +707,7 @@ exports.deleteNode = function (params, res, io) {
 						console.log("dropped collection", node.collection);
 					});
 			} 
-			mongoquery.update("projects",
+			mongoquery.update("mp_projects",
 				{_id:mongojs.ObjectId(params.project)},
 				{$pull:{nodes: {_id:mongojs.ObjectId(params.node)}}},
 				function() {
@@ -1159,7 +1170,7 @@ function writeJSON2File (filename, records, callback) {
 
 
 
-function generateView(node, callback) {
+function generateDynamicView(node, callback) {
 	// read one record and extract field names
 	// NOTE: this assumes that every record has all field names
 	mongoquery.findOne({}, node.collection, function(data) {
@@ -1191,7 +1202,13 @@ function generateView(node, callback) {
 		// data cells
 		html += '				<td data-bind="text: vcc"></td>'
 		for (key in data) {
-			html += '				<td data-bind="text: '+key+'"></td>'
+			if(typeof data[key] === "object" && key != "_id") {
+
+				html += '				<td data-bind="click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
+
+			} else {
+				html += '				<td data-bind="text: '+key+'"></td>'
+			}
 		}
 
 		html += '			</tr>'
@@ -1206,32 +1223,43 @@ function generateView(node, callback) {
 
 
 function createCollectionView(data, collectionName, callback) {
-	mongoquery.findOne({"nodes.collection":collectionName}, "projects", function(project) {
+	mongoquery.findOne({"nodes.collection":collectionName}, "mp_projects", function(project) {
 		var index = indexByKeyValue(project.nodes, "collection", collectionName);
 		data = data.replace(/\[\[project\]\]/, project.title);
 
 		// insert node's html view to view.html
-		if(typeof project.nodes[index].views.data === "undefined")
-			data = data.replace(/\[\[html\]\]/, '<h2>View not created</h2>Run node first!');
-		else
+		if(typeof project.nodes[index].views.data === "undefined") {
+			generateDynamicView(project.nodes[index], function(msg) {
+				data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+				callback(data);
+			});
+		} else {
 			data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+			callback(data);
+		}
 		
-		callback(data);
+		
 	});
 }
 
 function createNodeView(data, nodeId, callback) {
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "projects", function(project) {
+	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "mp_projects", function(project) {
 		var index = indexByKeyValue(project.nodes, "_id", nodeId);
 		data = data.replace(/\[\[project\]\]/, project.title);
 		data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
-		// insert node's data view to view.html
-		if(typeof project.nodes[index].views.data === "undefined")
-			data = data.replace(/\[\[html\]\]/, '<h2>View not created</h2>Run node first!');
-		else
+		
+		// if node has no static view, then we create in always on the fly (dynamic view)
+		if(typeof project.nodes[index].views.data_static === "undefined") {
+			generateDynamicView(project.nodes[index], function(html) {
+				// insert node's data view to view.html
+				data = data.replace(/\[\[html\]\]/, html);
+				callback(data);
+			});
+		} else {
+			// insert node's data view to view.html
 			data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
-			
-		callback(data);
+			callback(data);
+		}
 	});
 }
 

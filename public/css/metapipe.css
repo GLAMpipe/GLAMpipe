@@ -180,7 +180,7 @@ button.run {
 	background-color: white;
 	width:550px;
 	border: 1px solid black;
-	font-size:14px;;
+	font-size:14px;
 }
 
 #node_creator label, #node_creator div {
@@ -196,6 +196,14 @@ button.run {
 	margin-left:10px;
 }
 
+ul.node_types li {
+	color:#5F5F5F;
+}
+
+ul.node_types li:hover {
+	color:black;
+}
+
 #node_creator .node_types > li > div:first-of-type {
 	background-color: white;
 	font-weight:bold;
@@ -207,6 +215,11 @@ button.run {
 
 	padding:5px;
 }
+
+#node_creator h2 {
+	cursor:pointer;
+}
+
 
 #node_creator .params .submit {
 	background-color: #649834;
@@ -233,6 +246,18 @@ button.run {
 }
 
 
+.collection h2 {
+	background-color: #333;
+}
+
+
+.collection h3 {
+	background-color: #5F5F5F;
+}
+
+.collection .params {
+	background-color: #D8D8D8;
+}
 
 
 .export h2 {
@@ -310,10 +335,6 @@ button.run {
 	background-color: #E0DAFF;
 }
 
-
-.collection h2 {
-	background-color: #1885C0;
-}
 
 
 
@@ -434,8 +455,12 @@ html {
 	font-weight:bold;
 	font-family:arial;
 	color:#99B4B2;
-	padding-top:6px;
+	padding-top:3px;
 	margin-left:300px;
 	margin-right:300px;
 	text-shadow: 1px 1px 1px #3B5654;
+}
+
+.details .key {
+	font-weight:bold;
 }

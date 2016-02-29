@@ -7,7 +7,7 @@
 
     "scripts": {
         "hello": "out.say('news', '<h2>Hello, You just added a warper node!</h2>'); ",
-        "bye": "out.say('news', 'Deleted me!  Taking collection ' + context.node.params.collection + ' with me. Bye!'); ",
+        "bye": "out.say('news', 'Deleted mapwarper source node!  This does NOT remove data. Bye!'); ",
         
         "init": 
         [

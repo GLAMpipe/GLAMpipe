@@ -91,9 +91,51 @@
 			this.params.skip_value = 0;
 			this.loadData();
 		};
+		
+		// show deep data
+		this.openCell = function (data, event) {
+			event.preventDefault();
+			var obj = $(event.target);
+			var details = obj.parent().find(".details");
+			var table = $("<div></div>");
+			createTable(data, table);
+			details.empty();
+			details.append(table);
+
+		}
 	};
 	
 
+
+	function createTable (data, table) {
+		
+		
+		if(data instanceof Array) {
+			if(typeof data[i] === "object") {
+				
+			}
+			for(var i = 0; i < data.length; i++) {
+				if(typeof data[i] === "object" || data[i] instanceof Array) {
+					var row = $("<div><h3>"+i+"</h3></div>");
+					table.append(row);
+					createTable(data[i], row);
+				} else {
+					table.append("<div><span class=\"key\">"+i+": </span><span>"+data[i]+"</span></div>");
+				}
+			}
+		} else {
+			for (key in data) {
+				if(typeof data[key] === "object" || data[key] instanceof Array) {
+					var row = $("<div><h3>"+key+"</h3></div>");
+					table.append(row);
+					createTable(data[key], row);
+				} else {
+					table.append("<div><span class=\"key\">"+key+": </span><span>"+data[key]+"</span></div>");
+				}
+			}
+		} 
+		
+	}
 
 	function onLoad() {
 

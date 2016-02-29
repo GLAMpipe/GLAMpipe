@@ -8,7 +8,7 @@
 	
 	"scripts": {
 		"hello": "out.say('news', 'You added a Flickr import node'); ",
-        "bye": "out.say('finish', 'Deleted Flickr import node. Collection ' + context.node.params.collection + ' is deleted too. Bye!'); ",
+        "bye": "out.say('finish', 'This does NOT remove data. Bye!'); ",
 		
 		"init":	[
 				"var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos';",
@@ -17,7 +17,7 @@
 				"out.say('news', out.url); "
 				],
 		"run":"out.value = context.data.photoset.photo;",
-		"finish":"out.say('finish', 'Flickr images fetched'); "
+		"finish":"out.say('finish', 'Flickr images fetched to' + context.node.params.collection); "
 	},
 	
 	"views": {

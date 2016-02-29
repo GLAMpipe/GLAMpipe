@@ -47,7 +47,7 @@
 			if(typeof data.params.collection !== "undefined")
 				self.currentCollection = data.params.collection
 			else
-				self.currentCollection = "";
+				self.currentCollection = data.collection
 				
 			var node_settings_html = 
 				'<div id="node_bar" class="selected">' + 
@@ -116,7 +116,6 @@
 			$.getJSON("/get/nodes", function(data) { 
 				for(var i = 0; i< data.length; i++) {
 					var d = data[i];
-					console.log(data[i]);
 					for(var j = 0; j < data[i].subtypes.length; j++) {
 						for(var k = 0; k < data[i].subtypes[j].nodes.length; k++) {
 							data[i].subtypes[j].nodes[k].params = self.generateParams(data[i].subtypes[j].nodes[k]);
@@ -153,51 +152,58 @@
 
 		this.generateParams = function (data) {
 			var div = $("<div class=\"params\"></div>");
-			var nameInput = $("<label>node title</label><input name=\"title\" value='"+data.title+"'required/>");
-			var descInput = $("<label>node description</label><textarea name=\"description\"></textarea>");
 			//params.append(div);
 			
 			if(data.type == "source") {
-				if(data.subtype == "API") {
-					div.append(nameInput);
-					div.append(descInput);
-					div.append(data.views.params);
-					div.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createAPInode\">Create node</button>");
-				} else {
+				if(data.subtype == "file") {
 					var form = $("<form data-nodeid=\""+data.nodeid+"\" id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">");
 					var submit = $("<input type=\"submit\" value=\"upload and create source node\" class=\"submit\" />");
 					div.append(form);
-					form.append(nameInput);
-					form.append(descInput);
 					form.append(data.views.params);
 					form.append(submit);
+				} else {
+					div.append(data.views.params);
+					div.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createnode\">Create node</button>");
 				}
 			} else {
-				div.append(nameInput);
-				div.append(descInput);
 				div.append(data.views.params);
 				div.append("<button data-nodeid=\""+data.nodeid+"\" class=\"createnode\">Create node</button>");
 			}
 			return div.prop('outerHTML');
 		}
 
+		// shows all but source nodes and set current node, collection and position
 		this.openCreator = function(data, event) {
 			var obj = $(event.target);
 			$("#node_creator > div").show();
 			$("#node_creator > .source").hide();
-			//$("#node_creator > .source").hide();
+			$("#node_creator > .collection").hide();
 			$("#node_creator").show();
 			self.currentNode = obj.parent().attr("id");
 			self.currentCollection = obj.parent().data("collection");
 			self.currentNodePosition = obj.parent().position();
 		}
 
+		// shows only source nodes and set current node, collection and position
 		this.openSourceCreator = function(data, event) {
 			var obj = $(event.target);
 			$("#node_creator").show();
 			$("#node_creator > div").hide();
 			$("#node_creator > .source").show();
+			self.currentNode = obj.parent().attr("id");
+			self.currentCollection = obj.parent().data("collection");
+			self.currentNodePosition = obj.parent().position();
 		}
+
+		// show only collection node(s).
+
+		this.openCollectionCreator = function(data, event) {
+			var obj = $(event.target);
+			$("#node_creator").show();
+			$("#node_creator > div").hide();
+			$("#node_creator > .collection").show();
+		}
+
 
 		this.closeCreator = function(data, event) {
 			$("#node_creator").hide();
@@ -235,6 +241,9 @@
 				if(data.error)
 					alert(data.error);
 				self.resetSettings();
+				self.currentNode = null;
+				self.currentCollection = null;
+				self.currentNodePosition = null;
 				self.reloadProject();
 			});
 		}
@@ -279,7 +288,6 @@
 		$( window ).resize(function() {
 		  resizeCanvas();
 		  resizeInnerDiv();
-		  console.log("resize event");
 		});
 
 		$(document).on('click','.run', function(e) {
@@ -294,6 +302,8 @@
 			runNode(map, this.id);
 			e.preventDefault();
 		});	
+
+
 
 		// handler for file upload node creation
 		$(document).on('submit', "#uploadfile", function(e) {
@@ -333,7 +343,12 @@
 						data.params.filename = data.filename;
 						data.params.mimetype = data.mimetype;
 						data.nodeid = nodeId;
-						$.post("/create/source/node", data, function(returnedData) {
+						data.project = nodes.currentProject;
+						data.input_node = nodes.currentNode; 
+						data.collection = nodes.currentCollection; 
+						// send also x and y so that new node can be positioned close
+						data.position = nodes.currentNodePosition;
+						$.post("/create/node", data, function(returnedData) {
 							console.log('created node');
 							$("#node_creator").hide();
 							nodes.reloadProject();
@@ -343,31 +358,7 @@
 		   });
 		});
 
-		// handler for API node creation
-		$(document).on('click', ".createAPInode", function(e) {
-			var data = {};
-			var params = {};
-			var obj = $(e.target);
-			
-			// read params
-			obj.parent().find("input,textarea, select").not("input[type=button]").each(function(){
-				params[$(this).attr("name")] = $(this).val(); 
-			});
-			
-			data.params = params;
-			data.nodeid = obj.data("nodeid");
-			data.project = nodes.currentProject;
-			
-			$("#message").empty(); 
-			console.log(data);
 
-			$.post("/create/source/node", data, function(returnedData) {
-				console.log('created node');
-				$("#node_creator").hide();
-				nodes.reloadProject();
-			});
-			e.preventDefault();
-		});
 
 		// handler for normal node creation
 		$(document).on('click', ".createnode", function(e) {
@@ -384,20 +375,30 @@
 			data.nodeid= obj.data("nodeid");
 			data.project = nodes.currentProject;
 			data.input_node = nodes.currentNode; 
-			data.collection = nodes.currentCollection; 
+			 
 			// send also x and y so that new node can be positioned close
 			data.position = nodes.currentNodePosition;
 			
 			$("#message").empty();
-			console.log(data);
 
-			$.post("/create/node", data, function(returnedData) {
-				console.log('created node');
-				$("#node_creator").hide();
-				nodes.reloadProject();
-			});
+			if(data.nodeid == "collection_basic") {
+				$.post("/create/collection/node", data, function(returnedData) {
+					console.log('created node');
+					$("#node_creator").hide();
+					nodes.reloadProject();
+				});
+			} else {
+				data.collection = nodes.currentCollection;
+				$.post("/create/node", data, function(returnedData) {
+					console.log('created node');
+					$("#node_creator").hide();
+					nodes.reloadProject();
+				});
+			}
 			e.preventDefault();
 		});
+
+
 
 		// websocket stuff
 		var socket = io.connect('http://localhost');
@@ -496,9 +497,16 @@
 			<p class="params_description" data-bind="html:params.description"></p> 
 			<a class="view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
 		</div>
-		
+
+		<!-- ko if: type != 'source'  -->
 		<button data-bind="click: $root.openCreator" class="add_node">add node</button> 
+		<!-- /ko -->
 		
+		<!-- ko if: type == 'collection' -->
+			<button data-bind="click: $root.openSourceCreator" class="add_node">add source</button> 
+		<!-- /ko -->
+		
+
 	</div>
 
 	 <!-- ko if: input_node != '' -->
@@ -516,7 +524,7 @@
 	<div class="project_header">
 		<h1 class="inline_header"><a href="/" title="back to projects">projects:</a></h1>
 		<h1 class="inline_header" id="project_title"></h1>
-		<button data-bind="click: openSourceCreator" class="add_source" >add source</button>
+		<button data-bind="click: openCollectionCreator" class="add_source" >add collection</button>
 	</div>
 
 	<div id="node_settings">

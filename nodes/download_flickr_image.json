@@ -7,17 +7,16 @@
 
 
     "scripts": {
-        "init":"",
+        "init":"out.say('progress', 'I have ' + context.doc_count + ' images to download!');",
         "run": [
                 "var size = context.node.params.size;",
-                "var url = context.data.id_photo_sizes.size[size].source;",
+                "var url = context.doc.id_photo_sizes.size[size].source;",
                 "out.url = url;",
                 "var splitted = url.split('/');",
                 "out.file = splitted[splitted.length - 1];",
-                "context.console.log(out.value);",
-                "out.progress = url"
+                "out.say('progress', url);"
                 ],
-        "finish":"context.console.log('downloaded');out.msg = 'Images downloaded!'"
+        "finish":"out.say('finish', 'Images downloaded!')"
     },
     
     "views": {

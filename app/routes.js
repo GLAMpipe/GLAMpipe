@@ -52,8 +52,8 @@ module.exports = function(app, metapipe, io) {
 		metapipe.createNode(req.body, res, io);
 	});
 
-	app.post('/create/source/node', function (req, res) {
-		metapipe.createSourceNode(req.body, res, io);
+	app.post('/create/collection/node', function (req, res) {
+		metapipe.createCollectionNode(req.body, res, io);
 	});
 
 	app.post('/delete/node', function (req, res) {

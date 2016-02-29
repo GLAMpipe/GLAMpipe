@@ -95,9 +95,19 @@ exports.count = function (collectionname, query, callback) {
 // *********************************************************************
 
 
+
+exports.createCollection = function (collectionname, callback) {
+	db.createCollection(collectionname, function(err, data) {
+		if(err)
+			console.log(err);
+		console.log("created collection", collectionname);
+		callback();
+	});
+}
+
 exports.insertProject = function (doc, callback) {
 
-	var collection = db.collection('projects');
+	var collection = db.collection('mp_projects');
 
 	collection.insert(doc ,function (err, result) {
 		if (err) {
@@ -189,7 +199,7 @@ exports.empty = function (collectionname, doc, callback) {
 
 exports.nodes = function (callback) {
 
-	var collection = db.collection("nodes");
+	var collection = db.collection("mp_nodes");
 
 	collection.aggregate([
 
@@ -224,7 +234,7 @@ exports.closeDB = function () {
 
 
 exports.editProjectNode = function (doc_id, params, callback) {
-	var collection = db.collection('projects');
+	var collection = db.collection("mp_projects");
 	var setter = {};
 	setter.$set = createParamsObject("nodes", params);
 	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {callback(err,data);} )
@@ -234,9 +244,9 @@ exports.editProjectNode = function (doc_id, params, callback) {
 
 
 exports.getProject = function (title, callback) {
-	console.log('getProject called for project ',title );
+	console.log("getProject called for project ",title );
 	var query = {"title":title};
-	exports.findOne(query, 'projects', function(msg) {callback(msg)} );
+	exports.findOne(query, "mp_projects", function(msg) {callback(msg)} );
 }
 
 exports.getFunc = function (id, callback) {
@@ -253,7 +263,7 @@ exports.getSource = function (id, callback) {
 
 exports.getAllProjects = function (callback) {
 
-	var collection = db.collection("projects");
+	var collection = db.collection("mp_projects");
 
 	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
 	collection.find({}).sort({title:1}, function(err, docs) { callback(docs); });
@@ -261,7 +271,7 @@ exports.getAllProjects = function (callback) {
 }
 
 exports.getProjectNode = function (id, callback) {
-	var collection = db.collection("projects");
+	var collection = db.collection("mp_projects");
 	collection.find({"nodes._id": mongojs.ObjectId(id)}, {_id: 0, 'nodes.$': 1}, function(err, docs) { 
 		callback(err, docs);
 		});
@@ -277,6 +287,7 @@ exports.dropCollection = function (collectionName, callback) {
 exports.markNodeAsExecuted = function (node) {
 	
 }
+
 
 // creates an object for mongoquery array update wiht positional operator ($)
 function createParamsObject(arrayName, params) {
