@@ -270,6 +270,7 @@ exports.getAllProjects = function (callback) {
 
 }
 
+
 exports.getProjectNode = function (id, callback) {
 	var collection = db.collection("mp_projects");
 	collection.find({"nodes._id": mongojs.ObjectId(id)}, {_id: 0, 'nodes.$': 1}, function(err, docs) { 

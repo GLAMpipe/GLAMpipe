@@ -29,11 +29,13 @@
                 "       }",
                 "   }",
                 "};",
+                "",
 
-                "out.value = tag_open + str + tag_close;",
 
                 "if(parseInt(context.count) % 100 == 0) ",
-				"    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);"
+                "    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);",
+                "",
+                "out.value = tag_open + str + tag_close;"
                 ],
         "finish":[
                     "out.value = '</root>';",

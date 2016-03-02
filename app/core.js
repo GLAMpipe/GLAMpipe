@@ -168,9 +168,18 @@ exports.getProjectNodes = function (project, res) {
 	mongoquery.findOneById(project, "mp_projects", function(data) { res.json(data) });
 }
 
-
-exports.getNodeSettings = function (node_id, res) {
-	mongoquery.findOneById(node_id, "mp_nodes", function(data) { res.json(data) });
+exports.getNode = function (node_id, res) {
+	fs = require('fs')
+	// read first node type descriptions
+	var nodePath = path.join("nodes", node_id + ".json");
+	fs.readFile(nodePath, 'utf8', function (err, data) {
+		if(err) {
+			console.log("ERROR: node not found!");
+			res.json({"error": "node " + node_id + "not found!"});
+		} else {
+			res.json(JSON.parse(data));
+		}
+	});
 }
 
 /**
@@ -216,6 +225,7 @@ exports.runNode = function (req, res, io) {
 				value:"",
 				url: "",
 				file:"",
+				error: null,
 				console:console,
 				say: function(ch, msg) {
 					console.log(ch.toUpperCase() + ":", msg);
@@ -349,11 +359,11 @@ exports.runNode = function (req, res, io) {
 					runNodeScriptInContext("init", node, sandbox, io);
 					wstream.write(sandbox.out.value);
 
-					// TODO: there is really no need to async here
 					async.eachSeries(doc, function iterator(doc, next) {
 						sandbox.context.doc = doc;
 						sandbox.context.count++;
 						runNodeScriptInContext("run", node, sandbox, io);
+						if (sandbox.out.error !== null)  return;
 						wstream.write(sandbox.out.value)
 						next();
 						
@@ -390,6 +400,7 @@ exports.runNode = function (req, res, io) {
 						sandbox.context.count++;
 						// get URL for request from node
 						runNodeScriptInContext("url", node, sandbox, io);
+						if (sandbox.out.error !== null) return;
 						
 						// callback for updating record
 						var onNodeScript = function (sandbox) {
@@ -412,7 +423,6 @@ exports.runNode = function (req, res, io) {
 				
 				var callback = function() {
 					
-					
 					// find everything
 					mongoquery.find2({}, node.collection, function(err, doc) {
 						sandbox.context.doc_count = doc.length;
@@ -424,10 +434,13 @@ exports.runNode = function (req, res, io) {
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
 							runNodeScriptInContext("run", node, sandbox, io);
+							if (sandbox.out.error !== null) 
+								return;
+								
 							exports.downloadFile(node, sandbox, function() {
 								next();
 							})
-						
+							
 						}, function done() {
 							runNodeScriptInContext("finish", node, sandbox, io);
 						});

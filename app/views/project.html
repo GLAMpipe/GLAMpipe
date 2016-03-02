@@ -130,11 +130,19 @@
 
 		this.openNodeTypes = function(data, event) {
 			var obj = $(event.target);
-			// close all tabs
-			obj.parent().parent().find(".node_types").hide();
-			obj.parent().parent().find(".settings").hide();
-			// open current tab
-			obj.parent().find(".node_types").show();
+			var current = obj.parent().find(".node_types");
+			
+			// toggle
+			if(current.is(":visible")) {
+				current.hide();
+			} else {
+
+				// close all tabs
+				obj.parent().parent().find(".node_types").hide();
+				obj.parent().parent().find(".settings").hide();
+				// open current tab
+				current.show();
+			}
 		}
 
 
@@ -252,6 +260,10 @@
 			self.projectNodes.removeAll();
 			$("#mainCanvas").empty();
 			self.loadProject();
+		}
+		
+		this.clearConsole = function () {
+			$("#console").empty();
 		}
 	};
 
@@ -566,6 +578,9 @@
 		<!-- /ko -->
 	</div>
 	<div class="self_advertise">-MetaPipe-</div>
-	<footer><button id="addline">add line</button></footer>
+	<div id="footer">
+		<a data-bind="click:clearConsole" class="left" href="" target="_blank" title="clear console">clear</a> |
+		<a class="right" href="../node-viewer" target="_blank" title="open node viewer">node viewer</a> 
+	</div>
 </body>
 </html>

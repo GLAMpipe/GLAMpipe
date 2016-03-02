@@ -2,6 +2,32 @@ body {
 	background-color:#BFCCCB;
 }
 
+body
+{
+	font-family: monospace;
+	font-size: 12px;
+	padding: 0px;
+	margin: 0px;
+}
+
+h1
+{
+	margin: 0px;
+	font-size: 20px;
+}
+
+h2
+{
+	font-size: 15px;
+	margin: 0px;
+}
+
+h3
+{
+	font-size: 12px;
+	margin: 0px;
+}
+
 h2, h3 {
 	padding:5px;
 	color:white;
@@ -26,9 +52,6 @@ a:active {
     color: white;
 }
 
-p {
-	padding:5px;
-}
 
 input, textarea {
 	width:90%;
@@ -463,4 +486,56 @@ html {
 
 .details .key {
 	font-weight:bold;
+}
+
+#footer {
+    clear: both;
+    position: relative;
+    z-index: 10;
+    height: 20px;
+    margin-top:-10px;
+    padding-top:5px;
+    background-color:#99B4B2;
+}
+
+#footer a {
+	padding-right:10px;
+	padding-left:10px;
+}
+
+.right {
+	float:right;
+}
+
+/* NODE EDITOR */
+
+.nodesource {
+	padding:20px;
+}
+
+.nodesource h1 {
+	color: #395D5A;
+}
+
+.nodesource h2 {
+	color:white;
+	background-color:#99B4B2;
+	margin-bottom: 20px;
+}
+
+.nodesource h3 {
+	color:#395D5A;
+	font-size:18px;
+	padding:0px;
+	margin-top:40px;
+
+}
+
+.nodesource ul li {
+	font-weight:bold;
+}
+
+.nodesource .help {
+	margin-bottom:20px;
+	width:550px;
 }

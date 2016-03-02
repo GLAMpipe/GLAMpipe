@@ -40,8 +40,9 @@ module.exports = function(app, metapipe, io) {
 		metapipe.getNodes(res);
 	});
 
-	app.get('/get/node/settings/:node', function (req, res) {
-		metapipe.getNodeSettings(req.params.node, res);
+
+	app.get('/get/node/:id', function (req, res) {
+		metapipe.getNode(req.params.id, res);
 	});
 
 	app.get('/node/view/:id', function (req, res) {
@@ -90,4 +91,9 @@ module.exports = function(app, metapipe, io) {
 		metapipe.uploadFile(req, res);
 	});
 
+
+	// NODE EDITOR
+	app.get('/node-viewer', function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
+	});
 }

@@ -1,5 +1,5 @@
 {
-	"nodeid": "lookup_flickr_image_sizes",
+	"nodeid": "lookup_flickr_image_urls",
 	"title": "getSizes",
 	"type": "lookup",
 	"subtype": "Flickr",

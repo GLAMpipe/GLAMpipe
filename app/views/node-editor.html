@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Node Editor</title>
+
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/knockout.js"></script>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js?skin=sunburst"></script>
+
+<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
+<style>
+	
+</style>
+<script>
+
+	var NodeList = function () {
+		var self = this;
+		this.itemToAdd = ko.observable("");
+		this.nodes = ko.observableArray();
+		this.loadItems = function () {
+			$.getJSON("/get/nodes", function(data) { 
+				for(var i = 0; i< data.length; i++) {
+					self.nodes.push(data[i]);
+				}
+			})
+		}
+		
+	 
+		this.addItem = function () {
+			var match = ko.utils.arrayFirst(self.nodes(), function(item) {
+				return self.itemToAdd() === item.title;
+			});
+			
+			if ((this.itemToAdd() != ""))  {// Prevent blanks 
+				if(match) {
+					alert("Project title \"" + self.itemToAdd() + "\" exists!");
+				} else {
+					var data = {'title':self.itemToAdd()};
+					$.post("/create/project", data, function(returnedData) {
+						self.itemToAdd(""); // Clear the text box 
+						self.nodes([]);
+						self.loadItems();
+					});
+				}
+			}
+		};
+	 
+		this.selectedNode = ko.observable();
+		
+		this.select = function (data, event) {
+			$.getJSON("/get/node/" + data.nodeid, function(nodeData) {
+				self.selectedNode(nodeData);
+			});
+		}
+		
+		this.removeSelected = function () {
+			this.nodes.removeAll(this.selectedItems());
+			this.selectedItems([]); // Clear selection
+		};
+	 
+		this.sortItems = function() {
+			this.nodes.sort();
+		};
+
+		this.openNodes = function () {
+			$("#node_creator").show();
+		};
+
+		this.closeNodes = function () {
+			$("#node_creator").hide();
+		};
+		
+		this.openNodeTypes = function(data, event) {
+			var obj = $(event.target);
+			var current = obj.parent().find(".node_types");
+			
+			// toggle
+			if(current.is(":visible")) {
+				current.hide();
+			} else {
+
+				// close all tabs
+				obj.parent().parent().find(".node_types").hide();
+				obj.parent().parent().find(".settings").hide();
+				// open current tab
+				current.show();
+			}
+
+		};
+
+		this.script2html = function (data, ele) {
+			
+			if(typeof data === "undefined")
+				return ele + ": no function!";
+			
+			if (data instanceof Array)
+				var str = data.join("\n");
+			else
+				var str = data;
+			
+			var script = $("<pre class=\"prettyprint linenums\">"+str+"</pre>");
+			$("#" + ele).append(script);
+			PR.prettyPrint(script);
+			
+			self.closeNodes();
+			return ele;
+		}
+		
+		this.view2html = function (data, ele) {
+			
+			if(typeof data === "undefined")
+				return ele + ": no view!";
+			
+			if (data instanceof Array)
+				var str = data.join("\n");
+			else
+				var str = data;
+
+			var script = $("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
+			
+			$("#" + ele).append("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
+			PR.prettyPrint($("#" + ele).first().get());
+			
+			
+
+			return str;
+		}
+
+		
+	};
+
+	function onLoad()
+	{
+		var projects = new NodeList ();
+		ko.applyBindings(projects);
+		projects.loadItems();
+		
+	}
+		
+	
+</script>
+
+
+</head>
+<body onload="onLoad();">
+
+	<div class="project_header">
+		<h1 class="inline_header"><a href="/" title="back to projects">Main</a> > node viewer</h1>
+		<h1 class="inline_header" id="project_title"></h1>
+		<button data-bind="click: openNodes" class="add_source" >Choose node</button>
+	</div>
+
+	<div class="nodesource" data-bind="with: selectedNode">
+		<h1 data-bind="text: type.toUpperCase() + ' > ' + subtype +' > '+ title"></h1>
+		<span data-bind="text: description"></span>
+		
+		<h2>SCRIPT CONTEXT</h2>
+		<p>Scripts are executed in a limited context. </p>
+		<div>
+			<ul>
+				<li>context.doc</li>
+				<p>Contains current record.</p>
+				<li>context.data</li>
+				<p>For API nodes (API source and API lookup) context.data holds the request response.</p>
+				<li>context.node</li>
+				<p>Contains node object itself (params and settings).</p>
+				<li>context.doc_count</li>
+				<p>Contains total record count.</p>
+				<li>context.count</li>
+				<p>Contains loop counter (i.e. how many records have been processed).</p>
+			</ul>
+			<p>Nodes communicate with outer world via "out" object.</p>
+			<ul>
+				<li>out.url</li>
+				<p>Some nodes (like API lookup) must provide URL. </p>
+				<li>out.value</li>
+				<p>This is what is stored to database. All nodes must set this.</p>
+				<li>out.say</li>
+				<p>This allows node to communicate directly to the user. </p>
+			</ul>
+		</div>
+		
+		<h2>SCRIPTS</h2>
+
+		<h3 data-bind="html: $root.script2html(scripts.hello, 'hello')">hello</h3>
+		<div class="help">Script is called *before* node is inserted to database. 
+		Therefore it is possible to set for example node's title (see source - file - upload node).
+		</div>
+		<div id="hello"></div>
+
+		<h3 data-bind="html: $root.script2html(scripts.bye, 'bye')">bye</h3>
+		<div class="help">This is called when node is deleted. Chanche say by to the user.</div>
+		<div id="bye"></div>
+
+		<h3 data-bind="html: $root.script2html(scripts.url, 'url')">url</h3>
+		<div class="help">Lookup nodes must provide request url by setting out.url.</div>
+		<div id="url"></div>
+
+		<h3 data-bind="html: $root.script2html(scripts.init, 'init')">init</h3>
+		<div class="help">Init script is called once when running node. </div>
+		<div id="init"></div>
+
+		<h3 data-bind="html: $root.script2html(scripts.run, 'run')">run</h3>
+		<div class="help">Run script is executed once per record (excluding source nodes). </div>
+		<div id="run"></div>
+
+
+		<h2>VIEWS</h2>
+		<h3>params</h3>
+		<div class="help">Params are displayed to the user when node is created. 
+		Params are saved to database and these cannot be changed afterwards. 
+		Parameters are provided to node scripts via <b>context.node.params</b>.</div>
+		<div id="params" data-bind="html: $root.view2html(views.params, 'params_src')"></div>
+		<div id="params_src"></div>
+
+		<h3>settings</h3>
+		<div class="help">Settings are displayed to the user when running node. 
+		Currently settings are *not* saved to database. Settings are provided to node scripts via <b>context.node.settings</b>.</div>
+		<div id="settings" data-bind="html: $root.view2html(views.settings, 'settings_src')"></div>
+		<div id="settings_src"></div>
+		
+	</div>
+
+	<div id="node_creator">
+		<button data-bind="click:closeNodes">close</button>
+		<h1>Editor: Choose node</h1>
+		<!-- ko foreach: nodes -->
+		<div data-bind="attr:{id:_id.type + '_node', class:_id.type}">
+			<h2 data-bind="text: _id.type,click:$parent.openNodeTypes"></h2>
+			<p data-bind="html:_id.description"></p>
+			<div data-bind="foreach: subtypes" class="node_types" style="display:none">
+				<div data-bind="attr:{id:sub.subtype + '_node', class:sub.subtype}">
+					<h3 data-bind="text: sub.subtype"></h3>
+					<div class="node_types" >
+						<ul data-bind="foreach: nodes" class="node_types">
+							<li>
+								<div data-bind="text:title, click:$root.select"></div>
+								<div data-bind="html:description"></div>
+							
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /ko -->
+	</div>
+	</body>
+</html>
