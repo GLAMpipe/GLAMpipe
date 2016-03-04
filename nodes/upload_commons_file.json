@@ -1,0 +1,67 @@
+{
+    "nodeid": "upload_commons_file",
+    "title": "commons file",
+    "type": "upload",
+    "subtype": "mediawiki_bot",
+    "description": "Upload files to <a href=\"https://commons.wikimedia.org/wiki/Main_Page\" target=\"_blank\">wikimedia commons</a>",
+
+    "scripts": {
+        "hello": "out.say('news', 'You just created a commons node for uploading files'); ",
+        "bye": "out.say('finish', 'Deleted commons node!'); ",
+        "init": "out.say('progress', 'Starting to upload URLs...');",
+        "login": 
+        [
+            "var config = { ",
+            "   'protocol': 'http', ",
+            "    'server': 'commons.wikimedia.beta.wmflabs.org', ",
+            "    'path': '/w',  ",
+            "    'debug': true, ",
+            "    'username': context.node.settings.username, ",
+            "    'password': context.node.settings.password, ",
+            "    'dryRun': false, ",
+            "    'userAgent': 'Metapipe 0.0.1 via nodemw' ",      
+            "}; ",
+            "out.botconfig = config;",
+            
+            "var apis = ['https://commons.wikimedia.org/w/api.php','http://commons.wikimedia.beta.wmflabs.org/w/api.php']; ",
+            "out.say('progress', 'Trying to login to commons...'); ",
+            "out.url = apis[parseInt(context.node.settings.api)] +'?action=query&meta=tokens&type=login'; ",
+            ""
+        ],
+        
+        "url": [],
+        
+        "run":[
+            "var source = context.doc.id_photo_sizes.size[7].source;",
+            "var splitted = source.split('/'); ",
+            "var filename = splitted[splitted.length -1]; ",
+            "var s = filename.split('.'); ", 
+            "var ext = s[s.length - 1]; ",
+            "out.say('progress',splitted[splitted.length -1]); ",
+            "out.title = context.doc.title + '.' + ext; ",
+            "out.value = 'output/commons_upload/6_images/' + splitted[splitted.length -1]; "
+            ],
+            
+        "finish":"out.say('finish', 'Images uploaded'); "
+    },
+    
+    "views": {
+        "data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" data-bind=\"click: sort\">title</th>\n<th id=\"description\" >description</th>\n<th id=\"link\" >link</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<td data-bind=\"text: title\"></td>\n\n </tr>\n </tbody>\n </table>\n</div>\n",
+        "params":
+        [
+            "<label>directory</label><input type=\"text\" name=\"directory\" id=\"directory\" required />",
+            "<label>file name field</label><input name=\"field\"/>"
+        ],
+        "settings":
+        [
+            "<label>username </label><input type=\"text\" name=\"username\" id=\"username\" required />",
+            "<label>password</label><input name=\"password\" id=\"password\"/>",
+            "<label>choose site (practise with beta)</label>",
+            "<select name='api'>",
+            "    <option value='0'>beta</option>",
+            "    <option value='1'>production</option>",
+            "</select>"
+        ]
+    }
+
+}

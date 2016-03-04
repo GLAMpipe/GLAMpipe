@@ -182,7 +182,7 @@ exports.save = function (collectionname, doc, callback) {
 exports.drop = function (collectionname, callback) {
 	var collection = db.collection(collectionname);
 	collection.drop( function () {
-		console.log('dropped', collectionname);
+		console.log('DB: dropped', collectionname);
 		callback();
 	});
 }

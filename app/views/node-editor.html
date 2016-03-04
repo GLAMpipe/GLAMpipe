@@ -194,6 +194,10 @@
 		<div class="help">This is called when node is deleted. Chanche say by to the user.</div>
 		<div id="bye"></div>
 
+		<h3 data-bind="html: $root.script2html(scripts.login, 'login')">url</h3>
+		<div class="help">Upload nodes must provide login.</div>
+		<div id="login"></div>
+
 		<h3 data-bind="html: $root.script2html(scripts.url, 'url')">url</h3>
 		<div class="help">Lookup nodes must provide request url by setting out.url.</div>
 		<div id="url"></div>

@@ -7,6 +7,12 @@
 
 
     "scripts": {
+		"hello":
+		[
+			"out.say('news', 'You added a download node'); ",
+			"var sizes = ['small', 'medium', 'original']; ",
+			"context.node.title = sizes[context.node.params.size] + ' ' + context.node.title;"
+		],
         "init":"out.say('progress', 'I have ' + context.doc_count + ' images to download!');",
         "run": [
                 "var size = context.node.params.size;",

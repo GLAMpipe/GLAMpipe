@@ -302,12 +302,13 @@
 		  resizeInnerDiv();
 		});
 
+
 		$(document).on('click','.run', function(e) {
 			
-			//$("#console").empty(); 
+			var obj = $(e.target);
 			var map = {};
 			// read input from settings
-			$("input").each(function() {
+			obj.parent().find(".settings input, .settings select").each(function() {
 				map[$(this).attr("name")] = $(this).val();
 			});
 			// and run
@@ -436,6 +437,9 @@
 		socket.on('error', function (data) {
 			console.log(data);
 			$("#console").append("<div class=\"bad\">" + data + "</div>");
+			$("#node_msg").removeClass("busy");
+			$("#node_msg").addClass("done");
+			$("#node_msg").html("<div class=\"bad\">ERROR: " + data + "</div>");
 			tailScroll() 
 		  });
 

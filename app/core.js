@@ -1,12 +1,13 @@
 var multer 		= require("multer");
-var mongojs = require('mongojs');
-var async = require("async");
-var path = require("path");
-const vm = require('vm');
+var mongojs 	= require('mongojs');
+var async 		= require("async");
+var colors 		= require('ansicolors');
+var path 		= require("path");
+const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var exports 	= module.exports = {};
 
-var positionOffset = 20;
+var positionOffset = 60;
 
 /**
  * Create metapipe collection on start up
@@ -30,6 +31,22 @@ exports.initDB = function (callback) {
 	});
 }
 
+exports.initDir = function (callback) {
+
+	fs.mkdir("output", function(err) {
+		if(err) {
+			if(err.code === "EEXIST") {
+				console.log("INIT: output directory exists");
+				callback();
+			} else
+				console.log("ERROR:", err);
+			return;
+		}
+		console.log("INIT: output directory created");
+		callback();
+	});
+
+}
 
 /**
  * load stock nodes
@@ -38,8 +55,8 @@ exports.initDB = function (callback) {
  * - inserts nodes to "mp_nodes" collection
  */
 
-exports.initNodes = function () {
-	console.log("Loading node files...");
+exports.initNodes = function (callback) {
+	console.log("INIT: Loading node files...");
 	var data = {};
 	mongoquery.drop("mp_nodes", function() {
 
@@ -81,6 +98,10 @@ exports.initNodes = function () {
 					if(node.scripts.url instanceof Array)
 						node.scripts.url = node.scripts.url.join("");
 
+					// join "pretty" login script
+					if(node.scripts.login instanceof Array)
+						node.scripts.login = node.scripts.login.join("");
+
 					// join "pretty" run script
 					if(node.scripts.run instanceof Array)
 						node.scripts.run = node.scripts.run.join("");
@@ -93,17 +114,21 @@ exports.initNodes = function () {
 						if(error.length) {
 							console.log(error);
 						} else {
-							console.log("NODE: " + filename + " loaded");
+							console.log("INIT: " + filename + " loaded");
 							next();
 						}
 					})
 				} catch(e) {
-					console.log("ERROR: JSON is malformed in", filename);
+					console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
 					next(); // continue anyway
 				}
 
 			}, function onError (error) {
 				console.log(error);
+				
+			}, function onDone () {
+				console.log("INIT: nodes loaded");
+				callback();
 			});
 		});
 
@@ -112,8 +137,8 @@ exports.initNodes = function () {
 
 
 exports.createProject = function (title, res) {
-	console.log("creating project", title);
-
+	
+	console.log("PROJECT: creating project", title);
 	var title_dir = title.replace(/ /g,"_").toLowerCase();
 	// create output/project_name directory 
 	var projectPath = path.join("output", title_dir); 
@@ -121,7 +146,10 @@ exports.createProject = function (title, res) {
 		if(err) {
 			if(err.code === "EEXIST")
 				console.log("Project directory exists");
-			res.json({"status": "error in output directory creation!"});
+			else
+				console.log("ERROR:", err);
+				
+			res.json({"error": "error in project directory creation!"});
 			return;
 		}
 		// update project count and create project
@@ -209,6 +237,7 @@ exports.runNode = function (req, res, io) {
 		node.settings = req.body;
 		node.project = project._id;
 		node.dir = project.dir;
+		node.node_count = project.node_count;
 
 		console.log("NODE: running", node.type);
 
@@ -447,10 +476,27 @@ exports.runNode = function (req, res, io) {
 					});
 				}
 				
-				callback();
+				// create node's output directory if it does not exist
+				var nodeOutputPath = path.join("output", project.dir, node.node_count + "_" + node.title);
+				var fs = require("fs");
+				fs.mkdir(nodeOutputPath, function(err) {
+					if(err) {
+						if(err.code === "EEXIST") {
+							console.log("INIT: output directory exists");
+							callback();
+						} else {
+							console.log("ERROR:", err);
+							io.emit("error", err)
+							return;
+						}
+					}
+					node.dir = nodeOutputPath;
+					console.log("INIT: output directory created");
+					callback();
+				});
 				
 			break;
-			
+
 
 			case "transform":
 				
@@ -477,6 +523,92 @@ exports.runNode = function (req, res, io) {
 
 			break;
 
+
+			case "upload":
+
+				switch (node.subtype) {
+					
+					case "mediawiki_bot":
+					
+						var bot = require('nodemw');
+						fs = require('fs');
+						
+						// ask bot config (username, pass etc.) from node
+						runNodeScriptInContext("login", node, sandbox, io);
+						var client = new bot(sandbox.out.botconfig);
+						console.log(sandbox.context.node);
+						console.log(sandbox.out.botconfig);
+
+						client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
+							
+							if(err) {
+								io.sockets.emit("error", "Login failed!");
+								return;
+							}
+							// find everything
+							mongoquery.find2({}, node.collection, function(err, doc) {
+								sandbox.context.doc_count = doc.length;
+								runNodeScriptInContext("init", node, sandbox, io);
+								
+								// run node once per record
+								async.eachSeries(doc, function iterator(doc, next) {
+
+									sandbox.context.doc = doc;
+									sandbox.context.count++;
+									runNodeScriptInContext("run", node, sandbox, io);
+									
+									fs.readFile(sandbox.out.value, function (err,data) {
+										if (err) {
+											return console.log(err);
+										}
+										client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
+											console.log(data.filename);
+											next();
+										});
+									});
+
+
+
+									
+								}, function done () {
+									runNodeScriptInContext("finish", node, sandbox, io);
+								});
+							});
+						});
+
+					break;
+					
+					
+					default:
+					
+						runNodeScriptInContext("login", node, sandbox, io);
+						
+						// first we need to login
+						login2API(node, sandbox, function () {
+							// find everything
+							mongoquery.find2({}, node.collection, function(err, doc) {
+								sandbox.context.doc_count = doc.length;
+								runNodeScriptInContext("init", node, sandbox, io);
+								
+								// run node once per record
+								async.eachSeries(doc, function iterator(doc, next) {
+
+									sandbox.context.doc = doc;
+									sandbox.context.count++;
+									runNodeScriptInContext("run", node, sandbox, io);
+
+									
+								}, function done () {
+									runNodeScriptInContext("finish", node, sandbox, io);
+								});
+							});
+						});
+						
+					break;
+				}
+
+
+			break;
 
 			default:
 				if(typeof(node.scripts.run) !== "undefined") {
@@ -521,6 +653,87 @@ function getPrevNode(project, node) {
 		}
 	}
 }
+
+
+function login2API (node, sandbox, callback) {
+	
+	var request = require("request");
+	
+	var domain = "http://commons.wikimedia.beta.wmflabs.org/w/api.php";
+	var api_login = "?action=login";
+	var api_edittoken = "?action=query&format=json&meta=tokens&type=csrf";
+	
+	console.log("url:", sandbox.out.url);
+	console.log("login:", sandbox.out.login);
+
+	 var options_login = {
+		url: domain + api_login,
+		qs: sandbox.out.login,
+		json: true,
+		jar: true	// damn, finding this was hard...
+	};
+
+	 var options_edittoken = {
+		url: domain + api_edittoken,
+		qs: {format:"json"},
+		json: true,
+		jar: true	// damn, finding this was hard...
+	};
+
+	request.post(options_login, function(err, res, body) {
+		if(err) {
+			return console.error(err);
+		}
+		console.log("Response body:", body);
+		if(body.login.result == 'NeedToken') {
+			
+			options_login.qs.lgtoken = body.login.token;
+			//options_login.qs.sessionid = body.login.sessionid;
+			
+			request.post(options_login, function(err, res, body) {
+				if (err)
+					return console.error(err);
+				console.log(body);
+				
+				// request edit token
+				console.log(options_edittoken);
+				request.post(options_edittoken, function(err, res, body) {
+					if (err)
+						return console.error(err);
+					console.log(body);
+					
+					// make edit
+					var edit = "?action=edit";
+					var options_edit = {
+						url: domain + edit,
+						title: "Artturi",
+						section: "new",
+						summary:"test",
+						text:"Hello%20everyone",
+						token: body.query.tokens.csrftoken,
+						qs: {format:"json"},
+						json: true,
+						jar: true	// damn, finding this was hard...
+					};
+					console.log("--------------------------------");
+					console.log(options_edit);
+					console.log("--------------------------------");
+					console.log("--------------------------------");
+					request.post(options_edit, function(err, res, body) {
+						if (err)
+							return console.error(err);
+						console.log(body);
+						//callback();
+					});
+				});
+				//callback();
+			});
+		}
+		
+	});
+}
+
+
 
 /**
  * Generats data view for project node
@@ -628,8 +841,15 @@ exports.createNode = function (nodeRequest, res, io) {
 			mongoquery.update("mp_projects",
 				{_id:mongojs.ObjectId(nodeRequest.project)},
 				{$push:{nodes: node}},
-				function() {
-					res.json({"status": "node created"})
+				function(error) {
+					if(error) {
+						console.log(error);
+						res.json({"error": error});
+					}
+					mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
+						console.log("node created");
+						res.json({"status": "node created"})
+					});
 			})
 		} else {
 			console.log("ERROR: node not found");
@@ -679,11 +899,11 @@ function initNode (nodeRequest, res, io) {
 				function(error) {
 					if(error) {
 						console.log(error);
+						res.json({"error": error});
 					}
-					mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
-						console.log("node created");
-						res.json({"status": "node created"})
-					});
+					console.log("node created");
+					res.json({"status": "node created"})
+
 			})
 		} else {
 			console.log("node " + nodeRequest.nodeid + " not found!");
@@ -1056,7 +1276,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 	var fs = require("fs");
 	var request = require("request")
 	
-	var filePath = path.join("output", node.dir, sandbox.out.file); 
+	var filePath = path.join(node.dir, sandbox.out.file); 
 	var file = fs.createWriteStream(filePath);
 	var sendReq = request.get(sandbox.out.url);
 
@@ -1069,7 +1289,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 
 	// check for request errors
 	sendReq.on('error', function (err) {
-		fs.unlink(dest);
+		fs.unlink(filePath);
 
 		if (cb) {
 			return cb(err.message);
@@ -1083,7 +1303,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 	});
 
 	file.on('error', function(err) { 
-		fs.unlink(dest); // Delete the file async. 
+		fs.unlink(filePath); // Delete the file async. 
 		console.log(err);
 
 		if (cb) {
@@ -1288,7 +1508,7 @@ function indexByKeyValue(arraytosearch, key, value) {
 }
 
 
-function readFiles(dirname, onFileContent, onError) {
+function readFiles(dirname, onFileContent, onError, onDone) {
 	var fs = require("fs");
 	fs.readdir(dirname, function(err, filenames) {
 		if (err) {
@@ -1305,7 +1525,7 @@ function readFiles(dirname, onFileContent, onError) {
 				onFileContent(filename, content, next);
 			});
 		}, function done() {
-			console.log("Node init done!");
+			onDone();
 		});
 
 	});
