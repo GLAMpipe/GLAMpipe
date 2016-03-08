@@ -21,7 +21,11 @@
 	},
 	
 	"views": {
-		"params":"<label>Collection title </label><input type=\"text\" name=\"title\" id=\"title\" required />",
+		"params":
+		[
+			"<label>Collection title </label><input type=\"text\" name=\"title\" id=\"title\" required />",
+			"<label>Data description </label><textarea name=\"description\" id=\"description\" ></textarea>"
+		],
 		"settings":"no settings"
 	}
 }

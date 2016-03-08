@@ -167,20 +167,18 @@ button.run {
 	background-color: #E0E0E0;
 }
 
-.node_info .view_button {
+.node .view_button {
 	background-color: #99B4B2;
 	color:white;
 	padding:2px;
-	margin-bottom:10px;
+	margin-bottom:0px;
+
 }
 
-.node_info .view_button:hover {
+.node .view_button:hover {
 	background-color: #395D5A;
 }
 
-.block .add_node {
-	float:right;
-}
 
 #node_msg {
 	padding:20px;
@@ -268,6 +266,7 @@ ul.node_types li:hover {
   margin-top:1px;
   margin-right:1px;
 }
+
 
 
 .collection h2 {
@@ -419,15 +418,22 @@ html {
 	background-color : transparent;
 }
 
-#mainCanvas .block {
+#mainCanvas .node {
+	width:250px;
 	opacity: 1.0;
 	background-color : #99B4B2;
 	box-shadow: 10px 10px 5px #888888;
 	border-radius: 5px 0px 0px 15px;
+	z-index:2000;
 }
 
 #mainCanvas .block h2{
 	border-radius: 5px 0px 0px 0px;
+}
+
+#mainCanvas .collection {
+	width:350px;
+	background-color : #99B4B2;
 }
 
 
@@ -445,10 +451,7 @@ html {
 	color:white;
 }
 
-.add_source {
-	float:right;
-	background-color:#395D5A;
-}
+
 
 .strong {
 	font-weight:bold;
@@ -506,6 +509,10 @@ html {
 
 .right {
 	float:right;
+}
+
+.left {
+	float:left;
 }
 
 /* NODE EDITOR */

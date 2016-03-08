@@ -13,7 +13,7 @@
 			"out.say('news', 'You added a file import');",
 			"context.node.title = context.node.params.file; "
 		],
-        "bye": "out.say('news', 'Deleted file import node. This does NOT remove data. Bye!'); ",
+        "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
 		"init":"out.say('progress', context.node.title);",
 		"run":"out.value = context.data;",
 		"finish":"out.say('finish', '<h2>Data imported</h2> from file ' + context.node.params.file);"

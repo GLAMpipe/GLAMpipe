@@ -5,7 +5,9 @@ var colors 		= require('ansicolors');
 var path 		= require("path");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
+const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
+
 
 var positionOffset = 60;
 
@@ -296,15 +298,20 @@ exports.runNode = function (req, res, io) {
 								function (callback) {
 
 									exports.callAPI(sandbox.out.url, function(data) {
-											sandbox.context.data = data;
-											sandbox.out.url = "";
-											runNodeScriptInContext("run", node, sandbox, io);
-											
-											// insert data
-											mongoquery.insert(node.collection, sandbox.out.value, function() {
-												callback(null, sandbox.out.url);
-											});
+										sandbox.context.data = data;
+										sandbox.out.url = "";
+										runNodeScriptInContext("run", node, sandbox, io);
+										
+										// add source id to data (expects out.value to be an array)
+										for (var i = 0; i < sandbox.out.value.length; i++ ) {
+											sandbox.out.value[i][MP.source] = node._id;
+										}
+										
+										// insert data
+										mongoquery.insert(node.collection, sandbox.out.value, function() {
+											callback(null, sandbox.out.url);
 										});
+									});
 								}
 
 							], function(err, result){
@@ -350,7 +357,9 @@ exports.runNode = function (req, res, io) {
 						}
 						
 						// empty collection and import file
-						mongoquery.empty(node.collection, {}, function() {
+						var query = {}; 
+						query[MP.source] = node._id;
+						mongoquery.empty(node.collection, query, function() {
 							exports.importFile(node, fileImport);
 						});
 							
@@ -915,7 +924,8 @@ function initNode (nodeRequest, res, io) {
 /**
  * Delete project node
  * - removes node
- * - if source or cluster node, then also removes collection
+ * - if collection node, then also removes collection
+ * - if source node, then also removes node's data
  */
 exports.deleteNode = function (params, res, io) {
 
@@ -925,29 +935,63 @@ exports.deleteNode = function (params, res, io) {
 			var node = project.nodes[index];
 			// check that there is no nodes that depends on this node
 			if(inputNode(node, project.nodes)) {
-				return res.json({"error": "Can not remove node in the middle of the chain!"});
+				return res.json({"error": "Can not remove node with child nodes!"});
 			}
-			
+
 			// allow node to say bye
 			runNodeScript("bye", node, null, io);
-			
-			// if node is source or cluster node, then also remove its collection
-			if(node.type == "collection") {
-				mongoquery.dropCollection(node.collection, function (error) {
-					if(error)
-						console.log(error);
-					else
-						console.log("dropped collection", node.collection);
-					});
-			} 
-			mongoquery.update("mp_projects",
-				{_id:mongojs.ObjectId(params.project)},
-				{$pull:{nodes: {_id:mongojs.ObjectId(params.node)}}},
-				function() {
-					res.json({"status": "node deleted"});
-					
+
+			// check if we need to remove anything else
+			async.series([
+
+				// if node is collection node, then also remove its collection
+				function(callback) {
+					if(node.type == "collection") {
+						mongoquery.dropCollection(node.collection, function (error) {
+							if(error)
+								console.log(error);
+							else
+								console.log("dropped collection", node.collection);
+							callback(error);
+							});
+					} else {
+						callback(); // we did nothing
+					}
+				},
+				
+				// if node is a source node, then remove its own records
+				function (callback) {
+					if(node.type == "source") {
+						var query = {};
+						query[MP.source] = node._id;
+						mongoquery.empty(node.collection, query, function (error) {
+							if(error)
+								console.log(error);
+							else
+								console.log("data removed", node.collection);
+							callback(error);
+							});
+					} else {
+						callback(); // we did nothing
+					}
 				}
-			)
+
+			], function (err, results) {
+				if(err) {
+					console.log("ERROR:", err);
+					res.json({"error": err.message});
+				} else {
+					mongoquery.update("mp_projects",
+						{_id:mongojs.ObjectId(params.project)},
+						{$pull:{nodes: {_id:mongojs.ObjectId(params.node)}}},
+						function() {
+							res.json({"status": "node deleted"});
+							
+					})
+				}
+			});
+
+
 		} else {
 			console.log("ERROR: project not found");
 			return res.json({"error": "project not found (should not happen)"});
@@ -1342,31 +1386,19 @@ function importTSV (mode, node, cb) {
 					}
 
 					count++;
-					if(record[prop_clean] === "undefined" || record[prop_clean] == "")
+					if(typeof record[prop_clean] === "undefined" || record[prop_clean] == "")
 						empty++;
 				}
 			}
 			// check for totally empty records
-			if(empty != count)
-				records.push(record);
+			//if(empty != count)
+			
+			// mark origin of data
+			record[MP.source] = node._id;
+			records.push(record);
 		},
 		function onReady () {
 			cb(records);
-		}
-	);
-}
-
-
-function importCSV (req) {
-	var streamCSV = require("node-stream-csv");
-
-	streamCSV({
-		filename: "uploads/" + req.file.filename,
-		mode: "cvs",
-		dontguess: true },
-		function(record) {
-			console.log(record);
-			console.log('*************');
 		}
 	);
 }

@@ -6,7 +6,13 @@
     "description": "Fetch all maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
 
     "scripts": {
-        "hello": "out.say('news', '<h2>Hello, You just added a warper node!</h2>'); ",
+        "hello": 
+        [
+			"out.say('news', '<h2>Hello, You just added a warper node!</h2>'); ",
+			"var title = context.node.params.warper.replace('http://', ''); ",
+			"context.node.title = title; "
+        ],
+        
         "bye": "out.say('news', 'Deleted mapwarper source node!  This does NOT remove data. Bye!'); ",
         
         "init": 

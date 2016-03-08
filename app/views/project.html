@@ -187,9 +187,9 @@
 			$("#node_creator > .source").hide();
 			$("#node_creator > .collection").hide();
 			$("#node_creator").show();
-			self.currentNode = obj.parent().attr("id");
-			self.currentCollection = obj.parent().data("collection");
-			self.currentNodePosition = obj.parent().position();
+			self.currentNode = obj.parents(".node").attr("id");
+			self.currentCollection = obj.parents(".node").data("collection");
+			self.currentNodePosition = obj.parents(".node").position();
 		}
 
 		// shows only source nodes and set current node, collection and position
@@ -198,9 +198,9 @@
 			$("#node_creator").show();
 			$("#node_creator > div").hide();
 			$("#node_creator > .source").show();
-			self.currentNode = obj.parent().attr("id");
-			self.currentCollection = obj.parent().data("collection");
-			self.currentNodePosition = obj.parent().position();
+			self.currentNode = obj.parents(".node").attr("id");
+			self.currentCollection = obj.parents(".node").data("collection");
+			self.currentNodePosition = obj.parents(".node").position();
 		}
 
 		// show only collection node(s).
@@ -499,7 +499,7 @@
 </script>
 
 <script type="text/html" id="node-template">
-	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block draggable" style="width:250px;"> 
+	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title"></h2> 
 		
@@ -508,27 +508,38 @@
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
-	   <div class="node_info"> 
-		   <p class="description" data-bind="html:description"></p> 
+	   <div  class="node_info"> 
 			<p class="params_description" data-bind="html:params.description"></p> 
-			<a class="view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 
 		</div>
-
-		<!-- ko if: type != 'source'  -->
-		<button data-bind="click: $root.openCreator" class="add_node">add node</button> 
-		<!-- /ko -->
 		
-		<!-- ko if: type == 'collection' -->
-			<button data-bind="click: $root.openSourceCreator" class="add_node">add source</button> 
-		<!-- /ko -->
 		
+		<div>
+			<!-- ko if: type != 'source'  -->
+				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
+			<!-- /ko -->
+			
+			<!-- ko if: type == 'collection' -->
+				<button data-bind="click: $root.openSourceCreator" class="add_node left">add source</button> 
+			<!-- /ko -->
+			<div class="left">
+			
+			<a class="left view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 	
+			</div>
+		</div>
 
 	</div>
 
 	 <!-- ko if: input_node != '' -->
-	<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' down_start'">
-		<img class="connector-end" src="../arrow.gif">
-	</div>
+		<!-- ko if: type == 'source' -->
+			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' left_start'">
+				<img class="connector-end" src="../arrow.gif">
+			</div>
+		<!-- /ko -->
+		<!-- ko if: type != 'source' -->
+			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' down_start'">
+				<img class="connector-end" src="../arrow.gif">
+			</div>
+		<!-- /ko -->
 	<!-- /ko -->
 </script>
 
@@ -540,7 +551,7 @@
 	<div class="project_header">
 		<h1 class="inline_header"><a href="/" title="back to projects">projects:</a></h1>
 		<h1 class="inline_header" id="project_title"></h1>
-		<button data-bind="click: openCollectionCreator" class="add_source" >add collection</button>
+		<button data-bind="click: openCollectionCreator" class="right" >add collection</button>
 	</div>
 
 	<div id="node_settings">
