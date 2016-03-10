@@ -7,11 +7,11 @@
 
 
     "scripts": {
-		"hello": "out.say('news', 'You added a download node'); ",
+        "hello": "out.say('news', 'You added a download node'); ",
         "bye": "out.say('news', 'Deleted donwload node. Downloaded files will remain. Bye!'); ",
         "init":"out.say('progress', 'Starting downloads...'); ",
         "run": [
-				"out.value = context.doc[context.node.params.field]",
+                "out.value = context.doc[context.node.params.field]",
                 "out.say('progress', context.doc[context.node.params.field])"
                 ],
         "finish":"out.say('finish', 'Downloaded');"

@@ -51,8 +51,8 @@
 				
 			var node_settings_html = 
 				'<div id="node_bar" class="selected">' + 
-				'	<h2>' +data.title+": " +data.params.title+ '</h2>' +
-				'	<div class="description">'+data.params.description+'</div>' +
+				'	<h2>' +data.type+": " +data.title+ '</h2>' +
+				'	<div class="number">node number: '+data.number+'</div>' +
 				'	<h3 class="subhead">params</h3>' +
 				'	<div class="params">' +
 						self.nodeParams(data) +
@@ -149,6 +149,11 @@
 		this.openNodeParams = function(data, event) {
 			var obj = $(event.target);
 			var params = obj.parent().find(".params");
+			params.find(".dynamic_field").each(function (index) {
+				$(this).after("<h3 data-field='"+$(this).attr("name") + "' class='show_fields'>show fields</h3>");
+			});
+			
+			
 			
 			if(params.is(":visible")) {
 				$(".params").hide();
@@ -302,7 +307,28 @@
 		  resizeInnerDiv();
 		});
 
-
+		$(document).on('click','.show_fields', function(e) {
+			var obj = $(e.target);
+			var params = obj.parent();
+			
+			// fetch fields
+			$.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
+				var html = "";
+				for(var i = 0; i < data.length; i++) {
+					html += "<div class='pick_field' data-field='"+ obj.data("field") +"' data-val='"+data[i]+"'>"+data[i]+"</div>";
+				}
+				
+				params.after("<div class='dynamic_fields'>"+html+"</div>");
+			})
+		});
+		
+		$(document).on('click','.pick_field', function(e) {
+			var obj = $(e.target);
+			var params = obj.parents(".params");
+			params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
+			obj.parent(".dynamic_fields").remove();
+		});
+		
 		$(document).on('click','.run', function(e) {
 			
 			var obj = $(e.target);
@@ -501,7 +527,7 @@
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title"></h2> 
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype.toUpperCase() + ' <br/> ' + title"></h2> 
 		
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>

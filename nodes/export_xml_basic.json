@@ -3,7 +3,7 @@
     "type": "export",
     "subtype": "xml",
     "title": "simple",
-    "description": "Export collection as XML file. Very simple version.",
+    "description": "Export collection as XML file. Very simple version. Do not export objects.",
 
 
     "scripts": {
@@ -18,13 +18,11 @@
                 "for(f in context.doc) {",
                 "   var tag = context.node.settings['_mapkey_' + f];",
                 "   if(tag != '') {",
-                "       if(typeof context.doc[f] === \"object\" && f != \"_id\") {",
-                "           str += '    <'+tag+'>\\n';",
-                "           for(g in context.doc[f]) {",
-                "               str += '        <'+g+'>' + context.doc[f][g] + '</'+g+'>\\n';",
+                "       if (context.doc[f].length !== 'undefined' && typeof context.doc[f] === \"object\" ) {",
+                "           for (var i = 0; i < context.doc[f].length; i++ ) { ",
+                "               str += '    <'+tag+'>' + context.doc[f][i] + '</'+tag+'>\\n';",
                 "           }",
-                "           str += '    </'+tag+'>\\n';",
-                "       } else {",
+                "       } else {",  
                 "           str += '    <'+tag+'>' + context.doc[f] + '</'+tag+'>\\n'",
                 "       }",
                 "   }",
@@ -39,7 +37,7 @@
                 ],
         "finish":[
                     "out.value = '</root>';",
-                    "out.say('finish','Export done to \"metapipe/output/' + context.node.params.filename + '\"');"
+                    "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.file + '\"');"
                     ]
     },
     

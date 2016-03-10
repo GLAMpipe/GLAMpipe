@@ -14,7 +14,11 @@
 	
 	"views": {
 		"data":"<h2>Views for transform nodes not yet implemented!</h2>",
-		"params":"<label>in field:</label> <input name=\"field\"/><label>output field suffix:</label> <input name=\"suffix\"/ value=\"_splitted\">",
-		"settings":"<label>separator:</label> <input name=\"separator\"/><div>options</div><input type=\"checkbox\" name=\"trim\" value=\"trim\" checked /> trim result"
+		"params":
+		[
+			"<label>in field:</label> <input class='dynamic_field' name='field'/>",
+			"<label>output field suffix:</label> <input name='suffix'/ value='_splitted'>"
+		],
+		"settings":"<label>separator:</label> <input name='separator'/><div>options</div><input type='checkbox' name='trim' value='trim' checked /> trim result"
 	}
 }

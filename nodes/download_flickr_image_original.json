@@ -1,0 +1,35 @@
+{
+    "nodeid": "download_flickr_image_original",
+    "type": "download",
+    "subtype": "Flickr",
+    "title": "original images",
+    "description": "Downloads original images from Flickr.",
+
+
+    "scripts": {
+        "hello":
+        [
+            "out.say('news', 'You added a download node'); "
+        ],
+        "init":"out.say('progress', 'I have ' + context.doc_count + ' images to download!');",
+        "run": [
+                "var url = context.doc[context.node.params.field]; ",
+                "var splitted = url.split('/'); ",
+                "out.url = url; ",
+                "out.file = splitted[splitted.length - 1]; ",
+                "out.say('progress', out.url); "
+                ],
+        "finish":"out.say('finish', 'Images downloaded!')"
+    },
+    
+    "views": {
+        "params":
+        [
+            "No parameters <input type=\"hidden\" name=\"field\" id=\"field\" value='url_m'/>"
+        ],
+        "settings": 
+        [
+            "no settings"
+        ]
+    }
+}

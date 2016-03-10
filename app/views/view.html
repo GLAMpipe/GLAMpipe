@@ -94,6 +94,7 @@
 		
 		// show deep data
 		this.openCell = function (data, event) {
+			console.log(data);
 			event.preventDefault();
 			var obj = $(event.target);
 			var details = obj.parent().find(".details");

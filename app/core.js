@@ -35,7 +35,7 @@ exports.initDB = function (callback) {
 
 exports.initDir = function (callback) {
 
-	fs.mkdir("output", function(err) {
+	fs.mkdir(MP.projects_dir, function(err) {
 		if(err) {
 			if(err.code === "EEXIST") {
 				console.log("INIT: output directory exists");
@@ -84,6 +84,10 @@ exports.initNodes = function (callback) {
 					if(node.views.params instanceof Array)
 						node.views.params = node.views.params.join("");	
 
+					// join "pretty" data view
+					if(node.views.data_static instanceof Array)
+						node.views.data_static = node.views.data_static.join("");
+
 					// join "pretty" hello script
 					if(node.scripts.hello instanceof Array)
 						node.scripts.hello = node.scripts.hello.join("");
@@ -111,6 +115,8 @@ exports.initNodes = function (callback) {
 					// join "pretty" after_run script
 					if(node.scripts.finish instanceof Array)
 						node.scripts.finish = node.scripts.finish.join("");
+
+
 						
 					mongoquery.insert("mp_nodes",node , function(error) {
 						if(error.length) {
@@ -140,10 +146,11 @@ exports.initNodes = function (callback) {
 
 exports.createProject = function (title, res) {
 	
+	var dirs = ["download","export","source"];
 	console.log("PROJECT: creating project", title);
-	var title_dir = title.replace(/ /g,"_").toLowerCase();
-	// create output/project_name directory 
-	var projectPath = path.join("output", title_dir); 
+	var title_dir = title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+	// create projects/project_name directory 
+	var projectPath = path.join(MP.projects_dir, title_dir); 
 	fs.mkdir(projectPath, function(err) {
 		if(err) {
 			if(err.code === "EEXIST")
@@ -154,18 +161,22 @@ exports.createProject = function (title, res) {
 			res.json({"error": "error in project directory creation!"});
 			return;
 		}
+		// create node output directories (blocking)
+		for(var i = 0; i < dirs.length; i++) {
+			fs.mkdirSync(path.join(projectPath, dirs[i]));
+		} 
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(meta) {
-				var short = title.substring(0,16).toLowerCase();
-				short = short.replace(/ /g,"_");
+				var collectionName = title_dir.substring(0,16).toLowerCase();
+				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
 					"dir": title_dir,
-					"prefix": "p" + meta.project_count + "_" + short,
+					"prefix": "p" + meta.project_count + "_" + collectionName ,
 					"collection_count": 0,
 					"node_count":0
-					};
+				};
 				mongoquery.insertProject (project, function(data) {
 					console.log("project \"" + title + "\" created!");
 					res.json({"status": "project created"});
@@ -238,8 +249,6 @@ exports.runNode = function (req, res, io) {
 		var node = project.nodes[index];
 		node.settings = req.body;
 		node.project = project._id;
-		node.dir = project.dir;
-		node.node_count = project.node_count;
 
 		console.log("NODE: running", node.type);
 
@@ -356,7 +365,7 @@ exports.runNode = function (req, res, io) {
 							
 						}
 						
-						// empty collection and import file
+						// remove previous data insertet by node and import file
 						var query = {}; 
 						query[MP.source] = node._id;
 						mongoquery.empty(node.collection, query, function() {
@@ -384,7 +393,7 @@ exports.runNode = function (req, res, io) {
 
 				// we stream directly to file
 				var fs = require('fs');
-				var filePath = path.join("output", node.dir, node.params.file);
+				var filePath = path.join(node.dir, node.params.file);
 				var wstream = fs.createWriteStream(filePath);
 				
 
@@ -471,12 +480,17 @@ exports.runNode = function (req, res, io) {
 							
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
+							
+							// ask url and file name from node
 							runNodeScriptInContext("run", node, sandbox, io);
 							if (sandbox.out.error !== null) 
 								return;
 								
 							exports.downloadFile(node, sandbox, function() {
-								next();
+								// write file location to db
+								var setter = {};
+								setter[node.params.field + '_download' + node.number] = path.join(node.dir, sandbox.out.file) ;
+								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							})
 							
 						}, function done() {
@@ -485,10 +499,10 @@ exports.runNode = function (req, res, io) {
 					});
 				}
 				
-				// create node's output directory if it does not exist
-				var nodeOutputPath = path.join("output", project.dir, node.node_count + "_" + node.title);
+				// create node's output directory if it does not exist 
+				// TODO: sanitize directory names
 				var fs = require("fs");
-				fs.mkdir(nodeOutputPath, function(err) {
+				fs.mkdir(node.dir, function(err) {
 					if(err) {
 						if(err.code === "EEXIST") {
 							console.log("INIT: output directory exists");
@@ -498,10 +512,10 @@ exports.runNode = function (req, res, io) {
 							io.emit("error", err)
 							return;
 						}
+					} else {
+						console.log("INIT: output directory created");
+						callback();
 					}
-					node.dir = nodeOutputPath;
-					console.log("INIT: output directory created");
-					callback();
 				});
 				
 			break;
@@ -566,15 +580,34 @@ exports.runNode = function (req, res, io) {
 									sandbox.context.count++;
 									runNodeScriptInContext("run", node, sandbox, io);
 									
-									fs.readFile(sandbox.out.value, function (err,data) {
-										if (err) {
-											return console.log(err);
-										}
-										client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
-											console.log(data.filename);
+									switch (node.subsubtype) {
+										case "file":
+											fs.readFile(sandbox.out.value, function (err,data) {
+												if (err) {
+													console.log(err);
+													io.sockets.emit("error", err);
+													next();
+												}
+												client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
+													if(err) {
+														io.sockets.emit("error", err);
+													} else {
+														console.log(data.filename);
+														next();
+													}
+												});
+											});
+										break;
+										
+										case "page":
+										
+										break;
+										
+										default:
 											next();
-										});
-									});
+									}
+									
+
 
 
 
@@ -615,9 +648,8 @@ exports.runNode = function (req, res, io) {
 						
 					break;
 				}
-
-
 			break;
+
 
 			default:
 				if(typeof(node.scripts.run) !== "undefined") {
@@ -817,22 +849,51 @@ exports.setNodePosition = function (params, res) {
 	);
 }
 
+exports.createNode = function (nodeRequest, res, io) {
+
+	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(project) {
+		nodeRequest.node_count = project.node_count;
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
+			initNode(nodeRequest, res, io, project);
+		});
+	});
+}
+
+
 /**
  * Create default project node
  * - adds params defined by user to the stock node
  * - saves result to project record (under "nodes")
  */
  
-exports.createNode = function (nodeRequest, res, io) {
+function initNode (nodeRequest, res, io, project) {
 
 	console.log("nEW", mongojs.ObjectId());
 	console.log("nodeparams:", nodeRequest);
+	
+	// callback for inserting node to db
+	var insertNode = function (node, cb) {
+		mongoquery.update("mp_projects",
+			{_id:mongojs.ObjectId(node.project)},
+			{$push:{nodes: node}},
+			function(error) {
+				cb(error);
+		})
+	}
+	
 	// copy node to project with its settings
 	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
 		if(node) {
 			node.input_node = nodeRequest.input_node;
-			node.params = nodeRequest.params;
+			node.project = nodeRequest.project
 			node.collection = nodeRequest.collection;
+			node.number = nodeRequest.node_count;
+			
+			if(nodeRequest.params)
+				node.params = nodeRequest.params;
+			else
+				node.params = {};
+				
 			node.params.collection = nodeRequest.collection;
 			
 			// copy static data view to project node's view if defined
@@ -846,20 +907,45 @@ exports.createNode = function (nodeRequest, res, io) {
 			runNodeScript("hello", node, nodeRequest, io);
 			
 			node._id = mongojs.ObjectId();
-			//console.log(node);
-			mongoquery.update("mp_projects",
-				{_id:mongojs.ObjectId(nodeRequest.project)},
-				{$push:{nodes: node}},
-				function(error) {
-					if(error) {
-						console.log(error);
-						res.json({"error": error});
+			
+			// create output directory for nodes that do file output
+			if(node.type == "download" || node.type == "export" || node.type == "source") {
+				var fs = require("fs");
+				var dir = path.join(MP.projects_dir, project.dir, node.type, project.node_count + "_" + node.nodeid);
+				fs.mkdir(dir, function(err) {
+					if(err) {
+						console.log("ERROR:", err);
+						io.sockets.emit("error", "Could not create node's output directory!");
+						return res.json({"error":"Could not create node's output directory!"});
+							
+					} else {
+						console.log("INIT: output directory created");
+						node.dir = dir;
+						insertNode(node, function(err) {
+							if(err) {
+								console.log(err);
+								res.json({"error": err});
+							} else {
+								console.log("node created");
+								res.json({"status": "node created"})
+							}
+						});
 					}
-					mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
+				});
+			} else {
+				insertNode(node, function (err) {
+					if(err) {
+						console.log(err);
+						res.json({"error": err});
+					} else {
 						console.log("node created");
 						res.json({"status": "node created"})
-					});
-			})
+					}
+				});
+			}
+			
+
+
 		} else {
 			console.log("ERROR: node not found");
 		}
@@ -877,25 +963,33 @@ exports.createNode = function (nodeRequest, res, io) {
 exports.createCollectionNode = function (nodeRequest, res, io) {
 
 	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(data) {
-		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" +nodeRequest.params.title;
+		// cleanup name
+		collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+		
+		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
 		nodeRequest.params.collection = nodeRequest.collection;
-		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1} }, function() {
+		nodeRequest.node_count = data.node_count;
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1} }, function() {
 			mongoquery.createCollection(nodeRequest.collection, function () {
-				initNode(nodeRequest, res, io);
+				initCollectionNode(nodeRequest, res, io);
 			});
 		})
 	});
-
 }
 
-function initNode (nodeRequest, res, io) {
+function initCollectionNode (nodeRequest, res, io) {
 	
 	// copy node to project with its settings
 	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
 		if(node) {
 			node.input_node = "";
-			node.params = nodeRequest.params;
+			node.project = nodeRequest.project;
+			if(nodeRequest.params)
+				node.params = nodeRequest.params;
+			else
+				node.params = {};
 			node.collection = nodeRequest.collection;
+			node.number = nodeRequest.node_count;
 			node.x = "350";
 			node.y = "0";
 			
@@ -903,7 +997,7 @@ function initNode (nodeRequest, res, io) {
 			
 			node._id = mongojs.ObjectId();
 			mongoquery.update("mp_projects",
-				{_id:mongojs.ObjectId(nodeRequest.project)},
+				{_id:mongojs.ObjectId(node.project)},
 				{$push:{nodes: node}},
 				function(error) {
 					if(error) {
@@ -1039,14 +1133,13 @@ exports.getCollection = function (req, res) {
 }
 
 
-exports.getCollectionFields = function (collection_id, res) {
+exports.getCollectionFields = function (collection_id, cb) {
 	mongoquery.findOne({}, collection_id, function(data) {
 		var keys = [];
 		for (key in data) {
 			keys.push(key);
 		}
-		unset(keys["_id"]);
-		res.json(keys);
+		cb(keys);
 	});
 }
 
@@ -1357,6 +1450,10 @@ exports.downloadFile = function (node, sandbox, cb ) {
 
 }
 
+function insertNodeActionField (collection, doc_id, field, value) {
+	
+}
+
 function importXML(file) {
 	
 }
@@ -1367,8 +1464,9 @@ function importTSV (mode, node, cb) {
 	var streamCSV = require("node-stream-csv");
 
 	var records = [];
+	var file = path.join("uploads", node.params.filename);
 	streamCSV({
-		filename: "uploads/" + node.params.filename,
+		filename: file,
 		mode: mode,
 		dontguess: true },
 		function onEveryRecord (record) {
@@ -1440,6 +1538,8 @@ function generateDynamicView(node, callback) {
 	// NOTE: this assumes that every record has all field names
 	mongoquery.findOne({}, node.collection, function(data) {
 
+		delete data.__mp_source;
+
 		var html = ''
 			+ '<button data-bind="click: prevPage">prev</button>'
 			+ '<button data-bind="click: nextPage">next</button>'
@@ -1467,7 +1567,10 @@ function generateDynamicView(node, callback) {
 		// data cells
 		html += '				<td data-bind="text: vcc"></td>'
 		for (key in data) {
-			if(typeof data[key] === "object" && key != "_id") {
+			
+			if(data[key] instanceof Array) {
+				html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
+			} else if(typeof data[key] === "object" && key != "_id") {
 
 				html += '				<td data-bind="click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
 
@@ -1509,21 +1612,25 @@ function createCollectionView(data, collectionName, callback) {
 
 function createNodeView(data, nodeId, callback) {
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "mp_projects", function(project) {
-		var index = indexByKeyValue(project.nodes, "_id", nodeId);
-		data = data.replace(/\[\[project\]\]/, project.title);
-		data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
-		
-		// if node has no static view, then we create in always on the fly (dynamic view)
-		if(typeof project.nodes[index].views.data_static === "undefined") {
-			generateDynamicView(project.nodes[index], function(html) {
+		if(project) {
+			var index = indexByKeyValue(project.nodes, "_id", nodeId);
+			data = data.replace(/\[\[project\]\]/, project.title);
+			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
+			
+			// if node has no static view, then we create in always on the fly (dynamic view)
+			if(typeof project.nodes[index].views.data_static === "undefined") {
+				generateDynamicView(project.nodes[index], function(html) {
+					// insert node's data view to view.html
+					data = data.replace(/\[\[html\]\]/, html);
+					callback(data);
+				});
+			} else {
 				// insert node's data view to view.html
-				data = data.replace(/\[\[html\]\]/, html);
+				data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
 				callback(data);
-			});
+			}
 		} else {
-			// insert node's data view to view.html
-			data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
-			callback(data);
+			callback("<h1>Node view not found</h1><p>Maybe you deleted the node?</p>");
 		}
 	});
 }

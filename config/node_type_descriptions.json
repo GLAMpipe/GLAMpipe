@@ -5,7 +5,7 @@
 	"lookup":"Lookup nodes can fetch data from metapipe collections or from external APIs.",
 	"export":"Export nodes writes (XML, JSON etc.) files or send data to external APIs.",
 	"map":"Map nodes allows you to change field names usually for export purposes. They can be also used for flattening deep structures.",
-	"download":"Download nodes dowloads files from URLs defined in chosen.",
+	"download":"Download nodes dowloads files from URLs defined in chosen field.",
 	"upload":"Upload nodes uploads files and data to web services (like wikimedia commons)",
 	"test":"Test nodes"
 }
