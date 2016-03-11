@@ -1,0 +1,52 @@
+{
+	"nodeid": "transform_wikitext_template",
+	"title": "Wikitext template",
+	"type": "transform",
+	"subtype": "wikitext",
+	"description": "Produce wikitext output",
+	"scripts": {
+		"hello": "out.say('news', 'You added a wikitext node'); ",
+        "bye": "out.say('news', 'Deleted wikitext node. Bye!'); ",
+        "init":"out.say('progress', 'Starting converting to wikitext...');",
+		"run": 
+		[
+			"var output = ''; ",
+			"var wikiFields = context.node.params; ",
+			"for (var i = 0; i < wikiFields.length; i++) {",
+			"    if(context.doc[wikiFields[i]]) {",
+			"         output += wikiFields[i] + ' = ' +context.doc[wikiFields[i]]; ",
+			"     }",
+			"}",
+			"out.value = output;"
+		],
+		"finish": "out.say('finish', 'conversion done!');"
+	},
+	
+	"views": {
+		"params":
+		[
+			"<label>choose template</label>",
+			"<select id='template' name='template'>",
+			"    <option value='0'>None selected</option>",
+			"    <option value='1'>Photograph</option>",
+			"</select>",
+			"<div id='template_map'></div>",
+			"<script>",
+			"var wikiFields = [[],['desription', 'author']]; ",
+			"$('#template').change(function() { ",
+			"    var sel = parseInt($('#template option:selected' ).val()); ",
+			"    $('#template_map').empty(); ",
+			"    for(var i = 0; i < wikiFields[sel].length; i++) { ",
+			"        $('#template_map').append(wikiFields[sel][i] + '<input name=\"'+wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
+			"    }",
+			"})",
+			"</script>",
+			"<label>output field</label>",
+			"<input value='wikitext' name='out_field' />"
+		],
+		"settings":
+		[
+
+		]
+	}
+}

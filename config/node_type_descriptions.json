@@ -4,7 +4,7 @@
 	"transform":"Transform node is used to modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
 	"lookup":"Lookup nodes can fetch data from metapipe collections or from external APIs.",
 	"export":"Export nodes writes (XML, JSON etc.) files or send data to external APIs.",
-	"map":"Map nodes allows you to change field names usually for export purposes. They can be also used for flattening deep structures.",
+	"map":"Map nodes allows you to produce new documents usually for export purposes. They can be also used for flattening deep structures.",
 	"download":"Download nodes dowloads files from URLs defined in chosen field.",
 	"upload":"Upload nodes uploads files and data to web services (like wikimedia commons)",
 	"test":"Test nodes"

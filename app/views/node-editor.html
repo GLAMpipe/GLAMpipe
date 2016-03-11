@@ -121,7 +121,7 @@
 			var script = $("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
 			
 			$("#" + ele).append("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
-			PR.prettyPrint($("#" + ele).first().get());
+			//PR.prettyPrint(script);
 			
 			
 
@@ -216,13 +216,13 @@
 		<div class="help">Params are displayed to the user when node is created. 
 		Params are saved to database and these cannot be changed afterwards. 
 		Parameters are provided to node scripts via <b>context.node.params</b>.</div>
-		<div id="params" data-bind="html: $root.view2html(views.params, 'params_src')"></div>
+		<textarea id="params" data-bind="text: $root.view2html(views.params, 'params_src')"></textarea>
 		<div id="params_src"></div>
 
 		<h3>settings</h3>
 		<div class="help">Settings are displayed to the user when running node. 
 		Currently settings are *not* saved to database. Settings are provided to node scripts via <b>context.node.settings</b>.</div>
-		<div id="settings" data-bind="html: $root.view2html(views.settings, 'settings_src')"></div>
+		<textarea id="settings" data-bind="text: $root.view2html(views.settings, 'settings_src')"></textarea>
 		<div id="settings_src"></div>
 		
 	</div>

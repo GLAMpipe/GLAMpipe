@@ -149,11 +149,6 @@
 		this.openNodeParams = function(data, event) {
 			var obj = $(event.target);
 			var params = obj.parent().find(".params");
-			params.find(".dynamic_field").each(function (index) {
-				$(this).after("<h3 data-field='"+$(this).attr("name") + "' class='show_fields'>show fields</h3>");
-			});
-			
-			
 			
 			if(params.is(":visible")) {
 				$(".params").hide();
@@ -307,18 +302,18 @@
 		  resizeInnerDiv();
 		});
 
-		$(document).on('click','.show_fields', function(e) {
+		$(document).on('click','.dynamic_field', function(e) {
 			var obj = $(e.target);
-			var params = obj.parent();
+			var params = obj.parents(".params");
 			
 			// fetch fields
 			$.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
 				var html = "";
 				for(var i = 0; i < data.length; i++) {
-					html += "<div class='pick_field' data-field='"+ obj.data("field") +"' data-val='"+data[i]+"'>"+data[i]+"</div>";
+					html += "<div class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+data[i]+"'>"+data[i]+"</div>";
 				}
 				
-				params.after("<div class='dynamic_fields'>"+html+"</div>");
+				params.append("<div class='dynamic_fields'>"+html+"</div>");
 			})
 		});
 		
@@ -326,7 +321,7 @@
 			var obj = $(e.target);
 			var params = obj.parents(".params");
 			params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
-			obj.parent(".dynamic_fields").remove();
+			params.find(".dynamic_fields").remove();
 		});
 		
 		$(document).on('click','.run', function(e) {
@@ -608,7 +603,7 @@
 							<li>
 								<div data-bind="text:title, click:$root.openNodeParams"></div>
 								<div data-bind="html:description"></div>
-								<div data-bind="html:params" class="params"></div>
+								<div data-bind="html:params" ></div>
 							</li>
 							
 						</ul>
