@@ -7,8 +7,22 @@
 	"scripts": {
 		"hello": "out.say('news', 'You added a Split node'); ",
         "bye": "out.say('news', 'Deleted Split node. Bye!'); ",
-        "init":"out.say('progress', 'Starting Splitting...');",
-		"run": "out.value = context.doc[context.node.params.field].split(context.node.settings.separator);",
+        "init":
+        [
+			"out.say('progress', 'Starting Splitting...');",
+			"/* set output field */",
+			"out.field = context.node.params.in_field + context.node.params.suffix; "
+		],
+		"run": 
+		[
+			"function getDescendantProp(obj, desc) { ",
+			"    var arr = desc.split('.'); ",
+			"    while(arr.length && (obj = obj[arr.shift()])); ",
+			"    return obj; ",
+            "}",
+            "var val = getDescendantProp(context.doc, context.node.params.in_field); ",
+			"out.value = val.split(context.node.settings.separator);"
+		],
 		"finish": "out.say('finish', 'Split done!');"
 	},
 	
@@ -16,7 +30,7 @@
 		"data":"<h2>Views for transform nodes not yet implemented!</h2>",
 		"params":
 		[
-			"<label>in field:</label> <input class='dynamic_field' name='field'/>",
+			"<label>in field:</label> <input class='dynamic_field' name='in_field'/>",
 			"<label>output field suffix:</label> <input name='suffix'/ value='_splitted'>"
 		],
 		"settings":"<label>separator:</label> <input name='separator'/><div>options</div><input type='checkbox' name='trim' value='trim' checked /> trim result"

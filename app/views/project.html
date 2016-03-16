@@ -54,7 +54,7 @@
 				'	<h2>' +data.type+": " +data.title+ '</h2>' +
 				'	<div class="number">node number: '+data.number+'</div>' +
 				'	<h3 class="subhead">params</h3>' +
-				'	<div class="params">' +
+				'	<div class="node_params">' +
 						self.nodeParams(data) +
 				'	</div>' +
 				'	<h3 class="subhead">settings</h3>' +
@@ -142,6 +142,7 @@
 				obj.parent().parent().find(".settings").hide();
 				// open current tab
 				current.show();
+				$(".params").hide();
 			}
 		}
 
@@ -284,7 +285,7 @@
 		//resizeCanvas();
 		//initPageObjects();
 		$('.loading').hide();
-		$(".params").hide();
+		
 		$("#node_creator").hide();
 		
 		nodes = new nodeList();
@@ -292,10 +293,14 @@
 		ko.applyBindings(nodes);
 		nodes.loadNodes(nodes);
 		nodes.loadProject(nodes);
+		
+		
 
 		nodes.genSettings = ko.pureComputed(function() {
 			return this.par;
 		},nodes);
+
+		
 
 		$( window ).resize(function() {
 		  resizeCanvas();
@@ -303,23 +308,63 @@
 		});
 
 		$(document).on('click','.dynamic_field', function(e) {
+			
 			var obj = $(e.target);
 			var params = obj.parents(".params");
+			if(params.length == 0)
+				params = obj.parents(".settings");
 			
 			// fetch fields
 			$.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
-				var html = "";
-				for(var i = 0; i < data.length; i++) {
-					html += "<div class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+data[i]+"'>"+data[i]+"</div>";
-				}
-				
+				if(data.error)
+					alert(data.error);
+					
+				var html = "<h2>document structure (keys)</h2><ul><li class='pick_field good' data-field='"+ obj.attr("name") +"' data-val=''>CLEAR FIELD and CLOSE</li>";
+					for (key in data) {
+						if (data[key] instanceof Array) {
+							html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
+						} else if (typeof data[key] === "object") {
+							var p = key;
+							var a = [p];
+							var tree = makeDynFieldsfromObject(data[key], a, obj);
+							html +=  "<li>" + p + "<ul>" + tree + "</ul></li>";
+						} else {
+							html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
+						}
+					}
+				html += "</ul>"
 				params.append("<div class='dynamic_fields'>"+html+"</div>");
 			})
 		});
+
+function makeDynFieldsfromObject (data, parents, obj) {
+	
+	var html = "";
+	var parents_str = parents.join(".");
+	for (key in data) {
+		if (data[key] instanceof Array) {
+			html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+" <span class='array'>ARRAY</span></li>";
+		} else if (typeof data[key] === "object") {
+			var p = key;
+			parents.push(p);
+			var tree = makeDynFieldsfromObject(data[key], parents, obj);
+			parents.pop();
+			html +=  "<li>" + p + "<ul>" + tree + "</ul></li>";
+		} else {
+			html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+"</li>";
+		}
+	}
+	return html;
+}
+
+
 		
 		$(document).on('click','.pick_field', function(e) {
 			var obj = $(e.target);
 			var params = obj.parents(".params");
+			if (params.length == 0)
+				params = obj.parents(".settings");
+				
 			params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
 			params.find(".dynamic_fields").remove();
 		});

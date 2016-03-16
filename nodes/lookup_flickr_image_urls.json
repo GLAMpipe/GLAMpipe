@@ -13,7 +13,7 @@
 		[
 			"var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photos.getSizes';",
 			"var format = '&format=json&nojsoncallback=?';",
-			"out.url = base_url + '&photo_id=' + context.doc[context.node.params.field] + format + '&api_key=' + context.node.params.apikey"
+			"out.url = base_url + '&photo_id=' + context.doc[context.node.params.field] + format + '&api_key=' + context.node.settings.apikey"
 		],
 		"run":[
 			"if(context.data.stat != 'fail') {",
@@ -26,8 +26,8 @@
 	
 	"views": {
 		"data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" data-bind=\"click: sort\">title</th>\n<th id=\"description\" >description</th>\n<th id=\"link\" >link</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<td data-bind=\"text: title\"></td>\n\n </tr>\n </tbody>\n </table>\n</div>\n",
-		"params":"<label>Flickr API key </label><input type=\"text\" name=\"apikey\" id=\"apikey\" required /><input type=\"hidden\" name=\"field\" id=\"field\" value='id'/><input type=\"hidden\" name=\"suffix\" id=\"suffix\" value='_photo_sizes'/>",
-		"settings":"no settings"
+		"params":"<input type=\"hidden\" name=\"field\" id=\"field\" value='id'/><input type=\"hidden\" name=\"suffix\" id=\"suffix\" value='_photo_sizes'/>",
+		"settings":"<label>Flickr API key </label><input type=\"text\" name=\"apikey\" id=\"apikey\" required />"
 	}
 
 }

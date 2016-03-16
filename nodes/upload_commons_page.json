@@ -33,14 +33,8 @@
         "url": [],
         
         "run":[
-            "var source = context.doc.id_photo_sizes.size[7].source;",
-            "var splitted = source.split('/'); ",
-            "var filename = splitted[splitted.length -1]; ",
-            "var s = filename.split('.'); ", 
-            "var ext = s[s.length - 1]; ",
-            "out.say('progress',splitted[splitted.length -1]); ",
-            "out.title = context.doc.title + '.' + ext; ",
-            "out.value = 'output/commons_upload/6_images/' + splitted[splitted.length -1]; "
+            "out.title = 'File:Broadcast_van_and_a_reindeer,_Inari,_Lapland,_1930s.jpg'; ",
+            "out.value = context.doc[context.node.params.wikitext]; "
             ],
             
         "finish":"out.say('finish', 'Images uploaded'); "
@@ -50,8 +44,8 @@
         "data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" data-bind=\"click: sort\">title</th>\n<th id=\"description\" >description</th>\n<th id=\"link\" >link</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<td data-bind=\"text: title\"></td>\n\n </tr>\n </tbody>\n </table>\n</div>\n",
         "params":
         [
-            "<label>directory</label><input type=\"text\" name=\"directory\" id=\"directory\" required />",
-            "<label>file name field</label><input name=\"field\"/>"
+            "<label>commons title field</label><input class='dynamic_field' name=\"commons_title\"/>",
+            "<label>wikitext field</label><input class='dynamic_field' type=\"text\" name=\"wikitext\" id=\"wikitext\" required />"
         ],
         "settings":
         [

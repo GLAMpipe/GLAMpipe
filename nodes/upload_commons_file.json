@@ -9,7 +9,7 @@
     "scripts": {
         "hello": "out.say('news', 'You just created a commons node for uploading files'); ",
         "bye": "out.say('finish', 'Deleted commons node!'); ",
-        "init": "out.say('progress', 'Starting to upload URLs...');",
+        "init": "out.say('progress', 'Starting to upload URLs...'); out.field = context.doc[context.node.params.location] + '_url'; ",
         "login": 
         [
             "var config = { ",
@@ -24,23 +24,32 @@
             "}; ",
             "out.botconfig = config;",
             
-            "var apis = ['https://commons.wikimedia.org/w/api.php','http://commons.wikimedia.beta.wmflabs.org/w/api.php']; ",
+            "var apis = ['https://commons.wikimedia.org','http://commons.wikimedia.beta.wmflabs.org']; ",
             "out.say('progress', 'Trying to login to commons...'); ",
-            "out.url = apis[parseInt(context.node.settings.api)] +'?action=query&meta=tokens&type=login'; ",
+            "out.url = apis[parseInt(context.node.settings.api)] +'/w/api.php?action=query&meta=tokens&type=login'; ",
             ""
         ],
         
         "url": [],
         
         "run":[
-            "var source = context.doc.id_photo_sizes.size[7].source;",
+            "var apis = ['https://commons.wikimedia.org','http://commons.wikimedia.beta.wmflabs.org']; ",
+            "var title = context.doc[context.node.params.field]; ",
+            "var source = context.doc[context.node.params.location]; ",
+            
             "var splitted = source.split('/'); ",
             "var filename = splitted[splitted.length -1]; ",
             "var s = filename.split('.'); ", 
             "var ext = s[s.length - 1]; ",
             "out.say('progress',splitted[splitted.length -1]); ",
-            "out.title = context.doc.title + '.' + ext; ",
-            "out.value = 'output/commons_upload/6_images/' + splitted[splitted.length -1]; "
+            
+            "if(title[title.length - 1] != '.') ",
+            "    out.title = title + '.' + ext; ",
+            "else",
+            "    out.title = title + ext; ",
+            
+            "out.filename = source; ",
+            "out.value = apis[parseInt(context.node.settings.api)] + '/wiki/File:' + out.title;"
             ],
             
         "finish":"out.say('finish', 'Images uploaded'); "
@@ -56,7 +65,7 @@
         "settings":
         [
             "<label>username </label><input type=\"text\" name=\"username\" id=\"username\" required />",
-            "<label>password</label><input name=\"password\" id=\"password\"/>",
+            "<label>password</label><input type='password' name=\"password\" id=\"password\"/>",
             "<label>choose site (practise with beta)</label>",
             "<select name='api'>",
             "    <option value='0'>beta</option>",

@@ -54,9 +54,6 @@ a:active {
 }
 
 
-input, textarea {
-	width:90%;
-}
 input[type='checkbox'] { 
 	width:20px;
 	}
@@ -82,6 +79,8 @@ button.run {
 	font-weight:bold;
 }
 
+
+
 #node_bar {
 	padding:10px;
 	background-color:#99B4B2;
@@ -98,7 +97,7 @@ button.run {
 	margin-top:10px;
 }
 
-#node_bar .params {
+#node_bar .node_params {
 	margin-bottom:20px;
 	padding:10px;
 	border: 1px solid black;
@@ -123,11 +122,32 @@ button.run {
 	padding:1px;
 }
 
-.bold {
-	font-weight: bold;
+#node_bar .settings input.short_input {
+
+	width:3em;
 }
 
+#node_bar .settings input.middle_input {
+
+	width:15em;
+}
+
+#node_bar .settings input.dynamic_field {
+
+	background-color:#BFCCCB;
+	border: 2px solid orange;
+}
+
+
+
+
+
 #node_bar label {
+	font-weight: bold;
+	display:block;
+}
+
+.bold {
 	font-weight: bold;
 }
 
@@ -238,11 +258,30 @@ ul.node_types li:hover {
 	padding:5px;
 }
 
-#node_creator .dynamic_fields {
+
+ input, #node_bar textarea {
+	width:90%;
+}
+
+
+
+#node_bar .dynamic_fields {
 	display:block;
 	position:absolute;
 	top:0px;
-	background-color: #649834;
+	background-color: white;
+	border: 1px solid black;
+	height:80%;
+	overflow-x: auto;
+}
+
+#node_bar .dynamic_fields ul {
+	padding-right:20px;
+}
+
+#node_bar .dynamic_fields .array {
+	background-color:orange;
+	color:white;
 }
 
 #node_creator h2 {

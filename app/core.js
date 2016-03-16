@@ -88,35 +88,11 @@ exports.initNodes = function (callback) {
 					if(node.views.data_static instanceof Array)
 						node.views.data_static = node.views.data_static.join("");
 
-					// join "pretty" hello script
-					if(node.scripts.hello instanceof Array)
-						node.scripts.hello = node.scripts.hello.join("");
-
-					// join "pretty" bye script
-					if(node.scripts.bye instanceof Array)
-						node.scripts.bye = node.scripts.bye.join("");
-
-					// join "pretty" init script
-					if(node.scripts.init instanceof Array)
-						node.scripts.init = node.scripts.init.join("");
-
-					// join "pretty" url script
-					if(node.scripts.url instanceof Array)
-						node.scripts.url = node.scripts.url.join("");
-
-					// join "pretty" login script
-					if(node.scripts.login instanceof Array)
-						node.scripts.login = node.scripts.login.join("");
-
-					// join "pretty" run script
-					if(node.scripts.run instanceof Array)
-						node.scripts.run = node.scripts.run.join("");
-						
-					// join "pretty" after_run script
-					if(node.scripts.finish instanceof Array)
-						node.scripts.finish = node.scripts.finish.join("");
-
-
+					// join "pretty" scripts
+					for (key in node.scripts) {
+						if(node.scripts[key] instanceof Array)
+							node.scripts[key] = node.scripts[key].join("");
+					}
 						
 					mongoquery.insert("mp_nodes",node , function(error) {
 						if(error.length) {
@@ -146,9 +122,11 @@ exports.initNodes = function (callback) {
 
 exports.createProject = function (title, res) {
 	
-	var dirs = ["download","export","source"];
+	var dirs = ["download", "export", "source"];
 	console.log("PROJECT: creating project", title);
-	var title_dir = title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+	var title_dir = title.toLowerCase();
+	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
+	title_dir = title_dir.replace(/[ ]/g,"_");
 	// create projects/project_name directory 
 	var projectPath = path.join(MP.projects_dir, title_dir); 
 	fs.mkdir(projectPath, function(err) {
@@ -168,7 +146,7 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(meta) {
-				var collectionName = title_dir.substring(0,16).toLowerCase();
+				var collectionName = title_dir.substring(0,20).toLowerCase(); // limit 20 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -239,7 +217,7 @@ exports.getNode = function (node_id, res) {
 exports.runNode = function (req, res, io) {
 	console.log('Running node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
-	
+
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
 		if(!project) {
 			res.json({"error":"Node not found!"});
@@ -247,8 +225,19 @@ exports.runNode = function (req, res, io) {
 		}
 		var index = indexByKeyValue(project.nodes, "_id", req.params.id);
 		var node = project.nodes[index];
+		if(typeof node.input_node !== 'undefined') {
+			var index = indexByKeyValue(project.nodes, "_id", node.input_node);
+			var input_node = project.nodes[index];
+		} else {
+			var input_node = null;
+		}
 		node.settings = req.body;
 		node.project = project._id;
+
+		// save node settings TODO: set callback
+		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+			console.log("saved node settings");
+		})
 
 		console.log("NODE: running", node.type);
 
@@ -258,6 +247,7 @@ exports.runNode = function (req, res, io) {
 				doc: null,
 				data: null,
 				node: node,
+				input_node: input_node,
 				doc_count:0,
 				count:0
 			},
@@ -329,7 +319,7 @@ exports.runNode = function (req, res, io) {
 									
 								//generate view and do *not* wait it to complete
 								if (!node.views.data)
-									exports.generateView(node, function(msg) {});
+									exports.updateView(node, sandbox, io, function(msg) {});
 									
 								// if node provides new url, then continue loop
 								if (sandbox.out.url != "") {
@@ -360,7 +350,7 @@ exports.runNode = function (req, res, io) {
 							mongoquery.insert(node.collection, sandbox.out.value, function() {
 								runNodeScriptInContext("finish", node, sandbox, io);
 								//generate view and do *not* wait it to complete
-								exports.generateView(node, function(msg) {});
+								exports.updateView(node, sandbox, io, function(msg) {});
 							});
 							
 						}
@@ -489,7 +479,7 @@ exports.runNode = function (req, res, io) {
 							exports.downloadFile(node, sandbox, function() {
 								// write file location to db
 								var setter = {};
-								setter[node.params.field + '_download' + node.number] = path.join(node.dir, sandbox.out.file) ;
+								setter[sandbox.out.field + '_download'] = path.join(node.dir, sandbox.out.file) ;
 								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							})
 							
@@ -536,11 +526,13 @@ exports.runNode = function (req, res, io) {
 						runNodeScriptInContext("run", node, sandbox, io);
 
 						var setter = {};
-						setter[node.params.field + node.params.suffix] = sandbox.out.value;
+						setter[sandbox.out.field] = sandbox.out.value;
+						console.log(setter);
 						mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 						
 					}, function done () {
 						runNodeScriptInContext("finish", node, sandbox, io);
+						exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created");});
 					});
 				});
 
@@ -582,25 +574,39 @@ exports.runNode = function (req, res, io) {
 									
 									switch (node.subsubtype) {
 										case "file":
-											fs.readFile(sandbox.out.value, function (err,data) {
+											fs.readFile(sandbox.out.filename, function (err,data) {
 												if (err) {
 													console.log(err);
 													io.sockets.emit("error", err);
-													next();
+													next();	// continue despite the error
 												}
 												client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
 													if(err) {
 														io.sockets.emit("error", err);
 													} else {
-														console.log(data.filename);
-														next();
+														console.log(data.imageinfo.descriptionurl);
+														// write commons page url to db
+														var setter = {};
+														setter[sandbox.out.field] = data.imageinfo.descriptionurl;
+														mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 													}
 												});
 											});
 										break;
 										
 										case "page":
-										
+											client.edit(sandbox.out.title, sandbox.out.value, "test edit", function (err, data) {
+												if(err) {
+													io.sockets.emit("error", err);
+												} else {
+													//console.log(data.filename);
+													// write commons page url to db
+													//var setter = {};
+													//setter[sandbox.out.field] = sandbox.out.value;
+													//mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+													next();
+												}
+											});
 										break;
 										
 										default:
@@ -696,108 +702,35 @@ function getPrevNode(project, node) {
 }
 
 
-function login2API (node, sandbox, callback) {
-	
-	var request = require("request");
-	
-	var domain = "http://commons.wikimedia.beta.wmflabs.org/w/api.php";
-	var api_login = "?action=login";
-	var api_edittoken = "?action=query&format=json&meta=tokens&type=csrf";
-	
-	console.log("url:", sandbox.out.url);
-	console.log("login:", sandbox.out.login);
-
-	 var options_login = {
-		url: domain + api_login,
-		qs: sandbox.out.login,
-		json: true,
-		jar: true	// damn, finding this was hard...
-	};
-
-	 var options_edittoken = {
-		url: domain + api_edittoken,
-		qs: {format:"json"},
-		json: true,
-		jar: true	// damn, finding this was hard...
-	};
-
-	request.post(options_login, function(err, res, body) {
-		if(err) {
-			return console.error(err);
-		}
-		console.log("Response body:", body);
-		if(body.login.result == 'NeedToken') {
-			
-			options_login.qs.lgtoken = body.login.token;
-			//options_login.qs.sessionid = body.login.sessionid;
-			
-			request.post(options_login, function(err, res, body) {
-				if (err)
-					return console.error(err);
-				console.log(body);
-				
-				// request edit token
-				console.log(options_edittoken);
-				request.post(options_edittoken, function(err, res, body) {
-					if (err)
-						return console.error(err);
-					console.log(body);
-					
-					// make edit
-					var edit = "?action=edit";
-					var options_edit = {
-						url: domain + edit,
-						title: "Artturi",
-						section: "new",
-						summary:"test",
-						text:"Hello%20everyone",
-						token: body.query.tokens.csrftoken,
-						qs: {format:"json"},
-						json: true,
-						jar: true	// damn, finding this was hard...
-					};
-					console.log("--------------------------------");
-					console.log(options_edit);
-					console.log("--------------------------------");
-					console.log("--------------------------------");
-					request.post(options_edit, function(err, res, body) {
-						if (err)
-							return console.error(err);
-						console.log(body);
-						//callback();
-					});
-				});
-				//callback();
-			});
-		}
-		
-	});
-}
-
-
 
 /**
- * Generats data view for project node
+ * Generate/update data view for node
  * - if views.data_static is defined in node, then copy that to views.data
- * - otherwise generate view based on kyes in first record
+ * - else if script.view is defined, then let it create the view
+ * - otherwise generate view based on keys in first record
  * */
-exports.generateView = function (node, callback) {
+exports.updateView = function (node, sandbox, io, callback) {
 	
-	if(typeof node.views.data == "undefined" || node.views.data == "" ) {
-		if(node.views.data_static) {
-			mongoquery.editProjectNode(node._id, {"views.data":node.views.data_static}, function() {
-				return callback("using static");
-			})
-		} else {
-			generateDynamicView(node, function(view) {
-				mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
-				return callback("using dynamic");
-				})
-			}) 
-		}
+	if(node.views.data_static) {
+		mongoquery.editProjectNode(node._id, {"views.data":node.views.data_static}, function() {
+			return callback("using static");
+		})
+		
+	} else if (node.scripts.view) {
+		runNodeScriptInContext("view", node, sandbox, io);
+		mongoquery.editProjectNode(node._id, {"views.data":sandbox.out.view}, function() {
+			return callback("using view created by the node");
+		})
+		 
+	
 	} else {
-		callback("exists");
+		generateDynamicView(node, function(view) {
+			mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
+				return callback("using dynamic");
+			})
+		}) 
 	}
+
 }
 
 
@@ -1135,11 +1068,21 @@ exports.getCollection = function (req, res) {
 
 exports.getCollectionFields = function (collection_id, cb) {
 	mongoquery.findOne({}, collection_id, function(data) {
-		var keys = [];
-		for (key in data) {
-			keys.push(key);
+		if(!data) {
+			cb({"error":"collection is empty!"});
+		} else {
+			cb (data);
 		}
-		cb(keys);
+		
+		//return;
+		//var keys = {};
+		//for (key in data) {
+			//var type = typeof data[key];
+
+			//keys[key] = typeof data[key];
+
+		//}
+		//cb(keys);
 	});
 }
 
@@ -1537,54 +1480,60 @@ function generateDynamicView(node, callback) {
 	// read one record and extract field names
 	// NOTE: this assumes that every record has all field names
 	mongoquery.findOne({}, node.collection, function(data) {
+		
+		if(data) {
 
-		delete data.__mp_source;
+			if(data.__mp_source)
+				delete data.__mp_source;
 
-		var html = ''
-			+ '<button data-bind="click: prevPage">prev</button>'
-			+ '<button data-bind="click: nextPage">next</button>'
+			var html = ''
+				+ '<button data-bind="click: prevPage">prev</button>'
+				+ '<button data-bind="click: nextPage">next</button>'
 
-			+ '<div id="node_bar" class="selected">'
-			+ ' <h2 class="selected">TOOLS</h2>'
-			+ '</div>'
+				+ '<div id="node_bar" class="selected">'
+				+ ' <h2 class="selected">TOOLS</h2>'
+				+ '</div>'
 
-			+ '<div>'
-			+ '	<table>'
-			+ '		<thead>'
-			+ '			<tr>';
+				+ '<div>'
+				+ '	<table>'
+				+ '		<thead>'
+				+ '			<tr>';
 
-		html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
+			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
 
-		for (key in data) {
-			html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
-		}
-
-		html += '			</tr>'
-			+ '		</thead>'
-			+ '		<tbody data-bind="foreach: collection">'
-			+ '			<tr>';
-
-		// data cells
-		html += '				<td data-bind="text: vcc"></td>'
-		for (key in data) {
-			
-			if(data[key] instanceof Array) {
-				html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
-			} else if(typeof data[key] === "object" && key != "_id") {
-
-				html += '				<td data-bind="click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
-
-			} else {
-				html += '				<td data-bind="text: '+key+'"></td>'
+			for (key in data) {
+				html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
 			}
+
+			html += '			</tr>'
+				+ '		</thead>'
+				+ '		<tbody data-bind="foreach: collection">'
+				+ '			<tr>';
+
+			// data cells
+			html += '				<td data-bind="text: vcc"></td>'
+			for (key in data) {
+				
+				if(data[key] instanceof Array) {
+					html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
+				} else if(typeof data[key] === "object" && key != "_id") {
+
+					html += '				<td data-bind="click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
+
+				} else {
+					html += '				<td data-bind="text: '+key+'"></td>'
+				}
+			}
+
+			html += '			</tr>'
+				+ '		</tbody>'
+				+ '	</table>'
+				+ '</div>';
+
+			callback(html);
+		} else {
+			callback("<h3>dynamice view creation failed!</h3> Maybe collection is empty?</br>" + node.collection);
 		}
-
-		html += '			</tr>'
-			+ '		</tbody>'
-			+ '	</table>'
-			+ '</div>';
-
-		callback(html);
 	});
 }
 
@@ -1617,8 +1566,8 @@ function createNodeView(data, nodeId, callback) {
 			data = data.replace(/\[\[project\]\]/, project.title);
 			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
 			
-			// if node has no static view, then we create in always on the fly (dynamic view)
-			if(typeof project.nodes[index].views.data_static === "undefined") {
+			// if node has no view, then we create in always on the fly (dynamic view)
+			if(typeof project.nodes[index].views.data === "undefined") {
 				generateDynamicView(project.nodes[index], function(html) {
 					// insert node's data view to view.html
 					data = data.replace(/\[\[html\]\]/, html);
