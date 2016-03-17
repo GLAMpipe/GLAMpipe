@@ -217,248 +217,306 @@ exports.getNode = function (node_id, res) {
 exports.runNode = function (req, res, io) {
 	console.log('Running node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
-
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
-		if(!project) {
-			res.json({"error":"Node not found!"});
-			return;
-		}
-		var index = indexByKeyValue(project.nodes, "_id", req.params.id);
-		var node = project.nodes[index];
-		if(typeof node.input_node !== 'undefined') {
-			var index = indexByKeyValue(project.nodes, "_id", node.input_node);
-			var input_node = project.nodes[index];
-		} else {
-			var input_node = null;
-		}
-		node.settings = req.body;
-		node.project = project._id;
-
-		// save node settings TODO: set callback
-		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
-			console.log("saved node settings");
-		})
-
-		console.log("NODE: running", node.type);
-
-		// context for node scripts
-		var sandbox = {
-			context: {
-				doc: null,
-				data: null,
-				node: node,
-				input_node: input_node,
-				doc_count:0,
-				count:0
-			},
-			out: {
-				value:"",
-				url: "",
-				file:"",
-				error: null,
-				console:console,
-				say: function(ch, msg) {
-					console.log(ch.toUpperCase() + ":", msg);
-					io.sockets.emit(ch, msg);
-				}
-			},
-			say: io.sockets.emit
-		};
-		vm.createContext(sandbox);
-		
-		switch (node.type) {
-			
-			
-			case "cluster":
-				
-				var cluster_params = {
-					collection: 'kartverket_source',
-					field: 'data',
-					array: true,
-					new_collection: 'authors',
-					callback: function (d) {
-						res.json({"status": "clustered"});
-					}
-				}
-				mongoquery.cluster(cluster_params);
-			break;
-
-
-			case "source":
-			
-				runNodeScriptInContext("init", node, sandbox, io);
-				
-				switch (node.subtype) {
-					
-					case "API":
-					
-						function requestLoop(){
-							async.series([
-								function (callback) {
-
-									exports.callAPI(sandbox.out.url, function(data) {
-										sandbox.context.data = data;
-										sandbox.out.url = "";
-										runNodeScriptInContext("run", node, sandbox, io);
-										
-										// add source id to data (expects out.value to be an array)
-										for (var i = 0; i < sandbox.out.value.length; i++ ) {
-											sandbox.out.value[i][MP.source] = node._id;
-										}
-										
-										// insert data
-										mongoquery.insert(node.collection, sandbox.out.value, function() {
-											callback(null, sandbox.out.url);
-										});
-									});
-								}
-
-							], function(err, result){
-								if (err)
-									console.log(err);
-									
-								//generate view and do *not* wait it to complete
-								if (!node.views.data)
-									exports.updateView(node, sandbox, io, function(msg) {});
-									
-								// if node provides new url, then continue loop
-								if (sandbox.out.url != "") {
-									requestLoop()
-								} else {
-									runNodeScriptInContext("finish", node, sandbox, io);
-									return;
-								}
-							}
-						)};
-
-						// start query loop
-						requestLoop();
-						
-					break;
-					
-					
-					case "file":
-					
-						function fileImport (data) {
-							// provide data to node
-							sandbox.context.data = data;
-							
-							// let node pick the data it wants from result
-							runNodeScriptInContext("run", node, sandbox, io);
-
-							// insert
-							mongoquery.insert(node.collection, sandbox.out.value, function() {
-								runNodeScriptInContext("finish", node, sandbox, io);
-								//generate view and do *not* wait it to complete
-								exports.updateView(node, sandbox, io, function(msg) {});
-							});
-							
-						}
-						
-						// remove previous data insertet by node and import file
-						var query = {}; 
-						query[MP.source] = node._id;
-						mongoquery.empty(node.collection, query, function() {
-							exports.importFile(node, fileImport);
-						});
-							
-					
-					break;
-					
-				}
-
-
-
-			break;
-
-			
-			case "export":
-
-				// make sure that we have an export filename
-				if(node.params.file == "") {
-					console.log("ERROR: filename missing!");
-					io.sockets.emit("error","ERROR: filename missing!");
-					return;
-				}
-
-				// we stream directly to file
-				var fs = require('fs');
-				var filePath = path.join(node.dir, node.params.file);
-				var wstream = fs.createWriteStream(filePath);
-				
-
 	
-				// find everything
-				mongoquery.find2({}, node.collection, function (err, doc) {
-					
-					// tell node how many records was found
-					sandbox.context.doc_count = doc.length;
-					runNodeScriptInContext("init", node, sandbox, io);
-					wstream.write(sandbox.out.value);
+	try {
 
-					async.eachSeries(doc, function iterator(doc, next) {
-						sandbox.context.doc = doc;
-						sandbox.context.count++;
-						runNodeScriptInContext("run", node, sandbox, io);
-						if (sandbox.out.error !== null)  return;
-						wstream.write(sandbox.out.value)
-						next();
-						
-					}, function done() {
-						runNodeScriptInContext("finish", node, sandbox, io);
-						wstream.write(sandbox.out.value);
-						wstream.end();
+		mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
+			if(!project) {
+				console.log("node not found");
+				io.sockets.emit("error", "node not found");
+				return;
+			}
+			var index = indexByKeyValue(project.nodes, "_id", req.params.id);
+			var node = project.nodes[index];
+			if(typeof node.input_node !== 'undefined') {
+				var index = indexByKeyValue(project.nodes, "_id", node.input_node);
+				var input_node = project.nodes[index];
+			} else {
+				var input_node = null;
+			}
+			node.settings = req.body;
+			node.project = project._id;
 
-						//mongoquery.markNodeAsExecuted(node);
-						return;
-					});
-				});
+			// save node settings TODO: set callback
+			mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+				console.log("saved node settings");
+			})
 
-			break;
+			console.log("NODE: running", node.type);
 
-
-
-			case "lookup":
-				
-				
-				var onError = function(err) {
-					return;
-				}
-				
-				// find everything
-				mongoquery.find2({}, node.collection, function (err, doc) {
-					
-					sandbox.context.doc_count = doc.length;
-					runNodeScriptInContext("init", node, sandbox, io);
-					
-					async.eachSeries(doc, function iterator(doc, next) {
-						
-						sandbox.context.doc = doc;
-						sandbox.context.count++;
-						// get URL for request from node
-						runNodeScriptInContext("url", node, sandbox, io);
-						if (sandbox.out.error !== null) return;
-						
-						// callback for updating record
-						var onNodeScript = function (sandbox) {
-							var setter = {};
-							setter[node.params.field + node.params.suffix] = sandbox.out.value;
-							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-						}
-
-						callAPISerial (sandbox, node, onNodeScript, onError);
-
-					}, function done() {
-						runNodeScriptInContext("finish", node, sandbox, io);
-					});
-					
-				}); 
-			break;
+			// context for node scripts
+			var sandbox = {
+				context: {
+					doc: null,
+					data: null,
+					node: node,
+					input_node: input_node,
+					doc_count:0,
+					count:0
+				},
+				out: {
+					value:"",
+					url: "",
+					file:"",
+					error: null,
+					console:console,
+					say: function(ch, msg) {
+						console.log(ch.toUpperCase() + ":", msg);
+						io.sockets.emit(ch, msg);
+					}
+				},
+				say: io.sockets.emit
+			};
+			vm.createContext(sandbox);
 			
-
-			case "download":
+			switch (node.type) {
 				
-				var callback = function() {
+				
+				case "cluster":
+					
+					var cluster_params = {
+						collection: 'kartverket_source',
+						field: 'data',
+						array: true,
+						new_collection: 'authors',
+						callback: function (d) {
+							res.json({"status": "clustered"});
+						}
+					}
+					mongoquery.cluster(cluster_params);
+				break;
+
+
+				case "source":
+				
+					runNodeScriptInContext("init", node, sandbox, io);
+					
+					switch (node.subtype) {
+						
+						case "API":
+						
+							function requestLoop(){
+								async.series([
+									function (callback) {
+
+										exports.callAPI(sandbox.out.url, function(data) {
+											sandbox.context.data = data;
+											sandbox.out.url = "";
+											runNodeScriptInContext("run", node, sandbox, io);
+											
+											// add source id to data (expects out.value to be an array)
+											for (var i = 0; i < sandbox.out.value.length; i++ ) {
+												sandbox.out.value[i][MP.source] = node._id;
+											}
+											
+											// insert data
+											mongoquery.insert(node.collection, sandbox.out.value, function() {
+												callback(null, sandbox.out.url);
+											});
+										});
+									}
+
+								], function(err, result){
+									if (err)
+										console.log(err);
+										
+									//generate view and do *not* wait it to complete
+									if (!node.views.data)
+										exports.updateView(node, sandbox, io, function(msg) {});
+										
+									// if node provides new url, then continue loop
+									if (sandbox.out.url != "") {
+										requestLoop()
+									} else {
+										runNodeScriptInContext("finish", node, sandbox, io);
+										return;
+									}
+								}
+							)};
+
+							// start query loop
+							requestLoop();
+							
+						break;
+						
+						
+						case "file":
+						
+							function fileImport (data) {
+								// provide data to node
+								sandbox.context.data = data;
+								
+								// let node pick the data it wants from result
+								runNodeScriptInContext("run", node, sandbox, io);
+
+								// insert
+								mongoquery.insert(node.collection, sandbox.out.value, function() {
+									runNodeScriptInContext("finish", node, sandbox, io);
+									//generate view and do *not* wait it to complete
+									exports.updateView(node, sandbox, io, function(msg) {});
+								});
+								
+							}
+							
+							// remove previous data insertet by node and import file
+							var query = {}; 
+							query[MP.source] = node._id;
+							mongoquery.empty(node.collection, query, function() {
+								exports.importFile(node, fileImport);
+							});
+								
+						
+						break;
+						
+					}
+
+
+
+				break;
+
+				
+				case "export":
+
+					// make sure that we have an export filename
+					if(node.params.file == "") {
+						console.log("ERROR: filename missing!");
+						io.sockets.emit("error","ERROR: filename missing!");
+						return;
+					}
+
+					// we stream directly to file
+					var fs = require('fs');
+					var filePath = path.join(node.dir, node.params.file);
+					var wstream = fs.createWriteStream(filePath);
+					
+
+		
+					// find everything
+					mongoquery.find2({}, node.collection, function (err, doc) {
+						
+						// tell node how many records was found
+						sandbox.context.doc_count = doc.length;
+						runNodeScriptInContext("init", node, sandbox, io);
+						wstream.write(sandbox.out.value);
+
+						async.eachSeries(doc, function iterator(doc, next) {
+							sandbox.context.doc = doc;
+							sandbox.context.count++;
+							runNodeScriptInContext("run", node, sandbox, io);
+							if (sandbox.out.error !== null)  return;
+							wstream.write(sandbox.out.value)
+							next();
+							
+						}, function done() {
+							runNodeScriptInContext("finish", node, sandbox, io);
+							wstream.write(sandbox.out.value);
+							wstream.end();
+
+							//mongoquery.markNodeAsExecuted(node);
+							return;
+						});
+					});
+
+				break;
+
+
+
+				case "lookup":
+					
+					
+					var onError = function(err) {
+						return;
+					}
+					
+					// find everything
+					mongoquery.find2({}, node.collection, function (err, doc) {
+						
+						sandbox.context.doc_count = doc.length;
+						runNodeScriptInContext("init", node, sandbox, io);
+						
+						async.eachSeries(doc, function iterator(doc, next) {
+							
+							sandbox.context.doc = doc;
+							sandbox.context.count++;
+							// get URL for request from node
+							runNodeScriptInContext("url", node, sandbox, io);
+							if (sandbox.out.error !== null) return;
+							
+							// callback for updating record
+							var onNodeScript = function (sandbox) {
+								// let node pick the data it wants from result
+								runNodeScriptInContext("run", node, sandbox, io);
+								var setter = {};
+								setter[node.params.field + node.params.suffix] = sandbox.out.value;
+								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+							}
+
+							callAPISerial (sandbox, node, onNodeScript, onError);
+
+						}, function done() {
+							runNodeScriptInContext("finish", node, sandbox, io);
+						});
+						
+					}); 
+				break;
+				
+
+				case "download":
+					
+					var callback = function() {
+						
+						// find everything
+						mongoquery.find2({}, node.collection, function(err, doc) {
+							sandbox.context.doc_count = doc.length;
+							runNodeScriptInContext("init", node, sandbox, io);
+							
+							// run node once per record
+							async.eachSeries(doc, function iterator(doc, next) {
+								
+								sandbox.context.doc = doc;
+								sandbox.context.count++;
+								
+								// ask url and file name from node
+								runNodeScriptInContext("run", node, sandbox, io);
+								if (sandbox.out.error !== null) 
+									return;
+									
+								exports.downloadFile(node, sandbox, function() {
+									// write file location to db
+									var setter = {};
+									setter[sandbox.out.field + '_download'] = path.join(node.dir, sandbox.out.file) ;
+									mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+								})
+								
+							}, function done() {
+								runNodeScriptInContext("finish", node, sandbox, io);
+							});
+						});
+					}
+					
+					// create node's output directory if it does not exist 
+					// TODO: sanitize directory names
+					var fs = require("fs");
+					fs.mkdir(node.dir, function(err) {
+						if(err) {
+							if(err.code === "EEXIST") {
+								console.log("INIT: output directory exists");
+								callback();
+							} else {
+								console.log("ERROR:", err);
+								io.emit("error", err)
+								return;
+							}
+						} else {
+							console.log("INIT: output directory created");
+							callback();
+						}
+					});
+					
+				break;
+
+
+				case "transform":
 					
 					// find everything
 					mongoquery.find2({}, node.collection, function(err, doc) {
@@ -467,231 +525,209 @@ exports.runNode = function (req, res, io) {
 						
 						// run node once per record
 						async.eachSeries(doc, function iterator(doc, next) {
-							
+
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
-							
-							// ask url and file name from node
 							runNodeScriptInContext("run", node, sandbox, io);
-							if (sandbox.out.error !== null) 
-								return;
-								
-							exports.downloadFile(node, sandbox, function() {
-								// write file location to db
-								var setter = {};
-								setter[sandbox.out.field + '_download'] = path.join(node.dir, sandbox.out.file) ;
-								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-							})
+
+							var setter = {};
+							setter[sandbox.out.field] = sandbox.out.value;
+							console.log(setter);
+							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							
-						}, function done() {
+						}, function done () {
 							runNodeScriptInContext("finish", node, sandbox, io);
+							exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created");});
 						});
 					});
-				}
-				
-				// create node's output directory if it does not exist 
-				// TODO: sanitize directory names
-				var fs = require("fs");
-				fs.mkdir(node.dir, function(err) {
-					if(err) {
-						if(err.code === "EEXIST") {
-							console.log("INIT: output directory exists");
-							callback();
-						} else {
-							console.log("ERROR:", err);
-							io.emit("error", err)
-							return;
-						}
-					} else {
-						console.log("INIT: output directory created");
-						callback();
-					}
-				});
-				
-			break;
+
+				break;
 
 
-			case "transform":
-				
-				// find everything
-				mongoquery.find2({}, node.collection, function(err, doc) {
-					sandbox.context.doc_count = doc.length;
-					runNodeScriptInContext("init", node, sandbox, io);
-					
-					// run node once per record
-					async.eachSeries(doc, function iterator(doc, next) {
+				case "upload":
 
-						sandbox.context.doc = doc;
-						sandbox.context.count++;
-						runNodeScriptInContext("run", node, sandbox, io);
-
-						var setter = {};
-						setter[sandbox.out.field] = sandbox.out.value;
-						console.log(setter);
-						mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+					switch (node.subtype) {
 						
-					}, function done () {
-						runNodeScriptInContext("finish", node, sandbox, io);
-						exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created");});
-					});
-				});
-
-			break;
-
-
-			case "upload":
-
-				switch (node.subtype) {
-					
-					case "mediawiki_bot":
-					
-						var bot = require('nodemw');
-						fs = require('fs');
+						case "mediawiki_bot":
 						
-						// ask bot config (username, pass etc.) from node
-						runNodeScriptInContext("login", node, sandbox, io);
-						var client = new bot(sandbox.out.botconfig);
-						console.log(sandbox.context.node);
-						console.log(sandbox.out.botconfig);
-
-						client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
+							var bot = require('nodemw');
+							fs = require('fs');
 							
-							if(err) {
-								io.sockets.emit("error", "Login failed!");
-								return;
-							}
-							// find everything
-							mongoquery.find2({}, node.collection, function(err, doc) {
-								sandbox.context.doc_count = doc.length;
-								runNodeScriptInContext("init", node, sandbox, io);
-								
-								// run node once per record
-								async.eachSeries(doc, function iterator(doc, next) {
+							// ask bot config (username, pass etc.) from node
+							runNodeScriptInContext("login", node, sandbox, io);
+							var client = new bot(sandbox.out.botconfig);
+							console.log(sandbox.context.node);
+							console.log(sandbox.out.botconfig);
 
-									sandbox.context.doc = doc;
-									sandbox.context.count++;
-									runNodeScriptInContext("run", node, sandbox, io);
+							client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
+								
+								if(err) {
+									io.sockets.emit("error", "Login failed!");
+									return;
+								}
+								// find everything
+								mongoquery.find2({}, node.collection, function(err, doc) {
+									sandbox.context.doc_count = doc.length;
+									runNodeScriptInContext("init", node, sandbox, io);
 									
-									switch (node.subsubtype) {
-										case "file":
-											fs.readFile(sandbox.out.filename, function (err,data) {
-												if (err) {
-													console.log(err);
-													io.sockets.emit("error", err);
-													next();	// continue despite the error
-												}
-												client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
+									// run node once per record
+									async.eachSeries(doc, function iterator(doc, next) {
+
+										sandbox.context.doc = doc;
+										sandbox.context.count++;
+										runNodeScriptInContext("run", node, sandbox, io);
+										
+										switch (node.subsubtype) {
+											case "file":
+												fs.readFile(sandbox.out.filename, function (err,data) {
+													if (err) {
+														console.log(err);
+														io.sockets.emit("error", err);
+														next();	// continue despite the error
+													}
+													client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
+														if(err) {
+															io.sockets.emit("error", err);
+														} else {
+															console.log(data.imageinfo.descriptionurl);
+															// write commons page url to db
+															var setter = {};
+															setter[sandbox.out.field] = data.imageinfo.descriptionurl;
+															mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+														}
+													});
+												});
+											break;
+											
+											case "page":
+												client.edit(sandbox.out.title, sandbox.out.value, "test edit", function (err, data) {
 													if(err) {
 														io.sockets.emit("error", err);
 													} else {
-														console.log(data.imageinfo.descriptionurl);
+														//console.log(data.filename);
 														// write commons page url to db
-														var setter = {};
-														setter[sandbox.out.field] = data.imageinfo.descriptionurl;
-														mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+														//var setter = {};
+														//setter[sandbox.out.field] = sandbox.out.value;
+														//mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+														next();
 													}
 												});
-											});
-										break;
+											break;
+											
+											default:
+												next();
+										}
 										
-										case "page":
-											client.edit(sandbox.out.title, sandbox.out.value, "test edit", function (err, data) {
-												if(err) {
-													io.sockets.emit("error", err);
-												} else {
-													//console.log(data.filename);
-													// write commons page url to db
-													//var setter = {};
-													//setter[sandbox.out.field] = sandbox.out.value;
-													//mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-													next();
-												}
-											});
-										break;
+
+
+
+
 										
-										default:
-											next();
-									}
-									
-
-
-
-
-									
-								}, function done () {
-									runNodeScriptInContext("finish", node, sandbox, io);
+									}, function done () {
+										runNodeScriptInContext("finish", node, sandbox, io);
+									});
 								});
 							});
-						});
 
-					break;
-					
-					
-					default:
-					
-						runNodeScriptInContext("login", node, sandbox, io);
+						break;
 						
-						// first we need to login
-						login2API(node, sandbox, function () {
-							// find everything
-							mongoquery.find2({}, node.collection, function(err, doc) {
-								sandbox.context.doc_count = doc.length;
-								runNodeScriptInContext("init", node, sandbox, io);
-								
-								// run node once per record
-								async.eachSeries(doc, function iterator(doc, next) {
-
-									sandbox.context.doc = doc;
-									sandbox.context.count++;
-									runNodeScriptInContext("run", node, sandbox, io);
-
+						
+						default:
+						
+							runNodeScriptInContext("login", node, sandbox, io);
+							
+							// first we need to login
+							login2API(node, sandbox, function () {
+								// find everything
+								mongoquery.find2({}, node.collection, function(err, doc) {
+									sandbox.context.doc_count = doc.length;
+									runNodeScriptInContext("init", node, sandbox, io);
 									
-								}, function done () {
-									runNodeScriptInContext("finish", node, sandbox, io);
+									// run node once per record
+									async.eachSeries(doc, function iterator(doc, next) {
+
+										sandbox.context.doc = doc;
+										sandbox.context.count++;
+										runNodeScriptInContext("run", node, sandbox, io);
+
+										
+									}, function done () {
+										runNodeScriptInContext("finish", node, sandbox, io);
+									});
 								});
 							});
+							
+						break;
+					}
+				break;
+
+
+				default:
+					if(typeof(node.scripts.run) !== "undefined") {
+						exports.applyFuncForEachAndUpdate(node, function(error, count) {
+							if(error) {
+								//res.json({"error": error});
+								return;
+							}
+							console.log("DONE apply:", count);
+							//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
 						});
-						
-					break;
-				}
-			break;
-
-
-			default:
-				if(typeof(node.scripts.run) !== "undefined") {
-					exports.applyFuncForEachAndUpdate(node, function(error, count) {
-						if(error) {
-							//res.json({"error": error});
-							return;
-						}
-						console.log("DONE apply:", count);
-						//res.json({msg:sandbox.out.msg, count:count, status:"ok"})
-					});
-				} else {
-					console.log("No user defined function found!");
-					//res.json({"error":"No user defined function found!"});
-				}
-		}
+					} else {
+						console.log("No user defined function found!");
+						//res.json({"error":"No user defined function found!"});
+					}
+			}
+			
+		});
 		
-	});
+	} catch (e) {
+		console.log(e.name);
+		io.sockets.emit("error", e.message);
+	}
 }
 
 
-function executeNodeScript(script, sandbox, script_name) {
-	
-	try {
-		vm.runInNewContext(script, sandbox, script_name);
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			console.log("ERROR: syntax error in node", e);
-			sandbox.error = "syntax error in node:" + e;
-		} else {
-			console.log(e);
-			sandbox.error = e;
+
+
+
+/**
+ * Execute node's script without given context
+ * - used in node creation
+ * - node can say "hello" to user via out.say
+ */
+function runNodeScript (script, node, nodeParams, io) {
+	var sandbox = {
+		context: { node: node, noderequest: nodeParams},
+		out: { say: function (ch, msg) {
+				io.sockets.emit(ch, msg);
+			}
 		}
 	}
-
+	runNodeScriptInContext(script, node, sandbox, io);
 }
+
+
+function NodeScriptError (message) {
+	this.message = message;
+	this.name = "NodeScriptError";
+}
+
+function runNodeScriptInContext (script, node, sandbox, io) {
+	try {
+		vm.runInNewContext(node.scripts[script], sandbox);
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("Syntax error in node.scripts."+script+"!", e);
+			io.sockets.emit("error", "Syntax error in node.scripts."+script+"!</br>" + e);
+			throw new NodeScriptError("syntax error:" + e.message);
+		} else {
+			console.log("Error in node.scripts."+script+"!",e);
+			io.sockets.emit("error", "Error in node.scripts."+script+"!</br>" + e);
+			throw new NodeScriptError(e.message);
+		}
+	}
+}
+
 
 function getPrevNode(project, node) {
 	for(var i=0; i > project.nodes.length; i++) {
@@ -734,38 +770,6 @@ exports.updateView = function (node, sandbox, io, callback) {
 }
 
 
-
-/**
- * Execute node's script without given context
- * - used in node creation
- * - node can say "hello" to user via out.say
- */
-function runNodeScript (script, node, nodeParams, io) {
-	var sandbox = {
-		context: { node: node, noderequest: nodeParams},
-		out: { say: function (ch, msg) {
-				io.sockets.emit(ch, msg);
-			}
-		}
-	}
-	runNodeScriptInContext(script, node, sandbox, io);
-}
-
-
-function runNodeScriptInContext (script, node, sandbox, io) {
-
-	try {
-		vm.runInNewContext(node.scripts[script], sandbox);
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			console.log("Syntax error in node.scripts."+script+"!", e);
-			io.sockets.emit("error", "Syntax error in node.scripts."+script+"!</br>" + e);
-		} else {
-			console.log("Error in node.scripts."+script+"!",e);
-			io.sockets.emit("error", "Error in node.scripts."+script+"!</br>" + e);
-		}
-	}
-}
 
 
 /**
@@ -1664,12 +1668,6 @@ function callAPISerial (sandbox, node, onScript, onError) {
 		json: true
 	};
 
-	var onRequest = function(data) {
-		sandbox.context.data = data;
-		// let node pick the data it wants from result
-		vm.runInNewContext(node.scripts.run, sandbox,"node.script.run");
-		onScript(sandbox);
-	}
 	
 	try {
 		vm.runInNewContext(node.scripts.url, sandbox);
@@ -1688,7 +1686,8 @@ function callAPISerial (sandbox, node, onScript, onError) {
 	// make actual HTTP request
 	request(options, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
-			onRequest(body);
+			sandbox.context.data = body;
+			onScript(sandbox)
 		} else {
 			console.log(error);
 			onError(error);

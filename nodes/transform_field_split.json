@@ -15,7 +15,7 @@
 		],
 		"run": 
 		[
-			"function getDescendantProp(obj, desc) { ",
+			"function getDescendantProp(ob, desc) { ",
 			"    var arr = desc.split('.'); ",
 			"    while(arr.length && (obj = obj[arr.shift()])); ",
 			"    return obj; ",
@@ -27,7 +27,6 @@
 	},
 	
 	"views": {
-		"data":"<h2>Views for transform nodes not yet implemented!</h2>",
 		"params":
 		[
 			"<label>in field:</label> <input class='dynamic_field' name='in_field'/>",

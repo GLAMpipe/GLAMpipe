@@ -18,10 +18,12 @@
 		],
 		"run":
 		[
+			"    out.say('progress', context.data.photo.title._content); ",
 			"if(context.data.stat != 'fail') {",
-				"out.value = context.data.photo;",
-			"}",
-			"out.say('progress', context.data.photo.title._content); "
+			"    out.value = context.data.photo;",
+			"} else {",
+			"    out.say('error', 'request failed!');",
+			"}"
 		],
 		"finish":"out.say('finish', 'Flickr image details fetched');"
 	},

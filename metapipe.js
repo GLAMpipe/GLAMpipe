@@ -32,6 +32,11 @@ metapipe.initDB(function () {
 			  socket.emit('news', "Welcome to MetaPipe!" );
 			});
 
+			// last guard
+			process.on('uncaughtException', function (err) {
+			  console.log('Caught exception: ' + err.name);
+			});
+
 			// we notify browser of control + c
 			process.on( 'SIGINT', function() {
 				console.log( "\nGot SIGINT (Ctrl-C)" );

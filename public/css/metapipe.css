@@ -265,7 +265,7 @@ ul.node_types li:hover {
 
 
 
-#node_bar .dynamic_fields {
+#node_bar .dynamic_fields, #node_creator .dynamic_fields {
 	display:block;
 	position:absolute;
 	top:0px;
@@ -275,11 +275,11 @@ ul.node_types li:hover {
 	overflow-x: auto;
 }
 
-#node_bar .dynamic_fields ul {
+.dynamic_fields ul {
 	padding-right:20px;
 }
 
-#node_bar .dynamic_fields .array {
+.dynamic_fields .array {
 	background-color:orange;
 	color:white;
 }
