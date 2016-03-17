@@ -18,7 +18,7 @@
                 "for(f in context.doc) {",
                 "   var tag = context.node.settings['_mapkey_' + f];",
                 "   if(tag != '') {",
-                "       if (context.doc[f].length !== 'undefined' && typeof context.doc[f] === \"object\" ) {",
+                "       if (context.doc[f].constructor.name === 'Array') {",
                 "           for (var i = 0; i < context.doc[f].length; i++ ) { ",
                 "               str += '    <'+tag+'>' + context.doc[f][i] + '</'+tag+'>\\n';",
                 "           }",

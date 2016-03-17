@@ -162,11 +162,6 @@ button.run {
 }
 
 
-.selected h2{
-
-	border-bottom: 1px solid black;
-}
-
 #node_settings {
 	float:right;
 	width:350px;
@@ -175,8 +170,7 @@ button.run {
 }
 
 .node_info {
-	margin-bottom:10px;
-	background-color: white;
+	padding:5px;
 }
 
 .node_info .description, .node_info .params_description{
@@ -190,7 +184,7 @@ button.run {
 .node .view_button {
 	background-color: #99B4B2;
 	color:white;
-	padding:2px;
+	padding:3px;
 	margin-bottom:0px;
 
 }
@@ -469,7 +463,6 @@ html {
 	opacity: 1.0;
 	background-color : #99B4B2;
 	box-shadow: 10px 10px 5px #888888;
-	border-radius: 5px 0px 0px 15px;
 	z-index:2000;
 }
 
@@ -559,6 +552,15 @@ html {
 
 .left {
 	float:left;
+}
+
+.bottom {
+	position:absolute;
+	bottom:0px;
+}
+
+.after_left {
+	margin-left:100px;
 }
 
 /* NODE EDITOR */

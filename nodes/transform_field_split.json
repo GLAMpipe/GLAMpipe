@@ -2,7 +2,7 @@
 	"nodeid": "transform_field_split",
 	"title": "Split",
 	"type": "transform",
-	"subtype": "split",
+	"subtype": "string manipulation",
 	"description": "Split field to an array.",
 	"scripts": {
 		"hello": "out.say('news', 'You added a Split node'); ",
@@ -15,7 +15,7 @@
 		],
 		"run": 
 		[
-			"function getDescendantProp(ob, desc) { ",
+			"function getDescendantProp(obj, desc) { ",
 			"    var arr = desc.split('.'); ",
 			"    while(arr.length && (obj = obj[arr.shift()])); ",
 			"    return obj; ",

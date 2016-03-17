@@ -571,7 +571,7 @@ function makeDynFieldsfromObject (data, parents, obj) {
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype.toUpperCase() + ' <br/> ' + title"></h2> 
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
 		
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
@@ -579,7 +579,7 @@ function makeDynFieldsfromObject (data, parents, obj) {
 		</div>
 		
 	   <div  class="node_info"> 
-			<p class="params_description" data-bind="html:params.description"></p> 
+			<p class="node_title" data-bind="html:title"></p> 
 		</div>
 		
 		
@@ -589,11 +589,11 @@ function makeDynFieldsfromObject (data, parents, obj) {
 			<!-- /ko -->
 			
 			<!-- ko if: type == 'collection' -->
-				<button data-bind="click: $root.openSourceCreator" class="add_node left">add source</button> 
+				<button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
 			<!-- /ko -->
-			<div class="left">
 			
-			<a class="left view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 	
+			<div class="left bottom">
+				<a class="left view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 	
 			</div>
 		</div>
 
