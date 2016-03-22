@@ -561,10 +561,7 @@ function Segment(id, parentElement)
 			this.nextSegment.startY = this.getEndY();			
 		}
 		
-		if(this.visible)
-			this.htmlElement.style.display = 'block';
-		else
-			this.htmlElement.style.display = 'none';
+
 	
 		switch(this.orientation)
 		{

@@ -145,6 +145,7 @@ button.run {
 #node_bar label {
 	font-weight: bold;
 	display:block;
+	margin-top:10px;
 }
 
 .bold {
@@ -399,6 +400,18 @@ ul.node_types li:hover {
 }
 
 
+.upload h2 {
+	background-color:#612265;
+}
+
+.upload h3 {
+	background-color:#98399E;
+}
+
+.upload .params {
+	background-color: #E0DAFF;
+}
+
 
 
  table td {
@@ -555,7 +568,7 @@ html {
 }
 
 .bottom {
-	position:absolute;
+
 	bottom:0px;
 }
 

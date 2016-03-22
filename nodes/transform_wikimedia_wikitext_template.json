@@ -17,7 +17,7 @@
 		[
 			"var c = context; ",
 			"var templates = ['', 'Photograph', 'Map']; ",
-			"var output = '{{' + templates[parseInt(c.node.params.template)] + '\\n'; ",
+			"var output = '{{' + templates[parseInt(c.node.settings.template)] + '\\n'; ",
 			"var params = context.node.params; ",
 			
 			"/* function for getting properties by strings with dot notation */",
@@ -41,19 +41,23 @@
 	},
 	
 	"views": {
+
 		"params":
 		[
 			"<label>choose template</label>",
 			"<select id='template' name='template'>",
-			"    <option value='0'>None selected</option>",
-			"    <option value='1'>Photograph</option>",
-			"    <option value='2'>Map</option>",
-			"</select>",
+			"    <option value='0'>Photograph</option>",
+			"    <option value='1'>Map</option>",
+			"</select>"
+		],
+		
+		"settings":
+		[
+
 			"<div id='template_map'></div>",
 			"<script>",
 			"var wikiFields = ",
 			"[ ",
-			"    [],",
 			"    [",
 			"        'photographer',",
 			"        'title',",
@@ -110,20 +114,13 @@
 			"    ]",
 			"]; ",
 			
-			"$('#template').change(function() { ",
-			"    var sel = parseInt($('#template option:selected' ).val()); ",
-			"    $('#template_map').empty(); ",
-			"    for(var i = 0; i < wikiFields[sel].length; i++) { ",
-			"        $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
-			"    }",
-			"})",
+			"var sel = 0;",
+			"for(var i = 0; i < wikiFields[sel].length; i++) { ",
+			"    $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
+			"}",
 			"</script>",
 			"<label>output field</label>",
 			"<input value='wikitext' name='out_field' />"
-		],
-		"settings":
-		[
-
 		]
 	}
 }

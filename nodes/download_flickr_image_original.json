@@ -11,14 +11,19 @@
         [
             "out.say('news', 'You added a download node'); "
         ],
-        "init":"out.say('progress', 'I have ' + context.doc_count + ' images to download!');",
-        "run": [
+        "init":
+        [
+            "out.field = context.node.params.field + '_download'; ",
+            "out.say('progress', 'I have ' + context.doc_count + ' images to download!'); "
+        ],
+        "run": 
+        [
                 "var url = context.doc[context.node.params.field]; ",
                 "var splitted = url.split('/'); ",
                 "out.url = url; ",
                 "out.file = splitted[splitted.length - 1]; ",
                 "out.say('progress', out.url); "
-                ],
+        ],
         "finish":"out.say('finish', 'Images downloaded!')"
     },
     

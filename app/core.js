@@ -484,7 +484,7 @@ exports.runNode = function (req, res, io) {
 								exports.downloadFile(node, sandbox, function() {
 									// write file location to db
 									var setter = {};
-									setter[sandbox.out.field + '_download'] = path.join(node.dir, sandbox.out.file) ;
+									setter[sandbox.out.field] = path.join(node.dir, sandbox.out.file) ;
 									mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 								})
 								

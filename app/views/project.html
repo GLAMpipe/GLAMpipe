@@ -266,6 +266,12 @@
 		this.clearConsole = function () {
 			$("#console").empty();
 		}
+		
+		this.toggleConnectors = function () {
+			$(".connector").toggle();
+			$(".connector-end").toggle();
+			$(".connector-start").toggle();
+		}
 	};
 
 	function runNode(params, node_id) {
@@ -330,7 +336,7 @@
 								html +=  "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='null'>null</span></li>";
 							} else {
 								var tree = makeDynFieldsfromObject(data[key], a, obj);
-								html +=  "<li>obj"+data[key] + p + "<ul>" + tree + "</ul></li>";
+								html +=  "<li>"+ p + "<ul>" + tree + "</ul></li>";
 							}
 						} else {
 							html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
@@ -571,15 +577,22 @@ function makeDynFieldsfromObject (data, parents, obj) {
 <script type="text/html" id="node-template">
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
 		
+		<!-- ko if: type != 'transform'  -->
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+		<!-- /ko -->
+
+		<!-- ko if: type == 'transform'  -->
+		<h2 data-bind="click:$root.selectNode, html:title "></h2> 
+		<!-- /ko -->
+
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
 	   <div  class="node_info"> 
-			<p class="node_title" data-bind="html:title"></p> 
+			<p class="node_title" data-bind="html:params.title"></p> 
 		</div>
 		
 		
@@ -664,7 +677,8 @@ function makeDynFieldsfromObject (data, parents, obj) {
 	</div>
 	<div class="self_advertise">-MetaPipe-</div>
 	<div id="footer">
-		<a data-bind="click:clearConsole" class="left" href="" target="_blank" title="clear console">clear</a> |
+		<a data-bind="click:clearConsole" class="left" title="clear console">clear console</a><span class="left">|</span>
+		<a data-bind="click:toggleConnectors" class="left" title="hide/show connectors">connectors on/off</a> |
 		<a class="right" href="../node-viewer" target="_blank" title="open node viewer">node viewer</a> 
 	</div>
 </body>
