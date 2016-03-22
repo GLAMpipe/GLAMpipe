@@ -22,7 +22,7 @@ exports.findAll = function (params, callback) {
 exports.find2 = function (query, collectionname, callback) {
 
 	var collection = db.collection(collectionname);
-	collection.find(query ,function (err, result) {
+	collection.find(query, function (err, result) {
 		callback(err, result);
 	});   
 }

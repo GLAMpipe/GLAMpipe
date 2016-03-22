@@ -41,7 +41,7 @@
             "var filename = splitted[splitted.length -1]; ",
             "var s = filename.split('.'); ", 
             "var ext = s[s.length - 1]; ",
-            "out.say('progress',splitted[splitted.length -1]); ",
+            "out.say('progress', title); ",
             
             "if(title[title.length - 1] != '.') ",
             "    out.title = title + '.' + ext; ",
@@ -49,6 +49,7 @@
             "    out.title = title + ext; ",
             
             "out.filename = source; ",
+            "out.wikitext = context.doc[context.node.params.wikitext]; ",
             "out.value = apis[parseInt(context.node.settings.api)] + '/wiki/File:' + out.title;"
             ],
             

@@ -49,7 +49,10 @@
 				self.currentCollection = data.params.collection
 			else
 				self.currentCollection = data.collection
-				
+			
+			// plain script tag causes confusion in html views so we restore it here
+			data.views.settings = data.views.settings.replace(/_script/g,'script');	
+			
 			var node_settings_html = 
 				'<div id="node_bar" class="selected">' + 
 				'	<h2>' +data.type+": " +data.title+ '</h2>' +
@@ -61,9 +64,13 @@
 				'	<h3 class="subhead">settings</h3>' +
 				'	<div class="settings">' +
 						data.views.settings +
-				'	</div>' +	
-				'	<button id="'+data._id+'" class="run">run this node!</button>' +
-				'</div>';
+				'	</div>';
+				
+			if(data.type != 'collection') {
+				node_settings_html += '	<button id="'+data._id+'" class="run">run this node!</button>';
+			} 
+			node_settings_html += '</div>';
+			
 			$('#node_bar').replaceWith(node_settings_html);
 			$("#mainCanvas .block").removeClass("selected");
 			obj.parent().addClass("selected");
@@ -275,11 +282,13 @@
 		}
 	};
 
-	function runNode(params, node_id) {
+	function runNode(settings, node_id) {
 		$("#node_msg").text("running...");
 		$("#node_msg").removeClass("done");
 		$("#node_msg").addClass("busy");
-		$.post("/run/node/" + node_id, params, function(data) {
+		// save settings also locally
+		nodes.selectedNode.settings = settings;
+		$.post("/run/node/" + node_id, settings, function(data) {
 			console.log('node executed');
 			if(data.error)
 				alert(data.error);
@@ -664,8 +673,8 @@ function makeDynFieldsfromObject (data, parents, obj) {
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
 							<li>
-								<div data-bind="text:title, click:$root.openNodeParams"></div>
-								<div data-bind="html:description"></div>
+								<div data-bind="html:description, click:$root.openNodeParams"></div>
+								
 								<div data-bind="html:params" ></div>
 							</li>
 							

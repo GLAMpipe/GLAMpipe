@@ -537,7 +537,7 @@ exports.runNode = function (req, res, io) {
 							
 						}, function done () {
 							runNodeScriptInContext("finish", node, sandbox, io);
-							exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created");});
+							exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
 						});
 					});
 
@@ -577,51 +577,47 @@ exports.runNode = function (req, res, io) {
 										sandbox.context.count++;
 										runNodeScriptInContext("run", node, sandbox, io);
 										
-										switch (node.subsubtype) {
-											case "file":
+										console.log("GETTING:",sandbox.out.title);
+										// get revisions (to see if page exists)
+										client.getArticle('File:' +sandbox.out.title, function (err, d) {
+											if(err)
+												console.log(err);
+											if(d != null) {
+												io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
+												console.log("CONTENT:", d);
+												next();
+
+											} else {
+
 												fs.readFile(sandbox.out.filename, function (err,data) {
 													if (err) {
 														console.log(err);
 														io.sockets.emit("error", err);
 														next();	// continue despite the error
 													}
+													// upload file
 													client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
 														if(err) {
 															io.sockets.emit("error", err);
 														} else {
 															console.log(data.imageinfo.descriptionurl);
-															// write commons page url to db
-															var setter = {};
-															setter[sandbox.out.field] = data.imageinfo.descriptionurl;
-															mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+															
+															// upload wikitext
+															var content = sandbox.out.wikitext;
+															client.edit('File:'+sandbox.out.title, content, 'test', function(err) {
+																console.log('EDIT tethy'); 
+																// write commons page url to db
+																var setter = {};
+																setter[sandbox.out.field] = data.imageinfo.descriptionurl;
+																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+															});
 														}
 													});
 												});
-											break;
+											}
 											
-											case "page":
-												client.edit(sandbox.out.title, sandbox.out.value, "test edit", function (err, data) {
-													if(err) {
-														io.sockets.emit("error", err);
-													} else {
-														//console.log(data.filename);
-														// write commons page url to db
-														//var setter = {};
-														//setter[sandbox.out.field] = sandbox.out.value;
-														//mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-														next();
-													}
-												});
-											break;
-											
-											default:
-												next();
-										}
+										});
 										
-
-
-
-
 										
 									}, function done () {
 										runNodeScriptInContext("finish", node, sandbox, io);
@@ -1567,8 +1563,10 @@ function createNodeView(data, nodeId, callback) {
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "mp_projects", function(project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", nodeId);
+			var node = project.nodes[index];
 			data = data.replace(/\[\[project\]\]/, project.title);
-			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(project.nodes[index]));
+			data = data.replace(/\[\[page_title\]\]/, node.title);
+			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node));
 			
 			// if node has no view, then we create in always on the fly (dynamic view)
 			if(typeof project.nodes[index].views.data === "undefined") {

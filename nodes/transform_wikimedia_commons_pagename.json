@@ -1,6 +1,6 @@
 {
 	"nodeid": "transform_wikimedia_commons_pagename",
-	"title": "WM commons pagename",
+	"title": "Create commons pagename",
 	"type": "transform",
 	"subtype": "wikimedia",
 	"description": "Create commons page title",

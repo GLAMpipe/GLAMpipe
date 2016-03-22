@@ -1,9 +1,9 @@
 {
 	"nodeid": "transform_wikimedia_wikitext_template",
-	"title": "Wikitext template",
+	"title": "Create wikitext",
 	"type": "transform",
 	"subtype": "wikimedia",
-	"description": "Produce wikitext output",
+	"description": "Produce wikitext output based on template",
 	"scripts": {
 		"hello": "out.say('news', 'You added a wikitext node'); ",
         "bye": "out.say('news', 'Deleted wikitext node. Bye!'); ",
@@ -16,9 +16,9 @@
 		"run": 
 		[
 			"var c = context; ",
-			"var templates = ['', 'Photograph', 'Map']; ",
-			"var output = '{{' + templates[parseInt(c.node.settings.template)] + '\\n'; ",
-			"var params = context.node.params; ",
+			"var templates = ['Photograph', 'Map']; ",
+			"var output = '{{' + templates[parseInt(c.node.params.template)] + '\\n'; ",
+			"var settings = context.node.settings; ",
 			
 			"/* function for getting properties by strings with dot notation */",
 			"function getProp(obj, desc) { ",
@@ -28,21 +28,49 @@
 			"    return obj; ",
             "}",
             
-			"for (key in params) {",
+			"for (key in settings) {",
 			"    if (key.indexOf('_wt_') === 0) { ",
 			"        var stripped = key.replace(/_wt_/,''); ",
-			"        output += '|' + stripped + ' = ' +getProp(context.doc, params[key]) + '\\n'; ",
+			"        output += '|' + stripped + ' = ' +getProp(context.doc, settings[key]) + '\\n'; ",
 			"    }",
 			"}",
-			"output += '}}'; ",
+			"output += '}}\\n'; ",
+			"output += '[[Category:metapipe uploads]]'; ",
 			"out.value = output; "
 		],
-		"finish": "out.say('finish', 'wikitext conversion done!');",
-		"settings": "<h2>'+params.template+'</h2>"
+		"finish": "out.say('finish', 'wikitext conversion done!');"
 
 	},
 	
 	"views": {
+		"data_static": 
+		[
+			"<button data-bind=\"click: prevPage\">prev</button>",
+			"<button data-bind=\"click: nextPage\">next</button>",
+			"<div id=\"node_bar\" class=\"selected\">",
+			"    <h2 class=\"selected\">wikitext</h2>",
+			"</div>",
+			"<div>",
+			"    <table>",
+			"        <thead>",
+			"            <tr>",
+			"                <th id=\"vcc\" data-bind=\"click: sort\">[count]</th>",
+			"                <th id=\"id\" data-bind=\"click: sort\">id</th>",
+			"                <th id=\"wikitext\" >wikitext</th>",
+			"                <th id=\"preview\" >preview link</th>",
+			"            </tr>",
+			"        </thead>",
+			"        <tbody data-bind=\"foreach: collection\">",
+			"            <tr>",
+			"                <td data-bind=\"text: vcc\"></td>",
+			"                <td data-bind=\"text: id\"></td>",
+			"                <td data-bind=\"html: wikitext.replace(/\\|/g,'<br>')\"></td>",
+			"                <td data-bind=\"text: datetaken\"></td>",
+			"            </tr> ",
+			"        </tbody> ",
+			"    </table>",
+			"</div>"
+		],
 
 		"params":
 		[
@@ -50,14 +78,16 @@
 			"<select id='template' name='template'>",
 			"    <option value='0'>Photograph</option>",
 			"    <option value='1'>Map</option>",
-			"</select>"
+			"</select>",
+			"<label>output field</label>",
+			"<input value='wikitext' name='out_field' />"
 		],
 		
 		"settings":
 		[
 
 			"<div id='template_map'></div>",
-			"<script>",
+			"<_script>",
 			"var wikiFields = ",
 			"[ ",
 			"    [",
@@ -118,11 +148,12 @@
 			
 			"var sel = nodes.selectedNode.params.template;",
 			"for(var i = 0; i < wikiFields[sel].length; i++) { ",
-			"    $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
+			"    if(nodes.selectedNode.settings)",
+			"        $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" value=\"'+nodes.selectedNode.settings['_wt_'+wikiFields[sel][i]]+'\"/>'); ",
+			"    else ",
+			"        $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
 			"}",
-			"</script>",
-			"<label>output field</label>",
-			"<input value='wikitext' name='out_field' />"
+			"</_script>"
 		]
 	}
 }

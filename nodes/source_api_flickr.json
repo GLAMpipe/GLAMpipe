@@ -15,7 +15,7 @@
 				"    out.say('error', 'You must give an API key!'); ",
 				"} else {",
 				"    var base_url = 'https://api.flickr.com/services/rest/?method=flickr.photosets.getPhotos';",
-				"    var format = '&extras=url_sq,url_m,url_o,description,license,date_taken,date_upload&format=json&nojsoncallback=?';",
+				"    var format = '&extras=license,url_sq,url_m,url_o,description,license,date_taken,date_upload&format=json&nojsoncallback=?';",
 				"    out.url = base_url + '&photoset_id=' + context.node.params.album + format + '&api_key=' + context.node.settings.apikey;",
 				"    out.say('news', out.url); ",
 				"}"
