@@ -43,6 +43,7 @@
 
 		this.selectNode = function (data, event) {
 			var obj = $(event.target);
+			self.selectedNode = data;
 			
 			if(typeof data.params.collection !== "undefined")
 				self.currentCollection = data.params.collection

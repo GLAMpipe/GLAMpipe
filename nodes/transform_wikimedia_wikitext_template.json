@@ -37,7 +37,9 @@
 			"output += '}}'; ",
 			"out.value = output; "
 		],
-		"finish": "out.say('finish', 'wikitext conversion done!');"
+		"finish": "out.say('finish', 'wikitext conversion done!');",
+		"settings": "<h2>'+params.template+'</h2>"
+
 	},
 	
 	"views": {
@@ -114,7 +116,7 @@
 			"    ]",
 			"]; ",
 			
-			"var sel = 0;",
+			"var sel = nodes.selectedNode.params.template;",
 			"for(var i = 0; i < wikiFields[sel].length; i++) { ",
 			"    $('#template_map').append('<label>' + wikiFields[sel][i] + '</label><input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" />'); ",
 			"}",
