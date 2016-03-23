@@ -1478,7 +1478,7 @@ function writeJSON2File (filename, records, callback) {
 
 function generateDynamicView(node, callback) {
 	// read one record and extract field names
-	// NOTE: this assumes that every record has all field names
+	// NOTE: this assumes that every record has all fields
 	mongoquery.findOne({}, node.collection, function(data) {
 		
 		if(data) {
@@ -1491,7 +1491,6 @@ function generateDynamicView(node, callback) {
 				+ '<button data-bind="click: nextPage">next</button>'
 
 				+ '<div id="node_bar" class="selected">'
-				+ ' <h2 class="selected">TOOLS</h2>'
 				+ '</div>'
 
 				+ '<div>'
@@ -1514,11 +1513,11 @@ function generateDynamicView(node, callback) {
 			html += '				<td data-bind="text: vcc"></td>'
 			for (key in data) {
 				
-				if(data[key] instanceof Array) {
+				if(data[key].constructor.name === 'Array') {
 					html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
 				} else if(typeof data[key] === "object" && key != "_id") {
 
-					html += '				<td data-bind="click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
+					html += '				<td data-bind="text:'+key+',click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
 
 				} else {
 					html += '				<td data-bind="text: '+key+'"></td>'

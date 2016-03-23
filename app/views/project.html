@@ -280,6 +280,13 @@
 			$(".connector-end").toggle();
 			$(".connector-start").toggle();
 		}
+		
+		this.concatenate = function (str, data) {
+			if(data != null)
+				return str + data;
+			else
+				return null;
+		}
 	};
 
 	function runNode(settings, node_id) {
@@ -588,12 +595,27 @@ function makeDynFieldsfromObject (data, parents, obj) {
 	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		
-		<!-- ko if: type != 'transform'  -->
+		<!-- ko if: type == 'collection' -->
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+		<!-- /ko -->
+
+		<!-- ko if: type == 'source' -->
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+		<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.title)"></h2> 
+		<!-- /ko -->
+
+		<!-- ko if: type == 'download' -->
 		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'transform'  -->
 		<h2 data-bind="click:$root.selectNode, html:title "></h2> 
+		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
+		<!-- /ko -->
+		
+		<!-- ko if: type == 'upload'  -->
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+		<h2 class="out_field" data-bind="html:$root.concatenate('WITH: ', $data.subtype)"></h2> 
 		<!-- /ko -->
 
 		<div class="delete_confirm" style="display:none">

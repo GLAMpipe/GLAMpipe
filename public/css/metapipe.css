@@ -480,7 +480,19 @@ html {
 }
 
 #mainCanvas .block h2{
-	border-radius: 5px 0px 0px 0px;
+}
+
+#mainCanvas .block h2.out_field{
+	background-color:#6B6E6B;
+	padding:2px;
+	padding-left:5px;
+	font-size:12px;
+}
+
+
+#mainCanvas .block h2.out_field:empty {
+	padding:0px;
+	margin:0px;
 }
 
 #mainCanvas .collection {
