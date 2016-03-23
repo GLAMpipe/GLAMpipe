@@ -122,17 +122,17 @@ button.run {
 	padding:1px;
 }
 
-#node_bar .settings input.short_input {
+input.short_input {
 
 	width:3em;
 }
 
-#node_bar .settings input.middle_input {
+input.middle_input {
 
 	width:15em;
 }
 
-#node_bar .settings input.dynamic_field {
+input.dynamic_field {
 
 	background-color:#BFCCCB;
 	border: 2px solid orange;

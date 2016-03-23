@@ -3,7 +3,7 @@
     "type": "download",
     "subtype": "Flickr",
     "title": "original images",
-    "description": "Downloads original images from Flickr.",
+    "description": "BROKEN! Downloads original images from Flickr.",
 
 
     "scripts": {
@@ -30,7 +30,20 @@
     "views": {
         "params":
         [
-            "No parameters <input type=\"hidden\" name=\"field\" id=\"field\" value='url_m'/>"
+            "<input type=\"hidden\" name=\"field\" id=\"field\" value='url_m'/><br>",
+            "<input name='fileradio' class='short_input' type='radio' value='original' checked>use original<br>",
+            "<input name='fileradio' class='short_input' type='radio' value='own'>make your own",
+            "<label>construct filename</label>",
+            "<input name='file__1' class='short_input'/> + ",
+            "<input name='file__2' class='dynamic_field middle_input' /> + <br>",
+            "<input name='file__3' class='short_input'/> + ",
+            "<input name='file__4' class='dynamic_field middle_input' /> + <br>",
+            "<input name='file__5' class='short_input'/> + * ",
+            "<select name='counter'> ",
+            "    <option>document counter</option> ",
+            "    <option>no counter</option>",
+            "</select> ",
+            "<br>*) using document counter prevents duplicate file names"
         ],
         "settings": 
         [

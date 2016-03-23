@@ -15,24 +15,22 @@
 			
 			""
 		],
+		
 		"run": 
 		[
-			"function getDescendantProp(obj, desc) { ",
-			"    var arr = desc.split('.'); ",
-			"    while(arr.length && (obj = obj[arr.shift()])); ",
-			"    return obj; ",
-            "}",
-            "var node = context.node.settings; ",
+
+            "var settings = context.node.settings; ",
 			"var arr = []; ",
-			"arr.push(node.prefix); ",
-            "arr.push(getDescendantProp(context.doc, node.field1)); ",
-			"arr.push(node.after_field1); ",
-            "arr.push(getDescendantProp(context.doc, node.field2)); ",
-			"arr.push(node.after_field2); ",
-            "arr.push(getDescendantProp(context.doc, node.field3)); ",
-			"arr.push(node.suffix); ",
+			"arr.push(settings.prefix); ",
+            "arr.push(context.doc[settings.field1]); ",
+			"arr.push(settings.after_field1); ",
+            "arr.push(context.doc[settings.field2]); ",
+			"arr.push(settings.after_field2); ",
+            "arr.push(context.doc[settings.field3]); ",
+			"arr.push(settings.suffix); ",
 			"out.value = arr.join(''); "
 		],
+		
 		"finish": "out.say('finish', 'Commons names created done!');",
 		
 		"view":

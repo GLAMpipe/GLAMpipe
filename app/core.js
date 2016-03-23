@@ -3,6 +3,7 @@ var mongojs 	= require('mongojs');
 var async 		= require("async");
 var colors 		= require('ansicolors');
 var path 		= require("path");
+var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 const MP 		= require("../config/const.js");
@@ -306,6 +307,8 @@ exports.runNode = function (req, res, io) {
 											
 											// add source id to data (expects out.value to be an array)
 											for (var i = 0; i < sandbox.out.value.length; i++ ) {
+												// flatten
+												sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
 												sandbox.out.value[i][MP.source] = node._id;
 											}
 											
@@ -444,10 +447,12 @@ exports.runNode = function (req, res, io) {
 							
 							// callback for updating record
 							var onNodeScript = function (sandbox) {
+
 								// let node pick the data it wants from result
 								runNodeScriptInContext("run", node, sandbox, io);
 								var setter = {};
-								setter[node.params.field + node.params.suffix] = sandbox.out.value;
+								setter[node.params.out_field] = sandbox.out.value;
+								setter = flatten(setter, {delimiter:"__"});
 								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							}
 

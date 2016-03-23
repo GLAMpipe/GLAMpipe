@@ -8,6 +8,7 @@
     "async": "^1.5.2",
     "body-parser": "^1.14.2",
     "express": "^4.13.4",
+    "flat": "^2.0.0",
     "mongojs": "^2.3.0",
     "multer": "^1.1.0",
     "node-stream-csv": "0.0.2",
