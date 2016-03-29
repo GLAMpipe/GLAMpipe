@@ -74,12 +74,28 @@ button:hover {
 	background-color: #395D5A;
 }
 
-button.run {
+button.run, button.test {
 	border: 1px solid #5C5C5C;
 	font-weight:bold;
 }
 
+#test_results {
+	display:none;
+	border: 1px solid #5C5C5C;
+	position:absolute;
+	top:60px;
+	right:400px;
+	width:650px;
+	background-color: #395D5A;
+	z-index:100000;
+	color:white;
+	padding:5px;
+	
+}
 
+pre {
+	white-space: pre-wrap;
+}
 
 #node_bar {
 	padding:10px;
@@ -165,9 +181,13 @@ input.dynamic_field {
 
 #node_settings {
 	float:right;
-	width:350px;
-	height:100%;
+	width:390px;
 	background-color: #99B4B2;
+}
+
+#node_bar .settings {
+	overflow-y:scroll;
+	max-height:600px;
 }
 
 .node_info {

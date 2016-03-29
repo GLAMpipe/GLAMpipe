@@ -68,7 +68,6 @@
 
 			if(data.type == 'transform') {
 				node_settings_html += '	<button id="'+data._id+'" class="test">test!</button>';
-				node_settings_html += '	<div id="test_results"></div>';
 			} 
 
 			if(data.type != 'collection') {
@@ -230,6 +229,10 @@
 
 		this.closeCreator = function(data, event) {
 			$("#node_creator").hide();
+		}
+
+		this.closeTest = function(data, event) {
+			$("#test_results").hide();
 		}
 
 		this.removeSelected = function () {
@@ -416,28 +419,50 @@ function makeDynFieldsfromObject (data, parents, obj) {
 		});	
 
 
+		$(document).on('click','.next_test', function(e) {
+			var obj = $(e.target);
+			var settings = {};
+			// read input from settings
+			obj.parent().parent().find(".settings input, .settings select").each(function() {
+				settings[$(this).attr("name")] = $(this).val();
+			});
+			
+			$("#test_results #result").empty();
+			test(settings);
+		});
+
 		$(document).on('click','.test', function(e) {
 			var obj = $(e.target);
-			var map = {};
+			var settings = {};
 			// read input from settings
 			obj.parent().find(".settings input, .settings select").each(function() {
-				map[$(this).attr("name")] = $(this).val();
+				settings[$(this).attr("name")] = $(this).val();
 			});
-			// and test
-			// fetch fields
-			$.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
-				if(data.error)
-					alert(data.error);
-					
-				nodes.selectedNode.settings = map;
-				var context = {"node":nodes.selectedNode, "doc":data};
-				var out = {};
-				eval(nodes.selectedNode.scripts.run);
-				alert(out.value);
-			});
+			
+			nodes.selectedNode.test_counter = 0;
+			$("#test_results #result").empty();
+			$("#test_results").show();
+			test(settings);
 
 		});	
 
+
+		function test (settings) {
+			console.log(settings);
+			nodes.selectedNode.settings = settings;
+			var  count = nodes.selectedNode.test_counter;
+	
+			$.getJSON("/get/collection/" + nodes.currentCollection + "?limit=1&skip=" + count, function(data) { 
+				if(data.error)
+					alert(data.error);
+				
+				var context = {"node":nodes.selectedNode, "doc":data[0]};
+				var out = {};
+				eval(nodes.selectedNode.scripts.run);
+				$("#test_results #result").append("<pre>" + out.value + "</pre>");
+				nodes.selectedNode.test_counter++;
+			});
+		}
 
 		// handler for file upload node creation
 		$(document).on('submit', "#uploadfile", function(e) {
@@ -638,6 +663,7 @@ function makeDynFieldsfromObject (data, parents, obj) {
 
 		<!-- ko if: type == 'transform'  -->
 		<h2 data-bind="click:$root.selectNode, html:title "></h2> 
+		<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.field)"></h2> 
 		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
 		<!-- /ko -->
 
@@ -714,6 +740,13 @@ function makeDynFieldsfromObject (data, parents, obj) {
 		
 	</div>
 	
+	
+	<div id="test_results">
+		<button class="prev_test">prev</button>
+		<button class="next_test">next</button>
+		<button class="right" data-bind="click:closeTest">close</button>
+		<div id="result"></div>
+	</div>
 	
 	<div id="node_creator">
 		<button data-bind="click:closeCreator">close</button>
