@@ -190,7 +190,9 @@ exports.drop = function (collectionname, callback) {
 
 exports.empty = function (collectionname, doc, callback) {
 	var collection = db.collection(collectionname);
-	collection.remove(doc, function () {
+	collection.remove(doc, function (err) {
+		if(err)
+			console.log(err);
 		console.log('emptied', collectionname);
 		callback();
 	});

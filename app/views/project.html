@@ -50,6 +50,8 @@
 			else
 				self.currentCollection = data.collection
 			
+			$("#test_results").hide();
+			
 			// plain script tag causes confusion in html views so we restore it here
 			data.views.settings = data.views.settings.replace(/_script/g,'script');	
 			
@@ -66,7 +68,7 @@
 						data.views.settings +
 				'	</div>';
 
-			if(data.type == 'transform') {
+			if(data.type == 'transform' || data.type == 'lookup') {
 				node_settings_html += '	<button id="'+data._id+'" class="test">test!</button>';
 			} 
 
@@ -373,25 +375,6 @@
 			})
 		});
 
-function makeDynFieldsfromObject (data, parents, obj) {
-	
-	var html = "";
-	var parents_str = parents.join(".");
-	for (key in data) {
-		if (data[key] instanceof Array) {
-			html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+" <span class='array'>ARRAY</span></li>";
-		} else if (typeof data[key] === "object") {
-			var p = key;
-			parents.push(p);
-			var tree = makeDynFieldsfromObject(data[key], parents, obj);
-			parents.pop();
-			html +=  "<li>" + p + "<ul>" + tree + "</ul></li>";
-		} else {
-			html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+"</li>";
-		}
-	}
-	return html;
-}
 
 
 		
@@ -428,6 +411,7 @@ function makeDynFieldsfromObject (data, parents, obj) {
 			});
 			
 			$("#test_results #result").empty();
+			nodes.selectedNode.test_counter++;
 			test(settings);
 		});
 
@@ -446,6 +430,19 @@ function makeDynFieldsfromObject (data, parents, obj) {
 
 		});	
 
+		$(document).on('click','.prev_test', function(e) {
+			var obj = $(e.target);
+			var settings = {};
+			// read input from settings
+			obj.parent().parent().find(".settings input, .settings select").each(function() {
+				settings[$(this).attr("name")] = $(this).val();
+			});
+			
+			$("#test_results #result").empty();
+			nodes.selectedNode.test_counter--;
+			test(settings);
+		});
+
 
 		function test (settings) {
 			console.log(settings);
@@ -457,10 +454,17 @@ function makeDynFieldsfromObject (data, parents, obj) {
 					alert(data.error);
 				
 				var context = {"node":nodes.selectedNode, "doc":data[0]};
+				context.data = {};
+				context.path = {};
+				context.path.join = function (v1, v2) {return v1 + "/" + v2; }
 				var out = {};
-				eval(nodes.selectedNode.scripts.run);
-				$("#test_results #result").append("<pre>" + out.value + "</pre>");
-				nodes.selectedNode.test_counter++;
+				eval(nodes.selectedNode.scripts.pre_run);
+				$("#test_results #result").append("pre_run<pre>" + out.pre_value + "</pre>");
+				if(nodes.selectedNode.type != "lookup") {
+					eval(nodes.selectedNode.scripts.run);
+					$("#test_results #result").append("run<pre>" + out.value + "</pre>");
+				}
+				
 			});
 		}
 
@@ -641,6 +645,25 @@ function makeDynFieldsfromObject (data, parents, obj) {
 	}
 
 
+	function makeDynFieldsfromObject (data, parents, obj) {
+		
+		var html = "";
+		var parents_str = parents.join(".");
+		for (key in data) {
+			if (data[key] instanceof Array) {
+				html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+" <span class='array'>ARRAY</span></li>";
+			} else if (typeof data[key] === "object") {
+				var p = key;
+				parents.push(p);
+				var tree = makeDynFieldsfromObject(data[key], parents, obj);
+				parents.pop();
+				html +=  "<li>" + p + "<ul>" + tree + "</ul></li>";
+			} else {
+				html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+parents_str +"."+key+"'>"+key+"</li>";
+			}
+		}
+		return html;
+	}
 
 </script>
 
@@ -745,6 +768,7 @@ function makeDynFieldsfromObject (data, parents, obj) {
 		<button class="prev_test">prev</button>
 		<button class="next_test">next</button>
 		<button class="right" data-bind="click:closeTest">close</button>
+		<h3>This shows what values node gives to Metapipe.</h3>
 		<div id="result"></div>
 	</div>
 	

@@ -41,7 +41,7 @@ One step is still needed. You need to download Metapipe nodes. You can have a zi
 
 Extract that some where and copy "nodes" directory to "metapipe" directory. Then type:
 
-    nodeje metapipe.js
+    nodejs metapipe.js
 
 You should see something like this:
 

@@ -109,7 +109,10 @@ exports.initNodes = function (callback) {
 				}
 
 			}, function onError (error) {
-				console.log(error);
+				if( error.code == "ENOENT") {
+					console.log("ERROR: No nodes present!");
+					console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+				}
 				
 			}, function onDone () {
 				console.log("INIT: nodes loaded");
@@ -253,9 +256,11 @@ exports.runNode = function (req, res, io) {
 					node: node,
 					input_node: input_node,
 					doc_count:0,
-					count:0
+					count:0,
+					path: path
 				},
 				out: {
+					pre_value:"",
 					value:"",
 					url: "",
 					file:"",
@@ -271,21 +276,6 @@ exports.runNode = function (req, res, io) {
 			vm.createContext(sandbox);
 			
 			switch (node.type) {
-				
-				
-				case "cluster":
-					
-					var cluster_params = {
-						collection: 'kartverket_source',
-						field: 'data',
-						array: true,
-						new_collection: 'authors',
-						callback: function (d) {
-							res.json({"status": "clustered"});
-						}
-					}
-					mongoquery.cluster(cluster_params);
-				break;
 
 
 				case "source":
@@ -370,12 +360,83 @@ exports.runNode = function (req, res, io) {
 								
 						
 						break;
+
+
+						case "directory":
 						
+							var recursive = require('recursive-readdir');
+							
+							function scan (ignore) { 
+								recursive(node.params.root, [ignore], function (err, files) {
+									if(err) {
+										if(err.code == "ENOENT") {
+											console.log("ERROR: directory not found", node.params.root);
+											io.sockets.emit("error", "directory not found: " + node.params.root);
+										} else
+											console.log(err);
+										return;
+									} 
+									
+									var file_objects = [];
+									for (var i = 0; i < files.length; i++) {
+										var f = {};
+										f.basename = path.basename(files[i]);
+										f.dirname = path.dirname(files[i]);
+										f[MP.source] = node._id;
+										file_objects.push(f);
+									}
+									// insert
+									if(file_objects.length > 0) {
+										mongoquery.insert(node.collection, file_objects, function() {
+											runNodeScriptInContext("finish", node, sandbox, io);
+											//generate view and do *not* wait it to complete
+											exports.updateView(node, sandbox, io, function(msg) {});
+											console.log("DONE");
+										});
+									} else {
+										console.log("None found");
+									}
+								});
+							}
+							// remove previous data insertet by node and import file
+							var query = {}; 
+							query[MP.source] = node._id;
+							
+							mongoquery.empty(node.collection, query, function() {
+								var exts = node.params.include_ext.toLowerCase();
+								var exts = exts.replace(/[\s\.]/g, ""); 
+								
+								if(exts != "") {
+									var ext_arr = exts.split(",");
+									
+									// ignore function if wanted extensions are provided
+									function ignore (file, stats) {
+										var base_split = path.basename(file).split(".");
+										var ext = base_split[base_split.length-1].toLowerCase();
+										console.log(ext);
+										if (ext_arr.indexOf(ext) === -1 && stats.isFile())
+											return true;
+										else 
+											return false;
+									}
+									
+									scan(ignore);
+									
+								} else {
+									
+									// ignore function that does not ignore anyone
+									function ignore (file, stats) {
+										return false;
+									}
+									
+									scan(ignore);
+								}
+							});
+						break;
 					}
 
-
-
 				break;
+
 
 				
 				case "export":
@@ -426,11 +487,27 @@ exports.runNode = function (req, res, io) {
 
 				case "lookup":
 					
+					var runFunc = null;
+					
+					switch (node.subtype) {
+						
+						case "API":
+							runFunc = function(sandbox, node, onNodeScript, onError) {
+								callAPISerial (sandbox, node, onNodeScript, onError);
+							}
+						break;
+						
+						case "file":
+							runFunc = function(sandbox, node, onNodeScript, onError) {
+								fileStats (sandbox, node, onNodeScript, onError);
+							}
+						break;
+					}
+					
 					
 					var onError = function(err) {
 						return;
 					}
-					
 					// find everything
 					mongoquery.find2({}, node.collection, function (err, doc) {
 						
@@ -442,7 +519,8 @@ exports.runNode = function (req, res, io) {
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
 							// get URL for request from node
-							runNodeScriptInContext("url", node, sandbox, io);
+							runNodeScriptInContext("pre_run", node, sandbox, io);
+							console.log(sandbox.out.pre_value);
 							if (sandbox.out.error !== null) return;
 							
 							// callback for updating record
@@ -451,20 +529,22 @@ exports.runNode = function (req, res, io) {
 								// let node pick the data it wants from result
 								runNodeScriptInContext("run", node, sandbox, io);
 								var setter = {};
-								setter[node.params.out_field] = sandbox.out.value;
+								setter[sandbox.out.field] = sandbox.out.value;
 								setter = flatten(setter, {delimiter:"__"});
 								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							}
 
-							callAPISerial (sandbox, node, onNodeScript, onError);
+							runFunc (sandbox, node, onNodeScript, onError);
 
 						}, function done() {
 							runNodeScriptInContext("finish", node, sandbox, io);
 						});
 						
 					}); 
+					
 				break;
-				
+
+
 
 				case "download":
 					
@@ -1673,8 +1753,8 @@ function callAPISerial (sandbox, node, onScript, onError) {
 	
 	try {
 		vm.runInNewContext(node.scripts.url, sandbox);
-		console.log(sandbox.out.url);
-		options.url = sandbox.out.url;
+		console.log(sandbox.out.pre_value);
+		options.url = sandbox.out.pre_value;
 	} catch (e) {
 		if (e instanceof SyntaxError) {
 			console.log("Syntax error in url function!");
@@ -1697,4 +1777,15 @@ function callAPISerial (sandbox, node, onScript, onError) {
 		}
 	});
 
+}
+
+
+function fileStats (sandbox, node, onScript, onError) {
+	fs.stat(sandbox.out.pre_value, function (err, stats) {
+		if(err)
+			onError(err);
+			
+		sandbox.context.filestats = stats;
+		onScript(sandbox);
+	});
 }
