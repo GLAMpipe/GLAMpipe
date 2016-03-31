@@ -273,7 +273,9 @@ exports.runNode = function (req, res, io) {
 				},
 				say: io.sockets.emit
 			};
-			vm.createContext(sandbox);
+			
+			var sand = vm.createContext(sandbox);
+			var run = new vm.createScript(node.scripts.run);
 			
 			switch (node.type) {
 
@@ -466,7 +468,9 @@ exports.runNode = function (req, res, io) {
 						async.eachSeries(doc, function iterator(doc, next) {
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
-							runNodeScriptInContext("run", node, sandbox, io);
+							sandbox.out.value = null;
+							run.runInContext(sand);
+							//runNodeScriptInContext("run", node, sandbox, io);
 							if (sandbox.out.error !== null)  return;
 							wstream.write(sandbox.out.value)
 							next();
@@ -613,11 +617,13 @@ exports.runNode = function (req, res, io) {
 
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
-							runNodeScriptInContext("run", node, sandbox, io);
-
+							sandbox.out.value = null;  // reset output
+							run.runInContext(sand);
+							//runNodeScriptInContext("run", node, sand, io);
+							//console.log(sandbox.out.value);
 							var setter = {};
 							setter[sandbox.out.field] = sandbox.out.value;
-							console.log(setter);
+							//console.log(setter);
 							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							
 						}, function done () {
@@ -827,13 +833,13 @@ function getPrevNode(project, node) {
  * - otherwise generate view based on keys in first record
  * */
 exports.updateView = function (node, sandbox, io, callback) {
-	
-	if(node.views.data_static) {
+
+	if(node.views.data_static != null) {
 		mongoquery.editProjectNode(node._id, {"views.data":node.views.data_static}, function() {
 			return callback("using static");
 		})
 		
-	} else if (node.scripts.view) {
+	} else if (node.scripts.view != null) {
 		runNodeScriptInContext("view", node, sandbox, io);
 		mongoquery.editProjectNode(node._id, {"views.data":sandbox.out.view}, function() {
 			return callback("using view created by the node");
@@ -1086,7 +1092,27 @@ exports.deleteNode = function (params, res, io) {
 					} else {
 						callback(); // we did nothing
 					}
+				},
+
+				// if node is a transform node, then remove its output field
+				function (callback) {
+					if(node.type == "transform" && node.params.out_field != null) {
+						var field = {};
+						var query = {};
+						field[node.params.out_field] = 1;
+						query["$unset"] = field;
+						mongoquery.updateAll(node.collection, query, function (error) {
+							if(error)
+								console.log(error);
+							else
+								console.log("data removed", node.collection);
+							callback(error);
+							});
+					} else {
+						callback(); // we did nothing
+					}
 				}
+
 
 			], function (err, results) {
 				if(err) {
@@ -1129,7 +1155,7 @@ exports.getCollection = function (req, res) {
 
 	var limit = parseInt(req.query.limit);
 	if (limit <= 0 || isNaN(limit))
-		limit = 50;
+		limit = 25;
 
 	var skip = parseInt(req.query.skip);
 	if (skip <= 0 || isNaN(skip))
@@ -1597,15 +1623,15 @@ function generateDynamicView(node, callback) {
 			// data cells
 			html += '				<td data-bind="text: vcc"></td>'
 			for (key in data) {
-				
-				if(data[key].constructor.name === 'Array') {
-					html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
-				} else if(typeof data[key] === "object" && key != "_id") {
+				if(data[key] != null) {
+					if(data[key].constructor.name === 'Array') {
+						//html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
 
-					html += '				<td data-bind="text:'+key+',click:$root.openCell"><a href="">show details</a><div class="details"></div></td>'
-
+					} else {
+						html += '				<td data-bind="text: '+key+'"></td>'
+					}
 				} else {
-					html += '				<td data-bind="text: '+key+'"></td>'
+					html += '				<td>null</td>'
 				}
 			}
 

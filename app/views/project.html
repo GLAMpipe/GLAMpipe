@@ -700,6 +700,11 @@
 		<h2 class="out_field" data-bind="html:$root.concatenate('WITH: ', $data.subtype)"></h2> 
 		<!-- /ko -->
 
+		<!-- ko if: type == 'export'  -->
+		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.file)"></h2> 
+		<!-- /ko -->
+
 		<div class="delete_confirm" style="display:none">
 			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>

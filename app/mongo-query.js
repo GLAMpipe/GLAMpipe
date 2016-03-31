@@ -199,6 +199,21 @@ exports.empty = function (collectionname, doc, callback) {
 }
 
 
+exports.updateAll = function (collectionname, query, callback) {
+	
+	var collection = db.collection(collectionname);
+
+	collection.update({}, query, {multi:true} ,function (err, result) {
+		if (err) {
+			console.log(err);
+			callback({'error':err})
+		} else {
+			callback();
+		}
+	}); 
+
+}
+
 exports.nodes = function (callback) {
 
 	var collection = db.collection("mp_nodes");
