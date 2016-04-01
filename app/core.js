@@ -257,7 +257,8 @@ exports.runNode = function (req, res, io) {
 					input_node: input_node,
 					doc_count:0,
 					count:0,
-					path: path
+					path: path,
+					MP: MP
 				},
 				out: {
 					pre_value:"",
@@ -379,17 +380,13 @@ exports.runNode = function (req, res, io) {
 										return;
 									} 
 									
-									var file_objects = [];
-									for (var i = 0; i < files.length; i++) {
-										var f = {};
-										f.basename = path.basename(files[i]);
-										f.dirname = path.dirname(files[i]);
-										f[MP.source] = node._id;
-										file_objects.push(f);
-									}
+									// compose file data
+									sandbox.context.data = files;
+									run.runInContext(sand);
+									
 									// insert
-									if(file_objects.length > 0) {
-										mongoquery.insert(node.collection, file_objects, function() {
+									if(sandbox.out.value.length > 0) {
+										mongoquery.insert(node.collection, sandbox.out.value, function() {
 											runNodeScriptInContext("finish", node, sandbox, io);
 											//generate view and do *not* wait it to complete
 											exports.updateView(node, sandbox, io, function(msg) {});
@@ -406,16 +403,15 @@ exports.runNode = function (req, res, io) {
 							
 							mongoquery.empty(node.collection, query, function() {
 								var exts = node.params.include_ext.toLowerCase();
-								var exts = exts.replace(/[\s\.]/g, ""); 
+								exts = exts.replace(/[\s\.]/g, ""); 
 								
 								if(exts != "") {
 									var ext_arr = exts.split(",");
 									
 									// ignore function if wanted extensions are provided
-									function ignore (file, stats) {
+									var ignore = function (file, stats) {
 										var base_split = path.basename(file).split(".");
 										var ext = base_split[base_split.length-1].toLowerCase();
-										console.log(ext);
 										if (ext_arr.indexOf(ext) === -1 && stats.isFile())
 											return true;
 										else 
@@ -427,7 +423,7 @@ exports.runNode = function (req, res, io) {
 								} else {
 									
 									// ignore function that does not ignore anyone
-									function ignore (file, stats) {
+									var ignore = function (file, stats) {
 										return false;
 									}
 									
