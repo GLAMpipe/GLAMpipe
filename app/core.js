@@ -1194,13 +1194,41 @@ exports.getCollectionFields = function (collection_id, cb) {
 }
 
 
+exports.editCollection = function (collection_id, req, callback) {
+
+	console.log("editing", collection_id);
+	var setter = {};
+	setter[req.body.field] = req.body.value;
+	console.log("setter:", setter);
+	
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$set:setter}, function(result) {
+		callback(result); 
+	});
+
+
+}
+
 exports.nodeView = function  (nodeId, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
 		if (err) {
 			return console.log(err);
 		}
-		createNodeView(data, nodeId, function (html) {
+		createNodeView(data, nodeId, false, function (html) {
+			cb(html);
+		});
+
+	});
+}
+
+
+exports.nodeEditView = function  (nodeId, cb) {
+	fs = require('fs')
+	fs.readFile("./app/views/edit.html", 'utf8', function (err,data) {
+		if (err) {
+			return console.log(err);
+		}
+		createNodeView(data, nodeId, true, function (html) {
 			cb(html);
 		});
 
@@ -1583,7 +1611,7 @@ function writeJSON2File (filename, records, callback) {
 
 
 
-function generateDynamicView(node, callback) {
+function generateDynamicView(node, edit, callback) {
 	// read one record and extract field names
 	// NOTE: this assumes that every record has all fields
 	mongoquery.findOne({}, node.collection, function(data) {
@@ -1624,7 +1652,13 @@ function generateDynamicView(node, callback) {
 						//html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
 
 					} else {
-						html += '				<td data-bind="text: '+key+'"></td>'
+						if(edit) { 
+							if(key == "_id") // id is not editable
+								html += '				<td data-bind="text: '+key+'"></td>';
+							else
+								html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+						} else
+							html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
 					}
 				} else {
 					html += '				<td>null</td>'
@@ -1665,7 +1699,7 @@ function createCollectionView(data, collectionName, callback) {
 	});
 }
 
-function createNodeView(data, nodeId, callback) {
+function createNodeView(data, nodeId, edit, callback) {
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "mp_projects", function(project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", nodeId);
@@ -1676,7 +1710,7 @@ function createNodeView(data, nodeId, callback) {
 			
 			// if node has no view, then we create in always on the fly (dynamic view)
 			if(typeof project.nodes[index].views.data === "undefined") {
-				generateDynamicView(project.nodes[index], function(html) {
+				generateDynamicView(project.nodes[index], edit, function(html) {
 					// insert node's data view to view.html
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);

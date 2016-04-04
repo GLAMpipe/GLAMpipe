@@ -722,6 +722,9 @@
 			
 			<!-- ko if: type == 'collection' -->
 				<button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
+				<div class="left bottom">
+				<a class="left view_button" data-bind="attr:{href:'/node/editview/' + _id}" target="_blank" >edit data</a> 
+				</div>
 			<!-- /ko -->
 			
 			<div class="left bottom">

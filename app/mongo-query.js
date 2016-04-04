@@ -162,7 +162,7 @@ exports.update = function (collectionname, query, doc, callback) {
 			console.log(err);
 			callback({'error':err})
 		} else {
-			callback();
+			callback(result);
 		}
 	}); 
 }
