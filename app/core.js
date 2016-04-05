@@ -334,7 +334,40 @@ exports.runNode = function (req, res, io) {
 							requestLoop();
 							
 						break;
+
+						case "cluster":
 						
+							function clusterCB (data) {
+								// provide data to node
+								//sandbox.context.data = data;
+								
+								// let node pick the data it wants from result
+								//runNodeScriptInContext("run", node, sandbox, io);
+								
+								// add source id to data
+								for (var i = 0; i < data.length; i++ ) {
+									// flatten
+									data[i][MP.source] = node._id;
+								}
+								// insert
+								mongoquery.insert(node.collection, data, function() {
+									runNodeScriptInContext("finish", node, sandbox, io);
+									//generate view and do *not* wait it to complete
+									exports.updateView(node, sandbox, io, function(msg) {});
+								});
+								
+							}
+							
+							// remove previous data insertet by node and import file
+							var query = {}; 
+							query[MP.source] = node._id;
+							mongoquery.empty(node.collection, query, function() {
+								mongoquery.cluster(node, clusterCB);
+							});
+								
+						
+						break;
+
 						
 						case "file":
 						
@@ -843,12 +876,14 @@ exports.updateView = function (node, sandbox, io, callback) {
 		 
 	
 	} else {
-		generateDynamicView(node, function(view) {
-			mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
-				return callback("using dynamic");
-			})
-		}) 
+		return callback("using dynamic");
 	}
+		//generateDynamicView(node, function(view) {
+			//mongoquery.editProjectNode(node._id, {"views.data":view}, function() {
+				//return callback("using dynamic");
+			//})
+		//}) 
+	//}
 
 }
 
@@ -1023,9 +1058,10 @@ function initCollectionNode (nodeRequest, res, io) {
 					if(error) {
 						console.log(error);
 						res.json({"error": error});
+					} else {
+						console.log("node created");
+						res.json({"status": "node created"})
 					}
-					console.log("node created");
-					res.json({"status": "node created"})
 
 			})
 		} else {
@@ -1683,6 +1719,7 @@ function generateDynamicView(node, fields, edit, callback) {
 				if(data[key] != null) {
 					if(data[key].constructor.name === 'Array') {
 						//html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
+						html += '			<td>array</td>'
 
 					} else {
 						if(edit) { 

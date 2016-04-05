@@ -14,7 +14,7 @@ var exports = module.exports = {};
 exports.findAll = function (params, callback) {
 	var collection = db.collection(params.collection);
 	var sort = {};
-	sort[params.sort] = 1;
+	sort[params.sort] = -1;
 	collection.find({}).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
 }
 
@@ -244,6 +244,51 @@ exports.nodes = function (callback) {
 	)
 
 }
+
+exports.cluster = function (node, callback) {
+
+	var cluster_collection = db.collection(node.params.collection);
+	var collection = db.collection(node.params.source_collection);
+	var field_name = "$" + node.params.in_field;
+	var project = {};
+	project[node.params.in_field] = 1;
+	project["_id"] = 1;
+
+	if(node.array) {
+		collection.aggregate([
+			{$project: project},
+			{$unwind: field_name},
+			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
+			{$project: { _id: 0, "name": "$_id", ids: 1, count:1 } },
+			{$sort: { count: 1 }}
+			// use $out for mongo 2.6 and newer
+			],
+			function (err, data) {
+				if(err)
+					console.log(err);
+				callback(data);
+			}
+		)
+	} else {
+		collection.aggregate([
+			// {"$match": {"author":{"$ne": ""}} },
+			{$project: project},
+			{"$group" : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
+			{$project: { count:1, "name": "$_id", ids: 1, _id: 0 } },
+			{"$sort": { count: -1 }}
+			// use $out for mongo 2.6 and newer
+			],
+			function (err, data) {
+				if(err)
+					console.log(err);
+				callback(data);
+			}
+		)
+	}
+
+}
+
+
 
 exports.closeDB = function () {
 	db.close();

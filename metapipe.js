@@ -33,9 +33,9 @@ metapipe.initDB(function () {
 			});
 
 			// last guard
-			process.on('uncaughtException', function (err) {
-			  console.log('Caught exception: ' + err.name);
-			});
+			//process.on('uncaughtException', function (err) {
+			  //console.log('Caught exception: ' + err.name);
+			//});
 
 			// we notify browser of control + c
 			process.on( 'SIGINT', function() {
