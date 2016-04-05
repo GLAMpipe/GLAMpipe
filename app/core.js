@@ -1194,6 +1194,15 @@ exports.getCollectionFields = function (collection_id, cb) {
 }
 
 
+exports.getCollectionCount = function (collection_id, cb) {
+	//var collection = db.collection(collection_id);
+	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
+	mongoquery.countDocs(collection_id, {}, function (result) {
+		cb(result);
+	});
+}
+
+
 exports.editCollection = function (collection_id, req, callback) {
 
 	console.log("editing", collection_id);
@@ -1208,13 +1217,13 @@ exports.editCollection = function (collection_id, req, callback) {
 
 }
 
-exports.nodeView = function  (nodeId, cb) {
+exports.nodeView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
 		if (err) {
 			return console.log(err);
 		}
-		createNodeView(data, nodeId, false, function (html) {
+		createNodeView(data, req, false, function (html) {
 			cb(html);
 		});
 
@@ -1222,13 +1231,13 @@ exports.nodeView = function  (nodeId, cb) {
 }
 
 
-exports.nodeEditView = function  (nodeId, cb) {
+exports.nodeEditView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/edit.html", 'utf8', function (err,data) {
 		if (err) {
 			return console.log(err);
 		}
-		createNodeView(data, nodeId, true, function (html) {
+		createNodeView(data, req, true, function (html) {
 			cb(html);
 		});
 
@@ -1611,22 +1620,46 @@ function writeJSON2File (filename, records, callback) {
 
 
 
-function generateDynamicView(node, edit, callback) {
+function generateDynamicView(node, fields, edit, callback) {
 	// read one record and extract field names
 	// NOTE: this assumes that every record has all fields
 	mongoquery.findOne({}, node.collection, function(data) {
 		
+
 		if(data) {
 
 			if(data.__mp_source)
 				delete data.__mp_source;
 
-			var html = ''
+
+
+
+				
+			var html = '<label>visible fields (click to remove)</label><div id="controls">'
+				+ '<div id="selected_fields"></div>'
+				+ '<select id="field_select">';
+				
+			for (key in data) {
+				html += '	<option value="'+key+'">'+key+'</option>' + "\n";
+			}
+			html += '</select></div>';
+
+			html += '<div id="prevnext">'
 				+ '<button data-bind="click: prevPage">prev</button>'
 				+ '<button data-bind="click: nextPage">next</button>'
-
-				+ '<div id="node_bar" class="selected">'
 				+ '</div>'
+
+
+			// remove keys that are not listed inf "fields"
+			if(fields != null) {
+				var fields_arr = fields.split(",");
+				for (key in data) {
+					if(fields_arr.indexOf(key) == -1)
+						delete data[key];
+				}
+			}
+
+			html += '</div>'
 
 				+ '<div>'
 				+ '	<table>'
@@ -1636,7 +1669,7 @@ function generateDynamicView(node, edit, callback) {
 			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
 
 			for (key in data) {
-				html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
+					html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
 			}
 
 			html += '			</tr>'
@@ -1663,6 +1696,7 @@ function generateDynamicView(node, edit, callback) {
 				} else {
 					html += '				<td>null</td>'
 				}
+				
 			}
 
 			html += '			</tr>'
@@ -1699,7 +1733,9 @@ function createCollectionView(data, collectionName, callback) {
 	});
 }
 
-function createNodeView(data, nodeId, edit, callback) {
+function createNodeView(data, req, edit, callback) {
+	var nodeId = req.params.id;
+	console.log("nodeid", nodeId);
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(nodeId)}, "mp_projects", function(project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", nodeId);
@@ -1710,7 +1746,10 @@ function createNodeView(data, nodeId, edit, callback) {
 			
 			// if node has no view, then we create in always on the fly (dynamic view)
 			if(typeof project.nodes[index].views.data === "undefined") {
-				generateDynamicView(project.nodes[index], edit, function(html) {
+				if(req.query.fields != null) var fields = req.query.fields;
+				else var fields = null;
+				
+				generateDynamicView(project.nodes[index], fields, edit, function(html) {
 					// insert node's data view to view.html
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);

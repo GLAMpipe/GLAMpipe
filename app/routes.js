@@ -46,11 +46,11 @@ module.exports = function(app, metapipe, io) {
 	});
 
 	app.get('/node/view/:id', function (req, res) {
-		metapipe.nodeView(req.params.id, function(data) {res.send(data)});
+		metapipe.nodeView(req, function(data) {res.send(data)});
 	});
 
 	app.get('/node/editview/:id', function (req, res) {
-		metapipe.nodeEditView(req.params.id, function(data) {res.send(data)});
+		metapipe.nodeEditView(req, function(data) {res.send(data)});
 	});
 
 	app.post('/create/node', function (req, res) {
@@ -87,6 +87,10 @@ module.exports = function(app, metapipe, io) {
 
 	app.get('/get/collection/fields/:id', function (req, res) {
 		metapipe.getCollectionFields(req.params.id, function(data) {res.send(data)});
+	});
+
+	app.get('/get/collection/count/:id', function (req, res) {
+		metapipe.getCollectionCount(req.params.id, function(data) {res.send(data)});
 	});
 
 	app.post('/edit/collection/:id', function (req, res) {

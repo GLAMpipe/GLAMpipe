@@ -15,7 +15,6 @@ exports.findAll = function (params, callback) {
 	var collection = db.collection(params.collection);
 	var sort = {};
 	sort[params.sort] = 1;
-	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
 	collection.find({}).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
 }
 
@@ -72,18 +71,19 @@ exports.findOneById = function (doc_id, collectionname, callback) {
 	})
 }
 
-exports.count = function (collectionname, query, callback) {
-
+exports.countDocs = function (collectionname, query, callback) {
 	var collection = db.collection(collectionname);
 
-	collection.count(query ,function (err, result) {
-		if (err) {
+	collection.count({}, function(err, count) {
+		if(err) {
 			console.log(err);
-			callback({'error':err})
+			callback("error in count");
 		} else {
-			callback(result);
+			console.log("COUNT:", count)
+			callback(count.toString());
 		}
-	}); 
+	});
+
 
 }
 

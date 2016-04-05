@@ -89,6 +89,7 @@
 					data[i].vcc = self.params.skip_value + i + 1;
 					self.collection.push(data[i]);
 				}
+				getCount();
 			})
 		}
 		
@@ -155,10 +156,24 @@
 		
 	}
 
+	function getCount() {
+		$.getJSON("/get/collection/count/" + node.collection , function(data) { 
+			$("#count").text("("+data+" docs)");
+		})
+	}
+
 	function onLoad() {
 
 		var path = location.pathname.split("/");
-		
+
+		var fields = getURLParameter("fields");
+		if (fields != null) {
+			fields = fields.split(",");
+			for(var i=0; i < fields.length; i++) {
+				$("#selected_fields").append("<button>"+fields[i]+"</button>");
+			}
+		}
+
 		var nodes = new nodeList();
 		nodes.collectionName = path[path.length -1];
 		ko.applyBindings(nodes);
@@ -169,6 +184,30 @@
 		$("#show_source").click(function() {
 			$("#source").toggle();
 		});
+
+		$("#selected_fields").on("click", "button", function() {
+			$(this).remove();
+			reloadFieldSelection();
+		});
+		
+		$("#field_select").on("change", function() {
+			$("#selected_fields").append("<button>"+this.value+"</button>");
+			reloadFieldSelection();
+		});
+
+	}
+
+	function reloadFieldSelection () {
+		var fields = [];
+		$("#selected_fields button").each(function(index) {
+			fields.push($(this).text());
+			
+		});
+		var fields_str = fields.join(",");
+		if(fields_str == "")
+			window.location.search = "";
+		else
+			window.location.search = "?fields=" + fields_str;
 	}
 
 	function getURLParameter(name) {
@@ -181,7 +220,7 @@
 </head>
 <body onload="onLoad();">
 
-	<h1>PROJECT: [[project]] (editmode)</h1>
+	<h1>PROJECT: [[project]] (editmode) <span id="count"></span></h1>
 	<!-- <div style="float:right"><a href="#" id="show_source">source</a></div> -->
 	<div id="source" style="display:none"></div>
 	
