@@ -15,7 +15,7 @@ exports.findAll = function (params, callback) {
 	var collection = db.collection(params.collection);
 	var sort = {};
 	sort[params.sort] = -1;
-	collection.find({}).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
+	collection.find(params.query).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
 }
 
 exports.find2 = function (query, collectionname, callback) {
@@ -157,12 +157,12 @@ exports.update = function (collectionname, query, doc, callback) {
 
 	var collection = db.collection(collectionname);
 
-	collection.update(query, doc ,function (err, result) {
+	collection.update(query, doc , {multi:true}, function (err, result) {
 		if (err) {
 			console.log(err);
-			callback({'error':err})
+			callback();
 		} else {
-			callback(result);
+			callback();
 		}
 	}); 
 }
@@ -253,6 +253,9 @@ exports.cluster = function (node, callback) {
 	var project = {};
 	project[node.params.in_field] = 1;
 	project["_id"] = 1;
+	var project2 = { count:1, ids: 1, _id: 0 };
+	project2[node.params.in_field] = "$_id";	// preserve original field name
+	
 
 	if(node.array) {
 		collection.aggregate([
@@ -274,7 +277,7 @@ exports.cluster = function (node, callback) {
 			// {"$match": {"author":{"$ne": ""}} },
 			{$project: project},
 			{"$group" : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-			{$project: { count:1, "name": "$_id", ids: 1, _id: 0 } },
+			{$project: project2 },
 			{"$sort": { count: -1 }}
 			// use $out for mongo 2.6 and newer
 			],
@@ -288,7 +291,14 @@ exports.cluster = function (node, callback) {
 
 }
 
+exports.collectionLookup = function (sandbox, node, onNodeScript, onError) {
 
+	var collection = db.collection(node.params.target_collection);
+	var key = node.params.target_key;
+	var value = sandbox.out.value;
+	onNodeScript(sandbox);
+
+}
 
 exports.closeDB = function () {
 	db.close();

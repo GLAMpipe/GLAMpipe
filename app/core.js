@@ -265,6 +265,8 @@ exports.runNode = function (req, res, io) {
 					value:"",
 					url: "",
 					file:"",
+					setter:null,
+					updatequery: null,
 					error: null,
 					console:console,
 					say: function(ch, msg) {
@@ -535,10 +537,17 @@ exports.runNode = function (req, res, io) {
 								fileStats (sandbox, node, onNodeScript, onError);
 							}
 						break;
+						
+						case "collection":
+							runFunc = function(sandbox, node, onNodeScript, onError) {
+								mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
+							}
+						break;
 					}
 					
 					
 					var onError = function(err) {
+						console.log(err);
 						return;
 					}
 					// find everything
@@ -551,20 +560,33 @@ exports.runNode = function (req, res, io) {
 							
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
-							// get URL for request from node
+							
+							// get URL/filename from node
 							runNodeScriptInContext("pre_run", node, sandbox, io);
-							console.log(sandbox.out.pre_value);
 							if (sandbox.out.error !== null) return;
 							
 							// callback for updating record
 							var onNodeScript = function (sandbox) {
 
+								sandbox.out.updatequery = null;
+								sandbox.out.setter = null;
 								// let node pick the data it wants from result
-								runNodeScriptInContext("run", node, sandbox, io);
-								var setter = {};
-								setter[sandbox.out.field] = sandbox.out.value;
-								setter = flatten(setter, {delimiter:"__"});
-								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+								run.runInContext(sand);
+								
+								if(sandbox.out.setter != null) {
+									var setter = sandbox.out.setter; 
+								} else {
+									var setter = {};
+									setter[sandbox.out.field] = sandbox.out.value;
+								}
+								
+								if(sandbox.out.updatequery != null)
+									var updatequery = sandbox.out.updatequery;
+								else
+									var updatequery = {_id:sandbox.context.doc._id};
+									
+								//setter = flatten(setter, {delimiter:"__"});
+								mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
 							}
 
 							runFunc (sandbox, node, onNodeScript, onError);
@@ -637,22 +659,22 @@ exports.runNode = function (req, res, io) {
 				case "transform":
 					
 					// find everything
-					mongoquery.find2({}, node.collection, function(err, doc) {
-						sandbox.context.doc_count = doc.length;
+					mongoquery.find2({}, node.collection, function(err, docs) {
+						sandbox.context.doc_count = docs.length;
+						console.log(docs.length);
 						runNodeScriptInContext("init", node, sandbox, io);
 						
 						// run node once per record
-						async.eachSeries(doc, function iterator(doc, next) {
+						async.eachSeries(docs, function iterator(doc, next) {
 
 							sandbox.context.doc = doc;
 							sandbox.context.count++;
 							sandbox.out.value = null;  // reset output
 							run.runInContext(sand);
 							//runNodeScriptInContext("run", node, sand, io);
-							//console.log(sandbox.out.value);
 							var setter = {};
 							setter[sandbox.out.field] = sandbox.out.value;
-							//console.log(setter);
+							console.log(setter);
 							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							
 						}, function done () {
@@ -1183,7 +1205,7 @@ function inputNode(node, nodes) {
  * Get paged collection data
  * - gives records between skip and skip + limit
  */
-exports.getCollection = function (req, res) {
+exports.getCollection = function (req, query, res) {
 
 	var limit = parseInt(req.query.limit);
 	if (limit <= 0 || isNaN(limit))
@@ -1200,12 +1222,21 @@ exports.getCollection = function (req, res) {
 
 	var params = {
 		collection: req.params.id,
+		query: query,
 		limit: limit,
 		skip: skip,
 		sort: req.query.sort,
 		reverse: false
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
+}
+
+exports.getCollectionByField = function (req, res) {
+
+	var query = {};
+	query[req.query.field] = req.query.value;
+	
+	exports.getCollection (req, query, res);
 }
 
 
@@ -1274,6 +1305,20 @@ exports.nodeEditView = function  (req, cb) {
 			return console.log(err);
 		}
 		createNodeView(data, req, true, function (html) {
+			cb(html);
+		});
+
+	});
+}
+
+
+exports.nodeFileView = function  (req, cb) {
+	fs = require('fs')
+	fs.readFile("./app/views/" + req.query.view, 'utf8', function (err,data) {
+		if (err) {
+			return console.log(err);
+		}
+		createNodeView(data, req, false, function (html) {
 			cb(html);
 		});
 
@@ -1410,19 +1455,7 @@ exports.callAPI = function (url, callback) {
 // *********************************************************************
 
 
-exports.applyFunc = function (func, params, callback) {
-	var count = 0;
-	db.collection('kartverket_source').find().forEach(function (err, doc) {
-		
-		if (!doc) {
-			// we visited all docs in the collection
-			callback();
-		}
-		// doc is a document in the collection
-		console.log(count + ": "+ doc.author);
-		count++;
-	});
-}
+
 
 /**
  * Apply node script to records
@@ -1671,7 +1704,7 @@ function generateDynamicView(node, fields, edit, callback) {
 
 
 				
-			var html = '<label>visible fields (click to remove)</label><div id="controls">'
+			var html = '<label>select visible fields (click to remove)</label><div id="controls">'
 				+ '<div id="selected_fields"></div>'
 				+ '<select id="field_select">';
 				

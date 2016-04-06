@@ -20,38 +20,12 @@
 
 <script>
 	
-	// place holder for node data
-	[[node]]
-	
-	ko.bindingHandlers.inline = {
-		init: function(element, valueAccessor) {
-			var span = $(element);
-			var input = $('<input />',{'type': 'text', 'style' : 'display:none'});
-			span.after(input);
-			
-			ko.applyBindingsToNode(input.get(0), { value: valueAccessor()});
-			ko.applyBindingsToNode(span.get(0), { text: valueAccessor()});
-			
-			span.click(function(){
-				input.width(span.width());
-				span.hide();
-				input.show();
-				input.focus();
-			});
-			
-			input.blur(function() { 
-				span.show();
-				input.hide();
-			});
-			
-			input.keypress(function(e){
-				if(e.keyCode == 13){
-				   span.show();
-				   input.hide();
-			   }; 
-			});
-		}
-	};
+	var node = {};
+	node.collection = "p26_cluster-testi1_c4_authors";
+	node.lookup_collection = "p26_cluster-testi1_c0_kartverket";
+	node.params = {};
+	node.params.key = "author";
+	node.params.fields = ["author"];
 	
 
 	var nodeList = function () {
@@ -65,21 +39,29 @@
 				if (this.skip_value <= 0)
 					this.skip_value = 0;
 				},
-			sort:""
+			sort:"&sort=author"
 		};
 
-		this.collection = ko.observableArray(); // Initial items
+		this.collection = [];
 		this.loadData = function () {
 			$.getJSON("/get/collection/" + node.collection + this.params.skip() + this.params.sort, function(data) { 
-				self.collection([]);
+				self.collection = [];
 				for(var i = 0; i< data.length; i++) {
 					data[i].vcc = self.params.skip_value + i + 1;
 					self.collection.push(data[i]);
 				}
 				getCount();
+				self.renderList();
 			})
 		}
-		
+
+		this.renderList = function () {
+			$("#items").empty();
+			for(var i = 0; i < self.collection.length; i++) {
+				$("#items").append("<a class='item'> "+self.collection[i].author +"</a> (" + self.collection[i].count + ")<br>");
+			}
+		}
+	
 		this.nextPage = function() {
 			this.params.skip_func(25);
 			this.loadData();
@@ -92,7 +74,6 @@
 		
 		this.sort = function (data, event) {
 			this.params.sort = '&sort=' + event.target.id;
-			this.collection([]);
 			this.params.skip_value = 0;
 			this.loadData();
 		};
@@ -113,37 +94,10 @@
 	
 
 
-	function createTable (data, table) {
-		
-		
-		if(data instanceof Array) {
-			if(typeof data[i] === "object") {
-				
-			}
-			for(var i = 0; i < data.length; i++) {
-				if(typeof data[i] === "object" || data[i] instanceof Array) {
-					var row = $("<div><h3>"+i+"</h3></div>");
-					table.append(row);
-					createTable(data[i], row);
-				} else {
-					table.append("<div><span class=\"key\">"+i+": </span><span>"+data[i]+"</span></div>");
-				}
-			}
-		} else {
-			for (key in data) {
-				if(typeof data[key] === "object" || data[key] instanceof Array) {
-					var row = $("<div><h3>"+key+"</h3></div>");
-					table.append(row);
-					createTable(data[key], row);
-				} else {
-					table.append("<div><span class=\"key\">"+key+": </span><span>"+data[key]+"</span></div>");
-				}
-			}
-		} 
-		
-	}
+
 
 	function getCount() {
+		
 		$.getJSON("/get/collection/count/" + node.collection , function(data) { 
 			$("#count").text("("+data+" docs)");
 		})
@@ -162,24 +116,36 @@
 		
 		var nodes = new nodeList();
 		nodes.collectionName = path[path.length -1];
-		ko.applyBindings(nodes);
 		nodes.loadData(nodes);
 		
 		$("#source").text(node.data_view);
 		
-		$("#show_source").click(function() {
-			$("#source").toggle();
+		$("#prev").click(function() {
+			nodes.prevPage();
+		});
+		$("#next").click(function() {
+			nodes.nextPage();
 		});
 		
-		$("#selected_fields").on("click", "button", function() {
-			$(this).remove();
-			reloadFieldSelection();
+		$("#items").on("click", ".item", function() {
+			query($(this).text());
 		});
 		
 		$("#field_select").on("change", function() {
 			$("#selected_fields").append("<button>"+this.value+"</button>");
 			reloadFieldSelection();
 		});
+	}
+
+	function query (term) {
+		term = term.trim();
+		$.getJSON("/get/collection/byfield/" + node.lookup_collection +"/?field="+ node.params.key + "&value=" + term , function(data) { 
+			for(var i = 0; i < data.length; i++) {
+				for(var j = 0; j < node.params.fields.length; j++) {
+					$("#result").append("<div>"+data[i][node.params.fields[j]]+"</div>");
+				}
+			}
+		})
 	}
 
 	function reloadFieldSelection () {
@@ -205,12 +171,15 @@
 </head>
 <body onload="onLoad();">
 
-	<h1>PROJECT: [[project]] <span id="count">count</span></h1>
+	<h1>BROWSER <span id="count">count</span></h1>
+
+	<div id="prevnext">
+		<button id="prev">prev</button>
+		<button id="next">next</button>
+	</div>
 	
-	<!-- <div style="float:right"><a href="#" id="show_source">source</a></div> -->
-	<div style="clear:both" id="source" style="display:none"></div>
-	
-	<!-- place holder for data_view html from node -->
-	<div id="view">[[html]]</div>
+	<div id="items"></div>
+	<div id="result"></div>
+
 	</body>
 </html>
