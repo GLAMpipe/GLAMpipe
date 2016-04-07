@@ -44,6 +44,7 @@
 		this.selectNode = function (data, event) {
 			var obj = $(event.target);
 			self.selectedNode = data;
+			console.log(data);
 			
 			if(typeof data.params.collection !== "undefined")
 				self.currentCollection = data.params.collection
@@ -80,7 +81,7 @@
 			
 			$('#node_bar').replaceWith(node_settings_html);
 			$("#mainCanvas .block").removeClass("selected");
-			obj.parent().addClass("selected");
+			obj.parents(".block").addClass("selected");
 			self.setSettingsValues(data);
 		}
 		
@@ -198,6 +199,7 @@
 
 		// shows all but source nodes and set current node, collection and position
 		this.openCreator = function(data, event) {
+			self.selectNode(data, event);
 			var obj = $(event.target);
 			$("#node_creator > div").show();
 			$("#node_creator > .source").hide();
@@ -210,6 +212,7 @@
 
 		// shows only source nodes and set current node, collection and position
 		this.openSourceCreator = function(data, event) {
+			self.selectNode(data, event);
 			var obj = $(event.target);
 			$("#node_creator").show();
 			$("#node_creator > div").hide();

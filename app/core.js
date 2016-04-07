@@ -1154,7 +1154,7 @@ exports.deleteNode = function (params, res, io) {
 
 				// if node is a transform node, then remove its output field
 				function (callback) {
-					if((node.type == "transform" || ode.type == "lookup") && node.out_field != null) {
+					if((node.type == "transform" || node.type == "lookup") && node.out_field != null) {
 						var field = {};
 						var query = {};
 						field[node.out_field] = 1;
