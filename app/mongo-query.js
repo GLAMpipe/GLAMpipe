@@ -14,7 +14,11 @@ var exports = module.exports = {};
 exports.findAll = function (params, callback) {
 	var collection = db.collection(params.collection);
 	var sort = {};
-	sort[params.sort] = -1;
+	var sort_order = 1;
+	if(params.reverse)
+		sort_order = -1;
+	sort[params.sort] = sort_order;
+	
 	collection.find(params.query).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
 }
 

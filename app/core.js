@@ -577,7 +577,7 @@ exports.runNode = function (req, res, io) {
 									var setter = sandbox.out.setter; 
 								} else {
 									var setter = {};
-									setter[sandbox.out.field] = sandbox.out.value;
+									setter[node.out_field] = sandbox.out.value;
 								}
 								
 								if(sandbox.out.updatequery != null)
@@ -624,7 +624,7 @@ exports.runNode = function (req, res, io) {
 								exports.downloadFile(node, sandbox, function() {
 									// write file location to db
 									var setter = {};
-									setter[sandbox.out.field] = path.join(node.dir, sandbox.out.file) ;
+									setter[node.out_field] = path.join(node.dir, sandbox.out.file) ;
 									mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 								})
 								
@@ -673,8 +673,8 @@ exports.runNode = function (req, res, io) {
 							run.runInContext(sand);
 							//runNodeScriptInContext("run", node, sand, io);
 							var setter = {};
-							setter[sandbox.out.field] = sandbox.out.value;
-							console.log(setter);
+							setter[node.out_field] = sandbox.out.value;
+							//console.log(setter);
 							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 							
 						}, function done () {
@@ -748,9 +748,10 @@ exports.runNode = function (req, res, io) {
 															var content = sandbox.out.wikitext;
 															client.edit('File:'+sandbox.out.title, content, 'test', function(err) {
 																console.log('EDIT tethy'); 
+																
 																// write commons page url to db
 																var setter = {};
-																setter[sandbox.out.field] = data.imageinfo.descriptionurl;
+																setter[node.out_field] = data.imageinfo.descriptionurl;
 																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 															});
 														}
@@ -971,6 +972,9 @@ function initNode (nodeRequest, res, io, project) {
 			else
 				node.params = {};
 				
+			if(node.params.out_field)
+				node.out_field = node.params.out_field;
+				
 			node.params.collection = nodeRequest.collection;
 			
 			// copy static data view to project node's view if defined
@@ -1150,10 +1154,10 @@ exports.deleteNode = function (params, res, io) {
 
 				// if node is a transform node, then remove its output field
 				function (callback) {
-					if(node.type == "transform" && node.params.out_field != null) {
+					if((node.type == "transform" || ode.type == "lookup") && node.out_field != null) {
 						var field = {};
 						var query = {};
-						field[node.params.out_field] = 1;
+						field[node.out_field] = 1;
 						query["$unset"] = field;
 						mongoquery.updateAll(node.collection, query, function (error) {
 							if(error)
@@ -1219,6 +1223,9 @@ exports.getCollection = function (req, query, res) {
 	if(sort === 'undefined')  // by default sort by _id (mongoid)
 		sort = "_id";
 
+	var reverse = false
+	if(req.query.reverse != null)  // by default sort by _id (mongoid)
+		reverse = true;
 
 	var params = {
 		collection: req.params.id,
@@ -1226,7 +1233,7 @@ exports.getCollection = function (req, query, res) {
 		limit: limit,
 		skip: skip,
 		sort: req.query.sort,
-		reverse: false
+		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
 }
