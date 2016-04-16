@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Georeferencer</title>
+<script type="text/javascript" src="../../js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="../../js/knockout.js"></script>
+<script type="text/javascript" src="../../js/view_noko.js"></script>
+
+ <script src="../../js/leaflet.js"></script>
+ <link rel="stylesheet" href="../../css/leaflet.css" />
+
+
+<style>
+	textarea { width:300px; height:80px;}
+	td {border: 1px solid black; padding:5px; }
+	.data-container {min-width:300px}
+	#selected_fields button {background-color:#C1E1E0;}
+	#prevnext {margin-top:10px;}
+	#mapid { height: 400px; }
+	#controls {
+		position: fixed;
+		top: 100px;
+		width:200px;
+	}
+	div#left {
+		background: #ccc;
+		position: fixed;
+		top: 100px;
+		bottom: 0; 
+		left: 200px;
+		width: 40%;
+		height: 100%;
+	}
+	
+	div#right {
+		background: #aaa;
+		position: fixed;
+		top: 100px; 
+		width:40%;
+		right: 0;
+		bottom: 0;
+		left: calc(200px + 40%);
+}
+	h2 {float:right}
+	
+.leaflet-div-icon {
+	background: transparent;
+	border: none;
+}
+
+.leaflet-marker-icon .number{
+	position: relative;
+	top: -37px;
+	font-size: 12px;
+	width: 25px;
+	text-align: center;
+}
+
+</style>
+
+
+
+
+</head>
+
+<body onload="onLoad();">
+
+	<h2>Georefencer</h2>
+
+	<div id="header">
+	<div id="prevnext">
+		<button id="prev">prev</button>
+		<button id="next">next</button>
+		<div id="count"></div>
+	</div>
+	</div>
+
+	
+	<div id="controls">
+		<h4>control points</h4>
+		<div id="control_points" >
+
+		</div>
+	</div>
+	<div id="left">Left</div>
+	<div id="right">Right</div>
+
+</body>
+
+
+<script>
+
+	// place holder for node data
+	[[node]]
+
+L.NumberedDivIcon = L.Icon.extend({
+	options: {
+    // EDIT THIS TO POINT TO THE FILE AT http://www.charliecroom.com/marker_hole.png (or your own marker)
+    iconUrl: '../../images/marker_hole.png',
+    number: '',
+    shadowUrl: null,
+    iconSize: new L.Point(25, 41),
+		iconAnchor: new L.Point(13, 41),
+		popupAnchor: new L.Point(0, -33),
+		/*
+		iconAnchor: (Point)
+		popupAnchor: (Point)
+		*/
+		className: 'leaflet-div-icon'
+	},
+
+	createIcon: function () {
+		var div = document.createElement('div');
+		var img = this._createImg(this.options['iconUrl']);
+		var numdiv = document.createElement('div');
+		numdiv.setAttribute ( "class", "number" );
+		numdiv.innerHTML = this.options['number'] || '';
+		div.appendChild ( img );
+		div.appendChild ( numdiv );
+		this._setIconStyles(div, 'icon');
+		return div;
+	},
+
+	//you could change this to add a shadow like in the normal marker if you really wanted
+	createShadow: function () {
+		return null;
+	}
+});
+
+	function updateDB (field, pixels, coords) {
+		var value = {pixel:{x:pixels[0], y:pixels[1]}, coord:{lat:coords[0], lon:coords[1]}};
+		var data = {doc_id: "570b418e1ac720b80ac63654", field: field, value:value};
+			
+		nodes.collection[nodes.current].control_points = value;
+		$.post("/edit/collection/" + node.collection, data, function(returnedData) {});
+	}
+
+	var control_points = {
+		points : [],
+		count: 1,
+		update: function () {
+			//updateDB("control_points", this.points);
+			console.log(this.points);
+			this.count++;
+		}
+	}
+
+	var gcps = {
+
+		pixels: [],
+		coords: [],
+
+		setPixels: function(x, y, update) {
+			this.pixels = [x,y];
+			this.check(update);
+			
+		},
+		setCoords: function(lat, lon, update) {
+			this.coords = [lat,lon];
+			this.check(update);
+			
+		},
+		check: function (update) {
+			console.log(control_points.count);
+			if(this.pixels.length && this.coords.length) {
+				console.log("ADDING");
+				var table = $("<table></table>");
+				table.append("<tr><td>" + this.pixels[0] + "</td><td>" + this.coords[0] + "</td></tr>");
+				table.append("<tr><td>" + this.pixels[1] + "</td><td>"+this.coords[1]+"</td></tr></table>");
+				$("#control_points").append(table);
+				//if(update)
+					//updateDB("control_points", this.pixels, this.coords);
+					
+				control_points.points.push({pixels:this.pixels, coords:this.coords});
+				control_points.update();
+				this.pixels = [];
+				this.coords = [];
+				//world_map.on('click', onWorldMapClick);
+				//map.on('click', onMapClick);
+			}
+		}
+	};
+
+	var  local_map = {
+
+		init: function (url, w, h) {
+			console.log(url, w, h);
+			this.map = L.map('left', {
+			  minZoom: 1,
+			  maxZoom: 6,
+			  center: [0, 0],
+			  zoom: 4,
+			  crs: L.CRS.Simple
+			});
+
+			// dimensions of the image
+			this.w = w;
+			this.h = h
+			this.url = url;
+			// calculate the edges of the image, in coordinate space
+			var southWest = this.map.unproject([0, this.h], this.map.getMaxZoom()-2);
+			var northEast = this.map.unproject([this.w, 0], this.map.getMaxZoom()-2);
+			this.bounds = new L.LatLngBounds(southWest, northEast);
+
+			// add the image overlay, 
+			// so that it covers the entire map
+			this.overlay = L.imageOverlay(this.url, this.bounds);
+			this.overlay.addTo(this.map);
+			// tell leaflet that the map is exactly as big as the image
+			this.map.setMaxBounds(this.bounds);
+
+			this.map.on('click', onMapClick);
+		},
+	}
+
+	
+
+	// Script for adding marker on map click
+	function onMapClick (e) {
+		var self = this;
+		
+		//Project the map click to x,y coordinates
+		//This projection is the actual XY coordinates of the image layer
+		//This coordinate is scaled by the amount the image is zoomed.
+		var clientClick = local_map.map.project(e.latlng);
+
+		//Grab the original overlay
+		var overlayImage = local_map.overlay._image;
+
+		//Calculate the current image ratio from the original (deals with zoom)
+		var yR = overlayImage.clientHeight / overlayImage.naturalHeight;
+		var xR = overlayImage.clientWidth / overlayImage.naturalWidth;
+
+		//scale the click coordinates to the original dimensions
+		//basically compensating for the scaling calculated by the map projection
+		var x = clientClick.x / xR;
+		var y = clientClick.y / yR;
+		console.log(x,y);
+		
+		//console.log(map.unproject(e.latlng));
+		
+		var geojsonFeature = {
+			"type": "Feature",
+				"properties": {},
+				"geometry": {
+					"type": "Point",
+					"coordinates": [e.latlng.lat, e.latlng.lng]
+			}
+		}
+
+		var marker;
+
+
+
+		L.geoJson(geojsonFeature, {
+			
+			pointToLayer: function(feature, latlng){
+				
+				marker = L.marker(e.latlng, {
+					
+					title: "Resource Location",
+					alt: "Resource Location",
+					riseOnHover: true,
+					draggable: true,
+					icon: new L.NumberedDivIcon({number: control_points.count})
+
+				}).bindPopup("<input type='button' value='Delete this marker' class='marker-delete-button'/>");
+
+				marker.on("popupopen", onPopupOpen);
+		   
+				return marker;
+			}
+		}).addTo(local_map.map);
+		
+		gcps.setPixels(x,y, true);
+		
+		// remove click when one marker is created
+		//map.off('click', onMapClick);
+	}
+
+
+
+	// Function to handle delete as well as other events on marker popup open
+	function onPopupOpen() {
+
+		var tempMarker = this;
+
+		//var tempMarkerGeoJSON = this.toGeoJSON();
+
+		//var lID = tempMarker._leaflet_id; // Getting Leaflet ID of this marker
+
+		// To remove marker on click of delete
+		$(".marker-delete-button:visible").click(function () {
+			local_map.map.removeLayer(tempMarker);
+			local_map.map.on('click', onMapClick);
+		});
+	}
+
+
+	// getting all the markers at once
+	function getAllMarkers() {
+		
+		var allMarkersObjArray = [];//new Array();
+		var allMarkersGeoJsonArray = [];//new Array();
+
+		$.each(map._layers, function (ml) {
+			//console.log(map._layers)
+			if (map._layers[ml].feature) {
+				
+				allMarkersObjArray.push(this)
+										allMarkersGeoJsonArray.push(JSON.stringify(this.toGeoJSON()))
+			}
+		})
+
+		console.log(allMarkersObjArray);
+		alert("total Markers : " + allMarkersGeoJsonArray.length + "\n\n" + allMarkersGeoJsonArray + "\n\n Also see your console for object view of this array" );
+	}
+
+	//$(".get-markers").on("click", getAllMarkers);
+
+    
+    // WORLD MAP
+
+	var world_map = L.map('right').setView([51.505, -0.09], 4);
+
+	var OpenStreetMap_Mapnik = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	});
+
+	var markers = L.layerGroup();
+	world_map.addLayer(markers);
+	world_map.addLayer(OpenStreetMap_Mapnik);
+	world_map.on('click', onWorldMapClick);
+	
+	// Script for adding marker on map click
+	function onWorldMapClick(e) {
+		
+
+		console.log(e.latlng);
+		
+		
+		var geojsonFeature = {
+			"type": "Feature",
+				"properties": {},
+				"geometry": {
+					"type": "Point",
+					"coordinates": [e.latlng.lat, e.latlng.lng]
+			}
+		}
+
+		var marker;
+
+		L.geoJson(geojsonFeature, {
+			
+			pointToLayer: function(feature, latlng){
+				
+				marker = L.marker(e.latlng, {
+					
+					title: "Resource Location",
+					alt: "Resource Location",
+					riseOnHover: true,
+					draggable: true,
+					icon: new L.NumberedDivIcon({number: control_points.count})
+
+				}).bindPopup("<input type='button' value='Delete this marker' class='marker-delete-button'/>");
+
+				marker.on("popupopen", onWorldPopupOpen);
+		   
+				return marker;
+			}
+		}).addTo(markers);
+		
+		gcps.setCoords(e.latlng.lat, e.latlng.lng, true);
+		// remove click when one marker is created
+		//world_map.off('click', onWorldMapClick);
+	}
+
+
+	// Function to handle delete as well as other events on marker popup open
+	function onWorldPopupOpen() {
+
+		var tempMarker = this;
+
+		//var tempMarkerGeoJSON = this.toGeoJSON();
+
+		//var lID = tempMarker._leaflet_id; // Getting Leaflet ID of this marker
+
+		// To remove marker on click of delete
+		$(".marker-delete-button:visible").click(function () {
+			world_map.removeLayer(tempMarker);
+			world_map.on('click', onWorldMapClick);
+		});
+	}
+	
+	var nodes;
+	
+	function onLoad() {
+		nodes = new nodeList();
+		nodes.current = 0;
+		
+		nodes.loadData(function () {
+			var info = nodes.collection[0].id__photo_sizes.size[8];
+			local_map.init(info.source, info.width, info.height); 
+		});
+		
+		getCount(function (data) {
+			nodes.count = data;
+			$("#count").text((nodes.current + 1) +"/" + data);
+		})
+		
+		
+		$("#prev").click(function() {
+			nodes.current--;
+			if(nodes.current < 0)
+				nodes.current = 0;
+			
+			clear();
+			var info = nodes.collection[nodes.current].id__photo_sizes.size[8];
+			local_map.init(info.source, info.width, info.height );
+			$("#count").text((nodes.current + 1) +"/" + nodes.count);
+			
+		});
+		$("#next").click(function() {
+			nodes.current++;
+			if(nodes.current > nodes.count -1) 
+				nodes.current = nodes.count - 1;
+				
+			clear();
+			var info = nodes.collection[nodes.current].id__photo_sizes.size[8];
+			local_map.init(info.source, info.width, info.height );
+			$("#count").text((nodes.current + 1) +"/" + nodes.count);
+
+		});
+
+		function clear() {
+			local_map.map.remove();
+			markers.clearLayers();
+			$("#control_points").empty();
+			if(nodes.collection[nodes.current].control_points != null) {
+				var curr = nodes.collection[nodes.current].control_points;
+				gcps.setPixels(curr.pixel.x, curr.pixel.y, false);
+				gcps.setCoords(curr.coord.lat, curr.coord.lon, false);
+			}
+			control_points.count = 1;
+		}
+	}
+	
+</script>
+
+</html>

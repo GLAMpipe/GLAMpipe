@@ -394,6 +394,19 @@ ul.node_types li:hover {
 }
 
 
+.view h2 {
+	background-color:#406360;
+}
+
+.view h3 {
+	background-color:#406360;
+}
+
+.view .params {
+	background-color: #406360;
+}
+
+
 .transform h2 {
 	background-color:#BDA14F;
 }
@@ -640,3 +653,6 @@ html {
 	margin-bottom:20px;
 	width:550px;
 }
+
+
+

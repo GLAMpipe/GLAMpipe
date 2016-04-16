@@ -207,8 +207,6 @@ exports.getNode = function (node_id, res) {
 
 /**
  * run project node based on node type
- * CLUSTER
- * - executes metapipe.cluster function
  * SOURCE - API
  * - calls metapipe.callAPI 
  * - executes script in node's scripts.run
@@ -295,8 +293,10 @@ exports.runNode = function (req, res, io) {
 								async.series([
 									function (callback) {
 
-										exports.callAPI(sandbox.out.url, function(data) {
-											sandbox.context.data = data;
+										exports.callAPI(sandbox.out.url, function(error, response, body) {
+											sandbox.context.error = error;
+											sandbox.context.response = response;
+											sandbox.context.data = body;
 											sandbox.out.url = "";
 											runNodeScriptInContext("run", node, sandbox, io);
 											
@@ -337,9 +337,9 @@ exports.runNode = function (req, res, io) {
 							
 						break;
 
-						case "cluster":
+						case "group":
 						
-							function clusterCB (data) {
+							function groupCB (data) {
 								// provide data to node
 								//sandbox.context.data = data;
 								
@@ -364,7 +364,7 @@ exports.runNode = function (req, res, io) {
 							var query = {}; 
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
-								mongoquery.cluster(node, clusterCB);
+								mongoquery.group(node, groupCB);
 							});
 								
 						
@@ -383,8 +383,6 @@ exports.runNode = function (req, res, io) {
 								// insert
 								mongoquery.insert(node.collection, sandbox.out.value, function() {
 									runNodeScriptInContext("finish", node, sandbox, io);
-									//generate view and do *not* wait it to complete
-									exports.updateView(node, sandbox, io, function(msg) {});
 								});
 								
 							}
@@ -1447,10 +1445,10 @@ exports.callAPI = function (url, callback) {
 	request(options, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			//console.log(body); 
-			callback(body);
+			callback(error, response, body);
 		} else {
 			console.log(error);
-			callback();
+			callback(error, response, body);
 			return;
 		}
 	});
@@ -1758,8 +1756,8 @@ function generateDynamicView(node, fields, edit, callback) {
 			for (key in data) {
 				if(data[key] != null) {
 					if(data[key].constructor.name === 'Array') {
-						//html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
-						html += '			<td>array</td>'
+						html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
+						//html += '			<td>array</td>'
 
 					} else {
 						if(edit) { 

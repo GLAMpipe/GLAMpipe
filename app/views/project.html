@@ -44,7 +44,6 @@
 		this.selectNode = function (data, event) {
 			var obj = $(event.target);
 			self.selectedNode = data;
-			console.log(data);
 			
 			if(typeof data.params.collection !== "undefined")
 				self.currentCollection = data.params.collection
@@ -378,6 +377,22 @@
 			})
 		});
 
+		$(document).on('click','.dynamic_collection', function(e) {
+			var obj = $(e.target);
+			var params = obj.parents(".params");
+			if(params.length == 0)
+				params = obj.parents(".settings");
+			
+			var html = "<ul>";
+			for(var i = 0; i < nodes.projectNodes().length; i++) {
+				var node = nodes.projectNodes()[i];
+				if(node.type == "collection" && node.collection != nodes.currentCollection) {
+					html += '<li class="pick_field" data-field="source_collection" data-val="'+node.collection+'">' + node.collection + '</li>';
+				}
+			}
+			html += "</ul>";
+			params.append("<div class='dynamic_fields'>"+html+"</div>");
+		})
 
 
 		
@@ -386,7 +401,7 @@
 			var params = obj.parents(".params");
 			if (params.length == 0)
 				params = obj.parents(".settings");
-				
+			
 			params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
 			params.find(".dynamic_fields").remove();
 		});
@@ -675,37 +690,52 @@
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		
 		<!-- ko if: type == 'collection' -->
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'source' -->
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.title)"></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
+			<!-- ko if: subtype == 'cluster' -->
+				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.source_collection)"></h2> 
+			<!-- /ko -->
+			<!-- ko if: subtype == 'directory' -->
+				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.root)"></h2> 
+			<!-- /ko -->
+			<!-- ko if: subtype == 'file' -->
+				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.file)"></h2> 
+			<!-- /ko -->
+
+
 		<!-- /ko -->
 
 		<!-- ko if: type == 'download' -->
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'transform'  -->
-		<h2 data-bind="click:$root.selectNode, html:title "></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.field)"></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
+			<h2 data-bind="click:$root.selectNode, html:title "></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.in_field)"></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', out_field)"></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'lookup'  -->
-		<h2 data-bind="click:$root.selectNode, html:title "></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title "></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
+		<!-- /ko -->
+
+		<!-- ko if: type == 'view'  -->
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title"></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.out_field)"></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'upload'  -->
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('WITH: ', $data.subtype)"></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('WITH: ', $data.subtype)"></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'export'  -->
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
-		<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.file)"></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+			<h2 class="out_field" data-bind="html:$root.concatenate('TO: ', $data.params.file)"></h2> 
 		<!-- /ko -->
 
 		<div class="delete_confirm" style="display:none">
@@ -713,8 +743,13 @@
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
-	   <div  class="node_info"> 
+	   <div  class="node_info">
+		   <!-- ko if: type == 'collection' --> 
+		   <p class="node_title" data-bind="html:collection"></p> 
+		   <!-- /ko -->
+		   <!-- ko if: type != 'collection' --> 
 			<p class="node_title" data-bind="html:params.title"></p> 
+			<!-- /ko -->
 		</div>
 		
 		
@@ -730,23 +765,27 @@
 				</div>
 			<!-- /ko -->
 			
+			<!-- ko if: type == 'collection' --> 
 			<div class="left bottom">
 				<a class="left view_button" data-bind="attr:{href:'/node/view/' + _id}" target="_blank" >view data</a> 	
 			</div>
+			<!-- /ko -->
+			
+			<!-- ko if: type == 'view' --> 
+			<div class="left bottom">
+				<a class="left view_button" data-bind="attr:{href:'/node/fileview/' + _id + '?view=georeferencer.html'}" target="_blank" >georeferencer</a> 	
+			</div>
+			<!-- /ko -->
 		</div>
 
 	</div>
 
 	 <!-- ko if: input_node != '' -->
 		<!-- ko if: type == 'source' -->
-			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' left_start'">
-				<img class="connector-end" src="../arrow.gif">
-			</div>
+			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' left_start'"></div>
 		<!-- /ko -->
 		<!-- ko if: type != 'source' -->
-			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' down_start'">
-				<img class="connector-end" src="../arrow.gif">
-			</div>
+			<div data-bind="css: 'connector ' + input_node + ' ' + $data._id + ' down_start'"></div>
 		<!-- /ko -->
 	<!-- /ko -->
 </script>
@@ -796,7 +835,7 @@
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
 							<li>
-								<div data-bind="html:description, click:$root.openNodeParams"></div>
+								<div data-bind="html:title, click:$root.openNodeParams"></div>
 								
 								<div data-bind="html:params" ></div>
 							</li>

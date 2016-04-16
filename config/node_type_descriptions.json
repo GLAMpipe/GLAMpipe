@@ -1,11 +1,13 @@
 {
 	"collection": "Collection node creates the data holder (collection) for your data. This is the first node to add.",
 	"source":"With source node you can import your data to metapipe. Your data can be in file (xml, csv, tsv or json) or data can be imported from API.",
-	"transform":"Transform node is used to modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
+	"transform":"Transform node is used for modifying fields in your data. Typical modifications are trimming spaces, splitting values,  changing case and so on.",
 	"lookup":"Lookup nodes can fetch data from metapipe collections or from external APIs.",
 	"export":"Export nodes writes (XML, JSON etc.) files or send data to external APIs.",
 	"map":"Map nodes allows you to produce new documents usually for export purposes. They can be also used for flattening deep structures.",
 	"download":"Download nodes dowloads files from URLs defined in chosen field.",
 	"upload":"Upload nodes uploads files and data to web services (like wikimedia commons)",
+	"file": "File nodes operates on local files (MD5 sum, thumbnailing and so on)",
+	"view": "Data spesific views which can also be interactive.",
 	"test":"Test nodes"
 }

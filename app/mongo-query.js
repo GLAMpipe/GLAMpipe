@@ -249,9 +249,8 @@ exports.nodes = function (callback) {
 
 }
 
-exports.cluster = function (node, callback) {
+exports.group = function (node, callback) {
 
-	var cluster_collection = db.collection(node.params.collection);
 	var collection = db.collection(node.params.source_collection);
 	var field_name = "$" + node.params.in_field;
 	var project = {};

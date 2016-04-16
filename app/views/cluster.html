@@ -20,13 +20,16 @@
 
 <script>
 	
-	var node = {};
-	node.collection = "p26_cluster-testi1_c4_authors";
-	node.lookup_collection = "p26_cluster-testi1_c0_kartverket";
-	node.params = {};
-	node.params.key = "author";
-	node.params.fields = ["author"];
+	//var node = {};
+	//node.collection = "p26_cluster-testi1_c4_authors";
+	//node.source_collection = "p26_cluster-testi1_c0_kartverket";
+	//node.params = {};
+	//node.params.key = "author";
+	//node.params.fields = ["author"];
 	
+
+	// place holder for node data
+	[[node]]
 
 	var nodeList = function () {
 		var self = this;
@@ -147,11 +150,11 @@
 
 	function query (term) {
 		term = term.trim();
-		$.getJSON("/get/collection/byfield/" + node.lookup_collection +"/?field="+ node.params.key + "&value=" + term , function(data) { 
+		$.getJSON("/get/collection/byfield/" + node.source_collection +"/?field="+ node.params.key + "&value=" + term , function(data) { 
 			for(var i = 0; i < data.length; i++) {
-				for(var j = 0; j < node.params.fields.length; j++) {
-					$("#result").append("<div>"+data[i][node.params.fields[j]]+"</div>");
-				}
+				//for(var j = 0; j < node.params.fields.length; j++) {
+					//$("#result").append("<div>"+data[i][node.params.fields[j]]+"</div>");
+				//}
 			}
 		})
 	}
