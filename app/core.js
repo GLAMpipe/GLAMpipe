@@ -303,7 +303,7 @@ exports.runNode = function (req, res, io) {
 											// add source id to data (expects out.value to be an array)
 											for (var i = 0; i < sandbox.out.value.length; i++ ) {
 												// flatten
-												sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
+												//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
 												sandbox.out.value[i][MP.source] = node._id;
 											}
 											
@@ -613,16 +613,15 @@ exports.runNode = function (req, res, io) {
 								
 								sandbox.context.doc = doc;
 								sandbox.context.count++;
+								sandbox.out.url = null;
 								
 								// ask url and file name from node
-								runNodeScriptInContext("run", node, sandbox, io);
-								if (sandbox.out.error !== null) 
-									return;
-									
-								exports.downloadFile(node, sandbox, function() {
+								runNodeScriptInContext("pre_run", node, sandbox, io);
+								exports.downloadFile(node, sandbox, function(sandbox) {
+									run.runInContext(sand);
 									// write file location to db
 									var setter = {};
-									setter[node.out_field] = path.join(node.dir, sandbox.out.file) ;
+									setter[node.out_field] = sandbox.out.value;
 									mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 								})
 								
@@ -1573,6 +1572,13 @@ exports.readDir = function (dirname, onFileList, onError) {
 exports.downloadFile = function (node, sandbox, cb ) {
 	var fs = require("fs");
 	var request = require("request")
+
+	
+	if(sandbox.out.url == null) {
+		sandbox.context.error = "URL missing";
+		return cb(sandbox);
+	} 
+
 	
 	var filePath = path.join(node.dir, sandbox.out.file); 
 	var file = fs.createWriteStream(filePath);
@@ -1580,32 +1586,31 @@ exports.downloadFile = function (node, sandbox, cb ) {
 
 	// verify response code
 	sendReq.on('response', function(response) {
-		if (response.statusCode !== 200) {
-			return cb('Response status was ' + response.statusCode);
-		}
+		sandbox.context.response = response;
+
 	});
 
 	// check for request errors
 	sendReq.on('error', function (err) {
 		fs.unlink(filePath);
+		console.log(err);
+		sandbox.context.error = err;
 
-		if (cb) {
-			return cb(err.message);
-		}
 	});
 
 	sendReq.pipe(file);
 
 	file.on('finish', function() {
-		file.close(cb);  // close() is async, call cb after close completes.
+		file.close(function () {cb(sandbox);});  // close() is async, call cb after close completes.
 	});
 
 	file.on('error', function(err) { 
 		fs.unlink(filePath); // Delete the file async. 
 		console.log(err);
+		sandbox.context.fileerror = err;
 
 		if (cb) {
-			return cb(err.message);
+			return cb(sandbox);
 		}
 	});
 
@@ -1937,14 +1942,10 @@ function callAPISerial (sandbox, node, onScript, onError) {
 
 	// make actual HTTP request
 	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
+			sandbox.context.error = error;
+			sandbox.context.response = response;
 			sandbox.context.data = body;
 			onScript(sandbox)
-		} else {
-			console.log(error);
-			onError(error);
-			return;
-		}
 	});
 
 }

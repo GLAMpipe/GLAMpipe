@@ -694,22 +694,27 @@
 		<!-- /ko -->
 
 		<!-- ko if: type == 'source' -->
-			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
 			<!-- ko if: subtype == 'cluster' -->
+				<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
 				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.source_collection)"></h2> 
 			<!-- /ko -->
 			<!-- ko if: subtype == 'directory' -->
+				<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
 				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.root)"></h2> 
 			<!-- /ko -->
 			<!-- ko if: subtype == 'file' -->
+				<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
 				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', $data.params.file)"></h2> 
 			<!-- /ko -->
-
+			<!-- ko if: subtype == 'API' -->
+				<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ':' + subtype "></h2> 
+				<h2 class="out_field" data-bind="html:$root.concatenate('FROM: ', title)"></h2> 
+			<!-- /ko -->
 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'download' -->
-			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() "></h2> 
+			<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() + ': ' + title  "></h2> 
 		<!-- /ko -->
 
 		<!-- ko if: type == 'transform'  -->
