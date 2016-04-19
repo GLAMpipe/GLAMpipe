@@ -474,6 +474,12 @@
 				var context = {"node":nodes.selectedNode, "doc":data[0]};
 				context.data = {};
 				context.path = {};
+				context.get = function (obj, desc) { 
+					var arr = desc.split('.'); 
+					while(arr.length && (obj = obj[arr.shift()])); 
+					if(typeof obj === 'undefined') return ''; 
+					return obj; 
+				}
 				context.path.join = function (v1, v2) {return v1 + "/" + v2; }
 				var out = {};
 				eval(nodes.selectedNode.scripts.pre_run);

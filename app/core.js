@@ -205,6 +205,13 @@ exports.getNode = function (node_id, res) {
 	});
 }
 
+function getProp(obj, desc) { 
+    var arr = desc.split('.'); 
+    while(arr.length && (obj = obj[arr.shift()])); 
+    if(typeof obj === 'undefined') return ''; 
+    return obj; 
+}
+
 /**
  * run project node based on node type
  * SOURCE - API
@@ -256,6 +263,7 @@ exports.runNode = function (req, res, io) {
 					doc_count:0,
 					count:0,
 					path: path,
+					get: getProp,
 					MP: MP
 				},
 				out: {
@@ -333,7 +341,13 @@ exports.runNode = function (req, res, io) {
 							)};
 
 							// start query loop
-							requestLoop();
+							// remove previous data insertet by node and import file
+							var query = {}; 
+							query[MP.source] = node._id;
+							mongoquery.empty(node.collection, query, function() {
+								requestLoop();
+							});
+							
 							
 						break;
 
@@ -614,6 +628,7 @@ exports.runNode = function (req, res, io) {
 								sandbox.context.doc = doc;
 								sandbox.context.count++;
 								sandbox.out.url = null;
+								sandbox.context.error = null;
 								
 								// ask url and file name from node
 								runNodeScriptInContext("pre_run", node, sandbox, io);
@@ -714,7 +729,10 @@ exports.runNode = function (req, res, io) {
 
 										sandbox.context.doc = doc;
 										sandbox.context.count++;
-										runNodeScriptInContext("run", node, sandbox, io);
+										sandbox.context.data = null;
+										sandbox.context.error = null;
+										
+										runNodeScriptInContext("pre_run", node, sandbox, io);
 										
 										console.log("GETTING:",sandbox.out.title);
 										// get revisions (to see if page exists)
@@ -738,14 +756,20 @@ exports.runNode = function (req, res, io) {
 													client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
 														if(err) {
 															io.sockets.emit("error", err);
+															var setter = {};
+															setter[node.out_field] = err;
+															mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 														} else {
-															console.log(data.imageinfo.descriptionurl);
+															//console.log(data);
 															
 															// upload wikitext
 															var content = sandbox.out.wikitext;
-															client.edit('File:'+sandbox.out.title, content, 'test', function(err) {
-																console.log('EDIT tethy'); 
-																
+															console.log("STARTING TO EDIT", sandbox.out.title);
+															console.log("******REAL URL", data.imageinfo.canonicaltitle);
+															client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
+																sandbox.context.error = err;
+																sandbox.context.data = data;
+																runNodeScriptInContext("run", node, sandbox, io);
 																// write commons page url to db
 																var setter = {};
 																setter[node.out_field] = data.imageinfo.descriptionurl;
@@ -767,33 +791,6 @@ exports.runNode = function (req, res, io) {
 
 						break;
 						
-						
-						default:
-						
-							runNodeScriptInContext("login", node, sandbox, io);
-							
-							// first we need to login
-							login2API(node, sandbox, function () {
-								// find everything
-								mongoquery.find2({}, node.collection, function(err, doc) {
-									sandbox.context.doc_count = doc.length;
-									runNodeScriptInContext("init", node, sandbox, io);
-									
-									// run node once per record
-									async.eachSeries(doc, function iterator(doc, next) {
-
-										sandbox.context.doc = doc;
-										sandbox.context.count++;
-										runNodeScriptInContext("run", node, sandbox, io);
-
-										
-									}, function done () {
-										runNodeScriptInContext("finish", node, sandbox, io);
-									});
-								});
-							});
-							
-						break;
 					}
 				break;
 
@@ -963,6 +960,7 @@ function initNode (nodeRequest, res, io, project) {
 			node.project = nodeRequest.project
 			node.collection = nodeRequest.collection;
 			node.number = nodeRequest.node_count;
+			node.dirsuffix = ""; // node can set this in "hello" script
 			
 			if(nodeRequest.params)
 				node.params = nodeRequest.params;
@@ -989,7 +987,7 @@ function initNode (nodeRequest, res, io, project) {
 			// create output directory for nodes that do file output
 			if(node.type == "download" || node.type == "export" || node.type == "source") {
 				var fs = require("fs");
-				var dir = path.join(MP.projects_dir, project.dir, node.type, project.node_count + "_" + node.nodeid);
+				var dir = path.join(MP.projects_dir, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
 				fs.mkdir(dir, function(err) {
 					if(err) {
 						console.log("ERROR:", err);
@@ -1607,7 +1605,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 	file.on('error', function(err) { 
 		fs.unlink(filePath); // Delete the file async. 
 		console.log(err);
-		sandbox.context.fileerror = err;
+		sandbox.context.error = err;
 
 		if (cb) {
 			return cb(sandbox);
