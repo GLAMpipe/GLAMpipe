@@ -1,8 +1,8 @@
-# metapipe
-2*node-based (meta)data processing tool
+# GLAMpipe
+Visual tool for viewing, editing, downloading and uploading of GLAM-based data. 
 
 # what is this?
-http://artturimatias.github.io/metapipe/
+http://artturimatias.github.io/GLAMpipe/
 
 # what and where are nodes?
 https://github.com/artturimatias/metapipe-nodes
@@ -25,27 +25,27 @@ These commands should give you all you need to install Metapipe:
 
 Now its time to install metapipe. Start by fetching code:
 
-    git clone https://github.com/artturimatias/metapipe.git
+    git clone https://github.com/artturimatias/GLAMpipe.git
 
 Then move to directory that was created:
 
-    cd metapipe
+    cd GLAMpipe
 
 Finally, you need to install all the extra stuff that Metapipe needs. It's easy, just type:
 
     npm install
 
-One step is still needed. You need to download Metapipe nodes. You can have a zip from here:
+One step is still needed. You need to download GLAMpipe nodes. You can have a zip from here:
 
 [https://github.com/artturimatias/metapipe-nodes/archive/master.zip](https://github.com/artturimatias/metapipe-nodes/archive/master.zip)
 
-Extract that some where and copy "nodes" directory to "metapipe" directory. Then type:
+Extract that some where and copy "nodes" directory to "GLAMpipe" directory. Then type:
 
-    nodejs metapipe.js
+    nodejs GLAMpipe.js
 
 You should see something like this:
 
-    metapipe running!
+    GLAMpipe running!
     copy this to your web browser -> http://localhost:3000
 
-Open link in your browser and you are using Metapipe (that is, if everything went well)!
+Open link in your browser and you are using GLAMpipe (that is, if everything went well)!
