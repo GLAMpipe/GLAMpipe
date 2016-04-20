@@ -578,11 +578,10 @@ html {
 	font-size: 34px;
 	font-weight:bold;
 	font-family:arial;
-	color:#99B4B2;
+	color:white;
 	padding-top:3px;
 	margin-left:300px;
 	margin-right:300px;
-	text-shadow: 1px 1px 1px #3B5654;
 }
 
 .details .key {

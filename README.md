@@ -41,7 +41,7 @@ One step is still needed. You need to download GLAMpipe nodes. You can have a zi
 
 Extract that some where and copy "nodes" directory to "GLAMpipe" directory. Then type:
 
-    nodejs GLAMpipe.js
+    nodejs glampipe.js
 
 You should see something like this:
 

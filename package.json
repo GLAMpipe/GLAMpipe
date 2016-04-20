@@ -2,7 +2,7 @@
   "name": "metapipe",
   "version": "0.0.0",
   "description": "",
-  "main": "metapipe.js",
+  "main": "glampipe.js",
   "dependencies": {
     "ansicolors": "^0.3.2",
     "async": "^1.5.2",

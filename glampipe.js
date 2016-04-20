@@ -29,7 +29,7 @@ metapipe.initDB(function () {
 
 			//websocket
 			io.on("connection", function (socket) {
-			  socket.emit('news', "Welcome to MetaPipe!" );
+			  socket.emit('news', "Welcome to GLAMpipe!" );
 			});
 
 			// last guard
@@ -40,14 +40,14 @@ metapipe.initDB(function () {
 			// we notify browser of control + c
 			process.on( 'SIGINT', function() {
 				console.log( "\nGot SIGINT (Ctrl-C)" );
-				io.sockets.emit("error", "metapipe server was shut down!!");
+				io.sockets.emit("error", "GLAMpipe server was shut down!!");
 				process.exit( );
 			})
 
 			var server = http.listen(3000, function() {
 				var host = server.address().address;
 				var port = server.address().port;
-				console.log('metapipe running!');
+				console.log('GLAMpipe running!');
 				console.log('copy this to your web browser -> http://%s:%s', host, port);
 			});
 		});
