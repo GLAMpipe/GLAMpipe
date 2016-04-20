@@ -683,7 +683,6 @@ exports.runNode = function (req, res, io) {
 							sandbox.context.count++;
 							sandbox.out.value = null;  // reset output
 							run.runInContext(sand);
-							//runNodeScriptInContext("run", node, sand, io);
 							var setter = {};
 							setter[node.out_field] = sandbox.out.value;
 							//console.log(setter);
@@ -731,56 +730,66 @@ exports.runNode = function (req, res, io) {
 										sandbox.context.count++;
 										sandbox.context.data = null;
 										sandbox.context.error = null;
+										sandbox.context.skip = null;
 										
 										runNodeScriptInContext("pre_run", node, sandbox, io);
-										
-										console.log("GETTING:",sandbox.out.title);
-										// get revisions (to see if page exists)
-										client.getArticle('File:' +sandbox.out.title, function (err, d) {
-											if(err)
-												console.log(err);
-											if(d != null) {
-												io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-												console.log("CONTENT:", d);
-												next();
+                                        if(sandbox.context.skip) {
+                                            next();
+                                        } else {
+                                            
+                                            console.log("GETTING:",sandbox.out.title);
+                                            // get revisions (to see if page exists)
+                                            client.getArticle('File:' +sandbox.out.title, function (err, d) {
+                                                if(err)
+                                                    console.log(err);
+                                                if(d != null) {
+                                                    io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
+                                                    console.log("CONTENT:", d);
+                                                    next();
 
-											} else {
+                                                } else {
 
-												fs.readFile(sandbox.out.filename, function (err,data) {
-													if (err) {
-														console.log(err);
-														io.sockets.emit("error", err);
-														next();	// continue despite the error
-													}
-													// upload file
-													client.upload(sandbox.out.title, data, "uploaded with MetaPipe via nodemw", function (err, data) {
-														if(err) {
-															io.sockets.emit("error", err);
-															var setter = {};
-															setter[node.out_field] = err;
-															mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-														} else {
-															//console.log(data);
-															
-															// upload wikitext
-															var content = sandbox.out.wikitext;
-															console.log("STARTING TO EDIT", sandbox.out.title);
-															console.log("******REAL URL", data.imageinfo.canonicaltitle);
-															client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-																sandbox.context.error = err;
-																sandbox.context.data = data;
-																runNodeScriptInContext("run", node, sandbox, io);
-																// write commons page url to db
-																var setter = {};
-																setter[node.out_field] = data.imageinfo.descriptionurl;
-																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-															});
-														}
-													});
-												});
-											}
-											
-										});
+                                                    fs.readFile(sandbox.out.filename, function (err,data) {
+                                                        if (err) {
+                                                            console.log(err);
+                                                            io.sockets.emit("error", err);
+                                                            next();	// continue despite the error
+                                                        }
+                                                        // upload file
+                                                        client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
+                                                            if(err) {
+                                                                io.sockets.emit("error", err);
+                                                                var setter = {};
+                                                                setter[node.out_field] = err;
+                                                                mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+                                                            } else {
+                                                                //console.log(data);
+                                                                
+                                                                // upload wikitext
+                                                                var content = sandbox.out.wikitext;
+                                                                console.log("STARTING TO EDIT", sandbox.out.title);
+                                                                console.log("******REAL URL", data.imageinfo.canonicaltitle);
+                                                                client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
+                                                                    sandbox.context.error = err;
+                                                                    sandbox.context.data = data;
+                                                                    runNodeScriptInContext("run", node, sandbox, io);
+                                                                    // write commons page url to db
+                                                                    var setter = {};
+                                                                    setter[node.out_field] = data.imageinfo.descriptionurl;
+                                                                    mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
+                                                                        if(sandbox.context.abort)
+                                                                            next(true);
+                                                                        else
+                                                                            next();
+                                                                    });
+                                                                });
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                                
+                                            });
+                                    }
 										
 										
 									}, function done () {
