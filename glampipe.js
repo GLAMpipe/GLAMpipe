@@ -74,10 +74,9 @@ var GlamPipe = function() {
 	 */
 	self.terminator = function(sig){
 		if (typeof sig === "string") {
-		   console.log('%s: Received %s - terminating sample app ...',
-					   Date(Date.now()), sig);
+			console.log('%s: Received %s - terminating sample app ...', Date(Date.now()), sig);
 			self.io.sockets.emit("error", "GLAMpipe server was shut down!!");
-		   process.exit(1);
+			process.exit(1);
 		}
 		console.log('%s: Node server stopped.', Date(Date.now()) );
 	};
