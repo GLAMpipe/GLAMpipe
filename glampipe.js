@@ -1,15 +1,14 @@
 
-const fs           = require('fs');
-const path         = require('path');
-const contentTypes = require('./utils/content-types');
-const sysInfo      = require('./utils/sys-info');
-const env          = process.env;
+const fs			= require('fs');
+const path			= require('path');
+const contentTypes	= require('./utils/content-types');
+const sysInfo		= require('./utils/sys-info');
+const env			= process.env;
 
-var express         = require('express');
-var request         = require('request');
-
-var bodyParser	    = require("body-parser");
-var colors 		    = require('ansicolors');
+var express			= require('express');
+var request			= require('request');
+var bodyParser		= require("body-parser");
+var colors 			= require('ansicolors');
 
 var config 		= require("./config/config.js");
 
@@ -53,23 +52,16 @@ var GlamPipe = function() {
 		
 		self.metapipe 	= require("./app/core.js");
 
-		self.app 		= express();
+		self.app = express();
 		self.app.use(express.static('public'));
 		self.app.use( bodyParser.json() );       // to support JSON-encoded bodies
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 			extended: true
 		})); 
-		self.http 		= require('http').Server(self.app);
-		self.io 			= require('socket.io')(self.http);
-
-
 		
-		//self.createRoutes();
-		//self.app.use(express.static('public'));
-		//  Add handlers for the app (from the routes).
-		//for (var r in self.routes) {
-		  //  self.app.get(r, self.routes[r]);
-		//}
+		self.http 		= require('http').Server(self.app);
+		self.io 		= require('socket.io')(self.http);
+
 		require('./app/routes.js')(self.app, self.metapipe, self.io);
 
 	};
@@ -114,12 +106,8 @@ var GlamPipe = function() {
 		//self.populateCache();
 		//self.setupTerminationHandlers();
 
-
-
 		// Create the express server and routes.
 		self.initializeServer();
-
-
 
 		self.metapipe.initDB(function () {
 			self.metapipe.initNodes(function() {
