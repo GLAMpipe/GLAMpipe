@@ -3,7 +3,8 @@ var mongojs = require('mongojs');
 var async = require("async");
 var database = require('../config/database');
 
-var db = mongojs(database.url);
+console.log(database.initDBConnect());
+var db = mongojs(database.initDBConnect());
 var exports = module.exports = {};
 
 

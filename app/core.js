@@ -1,4 +1,3 @@
-var multer 		= require("multer");
 var mongojs 	= require('mongojs');
 var async 		= require("async");
 var colors 		= require('ansicolors');
@@ -7,6 +6,7 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 const MP 		= require("../config/const.js");
+var config 		= require("../config/config.js");
 var exports 	= module.exports = {};
 
 
@@ -35,8 +35,8 @@ exports.initDB = function (callback) {
 }
 
 exports.initDir = function (callback) {
-
-	fs.mkdir(MP.projects_dir, function(err) {
+    console.log(config.projectsDir());
+	fs.mkdir(config.projectsDir(), function(err) {
 		if(err) {
 			if(err.code === "EEXIST") {
 				console.log("INIT: output directory exists");
@@ -132,7 +132,7 @@ exports.createProject = function (title, res) {
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
 	title_dir = title_dir.replace(/[ ]/g,"_");
 	// create projects/project_name directory 
-	var projectPath = path.join(MP.projects_dir, title_dir); 
+	var projectPath = path.join(config.projectsDir(), title_dir); 
 	fs.mkdir(projectPath, function(err) {
 		if(err) {
 			if(err.code === "EEXIST")
@@ -996,7 +996,7 @@ function initNode (nodeRequest, res, io, project) {
 			// create output directory for nodes that do file output
 			if(node.type == "download" || node.type == "export" || node.type == "source") {
 				var fs = require("fs");
-				var dir = path.join(MP.projects_dir, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
+				var dir = path.join(config.projectsDir(), project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
 				fs.mkdir(dir, function(err) {
 					if(err) {
 						console.log("ERROR:", err);
@@ -1637,7 +1637,7 @@ function importTSV (mode, node, cb) {
 	var streamCSV = require("node-stream-csv");
 
 	var records = [];
-	var file = path.join("uploads", node.params.filename);
+	var file = path.join(config.dataPath(), "tmp", node.params.filename);
 	streamCSV({
 		filename: file,
 		mode: mode,

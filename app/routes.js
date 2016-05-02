@@ -1,13 +1,18 @@
 
-
+const MP 		= require("../config/const.js");
+var config 		= require("../config/config.js");
 
 module.exports = function(app, metapipe, io) {
+    
 	var multer 		= require("multer");
-	var upload 		= multer({ dest: 'uploads/' });
 	var path 		= require('path');
+    var p = path.join(config.dataPath(), 'tmp');
+	var upload 		= multer({ dest: p });
 
+    // INFO to console
 	app.all("*", function (req, res, next) {
-		console.log(req.url);
+		console.log(req.method, req.url);
+		//console.log(req.params);
         next();
 	});
 
