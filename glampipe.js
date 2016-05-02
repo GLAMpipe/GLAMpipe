@@ -44,6 +44,10 @@ metapipe.initDB(function () {
 				process.exit( );
 			})
 
+            http.on("error", function(e) {
+                console.log(e);
+            });
+
 			var server = http.listen(3000, function() {
 				var host = server.address().address;
 				var port = server.address().port;

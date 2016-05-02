@@ -6,6 +6,11 @@ module.exports = function(app, metapipe, io) {
 	var upload 		= multer({ dest: 'uploads/' });
 	var path 		= require('path');
 
+	app.all("*", function (req, res, next) {
+		console.log(req.url);
+        next();
+	});
+
 	// PROJECTS
 
 	app.get('/', function (req, res) {
