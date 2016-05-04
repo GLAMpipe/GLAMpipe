@@ -1,11 +1,10 @@
 body {
-	background-color:#BFCCCB;
+
 }
 
 body
 {
 	font-family: monospace;
-	font-size: 12px;
 	padding: 0px;
 	margin: 0px;
 }
@@ -13,25 +12,25 @@ body
 h1
 {
 	margin: 0px;
-	font-size: 20px;
+
 }
 
 h2
 {
-	font-size: 15px;
+
 	margin: 0px;
 }
 
 h3
 {
-	font-size: 12px;
+
 	margin: 0px;
 }
 
 h2, h3 {
 	padding:5px;
 	color:white;
-	background-color:#BFCCCB;
+
 }
 
 a:link {
@@ -654,4 +653,31 @@ html {
 }
 
 
+/* ********************* NEW UI *********************** */
 
+.collection_pipe {
+    width:400px;
+    float:left;
+}
+
+.collection_pipe > h2 {
+    background-color:#99B4B2;
+}
+
+.pipe {
+    margin:10px;
+}
+
+.collection_view {
+    margin-left:400px;
+}
+
+.collection_view h2 {
+    background-color:#073763;
+}
+
+.node {
+	width:350px;
+    background:#ECECEC;
+    margin-bottom:10px;
+}

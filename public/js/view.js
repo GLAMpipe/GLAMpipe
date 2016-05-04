@@ -37,7 +37,7 @@
 	};
 	
 
-	var nodeList = function () {
+	var dataList = function () {
 		var self = this;
 		this.reverse = false;
 		this.collectionName = "";
@@ -158,7 +158,7 @@
 			}
 		}
 		
-		var nodes = new nodeList();
+		var nodes = new dataList();
 		nodes.collectionName = path[path.length -1];
 		ko.applyBindings(nodes);
 		nodes.loadData(nodes);
