@@ -10,7 +10,7 @@ var request			= require('request');
 var bodyParser		= require("body-parser");
 var colors 			= require('ansicolors');
 
-var config 		= require("./config/config.js");
+global.config = {};
 
 
 var GlamPipe = function() {
@@ -50,7 +50,7 @@ var GlamPipe = function() {
 		
 		console.log("initializing server");
 		
-		self.metapipe 	= require("./app/core.js");
+		
 
 		self.app = express();
 		self.app.use(express.static('public'));
@@ -62,7 +62,7 @@ var GlamPipe = function() {
 		self.http 		= require('http').Server(self.app);
 		self.io 		= require('socket.io')(self.http);
 
-		require('./app/routes.js')(self.app, self.metapipe, self.io);
+		require('./app/routes.js')(self.app, self);
 
 	};
 
@@ -97,27 +97,48 @@ var GlamPipe = function() {
 		});
 	};
 
+
+
+		
+
+
 	/**
-	 *  Initializes the sample application.
+	 *  Initializes the application.
 	 */
 	self.initialize = function(cb) {
 		self.setupVariables();
 		//self.populateCache();
 		//self.setupTerminationHandlers();
-
-		// Create the express server and routes.
-		self.initializeServer();
-
-		self.metapipe.initDB(function () {
-			self.metapipe.initNodes(function() {
-				self.metapipe.initDir(function() {
-					
-					console.log("INIT done");
+		
+		self.core 	= require("./app/core.js");
+	   
+		self.core.initDB(function () {
+			self.core.initDir(function(dataPath) {
+				
+				if(!dataPath) {
+					self.dataPath = "fakedir";
+					console.log(colors.red("ERROR: DATAPATH not set"));
+					self.initError = "datapath is not set!";
+					self.initializeServer();
 					cb();
+				} else {
+					self.dataPath = dataPath;
+					global.config.dataPath = dataPath;
+					global.config.projectsPath = path.join(dataPath, "projects");
 
-				});
+					self.core.initNodes(function(error) {
+						if(error)
+							self.initError = "nodes not found!";
+
+						// Create the express server and routes.
+						self.initializeServer();
+						console.log("INIT done");
+						cb();
+					});
+				}
 			});
 		});
+
 	};
 
 
@@ -128,7 +149,6 @@ var GlamPipe = function() {
 	self.start = function() {
 		
 		console.log('starting GLAMpipe!');
-		console.log("http:", typeof self.http);
 		self.http.on("error", function(e) {
 			console.log(e);
 		});
@@ -137,8 +157,8 @@ var GlamPipe = function() {
 			var server = self.http.listen(self.port, self.ipaddress, function() {
 				var host = server.address().address;
 				var port = server.address().port;
-				console.log("DATA PATH:",config.dataPath());
-				console.log("PROJECTS PATH:",config.projectsDir());
+				//console.log("DATA PATH:",config.dataPath());
+				//console.log("PROJECTS PATH:",config.projectsDir());
 				console.log('GLAMpipe running!');
 				console.log('copy this to your web browser -> http://%s:%s', host, port);
 			});
@@ -147,7 +167,16 @@ var GlamPipe = function() {
 }
 
 var glampipe = new GlamPipe();
-glampipe.initialize(function() {
-	glampipe.start();
-});
+
+
+try {
+	 
+	glampipe.initialize(function() {
+		glampipe.start();
+	});
+	
+} catch (e) {
+		console.log("PAM");
+		console.log(e);
+	}
 

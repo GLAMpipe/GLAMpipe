@@ -1,4 +1,5 @@
 var path 		= require("path");
+var mongoquery 	= require("../app/mongo-query.js");
 
 var MP = "__mp";
 var datapath = "/home/arihayri/Documents/GLAMpipe_data";
@@ -9,13 +10,15 @@ var exports = module.exports = {};
 exports.source =  MP + "_source";
 
 
-exports.dataPath = function () {
+exports.dataPath = function (glampipe) {
 	
-	// check if we are running on OPENSHIFT
-	
-	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined")
+	// if we are not running on OPENSHIFT
+	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
+		// then use datapath from "mp_settings" collection
 		return datapath;
-	else 
+		
+	// else use OPENSHIFT data dir
+	} else 
 		return process.env.OPENSHIFT_DATA_DIR;
 
 }

@@ -6,7 +6,6 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 const MP 		= require("../config/const.js");
-var config 		= require("../config/config.js");
 var exports 	= module.exports = {};
 
 
@@ -19,12 +18,13 @@ var positionOffset = 60;
  */
 exports.initDB = function (callback) {
 	mongoquery.findOne({},"mp_settings", function(data) { 
+
 		if(data) {
 			console.log("DB: mp_settings exists");
 			callback();
 		} else {
 			console.log("DB: creating project counter");
-			mongoquery.insert("mp_settings", {"project_count":0}, function(result) {
+			mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
 				if(result.error)
 					console.log("ERROR: could not create project counter!");
 				else 
@@ -35,21 +35,40 @@ exports.initDB = function (callback) {
 }
 
 exports.initDir = function (callback) {
-    console.log(config.projectsDir());
-	fs.mkdir(config.projectsDir(), function(err) {
-		if(err) {
-			if(err.code === "EEXIST") {
-				console.log("INIT: output directory exists");
-				callback();
-			} else
-				console.log("ERROR:", err);
-			return;
+	fs = require('fs');
+	var dataPath = "";
+
+	mongoquery.findOne({},"mp_settings", function(data) { 
+		if(data.data_path == "") {
+			callback(null);
+		} else {
+			// if we are not running on OPENSHIFT
+			if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
+				// then use datapath from "mp_settings" collection
+				dataPath = data.data_path;
+			// else use OPENSHIFT data dir
+			} else 
+				dataPath = process.env.OPENSHIFT_DATA_DIR;
+				
+			// create "projects" directory
+			fs.mkdir(path.join(dataPath, "projects"), function(err) {
+				if(err) {
+					if(err.code === "EEXIST") {
+						console.log("INIT: projects directory exists");
+						callback(dataPath);
+					} else
+						console.log("ERROR:", err);
+					return;
+				}
+				console.log("INIT: output directory created");
+				callback(dataPath);
+			});
+			
 		}
-		console.log("INIT: output directory created");
-		callback();
 	});
 
 }
+
 
 /**
  * load stock nodes
@@ -63,7 +82,7 @@ exports.initNodes = function (callback) {
 	var data = {};
 	mongoquery.drop("mp_nodes", function() {
 
-		fs = require('fs')
+		fs = require('fs');
 		// read first node type descriptions
 		fs.readFile("config/node_type_descriptions.json", 'utf8', function (err, data) {
 			if(err)
@@ -71,7 +90,8 @@ exports.initNodes = function (callback) {
 			else 
 				var descriptions = JSON.parse(data);
 				
-			readFiles('nodes/', function(filename, content, next) {
+			console.log(path.join(global.config.dataPath, 'nodes/'));
+			readFiles(path.join(global.config.dataPath, 'nodes/'), function(filename, content, next) {
 				
 				try {
 					var node = JSON.parse(content);
@@ -112,16 +132,46 @@ exports.initNodes = function (callback) {
 				if( error.code == "ENOENT") {
 					console.log("ERROR: No nodes present!");
 					console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+					callback(error);
 				}
 				
 			}, function onDone () {
 				console.log("INIT: nodes loaded");
-				callback();
+				callback(null);
 			});
 		});
 
 	});
 }
+
+
+exports.sendErrorPage = function (res, error) {
+	fs = require('fs');
+	fs.readFile(path.join(__dirname, "views", "setup.html"), 'utf-8', function(err, content) {
+		if (err) {
+			console.log(err);
+			res.send(err);
+		} else {
+			content = content.replace("[[initerror]]", "<h3 id='initerror' class='bad'>" + error + "</h3>");
+			res.send(content);
+		}
+	});
+}
+
+
+exports.setDataPath = function (params, glampipe, res) {
+	var path = params.datapath;
+	mongoquery.update("mp_settings",{}, {$set: {data_path: path}}, function(error) {
+		if(error) {
+			console.log(error);
+			res.json({"error":"not working"});
+		} else {
+			console.log("datapath set to:", path );
+			glampipe.initError = null;
+			res.json({"status": "datapath set"});
+		}
+	})
+};
 
 
 exports.createProject = function (title, res) {
@@ -132,7 +182,7 @@ exports.createProject = function (title, res) {
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
 	title_dir = title_dir.replace(/[ ]/g,"_");
 	// create projects/project_name directory 
-	var projectPath = path.join(config.projectsDir(), title_dir); 
+	var projectPath = path.join(global.config.projectsPath, title_dir); 
 	fs.mkdir(projectPath, function(err) {
 		if(err) {
 			if(err.code === "EEXIST")
@@ -206,10 +256,10 @@ exports.getNode = function (node_id, res) {
 }
 
 function getProp(obj, desc) { 
-    var arr = desc.split('.'); 
-    while(arr.length && (obj = obj[arr.shift()])); 
-    if(typeof obj === 'undefined') return ''; 
-    return obj; 
+	var arr = desc.split('.'); 
+	while(arr.length && (obj = obj[arr.shift()])); 
+	if(typeof obj === 'undefined') return ''; 
+	return obj; 
 }
 
 /**
@@ -733,63 +783,63 @@ exports.runNode = function (req, res, io) {
 										sandbox.context.skip = null;
 										
 										runNodeScriptInContext("pre_run", node, sandbox, io);
-                                        if(sandbox.context.skip) {
-                                            next();
-                                        } else {
-                                            
-                                            console.log("GETTING:",sandbox.out.title);
-                                            // get revisions (to see if page exists)
-                                            client.getArticle('File:' +sandbox.out.title, function (err, d) {
-                                                if(err)
-                                                    console.log(err);
-                                                if(d != null) {
-                                                    io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-                                                    console.log("CONTENT:", d);
-                                                    next();
+										if(sandbox.context.skip) {
+											next();
+										} else {
+											
+											console.log("GETTING:",sandbox.out.title);
+											// get revisions (to see if page exists)
+											client.getArticle('File:' +sandbox.out.title, function (err, d) {
+												if(err)
+													console.log(err);
+												if(d != null) {
+													io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
+													console.log("CONTENT:", d);
+													next();
 
-                                                } else {
+												} else {
 
-                                                    fs.readFile(sandbox.out.filename, function (err,data) {
-                                                        if (err) {
-                                                            console.log(err);
-                                                            io.sockets.emit("error", err);
-                                                            next();	// continue despite the error
-                                                        }
-                                                        // upload file
-                                                        client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
-                                                            if(err) {
-                                                                io.sockets.emit("error", err);
-                                                                var setter = {};
-                                                                setter[node.out_field] = err;
-                                                                mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-                                                            } else {
-                                                                //console.log(data);
-                                                                
-                                                                // upload wikitext
-                                                                var content = sandbox.out.wikitext;
-                                                                console.log("STARTING TO EDIT", sandbox.out.title);
-                                                                console.log("******REAL URL", data.imageinfo.canonicaltitle);
-                                                                client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-                                                                    sandbox.context.error = err;
-                                                                    sandbox.context.data = data;
-                                                                    runNodeScriptInContext("run", node, sandbox, io);
-                                                                    // write commons page url to db
-                                                                    var setter = {};
-                                                                    setter[node.out_field] = data.imageinfo.descriptionurl;
-                                                                    mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
-                                                                        if(sandbox.context.abort)
-                                                                            next(true);
-                                                                        else
-                                                                            next();
-                                                                    });
-                                                                });
-                                                            }
-                                                        });
-                                                    });
-                                                }
-                                                
-                                            });
-                                    }
+													fs.readFile(sandbox.out.filename, function (err,data) {
+														if (err) {
+															console.log(err);
+															io.sockets.emit("error", err);
+															next();	// continue despite the error
+														}
+														// upload file
+														client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
+															if(err) {
+																io.sockets.emit("error", err);
+																var setter = {};
+																setter[node.out_field] = err;
+																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+															} else {
+																//console.log(data);
+																
+																// upload wikitext
+																var content = sandbox.out.wikitext;
+																console.log("STARTING TO EDIT", sandbox.out.title);
+																console.log("******REAL URL", data.imageinfo.canonicaltitle);
+																client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
+																	sandbox.context.error = err;
+																	sandbox.context.data = data;
+																	runNodeScriptInContext("run", node, sandbox, io);
+																	// write commons page url to db
+																	var setter = {};
+																	setter[node.out_field] = data.imageinfo.descriptionurl;
+																	mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
+																		if(sandbox.context.abort)
+																			next(true);
+																		else
+																			next();
+																	});
+																});
+															}
+														});
+													});
+												}
+												
+											});
+									}
 										
 										
 									}, function done () {
@@ -996,7 +1046,7 @@ function initNode (nodeRequest, res, io, project) {
 			// create output directory for nodes that do file output
 			if(node.type == "download" || node.type == "export" || node.type == "source") {
 				var fs = require("fs");
-				var dir = path.join(config.projectsDir(), project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
+				var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
 				fs.mkdir(dir, function(err) {
 					if(err) {
 						console.log("ERROR:", err);
@@ -1637,7 +1687,7 @@ function importTSV (mode, node, cb) {
 	var streamCSV = require("node-stream-csv");
 
 	var records = [];
-	var file = path.join(config.dataPath(), "tmp", node.params.filename);
+	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	streamCSV({
 		filename: file,
 		mode: mode,

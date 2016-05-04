@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>GLAMpipe setup</title>
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/js-graph-it.css" />
+<link rel="stylesheet" type="text/css" href="css/sf-homepage.css" />
+<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
+
+<style>
+p {padding:5px}
+</style>
+
+<script>
+function init() {
+    var error = $("#initerror").text();
+    if(error == "data path not set!")
+        $("#setpath").show();
+        
+    
+}
+
+</script>
+
+</head>
+<body onLoad="init()">
+    <div class="project_header">
+        <h1>SETUP</h1>
+    </div>
+    <h2>errors:</h2>
+    [[initerror]]
+    
+    <br><br><br>
+    <div id="setpath" style="width:600px; float:left;display:none" >
+        <div class="source">
+            
+            <h2>set data path here</h2>
+           
+            <form method="POST" action="/set/datapath">
+                <label>data path</label>
+                <input name="datapath" style="width:500px"/>
+                <input type="submit" value="set data path">
+            </form>
+        </div>
+    </div>
+    
+    <div class="upload" id="node_settings" style="width:500px">
+        <h2>Fixing errors</h2>
+        <h3>"datapath is not set!"</h3>
+        <p>You need create a directory where GLAMpipe can save its data. </p>
+        <p>Then write full path to "data path" field and click "set data path".</p>
+        <h3>"nodes not found" </h3>
+        <p>GLAMpipe does not find node files. Download nodes to "nodes" directory IN your data directory.</p>
+        <p>Nodes can be found here: <a href="https://github.com/artturimatias/metapipe-nodes/archive/master.zip">https://github.com/artturimatias/metapipe-nodes/archive/master.zip</a></p>
+        <img src="images/what.png" />
+    </div>
+
+	</body>
+</html>

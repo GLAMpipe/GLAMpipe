@@ -5,6 +5,11 @@ var database = require('../config/database');
 
 console.log(database.initDBConnect());
 var db = mongojs(database.initDBConnect());
+
+db.on("error", function(e) {
+    throw("dberror","ERROR: can not connect to database (mongodb).\nPlease note that just installing mongodb is not enough.\nYou must also have it *running*.")
+});
+    
 var exports = module.exports = {};
 
 
@@ -56,12 +61,13 @@ exports.find = function (query, collectionname, callback) {
 }
 
 exports.findOne = function (query, collectionname, callback) {
-
+    
 	var collection = db.collection(collectionname);
 
+    
 	collection.findOne(query ,function (err, result) {
 		if (err) {
-			console.log(err);
+			console.log("ERROR:", err);
 			callback({'error':err})
 		} else {
 			callback(result);
@@ -165,7 +171,7 @@ exports.update = function (collectionname, query, doc, callback) {
 	collection.update(query, doc , {multi:true}, function (err, result) {
 		if (err) {
 			console.log(err);
-			callback();
+			callback(err);
 		} else {
 			callback();
 		}

@@ -1,129 +1,140 @@
 
-const MP 		= require("../config/const.js");
-var config 		= require("../config/config.js");
 
-module.exports = function(app, metapipe, io) {
+module.exports = function(express, glampipe) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p = path.join(config.dataPath(), 'tmp');
+    var p = path.join(glampipe.dataPath, 'tmp');
 	var upload 		= multer({ dest: p });
 
     // INFO to console
-	app.all("*", function (req, res, next) {
+	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
 		//console.log(req.params);
-        next();
+        if(glampipe.initError && req.method == "GET") 
+            glampipe.core.sendErrorPage(res, glampipe.initError);
+        else
+            next();
+	});
+
+    // SETUP
+
+	express.post('/set/datapath', function (req, res) {
+		glampipe.core.setDataPath(req.body, glampipe, res);
 	});
 
 	// PROJECTS
 
-	app.get('/', function (req, res) {
+	express.get('/', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'index.html'));
 	});
 
-	app.get('/project/:id', function (req, res) {
+	express.get('/setup', function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'setup.html'));
+	});
+
+	express.get('/project/:id', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'project.html'));
 	});
 
-	app.post('/create/project', function (req, res) {
-		metapipe.createProject(req.body.title, res);
+	express.post('/create/project', function (req, res) {
+		glampipe.core.createProject(req.body.title, res);
 	});
 
-	app.get('/get/projects', function (req, res) {
-		metapipe.getProjects(res);
+	express.get('/get/projects', function (req, res) {
+		glampipe.core.getProjects(res);
 	});
 
-	app.get('/get/project/:id', function (req, res) {
-		metapipe.getProject(req.params.id, res);
+	express.get('/get/project/:id', function (req, res) {
+		glampipe.core.getProject(req.params.id, res);
 	});
 
 
 
 	// NODES
 
-	app.get('/get/nodes/:project', function (req, res) {
-		metapipe.getProjectNodes(req.params.project, res);
+	express.get('/get/nodes/:project', function (req, res) {
+		glampipe.core.getProjectNodes(req.params.project, res);
 	});
 
-	app.get('/get/nodes', function (req, res) {
-		metapipe.getNodes(res);
+	express.get('/get/nodes', function (req, res) {
+		glampipe.core.getNodes(res);
 	});
 
 
-	app.get('/get/node/:id', function (req, res) {
-		metapipe.getNode(req.params.id, res);
+	express.get('/get/node/:id', function (req, res) {
+		glampipe.core.getNode(req.params.id, res);
 	});
 
-	app.get('/node/view/:id', function (req, res) {
-		metapipe.nodeView(req, function(data) {res.send(data)});
+	express.get('/node/view/:id', function (req, res) {
+		glampipe.core.nodeView(req, function(data) {res.send(data)});
 	});
 
-	app.get('/node/editview/:id', function (req, res) {
-		metapipe.nodeEditView(req, function(data) {res.send(data)});
+	express.get('/node/editview/:id', function (req, res) {
+		glampipe.core.nodeEditView(req, function(data) {res.send(data)});
 	});
 
-	app.get('/node/fileview/:id', function (req, res) {
-		metapipe.nodeFileView(req, function(data) {res.send(data)});
+	express.get('/node/fileview/:id', function (req, res) {
+		glampipe.core.nodeFileView(req, function(data) {res.send(data)});
 	});
 
-	app.post('/create/node', function (req, res) {
-		metapipe.createNode(req.body, res, io);
+	express.post('/create/node', function (req, res) {
+		glampipe.core.createNode(req.body, res, glampipe.io);
 	});
 
-	app.post('/create/collection/node', function (req, res) {
-		metapipe.createCollectionNode(req.body, res, io);
+	express.post('/create/collection/node', function (req, res) {
+		glampipe.core.createCollectionNode(req.body, res, glampipe.io);
 	});
 
-	app.post('/delete/node', function (req, res) {
-		metapipe.deleteNode(req.body, res, io);
+	express.post('/delete/node', function (req, res) {
+		glampipe.core.deleteNode(req.body, res, glampipe.io);
 	});
 
-	app.post('/set/node/position', function (req, res) {
-		metapipe.setNodePosition(req.body, res);
+	express.post('/set/node/position', function (req, res) {
+		glampipe.core.setNodePosition(req.body, res);
 	});
 
-	app.post('/run/node/:id', function (req, res) {
-		metapipe.runNode(req, res, io);
+	express.post('/run/node/:id', function (req, res) {
+		glampipe.core.runNode(req, res, glampipe.io);
 		res.json({status:"started"});
 	});
 
 
 
 	// DATA
-	app.get('/get/collection/:id', function (req, res) {
-		metapipe.getCollection(req, {}, res);
+	express.get('/get/collection/:id', function (req, res) {
+		glampipe.core.getCollection(req, {}, res);
 	});
 
-	app.get('/get/collection/byfield/:id', function (req, res) {
-		metapipe.getCollectionByField(req, res);
+	express.get('/get/collection/byfield/:id', function (req, res) {
+		glampipe.core.getCollectionByField(req, res);
 	});
 
-	app.get('/view/collection/:id', function (req, res) {
-		metapipe.viewCollection(req.params.id, function(data) {res.send(data)});
+	express.get('/view/collection/:id', function (req, res) {
+		glampipe.core.viewCollection(req.params.id, function(data) {res.send(data)});
 	});
 
-	app.get('/get/collection/fields/:id', function (req, res) {
-		metapipe.getCollectionFields(req.params.id, function(data) {res.send(data)});
+	express.get('/get/collection/fields/:id', function (req, res) {
+		glampipe.core.getCollectionFields(req.params.id, function(data) {res.send(data)});
 	});
 
 
-	app.get('/get/collection/count/:id', function (req, res) {
-		metapipe.getCollectionCount(req.params.id, function(data) {res.send(data)});
+	express.get('/get/collection/count/:id', function (req, res) {
+		glampipe.core.getCollectionCount(req.params.id, function(data) {res.send(data)});
 	});
 
-	app.post('/edit/collection/:id', function (req, res) {
-		metapipe.editCollection(req.params.id, req, function(data) {res.send(data)});
+	express.post('/edit/collection/:id', function (req, res) {
+		glampipe.core.editCollection(req.params.id, req, function(data) {res.send(data)});
 	});
 
 	// UPLOAD
-	app.post('/upload/file', upload.single('file'), function (req, res) {
-		metapipe.uploadFile(req, res);
+	express.post('/upload/file', upload.single('file'), function (req, res) {
+		glampipe.core.uploadFile(req, res);
 	});
 
 
 	// NODE EDITOR
-	app.get('/node-viewer', function (req, res) {
+	express.get('/node-viewer', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
 	});
 }
