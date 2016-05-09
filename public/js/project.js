@@ -6,24 +6,12 @@
 var node = null;
 
 
+
+
 var nodeList = function () {
 	var self = this;
 
-ko.components.register('test', {
-    viewModel: function(params) {
-        //Define view model here
-        this.title = ko.observable("Hello from component!!!");
-    },
-    template: { require: 'text!/template/test.html' } // TODO: add text plugin for require
-});
 
-ko.components.register('mywidget', {
-    viewModel: function(params) {
-        //Define view model here
-        this.title = ko.observable("Hello from component!!!");
-    },
-    template: '<div data-bind="text: title"></div>'
-});
 
 	this.collection = ko.observableArray(); 
 	this.projectNodes = ko.observableArray(); 
@@ -31,6 +19,7 @@ ko.components.register('mywidget', {
 
     // get project nodes
 	this.loadProject = function (nodesModel) {
+
 		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
 			var data = project.nodes;
 			if(typeof data !== "undefined") { 
@@ -116,3 +105,33 @@ $( document ).ready(function() {
 
 
 });
+
+
+
+window.getTemplate = function (name) {
+    var baseUrl = "/template/";
+
+    var loaded = ko.observable(false);
+
+    var template = document.getElementById('template-' + name);
+
+    if (template) {
+        loaded(true);
+    } else {
+        jQuery.get(baseUrl + name + '.html', function (data) {
+            var scriptTag = $('<script type="text/html" id="template-' + name + '"></script>');
+            scriptTag.html(data);
+            console.log(data);
+            $('head').append(scriptTag);
+            loaded(true);
+        });
+    }
+
+    return ko.computed(function () {
+        if (loaded()) {
+            return 'template-' + name;
+        } else {
+            return "template-empty";
+        }
+    })();
+};

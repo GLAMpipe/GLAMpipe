@@ -33,7 +33,7 @@ module.exports = function(express, glampipe) {
 		res.sendFile(path.join(__dirname, 'views', 'setup.html'));
 	});
 
-	express.get('/template/file', function (req, res) {
+	express.get('/template/:file', function (req, res) {
 		res.sendFile(path.join(__dirname, 'templates', 'test.html'));
 	});
 
