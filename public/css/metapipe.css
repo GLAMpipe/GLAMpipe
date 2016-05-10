@@ -182,8 +182,11 @@ input.dynamic_field {
 
 
 #node_settings {
-	float:right;
+	position:absolute;
+    z-index:1000;
+    top:20px;
 	width:390px;
+    left:400px;
 	background-color: #99B4B2;
 }
 

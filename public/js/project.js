@@ -111,7 +111,7 @@ var nodeList = function () {
         node_settings_html += '</div>';
         
         $('#node_bar').replaceWith(node_settings_html);
-        $("#mainCanvas .block").removeClass("selected");
+        $(".pipe .block").removeClass("selected");
         obj.parents(".block").addClass("selected");
         self.setSettingsValues(data);
     }
@@ -256,6 +256,10 @@ $( document ).ready(function() {
     nodes.tabs = $tabs;
     var beginTab = $("#tabs ul li:eq(" + getSelectedTabIndex($tabs) + ")").find("a");
     loadTabFrame($(beginTab).attr("href"),$(beginTab).attr("rel"));
+
+    $( ".pipe" ).sortable({
+      revert: true
+    });
 
     // close icon: removing the tab on click
     $("#tabs").on("click",  "span.ui-icon-close", function() {
