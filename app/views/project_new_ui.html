@@ -5,6 +5,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>GLAMpipe</title>
 <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/js/knockout.js"></script>
 <script type="text/javascript" src="/js/project.js"></script>
 <script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
@@ -12,6 +13,7 @@
 
 
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
 
 
 <script type="text/html" id="node-template">
@@ -35,33 +37,86 @@
 			<p class="node_title" data-bind="html:params.title"></p> 
 			<!-- /ko -->
 		</div>
+
 		
+		<div>
+			
+			<!-- ko if: type == 'collection' --> 
+				<button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
+                <button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
+			<div class="left bottom">
+				<a class="left view_button" data-bind="click:$root.openTab">view data</a> 	
+			</div>
+			<!-- /ko -->
+			
+			<!-- ko if: type == 'view' --> 
+			<div class="bottom">
+				<a class="left view_button" data-bind="attr:{href:'/node/fileview/' + _id + '?view=georeferencer.html'}" target="_blank" >georeferencer</a> 	
+			</div>
+			<!-- /ko -->
+		</div>
+
 	</div>
 
 </script>
 
 
-
 </head>
-<body>
 
+<body>
+    <button data-bind="click: openCollectionCreator" class="right" >add collection</button>
+    
+    
+    <!-- PROJECT NODES -->
 	<div class="collection_pipe">
 		<h2><a href="/"><</a> Project: jotain</h2>
 		<div class="pipe" data-bind="template: { name: 'node-template', foreach: projectNodes }"></div>
-	
-
 	</div>
 
+    <!-- VIEW TABS -->
 	<div class="collection_view">
 		<h2>Data in collection: jotain</h2>
-		<div id="" class="view">
-<div id="prevnext"><button data-bind="click: prevPage">prev</button><button data-bind="click: nextPage">next</button></div></div><div>	<table>		<thead>			<tr>			<th id="vcc" data-bind="click: sort">[count]</th>			<th id="catalog_identifier" data-bind="click: sort">catalog_identifier</th>			<th id="isbn" data-bind="click: sort">isbn</th>			<th id="uc_identifier" data-bind="click: sort">uc_identifier</th>			<th id="language" data-bind="click: sort">language</th>			<th id="first_author" data-bind="click: sort">first_author</th>			<th id="other_authors" data-bind="click: sort">other_authors</th>			<th id="full_title" data-bind="click: sort">full_title</th>			<th id="year" data-bind="click: sort">year</th>			<th id="total_pages" data-bind="click: sort">total_pages</th>			<th id="thesis_type" data-bind="click: sort">thesis_type</th>			<th id="thesis_subject_area" data-bind="click: sort">thesis_subject_area</th>			<th id="thesis_year" data-bind="click: sort">thesis_year</th>			<th id="controlled_subject" data-bind="click: sort">controlled_subject</th>			<th id="series_name" data-bind="click: sort">series_name</th>			<th id="series_issn" data-bind="click: sort">series_issn</th>			<th id="series_volume_issue" data-bind="click: sort">series_volume_issue</th>			<th id="description" data-bind="click: sort">description</th>			<th id="method_in_use" data-bind="click: sort">method_in_use</th>			<th id="person_as_subject" data-bind="click: sort">person_as_subject</th>			<th id="title_as_subject" data-bind="click: sort">title_as_subject</th>			<th id="uncontrolled_keywords" data-bind="click: sort">uncontrolled_keywords</th>			<th id="urn_identifier" data-bind="click: sort">urn_identifier</th>			<th id="thesis_subject_code_1_1" data-bind="click: sort">thesis_subject_code_1_1</th>			<th id="okm_kota_code_1" data-bind="click: sort">okm_kota_code_1</th>			<th id="okm_kota_code_2" data-bind="click: sort">okm_kota_code_2</th>			<th id="okm_kota_code_3" data-bind="click: sort">okm_kota_code_3</th>			<th id="okm_kota_code_4" data-bind="click: sort">okm_kota_code_4</th>			<th id="_id" data-bind="click: sort">_id</th>			</tr>		</thead>		
-<tbody data-bind="foreach: documents">			<tr>				<td data-bind="text: vcc"></td>				<td><div class="data-container"  data-bind="text: catalog_identifier"></div></td>				<td><div class="data-container"  data-bind="text: isbn"></div></td>				<td><div class="data-container"  data-bind="text: uc_identifier"></div></td>				<td><div class="data-container"  data-bind="text: language"></div></td>				<td><div class="data-container"  data-bind="text: first_author"></div></td>				<td><div class="data-container"  data-bind="text: other_authors"></div></td>				<td><div class="data-container"  data-bind="text: full_title"></div></td>				<td><div class="data-container"  data-bind="text: year"></div></td>				<td><div class="data-container"  data-bind="text: total_pages"></div></td>				<td><div class="data-container"  data-bind="text: thesis_type"></div></td>				<td><div class="data-container"  data-bind="text: thesis_subject_area"></div></td>				<td><div class="data-container"  data-bind="text: thesis_year"></div></td>				<td><div class="data-container"  data-bind="text: controlled_subject"></div></td>				<td><div class="data-container"  data-bind="text: series_name"></div></td>				<td><div class="data-container"  data-bind="text: series_issn"></div></td>				<td><div class="data-container"  data-bind="text: series_volume_issue"></div></td>				<td><div class="data-container"  data-bind="text: description"></div></td>				<td><div class="data-container"  data-bind="text: method_in_use"></div></td>				<td><div class="data-container"  data-bind="text: person_as_subject"></div></td>				<td><div class="data-container"  data-bind="text: title_as_subject"></div></td>				<td><div class="data-container"  data-bind="text: uncontrolled_keywords"></div></td>				<td>null</td>				<td><div class="data-container"  data-bind="text: thesis_subject_code_1_1"></div></td>				<td><div class="data-container"  data-bind="text: okm_kota_code_1"></div></td>				<td><div class="data-container"  data-bind="text: okm_kota_code_2"></div></td>				<td><div class="data-container"  data-bind="text: okm_kota_code_3"></div></td>				<td><div class="data-container"  data-bind="text: okm_kota_code_4"></div></td>				<td><div class="data-container"  data-bind="text: _id"></div></td>			</tr>		</tbody>	</table></div>
+        <div id="tabs">
+            <ul>
+                <li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
 
-		</div>
+            </ul>
+          <div class="tab" id="tabs-1">
+          </div>
+        </div>
 	</div>
 
+
+    <!-- NODE CREATOR -->
+	<div id="node_creator">
+		<button data-bind="click:closeCreator">close</button>
+		<h1>Choose node type</h1>
+		<!-- ko foreach: collection -->
+		<div data-bind="attr:{id:_id.type + '_node', class:_id.type}">
+			<h2 data-bind="text: _id.type,click:$parent.openNodeTypes"></h2>
+			<p data-bind="html:_id.description"></p>
+			<div data-bind="foreach: subtypes" class="node_types" style="display:none">
+				<div data-bind="attr:{id:sub.subtype + '_node', class:sub.subtype}">
+					<h3 data-bind="text: sub.subtype"></h3>
+					<div class="node_types" >
+						<ul data-bind="foreach: nodes" class="node_types">
+							<li>
+								<div data-bind="html:title, click:$root.openNodeParams"></div>
+								
+								<div data-bind="html:params" ></div>
+							</li>
+							
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /ko -->
+	</div>
 	
+    <div id="footer">
+        <div id="console"></div>
+    </div>
 
 </body>
 </html>

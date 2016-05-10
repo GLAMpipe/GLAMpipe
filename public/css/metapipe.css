@@ -1,12 +1,13 @@
-body {
 
-}
 
-body
+html, body
 {
 	font-family: monospace;
 	padding: 0px;
 	margin: 0px;
+    height:100%;
+    background: url(../images/data.svg);
+    background-size: 100% 150%;
 }
 
 h1
@@ -19,6 +20,7 @@ h2
 {
 
 	margin: 0px;
+    font-size:14px;
 }
 
 h3
@@ -30,6 +32,7 @@ h3
 h2, h3 {
 	padding:5px;
 	color:white;
+    
 
 }
 
@@ -456,14 +459,9 @@ html {
 }
 
 #console {
-	position:fixed;
-	top:60px;
 	padding:10px;
-	padding-top:60px;
 	top:0px;
-	height:auto;
-	bottom:60px;
-	width:550px;
+	height:80px;
 	color:white;
 	z-index:-1;
 	overflow:hidden;
@@ -481,7 +479,7 @@ html {
 	font-size: 20px;
 	text-align: center;
 	vertical-align: middle;
-	background-color: #AE6B6B;
+	color:white;
 	
 }
 
@@ -566,32 +564,17 @@ html {
 	color:black;
 }
 
-.self_advertise {
-	position:fixed;
-	top:0;
-	width:auto;
-	right:0px;
-	left:0px;
-	letter-spacing: 6px;
-	text-align:center;
-	font-size: 34px;
-	font-weight:bold;
-	font-family:arial;
-	color:white;
-	padding-top:3px;
-	margin-left:300px;
-	margin-right:300px;
-}
+
 
 .details .key {
 	font-weight:bold;
 }
 
 #footer {
-    clear: both;
-    position: relative;
-    z-index: 10;
-    height: 20px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
     margin-top:-10px;
     padding-top:5px;
     background-color:#99B4B2;
@@ -657,7 +640,7 @@ html {
 
 .collection_pipe {
     width:400px;
-    float:left;
+
 }
 
 .collection_pipe > h2 {
@@ -670,6 +653,10 @@ html {
 
 .collection_view {
     margin-left:400px;
+    position:absolute;
+    top:0px;
+    width:  calc(100% - 400px);
+    height: 100%;
 }
 
 .collection_view h2 {
@@ -681,3 +668,25 @@ html {
     background:#ECECEC;
     margin-bottom:10px;
 }
+
+#tabs {
+    height:80%;
+}
+#tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
+
+.tab {
+height:100%;
+}
+
+.tabIframeWrapper {
+    height:100%;
+}
+
+.iframetab {
+    width:100%;
+    height:100%;
+    border:0px;
+    margin:0px;
+    background:url("data/iframeno.png");
+}
+
