@@ -62,24 +62,7 @@ input[type='checkbox'] {
 	
 
 
-button {
-    background-color: #99B4B2;
-    border-radius:2px;
-    color: #fff;
-    text-decoration: none;
-    cursor: pointer;
-    border:none;
-    
-}
 
-button:hover {
-	background-color: #395D5A;
-}
-
-button.run, button.test {
-	border: 1px solid #5C5C5C;
-	font-weight:bold;
-}
 
 #test_results {
 	display:none;
@@ -154,6 +137,7 @@ input.dynamic_field {
 
 	background-color:#BFCCCB;
 	border: 2px solid orange;
+    width:300px;
 }
 
 
@@ -181,19 +165,14 @@ input.dynamic_field {
 }
 
 
-#node_settings {
-	position:absolute;
-    z-index:1000;
-    top:20px;
-	width:390px;
-    left:400px;
-	background-color: #99B4B2;
+.node_settings {
+    display:none;
 }
 
-#node_bar .settings {
-	overflow-y:scroll;
-	max-height:600px;
+.node_buttons {
+    display:none;
 }
+
 
 .node_info {
 	padding:5px;
@@ -235,7 +214,7 @@ input.dynamic_field {
 #node_creator {
 	position:absolute;
 	top:0px;
-	right:0px;
+	left:400px;
 
 	z-index:100000;
 	padding:20px;
@@ -461,30 +440,12 @@ html {
 
 }
 
-#console {
-	padding:10px;
-	top:0px;
-	height:80px;
-	color:white;
-	z-index:-1;
-	overflow:hidden;
-	background-color:#BFCCCB;
-}
 
 #console img {
 	opacity:0.5;
 }
 
-.delete_icon {
-	float:right;
-	width:30px;
-	height:28px;
-	font-size: 20px;
-	text-align: center;
-	vertical-align: middle;
-	color:white;
-	
-}
+
 
 .delete {
 	float:right;
@@ -500,53 +461,13 @@ html {
 	background-color: #EFB134;
 }
 
-#mainCanvas {
-	background-color : transparent;
-}
 
-#mainCanvas .node {
-	width:250px;
-	opacity: 1.0;
-	background-color : #99B4B2;
-	box-shadow: 10px 10px 5px #888888;
-	z-index:2000;
-}
-
-#mainCanvas .block h2{
-}
-
-#mainCanvas .block h2.out_field{
-	background-color:#6B6E6B;
-	padding:2px;
-	padding-left:5px;
-	font-size:12px;
-}
-
-
-#mainCanvas .block h2.out_field:empty {
-	padding:0px;
-	margin:0px;
-}
-
-#mainCanvas .collection {
-	width:350px;
-	background-color : #99B4B2;
-}
-
-
-#mainCanvas .selected {
-	border: 5px solid orange;
-}
 
 .inline_header {
 	display:inline;
 }
 
-.project_header {
-	background-color:#99B4B2;
-	padding:10px;
-	color:white;
-}
+
 
 
 
@@ -573,15 +494,7 @@ html {
 	font-weight:bold;
 }
 
-#footer {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    margin-top:-10px;
-    padding-top:5px;
-    background-color:#99B4B2;
-}
+
 
 #footer a {
 	padding-right:10px;
@@ -639,11 +552,21 @@ html {
 }
 
 
+
+
+
 /* ********************* NEW UI *********************** */
+
+#project_header {
+	background-color:#99B4B2;
+	color:white;
+    padding:5px;
+    height:20px;
+    width:390px;
+}
 
 .collection_pipe {
     width:400px;
-
 }
 
 .collection_pipe > h2 {
@@ -655,11 +578,11 @@ html {
 }
 
 .collection_view {
-    margin-left:400px;
+    left:400px;
     position:absolute;
     top:0px;
     width:  calc(100% - 400px);
-    height: 100%;
+    height: calc(100% - 60px);
 }
 
 .collection_view h2 {
@@ -673,12 +596,27 @@ html {
 }
 
 #tabs {
-    height:80%;
+    height:90%;
+    padding:0px;
+    margin:0px;
 }
+
+.ui-corner-flat {
+    border-top-left-radius: 0px !important;
+    border-top-right-radius: 0px !important;
+    border-bottom-left-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+
 #tabs li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
 
+
+
+
+
 .tab {
-height:100%;
+    height:100%;
+    overflow-y:scroll;
 }
 
 .tabIframeWrapper {
@@ -692,4 +630,132 @@ height:100%;
     margin:0px;
     background:url("data/iframeno.png");
 }
+
+.delete_icon {
+	float:right;
+	width:30px;
+	height:28px;
+	font-size: 20px;
+	text-align: center;
+	vertical-align: middle;
+	color:white;
+}
+
+.drag_icon {
+    float:left;
+    width:24px;
+    height:24px;
+    padding:3px;
+    cursor: grab;
+    
+}
+
+/* ********************* BUTTONS *********************** */
+
+button {
+    background-color: #99B4B2;
+    border-radius:2px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    border:none;
+    
+}
+
+button:hover {
+	background-color: #395D5A;
+}
+
+button.run, button.test {
+	border: 1px solid #5C5C5C;
+	font-weight:bold;
+}
+
+.node_settings button.run {
+    padding:20px;
+    background-color:orange;
+    font-size:20px;
+}
+
+.open_settings_button {
+    margin-top:20px;
+    display:block;
+    width:100%;
+}
+
+#footer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin-top:-10px;
+    padding-top:5px;
+    background-color:#99B4B2;
+}
+
+
+#console {
+	padding:10px;
+	top:0px;
+	height:70px;
+	color:white;
+	z-index:-1;
+	overflow:hidden;
+	background-color:#BFCCCB;
+}
+
+
+
+
+#tabs > ul > li.transform {
+    background-color:#F6F4C5;
+}
+
+#tabs > ul > li.ui-tabs-active.transform {
+    background-color:#BDA14F;
+}
+
+#tabs > ul > li.collection {
+    background-color:#B6B6B6;
+}
+
+#tabs > ul > li.ui-tabs-active.collection {
+    background-color:#333;
+}
+
+#tabs > ul > li.export {
+    background-color: #F2DCDC;
+}
+
+#tabs > ul > li.ui-tabs-active.export {
+    background-color: #AE6B6B;
+}
+
+#tabs > ul > li.cluster {
+    background-color: #D4E5EF;
+}
+
+#tabs > ul > li.ui-tabs-active.cluster{
+    background-color: #BA8D32;
+}
+
+#tabs > ul > li.source {
+    background-color: #D4E5EF;
+}
+
+#tabs > ul > li.ui-tabs-active.source {
+    background-color: #1885C0;
+}
+
+#tabs > ul > li.lookup {
+    background-color: #D5F0BB;
+}
+
+#tabs > ul > li.ui-tabs-active.lookup {
+    background-color: #649834;
+}
+
+
+
+
 

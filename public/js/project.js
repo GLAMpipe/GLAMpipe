@@ -75,6 +75,7 @@ var nodeList = function () {
         
     this.selectNode = function (data, event) {
         var obj = $(event.target);
+        var settings = obj.parent().find(".node_buttons");
         self.selectedNode = data;
         
         if(typeof data.params.collection !== "undefined")
@@ -86,31 +87,9 @@ var nodeList = function () {
         
         // plain script tag causes confusion in html views so we restore it here
         data.views.settings = data.views.settings.replace(/_script/g,'script');	
+
         
-        var node_settings_html = 
-            '<div id="node_bar" class="selected">' + 
-            '	<h2>' +data.type+": " +data.title+ '</h2>' +
-            '	<div class="number">node number: '+data.number+'</div>' +
-            '	<h3 class="subhead">params</h3>' +
-            '	<div class="node_params">' +
-                    self.nodeParams(data) +
-            '	</div>' +
-            '	<h3 class="subhead">settings</h3>' +
-            '	<div class="settings">' +
-                    data.views.settings +
-            '	</div>';
-
-        if(data.type == 'transform' || data.type == 'lookup') {
-            node_settings_html += '	<button id="'+data._id+'" class="test">test!</button>';
-        } 
-
-        if(data.type != 'collection') {
-            node_settings_html += '	<button id="'+data._id+'" class="run">run this node!</button>';
-        } 
-
-        node_settings_html += '</div>';
-        
-        $('#node_bar').replaceWith(node_settings_html);
+        settings.toggle();
         $(".pipe .block").removeClass("selected");
         obj.parents(".block").addClass("selected");
         self.setSettingsValues(data);
@@ -138,6 +117,12 @@ var nodeList = function () {
             else
                 $("input[name='"+prop+"']").val(data.settings[prop]);
         }
+    }
+
+    this.getSettings = function (data) {
+        // plain script tag causes confusion in html views so we restore it here
+        var r = data.views.settings.replace(/\[\[node\]\]/, "var node = {}; node.params = " + JSON.stringify(data.params) +"\n");	
+        return r.replace(/_script/g,'script');	
     }
 
     this.closeCreator = function(data, event) {
@@ -176,6 +161,43 @@ var nodeList = function () {
             $(".params").hide();
             params.show();
         }
+    }
+
+
+    // opens/creates a tab for settings
+    this.openNodeSettings = function(data, event) {
+        var obj = $(event.target);
+        var settings = obj.parent().parent().find(".node_settings");
+        
+        
+        // if tab exists, then activate it
+        var tab_id = "#tabs-" + data._id;
+        if ($(tab_id).length) {
+            var index = $('#tabs a[href="'+tab_id+'"]').parent().index();
+            $("#tabs").tabs("option", "active", index);
+        // otherwise create it
+        } else {
+            var content = settings.clone(true);
+            content.show();
+            
+            var title = "settings: " + data.title;
+            id = "tabs-" + data._id;
+            addTab(self.tabs, id, title, null, content, data.type); // null URL creates regular tab (not iframe)
+        }
+    }
+
+
+    // opens/creates a tab for settings
+    this.openNodeView = function(data, event) {
+        var obj = $(event.target);
+        var settings = obj.parent().find(".node_settings");
+
+        var url = '/node/view/' + data._id;
+        var title = "data: " + data.title;
+        var milliseconds = (new Date).getTime();
+        var id = "tabs-" + milliseconds;
+        addTab(self.tabs, id, title, url, null, data.type);
+        loadTabFrame("#" + id, url);
     }
 
     this.generateParams = function (data) {
@@ -229,15 +251,9 @@ var nodeList = function () {
     
     this.reloadProject = function () {
         self.projectNodes.removeAll();
-        $(".collection_pipe").empty();
         self.loadProject();
     }
 
-
-    this.openTab = function (data, event) {
-        var url = '/node/view/' + data._id;
-        addTab(self.tabs, data.title, url);
-    }
 
 }
 
@@ -252,21 +268,32 @@ $( document ).ready(function() {
 	nodes.loadNodes(nodes);
 	nodes.loadProject(nodes);
 
+    // TABS CREATE
     var $tabs = $('#tabs').tabs();
     nodes.tabs = $tabs;
     var beginTab = $("#tabs ul li:eq(" + getSelectedTabIndex($tabs) + ")").find("a");
     loadTabFrame($(beginTab).attr("href"),$(beginTab).attr("rel"));
 
-    $( ".pipe" ).sortable({
-      revert: true
+    // TABS LOAD
+    $("a.tabref").click(function() {
+        loadTabFrame($(this).attr("href"),$(this).attr("rel"));
     });
 
-    // close icon: removing the tab on click
+    // TABS CLOSE
     $("#tabs").on("click",  "span.ui-icon-close", function() {
       var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
       $( "#" + panelId ).remove();
       $tabs.tabs( "refresh" );
     });
+
+
+    // SORTABLE PROJECT NODES
+    $( ".pipe" ).sortable({
+      revert: true,
+      handle: ".drag_icon" 
+    });
+
+
 
     // handler for file upload node creation
     $(document).on('submit', "#uploadfile", function(e) {
@@ -309,8 +336,6 @@ $( document ).ready(function() {
                     data.project = nodes.currentProject;
                     data.input_node = nodes.currentNode; 
                     data.collection = nodes.currentCollection; 
-                    // send also x and y so that new node can be positioned close
-                    data.position = nodes.currentNodePosition;
                     $.post("/create/node", data, function(returnedData) {
                         console.log('created node');
                         $("#node_creator").hide();
@@ -337,9 +362,6 @@ $( document ).ready(function() {
         data.nodeid= obj.data("nodeid");
         data.project = nodes.currentProject;
         data.input_node = nodes.currentNode; 
-         
-        // send also x and y so that new node can be positioned close
-        data.position = nodes.currentNodePosition;
         
         $("#message").empty();
 
@@ -358,6 +380,85 @@ $( document ).ready(function() {
             });
         }
         e.preventDefault();
+    });
+
+
+    $(document).on('click','.run', function(e) {
+        
+        var obj = $(e.target);
+        var map = {};
+        // read input from settings
+        obj.parents().find(".settings input, .settings select").each(function() {
+            map[$(this).attr("name")] = $(this).val();
+        });
+        // and run
+        runNode(map, this.id);
+        e.preventDefault();
+    });	
+
+    $(document).on('click','.dynamic_field', function(e) {
+        
+        var obj = $(e.target);
+        var params = obj.parents(".params");
+        if(params.length == 0)
+            params = obj.parents(".settings");
+        
+        // fetch fields
+        $.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
+            if(data.error)
+                alert(data.error);
+                
+            var html = "<h2>document structure (keys)</h2><ul><li class='pick_field good' data-field='"+ obj.attr("name") +"' data-val=''>CLEAR FIELD and CLOSE</li>";
+                for (key in data) {
+                    if (data[key] instanceof Array) {
+                        html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='array'>ARRAY</span></li>";
+                    } else if (typeof data[key] === "object" ) {
+                        var p = key;
+                        var a = [p];
+                        if (data[key] === null) {
+                            html +=  "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='null'>null</span></li>";
+                        } else {
+                            var tree = makeDynFieldsfromObject(data[key], a, obj);
+                            html +=  "<li>"+ p + "<ul>" + tree + "</ul></li>";
+                        }
+                    } else {
+                        html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
+                    }
+                }
+            html += "</ul>"
+            params.append("<div class='dynamic_fields'>"+html+"</div>");
+        })
+    });
+
+
+
+    $(document).on('click','.dynamic_collection', function(e) {
+        var obj = $(e.target);
+        var params = obj.parents(".params");
+        if(params.length == 0)
+            params = obj.parents(".settings");
+        
+        var html = "<ul>";
+        for(var i = 0; i < nodes.projectNodes().length; i++) {
+            var node = nodes.projectNodes()[i];
+            if(node.type == "collection" && node.collection != nodes.currentCollection) {
+                html += '<li class="pick_field" data-field="source_collection" data-val="'+node.collection+'">' + node.collection + '</li>';
+            }
+        }
+        html += "</ul>";
+        params.append("<div class='dynamic_fields'>"+html+"</div>");
+    })
+
+
+    
+    $(document).on('click','.pick_field', function(e) {
+        var obj = $(e.target);
+        var params = obj.parents(".params");
+        if (params.length == 0)
+            params = obj.parents(".settings");
+        
+        params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
+        params.find(".dynamic_fields").remove();
     });
 
 
@@ -399,67 +500,10 @@ $( document ).ready(function() {
         $("#node_msg").html("");
       });
 
-    $("a.tabref").click(function() {
-        loadTabFrame($(this).attr("href"),$(this).attr("rel"));
-    });
+
     
 });
 
 
 
 
-
-
-
-// iframes setup from http://deano.me/2011/08/jquery-tabs-iframes/
-
-function loadTabFrame(tab, url) {
-    if ($(tab).find("iframe").length == 0) {
-        var html = [];
-        html.push('<div class="tabIframeWrapper">');
-        html.push('<iframe class="iframetab" src="' + url + '">Load Failed?</iframe>');
-        html.push('</div>');
-        $(tab).append(html.join(""));
-    }
-    return false;
-}
-
-function getSelectedTabIndex($tabs) {
-    return $tabs.tabs('option', 'active');
-}
-
-
-function addTab(tabs, title, url) {
-    var tabTitle = $( "#tab_title" ),
-      tabContent = $( "#tab_content" ),
-      tabTemplate = "<li><a class='tabref' href='#{href}' rel='#{url}'>#{label}</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>",
-      tabCounter = $('#tabs >ul >li').size();
-      console.log("size", tabCounter);
-      
-    tabCounter++;
-    var label = title;
-    var id = "tabs-" + tabCounter;
-    var liCont = tabTemplate.replace( /#\{href\}/g, "#" + id );
-    liCont = liCont.replace( /#\{label\}/g, label );
-    liCont = liCont.replace( /#\{url\}/g, url );
-    var li = $(liCont);
-    var tabContentHtml = tabContent.val() || "Tab " + tabCounter + " content.";
-
-    tabs.find( ".ui-tabs-nav" ).append( li );
-    tabs.append( "<div class='tab' id='" + id + "'></div>" );
-    tabs.tabs( "refresh" );
-    
-    loadTabFrame("#" + id, url);
-    var tabCount = $('#tabs >ul >li').size();
-    $( "#tabs" ).tabs({ active: tabCount-1 });
-}
-
-
-
-	// console effect from here: http://jsfiddle.net/manuel/zejCD/1/
-	function tailScroll() {
-		var height = $("#console").get(0).scrollHeight -260;
-		$("#console").animate({
-			scrollTop: height
-		}, 50);
-	}

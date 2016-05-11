@@ -1035,10 +1035,6 @@ function initNode (nodeRequest, res, io, project) {
 			if(typeof node.views.data_static !== "undefined")
 				node.views.data = node.views.data_static;
 			
-			// let's place node near parent node	
-			node.x = parseInt(nodeRequest.position.left) + positionOffset;
-			node.y = parseInt(nodeRequest.position.top) + positionOffset;
-			
 			runNodeScript("hello", node, nodeRequest, io);
 			
 			node._id = mongojs.ObjectId();

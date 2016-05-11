@@ -7,6 +7,7 @@
 <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/js/knockout.js"></script>
+<script type="text/javascript" src="/js/funcs.js"></script>
 <script type="text/javascript" src="/js/project.js"></script>
 <script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
 <script type="text/javascript" src="/js/require.js"></script>
@@ -17,11 +18,12 @@
 
 
 <script type="text/html" id="node-template">
-	<div data-bind="attr:{id:_id, 'data-collection':collection},style:{left:x+'px', top:y+'px'},css:type" class="block node draggable"> 
+	<div data-bind="attr:{id:_id, 'data-collection':collection},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
+        <div class="drag_icon"><img src="../images/drag.png"/></div>
 		
 		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
-
+        
 
 
 		<div class="delete_confirm" style="display:none">
@@ -38,23 +40,50 @@
 			<!-- /ko -->
 		</div>
 
-		
-		<div>
-			
-			<!-- ko if: type == 'collection' --> 
-				<button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
+
+        <div class="node_buttons">
+            <!-- ko if: type == 'collection' --> 
+                <button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
                 <button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
-			<div class="left bottom">
-				<a class="left view_button" data-bind="click:$root.openTab">view data</a> 	
-			</div>
-			<!-- /ko -->
-			
-			<!-- ko if: type == 'view' --> 
-			<div class="bottom">
-				<a class="left view_button" data-bind="attr:{href:'/node/fileview/' + _id + '?view=georeferencer.html'}" target="_blank" >georeferencer</a> 	
-			</div>
-			<!-- /ko -->
-		</div>
+
+            <!-- /ko -->
+            
+            <!-- ko if: type == 'view' --> 
+            <div class="bottom">
+                <a class="left view_button" data-bind="attr:{href:'/node/fileview/' + _id + '?view=georeferencer.html'}" target="_blank" >georeferencer</a> 	
+            </div>
+            <!-- /ko -->
+            
+            <!-- ko if: type != 'export' --> 
+            <button class="left " data-bind="click:$root.openNodeView">view data</button> 
+            <!-- /ko -->
+
+            <button class="right open_settings_button" data-bind="click: $root.openNodeSettings" >open settings</button> 
+            <div style="clear:both"></div>
+            
+        </div>
+
+
+
+        <div class="node_settings">
+
+            <div id="node_bar" class="selected">
+                <h2>DETAILS</h2>
+                <div class="number" data-bind="number"></div> 
+                <h3 class="subhead">params</h3> 
+                <div class="params" data-bind="html:$root.nodeParams($data)"></div>
+                <h3 class="subhead">settings</h3> 
+                <div class="settings" data-bind="html:$root.getSettings($data)"></div>
+            </div>
+            
+
+            <!-- ko if: type != 'collection' --> 
+            <div>
+                <button data-bind="attr:{id:_id}" class="run">run this node!</button>
+            </div>
+            <!-- /ko -->
+         
+        </div>
 
 	</div>
 
@@ -64,22 +93,29 @@
 </head>
 
 <body>
-    <button data-bind="click: openCollectionCreator" class="right" >add collection</button>
-    
+   
+    <!-- PROJECT HEADER -->
+    <div id="project_header">
+        <h2 class="inline_header"><a href="/" title="back to projects"><</a></h2>
+        <h2 class="inline_header" id="project_title"></h2>
+         <button data-bind="click: openCollectionCreator" class="right" >add collection</button>
+    </div>
+  
     
     <!-- PROJECT NODES -->
 	<div class="collection_pipe">
-		<h2><a href="/"><</a> Project: jotain</h2>
 		<div class="pipe" data-bind="template: { name: 'node-template', foreach: projectNodes }"></div>
 	</div>
 
+
+    
+    
     <!-- VIEW TABS -->
 	<div class="collection_view">
-		<h2>Data in collection: jotain</h2>
+		
         <div id="tabs">
             <ul>
                 <li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
-
             </ul>
           <div class="tab" id="tabs-1">
           </div>
@@ -114,12 +150,6 @@
 		<!-- /ko -->
 	</div>
 
-
-    <!-- NODE SETTINGS -->
-	<div id="node_settings">
-		<div id="node_bar" class="selected"></div>
-		<div id="node_msg" class="done"></div>
-	</div>
 
     <!-- FOOTER AND CONSOLE -->
     <div id="footer">
