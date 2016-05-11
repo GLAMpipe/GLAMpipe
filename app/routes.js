@@ -136,6 +136,10 @@ module.exports = function(express, glampipe) {
 		glampipe.core.uploadFile(req, res);
 	});
 
+    // DOWNLOAD
+	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
+		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
+	});
 
 	// NODE EDITOR
 	express.get('/node-viewer', function (req, res) {

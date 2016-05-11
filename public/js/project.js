@@ -193,6 +193,9 @@ var nodeList = function () {
         var settings = obj.parent().find(".node_settings");
 
         var url = '/node/view/' + data._id;
+        if(data.type == "transform")
+            url += "?fields=" + data.out_field;
+        
         var title = "data: " + data.title;
         var milliseconds = (new Date).getTime();
         var id = "tabs-" + milliseconds;

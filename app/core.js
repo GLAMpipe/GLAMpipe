@@ -295,6 +295,7 @@ exports.runNode = function (req, res, io) {
 			}
 			node.settings = req.body;
 			node.project = project._id;
+            node.project_dir = project.dir;
 
 			// save node settings TODO: set callback
 			mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
@@ -1873,12 +1874,26 @@ function createNodeView(data, req, edit, callback) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", nodeId);
 			var node = project.nodes[index];
+            node.project_dir = project.dir;
 			data = data.replace(/\[\[project\]\]/, project.title);
 			data = data.replace(/\[\[page_title\]\]/, node.title);
 			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node));
 			
-			// if node has no view, then we create in always on the fly (dynamic view)
-			if(typeof project.nodes[index].views.data === "undefined") {
+			// if node has script view, then use that
+			if(typeof project.nodes[index].scripts.view !== "undefined") {
+				sandbox = {out:{}, context: {node:node}};
+				vm.runInNewContext(node.scripts.view, sandbox);
+				callback(sandbox.out.html);
+			
+			// if node has stativ view, then we create in always on the fly (dynamic view)
+			} else if(typeof project.nodes[index].views.data !== "undefined") {
+				// insert node's data view to view.html
+				data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
+				callback(data);
+			
+			// otherwise we create in always on the fly (dynamic view)
+			} else {
+
 				if(req.query.fields != null) var fields = req.query.fields;
 				else var fields = null;
 				
@@ -1887,10 +1902,6 @@ function createNodeView(data, req, edit, callback) {
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);
 				});
-			} else {
-				// insert node's data view to view.html
-				data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
-				callback(data);
 			}
 		} else {
 			callback("<h1>Node view not found</h1><p>Maybe you deleted the node?</p>");
