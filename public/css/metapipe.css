@@ -6,7 +6,6 @@ html, body
 	padding: 0px;
 	margin: 0px;
     height:100%;
-    background: url(../images/data.svg);
     background-size: 100% 150%;
 }
 
@@ -38,6 +37,8 @@ h2, h3 {
 
 a:link {
     color: #395D5A;
+    text-decoration: none;
+    
 }
 
 /* visited link */
@@ -704,7 +705,9 @@ button.run, button.test {
 	background-color:#BFCCCB;
 }
 
-
+.hidden {
+    display:none;
+}
 
 
 #tabs > ul > li.transform {
@@ -755,6 +758,27 @@ button.run, button.test {
     background-color: #649834;
 }
 
+
+
+.pipe ul {
+    list-style-type: none;
+    margin:0px;
+    padding:0px
+}
+
+.pipe ul li {
+    background-color: #B2BFC9;
+    margin:2px;
+    padding:3px;
+}
+
+.pipe a:link, #projects a:visited {
+    color:black;
+}
+
+.pipe a:hover {
+    color: white;
+}
 
 
 

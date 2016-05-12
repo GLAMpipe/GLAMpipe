@@ -152,7 +152,7 @@ exports.sendErrorPage = function (res, error) {
 			console.log(err);
 			res.send(err);
 		} else {
-			content = content.replace("[[initerror]]", "<h3 id='initerror' class='bad'>" + error + "</h3>");
+			content = content.replace("[[initerror]]", "<script>var error = " + JSON.stringify(error) + "</script>");
 			res.send(content);
 		}
 	});
@@ -164,11 +164,22 @@ exports.setDataPath = function (params, glampipe, res) {
 	mongoquery.update("mp_settings",{}, {$set: {data_path: path}}, function(error) {
 		if(error) {
 			console.log(error);
-			res.json({"error":"not working"});
+			res.json({"error":"could not save datapath"});
 		} else {
+            global.config.dataPath = path;
 			console.log("datapath set to:", path );
-			glampipe.initError = null;
-			res.json({"status": "datapath set"});
+            
+            // let's try to load nodes
+            exports.initNodes(function(error) {
+                if(error) {
+                    glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":path};
+                    res.json({"status": "error"});
+                } else {
+                    glampipe.initError = null;
+                    res.json({"status": "ok"});
+                }
+            });
+			
 		}
 	})
 };

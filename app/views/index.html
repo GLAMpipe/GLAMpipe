@@ -7,9 +7,11 @@
 
 <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="js/knockout.js"></script>
-<link rel="stylesheet" type="text/css" href="css/js-graph-it.css" />
-<link rel="stylesheet" type="text/css" href="css/sf-homepage.css" />
+<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/funcs.js"></script>
+
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
 <style>
 	
 </style>
@@ -21,13 +23,10 @@
 		this.allItems = ko.observableArray(); // Initial items
 		this.loadItems = function () {
 			$.getJSON("/get/projects", function(data) { 
-				// Now use this data to update your view models, 
-				// and Knockout will update your UI automatically 
 				for(var i = 0; i< data.length; i++) {
 					self.allItems.push(data[i]);
 				}
 				
-				//alert(self.allItems()[0].title);
 			})
 		}
 		
@@ -66,7 +65,23 @@
 		var projects = new BetterListModel();
 		ko.applyBindings(projects);
 		projects.loadItems();
-		
+
+        // TABS CREATE
+        var $tabs = $('#tabs').tabs();
+
+        $.getJSON("/status", function(data) { 
+            console.log(data);
+            if(data.status == "ok")
+                loadTabFrame("#tabs-1", "http://artturimatias.github.io/GLAMpipe/");
+            else
+                loadTabFrame("#tabs-1", "/setup");
+        })
+
+
+
+        $("#show_project_creator").on("click", function() {
+            $("#new_project").show();
+        });
 	}
 		
 	
@@ -74,28 +89,45 @@
 </head>
 <body onload="onLoad();">
 
-	<div class="project_header">
-		<h1 class="inline_header"><a href="/" title="back to projects">GLAMpipe Projects</a></h1>
-		<h1 class="inline_header" id="project_title"></h1>
-	</div>
-	<div id="node_bar" class="selected">
-		<h2 class="selected">Create project</h2>
-		<form data-bind="submit:addItem">
-			Add project: <input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
-			<button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
-		</form>
-	</div>
-
-	<div>
-		<h2>Projects</h2>
-		<ul data-bind="foreach: allItems">
-			<li>
-				<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
-			</li>
-		</ul>
-	</div>
-    <div class="setup">
-        <h2>setup</h2>
+    <!-- PROJECT HEADER -->
+    <div id="project_header">
+        <h2 class="inline_header">Projects</h2>
+         <button id="show_project_creator" class="right" >add project</button>
     </div>
+    
+
+    <!-- PROJECTS -->
+	<div class="collection_pipe">
+        <div class="pipe">
+            <div id="new_project" class="hidden node source">
+                <h2>Create project</h2>
+                <form data-bind="submit:addItem">
+                    <input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
+                    <button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
+                </form>
+            </div>
+        
+            <ul data-bind="foreach: allItems">
+                <li>
+                    <a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
+                </li>
+            </ul>
+        </div>
+	</div>
+    
+    <!-- VIEW TABS -->
+	<div class="collection_view">
+		
+        <div id="tabs">
+            <ul>
+                <li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
+            </ul>
+
+          <div class="tab" id="tabs-1"></div>
+
+        </div>
+	</div>
+    
+
 	</body>
 </html>

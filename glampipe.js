@@ -118,7 +118,7 @@ var GlamPipe = function() {
 				if(!dataPath) {
 					self.dataPath = "fakedir";
 					console.log(colors.red("ERROR: DATAPATH not set"));
-					self.initError = "datapath is not set!";
+					self.initError = {"status":"datapath_error", "msg":"datapath not found!"};
 					self.initializeServer();
 					cb();
 				} else {
@@ -128,7 +128,7 @@ var GlamPipe = function() {
 
 					self.core.initNodes(function(error) {
 						if(error)
-							self.initError = "nodes not found!";
+							self.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
 
 						// Create the express server and routes.
 						self.initializeServer();

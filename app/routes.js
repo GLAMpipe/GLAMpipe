@@ -10,27 +10,30 @@ module.exports = function(express, glampipe) {
     // INFO to console
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
-		//console.log(req.params);
-        if(glampipe.initError && req.method == "GET") 
-            glampipe.core.sendErrorPage(res, glampipe.initError);
-        else
-            next();
+        next();
 	});
 
-    // SETUP
+
+    // SETUP AND STATUS
+	express.get('/status', function (req, res) {
+        if(glampipe.initError)
+            res.json(glampipe.initError);
+        else
+            res.json({"status":"ok"});
+	});
 
 	express.post('/set/datapath', function (req, res) {
 		glampipe.core.setDataPath(req.body, glampipe, res);
 	});
 
-	// PROJECTS
 
+	// PROJECTS
 	express.get('/', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'index.html'));
 	});
 
 	express.get('/setup', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'setup.html'));
+		glampipe.core.sendErrorPage(res, glampipe.initError);
 	});
 
 	express.get('/template/:file', function (req, res) {
@@ -56,7 +59,6 @@ module.exports = function(express, glampipe) {
 
 
 	// NODES
-
 	express.get('/get/nodes/:project', function (req, res) {
 		glampipe.core.getProjectNodes(req.params.project, res);
 	});
@@ -131,15 +133,18 @@ module.exports = function(express, glampipe) {
 		glampipe.core.editCollection(req.params.id, req, function(data) {res.send(data)});
 	});
 
+
 	// UPLOAD
 	express.post('/upload/file', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
 	});
 
+
     // DOWNLOAD
 	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
 		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
 	});
+
 
 	// NODE EDITOR
 	express.get('/node-viewer', function (req, res) {
