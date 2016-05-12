@@ -41,7 +41,7 @@ var nodeList = function () {
 
     // shows only source nodes and set current node, collection and position
     this.openSourceCreator = function(data, event) {
-        self.selectNode(data, event);
+        //self.selectNode(data, event);
         var obj = $(event.target);
         $("#node_creator").show();
         $("#node_creator > div").hide();
@@ -53,7 +53,7 @@ var nodeList = function () {
     
     // shows all but source nodes and set current node, collection and position
     this.openCreator = function(data, event) {
-        self.selectNode(data, event);
+        //self.selectNode(data, event);
         var obj = $(event.target);
         $("#node_creator > div").show();
         $("#node_creator > .source").hide();
@@ -89,10 +89,16 @@ var nodeList = function () {
         data.views.settings = data.views.settings.replace(/_script/g,'script');	
 
         
-        settings.toggle();
+        //settings.toggle();
         $(".pipe .block").removeClass("selected");
         obj.parents(".block").addClass("selected");
-        self.setSettingsValues(data);
+        
+        if(data.type == "collection") {
+            self.openNodeView(data, event);
+        } else {
+            self.openNodeSettings(data, event);
+            self.setSettingsValues(data);
+        }
     }
 
     this.nodeParams = function (data) {
@@ -129,7 +135,16 @@ var nodeList = function () {
         $("#node_creator").hide();
     }
 
-
+    this.nodeInfo = function(data) {
+        var html = '<div  class="node_info">';
+		if(data.type == "collection")
+            html += '<p class="node_title">'+data.params.description+'</p>'; 
+		else if (data.params.title)
+			html += '<p class="node_title">' + data.params.title + '</p> ';
+            
+		html += '</div>';
+        return html;
+    }
 
 
     this.openNodeTypes = function(data, event) {
@@ -167,7 +182,7 @@ var nodeList = function () {
     // opens/creates a tab for settings
     this.openNodeSettings = function(data, event) {
         var obj = $(event.target);
-        var settings = obj.parent().parent().find(".node_settings");
+        var settings = obj.parent().find(".node_settings");
         
         
         // if tab exists, then activate it
@@ -180,7 +195,7 @@ var nodeList = function () {
             var content = settings.clone(true);
             content.show();
             
-            var title = "settings: " + data.title;
+            var title = "<span class='strong'>SETTINGS:</span> " + data.title;
             id = "tabs-" + data._id;
             addTab(self.tabs, id, title, null, content, data.type); // null URL creates regular tab (not iframe)
         }
@@ -196,7 +211,7 @@ var nodeList = function () {
         if(data.type == "transform")
             url += "?fields=" + data.out_field;
         
-        var title = "data: " + data.title;
+        var title = "<span class='strong'>VIEW:</span> " + data.title;
         var milliseconds = (new Date).getTime();
         var id = "tabs-" + milliseconds;
         addTab(self.tabs, id, title, url, null, data.type);
@@ -469,39 +484,47 @@ $( document ).ready(function() {
     var socket = io.connect('http://localhost');
 
     socket.on('hello', function (data) {
-        $("#console").append(data + "</br>");
-        tailScroll() 
-      });
+        if(data.nodeid) {
+            $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
+        } else {
+            $("#console").append(data + "</br>");
+            tailScroll() ;
+        }
+    });
 
     
     socket.on('news', function (data) {
-        //console.log(data);
-        $("#console").append(data + "</br>");
-        tailScroll() 
-      });
+        if(data.nodeid) {
+            $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
+        } else {
+            $("#console").append(data + "</br>");
+            tailScroll() 
+        }
+    });
 
     socket.on('progress', function (data) {
-        //console.log(data);
-        $("#console").append("<div class=\"progress\">" + data + "</div>");
-        tailScroll() 
-      });
+        $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"progress\">" + data.msg + "</div>");
+    });
 
     socket.on('error', function (data) {
-        console.log(data);
-        $("#console").append("<div class=\"bad\">" + data + "</div>");
-        $("#node_msg").removeClass("busy");
-        $("#node_msg").addClass("done");
-        $("#node_msg").html("<div class=\"bad\">ERROR: " + data + "</div>");
-        tailScroll() 
-      });
+        var console = $("#tabs-" + data.nodeid +" .node_console");
+        if(data.nodeid) {
+            console.append("<div class=\"error\">" + data.msg + "</div>");
+            console.removeClass("busy");
+            console.addClass("done");
+        } else {
+            $("#console").append("<div class=\"bad\">" + data + "</div>");
+
+            tailScroll()
+        }
+    });
 
     socket.on('finish', function (data) {
-        $("#console").append("<div class=\"good\">" + data + "</div>");
-        tailScroll(); 
-        $("#node_msg").removeClass("busy");
-        $("#node_msg").addClass("done");
-        $("#node_msg").html("");
-      });
+        var console = $("#tabs-" + data.nodeid +" .node_console");
+        console.append("<div class=\"progress\">" + data.msg + "</div>");
+        console.removeClass("busy");
+        console.addClass("done");
+    });
 
 
     

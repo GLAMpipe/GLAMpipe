@@ -223,6 +223,8 @@ input.dynamic_field {
 	width:550px;
 	border: 1px solid black;
 	font-size:14px;
+    max-height:80%;
+    overflow-y:scroll;
 }
 
 #node_creator label, #node_creator div {
@@ -328,6 +330,30 @@ ul.node_types li:hover {
 	background-color: #D8D8D8;
 }
 
+
+.file h2 {
+	background-color: #333;
+}
+
+.file h3 {
+	background-color: #5F5F5F;
+}
+
+.file .params {
+	background-color: #D8D8D8;
+}
+
+.query h2 {
+	background-color: #333;
+}
+
+.query h3 {
+	background-color: #5F5F5F;
+}
+
+.query .params {
+	background-color: #D8D8D8;
+}
 
 .export h2 {
 	background-color: #AE6B6B;
@@ -673,9 +699,10 @@ button.run, button.test {
 }
 
 .node_settings button.run {
-    padding:20px;
+    padding:10px;
     background-color:orange;
-    font-size:20px;
+    font-size:16px;
+
 }
 
 .open_settings_button {
@@ -780,6 +807,18 @@ button.run, button.test {
     color: white;
 }
 
+.clear {
+    clear:both;
+}
 
+.node_console {
+    border: 1px solid #5C5C5C;
+    padding:10px;
+    margin:5px;
+    margin-left:200px;
+    margin-right:200px;
+}
 
-
+.pointer {
+    cursor:pointer;
+}

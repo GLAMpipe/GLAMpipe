@@ -339,7 +339,7 @@ exports.runNode = function (req, res, io) {
 					console:console,
 					say: function(ch, msg) {
 						console.log(ch.toUpperCase() + ":", msg);
-						io.sockets.emit(ch, msg);
+						io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
 					}
 				},
 				say: io.sockets.emit

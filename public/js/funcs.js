@@ -1,8 +1,10 @@
 
 function runNode(settings, node_id) {
-    $("#node_msg").text("running...");
-    $("#node_msg").removeClass("done");
-    $("#node_msg").addClass("busy");
+    var console = $("#tabs-" + node_id + " .node_console");
+    console.empty();
+    console.append("running...");
+    console.removeClass("done");
+    console.addClass("busy");
     // save settings also locally
     nodes.selectedNode.settings = settings;
     $.post("/run/node/" + node_id, settings, function(data) {

@@ -22,7 +22,7 @@
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		<div class="drag_icon"><img src="../images/drag.png"/></div>
 		
-		<h2 data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
+		<h2 class="pointer" data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
 		
 
 
@@ -31,22 +31,21 @@
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
-	   <div  class="node_info">
-		   <!-- ko if: type == 'collection' --> 
-		   <p class="node_title" data-bind="html:collection"></p> 
-		   <!-- /ko -->
-		   <!-- ko if: type != 'collection' --> 
-			<p class="node_title" data-bind="html:params.title"></p> 
-			<!-- /ko -->
+		<div data-bind="html:$root.nodeInfo($data)">
+		
 		</div>
 
 
-		<div class="node_buttons">
+		<div>
 			<!-- ko if: type == 'collection' --> 
-				<button data-bind="click: $root.openSourceCreator" class="add_node after_left">add source</button> 
+				<button data-bind="click: $root.openSourceCreator" class="add_node left">add source</button> 
 				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
-
+				<div class="clear"></div>
 			<!-- /ko -->
+		</div>
+
+		<div class="node_buttons">
+
 			
 			<!-- ko if: type == 'view' --> 
 			<div class="bottom">
@@ -54,9 +53,8 @@
 			</div>
 			<!-- /ko -->
 			
-			<button class="left " data-bind="click:$root.openNodeView">view data</button> 
+			<button class="left" data-bind="click:$root.openNodeView">view data</button> 
 
-			<button class="right open_settings_button" data-bind="click: $root.openNodeSettings" >open settings</button> 
 			<div style="clear:both"></div>
 			
 		</div>
@@ -64,6 +62,15 @@
 
 
 		<div class="node_settings">
+
+			<!-- ko if: type != 'collection' --> 
+			<div>
+				<button data-bind="attr:{id:_id}" class="run left">run this node!</button>
+				<button data-bind="click:$root.openNodeView" class="run right">view data</button>
+				<div class="node_console"></div>
+			</div>
+			<div class="clear"></div>
+			<!-- /ko -->
 
 			<div id="node_bar" class="selected">
 				<h2>DETAILS</h2>
@@ -74,12 +81,6 @@
 				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
 			</div>
 			
-
-			<!-- ko if: type != 'collection' --> 
-			<div>
-				<button data-bind="attr:{id:_id}" class="run">run this node!</button>
-			</div>
-			<!-- /ko -->
 		 
 		</div>
 

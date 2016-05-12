@@ -9,5 +9,6 @@
 	"upload":"Upload nodes uploads files and data to web services (like wikimedia commons)",
 	"file": "File nodes operates on local files (MD5 sum, thumbnailing and so on)",
 	"view": "Data spesific views which can also be interactive.",
+    "query": "Query nodes executes direct queries to database.",
 	"test":"Test nodes"
 }
