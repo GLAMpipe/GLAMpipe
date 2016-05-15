@@ -36,13 +36,19 @@
 		</div>
 
 
+		
+		<!-- ko if: type == 'collection' --> 
 		<div>
-			<!-- ko if: type == 'collection' --> 
 				<button data-bind="click: $root.openSourceCreator" class="add_node left">add source</button> 
 				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
 				<div class="clear"></div>
-			<!-- /ko -->
 		</div>
+		<!-- /ko -->
+
+		<!-- ko if: type != 'collection' --> 
+		<button class="left" data-bind="click:$root.openNodeView">node view</button> 
+		<div style="clear:both"></div>
+		<!-- /ko -->
 
 		<div class="node_buttons">
 
@@ -53,7 +59,7 @@
 			</div>
 			<!-- /ko -->
 			
-			<button class="left" data-bind="click:$root.openNodeView">view data</button> 
+			<button class="left" data-bind="click:$root.openNodeView">node view</button> 
 
 			<div style="clear:both"></div>
 			
@@ -66,7 +72,6 @@
 			<!-- ko if: type != 'collection' --> 
 			<div>
 				<button data-bind="attr:{id:_id}" class="run left">run this node!</button>
-				<button data-bind="click:$root.openNodeView" class="run right">view data</button>
 				<div class="node_console"></div>
 			</div>
 			<div class="clear"></div>
