@@ -22,10 +22,17 @@ function init() {
             alert( "Data path can not be empty!" );
             
         } else {
+            
             var data = {"datapath": $("#datapath").val()};
             $.post("/set/datapath", data, function(returnedData) {
                 console.log(returnedData);
-                document.location.reload(true);
+                if(returnedData.status == "ok") {
+                    $("#info").text("Data path set, now fetching nodes...");
+                    error.status = "ok";
+                    $.post("/set/initnodes", data, function(returnedData) {
+                        document.location.reload(true);
+                    });
+                }
             });
         }
         event.preventDefault();
@@ -41,6 +48,11 @@ function init() {
             $("#datapath_error").show();
             $("#setpath").show();
         break;
+        case "ok":
+            $("#ok").show();
+            $("#datapath_info").text(error.datapath);
+        break;
+            
     }
 
    
@@ -51,17 +63,22 @@ function init() {
 </head>
 <body onLoad="init()">
     <div class="project_header">
-        <h1>There seems to be an error in your GLAMpipe setup</h1>
+        <h1>Setup</h1>
     </div>
-    <h2>errors:</h2>
+
     
     [[initerror]]
     
     <br><br><br>
 
+    <div class="lookup hidden" id="ok">
+        <h2>It should be ok now!</h2>
+        <p>Create a project and start experimenting!</p>
+        <div id="datapath_info"></div>
+    </div>
     
     <div class="upload hidden" id="nodepath_error" style="width:500px">
-        <h3>"nodes not found" </h3>
+        <h3>ERROR: "nodes not found" </h3>
         <p>GLAMpipe does not find node files. Download nodes to "nodes" directory IN your data directory.</p>
         
         <h4>your data path:</h4>
@@ -72,26 +89,27 @@ function init() {
     </div>
     
     <div class="upload hidden" id="datapath_error" style="width:500px">
-        <h3>"datapath is not set!"</h3>
-        <p>You need create a directory where GLAMpipe can save its data. </p>
-        <p>Then write <span class="strong">full path</span> to "data path" field and click "set data path".</p>
+        <h3>ERROR: "datapath is not set!"</h3>
+        <p>You need create a directory where GLAMpipe can save its data. 
+Then write <span class="strong">full path</span> to "data path" field and click "set data path".</p>
 
         <div id="setpath" >
             <div class="source">
                 
-                <h2>set data path here</h2>
+                <label class="strong">set data path here:</label>
                
                 <form method="POST" id="setdatapath" action="/set/datapath">
                     <input id="datapath" name="datapath" placeholder="/full/data/path/here" style="width:500px"/>
-                    <input type="submit" value="set data path">
+                    <input type="submit" value="set data path and fetch nodes (this takes a while)">
                 </form>
             </div>
+            
         </div>
 
 
     </div>
 
-
+    <div class="warning" id="info"></div>
 
 
     <img class="right" src="images/terrified_man.png" />

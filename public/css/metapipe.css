@@ -85,13 +85,10 @@ pre {
 
 #node_bar {
 	padding:10px;
-	background-color:#99B4B2;
-	color:white;
 }
 
 #node_bar button {
 	display:block;
-	margin-top:20px;
 }
 
 #node_bar .description {
@@ -114,8 +111,8 @@ pre {
 }
 
 #node_bar .subhead {
-	background-color: #7AA3F2;
-	color:white;
+	background-color: white;
+	color:black;
 	padding:5px;
 }
 
@@ -270,7 +267,7 @@ ul.node_types li:hover {
 #node_bar .dynamic_fields, #node_creator .dynamic_fields {
 	display:block;
 	position:absolute;
-	top:0px;
+
 	background-color: white;
 	border: 1px solid black;
 	height:80%;
@@ -303,8 +300,6 @@ ul.node_types li:hover {
 .button {
 	//font-family: 'Lobster', sans-serif;
   background: #47666A;
-  -moz-border-radius: 5px;
-  border-radius: 0px 0px 0px 10px;
   color: #ffffff;
   font-size: 1em;
   padding: 5px 10px 5px 10px;
@@ -612,9 +607,6 @@ html {
     height: calc(100% - 60px);
 }
 
-.collection_view h2 {
-    background-color:#073763;
-}
 
 .node {
 	width:350px;
@@ -700,8 +692,9 @@ button.run, button.test {
 
 .node_settings button.run {
     padding:10px;
-    background-color:orange;
-    font-size:16px;
+    margin-bottom:20px;
+    background-color:#10772E;
+    font-size:14px;
 
 }
 
@@ -821,4 +814,8 @@ button.run, button.test {
 
 .pointer {
     cursor:pointer;
+}
+
+.add_node {
+    margin-left:4px;
 }

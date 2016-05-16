@@ -129,37 +129,17 @@ var GlamPipe = function() {
 					global.config.dataPath = dataPath;
 					global.config.projectsPath = path.join(dataPath, "projects");
                     
+                    // read nodes to database
+                    self.core.initNodes(function(error) {
+                        if(error)
+                            self.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
 
-                    // download nodes
-                    var sandbox = { out:
-                                    {
-                                        url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
-                                        file:"master.zip"
-                                    },
-                                    context:{}};
-                                
-                    var node = {dir:dataPath};
-                    
-                    // download nodes
-                    console.log("DOWNLOADING: nodes from github");
-                    self.core.downloadFile(node, sandbox, function () {
-                        const Zip = require("adm-zip");
-                        var zip = new Zip(path.join(dataPath, "master.zip"));
-                        zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
-                        
-                        // read nodes to database
-                        self.core.initNodes(function(error) {
-                            if(error)
-                                self.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
+                        // Create the express server and routes.
+                        self.initializeServer();
+                        console.log("INIT done");
+                        cb(); 
 
-                            // Create the express server and routes.
-                            self.initializeServer();
-                            console.log("INIT done");
-                            cb(); 
-
-                        });
                     });
-
 				}
 			});
 		});
@@ -191,6 +171,8 @@ var GlamPipe = function() {
 
 }
 
+
+    
 var glampipe = new GlamPipe();
 
 
@@ -201,7 +183,6 @@ try {
 	});
 	
 } catch (e) {
-		console.log("PAM");
 		console.log(e);
 	}
 

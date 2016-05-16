@@ -69,6 +69,7 @@
         // TABS CREATE
         var $tabs = $('#tabs').tabs();
 
+        // check if serves is ok. If not, then show error setup
         $.getJSON("/status", function(data) { 
             console.log(data);
             if(data.status == "ok")

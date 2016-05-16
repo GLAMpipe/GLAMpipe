@@ -80,70 +80,108 @@ exports.initDir = function (callback) {
 exports.initNodes = function (callback) {
 	console.log("INIT: Loading node files...");
 	var data = {};
-	mongoquery.drop("mp_nodes", function() {
+    //exports.downloadNodes(function (err) {
+            
+        mongoquery.drop("mp_nodes", function() {
 
-		fs = require('fs');
-		// read first node type descriptions
-		fs.readFile("config/node_type_descriptions.json", 'utf8', function (err, data) {
-			if(err)
-				console.log("ERROR: node type descriptions not found!");
-			else 
-				var descriptions = JSON.parse(data);
-				
-			console.log(path.join(global.config.dataPath, 'nodes/'));
-			readFiles(path.join(global.config.dataPath, 'nodes/'), function(filename, content, next) {
-				
-				try {
-					var node = JSON.parse(content);
-					node.type_desc = descriptions[node.type];
-					
-					// join "pretty" settings
-					if(node.views.settings instanceof Array)
-						node.views.settings = node.views.settings.join("");	
-						
-					// join "pretty" params
-					if(node.views.params instanceof Array)
-						node.views.params = node.views.params.join("");	
+            fs = require('fs');
+            // read first node type descriptions
+            fs.readFile(path.join(global.config.dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
+                if(err)
+                    console.log("ERROR: node type descriptions not found!");
+                else 
+                    var descriptions = JSON.parse(data);
+                    
+                console.log(path.join(global.config.dataPath, 'nodes/'));
+                readFiles(path.join(global.config.dataPath, 'nodes/'), function(filename, content, next) {
+                    
+                    try {
+                        var node = JSON.parse(content);
+                        node.type_desc = descriptions[node.type];
+                        
+                        // join "pretty" settings
+                        if(node.views.settings instanceof Array)
+                            node.views.settings = node.views.settings.join("");	
+                            
+                        // join "pretty" params
+                        if(node.views.params instanceof Array)
+                            node.views.params = node.views.params.join("");	
 
-					// join "pretty" data view
-					if(node.views.data_static instanceof Array)
-						node.views.data_static = node.views.data_static.join("");
+                        // join "pretty" data view
+                        if(node.views.data_static instanceof Array)
+                            node.views.data_static = node.views.data_static.join("");
 
-					// join "pretty" scripts
-					for (key in node.scripts) {
-						if(node.scripts[key] instanceof Array)
-							node.scripts[key] = node.scripts[key].join("");
-					}
-						
-					mongoquery.insert("mp_nodes",node , function(error) {
-						if(error.length) {
-							console.log(error);
-						} else {
-							console.log("INIT: " + filename + " loaded");
-							next();
-						}
-					})
-				} catch(e) {
-					console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
-					next(); // continue anyway
-				}
+                        // join "pretty" scripts
+                        for (key in node.scripts) {
+                            if(node.scripts[key] instanceof Array)
+                                node.scripts[key] = node.scripts[key].join("");
+                        }
+                            
+                        mongoquery.insert("mp_nodes",node , function(error) {
+                            if(error.length) {
+                                console.log(error);
+                            } else {
+                                console.log("INIT: " + filename + " loaded");
+                                next();
+                            }
+                        })
+                    } catch(e) {
+                        console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
+                        next(); // continue anyway
+                    }
 
-			}, function onError (error) {
-				if( error.code == "ENOENT") {
-					console.log("ERROR: No nodes present!");
-					console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
-					callback(error);
-				}
-				
-			}, function onDone () {
-				console.log("INIT: nodes loaded");
-				callback(null);
-			});
-		});
+                }, function onError (error) {
+                    if( error.code == "ENOENT") {
+                        console.log("ERROR: No nodes present!");
+                        console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+                        callback(error);
+                    } else 
+                        console.log(error);
 
-	});
+                    
+                }, function onDone () {
+                    console.log("INIT: nodes loaded");
+                    callback(null);
+                });
+            });
+
+        });
+   //});
 }
 
+
+exports.downloadNodes = function (cb) {
+
+    var dataPath = global.config.dataPath;
+    var sandbox = { out:
+                    {
+                        url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
+                        file:"master.zip"
+                    },
+                    context:{}};
+                
+    var node = {dir:dataPath};
+    
+    // download nodes
+    console.log("DOWNLOADING: nodes from github");
+    console.log(sandbox.out.url);
+    exports.downloadFile(node, sandbox, function (err) {
+        if(err.context.error) {
+            console.log(err.context.error);
+            cb(err.context.error);
+            
+        } else {
+            const Zip = require("adm-zip");
+            var zip = new Zip(path.join(dataPath, "master.zip"));
+            console.log("EXTRACTING: master.zip");
+            zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
+            cb();
+        }
+    })
+     
+
+    
+}
 
 exports.sendErrorPage = function (res, error) {
 	fs = require('fs');
@@ -152,7 +190,12 @@ exports.sendErrorPage = function (res, error) {
 			console.log(err);
 			res.send(err);
 		} else {
-			content = content.replace("[[initerror]]", "<script>var error = " + JSON.stringify(error) + "</script>");
+            // write error inside a script tag
+            if(error) {
+                content = content.replace("[[initerror]]", "<script>var error = " + JSON.stringify(error) + "</script>");
+            } else {
+                content = content.replace("[[initerror]]", "<script>var error = {status:'ok'}</script>");
+            }
 			res.send(content);
 		}
 	});
@@ -160,26 +203,16 @@ exports.sendErrorPage = function (res, error) {
 
 
 exports.setDataPath = function (params, glampipe, res) {
-	var path = params.datapath;
-	mongoquery.update("mp_settings",{}, {$set: {data_path: path}}, function(error) {
+	var dataPath = params.datapath;
+	mongoquery.update("mp_settings",{}, {$set: {data_path: dataPath}}, function(error) {
 		if(error) {
 			console.log(error);
 			res.json({"error":"could not save datapath"});
 		} else {
-            global.config.dataPath = path;
-			console.log("datapath set to:", path );
-            
-            // let's try to load nodes
-            exports.initNodes(function(error) {
-                if(error) {
-                    glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":path};
-                    res.json({"status": "error"});
-                } else {
-                    glampipe.initError = null;
-                    res.json({"status": "ok"});
-                }
-            });
-			
+            global.config.dataPath = dataPath;
+            global.config.projectsPath = path.join(dataPath, "projects");
+			console.log("datapath set to:", dataPath );
+            res.json({"status": "ok","datapath": dataPath});
 		}
 	})
 };
@@ -1651,7 +1684,30 @@ exports.downloadFile = function (node, sandbox, cb ) {
 
 	// verify response code
 	sendReq.on('response', function(response) {
-		sandbox.context.response = response;
+        if(response.statusCode === 200) {
+            sandbox.context.response = response;
+            sendReq.pipe(file);
+
+            file.on('finish', function() {
+                file.close(function () {
+                    cb(sandbox);
+                }); 
+            });
+
+            file.on('error', function(err) { 
+                fs.unlink(filePath); // Delete the file async. 
+                console.log(err);
+                sandbox.context.error = err;
+
+                if (cb) {
+                    return cb(sandbox);
+                }
+            });
+            
+        } else {
+           sandbox.context.error = "file not found on server!";
+           return cb(sandbox);
+        }
 
 	});
 
@@ -1660,24 +1716,11 @@ exports.downloadFile = function (node, sandbox, cb ) {
 		fs.unlink(filePath);
 		console.log(err);
 		sandbox.context.error = err;
+        return cb(sandbox);
 
 	});
 
-	sendReq.pipe(file);
 
-	file.on('finish', function() {
-		file.close(function () {cb(sandbox);});  // close() is async, call cb after close completes.
-	});
-
-	file.on('error', function(err) { 
-		fs.unlink(filePath); // Delete the file async. 
-		console.log(err);
-		sandbox.context.error = err;
-
-		if (cb) {
-			return cb(sandbox);
-		}
-	});
 
 }
 
@@ -1824,8 +1867,8 @@ function generateDynamicView(node, fields, edit, callback) {
 			// data cells
 			html += '				<td data-bind="text: vcc"></td>'
 			for (key in data) {
-				if(data[key] != null) {
-					if(data[key].constructor.name === 'Array') {
+				//if(data[key] != null) {
+					if(data[key] != null && data[key].constructor.name === 'Array') {
 						html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
 						//html += '			<td>array</td>'
 
@@ -1838,9 +1881,9 @@ function generateDynamicView(node, fields, edit, callback) {
 						} else
 							html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
 					}
-				} else {
-					html += '				<td>null</td>'
-				}
+				//} else {
+					//html += '				<td>null</td>'
+				//}
 				
 			}
 
@@ -1940,14 +1983,22 @@ function readFiles(dirname, onFileContent, onError, onDone) {
 			return;
 		}
 
+
 		async.eachSeries(filenames, function iterator(filename, next) {
-			fs.readFile(dirname + filename, 'utf-8', function(err, content) {
-				if (err) {
-					onError(err);
-					return;
-				}
-				onFileContent(filename, content, next);
-			});
+            fs.stat(filename, function(err, stat) {
+                // skip directories
+                if (stat && stat.isDirectory()) { 
+                    next();
+                } else {
+                    fs.readFile(dirname + filename, 'utf-8', function(err, content) {
+                        if (err) {
+                            onError(err);
+                            return;
+                        }
+                        onFileContent(filename, content, next);
+                    });
+                }
+            })
 		}, function done() {
 			onDone();
 		});

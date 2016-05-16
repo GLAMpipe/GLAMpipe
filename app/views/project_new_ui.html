@@ -39,8 +39,8 @@
 		
 		<!-- ko if: type == 'collection' --> 
 		<div>
-				<button data-bind="click: $root.openSourceCreator" class="add_node left">add source</button> 
 				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
+				<button data-bind="click: $root.openSourceCreator" class="add_node right">add source</button> 
 				<div class="clear"></div>
 		</div>
 		<!-- /ko -->
@@ -69,22 +69,22 @@
 
 		<div class="node_settings">
 
-			<!-- ko if: type != 'collection' --> 
-			<div>
-				<button data-bind="attr:{id:_id}" class="run left">run this node!</button>
-				<div class="node_console"></div>
-			</div>
-			<div class="clear"></div>
-			<!-- /ko -->
-
-			<div id="node_bar" class="selected">
-				<h2>DETAILS</h2>
-				<div class="number" data-bind="number"></div> 
-				<h3 class="subhead">params</h3> 
-				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
+			<div id="node_bar" data-bind="css:type">
+				<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
 				<h3 class="subhead">settings</h3> 
 				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
+				<!-- ko if: type != 'collection' --> 
+				<div>
+					<button data-bind="attr:{id:_id}" class="button left run">run this node!</button>
+					<div class="node_console">console</div>
+				</div>
+				<div class="clear"></div>
+				<!-- /ko -->
+				<h3 class="subhead">params</h3> 
+				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
 			</div>
+			
+			
 			
 		 
 		</div>

@@ -192,7 +192,8 @@ var nodeList = function () {
             $("#tabs").tabs("option", "active", index);
         // otherwise create it
         } else {
-            var content = settings.clone(true);
+            //var content = settings.clone(true);
+            var content = settings;
             content.show();
             
             var title = "<span class='strong'>SETTINGS:</span> " + data.title;
@@ -207,15 +208,24 @@ var nodeList = function () {
         var obj = $(event.target);
         var settings = obj.parent().find(".node_settings");
 
-        var url = '/node/view/' + data._id;
-        if(data.type == "transform")
-            url += "?fields=" + data.out_field;
-        
-        var title = "<span class='strong'>VIEW:</span> " + data.title;
-        var milliseconds = (new Date).getTime();
-        var id = "tabs-" + milliseconds;
-        addTab(self.tabs, id, title, url, null, data.type);
-        loadTabFrame("#" + id, url);
+        var tab_id = "tabs-view-" + data._id;
+        if ($("#"+tab_id).length) {
+            var index = $('#tabs a[href="#'+tab_id+'"]').parent().index();
+            $("#tabs").tabs("option", "active", index);
+            
+        // otherwise create it
+        } else {
+
+            var url = '/node/view/' + data._id;
+            if(data.type == "transform")
+                url += "?fields=" + data.out_field;
+            
+            var title = "<span class='strong'>VIEW:</span> " + data.title;
+            //var milliseconds = (new Date).getTime();
+            
+            addTab(self.tabs, tab_id, title, url, null, data.type);
+            loadTabFrame("#" + tab_id, url);
+        }
     }
 
     this.generateParams = function (data) {
@@ -445,6 +455,7 @@ $( document ).ready(function() {
                 }
             html += "</ul>"
             params.append("<div class='dynamic_fields'>"+html+"</div>");
+            //alert(obj.position().top);
         })
     });
 
