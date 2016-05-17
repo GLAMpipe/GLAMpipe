@@ -39,6 +39,7 @@
 		
 		<!-- ko if: type == 'collection' --> 
 		<div>
+				<button class="left" data-bind="click:$root.openNodeView">data view</button> 
 				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
 				<button data-bind="click: $root.openSourceCreator" class="add_node right">add source</button> 
 				<div class="clear"></div>
@@ -46,7 +47,7 @@
 		<!-- /ko -->
 
 		<!-- ko if: type != 'collection' --> 
-		<button class="left" data-bind="click:$root.openNodeView">node view</button> 
+		<button class="left" data-bind="click:$root.openNodeView">data view</button> 
 		<div style="clear:both"></div>
 		<!-- /ko -->
 
@@ -75,8 +76,11 @@
 
 		<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
 
-			<div id="node_bar" data-bind="css:type">
+			<div class="node_bar" data-bind="css:type">
 				<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
+				<div class="node_info">
+					<div data-bind="html:description"></div>
+				</div>
 				<h3 class="subhead">settings</h3> 
 				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
 				<!-- ko if: type != 'collection' --> 

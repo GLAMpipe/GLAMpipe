@@ -1308,7 +1308,7 @@ exports.getCollection = function (req, query, res) {
 
 	var limit = parseInt(req.query.limit);
 	if (limit <= 0 || isNaN(limit))
-		limit = 25;
+		limit = 15;
 
 	var skip = parseInt(req.query.skip);
 	if (skip <= 0 || isNaN(skip))

@@ -33,6 +33,10 @@ function getSelectedTabIndex($tabs) {
 }
 
 
+function reloadIframe (tab_id) {
+    $("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", function ( i, val ) { return val; });
+}
+
 function addTab(tabs, tabId, title, url, content, tabClass) {
     
     var tabTemplate = "<li class='"+tabClass+"'><a class='tabref' href='#{href}' rel='#{url}'>#{label}</a> <span class='ui-icon ui-icon-close' role='presentation'>Remove Tab</span></li>";

@@ -184,14 +184,29 @@
 		var fields = [];
 		$("#selected_fields button").each(function(index) {
 			fields.push($(this).text());
-			
 		});
 		var fields_str = fields.join(",");
-		if(fields_str == "")
-			window.location.search = "";
-		else
-			window.location.search = "?fields=" + fields_str;
+        if(fields_str != "")
+            fields_str = "?fields=" + fields_str;
+
+        // if we are inside iframe, we must update iframe src so that reload keeps selected fields 
+        writeIframeSrc(fields_str);
+        
+        window.location.search = fields_str;
+ 
+
+        
 	}
+
+
+    function writeIframeSrc (fields_str) {
+           
+        var parent = $(window.parent.document); 
+        console.log(node._id);
+        var url = "/node/view/"+node._id + fields_str;
+        var tab_id = "tab-view-" + node._id;
+        parent.find("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", url);
+    }
 
 	function getURLParameter(name) {
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null

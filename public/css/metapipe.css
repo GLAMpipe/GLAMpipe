@@ -83,26 +83,26 @@ pre {
 	white-space: pre-wrap;
 }
 
-#node_bar {
+.node_bar {
 	padding:10px;
 }
 
-#node_bar button {
+.node_bar button {
 	display:block;
 }
 
-#node_bar .description {
+.node_bar .description {
 	margin-bottom:20px;
 	margin-top:10px;
 }
 
-#node_bar .node_params {
+.node_bar .node_params {
 	margin-bottom:20px;
 	padding:10px;
 	border: 1px solid black;
 }
 
-#node_bar .settings {
+.node_bar .settings {
 	margin-bottom:20px;
 	color:black;
 	padding:10px;
@@ -110,13 +110,17 @@ pre {
 	background-color:white;
 }
 
-#node_bar .subhead {
+.node_bar .settings input{
+    width:220px;
+}
+
+.node_bar .subhead {
 	background-color: white;
 	color:black;
 	padding:5px;
 }
 
-#node_bar table td {
+.node_bar table td {
 	border: 0px solid black;
 	padding:1px;
 }
@@ -142,7 +146,7 @@ input.dynamic_field {
 
 
 
-#node_bar label {
+.node_bar label {
 	font-weight: bold;
 	display:block;
 	margin-top:10px;
@@ -258,13 +262,13 @@ ul.node_types li:hover {
 }
 
 
- input, #node_bar textarea {
+ input, .node_bar textarea {
 	width:90%;
 }
 
 
 
-#node_bar .dynamic_fields, #node_creator .dynamic_fields {
+.node_bar .dynamic_fields, #node_creator .dynamic_fields {
 	display:block;
 	position:absolute;
 
@@ -798,6 +802,12 @@ button.run, button.test {
 
 .pipe a:hover {
     color: white;
+}
+
+.pipe .selected {
+    background-color: white;
+
+    box-shadow: 5px 5px 5px #888888;
 }
 
 .clear {

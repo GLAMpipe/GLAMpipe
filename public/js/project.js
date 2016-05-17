@@ -92,13 +92,10 @@ var nodeList = function () {
         //settings.toggle();
         $(".pipe .block").removeClass("selected");
         obj.parents(".block").addClass("selected");
+
+        self.openNodeSettings(data, event);
+        self.setSettingsValues(data);
         
-        if(data.type == "collection") {
-            self.openNodeView(data, event);
-        } else {
-            self.openNodeSettings(data, event);
-            self.setSettingsValues(data);
-        }
     }
 
     this.nodeParams = function (data) {
@@ -118,10 +115,18 @@ var nodeList = function () {
 
     this.setSettingsValues = function (data) {
         for(var prop in data.settings) {
-            if(typeof data.settings[prop] == "boolean")
+            if(typeof data.settings[prop] == "boolean") {
                 $("input[name='"+prop+"']").prop("checked", data.settings[prop]);
-            else
-                $("input[name='"+prop+"']").val(data.settings[prop]);
+            } else {
+                if(data.settings[prop].constructor.name === "Array") {
+                    for(var i = 0; i < data.settings[prop].length; i++) {
+                        var n = i+1;
+                        $("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
+                    }
+                } else {
+                    $("input[name='"+prop+"']").val(data.settings[prop]);
+                }
+            }
         }
     }
 
@@ -208,10 +213,15 @@ var nodeList = function () {
         var obj = $(event.target);
         var settings = obj.parent().find(".node_settings");
 
-        var tab_id = "tabs-view-" + data._id;
+        var tab_id = "tab-view-" + data._id;
         if ($("#"+tab_id).length) {
             var index = $('#tabs a[href="#'+tab_id+'"]').parent().index();
             $("#tabs").tabs("option", "active", index);
+            
+            // reload view
+            $("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", function ( i, val ) { return val; });
+
+
             
         // otherwise create it
         } else {
@@ -297,7 +307,11 @@ $( document ).ready(function() {
 	nodes.loadProject(nodes);
 
     // TABS CREATE
-    var $tabs = $('#tabs').tabs();
+    var $tabs = $('#tabs').tabs( { 
+        beforeActivate: function (event, ui) {
+            reloadIframe(ui.newPanel.attr('id'));
+        }
+    });
     nodes.tabs = $tabs;
     var beginTab = $("#tabs ul li:eq(" + getSelectedTabIndex($tabs) + ")").find("a");
     loadTabFrame($(beginTab).attr("href"),$(beginTab).attr("rel"));
@@ -309,9 +323,10 @@ $( document ).ready(function() {
 
     // TABS CLOSE
     $("#tabs").on("click",  "span.ui-icon-close", function() {
-      var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
-      //$( "#" + panelId ).remove();
-      $tabs.tabs( "refresh" );
+        var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
+        if(panelId.indexOf("tab-view") > -1) // views are removed, settings not
+            $( "#" + panelId ).remove();
+        $tabs.tabs( "refresh" );
     });
 
 
@@ -416,8 +431,15 @@ $( document ).ready(function() {
         var obj = $(e.target);
         var map = {};
         // read input from settings
-        obj.parents().find(".settings input, .settings select").each(function() {
-            map[$(this).attr("name")] = $(this).val();
+        obj.parent().parent().find(".settings input, .settings select").each(function() {
+            var nameSplitted = $(this).attr("name").split("[");
+            // if input name has form "set[something1]", then we want to gather all of them to array
+            if(nameSplitted.length > 1) {
+                //map[nameSplitted[0]] = $(this).val();
+                (map[nameSplitted[0]] || (map[nameSplitted[0]] = [])).push($(this).val());
+            } else {
+                map[$(this).attr("name")] = $(this).val();
+            }
         });
         // and run
         runNode(map, this.id);
@@ -506,7 +528,7 @@ $( document ).ready(function() {
     
     socket.on('news', function (data) {
         if(data.nodeid) {
-            $("#tabs-settings-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
+            $("#tab-settings-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             $("#console").append(data + "</br>");
             tailScroll() 
