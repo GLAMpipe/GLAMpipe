@@ -186,19 +186,19 @@ var nodeList = function () {
         
         
         // if tab exists, then activate it
-        var tab_id = "#tabs-" + data._id;
-        if ($(tab_id).length) {
+        var tab_id = "#tab-settings-" + data._id;
+        if ($('#tabs a[href="'+tab_id+'"]').length) {
             var index = $('#tabs a[href="'+tab_id+'"]').parent().index();
             $("#tabs").tabs("option", "active", index);
         // otherwise create it
         } else {
             //var content = settings.clone(true);
-            var content = settings;
-            content.show();
+            var content = $("#tab-settings-"+data._id);
+            content.removeClass("hidden");
             
             var title = "<span class='strong'>SETTINGS:</span> " + data.title;
-            id = "tabs-" + data._id;
-            addTab(self.tabs, id, title, null, content, data.type); // null URL creates regular tab (not iframe)
+            id = "tab-settings-" + data._id;
+            addTab(self.tabs, id, title, null, data.type); // null URL creates regular tab (not iframe)
         }
     }
 
@@ -223,7 +223,7 @@ var nodeList = function () {
             var title = "<span class='strong'>VIEW:</span> " + data.title;
             //var milliseconds = (new Date).getTime();
             
-            addTab(self.tabs, tab_id, title, url, null, data.type);
+            addTab(self.tabs, tab_id, title, url, data.type);
             loadTabFrame("#" + tab_id, url);
         }
     }
@@ -310,7 +310,7 @@ $( document ).ready(function() {
     // TABS CLOSE
     $("#tabs").on("click",  "span.ui-icon-close", function() {
       var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
-      $( "#" + panelId ).remove();
+      //$( "#" + panelId ).remove();
       $tabs.tabs( "refresh" );
     });
 
@@ -496,7 +496,7 @@ $( document ).ready(function() {
 
     socket.on('hello', function (data) {
         if(data.nodeid) {
-            $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
+            $("#tab-settings-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             $("#console").append(data + "</br>");
             tailScroll() ;
@@ -506,7 +506,7 @@ $( document ).ready(function() {
     
     socket.on('news', function (data) {
         if(data.nodeid) {
-            $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
+            $("#tabs-settings-" + data.nodeid +" .node_console").append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             $("#console").append(data + "</br>");
             tailScroll() 
@@ -514,11 +514,11 @@ $( document ).ready(function() {
     });
 
     socket.on('progress', function (data) {
-        $("#tabs-" + data.nodeid +" .node_console").append("<div class=\"progress\">" + data.msg + "</div>");
+        $("#tab-settings-" + data.nodeid +" .node_console").append("<div class=\"progress\">" + data.msg + "</div>");
     });
 
     socket.on('error', function (data) {
-        var console = $("#tabs-" + data.nodeid +" .node_console");
+        var console = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
             console.append("<div class=\"error\">" + data.msg + "</div>");
             console.removeClass("busy");
@@ -531,7 +531,7 @@ $( document ).ready(function() {
     });
 
     socket.on('finish', function (data) {
-        var console = $("#tabs-" + data.nodeid +" .node_console");
+        var console = $("#tab-settings-" + data.nodeid +" .node_console");
         console.append("<div class=\"progress\">" + data.msg + "</div>");
         console.removeClass("busy");
         console.addClass("done");

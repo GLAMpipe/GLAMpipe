@@ -65,9 +65,15 @@
 			
 		</div>
 
+	</div>
+
+</script>
 
 
-		<div class="node_settings">
+<script type="text/html" id="tab-template">
+	
+
+		<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
 
 			<div id="node_bar" data-bind="css:type">
 				<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
@@ -84,12 +90,8 @@
 				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
 			</div>
 			
-			
-			
-		 
 		</div>
 
-	</div>
 
 </script>
 
@@ -120,6 +122,11 @@
 			<ul>
 				<li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
 			</ul>
+			
+			<!-- NODE SETTINGS -->
+			<!-- ko template: { name: 'tab-template', foreach: projectNodes } -->
+			<!-- /ko -->
+
 		  <div class="tab" id="tabs-1"></div>
 		</div>
 	</div>

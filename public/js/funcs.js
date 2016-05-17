@@ -47,9 +47,11 @@ function addTab(tabs, tabId, title, url, content, tabClass) {
     liCont = liCont.replace( /#\{url\}/g, url );
     var li = $(liCont);
 
-    var tabContent = $("<div class='tab' id='" + tabId + "'></div>");
-    tabContent.append(content);
-    tabs.append(tabContent);
+    if(url) {
+        var tabContent = $("<div class='tab' id='" + tabId + "'></div>");
+        tabContent.append(content);
+        tabs.append(tabContent);
+    }
 
     tabs.find( ".ui-tabs-nav" ).append( li );
     tabs.tabs( "refresh" );
