@@ -128,18 +128,12 @@ var GlamPipe = function() {
 					self.dataPath = dataPath;
 					global.config.dataPath = dataPath;
 					global.config.projectsPath = path.join(dataPath, "projects");
-                    
-                    // read nodes to database
-                    self.core.initNodes(function(error) {
-                        if(error)
-                            self.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
 
-                        // Create the express server and routes.
-                        self.initializeServer();
-                        console.log("INIT done");
-                        cb(); 
+                    // Create the express server and routes.
+                    self.initializeServer();
+                    console.log("INIT done");
+                    cb(); 
 
-                    });
 				}
 			});
 		});

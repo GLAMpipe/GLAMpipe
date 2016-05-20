@@ -85,6 +85,7 @@ pre {
 
 .node_bar {
 	padding:10px;
+
 }
 
 .node_bar button {
@@ -108,6 +109,8 @@ pre {
 	padding:10px;
 	border: 1px solid black;
 	background-color:white;
+    max-height:450px;
+    overflow-y:auto;
 }
 
 .node_bar .settings input{
@@ -169,6 +172,8 @@ input.dynamic_field {
 
 .node_settings {
     display:none;
+    height:90%;
+    overflow-y:scroll;
 }
 
 .node_buttons {
@@ -176,8 +181,10 @@ input.dynamic_field {
 }
 
 
-.node_info {
-	padding:5px;
+.node .node_info {
+	padding:2px;
+    width:220px;
+    float:right;
 }
 
 .node_info .description, .node_info .params_description{
@@ -186,6 +193,10 @@ input.dynamic_field {
 
 .node_info .description{
 	background-color: #E0E0E0;
+}
+
+.node_info .node_title {
+    margin-top:3px;
 }
 
 .node .view_button {
@@ -593,6 +604,7 @@ html {
 
 .collection_pipe {
     width:400px;
+    height:80%;
 }
 
 .collection_pipe > h2 {
@@ -601,6 +613,8 @@ html {
 
 .pipe {
     margin:10px;
+    height:100%;
+    overflow-y:auto;
 }
 
 .collection_view {
@@ -820,6 +834,8 @@ button.run, button.test {
     margin:5px;
     margin-left:200px;
     margin-right:200px;
+    max-height: 400px;
+    overflow-y:auto;
 }
 
 .pointer {

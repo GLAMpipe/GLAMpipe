@@ -26,8 +26,12 @@ module.exports = function(express, glampipe) {
 		glampipe.core.setDataPath(req.body, glampipe, res);
 	});
 
-	express.post('/set/initnodes', function (req, res) {
-		glampipe.core.initNodes(function(error) {
+	express.get('/get/datapath', function (req, res) {
+		res.json({"datapath": global.config.dataPath});
+	});
+
+	express.post('/download/nodes', function (req, res) {
+		glampipe.core.downloadNodes(glampipe.io, function (error) {
             var dataPath = global.config.dataPath;
         // let's try to load nodes
             if(error) {
@@ -39,6 +43,25 @@ module.exports = function(express, glampipe) {
             }
         });
 	});
+
+	express.post('/read/nodes', function (req, res) {
+		glampipe.core.initNodes(glampipe.io, function(error) {
+            var dataPath = global.config.dataPath;
+        // let's try to load nodes
+            if(error) {
+                glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
+                res.json({"status": "error"});
+            } else {
+                glampipe.initError = null;
+                res.json({"status": "ok","datapath": dataPath});
+            }
+        });
+	});
+
+
+
+
+    
 
 	// PROJECTS
 	express.get('/', function (req, res) {

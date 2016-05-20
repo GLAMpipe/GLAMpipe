@@ -52,7 +52,6 @@
 		<!-- /ko -->
 
 		<div class="node_buttons">
-
 			
 			<!-- ko if: type == 'view' --> 
 			<div class="bottom">
@@ -81,7 +80,7 @@
 				<div class="node_info">
 					<div data-bind="html:description"></div>
 				</div>
-				<h3 class="subhead">settings</h3> 
+				<h3 class="subhead">settings for running node</h3> 
 				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
 				<!-- ko if: type != 'collection' --> 
 				<div>
@@ -90,7 +89,7 @@
 				</div>
 				<div class="clear"></div>
 				<!-- /ko -->
-				<h3 class="subhead">params</h3> 
+				<h3 class="subhead">parameters</h3> 
 				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
 			</div>
 			
@@ -124,14 +123,14 @@
 	<div class="collection_view">
 		<div id="tabs">
 			<ul>
-				<li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
+				<li><a class="tabref" href="#tab-view" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
 			</ul>
 			
 			<!-- NODE SETTINGS -->
 			<!-- ko template: { name: 'tab-template', foreach: projectNodes } -->
 			<!-- /ko -->
 
-		  <div class="tab" id="tabs-1"></div>
+		  <div class="tab" id="tab-view"></div>
 		</div>
 	</div>
 

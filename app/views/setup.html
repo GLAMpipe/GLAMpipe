@@ -1,23 +1,46 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Error in setup</title>
+<title>GLAMpipe setup</title>
 <script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-<link rel="stylesheet" type="text/css" href="css/js-graph-it.css" />
-<link rel="stylesheet" type="text/css" href="css/sf-homepage.css" />
+<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
 
 <style>
-p {padding:5px}
+p {padding:5px;}
+html, body { height:100%;}
+img.man {position:absolute; bottom:0px; right:0px}
+#wrapper {padding:20px;}
+a:hover {color:black;}
+#console {position:absolute; top:110px; left: 380px;overflow-y:auto; width:550px; height:500px; color:white; background-color:black; z-index:100000}
+#info {width:930px;}
 </style>
 
 <script>
 function init() {
 
 
-    $( "#setdatapath" ).submit(function( event ) {
+    // websocket stuff
+    var socket = io.connect('http://localhost');
+
+    socket.on("progress", function (data) {
+        $("#console").append(data + "</br>");
+    });
+
+    socket.on("error", function (data) {
+        $("#console").append("<div class=\"bad\">" + data + "</div>");
+    });
+
+    $.get("/get/datapath", function(returnedData) {
+        console.log(returnedData);
+        if(returnedData.datapath != "") {
+            $("#datapath").val(returnedData.datapath);
+        } else {
+            $("#datapath_error").show();
+        }
+    });
+
+    $( "#setdatapath" ).click(function( event ) {
         if($("#datapath").val() == "") {
             alert( "Data path can not be empty!" );
             
@@ -27,30 +50,52 @@ function init() {
             $.post("/set/datapath", data, function(returnedData) {
                 console.log(returnedData);
                 if(returnedData.status == "ok") {
-                    $("#info").text("Data path set, now fetching nodes...");
+                    $("#info").text("Data path set!");
+                    $("#datapath_error").hide();
                     error.status = "ok";
-                    $.post("/set/initnodes", data, function(returnedData) {
-                        document.location.reload(true);
-                    });
+                } else {
+                    alert("data path set failed!");
                 }
             });
         }
-        event.preventDefault();
     });
      
+    $( "#fetchnodes" ).click(function( event ) {
+        $("#console").empty();
+        $("#info").text("Starting to fetch nodes...");
+        var data = {};
+        $.post("/download/nodes", data, function(returnedData) {
+            if(returnedData.status == "ok") {
+                $("#info").text("Nodes fetched from github!");
+                error.status = "ok";
+            } else {
+                alert("Could not fetch nodes!");
+            }
+        });
+    });
+
+
+    $( "#readnodes" ).click(function( event ) {
+        $("#console").empty();
+        $("#info").text("Starting to read nodes ...");
+        var data = {};
+        $.post("/read/nodes", data, function(returnedData) {
+            if(returnedData.status == "ok") {
+                $("#info").text("Nodes ready!");
+                error.status = "ok";
+            } else {
+                alert("Could not read nodes!");
+            }
+        });
+    });
     
+    // if there was an init error, then show that
     switch (error.status) {
         case "nodepath_error":
-            $("#datadir").text(error.datapath);
             $("#nodepath_error").show();
         break;
         case "datapath_error":
             $("#datapath_error").show();
-            $("#setpath").show();
-        break;
-        case "ok":
-            $("#ok").show();
-            $("#datapath_info").text(error.datapath);
         break;
             
     }
@@ -61,58 +106,61 @@ function init() {
 </script>
 
 </head>
-<body onLoad="init()">
-    <div class="project_header">
-        <h1>Setup</h1>
-    </div>
-
+<body onLoad="init()" >
     
-    [[initerror]]
-    
-    <br><br><br>
-
-    <div class="lookup hidden" id="ok">
-        <h2>It should be ok now!</h2>
-        <p>Create a project and start experimenting!</p>
-        <div id="datapath_info"></div>
-    </div>
-    
-    <div class="upload hidden" id="nodepath_error" style="width:500px">
-        <h3>ERROR: "nodes not found" </h3>
-        <p>GLAMpipe does not find node files. Download nodes to "nodes" directory IN your data directory.</p>
-        
-        <h4>your data path:</h4>
-        <div id="datadir"></div>
-        <p>Nodes can be found here: <a href="https://github.com/artturimatias/metapipe-nodes/archive/master.zip">https://github.com/artturimatias/metapipe-nodes/archive/master.zip</a></p>
-        <h4>You have to restart GLAMpipe after you have placed nodes in "nodes" directory.</h4>
-        
-    </div>
-    
-    <div class="upload hidden" id="datapath_error" style="width:500px">
-        <h3>ERROR: "datapath is not set!"</h3>
-        <p>You need create a directory where GLAMpipe can save its data. 
-Then write <span class="strong">full path</span> to "data path" field and click "set data path".</p>
-
-        <div id="setpath" >
-            <div class="source">
-                
-                <label class="strong">set data path here:</label>
-               
-                <form method="POST" id="setdatapath" action="/set/datapath">
-                    <input id="datapath" name="datapath" placeholder="/full/data/path/here" style="width:500px"/>
-                    <input type="submit" value="set data path and fetch nodes (this takes a while)">
-                </form>
-            </div>
-            
+    <div id="wrapper">
+        <div class="project_header">
+            <h1>Setup</h1>
+            <a href="/">back to projects</a>
         </div>
 
+        
+        [[initerror]]
+        
+        <br><br><br>
 
+
+        <div class="upload node hidden" id="datapath_error">
+            <h3>ERROR: "datapath is not set!"</h3>
+        </div>
+
+        <!-- DATA PATH -->
+        <div class="source node">
+             <h2>SET DATA PATH</h2>
+            <p>You need to <span class="strong">create a directory</span> where GLAMpipe can save its data.</p> 
+            <p>Then write <span class="strong">full path</span> to "data path" field and click "set data path".</p>
+            <label class="strong">data path:</label>
+           
+            <input id="datapath" name="datapath" placeholder="/full/data/path/here"/>
+            <button id="setdatapath">set data path</button>
+            
+        </div>
+                
+        <!-- NODES -->
+        <div class="source node">
+            <h2>UPGRADE NODES</h2>
+            <p>You can download latest node set from web by clicking the button below. Remember to <span class="strong">load nodes</span> after download finishes.</p>
+            <button id="fetchnodes">Fetch nodes (takes a while)</button>
+            <p>You can load (or reload) nodes by clicking the button below.</p>
+            <button id="readnodes">(re)load nodes to GLAMpipe</button>
+        </div>
+        
+        <!-- NODES -->
+        <div class="source node">
+            <h2>BROWSE NODES</h2>
+            <p>You browse nodes here.</p>
+            <a href="/node-viewer">node viewer</a>
+        </div>
+        
+    
+
+
+        <div class="warning" id="info"></div>
+        <div class="" id="console"></div>
     </div>
-
-    <div class="warning" id="info"></div>
-
-
-    <img class="right" src="images/terrified_man.png" />
-
-	</body>
+    
+    <img class="right man" src="images/terrified_man.png" />
+    
+	
+</body>
 </html>

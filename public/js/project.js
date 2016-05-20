@@ -143,9 +143,9 @@ var nodeList = function () {
     this.nodeInfo = function(data) {
         var html = '<div  class="node_info">';
 		if(data.type == "collection")
-            html += '<p class="node_title">'+data.params.description+'</p>'; 
+            html += '<div class="node_title">'+data.params.description+'</div>'; 
 		else if (data.params.title)
-			html += '<p class="node_title">' + data.params.title + '</p> ';
+			html += '<div class="node_title">' + data.params.title + '</div> ';
             
 		html += '</div>';
         return html;
@@ -227,6 +227,7 @@ var nodeList = function () {
         } else {
 
             var url = '/node/view/' + data._id;
+            // for transform node show only node's out_field
             if(data.type == "transform")
                 url += "?fields=" + data.out_field;
             

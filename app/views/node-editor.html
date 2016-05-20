@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -11,7 +9,15 @@
 
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
 <style>
-	
+	textarea {width:100%; height:3em; margin-top:1em;}
+    .script {}
+    pre.prettyprint {margin:0px; }
+    .nodesource {width:650px;}
+    .nodesource h2 {margin-top:2em; margin-bottom:5px; width:550px;}
+    #json_container {height:90%; width:40%; position:fixed; right:0px; top:0px; margin-right:20px;}
+    #result {height:90%}
+    #scripts .script {display:none}
+    #views .view {display:none}
 </style>
 <script>
 
@@ -28,30 +34,12 @@
 		}
 		
 	 
-		this.addItem = function () {
-			var match = ko.utils.arrayFirst(self.nodes(), function(item) {
-				return self.itemToAdd() === item.title;
-			});
-			
-			if ((this.itemToAdd() != ""))  {// Prevent blanks 
-				if(match) {
-					alert("Project title \"" + self.itemToAdd() + "\" exists!");
-				} else {
-					var data = {'title':self.itemToAdd()};
-					$.post("/create/project", data, function(returnedData) {
-						self.itemToAdd(""); // Clear the text box 
-						self.nodes([]);
-						self.loadItems();
-					});
-				}
-			}
-		};
-	 
 		this.selectedNode = ko.observable();
 		
 		this.select = function (data, event) {
 			$.getJSON("/get/node/" + data.nodeid, function(nodeData) {
 				self.selectedNode(nodeData);
+                self.closeNodes();
 			});
 		}
 		
@@ -62,6 +50,11 @@
 	 
 		this.sortItems = function() {
 			this.nodes.sort();
+		};
+
+		this.open = function (data, event) {
+            var obj = $(event.target);
+            obj.parent().find(".script").show()
 		};
 
 		this.openNodes = function () {
@@ -101,10 +94,9 @@
 				var str = data;
 			
 			var script = $("<pre class=\"prettyprint linenums\">"+str+"</pre>");
-			$("#" + ele).append(script);
+			$("#" + ele + "_src").append(script);
 			PR.prettyPrint(script);
 			
-			self.closeNodes();
 			return ele;
 		}
 		
@@ -118,17 +110,50 @@
 			else
 				var str = data;
 
-			var script = $("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
-			
-			$("#" + ele).append("<pre class=\"prettyprint lang-html\">"+str+"</pre>");
-			//PR.prettyPrint(script);
-			
-			
-
 			return str;
 		}
 
-		
+
+		this.scriptview2html = function (data) {
+			
+			if(typeof data === "undefined")
+				return "";
+			
+			if (data instanceof Array)
+				var str = data.join("\n");
+			else
+				var str = data;
+
+			return str;
+		}
+        
+        this.save = function () {
+            console.log(self.selectedNode());
+           var data = {scripts:{}, views:{}};
+
+           data.title = $("#title").val();
+           data.description = $("#description").val();
+           
+           data.nodeid = self.selectedNode().nodeid;
+           data.type = self.selectedNode().type;
+           data.subtype = self.selectedNode().subtype;
+           
+           $("#scripts textarea.script").each(function(index) {
+               var id = $(this).attr("id");
+               var text = $(this).val().split("\n");
+               data.scripts[id] = text;
+           });
+
+           $("#views textarea.view").each(function(index) {
+               var id = $(this).attr("id");
+               var text = $(this).val().split("\n");
+               data.views[id] = text;
+           });
+
+           
+           $("#result").val(JSON.stringify(data,null,'\t'));
+        }
+
 	};
 
 	function onLoad()
@@ -136,7 +161,7 @@
 		var projects = new NodeList ();
 		ko.applyBindings(projects);
 		projects.loadItems();
-		
+
 	}
 		
 	
@@ -154,81 +179,132 @@
 
 	<div class="nodesource" data-bind="with: selectedNode">
 		<h1 data-bind="text: type.toUpperCase() + ' > ' + subtype +' > '+ title"></h1>
-		<span data-bind="text: description"></span>
+
+		<h2>title</h2>
+        <textarea id="title" data-bind="text:title"></textarea>
+        
+		<h2>description</h2>
+        <textarea id="description" data-bind="text:description"></textarea>
 		
-		<h2>SCRIPT CONTEXT</h2>
-		<p>Scripts are executed in a limited context. </p>
-		<div>
-			<ul>
-				<li>context.doc</li>
-				<p>Contains current record.</p>
-				<li>context.data</li>
-				<p>For API nodes (API source and API lookup) context.data holds the request response.</p>
-				<li>context.node</li>
-				<p>Contains node object itself (params and settings).</p>
-				<li>context.doc_count</li>
-				<p>Contains total record count.</p>
-				<li>context.count</li>
-				<p>Contains loop counter (i.e. how many records have been processed).</p>
-			</ul>
-			<p>Nodes communicate with outer world via "out" object.</p>
-			<ul>
-				<li>out.url</li>
-				<p>Some nodes (like API lookup) must provide URL. </p>
-				<li>out.value</li>
-				<p>This is what is stored to database. All nodes must set this.</p>
-				<li>out.say</li>
-				<p>This allows node to communicate directly to the user. </p>
-			</ul>
-		</div>
 		
-		<h2>SCRIPTS</h2>
+		<h1>SCRIPTS</h1>
+        
+        <div id="scripts">
 
-		<h3 data-bind="html: $root.script2html(scripts.hello, 'hello')">hello</h3>
-		<div class="help">Script is called *before* node is inserted to database. 
-		Therefore it is possible to set for example node's title (see source - file - upload node).
-		</div>
-		<div id="hello"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.init, 'init'), click:$root.open">init</h2>
+                <div class="help script">Init script is called once when running node. </div>
+                <div id="init_src" class="script"></div>
+                <textarea id="init" class="script" data-bind="text: $root.scriptview2html(scripts.init)"></textarea>
+            </div>
+            
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.pre_run, 'pre_run'), click:$root.open">run</h2>
+                <div class="help script">pre_run script is executed before run script. For example, a download node can set url here and then run script handles the result. </div>
+                <div id="pre_run_src" class="script"></div>
+                <textarea id="pre_run" class="script" data-bind="text: $root.scriptview2html(scripts.pre_run)"></textarea>
+            </div>
 
-		<h3 data-bind="html: $root.script2html(scripts.bye, 'bye')">bye</h3>
-		<div class="help">This is called when node is deleted. Chanche say by to the user.</div>
-		<div id="bye"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.run, 'run'), click:$root.open">run</h2>
+                <div class="help script">Run script is executed once per record (excluding source nodes). </div>
+                <div id="run_src" class="script"></div>
+                <textarea id="run" class="script" data-bind="text: $root.scriptview2html(scripts.run)"></textarea>
+            </div>
 
-		<h3 data-bind="html: $root.script2html(scripts.login, 'login')">url</h3>
-		<div class="help">Upload nodes must provide login.</div>
-		<div id="login"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.finish, 'finish'), click:$root.open">run</h2>
+                <div class="help script">Finish is run after records have been prosessed. </div>
+                <div id="finish_src" class="script"></div>
+                <textarea id="finish" class="script" data-bind="text: $root.scriptview2html(scripts.finish)"></textarea>
+            </div>
 
-		<h3 data-bind="html: $root.script2html(scripts.url, 'url')">url</h3>
-		<div class="help">Lookup nodes must provide request url by setting out.url.</div>
-		<div id="url"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.hello, 'hello'), click:$root.open">hello</h2>
+                <div class="help script">Script is called *before* node is inserted to database. 
+                Therefore it is possible to set for example node's title (see source - file - upload node).
+                </div>
+                <div id="hello_src" class="script"></div>
+                <textarea id="hello" class="script" data-bind="text: $root.scriptview2html(scripts.hello)"></textarea>
+            </div>
 
-		<h3 data-bind="html: $root.script2html(scripts.init, 'init')">init</h3>
-		<div class="help">Init script is called once when running node. </div>
-		<div id="init"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.bye, 'bye'), click:$root.open">bye</h2>
+                <div class="help script">This is called when node is deleted. Chanche say by to the user.</div>
+                <div id="bye_src" class="script"></div>
+                <textarea id="bye" class="script" data-bind="text: $root.scriptview2html(scripts.bye)"></textarea>
+            </div>
 
-		<h3 data-bind="html: $root.script2html(scripts.run, 'run')">run</h3>
-		<div class="help">Run script is executed once per record (excluding source nodes). </div>
-		<div id="run"></div>
 
-		<h3 data-bind="html: $root.script2html(scripts.view, 'view')">view</h3>
-		<div class="help">Run script is after run for transform and source nodes. </div>
-		<div id="view"></div>
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.login, 'login'), click:$root.open">url</h2>
+                <div class="help script">Upload nodes must provide login.</div>
+                <div id="login_src" class="script"></div>
+                <textarea id="login" class="script" data-bind="text: $root.scriptview2html(scripts.login)"></textarea>
+            </div>
+            
+            <div>
+                <h2 data-bind="html: $root.script2html(scripts.view, 'view'), click:$root.open">view</h2>
+                <div class="help script">View script can be used for creating dynamic views. </div>
+                <textarea id="view" class="script" data-bind="text: $root.scriptview2html(scripts.view, 'script')"></textarea>
+            </div>
+        </div>
 
-		<h2>VIEWS</h2>
-		<h3>params</h3>
-		<div class="help">Params are displayed to the user when node is created. 
-		Params are saved to database and these cannot be changed afterwards. 
-		Parameters are provided to node scripts via <b>context.node.params</b>.</div>
-		<textarea id="params" data-bind="text: $root.view2html(views.params, 'params_src')"></textarea>
-		<div id="params_src"></div>
 
-		<h3>settings</h3>
-		<div class="help">Settings are displayed to the user when running node. 
-		Currently settings are *not* saved to database. Settings are provided to node scripts via <b>context.node.settings</b>.</div>
-		<textarea id="settings" data-bind="text: $root.view2html(views.settings, 'settings_src')"></textarea>
-		<div id="settings_src"></div>
+		<h1>VIEWS</h1>
+        
+        <div id="views">
+        
+            <h2>params</h2>
+            <div class="help">Params are displayed to the user when node is created. 
+            Params are saved to database and these cannot be changed afterwards. 
+            Parameters are provided to node scripts via <b>context.node.params</b>.</div>
+            <textarea id="params" class="view" data-bind="text: $root.view2html(views.params, 'params_src')"></textarea>
+            
+
+            <h2>settings</h2>
+            <div class="help">Settings are displayed to the user when running node. 
+            Settings are saved to database when the node is executed. Settings are provided to node scripts via <b>context.node.settings</b>.</div>
+            <textarea id="settings" class="view" data-bind="text: $root.view2html(views.settings, 'settings_src')"></textarea>
+
+            <h1>SCRIPT CONTEXT</h1>
+            <p>Scripts are executed in a limited context. </p>
+            <div>
+                <ul>
+                    <li>context.doc</li>
+                    <p>Contains current record.</p>
+                    <li>context.data</li>
+                    <p>For API nodes (API source and API lookup) context.data holds the request response.</p>
+                    <li>context.node</li>
+                    <p>Contains node object itself (params and settings).</p>
+                    <li>context.doc_count</li>
+                    <p>Contains total record count.</p>
+                    <li>context.count</li>
+                    <p>Contains loop counter (i.e. how many records have been processed).</p>
+                </ul>
+                <p>Nodes communicate with outer world via "out" object.</p>
+                <ul>
+                    <li>out.url</li>
+                    <p>Some nodes (like API lookup) must provide URL. </p>
+                    <li>out.value</li>
+                    <p>This is what is stored to database. All nodes must set this.</p>
+                    <li>out.say</li>
+                    <p>This allows node to communicate directly to the user. </p>
+                </ul>
+            </div>
+        
+        </div>
+        
+        <h2>SAVE</h2>
+        
 		
 	</div>
+    
+    <div id="json_container">
+        <textarea id="result"></textarea>
+        <button id="save" data-bind="click:$root.save">update JSON</button>
+    </div>
+
 
 	<div id="node_creator">
 		<button data-bind="click:closeNodes">close</button>
