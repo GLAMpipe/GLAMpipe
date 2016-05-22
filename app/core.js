@@ -495,7 +495,7 @@ exports.runNode = function (req, res, io) {
 								mongoquery.insert(node.collection, data, function() {
 									runNodeScriptInContext("finish", node, sandbox, io);
 									//generate view and do *not* wait it to complete
-									exports.updateView(node, sandbox, io, function(msg) {});
+									//exports.updateView(node, sandbox, io, function(msg) {});
 								});
 								
 							}
@@ -504,7 +504,13 @@ exports.runNode = function (req, res, io) {
 							var query = {}; 
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
-								mongoquery.group(node, groupCB);
+                                // we must check if input key is array or not
+                                mongoquery.findOne({}, node.params.source_collection, function (record) {
+                                    if(record) {
+                                        var array = console.log(record[node.params.in_field].constructor.name == "Array");
+                                        mongoquery.group(node, array, groupCB);
+                                    }
+                                }) 
 							});
 								
 						
@@ -1853,7 +1859,8 @@ function generateDynamicView(node, fields, edit, callback) {
 
 
 				
-			var html = '<label>select visible fields (click to remove)</label><div id="controls">'
+			var html = '<div id="controls">'
+                + '<label>select visible fields (click to remove)</label>'
 				+ '<div id="selected_fields"></div>'
 				+ '<select id="field_select">'
                 + '<option>choose</option>';
@@ -1861,12 +1868,12 @@ function generateDynamicView(node, fields, edit, callback) {
 			for (key in data) {
 				html += '	<option value="'+key+'">'+key+'</option>' + "\n";
 			}
-			html += '</select></div>';
+			html += '</select>';
 
 			html += '<div id="prevnext">'
 				+ '<button data-bind="click: prevPage">prev</button>'
 				+ '<button data-bind="click: nextPage">next</button>'
-				+ '</div>'
+				+ '</div></div>'
 
 
 			// remove keys that are not listed inf "fields"
@@ -1901,12 +1908,15 @@ function generateDynamicView(node, fields, edit, callback) {
 			for (key in data) {
 				//if(data[key] != null) {
 					if(data[key] != null && data[key].constructor.name === 'Array') {
-						html += '				<td data-bind="foreach: '+key+'"><div data-bind="text:$data"></div></td>'
-						//html += '			<td>array</td>'
+                        html += '           <td class="array">' 
+						html += '				<div class="data-container" data-bind="foreach: '+key+'">'
+                        html += '                   <div data-bind="text:$data"></div>'
+                        html += '               </div>'
+						html += '           </td>'
 
 					} else {
 						if(edit) { 
-							if(key == "_id") // id is not editable
+							if(key == "_id") // id is not editable 
 								html += '				<td data-bind="text: '+key+'"></td>';
 							else
 								html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
@@ -1961,8 +1971,10 @@ function createNodeView(data, req, edit, callback) {
 			var index = indexByKeyValue(project.nodes, "_id", nodeId);
 			var node = project.nodes[index];
             node.project_dir = project.dir;
-			data = data.replace(/\[\[project\]\]/, project.title);
+            var editLink = "/node/editview/" + node._id;
+			data = data.replace(/\[\[collection\]\]/, node.collection);
 			data = data.replace(/\[\[page_title\]\]/, node.title);
+			data = data.replace(/\[\[edit_link\]\]/, editLink);
 			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node));
 			
 			// if node has script view, then use that
@@ -1971,20 +1983,19 @@ function createNodeView(data, req, edit, callback) {
 				vm.runInNewContext(node.scripts.view, sandbox);
 				callback(sandbox.out.html);
 			
-			// if node has stativ view, then we create in always on the fly (dynamic view)
+			// if node has static view, then we use that
 			} else if(typeof project.nodes[index].views.data !== "undefined") {
 				// insert node's data view to view.html
 				data = data.replace(/\[\[html\]\]/, project.nodes[index].views.data);
 				callback(data);
 			
-			// otherwise we create in always on the fly (dynamic view)
+			// otherwise we create view on the fly (dynamic view)
 			} else {
 
 				if(req.query.fields != null) var fields = req.query.fields;
 				else var fields = null;
 				
 				generateDynamicView(project.nodes[index], fields, edit, function(html) {
-					// insert node's data view to view.html
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);
 				});

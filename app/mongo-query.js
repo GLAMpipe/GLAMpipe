@@ -68,7 +68,7 @@ exports.findOne = function (query, collectionname, callback) {
 	collection.findOne(query ,function (err, result) {
 		if (err) {
 			console.log("ERROR:", err);
-			callback({'error':err})
+			callback(null)
 		} else {
 			callback(result);
 		}
@@ -256,7 +256,7 @@ exports.nodes = function (callback) {
 
 }
 
-exports.group = function (node, callback) {
+exports.group = function (node, array, callback) {
 
 	var collection = db.collection(node.params.source_collection);
 	var field_name = "$" + node.params.in_field;
@@ -265,11 +265,9 @@ exports.group = function (node, callback) {
 	project["_id"] = 1;
 	var project2 = { count:1, ids: 1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
-    
-    node.array = true;
-	
 
-	if(node.array) {
+
+	if(array) {
 		collection.aggregate([
 			{$project: project},
 			{$unwind: field_name},
@@ -288,9 +286,9 @@ exports.group = function (node, callback) {
 		collection.aggregate([
 			// {"$match": {"author":{"$ne": ""}} },
 			{$project: project},
-			{"$group" : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
+			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
 			{$project: project2 },
-			{"$sort": { count: -1 }}
+			{$sort: { count: -1 }}
 			// use $out for mongo 2.6 and newer
 			],
 			function (err, data) {

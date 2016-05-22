@@ -34,7 +34,7 @@
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		<div class="drag_icon"><img src="../images/drag.png"/></div>
 		
-		<h2 class="pointer" data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
+		<h2 class="pointer" data-bind="click:$root.openNodeView, html:type.toUpperCase() +': '+ title "></h2> 
 		
 
 
@@ -51,7 +51,7 @@
 		
 		<!-- ko if: type == 'collection' --> 
 		<div>
-				<button class="left" data-bind="click:$root.openNodeView">data view</button> 
+				<button class="left" data-bind="click:$root.selectNode">settings</button> 
 				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
 				<button data-bind="click: $root.openSourceCreator" class="add_node right">add source</button> 
 				<div class="clear"></div>
@@ -59,7 +59,7 @@
 		<!-- /ko -->
 
 		<!-- ko if: type != 'collection' --> 
-		<button class="left" data-bind="click:$root.openNodeView">data view</button> 
+		<button class="left" data-bind="click:$root.selectNode">settings</button> 
 		<div style="clear:both"></div>
 		<!-- /ko -->
 

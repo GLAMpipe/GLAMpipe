@@ -118,6 +118,7 @@ var nodeList = function () {
             html += "<tr><td class='strong'>params."+prop+"</td></tr><tr><td>" + data.params[prop] + "</td></tr>";
         }
         html += "</table>";
+        html += "<div>" + data._id + "</div>";
         return html;
     }
 

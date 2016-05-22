@@ -685,6 +685,28 @@ html {
     
 }
 
+
+/* ********************* NODE VIEW *********************** */
+
+#view #controls {
+    border: 1px solid #5C5C5C;
+    padding:10px;
+}
+
+td.array {
+    
+    border: 1px solid #5C5C5C;
+    background-color: #EFEABA;
+}
+
+td .data-container {
+    max-height:12em;
+    overflow-y:hidden;
+}
+
+td {
+    height: 20px;
+}
 /* ********************* BUTTONS *********************** */
 
 button {
@@ -843,3 +865,5 @@ button.run, button.test {
 .add_node {
     margin-left:4px;
 }
+
+
