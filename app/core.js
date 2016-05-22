@@ -78,77 +78,93 @@ exports.initDir = function (callback) {
  */
 
 exports.initNodes = function (io, callback) {
-	console.log("INIT: Loading node files...");
-	var data = {};
+
+    var dataPath = global.config.dataPath;
         
     mongoquery.drop("mp_nodes", function() {
 
         fs = require('fs');
         // read first node type descriptions
-        fs.readFile(path.join(global.config.dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
-            if(err)
-                console.log("ERROR: node type descriptions not found!");
-            else 
-                var descriptions = JSON.parse(data);
-                
-            console.log(path.join(global.config.dataPath, 'nodes/'));
-            readFiles(path.join(global.config.dataPath, 'nodes/'), function(filename, content, next) {
-                
-                try {
-                    var node = JSON.parse(content);
-                    node.type_desc = descriptions[node.type];
-                    
-                    // join "pretty" settings
-                    if(node.views.settings instanceof Array)
-                        node.views.settings = node.views.settings.join("");	
-                        
-                    // join "pretty" params
-                    if(node.views.params instanceof Array)
-                        node.views.params = node.views.params.join("");	
+        fs.readFile(path.join(dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
+            if(err) {
+                console.log("NOTICE: node type descriptions not found from " + dataPath);
+                desc = {};
+            } else 
+                var desc = JSON.parse(data);
 
-                    // join "pretty" data view
-                    if(node.views.data_static instanceof Array)
-                        node.views.data_static = node.views.data_static.join("");
-
-                    // join "pretty" scripts
-                    for (key in node.scripts) {
-                        if(node.scripts[key] instanceof Array)
-                            node.scripts[key] = node.scripts[key].join("");
-                    }
-                        
-                    mongoquery.insert("mp_nodes",node , function(error) {
-                        if(error.length) {
-                            console.log(error);
-                        } else {
-                            console.log("INIT: " + filename + " loaded");
-                            io.sockets.emit("progress", "INIT: " + filename + " loaded");
-                            next();
-                        }
-                    })
-                } catch(e) {
-                    console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
-                    io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
-                    next(); // continue anyway
-                }
-
-            }, function onError (error) {
-                if( error.code == "ENOENT") {
-                    console.log("ERROR: No nodes present!");
-                    console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
-                    callback(error);
-                } else 
-                    console.log(error);
-
-                
-            }, function onDone () {
-                console.log("INIT: nodes loaded");
-                callback(null);
+            // read local nodes first
+            console.log("INIT: Loading YOUR OWN nodes from " + path.join(dataPath, "mynodes/"));
+            exports.readNodes(io, path.join(dataPath, "mynodes/"), desc, function (error) {
+                // then "stock" nodes
+                console.log("INIT: Loading stock nodes from " + path.join(dataPath, "nodes/") );
+                exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
+                    callback(null);     
+                });        
             });
         });
-
     });
-
 }
+
+
+exports.readNodes = function (io, nodePath, descriptions, callback) {
+        
+    readFiles(nodePath, function(filename, content, next) {
+        
+        try {
+            var node = JSON.parse(content);
+            node.type_desc = descriptions[node.type];
+            
+            // join "pretty" settings
+            if(node.views.settings instanceof Array)
+                node.views.settings = node.views.settings.join("");	
+                
+            // join "pretty" params
+            if(node.views.params instanceof Array)
+                node.views.params = node.views.params.join("");	
+
+            // join "pretty" data view
+            if(node.views.data_static instanceof Array)
+                node.views.data_static = node.views.data_static.join("");
+
+            // join "pretty" scripts
+            for (key in node.scripts) {
+                if(node.scripts[key] instanceof Array)
+                    node.scripts[key] = node.scripts[key].join("");
+            }
+                
+            mongoquery.insert("mp_nodes",node , function(error) {
+                if(error.length) {
+                    console.log(error);
+                } else {
+                    console.log("LOAD: " + filename + " loaded");
+                    io.sockets.emit("progress", "LOAD: " + filename + " loaded");
+                    next();
+                }
+            })
+        } catch(e) {
+            console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
+            io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
+            next(); // continue anyway
+        }
+
+    }, function onError (error) {
+        if( error.code == "ENOENT") {
+            console.log("ERROR: No nodes present in " + nodePath);
+            //console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+        } else {
+            console.log(error);
+        }
+        return callback(error);
+
+        
+    }, function onDone () {
+        console.log("INIT: nodes loaded from " + nodePath);
+        console.log("******************************************");
+        callback(null);
+    });
+      
+}
+
 
 
 exports.downloadNodes = function (io, cb) {
@@ -290,20 +306,29 @@ exports.getProjectNodes = function (project, res) {
 	mongoquery.findOneById(project, "mp_projects", function(data) { res.json(data) });
 }
 
-exports.getNode = function (node_id, res) {
+exports.getNodeFromFile = function (node_id, res) {
 	fs = require('fs')
-	// read first node type descriptions
-	var nodePath = path.join(global.config.dataPath, "nodes", node_id + ".json");
-	fs.readFile(nodePath, 'utf8', function (err, data) {
+	var userNode = path.join(global.config.dataPath, "mynodes", node_id + ".json");
+    var stockNode = path.join(global.config.dataPath, "nodes", node_id + ".json");
+    
+    // try first stock nodes and then user nodes
+	fs.readFile(stockNode, 'utf8', function (err, data) {
 		if(err) {
-			console.log("ERROR: node not found!");
-			console.log("FILE:", nodePath);
-			res.json({"error": "node " + node_id + "not found!"});
+            fs.readFile(userNode, 'utf8', function (err, data) {
+                if(err) {
+                    console.log("ERROR: node not found!");
+                    console.log("FILE:", nodePath);
+                    res.json({"error": "node " + node_id + "not found!"});
+                } else {
+                    res.json(JSON.parse(data));    
+                }
+            })
 		} else {
 			res.json(JSON.parse(data));
 		}
 	});
 }
+
 
 function getProp(obj, desc) { 
 	var arr = desc.split('.'); 
@@ -1830,7 +1855,8 @@ function generateDynamicView(node, fields, edit, callback) {
 				
 			var html = '<label>select visible fields (click to remove)</label><div id="controls">'
 				+ '<div id="selected_fields"></div>'
-				+ '<select id="field_select">';
+				+ '<select id="field_select">'
+                + '<option>choose</option>';
 				
 			for (key in data) {
 				html += '	<option value="'+key+'">'+key+'</option>' + "\n";

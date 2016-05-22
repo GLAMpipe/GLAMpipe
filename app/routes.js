@@ -4,7 +4,7 @@ module.exports = function(express, glampipe) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p = path.join(glampipe.dataPath, 'tmp');
+    var p           = path.join(global.config.dataPath, 'tmp');
 	var upload 		= multer({ dest: p });
 
     // INFO to console
@@ -105,7 +105,7 @@ module.exports = function(express, glampipe) {
 
 
 	express.get('/get/node/:id', function (req, res) {
-		glampipe.core.getNode(req.params.id, res);
+		glampipe.core.getNodeFromFile(req.params.id, res);
 	});
 
 	express.get('/node/view/:id', function (req, res) {

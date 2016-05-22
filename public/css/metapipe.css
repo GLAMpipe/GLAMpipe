@@ -109,8 +109,7 @@ pre {
 	padding:10px;
 	border: 1px solid black;
 	background-color:white;
-    max-height:450px;
-    overflow-y:auto;
+
 }
 
 .node_bar .settings input{
@@ -613,8 +612,7 @@ html {
 
 .pipe {
     margin:10px;
-    height:100%;
-    overflow-y:auto;
+    margin-bottom:40px;
 }
 
 .collection_view {
@@ -653,7 +651,7 @@ html {
 
 .tab {
     height:100%;
-    overflow-y:scroll;
+
 }
 
 .tabIframeWrapper {
@@ -736,7 +734,7 @@ button.run, button.test {
 #console {
 	padding:10px;
 	top:0px;
-	height:70px;
+	height:60px;
 	color:white;
 	z-index:-1;
 	overflow:hidden;

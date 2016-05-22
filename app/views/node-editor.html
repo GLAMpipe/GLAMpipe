@@ -9,15 +9,17 @@
 
 <link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
 <style>
-	textarea {width:100%; height:3em; margin-top:1em;}
+	textarea {width:100%; height:6em; margin-top:1em;}
     .script {}
     pre.prettyprint {margin:0px; }
     .nodesource {width:650px;}
-    .nodesource h2 {margin-top:2em; margin-bottom:5px; width:550px;}
-    #json_container {height:90%; width:40%; position:fixed; right:0px; top:0px; margin-right:20px;}
+    .nodesource h2 {margin-top:2em; margin-bottom:5px; width:100%;}
+    #json_container {height:90%; width:50%; position:fixed; right:0px; top:0px; margin-right:20px;}
     #result {height:90%}
+    h2 {cursor:pointer;}
     #scripts .script {display:none}
     #views .view {display:none}
+    #save {}
 </style>
 <script>
 
@@ -38,8 +40,13 @@
 		
 		this.select = function (data, event) {
 			$.getJSON("/get/node/" + data.nodeid, function(nodeData) {
-				self.selectedNode(nodeData);
-                self.closeNodes();
+                if(nodeData.error) {
+                    alert(nodeData.error);
+                } else {
+                    self.selectedNode(nodeData);
+                    self.closeNodes();
+                    self.save();
+                }
 			});
 		}
 		
@@ -54,7 +61,7 @@
 
 		this.open = function (data, event) {
             var obj = $(event.target);
-            obj.parent().find(".script").show()
+            obj.parent().find(".script, .view").toggle()
 		};
 
 		this.openNodes = function () {
@@ -133,6 +140,7 @@
 
            data.title = $("#title").val();
            data.description = $("#description").val();
+           data.status = $("#status").val();
            
            data.nodeid = self.selectedNode().nodeid;
            data.type = self.selectedNode().type;
@@ -140,14 +148,18 @@
            
            $("#scripts textarea.script").each(function(index) {
                var id = $(this).attr("id");
-               var text = $(this).val().split("\n");
-               data.scripts[id] = text;
+               if($(this).val() != "") { 
+                   var text = $(this).val().split("\n");
+                   data.scripts[id] = text;
+               }
            });
 
            $("#views textarea.view").each(function(index) {
                var id = $(this).attr("id");
-               var text = $(this).val().split("\n");
-               data.views[id] = text;
+               if($(this).val() != "") {
+                   var text = $(this).val().split("\n");
+                   data.views[id] = text;
+               }
            });
 
            
@@ -181,7 +193,10 @@
 		<h1 data-bind="text: type.toUpperCase() + ' > ' + subtype +' > '+ title"></h1>
 
 		<h2>title</h2>
-        <textarea id="title" data-bind="text:title"></textarea>
+        <input id="title" data-bind="value:title"></input>
+
+		<h2>status (how usable this node is)</h2>
+        <input id="status" data-bind="value:status"></input>
         
 		<h2>description</h2>
         <textarea id="description" data-bind="text:description"></textarea>
@@ -255,21 +270,21 @@
         
         <div id="views">
         
-            <h2>params</h2>
-            <div class="help">Params are displayed to the user when node is created. 
+            <h2 data-bind="click:$root.open">params</h2>
+            <div class="help view">Params are displayed to the user when node is created. 
             Params are saved to database and these cannot be changed afterwards. 
             Parameters are provided to node scripts via <b>context.node.params</b>.</div>
             <textarea id="params" class="view" data-bind="text: $root.view2html(views.params, 'params_src')"></textarea>
             
 
             <h2>settings</h2>
-            <div class="help">Settings are displayed to the user when running node. 
+            <div class="help view">Settings are displayed to the user when running node. 
             Settings are saved to database when the node is executed. Settings are provided to node scripts via <b>context.node.settings</b>.</div>
             <textarea id="settings" class="view" data-bind="text: $root.view2html(views.settings, 'settings_src')"></textarea>
 
-            <h1>SCRIPT CONTEXT</h1>
-            <p>Scripts are executed in a limited context. </p>
-            <div>
+            <h1 class="view">SCRIPT CONTEXT</h1>
+            <p class="view">Scripts are executed in a limited context. </p>
+            <div class="view">
                 <ul>
                     <li>context.doc</li>
                     <p>Contains current record.</p>
@@ -301,6 +316,7 @@
 	</div>
     
     <div id="json_container">
+        <h1>JSON view</h1>
         <textarea id="result"></textarea>
         <button id="save" data-bind="click:$root.save">update JSON</button>
     </div>

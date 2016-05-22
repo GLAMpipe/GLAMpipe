@@ -1,11 +1,21 @@
 
 
+function compare(a,b) {
+  if (a.last_nom < b.last_nom)
+    return -1;
+  else if (a.last_nom > b.last_nom)
+    return 1;
+  else 
+    return 0;
+}
+
 
 var nodeList = function () {
 	var self = this;
 
 	this.collection = ko.observableArray(); 
 	this.projectNodes = ko.observableArray(); 
+	this.projectCollections = ko.observableArray(); 
 	this.documents = ko.observableArray(); 
 
     // get project nodes
@@ -16,7 +26,11 @@ var nodeList = function () {
 			if(typeof data !== "undefined") { 
 				for(var i = 0; i< data.length; i++) {
 					var d = data[i];
-					self.projectNodes.push(data[i]);
+                    // create separate array of collections so that we can group nodes
+                    if(data[i].type == "collection")
+                        self.projectCollections.push(data[i]);
+                        
+                    self.projectNodes.push(data[i]);
 				}
 			}
 			$("#project_title").text(project.title);
@@ -289,6 +303,7 @@ var nodeList = function () {
     }
     
     this.reloadProject = function () {
+        self.projectCollections.removeAll();
         self.projectNodes.removeAll();
         self.loadProject();
     }
@@ -453,6 +468,8 @@ $( document ).ready(function() {
         var params = obj.parents(".params");
         if(params.length == 0)
             params = obj.parents(".settings");
+
+        params.find(".dynamic_fields").remove();
         
         // fetch fields
         $.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
@@ -478,6 +495,7 @@ $( document ).ready(function() {
                 }
             html += "</ul>"
             params.append("<div class='dynamic_fields'>"+html+"</div>");
+            $(".dynamic_fields").insertAfter(obj);
             //alert(obj.position().top);
         })
     });

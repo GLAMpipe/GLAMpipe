@@ -17,7 +17,19 @@
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
 
 
+<script type="text/html" id="node-collection-template">
+	
+	<div class="pipe">
+		<!-- ko template: { name: 'node-template', foreach: $root.projectNodes } -->
+
+		<!-- /ko -->
+	</div>
+
+</script>
+
+
 <script type="text/html" id="node-template">
+	<!-- ko if: collection == $parent.collection -->
 	<div data-bind="attr:{id:_id, 'data-collection':collection},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		<div class="drag_icon"><img src="../images/drag.png"/></div>
@@ -66,6 +78,7 @@
 		</div>
 
 	</div>
+	<!-- /ko -->
 
 </script>
 
@@ -73,27 +86,27 @@
 <script type="text/html" id="tab-template">
 	
 
-		<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
+	<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
 
-			<div class="node_bar" data-bind="css:type">
-				<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
-				<div class="node_info">
-					<div data-bind="html:description"></div>
-				</div>
-				<h3 class="subhead">settings for running node</h3> 
-				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
-				<!-- ko if: type != 'collection' --> 
-				<div>
-					<button data-bind="attr:{id:_id}" class="button left run">run this node!</button>
-					<div class="node_console">console</div>
-				</div>
-				<div class="clear"></div>
-				<!-- /ko -->
-				<h3 class="subhead">parameters</h3> 
-				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
+		<div class="node_bar" data-bind="css:type">
+			<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
+			<div class="node_info">
+				<div data-bind="html:description"></div>
 			</div>
-			
+			<h3 class="subhead">settings for running node</h3> 
+			<div class="settings" data-bind="html:$root.getSettings($data)"></div>
+			<!-- ko if: type != 'collection' --> 
+			<div>
+				<button data-bind="attr:{id:_id}" class="button left run">run this node!</button>
+				<div class="node_console">console</div>
+			</div>
+			<div class="clear"></div>
+			<!-- /ko -->
+			<h3 class="subhead">parameters</h3> 
+			<div class="params" data-bind="html:$root.nodeParams($data)"></div>
 		</div>
+		
+	</div>
 
 
 </script>
@@ -113,7 +126,8 @@
 	
 	<!-- PROJECT NODES -->
 	<div class="collection_pipe">
-		<div class="pipe" data-bind="template: { name: 'node-template', foreach: projectNodes }"></div>
+		<!-- ko template: { name: 'node-collection-template', foreach: projectCollections } -->
+		<!-- /ko -->
 	</div>
 
 

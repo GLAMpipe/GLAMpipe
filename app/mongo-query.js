@@ -265,6 +265,8 @@ exports.group = function (node, callback) {
 	project["_id"] = 1;
 	var project2 = { count:1, ids: 1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
+    
+    node.array = true;
 	
 
 	if(node.array) {
