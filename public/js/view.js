@@ -107,6 +107,54 @@
 			details.append(table);
 
 		}
+        
+        this.keyValue = function (data, event) {
+            
+            var html = ""; 
+            if(typeof data === "object") {
+                if(data.constructor.name == "Array") {
+                    for (var i = 0; i < data.length; i++ ) {
+                        html += "<div class='array_array'>"+data[i]+"</div>";
+                    }
+                    
+                } else {
+                    html = "<div class='array_object'>\n";
+                    
+                    for (var j in data) {
+                        
+                        if (data.hasOwnProperty(j)) {
+                            //console.log(j);
+                            html += "<div>"+j+": "+data[j]+"</div>\n";
+                        }
+                    }
+                    html += "</div>\n";
+                }
+                
+                return html;
+            
+            } else {
+                return data;
+            }
+        }
+
+        this.keyValueList = function (data, key) {
+            var list = [];
+            console.log(data[0].value);
+
+            for (i = 0; i < data.length; i++) {
+                for (var j in data[i]) {
+                    if (data[i].hasOwnProperty(j)) {
+                        list.push({
+                            "key": j,
+                            "value": data[i][j]
+                        });
+                    }
+                }
+            }
+
+
+            return list;
+        };
 	};
 	
 

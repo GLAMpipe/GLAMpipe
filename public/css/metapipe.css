@@ -707,6 +707,15 @@ td .data-container {
 td {
     height: 20px;
 }
+
+.array_object {
+    background-color:#B6D88C;
+    margin-top:5px;
+}
+
+.array_array {
+    background-color:#E0D99A;
+}
 /* ********************* BUTTONS *********************** */
 
 button {

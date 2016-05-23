@@ -163,7 +163,7 @@
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
 							<li>
-								<div data-bind="html:title, click:$root.openNodeParams"></div>
+								<div data-bind="html:title + ' (' + status + ')' , click:$root.openNodeParams"></div>
 								
 								<div data-bind="html:params" ></div>
 							</li>

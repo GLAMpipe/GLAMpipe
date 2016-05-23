@@ -234,6 +234,7 @@ exports.nodes = function (callback) {
 		// group by subtype
 		{$group : {_id: {subtype:"$subtype", type:"$type"}, description : { $first: "$type_desc" },"nodes": {$push: {
 			title:"$title",
+            status:"$status",
 			nodeid:"$nodeid",
 			type:"$type",
 			subtype:"$subtype",
