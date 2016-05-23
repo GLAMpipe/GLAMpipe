@@ -1,6 +1,7 @@
 # GLAMpipe
 Visual tool for viewing, editing, downloading and uploading of GLAM-based data. 
 
+
 # what is this?
 http://artturimatias.github.io/GLAMpipe/
 
@@ -13,39 +14,42 @@ toddler
 
 ## install on Linux (Debian-based distros)
 
-These commands should give you all you need to install Metapipe:
+1. These commands should give you all you need to install Metapipe:
 
-    apt-get install mongodb
-    apt-get install git
-    apt-get install nodejs
-    apt-get install npm
-
-
+	    apt-get install mongodb
+	    apt-get install git
+	    apt-get install nodejs
+	    apt-get install npm
 
 
-Now its time to install metapipe. Start by fetching code:
+2. Now its time to install GLAMpipe. Start by fetching code:
 
-    git clone https://github.com/artturimatias/GLAMpipe.git
-
+	    git clone https://github.com/artturimatias/GLAMpipe.git
 Then move to directory that was created:
 
-    cd GLAMpipe
+	    cd GLAMpipe
 
-Finally, you need to install all the extra stuff that Metapipe needs. It's easy, just type:
+4. You need to install all the extra stuff that GLAMpipe needs. It's easy, just type:
 
-    npm install
+	    npm install
+Then type:
 
-One step is still needed. You need to download GLAMpipe nodes. You can have a zip from here:
-
-[https://github.com/artturimatias/metapipe-nodes/archive/master.zip](https://github.com/artturimatias/metapipe-nodes/archive/master.zip)
-
-Extract that some where and copy "nodes" directory to "GLAMpipe" directory. Then type:
-
-    nodejs glampipe.js
-
+	    nodejs glampipe.js
 You should see something like this:
 
-    GLAMpipe running!
-    copy this to your web browser -> http://localhost:3000
+	    GLAMpipe running!
+	    copy this to your web browser -> http://localhost:3000
 
-Open link in your browser and you are using GLAMpipe (that is, if everything went well)!
+5. Finally you must make some settings. Aim your browser address to address shown. You should see page saying like this:
+
+		ERROR: "datapath is not set!"
+You need to create a directory where GLAMpipe can save content. After you have created it, type *full path* to the text box and click "set data path".
+Then fetch nodes from github by clicking "fetch nodes". 
+After that finishes, click "(re)load nodes to GLAMpipe". This will import nodes to database.
+
+ If everything went well, You are all set! 
+ 
+##problems
+If things still don't work, than make sure that you have MongoDB
+a) installed
+b)  running 

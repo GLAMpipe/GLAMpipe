@@ -4,7 +4,8 @@ module.exports = function(express, glampipe) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p           = path.join(global.config.dataPath, 'tmp');
+    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings
+                                                            // this allows us to start everything normally still 
 	var upload 		= multer({ dest: p });
 
     // INFO to console
