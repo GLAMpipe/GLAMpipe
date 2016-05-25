@@ -1,4 +1,5 @@
 var mongojs = require('mongojs');
+const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 
 
@@ -103,6 +104,11 @@ function generateDynamicView (node, fields, edit, callback) {
 				+ '<button data-bind="click: prevPage">prev</button>'
 				+ '<button data-bind="click: nextPage">next</button>'
 				+ '</div></div>'
+                
+            html += '<div class="border padding">color codes: '
+                + '<span class="array_array" title="Array means that there several values">__</span> array '
+                + '<span class="object" title="object is a record inside main record with its own fields">__</span> object '
+                + '</div>';
 
 
 			// remove keys that are not listed inf "fields"
@@ -135,8 +141,18 @@ function generateDynamicView (node, fields, edit, callback) {
 			// data cells
 			html += '				<td data-bind="text: vcc"></td>'
 			for (key in data) {
-				//if(data[key] != null) {
-					if(data[key] != null && data[key].constructor.name === 'Array') {
+                
+                // EDIT VIEW
+                if (edit) {
+                    if(key == "_id") // id is not editable 
+                        html += '				<td data-bind="text: '+key+'"></td>';
+                    else if (typeof data[key] !== "object" && data[key].constructor.name !== 'Array') 
+                        html += '                               <td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+                    else 
+                        html += '				<td><div class="data-container warning">Currently can not edit arrays or objects</div></td>';
+
+                //  DATA VIEW
+                } else if (data[key] != null && data[key].constructor.name === 'Array') {
                         html += '           <td class="array">' 
 						//html += '				<div class="data-container" data-bind="foreach: $root.keyValueList($data[\''+key+'\'])">'
 						html += '				<div class="data-container" data-bind="foreach: '+key+'">'
@@ -144,19 +160,11 @@ function generateDynamicView (node, fields, edit, callback) {
                         html += '               </div>'
 						html += '           </td>'
 
-					} else {
-						if(edit) { 
-							if(key == "_id") // id is not editable 
-								html += '				<td data-bind="text: '+key+'"></td>';
-							else
-								html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
-						} else
-							html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
-					}
-				//} else {
-					//html += '				<td>null</td>'
-				//}
-				
+                } else if (typeof data[key] === "object") 
+                    html += '                   <td><div data-bind="html:$root.keyValueObj($data,\''+key+'\')"></div></td>';
+                else
+                    html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
+					
 			}
 
 			html += '			</tr>'

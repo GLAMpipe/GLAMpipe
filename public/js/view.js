@@ -137,6 +137,29 @@
             }
         }
 
+        this.keyValueObj = function (data, key) {
+            
+            var html = ""; 
+            if(typeof data[key] === "object") {
+
+                    html = "<div class='object'>\n";
+                    
+                    for (var j in data[key]) {
+                        
+                        if (data[key].hasOwnProperty(j)) {
+                            //console.log(j);
+                            html += "<div class='strong'>"+j+"</div>\n";
+                            html += "<div>"+data[key][j]+"</div>\n";
+                        }
+                    }
+                    html += "</div>\n";
+                }
+                
+            return html;
+        }
+
+        
+
         this.keyValueList = function (data, key) {
             var list = [];
             console.log(data[0].value);

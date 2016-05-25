@@ -112,9 +112,6 @@ pre {
 
 }
 
-.node_bar .settings input{
-    width:220px;
-}
 
 .node_bar .subhead {
 	background-color: white;
@@ -132,16 +129,18 @@ input.short_input {
 	width:3em;
 }
 
-input.middle_input {
-
-	width:15em;
-}
 
 input.dynamic_field {
 
 	background-color:#BFCCCB;
 	border: 2px solid orange;
     width:300px;
+}
+
+input.middle_input {
+
+	width:15em;
+    margin-left:5px;
 }
 
 
@@ -312,7 +311,7 @@ ul.node_types li:hover {
 }
 
 .button {
-	//font-family: 'Lobster', sans-serif;
+font-family: 'Lobster', sans-serif;
   background: #47666A;
   color: #ffffff;
   font-size: 1em;
@@ -512,11 +511,15 @@ html {
 }
 
 .good {
-	background:transparent linear-gradient(to right, rgba(16, 134, 17, 0.93) 0%, rgba(252, 252, 252, 0.04) 45%, rgba(252, 252, 252, 0) 100%) repeat scroll 0% 0%;
+	background-color: green;
+    color: white;
+    padding:2px;
 }
 
 .bad {
-	background:transparent linear-gradient(to right, rgba(255, 0, 0, 1.0) 0%, rgba(252, 252, 252, 0.04) 45%, rgba(252, 252, 252, 0) 100%) repeat scroll 0% 0%;
+	background-color:red;
+    color:white;
+    padding:2px;
 
 }
 
@@ -708,6 +711,10 @@ td {
     height: 20px;
 }
 
+.object {
+    background-color:#B6D88C;
+}
+
 .array_object {
     background-color:#B6D88C;
     margin-top:5px;
@@ -875,4 +882,10 @@ button.run, button.test {
     margin-left:4px;
 }
 
+.border {
+    border: 1px solid black;
+}
 
+.padding {
+    padding:3px;
+} 

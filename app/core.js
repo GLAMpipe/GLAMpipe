@@ -391,6 +391,7 @@ exports.runNode = function (req, res, io) {
 					count:0,
 					path: path,
 					get: getProp,
+                    flat: flatten,
 					MP: MP
 				},
 				out: {
@@ -411,14 +412,31 @@ exports.runNode = function (req, res, io) {
 			};
 			
 			var sand = vm.createContext(sandbox);
-			var run = new vm.createScript(node.scripts.run);
-			
+            
+            // create scripts (this will catch syntax errors)
+            try {
+                var run = new vm.createScript(node.scripts.run);
+            } catch (e) {
+                console.log("ERROR:", e.stack);
+                sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+                sandbox.out.say("error", "Slap the node writer!");
+                return;
+            }
+            
+            try {
+                var pre_run = new vm.createScript(node.scripts.pre_run);
+            } catch (e) {
+                console.log("ERROR:", e.stack);
+                sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
+                return;
+            }
 			switch (node.type) {
 
 
 				case "source":
 				
 					runNodeScriptInContext("init", node, sandbox, io);
+                    if(sandbox.context.init_error) return;
 					
 					switch (node.subtype) {
 						
@@ -434,6 +452,10 @@ exports.runNode = function (req, res, io) {
 											sandbox.context.data = body;
 											sandbox.out.url = "";
 											runNodeScriptInContext("run", node, sandbox, io);
+                                            
+                                            if(sandbox.context.node_error) 
+                                                return callback(sandbox.context.node_error, null);
+                                            
 											
 											// add source id to data (expects out.value to be an array)
 											for (var i = 0; i < sandbox.out.value.length; i++ ) {
@@ -450,8 +472,10 @@ exports.runNode = function (req, res, io) {
 									}
 
 								], function(err, result){
-									if (err)
+									if (err) {
 										console.log(err);
+                                        return;
+                                    }
 										
 									//generate view and do *not* wait it to complete
 									if (!node.views.data)
@@ -666,7 +690,9 @@ exports.runNode = function (req, res, io) {
 
 
 				case "lookup":
-					
+
+
+
 					var runFunc = null;
 					
 					switch (node.subtype) {
@@ -699,7 +725,8 @@ exports.runNode = function (req, res, io) {
 					mongoquery.find2({}, node.collection, function (err, doc) {
 						
 						sandbox.context.doc_count = doc.length;
-						runNodeScriptInContext("init", node, sandbox, io);
+                        runNodeScriptInContext("init", node, sandbox, io);
+                        if(sandbox.context.init_error) return;
 						
 						async.eachSeries(doc, function iterator(doc, next) {
 							
@@ -708,7 +735,8 @@ exports.runNode = function (req, res, io) {
 							
 							// get URL/filename from node
 							runNodeScriptInContext("pre_run", node, sandbox, io);
-							if (sandbox.out.error !== null) return;
+							if (sandbox.context.node_error) 
+                                return;
 							
 							// callback for updating record
 							var onNodeScript = function (sandbox) {
@@ -717,6 +745,9 @@ exports.runNode = function (req, res, io) {
 								sandbox.out.setter = null;
 								// let node pick the data it wants from result
 								run.runInContext(sand);
+                                
+                                //if(sandbox.context.node_error)
+                                    //return;
 								
 								if(sandbox.out.setter != null) {
 									var setter = sandbox.out.setter; 
@@ -747,57 +778,36 @@ exports.runNode = function (req, res, io) {
 
 
 				case "download":
-					
-					var callback = function() {
 						
-						// find everything
-						mongoquery.find2({}, node.collection, function(err, doc) {
-							sandbox.context.doc_count = doc.length;
-							runNodeScriptInContext("init", node, sandbox, io);
-							
-							// run node once per record
-							async.eachSeries(doc, function iterator(doc, next) {
-								
-								sandbox.context.doc = doc;
-								sandbox.context.count++;
-								sandbox.out.url = null;
-								sandbox.context.error = null;
-								
-								// ask url and file name from node
-								runNodeScriptInContext("pre_run", node, sandbox, io);
-								exports.downloadFile(node, sandbox, function(sandbox) {
-									run.runInContext(sand);
-									// write file location to db
-									var setter = {};
-									setter[node.out_field] = sandbox.out.value;
-									mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-								})
-								
-							}, function done() {
-								runNodeScriptInContext("finish", node, sandbox, io);
-							});
-						});
-					}
-					
-					// create node's output directory if it does not exist 
-					// TODO: sanitize directory names
-					var fs = require("fs");
-					fs.mkdir(node.dir, function(err) {
-						if(err) {
-							if(err.code === "EEXIST") {
-								console.log("INIT: output directory exists");
-								callback();
-							} else {
-								console.log("ERROR:", err);
-								io.emit("error", err)
-								return;
-							}
-						} else {
-							console.log("INIT: output directory created");
-							callback();
-						}
-					});
-					
+                    // find everything
+                    mongoquery.find2({}, node.collection, function(err, doc) {
+                        sandbox.context.doc_count = doc.length;
+                        runNodeScriptInContext("init", node, sandbox, io);
+                        
+                        // run node once per record
+                        async.eachSeries(doc, function iterator(doc, next) {
+                            
+                            sandbox.context.doc = doc;
+                            sandbox.context.count++;
+                            sandbox.out.url = null;
+                            sandbox.context.error = null;
+                            
+                            // ask url and file name from node
+                            runNodeScriptInContext("pre_run", node, sandbox, io);
+                            exports.downloadFile(node, sandbox, function(sandbox) {
+                                run.runInContext(sand);
+                                // write file location to db
+                                var setter = {};
+                                setter[node.out_field] = sandbox.out.value;
+                                console.log(setter);
+                                mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+                            })
+                            
+                        }, function done() {
+                            runNodeScriptInContext("finish", node, sandbox, io);
+                        });
+                    });
+
 				break;
 
 
@@ -1549,8 +1559,11 @@ exports.importFile = function (node, callback) {
 exports.callAPI = function (url, callback) {
 	var request = require("request");
 
+    if (typeof url === "undefined" || url == "")
+        callback("URL not set", null, null);
+
 	var headers = {
-		'User-Agent':       'MetaPipe/0.0.1',
+		'User-Agent':       'GLAMpipe/0.0.1',
 	}
 
 	 var options = {
@@ -1643,8 +1656,11 @@ exports.downloadFile = function (node, sandbox, cb ) {
 	var fs = require("fs");
 	var request = require("request")
 
-	
-	if(sandbox.out.url == null) {
+	if (typeof sandbox.out.url === "undefined") {
+        sandbox.context.error = "URL missing";
+		return cb(sandbox);
+	} 
+	if(sandbox.out.url == null || sandbox.out.url == "") {
 		sandbox.context.error = "URL missing";
 		return cb(sandbox);
 	} 
@@ -1832,25 +1848,10 @@ function callAPISerial (sandbox, node, onScript, onError) {
 	var request = require("request");
 
 	 var options = {
-		url: "",
+		url: sandbox.out.url,
 		method: 'GET',
 		json: true
 	};
-
-	
-	try {
-		vm.runInNewContext(node.scripts.url, sandbox);
-		console.log(sandbox.out.pre_value);
-		options.url = sandbox.out.pre_value;
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			console.log("Syntax error in url function!");
-		} else {
-			console.log("Error in url function!",e);
-		}
-		onError("Error in node function!", 0);
-		return;
-	}
 
 	// make actual HTTP request
 	request(options, function (error, response, body) {

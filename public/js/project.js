@@ -148,6 +148,7 @@ var nodeList = function () {
     this.getSettings = function (data) {
         // plain script tag causes confusion in html views so we restore it here
         var r = data.views.settings.replace(/\[\[node\]\]/, "var node = {}; node.params = " + JSON.stringify(data.params) +"\n");	
+        r = r.replace(/__node_id__/g, data._id); // write node id so that node's client script can refer to itself
         return r.replace(/_script/g,'script');	
     }
 
@@ -243,7 +244,7 @@ var nodeList = function () {
 
             var url = '/node/view/' + data._id;
             // for transform node show only node's out_field
-            if(data.type == "transform")
+            if(data.type == "transform" || data.type == "lookup")
                 url += "?fields=" + data.out_field;
             
             var title = "<span class='strong'>VIEW:</span> " + data.title;
@@ -476,7 +477,7 @@ $( document ).ready(function() {
         $.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
             if(data.error)
                 alert(data.error);
-                
+                    
             var html = "<h2>document structure (keys)</h2><ul><li class='pick_field good' data-field='"+ obj.attr("name") +"' data-val=''>CLEAR FIELD and CLOSE</li>";
                 for (key in data) {
                     if (data[key] instanceof Array) {
@@ -529,6 +530,7 @@ $( document ).ready(function() {
             params = obj.parents(".settings");
         
         params.find("input[name='"+obj.data("field")+"']").val(obj.data("val"));
+        params.find("input[name='"+obj.data("field")+"']").change();
         params.find(".dynamic_fields").remove();
     });
 
@@ -562,7 +564,7 @@ $( document ).ready(function() {
     socket.on('error', function (data) {
         var console = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
-            console.append("<div class=\"error\">" + data.msg + "</div>");
+            console.append("<div class=\"bad\">" + data.msg + "</div>");
             console.removeClass("busy");
             console.addClass("done");
         } else {
@@ -574,7 +576,7 @@ $( document ).ready(function() {
 
     socket.on('finish', function (data) {
         var console = $("#tab-settings-" + data.nodeid +" .node_console");
-        console.append("<div class=\"progress\">" + data.msg + "</div>");
+        console.append("<div class=\"good\">" + data.msg + "</div>");
         console.removeClass("busy");
         console.addClass("done");
     });
