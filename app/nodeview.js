@@ -18,7 +18,8 @@ exports.createNodeView = function (data, req, edit, callback) {
 			data = data.replace(/\[\[collection\]\]/, node.collection);
 			data = data.replace(/\[\[page_title\]\]/, node.title);
 			data = data.replace(/\[\[edit_link\]\]/, editLink);
-			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node));
+            // insert node json to view so that client scripts can use node data (also hide script tags)
+			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node).replace(/script>/g,"_script>"));
 			
 			// if node has script view, then use that
 			if(typeof project.nodes[index].scripts.view !== "undefined") {

@@ -385,6 +385,7 @@ exports.runNode = function (req, res, io) {
 				context: {
 					doc: null,
 					data: null,
+                    myvar: {},
 					node: node,
 					input_node: input_node,
 					doc_count:0,
@@ -532,7 +533,7 @@ exports.runNode = function (req, res, io) {
                                 // we must check if input key is array or not
                                 mongoquery.findOne({}, node.params.source_collection, function (record) {
                                     if(record) {
-                                        var array = console.log(record[node.params.in_field].constructor.name == "Array");
+                                        var array = record[node.params.in_field].constructor.name == "Array";
                                         mongoquery.group(node, array, groupCB);
                                     }
                                 }) 
@@ -756,13 +757,20 @@ exports.runNode = function (req, res, io) {
 									setter[node.out_field] = sandbox.out.value;
 								}
 								
+                                console.log(setter);
+                                
 								if(sandbox.out.updatequery != null)
 									var updatequery = sandbox.out.updatequery;
 								else
 									var updatequery = {_id:sandbox.context.doc._id};
-									
+                                    
 								//setter = flatten(setter, {delimiter:"__"});
-								mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
+                                
+                                // if node set the direct update, then use that
+								if(sandbox.out.mongoDBupdate)
+                                    mongoquery.update(node.collection, updatequery ,setter, next);
+								else
+                                    mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
 							}
 
 							runFunc (sandbox, node, onNodeScript, onError);
@@ -948,7 +956,8 @@ exports.runNode = function (req, res, io) {
 
 
 				default:
-                    res.json({"error":"Unknown node type"});
+                    sandbox.out.say("finish", "This node is not runnable");
+                    return;
 			}
 			
 		});
@@ -1576,7 +1585,7 @@ exports.callAPI = function (url, callback) {
 	request(options, function (error, response, body) {
 		if (!error && response.statusCode == 200) {
 			//console.log(body); 
-			callback(error, response, body);
+			callback(null, response, body);
 		} else {
 			console.log(error);
 			callback(error, response, body);

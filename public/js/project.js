@@ -244,7 +244,7 @@ var nodeList = function () {
 
             var url = '/node/view/' + data._id;
             // for transform node show only node's out_field
-            if(data.type == "transform" || data.type == "lookup")
+            if(data.type == "transform" || data.type == "lookup" || data.type == "download")
                 url += "?fields=" + data.out_field;
             
             var title = "<span class='strong'>VIEW:</span> " + data.title;

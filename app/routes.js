@@ -1,4 +1,4 @@
-
+var proxy 	= require("../app/proxy.js");
 
 module.exports = function(express, glampipe) {
     
@@ -187,4 +187,10 @@ module.exports = function(express, glampipe) {
 	express.get('/node-viewer', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
 	});
+    
+	// PROXY
+	express.get('/proxy/', function (req, res) {
+		proxy.proxyJSON(req.query.url, req.query.query, res);
+	});
+    
 }
