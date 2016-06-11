@@ -6,33 +6,29 @@ html, body
 	padding: 0px;
 	margin: 0px;
     height:100%;
+
     background-size: 100% 150%;
 }
 
 h1
 {
 	margin: 0px;
-
 }
 
-h2
-{
-
-	margin: 0px;
-    font-size:14px;
-}
-
-h3
-{
-
-	margin: 0px;
+button {
+    font-size:100%;
 }
 
 h2, h3 {
 	padding:5px;
 	color:white;
-    
+    margin: 0px;
+    font-size:90%;
+    height:20px;
+}
 
+.pipe h2{
+    height:16px;
 }
 
 a:link {
@@ -59,32 +55,17 @@ a:active {
 
 input[type='checkbox'] { 
 	width:20px;
-	}
-	
-
-
-
-
-#test_results {
-	display:none;
-	border: 1px solid #5C5C5C;
-	position:absolute;
-	top:60px;
-	right:400px;
-	width:650px;
-	background-color: #395D5A;
-	z-index:100000;
-	color:white;
-	padding:5px;
-	
 }
+
+
+
 
 pre {
 	white-space: pre-wrap;
 }
 
 .node_bar {
-	padding:10px;
+	padding:0px;
 
 }
 
@@ -189,6 +170,12 @@ input.middle_input {
 	margin-bottom:10px;
 }
 
+.params_wrapper {
+    float:right;
+
+    width:350px;
+}
+
 .node_info .description{
 	background-color: #E0E0E0;
 }
@@ -232,7 +219,6 @@ input.middle_input {
 	background-color: white;
 	width:550px;
 	border: 1px solid black;
-	font-size:14px;
     max-height:80%;
     overflow-y:scroll;
 }
@@ -270,8 +256,7 @@ ul.node_types li:hover {
 	padding:5px;
 }
 
-
- input, .node_bar textarea {
+.node_bar textarea {
 	width:90%;
 }
 
@@ -314,7 +299,6 @@ ul.node_types li:hover {
 font-family: 'Lobster', sans-serif;
   background: #47666A;
   color: #ffffff;
-  font-size: 1em;
   padding: 5px 10px 5px 10px;
   text-decoration: none;
 
@@ -575,7 +559,6 @@ html {
 
 .nodesource h3 {
 	color:#395D5A;
-	font-size:18px;
 	padding:0px;
 	margin-top:40px;
 
@@ -618,7 +601,7 @@ html {
     margin-bottom:40px;
 }
 
-.collection_view {
+#collection_view {
     left:400px;
     position:absolute;
     top:0px;
@@ -657,7 +640,7 @@ html {
 
 }
 
-.tabIframeWrapper {
+.IframeWrapper {
     height:100%;
 }
 
@@ -672,11 +655,11 @@ html {
 .delete_icon {
 	float:right;
 	width:30px;
-	height:28px;
-	font-size: 20px;
+	height:20px;
 	text-align: center;
 	vertical-align: middle;
 	color:white;
+    font-size:14px;
 }
 
 .drag_icon {
@@ -685,6 +668,8 @@ html {
     height:24px;
     padding:3px;
     cursor: grab;
+    
+    display:none;
     
 }
 
@@ -748,7 +733,6 @@ button.run, button.test {
     padding:10px;
     margin-bottom:20px;
     background-color:#10772E;
-    font-size:14px;
 
 }
 
@@ -766,6 +750,8 @@ button.run, button.test {
     margin-top:-10px;
     padding-top:5px;
     background-color:#99B4B2;
+    
+    display:none;
 }
 
 

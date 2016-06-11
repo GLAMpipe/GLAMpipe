@@ -533,8 +533,13 @@ exports.runNode = function (req, res, io) {
                                 // we must check if input key is array or not
                                 mongoquery.findOne({}, node.params.source_collection, function (record) {
                                     if(record) {
-                                        var array = record[node.params.in_field].constructor.name == "Array";
-                                        mongoquery.group(node, array, groupCB);
+                                        if(record[node.params.in_field]) {
+                                            var array = record[node.params.in_field].constructor.name == "Array";
+                                            mongoquery.group(node, array, groupCB);
+                                        } else {
+                                            io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
+                                            io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+                                        }
                                     }
                                 }) 
 							});
@@ -692,8 +697,6 @@ exports.runNode = function (req, res, io) {
 
 				case "lookup":
 
-
-
 					var runFunc = null;
 					
 					switch (node.subtype) {
@@ -711,9 +714,13 @@ exports.runNode = function (req, res, io) {
 						break;
 						
 						case "collection":
-							runFunc = function(sandbox, node, onNodeScript, onError) {
-								mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
-							}
+                            // we must clear previous lookup
+                            mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
+                                runFunc = function(sandbox, node, onNodeScript, onError) {
+                                    mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
+                                }
+                            });
+
 						break;
 					}
 					
@@ -767,10 +774,11 @@ exports.runNode = function (req, res, io) {
 								//setter = flatten(setter, {delimiter:"__"});
                                 
                                 // if node set the direct update, then use that
-								if(sandbox.out.mongoDBupdate)
-                                    mongoquery.update(node.collection, updatequery ,setter, next);
+								if(sandbox.out.mongoDBupdate) // TODO remove key
+                                    mongoquery.update(node.params.collection, updatequery ,setter, next);
 								else
                                     mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
+                                  
 							}
 
 							runFunc (sandbox, node, onNodeScript, onError);

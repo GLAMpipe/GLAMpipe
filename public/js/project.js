@@ -200,59 +200,26 @@ var nodeList = function () {
     }
 
 
-    // opens/creates a tab for settings
-    this.openNodeSettings = function(data, event) {
-        var obj = $(event.target);
-        var settings = obj.parent().find(".node_settings");
-        
-        
-        // if tab exists, then activate it
-        var tab_id = "#tab-settings-" + data._id;
-        if ($('#tabs a[href="'+tab_id+'"]').length) {
-            var index = $('#tabs a[href="'+tab_id+'"]').parent().index();
-            $("#tabs").tabs("option", "active", index);
-        // otherwise create it
-        } else {
-            //var content = settings.clone(true);
-            var content = $("#tab-settings-"+data._id);
-            content.removeClass("hidden");
-            
-            var title = "<span class='strong'>SETTINGS:</span> " + data.title;
-            id = "tab-settings-" + data._id;
-            addTab(self.tabs, id, title, null, data.type); // null URL creates regular tab (not iframe)
-        }
-    }
 
-
-    // opens/creates a tab for settings
+    // opens/creates a view
     this.openNodeView = function(data, event) {
-        var obj = $(event.target);
-        var settings = obj.parent().find(".node_settings");
 
-        var tab_id = "tab-view-" + data._id;
-        if ($("#"+tab_id).length) {
-            var index = $('#tabs a[href="#'+tab_id+'"]').parent().index();
-            $("#tabs").tabs("option", "active", index);
-            
-            // reload view
-            $("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", function ( i, val ) { return val; });
-
-
-            
-        // otherwise create it
-        } else {
-
-            var url = '/node/view/' + data._id;
-            // for transform node show only node's out_field
-            if(data.type == "transform" || data.type == "lookup" || data.type == "download")
-                url += "?fields=" + data.out_field;
-            
-            var title = "<span class='strong'>VIEW:</span> " + data.title;
-            //var milliseconds = (new Date).getTime();
-            
-            addTab(self.tabs, tab_id, title, url, data.type);
-            loadTabFrame("#" + tab_id, url);
+        // show settings
+        $(".node_settings").hide();
+        if(data.type != "collection") { // collection has no settings 
+            var content = $("#tab-settings-"+data._id);
+            content.show();
         }
+
+        // show data view
+        var url = '/node/view/' + data._id;
+        // for transform node show only node's out_field
+        if(data.type == "transform" || data.type == "lookup" || data.type == "download")
+            url += "?fields=" + data.out_field;
+            
+        $('#iframe_view').attr('src', url);
+
+        
     }
 
     this.generateParams = function (data) {
@@ -324,28 +291,6 @@ $( document ).ready(function() {
 	nodes.loadNodes(nodes);
 	nodes.loadProject(nodes);
 
-    // TABS CREATE
-    var $tabs = $('#tabs').tabs( { 
-        beforeActivate: function (event, ui) {
-            reloadIframe(ui.newPanel.attr('id'));
-        }
-    });
-    nodes.tabs = $tabs;
-    var beginTab = $("#tabs ul li:eq(" + getSelectedTabIndex($tabs) + ")").find("a");
-    loadTabFrame($(beginTab).attr("href"),$(beginTab).attr("rel"));
-
-    // TABS LOAD
-    $("a.tabref").click(function() {
-        loadTabFrame($(this).attr("href"),$(this).attr("rel"));
-    });
-
-    // TABS CLOSE
-    $("#tabs").on("click",  "span.ui-icon-close", function() {
-        var panelId = $( this ).closest( "li" ).remove().attr( "aria-controls" );
-        if(panelId.indexOf("tab-view") > -1) // views are removed, settings not
-            $( "#" + panelId ).remove();
-        $tabs.tabs( "refresh" );
-    });
 
 
     // SORTABLE PROJECT NODES

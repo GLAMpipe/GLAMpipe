@@ -42,25 +42,20 @@
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
-		<div data-bind="html:$root.nodeInfo($data)">
 		
-		</div>
 
 
 		
 		<!-- ko if: type == 'collection' --> 
 		<div>
-				<button class="left" data-bind="click:$root.selectNode">settings</button> 
-				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
-				<button data-bind="click: $root.openSourceCreator" class="add_node right">add source</button> 
+				<button data-bind="click: $root.openSourceCreator" class="left">add source</button> 
+				<button data-bind="click: $root.openCreator" class="right">add node</button> 
 				<div class="clear"></div>
 		</div>
 		<!-- /ko -->
 
-		<!-- ko if: type != 'collection' --> 
-		<button class="left" data-bind="click:$root.selectNode">settings</button> 
-		<div style="clear:both"></div>
-		<!-- /ko -->
+		<div data-bind="html:$root.nodeInfo($data)"></div>
+		<div class="clear"></div>
 
 		<div class="node_buttons">
 			
@@ -92,8 +87,15 @@
 			<div class="node_info">
 				<div data-bind="html:description"></div>
 			</div>
-			<h3 class="subhead">settings for running node</h3> 
+			
+			
+			<div class="params_wrapper">
+				<h3 class="subhead">parameters</h3> 
+				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
+			</div>
+			
 			<div class="settings" data-bind="html:$root.getSettings($data)"></div>
+			
 			<!-- ko if: type != 'collection' --> 
 			<div>
 				<button data-bind="attr:{id:_id}" class="button left run">run this node!</button>
@@ -101,8 +103,7 @@
 			</div>
 			<div class="clear"></div>
 			<!-- /ko -->
-			<h3 class="subhead">parameters</h3> 
-			<div class="params" data-bind="html:$root.nodeParams($data)"></div>
+
 		</div>
 		
 	</div>
@@ -133,18 +134,15 @@
 	
 	
 	<!-- VIEW TABS -->
-	<div class="collection_view">
-		<div id="tabs">
-			<ul>
-				<li><a class="tabref" href="#tab-view" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
-			</ul>
-			
+	<div id="collection_view">
+		<div id="node-settings">
 			<!-- NODE SETTINGS -->
 			<!-- ko template: { name: 'tab-template', foreach: projectNodes } -->
 			<!-- /ko -->
-
-		  <div class="tab" id="tab-view"></div>
 		</div>
+        <div class="IframeWrapper">
+			<iframe id="iframe_view" class="iframetab" src="">Load Failed?</iframe>
+        </div>
 	</div>
 
 
@@ -161,11 +159,13 @@
 					<h3 data-bind="text: sub.subtype"></h3>
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
+							<!-- ko if: status == 'usable' || status == 'works' --> 
 							<li>
 								<div data-bind="html:title + ' (' + status + ')' , click:$root.openNodeParams"></div>
 								
 								<div data-bind="html:params" ></div>
 							</li>
+							<!-- /ko -->
 							
 						</ul>
 					</div>

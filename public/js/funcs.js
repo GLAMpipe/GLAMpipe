@@ -18,13 +18,12 @@ function runNode(settings, node_id) {
 // iframes setup from http://deano.me/2011/08/jquery-tabs-iframes/
 
 function loadTabFrame(tab, url) {
-    if ($(tab).find("iframe").length == 0) {
-        var html = [];
-        html.push('<div class="tabIframeWrapper">');
-        html.push('<iframe class="iframetab" src="' + url + '">Load Failed?</iframe>');
-        html.push('</div>');
-        $(tab).append(html.join(""));
-    }
+   
+    var html = [];
+    html.push('<iframe class="iframetab" src="' + url + '">Load Failed?</iframe>');
+    $("#collection_view .IframeWrapper").empty();
+    $("#collection_view .IframeWrapper").replaceWith(html.join(""));
+    
     return false;
 }
 
