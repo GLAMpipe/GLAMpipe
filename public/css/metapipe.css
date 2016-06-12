@@ -27,9 +27,7 @@ h2, h3 {
     height:20px;
 }
 
-.pipe h2{
-    height:16px;
-}
+
 
 a:link {
     color: #395D5A;
@@ -64,46 +62,7 @@ pre {
 	white-space: pre-wrap;
 }
 
-.node_bar {
-	padding:0px;
 
-}
-
-.node_bar button {
-	display:block;
-}
-
-.node_bar .description {
-	margin-bottom:20px;
-	margin-top:10px;
-}
-
-.node_bar .node_params {
-	margin-bottom:20px;
-	padding:10px;
-	border: 1px solid black;
-}
-
-.node_bar .settings {
-	margin-bottom:20px;
-	color:black;
-	padding:10px;
-	border: 1px solid black;
-	background-color:white;
-
-}
-
-
-.node_bar .subhead {
-	background-color: white;
-	color:black;
-	padding:5px;
-}
-
-.node_bar table td {
-	border: 0px solid black;
-	padding:1px;
-}
 
 input.short_input {
 
@@ -159,22 +118,16 @@ input.middle_input {
     display:none;
 }
 
-
-.node .node_info {
+.node_info {
 	padding:2px;
-    width:220px;
-    float:right;
+
 }
 
 .node_info .description, .node_info .params_description{
 	margin-bottom:10px;
 }
 
-.params_wrapper {
-    float:right;
 
-    width:350px;
-}
 
 .node_info .description{
 	background-color: #E0E0E0;
@@ -209,18 +162,21 @@ input.middle_input {
 
 }
 
-#node_creator {
-	position:absolute;
-	top:0px;
-	left:400px;
+.node_creator {
+    width:550px;
+    height:400px;
+}
 
-	z-index:100000;
-	padding:20px;
-	background-color: white;
-	width:550px;
-	border: 1px solid black;
-    max-height:80%;
-    overflow-y:scroll;
+#node_creator h2 {
+    height:16px;
+}
+
+#node_creator h3 {
+    height:12px;
+}
+
+#node_creator .nodetype_description {
+    display:none;
 }
 
 #node_creator label, #node_creator div {
@@ -262,23 +218,18 @@ ul.node_types li:hover {
 
 
 
-.node_bar .dynamic_fields, #node_creator .dynamic_fields {
-	display:block;
-	position:absolute;
-
-	background-color: white;
-	border: 1px solid black;
-	height:80%;
-	overflow-x: auto;
+.dynamic_fields, #node_creator .dynamic_fields {
+	display:none;
 }
 
-.dynamic_fields ul {
+#dynamic_fields ul {
 	padding-right:20px;
 }
 
-.dynamic_fields .array {
+#dynamic_fields .array {
 	background-color:orange;
 	color:white;
+    margin-left:10px;
 }
 
 #node_creator h2 {
@@ -295,17 +246,6 @@ ul.node_types li:hover {
 	float:right;
 }
 
-.button {
-font-family: 'Lobster', sans-serif;
-  background: #47666A;
-  color: #ffffff;
-  padding: 5px 10px 5px 10px;
-  text-decoration: none;
-
-  width:120px;
-  margin-top:1px;
-  margin-right:1px;
-}
 
 
 
@@ -318,9 +258,6 @@ font-family: 'Lobster', sans-serif;
 	background-color: #5F5F5F;
 }
 
-.collection .params {
-	background-color: #D8D8D8;
-}
 
 
 .file h2 {
@@ -331,9 +268,6 @@ font-family: 'Lobster', sans-serif;
 	background-color: #5F5F5F;
 }
 
-.file .params {
-	background-color: #D8D8D8;
-}
 
 .query h2 {
 	background-color: #333;
@@ -351,13 +285,6 @@ font-family: 'Lobster', sans-serif;
 	background-color: #AE6B6B;
 }
 
-.export h3 {
-	background-color: #E18F8F;
-}
-
-.export .params {
-	background-color: #F2DCDC;
-}
 
 
 .cluster h2 {
@@ -367,9 +294,6 @@ font-family: 'Lobster', sans-serif;
 	background-color: #B9A276;
 }
 
-.cluster .params {
-	background-color: #D4E5EF;
-}
 
 
 .source h2 {
@@ -379,9 +303,6 @@ font-family: 'Lobster', sans-serif;
 	background-color: #699FBC;
 }
 
-.source .params {
-	background-color: #D4E5EF;
-}
 
 
 .lookup h2 {
@@ -390,10 +311,6 @@ font-family: 'Lobster', sans-serif;
 
 .lookup h3 {
 	background-color:#9DC37A;
-}
-
-.lookup .params {
-	background-color: #D5F0BB;
 }
 
 
@@ -405,10 +322,6 @@ font-family: 'Lobster', sans-serif;
 	background-color:#406360;
 }
 
-.view .params {
-	background-color: #406360;
-}
-
 
 .transform h2 {
 	background-color:#BDA14F;
@@ -418,9 +331,6 @@ font-family: 'Lobster', sans-serif;
 	background-color:#D5B34F;
 }
 
-.transform .params {
-	background-color: #F6F4C5;
-}
 
 
 .download h2 {
@@ -431,9 +341,6 @@ font-family: 'Lobster', sans-serif;
 	background-color:#9686E9;
 }
 
-.download .params {
-	background-color: #E0DAFF;
-}
 
 
 .upload h2 {
@@ -453,6 +360,7 @@ font-family: 'Lobster', sans-serif;
  table td {
 	border: 1px solid black;
 	padding:5px;
+    font-size:90%;
 }
 
 html { 
@@ -580,15 +488,15 @@ html {
 /* ********************* NEW UI *********************** */
 
 #project_header {
-	background-color:#99B4B2;
+	background-color:#307BCE;
 	color:white;
     padding:5px;
     height:20px;
-    width:390px;
+    width:310px;
 }
 
 .collection_pipe {
-    width:400px;
+    width:320px;
     height:80%;
 }
 
@@ -601,8 +509,12 @@ html {
     margin-bottom:40px;
 }
 
+.pipe h2{
+    height:16px;
+}
+
 #collection_view {
-    left:400px;
+    left:320px;
     position:absolute;
     top:0px;
     width:  calc(100% - 400px);
@@ -611,7 +523,7 @@ html {
 
 
 .node {
-	width:350px;
+	width:300px;
     background:#ECECEC;
     margin-bottom:10px;
 }
@@ -742,6 +654,107 @@ button.run, button.test {
     width:100%;
 }
 
+
+.button {
+  text-decoration: none;
+  margin-top:1px;
+  margin-right:1px;
+  width:20px;
+  margin-left:280px;
+}
+
+
+.button:hover {
+    text-decoration: underline;
+    color:black;
+}
+
+/* ********************* NODE SETTINGS *********************** */
+
+.node_bar {
+	padding:0px;
+
+}
+
+.node_bar button {
+	display:block;
+}
+
+.node_bar .description {
+	margin-bottom:20px;
+	margin-top:10px;
+}
+
+.node_bar .node_params {
+	margin-bottom:20px;
+	padding:10px;
+	border: 1px solid black;
+}
+
+.node_bar .settings_wrapper {
+	margin-bottom:20px;
+    margin-right:30%;
+	color:black;
+	padding:10px;
+	border: 1px solid black;
+	border-top: 0px solid black;
+	background-color:white;
+
+}
+
+.node_bar .subhead {
+	background-color: white;
+	color:black;
+	padding:5px;
+}
+
+.node_bar table td {
+	border: 0px solid black;
+	padding:1px;
+}
+
+.params_wrapper {
+    float:right;
+
+    width:29%;
+}
+
+
+/* ********************* PROJECT LISTING *********************** */
+
+
+.projects {
+    margin: 10px;
+}
+.projects ul {
+    list-style-type: none;
+    margin:0px;
+    padding:0px
+}
+
+.projects ul li {
+    margin:2px;
+    padding:3px;
+}
+
+.projects a:link, #projects a:visited {
+    color:black;
+}
+
+.projects a:hover {
+    color: black;
+    text-decoration: underline;
+}
+
+.projects .selected {
+    background-color: white;
+
+    box-shadow: 5px 5px 5px #888888;
+}
+
+
+
+
 #footer {
     position: absolute;
     right: 0;
@@ -820,42 +833,16 @@ button.run, button.test {
 
 
 
-.pipe ul {
-    list-style-type: none;
-    margin:0px;
-    padding:0px
-}
-
-.pipe ul li {
-    background-color: #B2BFC9;
-    margin:2px;
-    padding:3px;
-}
-
-.pipe a:link, #projects a:visited {
-    color:black;
-}
-
-.pipe a:hover {
-    color: white;
-}
-
-.pipe .selected {
-    background-color: white;
-
-    box-shadow: 5px 5px 5px #888888;
-}
 
 .clear {
     clear:both;
 }
 
 .node_console {
-    border: 1px solid #5C5C5C;
+
     padding:10px;
     margin:5px;
-    margin-left:200px;
-    margin-right:200px;
+    width:400px;
     max-height: 400px;
     overflow-y:auto;
 }

@@ -39,7 +39,8 @@ exports.createNodeView = function (data, req, edit, callback) {
 				if(req.query.fields != null) var fields = req.query.fields;
 				else var fields = null;
 				
-				generateDynamicView(project.nodes[index], fields, edit, function(html) {
+				generateDynamicView(project.nodes[index], fields, edit, function(keys, html) {
+					data = data.replace(/\[\[keys\]\]/, keys);
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);
 				});
@@ -77,6 +78,7 @@ exports.createCollectionView = function (data, collectionName, callback) {
 
 function generateDynamicView (node, fields, edit, callback) {
 	// read one record and extract field names
+    // create knockout template from that data
 	// NOTE: this assumes that every record has all fields
 	mongoquery.findOne({}, node.collection, function(data) {
 		
@@ -89,30 +91,22 @@ function generateDynamicView (node, fields, edit, callback) {
 
 
 
-				
-			var html = '<div id="controls">'
-                + '<label>select visible fields (click to remove)</label>'
-				+ '<div id="selected_fields"></div>'
-				+ '<select id="field_select">'
-                + '<option>choose</option>';
-				
+            var keys = '';
+            var html = '';
+			html += ''
+
+				+ '<div>'
+				+ '	<table>'
+				+ '		<thead>'
+				+ '			<tr>';
+
+			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
+
 			for (key in data) {
-				html += '	<option value="'+key+'">'+key+'</option>' + "\n";
+                    keys += '<option value="'+key+'">'+key+'</option>'
 			}
-			html += '</select>';
 
-			html += '<div id="prevnext">'
-				+ '<button data-bind="click: prevPage">prev</button>'
-				+ '<button data-bind="click: nextPage">next</button>'
-				+ '</div></div>'
-                
-            html += '<div class="border padding">color codes: '
-                + '<span class="array_array" title="Array means that there several values">__</span> array '
-                + '<span class="object" title="object is a record inside main record with its own fields">__</span> object '
-                + '</div>';
-
-
-			// remove keys that are not listed inf "fields"
+			// remove keys that are not listed in "fields" TODO: maybe this should be done in query
 			if(fields != null) {
 				var fields_arr = fields.split(",");
 				for (key in data) {
@@ -121,14 +115,6 @@ function generateDynamicView (node, fields, edit, callback) {
 				}
 			}
 
-			html += '</div>'
-
-				+ '<div>'
-				+ '	<table>'
-				+ '		<thead>'
-				+ '			<tr>';
-
-			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
 
 			for (key in data) {
 					html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
@@ -173,7 +159,7 @@ function generateDynamicView (node, fields, edit, callback) {
 				+ '	</table>'
 				+ '</div>';
 
-			callback(html);
+			callback(keys, html);
 		} else {
 			callback("<h3>dynamice view creation failed!</h3> Maybe collection is empty?</br>" + node.collection);
 		}

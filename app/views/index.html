@@ -64,16 +64,11 @@
 		ko.applyBindings(projects);
 		projects.loadItems();
 
-        // TABS CREATE
-        var $tabs = $('#tabs').tabs();
-
-        // check if serves is ok. If not, then show error setup
+        // check if server is ok. If not, then show error setup
         $.getJSON("/status", function(data) { 
             console.log(data);
-            if(data.status == "ok")
-                loadTabFrame("#tabs-1", "http://artturimatias.github.io/GLAMpipe/");
-            else
-                loadTabFrame("#tabs-1", "/setup");
+            if(data.status != "ok")
+                $('#iframe_view').attr('src', "/setup");
         })
 
 
@@ -92,12 +87,14 @@
     <div id="project_header">
         <h2 class="inline_header">Projects</h2>
          <button id="show_project_creator" class="right" >add project</button>
+         
     </div>
     
+    <a href="/setup" target="_blank" class="button" >setup</a>
 
     <!-- PROJECTS -->
 	<div class="collection_pipe">
-        <div class="pipe">
+        <div class="projects">
             <div id="new_project" class="hidden node source">
                 <h2>Create project</h2>
                 <form data-bind="submit:addItem">
@@ -115,18 +112,11 @@
 	</div>
     
     <!-- VIEW TABS -->
-	<div class="collection_view">
-		
-        <div id="tabs">
-            <ul>
-                <li><a class="tabref" href="#tabs-1" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
-            </ul>
-
-          <div class="tab" id="tabs-1"></div>
-
+	<div id="collection_view">
+        <div class="IframeWrapper">
+			<iframe id="iframe_view" class="iframetab" src="http://artturimatias.github.io/GLAMpipe/"></iframe>
         </div>
 	</div>
     
-
 	</body>
 </html>
