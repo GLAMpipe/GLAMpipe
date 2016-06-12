@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>GLAMpipe</title>
@@ -29,12 +28,12 @@
 
 
 <script type="text/html" id="node-template">
-	<!-- ko if: collection == $parent.collection -->
+	<!-- ko if: params.collection == $parent.collection -->
 	<div data-bind="attr:{id:_id, 'data-collection':collection},css:type" class="block node draggable"> 
 		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
 		<div class="drag_icon"><img src="../images/drag.png"/></div>
 		
-		<h2 class="pointer" data-bind="click:$root.openNodeView, html:type.toUpperCase() +': '+ title "></h2> 
+		<h2 class="pointer" data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
 		
 
 
@@ -43,39 +42,16 @@
 			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
 		</div>
 		
-		<div data-bind="html:$root.nodeInfo($data)">
-		
-		</div>
-
-
-		
 		<!-- ko if: type == 'collection' --> 
 		<div>
-				<button class="left" data-bind="click:$root.selectNode">settings</button> 
-				<button data-bind="click: $root.openCreator" class="add_node right">add node</button> 
-				<button data-bind="click: $root.openSourceCreator" class="add_node right">add source</button> 
+				<button data-bind="click: $root.openSourceCreator" class="left">add source</button> 
+				<button data-bind="click: $root.openCreator" class="right">add node</button> 
 				<div class="clear"></div>
 		</div>
 		<!-- /ko -->
 
-		<!-- ko if: type != 'collection' --> 
-		<button class="left" data-bind="click:$root.selectNode">settings</button> 
-		<div style="clear:both"></div>
-		<!-- /ko -->
-
-		<div class="node_buttons">
-			
-			<!-- ko if: type == 'view' --> 
-			<div class="bottom">
-				<a class="left view_button" data-bind="attr:{href:'/node/fileview/' + _id + '?view=georeferencer.html'}" target="_blank" >georeferencer</a> 	
-			</div>
-			<!-- /ko -->
-			
-			<button class="left" data-bind="click:$root.openNodeView">node view</button> 
-
-			<div style="clear:both"></div>
-			
-		</div>
+		<div data-bind="html:$root.nodeInfo($data)"></div>
+		<div class="clear"></div>
 
 	</div>
 	<!-- /ko -->
@@ -90,24 +66,32 @@
 
 		<div class="node_bar" data-bind="css:type">
 			<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
-			<div class="node_info">
-				<div data-bind="html:description"></div>
-			</div>
-			<h3 class="subhead">settings for running node</h3> 
-			<div class="settings" data-bind="html:$root.getSettings($data)"></div>
-			<!-- ko if: type != 'collection' --> 
-			<div>
-				<button data-bind="attr:{id:_id}" class="button left run">run this node!</button>
-				<div class="node_console">console</div>
-			</div>
-			<div class="clear"></div>
-			<!-- /ko -->
-			<h3 class="subhead">parameters</h3> 
-			<div class="params" data-bind="html:$root.nodeParams($data)"></div>
-		</div>
-		
-	</div>
 
+			
+			
+			<div class="params_wrapper">
+				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
+			</div>
+			
+			<div class="settings_wrapper">
+				<div class="node_info">
+					<div data-bind="html:description"></div>
+				</div>
+				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
+				
+				<!-- ko if: type != 'collection' --> 
+				<div>
+					<button data-bind="attr:{id:_id}" class="left run">run!</button>
+					<div class="node_console"></div>
+				</div>
+				<div class="clear"></div>
+				<!-- /ko -->
+			</div>
+			
+
+
+		</div>
+	</div>
 
 </script>
 
@@ -134,39 +118,36 @@
 	
 	
 	<!-- VIEW TABS -->
-	<div class="collection_view">
-		<div id="tabs">
-			<ul>
-				<li><a class="tabref" href="#tab-view" rel="http://artturimatias.github.io/GLAMpipe/">Welcome!</a><span class="ui-icon ui-icon-close" role="presentation">Remove Tab</span></li>
-			</ul>
-			
+	<div id="collection_view">
+		<div id="node-settings">
 			<!-- NODE SETTINGS -->
 			<!-- ko template: { name: 'tab-template', foreach: projectNodes } -->
 			<!-- /ko -->
-
-		  <div class="tab" id="tab-view"></div>
 		</div>
+        <div class="IframeWrapper">
+			<iframe id="iframe_view" class="iframetab" src="">Load Failed?</iframe>
+        </div>
 	</div>
 
 
 	<!-- NODE CREATOR -->
-	<div id="node_creator">
-		<button data-bind="click:closeCreator">close</button>
-		<h1>Choose node type</h1>
+	<div id="node_creator" title="Choose node" class="node_creator">
 		<!-- ko foreach: collection -->
 		<div data-bind="attr:{id:_id.type + '_node', class:_id.type}">
 			<h2 data-bind="text: _id.type,click:$parent.openNodeTypes"></h2>
-			<p data-bind="html:_id.description"></p>
+			<p class="nodetype_description" data-bind="html:_id.description"></p>
 			<div data-bind="foreach: subtypes" class="node_types" style="display:none">
 				<div data-bind="attr:{id:sub.subtype + '_node', class:sub.subtype}">
 					<h3 data-bind="text: sub.subtype"></h3>
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
+							<!-- ko if: status == 'usable' || status == 'works' --> 
 							<li>
 								<div data-bind="html:title + ' (' + status + ')' , click:$root.openNodeParams"></div>
 								
 								<div data-bind="html:params" ></div>
 							</li>
+							<!-- /ko -->
 							
 						</ul>
 					</div>
@@ -176,6 +157,8 @@
 		<!-- /ko -->
 	</div>
 
+	<!-- DYNAMIC FIELDS DIALOG -->
+	<div id='dynamic_fields'></div>
 
 	<!-- FOOTER AND CONSOLE -->
 	<div id="footer">

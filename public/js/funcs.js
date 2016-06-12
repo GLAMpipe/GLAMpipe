@@ -1,12 +1,15 @@
 
 function runNode(settings, node_id) {
-    var console = $("#tabs-" + node_id + " .node_console");
-    console.empty();
-    console.append("running...");
-    console.removeClass("done");
-    console.addClass("busy");
+    var cons = $("#tabs-" + node_id + " .node_console");
+    cons.empty();
+    $(".node_console").empty();
+    cons.append("running...");
+    cons.removeClass("done");
+    cons.addClass("busy");
+    
     // save settings also locally
     nodes.selectedNode.settings = settings;
+    
     $.post("/run/node/" + node_id, settings, function(data) {
         console.log('node executed');
         if(data.error)
@@ -15,26 +18,11 @@ function runNode(settings, node_id) {
 }
 
 
-// iframes setup from http://deano.me/2011/08/jquery-tabs-iframes/
-
-function loadTabFrame(tab, url) {
-    if ($(tab).find("iframe").length == 0) {
-        var html = [];
-        html.push('<div class="tabIframeWrapper">');
-        html.push('<iframe class="iframetab" src="' + url + '">Load Failed?</iframe>');
-        html.push('</div>');
-        $(tab).append(html.join(""));
-    }
-    return false;
-}
-
-function getSelectedTabIndex($tabs) {
-    return $tabs.tabs('option', 'active');
-}
 
 
-function reloadIframe (tab_id) {
-    $("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", function ( i, val ) { return val; });
+
+function reloadIframe () {
+    $("#iframe_view" ).attr( "src", function ( i, val ) { return val; });
 }
 
 function addTab(tabs, tabId, title, url, content, tabClass) {
@@ -87,9 +75,9 @@ function makeDynFieldsfromObject (data, parents, obj) {
 }
 
 // console effect from here: http://jsfiddle.net/manuel/zejCD/1/
-function tailScroll() {
-    var height = $("#console").get(0).scrollHeight -260;
-    $("#console").animate({
+function tailScroll(console) {
+    var height = console.get(0).scrollHeight;
+    console.animate({
         scrollTop: height
     }, 50);
 }

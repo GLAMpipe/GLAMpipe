@@ -137,6 +137,29 @@
             }
         }
 
+        this.keyValueObj = function (data, key) {
+            
+            var html = ""; 
+            if(typeof data[key] === "object") {
+
+                    html = "<div class='object'>\n";
+                    
+                    for (var j in data[key]) {
+                        
+                        if (data[key].hasOwnProperty(j)) {
+                            //console.log(j);
+                            html += "<div class='strong'>"+j+"</div>\n";
+                            html += "<div>"+data[key][j]+"</div>\n";
+                        }
+                    }
+                    html += "</div>\n";
+                }
+                
+            return html;
+        }
+
+        
+
         this.keyValueList = function (data, key) {
             var list = [];
             console.log(data[0].value);
@@ -236,9 +259,9 @@
 		var fields_str = fields.join(",");
         if(fields_str != "")
             fields_str = "?fields=" + fields_str;
-
+            
         // if we are inside iframe, we must update iframe src so that reload keeps selected fields 
-        writeIframeSrc(fields_str);
+        //writeIframeSrc(fields_str);
         
         window.location.search = fields_str;
  
@@ -253,7 +276,7 @@
         console.log(node._id);
         var url = "/node/view/"+node._id + fields_str;
         var tab_id = "tab-view-" + node._id;
-        parent.find("#" + tab_id + " div.tabIframeWrapper iframe.iframetab" ).attr( "src", url);
+        parent.find("#iframe_view" ).attr( "src", url);
     }
 
 	function getURLParameter(name) {

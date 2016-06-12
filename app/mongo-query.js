@@ -188,6 +188,18 @@ exports.save = function (collectionname, doc, callback) {
 	collection.save(doc, function () {console.log('SAVED to', collectionname)});
 }
 
+exports.removeKey = function (collectionname, key, callback) {
+	var collection = db.collection(collectionname);
+    var unset = {};
+    unset[key] = 1;
+    collection.update({},{$unset: unset}, {multi: true}, function(err, result) {
+		if(err)
+			console.log(err);
+        else
+            console.log('DB: removed key', key);
+		callback(); 
+    });
+}
 
 
 exports.drop = function (collectionname, callback) {
@@ -304,7 +316,7 @@ exports.group = function (node, array, callback) {
 
 exports.collectionLookup = function (sandbox, node, onNodeScript, onError) {
 
-	var collection = db.collection(node.params.target_collection);
+	var collection = db.collection(node.collection);
 	var key = node.params.target_key;
 	var value = sandbox.out.value;
 	onNodeScript(sandbox);

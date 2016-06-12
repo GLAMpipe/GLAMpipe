@@ -1,4 +1,5 @@
 var mongojs = require('mongojs');
+const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 
 
@@ -17,7 +18,8 @@ exports.createNodeView = function (data, req, edit, callback) {
 			data = data.replace(/\[\[collection\]\]/, node.collection);
 			data = data.replace(/\[\[page_title\]\]/, node.title);
 			data = data.replace(/\[\[edit_link\]\]/, editLink);
-			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node));
+            // insert node json to view so that client scripts can use node data (also hide script tags)
+			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node).replace(/script>/g,"_script>"));
 			
 			// if node has script view, then use that
 			if(typeof project.nodes[index].scripts.view !== "undefined") {
@@ -37,7 +39,8 @@ exports.createNodeView = function (data, req, edit, callback) {
 				if(req.query.fields != null) var fields = req.query.fields;
 				else var fields = null;
 				
-				generateDynamicView(project.nodes[index], fields, edit, function(html) {
+				generateDynamicView(project.nodes[index], fields, edit, function(keys, html) {
+					data = data.replace(/\[\[keys\]\]/, keys);
 					data = data.replace(/\[\[html\]\]/, html);
 					callback(data);
 				});
@@ -75,6 +78,7 @@ exports.createCollectionView = function (data, collectionName, callback) {
 
 function generateDynamicView (node, fields, edit, callback) {
 	// read one record and extract field names
+    // create knockout template from that data
 	// NOTE: this assumes that every record has all fields
 	mongoquery.findOne({}, node.collection, function(data) {
 		
@@ -87,25 +91,22 @@ function generateDynamicView (node, fields, edit, callback) {
 
 
 
-				
-			var html = '<div id="controls">'
-                + '<label>select visible fields (click to remove)</label>'
-				+ '<div id="selected_fields"></div>'
-				+ '<select id="field_select">'
-                + '<option>choose</option>';
-				
+            var keys = '';
+            var html = '';
+			html += ''
+
+				+ '<div>'
+				+ '	<table>'
+				+ '		<thead>'
+				+ '			<tr>';
+
+			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
+
 			for (key in data) {
-				html += '	<option value="'+key+'">'+key+'</option>' + "\n";
+                    keys += '<option value="'+key+'">'+key+'</option>'
 			}
-			html += '</select>';
 
-			html += '<div id="prevnext">'
-				+ '<button data-bind="click: prevPage">prev</button>'
-				+ '<button data-bind="click: nextPage">next</button>'
-				+ '</div></div>'
-
-
-			// remove keys that are not listed inf "fields"
+			// remove keys that are not listed in "fields" TODO: maybe this should be done in query
 			if(fields != null) {
 				var fields_arr = fields.split(",");
 				for (key in data) {
@@ -114,14 +115,6 @@ function generateDynamicView (node, fields, edit, callback) {
 				}
 			}
 
-			html += '</div>'
-
-				+ '<div>'
-				+ '	<table>'
-				+ '		<thead>'
-				+ '			<tr>';
-
-			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
 
 			for (key in data) {
 					html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
@@ -135,8 +128,18 @@ function generateDynamicView (node, fields, edit, callback) {
 			// data cells
 			html += '				<td data-bind="text: vcc"></td>'
 			for (key in data) {
-				//if(data[key] != null) {
-					if(data[key] != null && data[key].constructor.name === 'Array') {
+                
+                // EDIT VIEW
+                if (edit) {
+                    if(key == "_id") // id is not editable 
+                        html += '				<td data-bind="text: '+key+'"></td>';
+                    else if (typeof data[key] !== "object" && data[key].constructor.name !== 'Array') 
+                        html += '                               <td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+                    else 
+                        html += '				<td><div class="data-container warning">Currently can not edit arrays or objects</div></td>';
+
+                //  DATA VIEW
+                } else if (data[key] != null && data[key].constructor.name === 'Array') {
                         html += '           <td class="array">' 
 						//html += '				<div class="data-container" data-bind="foreach: $root.keyValueList($data[\''+key+'\'])">'
 						html += '				<div class="data-container" data-bind="foreach: '+key+'">'
@@ -144,19 +147,11 @@ function generateDynamicView (node, fields, edit, callback) {
                         html += '               </div>'
 						html += '           </td>'
 
-					} else {
-						if(edit) { 
-							if(key == "_id") // id is not editable 
-								html += '				<td data-bind="text: '+key+'"></td>';
-							else
-								html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
-						} else
-							html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
-					}
-				//} else {
-					//html += '				<td>null</td>'
-				//}
-				
+                } else if (typeof data[key] === "object") 
+                    html += '                   <td><div data-bind="html:$root.keyValueObj($data,\''+key+'\')"></div></td>';
+                else
+                    html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
+					
 			}
 
 			html += '			</tr>'
@@ -164,7 +159,7 @@ function generateDynamicView (node, fields, edit, callback) {
 				+ '	</table>'
 				+ '</div>';
 
-			callback(html);
+			callback(keys, html);
 		} else {
 			callback("<h3>dynamice view creation failed!</h3> Maybe collection is empty?</br>" + node.collection);
 		}
