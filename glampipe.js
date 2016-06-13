@@ -1,8 +1,6 @@
 
 const fs			= require('fs');
 const path			= require('path');
-const contentTypes	= require('./utils/content-types');
-const sysInfo		= require('./utils/sys-info');
 const env			= process.env;
 
 var express			= require('express');

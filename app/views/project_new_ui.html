@@ -79,7 +79,7 @@
 				</div>
 				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
 				
-				<!-- ko if: type != 'collection' --> 
+				<!-- ko if: type != 'collection' &&  type != 'view' --> 
 				<div>
 					<button data-bind="attr:{id:_id}" class="left run">run!</button>
 					<div class="node_console"></div>

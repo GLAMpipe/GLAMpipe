@@ -94,17 +94,20 @@ exports.initNodes = function (io, callback) {
                 var desc = JSON.parse(data);
 
             // read local nodes first
-            console.log("INIT: Loading YOUR OWN nodes from " + path.join(dataPath, "mynodes/"));
-            exports.readNodes(io, path.join(dataPath, "mynodes/"), desc, function (error) {
+           // console.log("INIT: Loading YOUR OWN nodes from " + path.join(dataPath, "mynodes/"));
+            //exports.readNodes(io, path.join(dataPath, "mynodes/"), desc, function (error) {
                 // then "stock" nodes
                 console.log("INIT: Loading stock nodes from " + path.join(dataPath, "nodes/") );
                 exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
                     callback(null);     
                 });        
-            });
+            //});
         });
     });
 }
+
+
+
 
 
 exports.readNodes = function (io, nodePath, descriptions, callback) {
@@ -142,6 +145,7 @@ exports.readNodes = function (io, nodePath, descriptions, callback) {
                     next();
                 }
             })
+            
         } catch(e) {
             console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
             io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
@@ -379,6 +383,9 @@ exports.runNode = function (req, res, io) {
 			})
 
 			console.log("NODE: running", node.type);
+            
+
+
 
 			// context for node scripts
 			var sandbox = {
@@ -1430,9 +1437,20 @@ exports.editCollection = function (collection_id, req, callback) {
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$set:setter}, function(result) {
 		callback(result); 
 	});
-
-
 }
+
+exports.editCollectionAddToSet = function (collection_id, req, callback) {
+
+	console.log("adding to set", collection_id);
+	var setter = {};
+	setter[req.body.field] = req.body.value;
+	console.log("setter:", setter);
+	
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$addToSet:setter}, function(result) {
+		callback(result); 
+	});
+}
+
 
 exports.nodeView = function  (req, cb) {
 	fs = require('fs')
@@ -1825,6 +1843,8 @@ function indexByKeyValue(arraytosearch, key, value) {
 }
 
 
+
+
 function readFiles(dirname, onFileContent, onError, onDone) {
 	var fs = require("fs");
 	fs.readdir(dirname, function(err, filenames) {
@@ -1835,9 +1855,9 @@ function readFiles(dirname, onFileContent, onError, onDone) {
 
 
 		async.eachSeries(filenames, function iterator(filename, next) {
-            fs.stat(filename, function(err, stat) {
+            //fs.stat(filename, function(err, stat) {
                 // skip directories
-                if (stat && stat.isDirectory()) { 
+                if (filename == "config" || filename == "data") { 
                     next();
                 } else {
                     fs.readFile(dirname + filename, 'utf-8', function(err, content) {
@@ -1848,7 +1868,7 @@ function readFiles(dirname, onFileContent, onError, onDone) {
                         onFileContent(filename, content, next);
                     });
                 }
-            })
+           // })
 		}, function done() {
 			onDone();
 		});

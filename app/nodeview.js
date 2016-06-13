@@ -1,5 +1,6 @@
 var mongojs = require('mongojs');
 const vm 		= require('vm');
+var path        = require('path');
 var mongoquery 	= require("../app/mongo-query.js");
 
 
@@ -23,9 +24,18 @@ exports.createNodeView = function (data, req, edit, callback) {
 			
 			// if node has script view, then use that
 			if(typeof project.nodes[index].scripts.view !== "undefined") {
+                
 				sandbox = {out:{}, context: {node:node}};
 				vm.runInNewContext(node.scripts.view, sandbox);
-				callback(sandbox.out.html);
+                if(sandbox.out.htmlfile) {
+                    var fs = require('fs');
+                    var file = path.join(global.config.dataPath, "nodes", "data", sandbox.out.htmlfile);
+                    var contents = fs.readFileSync(file).toString();
+                    contents = contents.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node).replace(/script>/g,"_script>"));
+                    callback(contents);
+                } else { 
+                    callback(sandbox.out.html);
+                }
 			
 			// if node has static view, then we use that
 			} else if(typeof project.nodes[index].views.data !== "undefined") {

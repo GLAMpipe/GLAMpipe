@@ -170,6 +170,9 @@ module.exports = function(express, glampipe) {
 		glampipe.core.editCollection(req.params.id, req, function(data) {res.send(data)});
 	});
 
+	express.post('/edit/collection/addtoset/:id', function (req, res) {
+		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
+	});
 
 	// UPLOAD
 	express.post('/upload/file', upload.single('file'), function (req, res) {
