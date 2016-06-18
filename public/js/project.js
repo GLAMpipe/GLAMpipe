@@ -494,10 +494,10 @@ $( document ).ready(function() {
 
 
     $(document).on('click','.dynamic_collection', function(e) {
+        
         var obj = $(e.target);
-        var params = obj.parents(".params");
-        if(params.length == 0)
-            params = obj.parents(".settings");
+        nodes.currentInput = obj; 
+
         
         var html = "<ul>";
         for(var i = 0; i < nodes.projectNodes().length; i++) {
@@ -507,7 +507,20 @@ $( document ).ready(function() {
             }
         }
         html += "</ul>";
-        params.append("<div class='dynamic_fields'>"+html+"</div>");
+        //params.append("<div class='dynamic_fields'>"+html+"</div>");
+
+        // open dialog
+        $("#dynamic_fields").empty();
+        $("#dynamic_fields").append(html);
+        $("#dynamic_fields").dialog({
+            position: { 
+                my: 'left top',
+                at: 'right top',
+                of: obj
+            },
+            title: "choose collection"
+        });
+
     })
 
 
