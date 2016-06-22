@@ -63,6 +63,7 @@ var nodeList = function () {
         $("#node_creator").dialog();
         self.currentNode = obj.parents(".node").attr("id");
         self.currentCollection = obj.parents(".node").data("collection");
+        self.pickCollection = self.currentCollection;
         //self.currentNodePosition = obj.parents(".node").position();
     }
     
@@ -78,6 +79,7 @@ var nodeList = function () {
 
         self.currentNode = obj.parents(".node").attr("id");
         self.currentCollection = obj.parents(".node").data("collection");
+        self.pickCollection = self.currentCollection;
         //self.currentNodePosition = obj.parents(".node").position();
     }
         
@@ -99,6 +101,8 @@ var nodeList = function () {
             self.currentCollection = data.params.collection
         else
             self.currentCollection = data.collection
+        
+        self.pickCollection = self.currentCollection;
         
         // plain script tag causes confusion in html views so we restore it here
         data.views.settings = data.views.settings.replace(/_script/g,'script');	
@@ -442,7 +446,7 @@ $( document ).ready(function() {
         nodes.currentInput = obj;   // put input to global variable so that we can update it later
         
         // fetch fields
-        $.getJSON("/get/collection/fields/" + nodes.currentCollection, function(data) { 
+        $.getJSON("/get/collection/fields/" + nodes.pickCollection, function(data) { 
             if(data.error)
                 alert(data.error);
                     
@@ -492,6 +496,20 @@ $( document ).ready(function() {
     });
 
 
+    $(document).on('click','.pick_collection', function(e) {
+        var obj = $(e.target);
+        
+        nodes.currentInput.val(obj.data("val"));
+        nodes.currentInput.change();
+        nodes.currentInput = null;
+        
+        // we pick fields from different collection than where we are adding the node
+        nodes.pickCollection = obj.data("val");
+        
+        $("#dynamic_fields").dialog("close");
+    });
+
+
 
     $(document).on('click','.dynamic_collection', function(e) {
         
@@ -503,7 +521,7 @@ $( document ).ready(function() {
         for(var i = 0; i < nodes.projectNodes().length; i++) {
             var node = nodes.projectNodes()[i];
             if(node.type == "collection" && node.collection != nodes.currentCollection) {
-                html += '<li class="pick_field" data-field="source_collection" data-val="'+node.collection+'">' + node.collection + '</li>';
+                html += '<li class="pick_collection" data-field="source_collection" data-val="'+node.collection+'">' + node.collection + '</li>';
             }
         }
         html += "</ul>";
