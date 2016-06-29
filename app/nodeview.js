@@ -19,6 +19,7 @@ exports.createNodeView = function (data, req, edit, callback) {
 			data = data.replace(/\[\[collection\]\]/, node.collection);
 			data = data.replace(/\[\[page_title\]\]/, node.title);
 			data = data.replace(/\[\[edit_link\]\]/, editLink);
+			data = data.replace(/\[\[tab_link\]\]/, "/node/view/" + node._id);
             // insert node json to view so that client scripts can use node data (also hide script tags)
 			data = data.replace(/\[\[node\]\]/, "var node = " + JSON.stringify(node).replace(/script>/g,"_script>"));
 			
@@ -158,7 +159,7 @@ function generateDynamicView (node, fields, edit, callback) {
 						html += '           </td>'
 
                 } else if (typeof data[key] === "object") 
-                    html += '                   <td><div data-bind="html:$root.keyValueObj($data,\''+key+'\')"></div></td>';
+                    html += '                   <td><div class="data-container" data-bind="html:$root.keyValueObj($data,\''+key+'\')"></div></td>';
                 else
                     html += '				<td><div class="data-container"  data-bind="text: '+key+'"></div></td>';
 					

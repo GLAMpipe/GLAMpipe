@@ -141,7 +141,7 @@
 					<h3 data-bind="text: sub.subtype"></h3>
 					<div class="node_types" >
 						<ul data-bind="foreach: nodes" class="node_types">
-							<!-- ko if: status == 'usable' || status == 'works' --> 
+							<!-- ko if: status == 'usable' || status == 'works' || status == 'test'--> 
 							<li>
 								<div data-bind="html:title + ' (' + status + ')' , click:$root.openNodeParams"></div>
 								

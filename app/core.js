@@ -1374,7 +1374,8 @@ exports.getCollection = function (req, query, res) {
 		sort = "_id";
 
 	var reverse = false
-	if(req.query.reverse != null)  // by default sort by _id (mongoid)
+    var r = parseInt(req.query.reverse);
+	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
 		reverse = true;
 
 	var params = {

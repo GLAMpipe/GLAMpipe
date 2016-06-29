@@ -223,11 +223,22 @@ var nodeList = function () {
         // show data view
         var url = '/node/view/' + data._id;
         // for transform node show only node's out_field
-        if(data.type == "transform" || data.type == "lookup" || data.type == "download")
-            url += "?fields=" + data.out_field;
-            
+        //alert(data.iframe_src == null);
+        if(data.iframe_src == null) {
+            if(data.type == "transform" || data.type == "lookup" || data.type == "download")
+                url += "?fields=" + data.out_field;
+        } else {
+            url += data.iframe_src; 
+        }
         $('#iframe_view').attr('src', url);
 
+        
+    }
+
+    this.updateNodeViewURL = function (node_id, url) {
+        //alert(node_id + " = " + self.selectedNode._id);
+        self.selectedNode.iframe_src = url;
+        console.log("iframe src:" + url);
         
     }
 

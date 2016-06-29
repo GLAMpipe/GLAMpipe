@@ -1,4 +1,4 @@
-
+var nodes = {};
 	
 	ko.bindingHandlers.inline = {
 		init: function(element, valueAccessor) {
@@ -39,8 +39,7 @@
 
 	var dataList = function () {
 		var self = this;
-		this.reverse = false;
-		this.collectionName = "";
+		this.nodeId = "";
 		this.params = {
 			skip:function() {return "?skip="+this.skip_value;}, 
 			skip_value: 0, 
@@ -49,7 +48,18 @@
 				if (this.skip_value <= 0)
 					this.skip_value = 0;
 				},
-			sort:""
+			sort:function() {
+                var r = 0;
+                if(self.params.reverse)
+                    r = 1;
+                
+                if(this.sort_value != "")
+                    return "&reverse="+r+"&sort="+this.sort_value;
+                else
+                    return "";},
+            sort_value: "",
+            fields: "",
+            reverse: 0
 		};
 
 		this.inedit = function (data, event) {
@@ -61,7 +71,8 @@
 
 		this.collection = ko.observableArray(); // Initial items
 		this.loadData = function () {
-			$.getJSON("/get/collection/" + node.collection + this.params.skip() + this.params.sort, function(data) { 
+            console.log(this.params.sort());
+			$.getJSON("/get/collection/" + node.collection + this.params.skip() + this.params.sort(), function(data) { 
 				self.collection([]);
 				for(var i = 0; i< data.length; i++) {
 					data[i].vcc = self.params.skip_value + i + 1;
@@ -73,28 +84,104 @@
 		
 		this.nextPage = function() {
 			this.params.skip_func(25);
+            this.updateURL(this.createParamsURL());
 			this.loadData();
 		};
 
 		this.prevPage = function() {
 			this.params.skip_func(-25);
+            this.updateURL(this.createParamsURL());
 			this.loadData();
 		};
 		
 		this.sort = function (data, event) {
-			if(this.reverse) {
-				this.params.sort = '&reverse=1&sort=' + event.target.id;
-				this.reverse = false;
+			if(this.params.reverse) {
+				this.params.sort_value = event.target.id;
+				this.params.reverse = 0;
 			} else {
-				this.params.sort = '&sort=' + event.target.id;
-				this.reverse = true;
+				this.params.sort_value = event.target.id;
+				this.params.reverse = 1;
 			}
 				
 			this.collection([]);
 			this.params.skip_value = 0;
+            this.updateURL(this.createParamsURL());
+            //window.location.search = "sort=" + event.target.id
 			this.loadData();
+            
 		};
 		
+
+        this.createParamsURL = function () {
+            var query = "";
+            
+            query += this.params.fields ? "?fields=" + this.params.fields + "&": "?"
+            query += "sort=" + this.params.sort_value;
+            query += "&reverse=" + this.params.reverse;
+            query += "&skip=" + this.params.skip_value;
+            return query
+        };
+        
+        this.updateURL = function (url) {
+            var self = this;
+            var stateObj = { foo: "bar" };
+            history.pushState(stateObj, "", url);
+            if(window.parent.nodes.updateNodeViewURL)
+                window.parent.nodes.updateNodeViewURL(self.nodeId, url);
+            
+            // update tab link 
+            $("#tab_link").attr("href", url);
+            
+        };
+
+        this.parseURL = function () {
+
+            // get fields from URL and update field list in UI
+            var fields = getURLParameter("fields");
+            if (fields != null) {
+                self.params.fields = fields;
+                fields = fields.split(",");
+                for(var i=0; i < fields.length; i++) {
+                    $("#selected_fields").append("<button>"+fields[i]+"</button>");
+                }
+                
+            }
+
+            // get skip from URL
+            var skip = parseInt(getURLParameter("skip"));
+            if (skip <= 0 || isNaN(skip))
+                this.params.skip_value = 0;
+            else
+                this.params.skip_value = skip;
+                
+            // and sort
+            this.params.sort_value = getURLParameter("sort");
+            
+            // and sort order
+            this.params.reverse = 0;
+            var r = parseInt(getURLParameter("reverse"));
+            if(!isNaN(r) && r == 1) 
+                this.params.reverse = 1;
+            
+            this.updateURL(this.createParamsURL());
+            
+        }
+
+        this.updateFields = function () {
+            var self = this;
+            var fields = [];
+            $("#selected_fields button").each(function(index) {
+                fields.push($(this).text());
+            });
+            var fields_str = fields.join(",");
+            self.params.fields = fields_str;
+            var query = this.createParamsURL();
+            //parent.nodes.updateNodeViewURL(self.nodeId, query);
+            
+            // reload
+            window.location.search = query;
+        }
+        
 		// show deep data
 		this.openCell = function (data, event) {
 			console.log(data);
@@ -147,9 +234,12 @@
                     for (var j in data[key]) {
                         
                         if (data[key].hasOwnProperty(j)) {
-                            //console.log(j);
                             html += "<div class='strong'>"+j+"</div>\n";
-                            html += "<div>"+data[key][j]+"</div>\n";
+                            if(data[key][j].constructor.name != "Array") {
+                                html += "<div>"+data[key][j]+"</div>\n";
+                            } else {
+                                html += "<div class='array'> ARRAY "+data[key][j].length+"</div>\n";
+                            }
                         }
                     }
                     html += "</div>\n";
@@ -221,53 +311,24 @@
 	function onLoad() {
 
 		var path = location.pathname.split("/");
-		var fields = getURLParameter("fields");
-		if (fields != null) {
-			fields = fields.split(",");
-			for(var i=0; i < fields.length; i++) {
-				$("#selected_fields").append("<button>"+fields[i]+"</button>");
-			}
-		}
-		
-		var nodes = new dataList();
-		nodes.collectionName = path[path.length -1];
+
+		nodes = new dataList();
+		nodes.nodeId = path[path.length -1];
+        nodes.parseURL();
 		ko.applyBindings(nodes);
 		nodes.loadData(nodes);
 		
-		$("#source").text(node.data_view);
-		
-		$("#show_source").click(function() {
-			$("#source").toggle();
-		});
-		
 		$("#selected_fields").on("click", "button", function() {
 			$(this).remove();
-			reloadFieldSelection();
+			nodes.updateFields();
 		});
 		
 		$("#field_select").on("change", function() {
 			$("#selected_fields").append("<button>"+this.value+"</button>");
-			reloadFieldSelection();
+            nodes.updateFields();
 		});
 	}
 
-	function reloadFieldSelection () {
-		var fields = [];
-		$("#selected_fields button").each(function(index) {
-			fields.push($(this).text());
-		});
-		var fields_str = fields.join(",");
-        if(fields_str != "")
-            fields_str = "?fields=" + fields_str;
-            
-        // if we are inside iframe, we must update iframe src so that reload keeps selected fields 
-        //writeIframeSrc(fields_str);
-        
-        window.location.search = fields_str;
- 
-
-        
-	}
 
 
     function writeIframeSrc (fields_str) {
@@ -283,3 +344,9 @@
 	  return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.search)||[,""])[1].replace(/\+/g, '%20'))||null
 	}
 
+    window.onpopstate = function(event) {
+        $("#selected_fields").empty();
+        nodes.parseURL();
+        nodes.loadData();
+      
+    };
