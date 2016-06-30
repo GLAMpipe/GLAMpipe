@@ -466,16 +466,19 @@ exports.runNode = function (req, res, io) {
                                             
 											
 											// add source id to data (expects out.value to be an array)
-											for (var i = 0; i < sandbox.out.value.length; i++ ) {
-												// flatten
-												//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
-												sandbox.out.value[i][MP.source] = node._id;
-											}
-											
-											// insert data
-											mongoquery.insert(node.collection, sandbox.out.value, function() {
-												callback(null, sandbox.out.url);
-											});
+                                            if(sandbox.out.value != null) {
+                                                for (var i = 0; i < sandbox.out.value.length; i++ ) {
+                                                    // flatten
+                                                    //sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
+                                                    sandbox.out.value[i][MP.source] = node._id;
+                                                }
+                                            
+                                                
+                                                // insert data
+                                                mongoquery.insert(node.collection, sandbox.out.value, function() {
+                                                    callback(null, sandbox.out.url);
+                                                });
+                                            }
 										});
 									}
 

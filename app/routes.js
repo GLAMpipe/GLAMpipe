@@ -195,5 +195,9 @@ module.exports = function(express, glampipe) {
 	express.get('/proxy/', function (req, res) {
 		proxy.proxyJSON(req.query.url, req.query.query, res);
 	});
+
+	express.post('/proxy/', function (req, res) {
+		proxy.proxyJSON(req.body.url, req.body.query, res);
+	});
     
 }

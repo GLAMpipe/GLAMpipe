@@ -3,7 +3,7 @@ var nodes = {};
 	ko.bindingHandlers.inline = {
 		init: function(element, valueAccessor) {
 			var span = $(element);
-			var input = $('<input />',{'type': 'text', 'style' : 'display:none'});
+			var input = $('<textarea />',{'type': 'text', 'style' : 'display:none'});
 			span.after(input);
 			
 			ko.applyBindingsToNode(input.get(0), { value: valueAccessor()});
@@ -83,13 +83,13 @@ var nodes = {};
 		}
 		
 		this.nextPage = function() {
-			this.params.skip_func(25);
+			this.params.skip_func(15);
             this.updateURL(this.createParamsURL());
 			this.loadData();
 		};
 
 		this.prevPage = function() {
-			this.params.skip_func(-25);
+			this.params.skip_func(-15);
             this.updateURL(this.createParamsURL());
 			this.loadData();
 		};

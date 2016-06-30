@@ -4,11 +4,7 @@ var exports 	= module.exports = {};
 
 
 
-/**
- * Create metapipe collection on start up
- * - "metapipe" is only collection that must exist
- * - makes sure that "project_count" exists
- */
+
 exports.proxyJSON = function (url, query, res) {
     if (typeof url === "undefined" || url == "")
         return res.json({"error":"no url"});
@@ -17,7 +13,7 @@ exports.proxyJSON = function (url, query, res) {
 		'User-Agent':       'GLAMpipe/0.0.1',
 	}
 
-    url = url + "?query=" + encodeURIComponent(query);
+    url = url + query;
     console.log("PROXY:", url);
 
 	 var options = {

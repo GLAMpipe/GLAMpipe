@@ -47,8 +47,6 @@ var GlamPipe = function() {
 	self.initializeServer = function() {
 		
 		console.log("initializing server");
-		
-		
 
 		self.app = express();
 		self.app.use(express.static('public'));
@@ -94,10 +92,6 @@ var GlamPipe = function() {
 			process.on(element, function() { self.terminator(element); });
 		});
 	};
-
-
-
-		
 
 
 	/**
@@ -149,6 +143,11 @@ var GlamPipe = function() {
 		self.http.on("error", function(e) {
 			console.log(e);
 		});
+
+       // process.on('uncaughtException', function(err) {
+            // handle the error safely
+         //   console.log(err)
+        //})
 
 		//  Start the app on the specific interface (and port).
 			var server = self.http.listen(self.port, self.ipaddress, function() {

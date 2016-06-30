@@ -65,7 +65,7 @@
 	<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
 
 		<div class="node_bar" data-bind="css:type">
-			<h2 data-bind="html:type.toUpperCase() +': '+ title"></h2>
+			<h2 data-bind="click:$root.displaySettings, html:type.toUpperCase() +': '+ title + ' (click for settings)'"></h2>
 
 			
 			

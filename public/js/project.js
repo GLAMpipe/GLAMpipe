@@ -150,6 +150,12 @@ var nodeList = function () {
         }
     }
 
+    this.displaySettings = function (data, event) {
+        var obj = $(event.target);
+        obj.parent().find(".settings_wrapper").toggle();
+        obj.parent().find(".params_wrapper").toggle();
+    }
+
     this.getSettings = function (data) {
         // plain script tag causes confusion in html views so we restore it here
         var r = data.views.settings.replace(/\[\[node\]\]/, "var node = {}; node.params = " + JSON.stringify(data.params) +"\n");	
@@ -565,7 +571,7 @@ $( document ).ready(function() {
             console.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             console.append(data + "</br>");
-            tailScroll() ;
+            tailScroll(console) ;
         }
     });
 
