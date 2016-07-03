@@ -662,7 +662,7 @@ exports.runNode = function (req, res, io) {
 					// make sure that we have an export filename
 					if(node.params.file == "") {
 						console.log("ERROR: filename missing!");
-						io.sockets.emit("error","ERROR: filename missing!");
+                        io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
 						return;
 					}
 
@@ -678,6 +678,7 @@ exports.runNode = function (req, res, io) {
 						
 						// tell node how many records was found
 						sandbox.context.doc_count = doc.length;
+						sandbox.context.doc_eka = doc[0];
 						runNodeScriptInContext("init", node, sandbox, io);
 						wstream.write(sandbox.out.value);
 
@@ -725,11 +726,11 @@ exports.runNode = function (req, res, io) {
 						
 						case "collection":
                             // we must clear previous lookup
-                            mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
+                           // mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
                                 runFunc = function(sandbox, node, onNodeScript, onError) {
                                     mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
                                 }
-                            });
+                            //});
 
 						break;
 					}
@@ -1166,6 +1167,8 @@ function initNode (nodeRequest, res, io, project) {
 						});
 					}
 				});
+
+            // otherwise just insert node 
 			} else {
 				insertNode(node, function (err) {
 					if(err) {
@@ -1173,7 +1176,21 @@ function initNode (nodeRequest, res, io, project) {
 						res.json({"error": err});
 					} else {
 						console.log("node created");
-						res.json({"status": "node created"})
+						
+                        
+                        // interactive nodes are not run, so we
+                        // initialize empty field for all records
+                        if (node.init_fields) {
+                            var setter = {};
+                            for (var i = 0; i < node.init_fields.length; i++) {
+                                setter[node.init_fields[i]] = "";
+                            }
+                            mongoquery.update(node.collection,{}, {$set: setter }, function() {
+                                res.json({"status": "node created"});
+                            })  
+                        } else {
+                            res.json({"status": "node created"});
+                        } 
 					}
 				});
 			}
@@ -1322,7 +1339,30 @@ exports.deleteNode = function (params, res, io) {
 					} else {
 						callback(); // we did nothing
 					}
-				}
+				},
+                
+				// if node is an interactive, then remove its init_fields
+				function (callback) {
+					if((node.type == "view") && node.init_fields != null) {
+                        console.log("REMOVING INIT FIELDS");
+						var field = {};
+						var query = {};
+                        for (var i = 0; i < node.init_fields.length; i++) {
+                            field[node.init_fields[i]] = 1;   
+                        }
+						console.log(field);
+						query["$unset"] = field;
+						mongoquery.updateAll(node.collection, query, function (error) {
+							if(error)
+								console.log(error);
+							else
+								console.log("data removed", node.collection);
+							callback(error);
+							});
+					} else {
+						callback(); // we did nothing
+					}
+				},
 
 
 			], function (err, results) {
@@ -1365,7 +1405,7 @@ function inputNode(node, nodes) {
 exports.getCollection = function (req, query, res) {
 
 	var limit = parseInt(req.query.limit);
-	if (limit <= 0 || isNaN(limit))
+	if (limit < 0 || isNaN(limit))
 		limit = 15;
 
 	var skip = parseInt(req.query.skip);
