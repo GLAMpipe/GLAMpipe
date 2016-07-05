@@ -160,8 +160,13 @@ function generateDynamicView (node, fields, edit, callback) {
 
                 } else if (typeof data[key] === "object") 
                     html += '                   <td><div class="data-container" data-bind="html:$root.keyValueObj($data,\''+key+'\')"></div></td>';
-                else
-                    html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+                else {
+                    // we render "_html" fields as html (for example thumbnails)
+                    if (key.indexOf("_html") !== -1)
+                        html += '				<td><div class="data-container" data-bind="html: '+key+'"></div></td>';
+                    else
+                        html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+                }
 					
 			}
 

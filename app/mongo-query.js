@@ -36,6 +36,14 @@ exports.find2 = function (query, collectionname, callback) {
 	});   
 }
 
+exports.findFields = function (query, fields,  collectionname, callback) {
+
+	var collection = db.collection(collectionname);
+	collection.find(query, fields, function (err, result) {
+		callback(err, result);
+	});   
+}
+
 exports.findCursor = function (query, collectionname) {
 
 	var collection = db.collection(collectionname);

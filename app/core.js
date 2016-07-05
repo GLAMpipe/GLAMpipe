@@ -289,6 +289,24 @@ exports.createProject = function (title, res) {
 }
 
 
+exports.deleteProject = function (doc_id, res) {
+	
+	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
+        console.log("PROJECT: deleting project", data.title);
+        res.json({status:'ok'});
+    });
+    
+
+}
+
+exports.getProjectTitles = function  (res) {
+	mongoquery.findFields({}, {title:true}, "mp_projects", function(err, data) { 
+        if (!err)
+            res.json(data) ;
+        else 
+            res.json(JSON.parse(err));
+    });
+}
 
 
 exports.getProjects = function  (res) {

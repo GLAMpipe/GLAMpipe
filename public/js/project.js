@@ -243,8 +243,9 @@ var nodeList = function () {
 
     this.updateNodeViewURL = function (node_id, url) {
         //alert(node_id + " = " + self.selectedNode._id);
-        self.selectedNode.iframe_src = url;
-        console.log("iframe src:" + url);
+        if(self.selectedNode)
+            self.selectedNode.iframe_src = url;
+        //console.log("iframe src:" + url);
         
     }
 

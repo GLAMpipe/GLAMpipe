@@ -85,6 +85,10 @@ module.exports = function(express, glampipe) {
 		glampipe.core.createProject(req.body.title, res);
 	});
 
+	express.get('/get/project/titles', function (req, res) {
+		glampipe.core.getProjectTitles(res);
+	});
+
 	express.get('/get/projects', function (req, res) {
 		glampipe.core.getProjects(res);
 	});
@@ -93,6 +97,9 @@ module.exports = function(express, glampipe) {
 		glampipe.core.getProject(req.params.id, res);
 	});
 
+	express.post('/delete/project/:id', function (req, res) {
+		glampipe.core.deleteProject(req.params.id, res);
+	});
 
 
 	// NODES

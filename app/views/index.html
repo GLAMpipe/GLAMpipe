@@ -15,12 +15,21 @@
 </style>
 <script>
 
+	function compare(a,b) {
+		if (a.title < b.title)
+			return -1;
+		if (a.title > b.title)
+			return 1;
+		return 0;
+	}
+
 	var BetterListModel = function () {
 		var self = this;
 		this.itemToAdd = ko.observable("");
 		this.allItems = ko.observableArray(); // Initial items
 		this.loadItems = function () {
-			$.getJSON("/get/projects", function(data) { 
+			$.getJSON("/get/project/titles", function(data) { 
+				data.sort(compare);
 				for(var i = 0; i< data.length; i++) {
 					self.allItems.push(data[i]);
 				}
@@ -64,18 +73,18 @@
 		ko.applyBindings(projects);
 		projects.loadItems();
 
-        // check if server is ok. If not, then show error setup
-        $.getJSON("/status", function(data) { 
-            console.log(data);
-            if(data.status != "ok")
-                $('#iframe_view').attr('src', "/setup");
-        })
+		// check if server is ok. If not, then show error setup
+		$.getJSON("/status", function(data) { 
+			console.log(data);
+			if(data.status != "ok")
+				$('#iframe_view').attr('src', "/setup");
+		})
 
 
 
-        $("#show_project_creator").on("click", function() {
-            $("#new_project").show();
-        });
+		$("#show_project_creator").on("click", function() {
+			$("#new_project").show();
+		});
 	}
 		
 	
@@ -83,40 +92,40 @@
 </head>
 <body onload="onLoad();">
 
-    <!-- PROJECT HEADER -->
-    <div id="project_header">
-        <h2 class="inline_header">Projects</h2>
-         <button id="show_project_creator" class="right" >add project</button>
-         
-    </div>
-    
-    <a href="/setup" target="_blank" class="button" >setup</a>
+	<!-- PROJECT HEADER -->
+	<div id="project_header">
+		<h2 class="inline_header">Projects</h2>
+		 <button id="show_project_creator" class="right" >add project</button>
+		 
+	</div>
+	
+	<a href="/setup" target="_blank" class="button" >setup</a>
 
-    <!-- PROJECTS -->
+	<!-- PROJECTS -->
 	<div class="collection_pipe">
-        <div class="projects">
-            <div id="new_project" class="hidden node source">
-                <h2>Create project</h2>
-                <form data-bind="submit:addItem">
-                    <input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
-                    <button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
-                </form>
-            </div>
-        
-            <ul data-bind="foreach: allItems">
-                <li>
-                    <a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
-                </li>
-            </ul>
-        </div>
+		<div class="projects">
+			<div id="new_project" class="hidden node source">
+				<h2>Create project</h2>
+				<form data-bind="submit:addItem">
+					<input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
+					<button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
+				</form>
+			</div>
+		
+			<ul data-bind="foreach: allItems">
+				<li>
+					<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
+				</li>
+			</ul>
+		</div>
 	</div>
-    
-    <!-- VIEW TABS -->
+	
+	<!-- VIEW TABS -->
 	<div id="collection_view">
-        <div class="IframeWrapper">
+		<div class="IframeWrapper">
 			<iframe id="iframe_view" class="iframetab" src="http://artturimatias.github.io/GLAMpipe/"></iframe>
-        </div>
+		</div>
 	</div>
-    
+	
 	</body>
 </html>
