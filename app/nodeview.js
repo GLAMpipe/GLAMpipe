@@ -126,6 +126,17 @@ function generateDynamicView (node, fields, edit, callback) {
 				}
 			}
 
+            // we put thumbnails first
+            var thumb_cell = '';
+			for (key in data) {
+				if(key.indexOf("thumbnail_html") != -1) {
+                    html +=  '			<th id="thumbnail_html">thumbnail_html</th>';
+                    thumb_cell = '				<td><div class="data-container"  data-bind="html: thumbnail_html"></div></td>';
+                    delete data[key];
+                }
+			}
+
+			
 
 			for (key in data) {
 					html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
@@ -138,6 +149,8 @@ function generateDynamicView (node, fields, edit, callback) {
 
 			// data cells
 			html += '				<td data-bind="text: vcc"></td>'
+            html += thumb_cell;
+            
 			for (key in data) {
                 
                 // EDIT VIEW

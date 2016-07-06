@@ -545,7 +545,7 @@ html {
     position:absolute;
     top:0px;
     width:  calc(100% - 400px);
-    height: calc(100% - 60px);
+    height: calc(100% - 35px);
 }
 
 
@@ -580,7 +580,7 @@ html {
 }
 
 .IframeWrapper {
-    height:90%;
+    height:100%;
     width:100%
 }
 
