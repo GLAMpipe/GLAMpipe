@@ -186,6 +186,28 @@ exports.update = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+
+// *********************************************************************
+// ******************************* DELETE ******************************
+// *********************************************************************
+
+
+exports.remove = function (doc_id, collectionname, callback) {
+	var collection = db.collection(collectionname);
+
+	collection.remove({_id: mongojs.ObjectId(doc_id)} ,function (err, result) {
+		if (err) {
+			console.log(err);
+			callback({'error':err})
+		} else {
+			console.log('Removed');
+			callback({status:'ok'});
+		}
+	}); 
+}
+
+
+
 exports.foreach = function (collectionname, func) {
 	var collection = db.collection(collectionname);
 	collection.foreach({}, func);

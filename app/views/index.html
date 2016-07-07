@@ -30,6 +30,7 @@
 		this.loadItems = function () {
 			$.getJSON("/get/project/titles", function(data) { 
 				data.sort(compare);
+				self.allItems([]);
 				for(var i = 0; i< data.length; i++) {
 					self.allItems.push(data[i]);
 				}
@@ -65,10 +66,17 @@
 		this.sortItems = function() {
 			this.allItems.sort();
 		};
+		
+		this.delete = function () {
+			
+		};
 	};
 
 	function onLoad()
 	{
+		
+		$( "#dialog-confirm" ).hide();
+		
 		var projects = new BetterListModel();
 		ko.applyBindings(projects);
 		projects.loadItems();
@@ -80,11 +88,39 @@
 				$('#iframe_view').attr('src', "/setup");
 		})
 
-
-
 		$("#show_project_creator").on("click", function() {
 			$("#new_project").show();
 		});
+
+
+		// DELETE PROJECT
+		// hmm, not using data-bind...
+		$(document).on('click', ".delete_icon", function(e) {
+			$( "#dialog-confirm" ).dialog({
+			  resizable: false,
+			  height:160,
+			  modal: true,
+			  buttons: {
+				"Delete project": function() {
+					$( this ).dialog( "close" );
+					var docid = $(e.target).attr("docid");
+					var data = {};
+					$.post("/delete/project/" + docid, data, function(returnedData) {
+						if(returnedData.error)
+							alert("Could not remove project!" + returnedData.error);
+						else
+							projects.loadItems();
+						
+					});
+				},
+				Cancel: function() {
+				  $( this ).dialog( "close" );
+				}
+			  }
+			});
+		})
+
+
 	}
 		
 	
@@ -98,7 +134,7 @@
 		 <button id="show_project_creator" class="right" >add project</button>
 		 
 	</div>
-	
+
 	<a href="/setup" target="_blank" class="button" >setup</a>
 
 	<!-- PROJECTS -->
@@ -114,7 +150,7 @@
 		
 			<ul data-bind="foreach: allItems">
 				<li>
-					<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a>
+					<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a><span data-bind="attr:{docid:_id}" class="right delete_icon">X</span>
 				</li>
 			</ul>
 		</div>
@@ -126,6 +162,10 @@
 			<iframe id="iframe_view" class="iframetab" src="http://artturimatias.github.io/GLAMpipe/"></iframe>
 		</div>
 	</div>
-	
+
+	<div id="dialog-confirm" title="Really delete project?">
+	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Removing project removes data from database. Are you sure?</p>
+	</div>
+
 	</body>
 </html>

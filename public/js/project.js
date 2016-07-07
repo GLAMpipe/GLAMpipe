@@ -275,28 +275,35 @@ var nodeList = function () {
 
     this.deleteNodeConfirm = function (data, event) {
         var obj = $(event.target);
-        obj.parent().find(".delete_confirm").show();
-    }
-    
-    this.cancelDeleteNode = function (data, event) {
-        var obj = $(event.target);
-        obj.parent().parent().find(".delete_confirm").hide();
-    }
-    
-    this.reallyDeleteNode = function (data, event) {
-        
-        var params = {node:data._id, project:self.currentProject};
-        $.post("/delete/node/", params, function(data) {
-            console.log('node deleted');
-            if(data.error)
-                alert(data.error);
-            self.resetSettings();
-            self.currentNode = null;
-            self.currentCollection = null;
-            self.currentNodePosition = null;
-            self.reloadProject();
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          modal: true,
+          buttons: {
+            "Delete node": function() {
+                $( this ).dialog( "close" );
+                var params = {node:data._id, project:self.currentProject};
+                $.post("/delete/node/", params, function(retData) {
+                    console.log('node deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+                        self.resetSettings();
+                        self.currentNode = null;
+                        self.currentCollection = null;
+                        self.currentNodePosition = null;
+                        self.reloadProject();
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
         });
     }
+    
+
     
     this.reloadProject = function () {
         self.projectCollections.removeAll();

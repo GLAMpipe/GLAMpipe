@@ -291,9 +291,9 @@ exports.createProject = function (title, res) {
 
 exports.deleteProject = function (doc_id, res) {
 	
-	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
-        console.log("PROJECT: deleting project", data.title);
-        res.json({status:'ok'});
+	mongoquery.remove(doc_id, "mp_projects", function(data) {
+        console.log("PROJECT: deleting project:", doc_id);
+        res.json(data);
     });
     
 

@@ -868,6 +868,10 @@ button.run, button.test {
 }
 
 
+.projects li:hover {
+    background-color: #307BCE;
+    color:white;
+}
 
 
 .clear {
@@ -898,3 +902,7 @@ button.run, button.test {
 .padding {
     padding:3px;
 } 
+
+#dialog-confirm {
+    display:none;
+}
