@@ -113,7 +113,7 @@ module.exports = function(express, glampipe) {
 
 
 	express.get('/get/node/:id', function (req, res) {
-		glampipe.core.getNodeFromFile(req.params.id, res);
+		glampipe.core.getNodeFromDir(req.params.id, res);
 	});
 
 	express.get('/node/view/:id', function (req, res) {

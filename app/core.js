@@ -80,130 +80,124 @@ exports.initDir = function (callback) {
 
 exports.initNodes = function (io, callback) {
 
-    var dataPath = global.config.dataPath;
-        
-    mongoquery.drop("mp_nodes", function() {
+	var dataPath = global.config.dataPath;
+		
+	mongoquery.drop("mp_nodes", function() {
 
-        fs = require('fs');
-        // read first node type descriptions
-        fs.readFile(path.join(dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
-            if(err) {
-                console.log("NOTICE: node type descriptions not found from " + dataPath);
-                desc = {};
-            } else 
-                var desc = JSON.parse(data);
-
-            // read local nodes first
-           // console.log("INIT: Loading YOUR OWN nodes from " + path.join(dataPath, "mynodes/"));
-            //exports.readNodes(io, path.join(dataPath, "mynodes/"), desc, function (error) {
-                // then "stock" nodes
-                console.log("INIT: Loading stock nodes from " + path.join(dataPath, "nodes/") );
-                exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
-                    callback(null);     
-                });        
-            //});
-        });
-    });
+		fs = require('fs');
+		// read first node type descriptions
+		fs.readFile(path.join(dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
+			if(err) {
+				console.log("NOTICE: node type descriptions not found from " + dataPath);
+				desc = {};
+			} else 
+				var desc = JSON.parse(data);
+				console.log("INIT: Loading nodes from " + path.join(dataPath, "nodes/") );
+				exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
+					callback(null);     
+				});        
+		});
+	});
 }
 
 
 
 
 
-exports.readNodes = function (io, nodePath, descriptions, callback) {
-        
-    readFiles(nodePath, function(filename, content, next) {
-        
-        try {
-            var node = JSON.parse(content);
-            node.type_desc = descriptions[node.type];
-            
-            // join "pretty" settings
-            if(node.views.settings instanceof Array)
-                node.views.settings = node.views.settings.join("");	
-                
-            // join "pretty" params
-            if(node.views.params instanceof Array)
-                node.views.params = node.views.params.join("");	
+exports.readNodes_old = function (io, nodePath, descriptions, callback) {
+		
+	readFiles(nodePath, function(filename, content, next) {
+		
+		try {
+			var node = JSON.parse(content);
+			node.type_desc = descriptions[node.type];
+			
+			// join "pretty" settings
+			if(node.views.settings instanceof Array)
+				node.views.settings = node.views.settings.join("");	
+				
+			// join "pretty" params
+			if(node.views.params instanceof Array)
+				node.views.params = node.views.params.join("");	
 
-            // join "pretty" data view
-            if(node.views.data_static instanceof Array)
-                node.views.data_static = node.views.data_static.join("");
+			// join "pretty" data view
+			if(node.views.data_static instanceof Array)
+				node.views.data_static = node.views.data_static.join("");
 
-            // join "pretty" scripts
-            for (key in node.scripts) {
-                if(node.scripts[key] instanceof Array)
-                    node.scripts[key] = node.scripts[key].join("");
-            }
-                
-            mongoquery.insert("mp_nodes",node , function(error) {
-                if(error.length) {
-                    console.log(error);
-                } else {
-                    console.log("LOAD: " + filename + " loaded");
-                    io.sockets.emit("progress", "LOAD: " + filename + " loaded");
-                    next();
-                }
-            })
-            
-        } catch(e) {
-            console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
-            io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
-            next(); // continue anyway
-        }
+			// join "pretty" scripts
+			for (key in node.scripts) {
+				if(node.scripts[key] instanceof Array)
+					node.scripts[key] = node.scripts[key].join("");
+			}
+				
+			mongoquery.insert("mp_nodes",node , function(error) {
+				if(error.length) {
+					console.log(error);
+				} else {
+					console.log("LOAD: " + filename + " loaded");
+					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
+					next();
+				}
+			})
+			
+		} catch(e) {
+			console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
+			io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
+			next(); // continue anyway
+		}
 
-    }, function onError (error) {
-        if( error.code == "ENOENT") {
-            console.log("ERROR: No nodes present in " + nodePath);
-            //console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
-        } else {
-            console.log(error);
-        }
-        return callback(error);
+	}, function onError (error) {
+		if( error.code == "ENOENT") {
+			console.log("ERROR: No nodes present in " + nodePath);
+			//console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+		} else {
+			console.log(error);
+		}
+		return callback(error);
 
-        
-    }, function onDone () {
-        console.log("INIT: nodes loaded from " + nodePath);
-        console.log("******************************************");
-        callback(null);
-    });
-      
+		
+	}, function onDone () {
+		console.log("INIT: nodes loaded from " + nodePath);
+		console.log("******************************************");
+		callback(null);
+	});
+	  
 }
 
 
 
 exports.downloadNodes = function (io, cb) {
 
-    var dataPath = global.config.dataPath;
-    var sandbox = { 
-        out: {
-            url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
-            file:"master.zip"
-        },
-        context:{}
-    };
-                
-    var node = {dir:dataPath};
-    
-    // download nodes
-    console.log("DOWNLOADING: nodes from github");
-    io.sockets.emit("progress", "DOWNLOADING: nodes from github");
-    console.log(sandbox.out.url);
-    exports.downloadFile(node, sandbox, function (err) {
-        if(err.context.error) {
-            console.log(err.context.error);
-            io.sockets.emit("error", err.context.error);
-            cb(err.context.error);
-            
-        } else {
-            const Zip = require("adm-zip");
-            var zip = new Zip(path.join(dataPath, "master.zip"));
-            console.log("EXTRACTING: master.zip");
-            zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
-            io.sockets.emit("progress", "DOWNLOADING: done!");
-            cb();
-        }
-    })
+	var dataPath = global.config.dataPath;
+	var sandbox = { 
+		out: {
+			url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
+			file:"master.zip"
+		},
+		context:{}
+	};
+				
+	var node = {dir:dataPath};
+	
+	// download nodes
+	console.log("DOWNLOADING: nodes from github");
+	io.sockets.emit("progress", "DOWNLOADING: nodes from github");
+	console.log(sandbox.out.url);
+	exports.downloadFile(node, sandbox, function (err) {
+		if(err.context.error) {
+			console.log(err.context.error);
+			io.sockets.emit("error", err.context.error);
+			cb(err.context.error);
+			
+		} else {
+			const Zip = require("adm-zip");
+			var zip = new Zip(path.join(dataPath, "master.zip"));
+			console.log("EXTRACTING: master.zip");
+			zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
+			io.sockets.emit("progress", "DOWNLOADING: done!");
+			cb();
+		}
+	})
 }
 
 exports.sendErrorPage = function (res, error) {
@@ -213,12 +207,12 @@ exports.sendErrorPage = function (res, error) {
 			console.log(err);
 			res.send(err);
 		} else {
-            // write error inside a script tag
-            if(error) {
-                content = content.replace("[[initerror]]", "<script>var error = " + JSON.stringify(error) + "</script>");
-            } else {
-                content = content.replace("[[initerror]]", "<script>var error = {status:'ok',datapath:'"+global.config.dataPath+"'}</script>");
-            }
+			// write error inside a script tag
+			if(error) {
+				content = content.replace("[[initerror]]", "<script>var error = " + JSON.stringify(error) + "</script>");
+			} else {
+				content = content.replace("[[initerror]]", "<script>var error = {status:'ok',datapath:'"+global.config.dataPath+"'}</script>");
+			}
 			res.send(content);
 		}
 	});
@@ -230,15 +224,15 @@ exports.setDataPath = function (params, glampipe, res) {
 	mongoquery.update("mp_settings",{}, {$set: {data_path: dataPath}}, function(error) {
 		if(error) {
 			console.log(error);
-            glampipe.io.sockets.emit("error", "could not save datapath");
+			glampipe.io.sockets.emit("error", "could not save datapath");
 			res.json({"error":"could not save datapath"});
 		} else {
-            glampipe.initError = {status: "ok"};
-            global.config.dataPath = dataPath;
-            global.config.projectsPath = path.join(dataPath, "projects");
+			glampipe.initError = {status: "ok"};
+			global.config.dataPath = dataPath;
+			global.config.projectsPath = path.join(dataPath, "projects");
 			console.log("datapath set to:", dataPath );
-            glampipe.io.sockets.emit("progress", "datapath set to: " + dataPath);
-            res.json({"status": "ok","datapath": dataPath});
+			glampipe.io.sockets.emit("progress", "datapath set to: " + dataPath);
+			res.json({"status": "ok","datapath": dataPath});
 		}
 	})
 };
@@ -291,21 +285,21 @@ exports.createProject = function (title, res) {
 
 exports.deleteProject = function (doc_id, res) {
 	
-	mongoquery.remove(doc_id, "mp_projects", function(data) {
-        console.log("PROJECT: deleting project:", doc_id);
-        res.json(data);
-    });
-    
+	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
+		console.log("PROJECT: deleting project", data.title);
+		res.json({status:'ok'});
+	});
+	
 
 }
 
 exports.getProjectTitles = function  (res) {
 	mongoquery.findFields({}, {title:true}, "mp_projects", function(err, data) { 
-        if (!err)
-            res.json(data) ;
-        else 
-            res.json(JSON.parse(err));
-    });
+		if (!err)
+			res.json(data) ;
+		else 
+			res.json(JSON.parse(err));
+	});
 }
 
 
@@ -329,29 +323,37 @@ exports.getProjectNodes = function (project, res) {
 	mongoquery.findOneById(project, "mp_projects", function(data) { res.json(data) });
 }
 
+exports.getNodeFromDir = function (node_id, res) {
+	fs = require('fs')
+	var nodeDir = path.join(global.config.dataPath, "nodes", node_id);
+	
+	readNodeDirectory (nodeDir, null, function callback(node) {
+		res.json(node); 
+	})
+}
+
+
 exports.getNodeFromFile = function (node_id, res) {
 	fs = require('fs')
 	var userNode = path.join(global.config.dataPath, "mynodes", node_id + ".json");
-    var stockNode = path.join(global.config.dataPath, "nodes", node_id + ".json");
-    
-    // try first stock nodes and then user nodes
+	var stockNode = path.join(global.config.dataPath, "nodes", node_id + ".json");
+	
+	// try first stock nodes and then user nodes
 	fs.readFile(stockNode, 'utf8', function (err, data) {
 		if(err) {
-            fs.readFile(userNode, 'utf8', function (err, data) {
-                if(err) {
-                    console.log("ERROR: node not found!");
-                    console.log("FILE:", nodePath);
-                    res.json({"error": "node " + node_id + "not found!"});
-                } else {
-                    res.json(JSON.parse(data));    
-                }
-            })
+			fs.readFile(userNode, 'utf8', function (err, data) {
+				if(err) {
+					console.log("ERROR: node not found!");
+					res.json({"error": "node " + node_id + "not found!"});
+				} else {
+					res.json(JSON.parse(data));    
+				}
+			})
 		} else {
 			res.json(JSON.parse(data));
 		}
 	});
 }
-
 
 function getProp(obj, desc) { 
 	var arr = desc.split('.'); 
@@ -393,7 +395,7 @@ exports.runNode = function (req, res, io) {
 			}
 			node.settings = req.body;
 			node.project = project._id;
-            node.project_dir = project.dir;
+			node.project_dir = project.dir;
 
 			// save node settings TODO: set callback
 			mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
@@ -401,7 +403,7 @@ exports.runNode = function (req, res, io) {
 			})
 
 			console.log("NODE: running", node.type);
-            
+			
 
 
 
@@ -410,14 +412,14 @@ exports.runNode = function (req, res, io) {
 				context: {
 					doc: null,
 					data: null,
-                    myvar: {},
+					myvar: {},
 					node: node,
 					input_node: input_node,
 					doc_count:0,
 					count:0,
 					path: path,
 					get: getProp,
-                    flat: flatten,
+					flat: flatten,
 					MP: MP
 				},
 				out: {
@@ -438,31 +440,31 @@ exports.runNode = function (req, res, io) {
 			};
 			
 			var sand = vm.createContext(sandbox);
-            
-            // create scripts (this will catch syntax errors)
-            try {
-                var run = new vm.createScript(node.scripts.run);
-            } catch (e) {
-                console.log("ERROR:", e.stack);
-                sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
-                sandbox.out.say("error", "Slap the node writer!");
-                return;
-            }
-            
-            try {
-                var pre_run = new vm.createScript(node.scripts.pre_run);
-            } catch (e) {
-                console.log("ERROR:", e.stack);
-                sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
-                return;
-            }
+			
+			// create scripts (this will catch syntax errors)
+			try {
+				var run = new vm.createScript(node.scripts.run);
+			} catch (e) {
+				console.log("ERROR:", e.stack);
+				console.log(node.scripts.run);
+				sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+				sandbox.out.say("error", "Slap the node writer!");
+				return;
+			}
+			
+			try {
+				var pre_run = new vm.createScript(node.scripts.pre_run);
+			} catch (e) {
+				console.log("ERROR:", e.stack);
+				sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
+				return;
+			}
 			switch (node.type) {
 
 
 				case "source":
-				
 					runNodeScriptInContext("init", node, sandbox, io);
-                    if(sandbox.context.init_error) return;
+					if(sandbox.context.init_error) return;
 					
 					switch (node.subtype) {
 						
@@ -478,33 +480,33 @@ exports.runNode = function (req, res, io) {
 											sandbox.context.data = body;
 											sandbox.out.url = "";
 											runNodeScriptInContext("run", node, sandbox, io);
-                                            
-                                            if(sandbox.context.node_error) 
-                                                return callback(sandbox.context.node_error, null);
-                                            
+											
+											if(sandbox.context.node_error) 
+												return callback(sandbox.context.node_error, null);
+											
 											
 											// add source id to data (expects out.value to be an array)
-                                            if(sandbox.out.value != null) {
-                                                for (var i = 0; i < sandbox.out.value.length; i++ ) {
-                                                    // flatten
-                                                    //sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
-                                                    sandbox.out.value[i][MP.source] = node._id;
-                                                }
-                                            
-                                                
-                                                // insert data
-                                                mongoquery.insert(node.collection, sandbox.out.value, function() {
-                                                    callback(null, sandbox.out.url);
-                                                });
-                                            }
+											if(sandbox.out.value != null) {
+												for (var i = 0; i < sandbox.out.value.length; i++ ) {
+													// flatten
+													//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
+													sandbox.out.value[i][MP.source] = node._id;
+												}
+											
+												
+												// insert data
+												mongoquery.insert(node.collection, sandbox.out.value, function() {
+													callback(null, sandbox.out.url);
+												});
+											}
 										});
 									}
 
 								], function(err, result){
 									if (err) {
 										console.log(err);
-                                        return;
-                                    }
+										return;
+									}
 										
 									//generate view and do *not* wait it to complete
 									if (!node.views.data)
@@ -558,18 +560,18 @@ exports.runNode = function (req, res, io) {
 							var query = {}; 
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
-                                // we must check if input key is array or not
-                                mongoquery.findOne({}, node.params.source_collection, function (record) {
-                                    if(record) {
-                                        if(record[node.params.in_field]) {
-                                            var array = record[node.params.in_field].constructor.name == "Array";
-                                            mongoquery.group(node, array, groupCB);
-                                        } else {
-                                            io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
-                                            io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
-                                        }
-                                    }
-                                }) 
+								// we must check if input key is array or not
+								mongoquery.findOne({}, node.params.source_collection, function (record) {
+									if(record) {
+										if(record[node.params.in_field]) {
+											var array = record[node.params.in_field].constructor.name == "Array";
+											mongoquery.group(node, array, groupCB);
+										} else {
+											io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
+											io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+										}
+									}
+								}) 
 							});
 								
 						
@@ -680,7 +682,7 @@ exports.runNode = function (req, res, io) {
 					// make sure that we have an export filename
 					if(node.params.file == "") {
 						console.log("ERROR: filename missing!");
-                        io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
+						io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
 						return;
 					}
 
@@ -743,12 +745,12 @@ exports.runNode = function (req, res, io) {
 						break;
 						
 						case "collection":
-                            // we must clear previous lookup
-                           // mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
-                                runFunc = function(sandbox, node, onNodeScript, onError) {
-                                    mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
-                                }
-                            //});
+							// we must clear previous lookup
+						   // mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
+								runFunc = function(sandbox, node, onNodeScript, onError) {
+									mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
+								}
+							//});
 
 						break;
 					}
@@ -762,8 +764,8 @@ exports.runNode = function (req, res, io) {
 					mongoquery.find2({}, node.collection, function (err, doc) {
 						
 						sandbox.context.doc_count = doc.length;
-                        runNodeScriptInContext("init", node, sandbox, io);
-                        if(sandbox.context.init_error) return;
+						runNodeScriptInContext("init", node, sandbox, io);
+						if(sandbox.context.init_error) return;
 						
 						async.eachSeries(doc, function iterator(doc, next) {
 							
@@ -773,7 +775,7 @@ exports.runNode = function (req, res, io) {
 							// get URL/filename from node
 							runNodeScriptInContext("pre_run", node, sandbox, io);
 							if (sandbox.context.node_error) 
-                                return;
+								return;
 							
 							// callback for updating record
 							var onNodeScript = function (sandbox) {
@@ -782,9 +784,9 @@ exports.runNode = function (req, res, io) {
 								sandbox.out.setter = null;
 								// let node pick the data it wants from result
 								run.runInContext(sand);
-                                
-                                //if(sandbox.context.node_error)
-                                    //return;
+								
+								//if(sandbox.context.node_error)
+									//return;
 								
 								if(sandbox.out.setter != null) {
 									var setter = sandbox.out.setter; 
@@ -793,21 +795,21 @@ exports.runNode = function (req, res, io) {
 									setter[node.out_field] = sandbox.out.value;
 								}
 								
-                                console.log(setter);
-                                
+								console.log(setter);
+								
 								if(sandbox.out.updatequery != null)
 									var updatequery = sandbox.out.updatequery;
 								else
 									var updatequery = {_id:sandbox.context.doc._id};
-                                    
+									
 								//setter = flatten(setter, {delimiter:"__"});
-                                
-                                // if node set the direct update, then use that
+								
+								// if node set the direct update, then use that
 								if(sandbox.out.mongoDBupdate) // TODO remove key
-                                    mongoquery.update(node.params.collection, updatequery ,setter, next);
+									mongoquery.update(node.params.collection, updatequery ,setter, next);
 								else
-                                    mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
-                                  
+									mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
+								  
 							}
 
 							runFunc (sandbox, node, onNodeScript, onError);
@@ -824,34 +826,34 @@ exports.runNode = function (req, res, io) {
 
 				case "download":
 						
-                    // find everything
-                    mongoquery.find2({}, node.collection, function(err, doc) {
-                        sandbox.context.doc_count = doc.length;
-                        runNodeScriptInContext("init", node, sandbox, io);
-                        
-                        // run node once per record
-                        async.eachSeries(doc, function iterator(doc, next) {
-                            
-                            sandbox.context.doc = doc;
-                            sandbox.context.count++;
-                            sandbox.out.url = null;
-                            sandbox.context.error = null;
-                            
-                            // ask url and file name from node
-                            runNodeScriptInContext("pre_run", node, sandbox, io);
-                            exports.downloadFile(node, sandbox, function(sandbox) {
-                                run.runInContext(sand);
-                                // write file location to db
-                                var setter = {};
-                                setter[node.out_field] = sandbox.out.value;
-                                console.log(setter);
-                                mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-                            })
-                            
-                        }, function done() {
-                            runNodeScriptInContext("finish", node, sandbox, io);
-                        });
-                    });
+					// find everything
+					mongoquery.find2({}, node.collection, function(err, doc) {
+						sandbox.context.doc_count = doc.length;
+						runNodeScriptInContext("init", node, sandbox, io);
+						
+						// run node once per record
+						async.eachSeries(doc, function iterator(doc, next) {
+							
+							sandbox.context.doc = doc;
+							sandbox.context.count++;
+							sandbox.out.url = null;
+							sandbox.context.error = null;
+							
+							// ask url and file name from node
+							runNodeScriptInContext("pre_run", node, sandbox, io);
+							exports.downloadFile(node, sandbox, function(sandbox) {
+								run.runInContext(sand);
+								// write file location to db
+								var setter = {};
+								setter[node.out_field] = sandbox.out.value;
+								console.log(setter);
+								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+							})
+							
+						}, function done() {
+							runNodeScriptInContext("finish", node, sandbox, io);
+						});
+					});
 
 				break;
 
@@ -993,8 +995,8 @@ exports.runNode = function (req, res, io) {
 
 
 				default:
-                    sandbox.out.say("finish", "This node is not runnable");
-                    return;
+					sandbox.out.say("finish", "This node is not runnable");
+					return;
 			}
 			
 		});
@@ -1186,7 +1188,7 @@ function initNode (nodeRequest, res, io, project) {
 					}
 				});
 
-            // otherwise just insert node 
+			// otherwise just insert node 
 			} else {
 				insertNode(node, function (err) {
 					if(err) {
@@ -1195,20 +1197,20 @@ function initNode (nodeRequest, res, io, project) {
 					} else {
 						console.log("node created");
 						
-                        
-                        // interactive nodes are not run, so we
-                        // initialize empty field for all records
-                        if (node.init_fields) {
-                            var setter = {};
-                            for (var i = 0; i < node.init_fields.length; i++) {
-                                setter[node.init_fields[i]] = "";
-                            }
-                            mongoquery.update(node.collection,{}, {$set: setter }, function() {
-                                res.json({"status": "node created"});
-                            })  
-                        } else {
-                            res.json({"status": "node created"});
-                        } 
+						
+						// interactive nodes are not run, so we
+						// initialize empty field for all records
+						if (node.init_fields) {
+							var setter = {};
+							for (var i = 0; i < node.init_fields.length; i++) {
+								setter[node.init_fields[i]] = "";
+							}
+							mongoquery.update(node.collection,{}, {$set: setter }, function() {
+								res.json({"status": "node created"});
+							})  
+						} else {
+							res.json({"status": "node created"});
+						} 
 					}
 				});
 			}
@@ -1358,16 +1360,16 @@ exports.deleteNode = function (params, res, io) {
 						callback(); // we did nothing
 					}
 				},
-                
+				
 				// if node is an interactive, then remove its init_fields
 				function (callback) {
 					if((node.type == "view") && node.init_fields != null) {
-                        console.log("REMOVING INIT FIELDS");
+						console.log("REMOVING INIT FIELDS");
 						var field = {};
 						var query = {};
-                        for (var i = 0; i < node.init_fields.length; i++) {
-                            field[node.init_fields[i]] = 1;   
-                        }
+						for (var i = 0; i < node.init_fields.length; i++) {
+							field[node.init_fields[i]] = 1;   
+						}
 						console.log(field);
 						query["$unset"] = field;
 						mongoquery.updateAll(node.collection, query, function (error) {
@@ -1435,7 +1437,7 @@ exports.getCollection = function (req, query, res) {
 		sort = "_id";
 
 	var reverse = false
-    var r = parseInt(req.query.reverse);
+	var r = parseInt(req.query.reverse);
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
 		reverse = true;
 
@@ -1656,8 +1658,8 @@ exports.importFile = function (node, callback) {
 exports.callAPI = function (url, callback) {
 	var request = require("request");
 
-    if (typeof url === "undefined" || url == "")
-        callback("URL not set", null, null);
+	if (typeof url === "undefined" || url == "")
+		callback("URL not set", null, null);
 
 	var headers = {
 		'User-Agent':       'GLAMpipe/0.0.1',
@@ -1754,7 +1756,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 	var request = require("request")
 
 	if (typeof sandbox.out.url === "undefined") {
-        sandbox.context.error = "URL missing";
+		sandbox.context.error = "URL missing";
 		return cb(sandbox);
 	} 
 	if(sandbox.out.url == null || sandbox.out.url == "") {
@@ -1769,30 +1771,30 @@ exports.downloadFile = function (node, sandbox, cb ) {
 
 	// verify response code
 	sendReq.on('response', function(response) {
-        if(response.statusCode === 200) {
-            sandbox.context.response = response;
-            sendReq.pipe(file);
+		if(response.statusCode === 200) {
+			sandbox.context.response = response;
+			sendReq.pipe(file);
 
-            file.on('finish', function() {
-                file.close(function () {
-                    cb(sandbox);
-                }); 
-            });
+			file.on('finish', function() {
+				file.close(function () {
+					cb(sandbox);
+				}); 
+			});
 
-            file.on('error', function(err) { 
-                fs.unlink(filePath); // Delete the file async. 
-                console.log(err);
-                sandbox.context.error = err;
+			file.on('error', function(err) { 
+				fs.unlink(filePath); // Delete the file async. 
+				console.log(err);
+				sandbox.context.error = err;
 
-                if (cb) {
-                    return cb(sandbox);
-                }
-            });
-            
-        } else {
-           sandbox.context.error = "file not found on server!";
-           return cb(sandbox);
-        }
+				if (cb) {
+					return cb(sandbox);
+				}
+			});
+			
+		} else {
+		   sandbox.context.error = "file not found on server!";
+		   return cb(sandbox);
+		}
 
 	});
 
@@ -1801,7 +1803,7 @@ exports.downloadFile = function (node, sandbox, cb ) {
 		fs.unlink(filePath);
 		console.log(err);
 		sandbox.context.error = err;
-        return cb(sandbox);
+		return cb(sandbox);
 
 	});
 
@@ -1891,9 +1893,6 @@ function writeJSON2File (filename, records, callback) {
 
 
 
-
-
-
 function indexByKeyValue(arraytosearch, key, value) {
 
 	for (var i = 0; i < arraytosearch.length; i++) {
@@ -1906,31 +1905,177 @@ function indexByKeyValue(arraytosearch, key, value) {
 
 
 
+exports.readNodes = function (io, nodePath, descriptions, callback) {
+		
+	readFiles(nodePath, function onNodeContent (filename, node, next) {
+		// save node.json to db
+		mongoquery.insert("mp_nodes",node , function(error) {
+			if(error.length) {
+				console.log(error);
+			} else {
+				console.log("LOADED: " + filename );
+				io.sockets.emit("progress", "LOAD: " + filename + " loaded");
+				next();
+			}
+		})
 
-function readFiles(dirname, onFileContent, onError, onDone) {
+	}, function onError (error) {
+		if( error.code == "ENOENT") {
+			console.log("ERROR: No nodes present in " + nodePath);
+			//console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+		} else {
+			console.log(error);
+		}
+		return callback(error);
+
+		
+	}, function onDone () {
+		console.log("INIT: nodes loaded from " + nodePath);
+		console.log("******************************************");
+		callback(null);
+	});
+}
+
+
+
+function readFiles(dirname, onNodeContent, onError, onDone) {
+	var fs = require("fs");
+	
+	// reas node directories
+	fs.readdir(dirname, function(err, nodedirs) {
+		if (err) {
+			onError(err);
+			return;
+		}
+		
+		async.eachSeries(nodedirs, function iterator(nodedir, next) {
+            console.log(nodedir);
+			fs.stat(dirname + nodedir, function(err, stat) {
+				// read each node directory but skip "config"
+				if ( nodedir == "config") {
+					next();
+				} else if (stat.isDirectory()) { 
+					readNodeDirectory(path.join(dirname, nodedir), next, function (node) {
+						onNodeContent(nodedir, node, next);
+					}) 
+                // skip files
+				} else next();
+			})
+		// we have read all node directories
+		}, function done() {
+			onDone();
+		});
+	});
+}
+
+
+
+function readNodeDirectory (nodeDir, skip, cb) {
+	console.log("READING directory: " + nodeDir);
+	
+	// read description.js from node directory
+	fs.readFile(path.join(nodeDir, "description.json"), 'utf-8', function(err, content) {
+		if (err) {
+			console.log("Skipping", nodeDir);
+			skip(); // we skip directory if there is no description.json
+			return;
+		} else {
+			var node = JSON.parse(content);
+            // make sure that we have "scripts" and "views"
+            if(!node.scripts) node.scripts = {};
+            if(!node.views) node.views = {};
+
+			// join "pretty" settings
+			if(node.views.settings instanceof Array)
+				node.views.settings = node.views.settings.join("");	
+				
+			// join "pretty" params
+			if(node.views.params instanceof Array)
+				node.views.params = node.views.params.join("");	
+
+			// join "pretty" data view
+			if(node.views.data_static instanceof Array)
+				node.views.data_static = node.views.data_static.join("");
+
+			// join "pretty" scripts
+			for (key in node.scripts) {
+				if(node.scripts[key] instanceof Array)
+					node.scripts[key] = node.scripts[key].join("");
+			}
+
+			// read each file in each node directory
+			fs.readdir(nodeDir, function(err, nodeFiles) {
+				if (err) {
+					skip(err);
+					return;
+				}
+                console.log(nodeFiles.length);
+                if(nodeFiles.length == 1) {
+                    cb(node); return;
+                }
+				// read each file and add content to node
+				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
+					js2Array(nodeDir, nodeFile, node, function() {
+						next();
+					})
+				// all files read. Return node object
+				}, function done() {
+					cb(node);
+				})
+			})
+		}
+	});
+}
+
+
+// transform js to array so that it can be placed inside JSON
+function js2Array (dirName, fileName, node, cb) {
+	
+	var f = fileName.split(".");
+	
+	fs.readFile(path.join(dirName, fileName), 'utf-8', function(err, content) {
+		if(err) {
+			console.log(err);
+		}
+		var lines = content.split("\n");
+		for (var i = 0; i < lines.length; i++) {
+			lines[i] = lines[i].replace('"', '\"');
+			lines[i] = lines[i].replace('\t', '  ');
+		} 
+		
+		// add javascript files to "scripts" section
+		if(f[1] == "js")
+			node.scripts[f[0]] = lines.join("\n");
+		// add html files to "views" section
+		if(f[1] == "html")
+			node.views[f[0]] = lines.join("\n");
+		cb();
+	})
+}
+
+function readFiles_old(dirname, onFileContent, onError, onDone) {
 	var fs = require("fs");
 	fs.readdir(dirname, function(err, filenames) {
 		if (err) {
 			onError(err);
 			return;
 		}
-
-
+	
 		async.eachSeries(filenames, function iterator(filename, next) {
-            //fs.stat(filename, function(err, stat) {
-                // skip directories
-                if (filename == "config" || filename == "data") { 
-                    next();
-                } else {
-                    fs.readFile(dirname + filename, 'utf-8', function(err, content) {
-                        if (err) {
-                            onError(err);
-                            return;
-                        }
-                        onFileContent(filename, content, next);
-                    });
-                }
-           // })
+			//fs.stat(filename, function(err, stat) {
+				// skip directories
+				if (filename == "config" || filename == "data") { 
+					next();
+				} else {
+					fs.readFile(dirname + filename, 'utf-8', function(err, content) {
+						if (err) {
+							onError(err);
+							return;
+						}
+						onFileContent(filename, content, next);
+					});
+				}
+		   // })
 		}, function done() {
 			onDone();
 		});
