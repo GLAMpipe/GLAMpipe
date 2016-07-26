@@ -2,13 +2,17 @@
 const fs			= require('fs');
 const path			= require('path');
 const env			= process.env;
+const passport      = require('passport'); 
+const LocalStrategy = require('passport-local').Strategy
 
 var express			= require('express');
 var request			= require('request');
 var bodyParser		= require("body-parser");
 var colors 			= require('ansicolors');
 
+
 global.config = {};
+
 
 
 var GlamPipe = function() {
@@ -54,11 +58,45 @@ var GlamPipe = function() {
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 			extended: true
 		})); 
-		
+
+		self.app.use(passport.initialize()); 
+
+
+		const user = {  
+			username: 'testi',
+			password: 'testi',
+			id: 1
+		}
+
+		passport.use(new LocalStrategy(  
+		  function(username, password, done) {
+			findUser(username, function (err, user) {
+				console.log(username);
+				
+				if (err) {
+					return done(err)
+				}
+				if (!user) {
+					return done(null, false)
+				}
+				if (password !== user.password  ) {
+					return done(null, false)
+				}
+					return done(null, user)
+			})
+		  }
+		))
+
+		function findUser (username, cb) {
+			cb(null,user);
+			
+		}
+		self.passport = passport;
+
 		self.http 		= require('http').Server(self.app);
 		self.io 		= require('socket.io')(self.http);
 
-		require('./app/routes.js')(self.app, self);
+		require('./app/routes.js')(self.app, self, passport);
 
 	};
 
@@ -96,9 +134,9 @@ var GlamPipe = function() {
 
 	/**
 	 *  Initializes the application.
-     * - check data path
-     * - if data path ok, download nodes
-     * - if nodes ok, initialize server
+	 * - check data path
+	 * - if data path ok, download nodes
+	 * - if nodes ok, initialize server
 	 */
 	self.initialize = function(cb) {
 		self.setupVariables();
@@ -121,10 +159,10 @@ var GlamPipe = function() {
 					global.config.dataPath = dataPath;
 					global.config.projectsPath = path.join(dataPath, "projects");
 
-                    // Create the express server and routes.
-                    self.initializeServer();
-                    console.log("INIT done");
-                    cb(); 
+					// Create the express server and routes.
+					self.initializeServer();
+					console.log("INIT done");
+					cb(); 
 
 				}
 			});
@@ -135,7 +173,7 @@ var GlamPipe = function() {
 
 
 	/**
-	 *  Start the server (starts up the sample application).
+	 *  Start the server.
 	 */
 	self.start = function() {
 		
@@ -144,10 +182,10 @@ var GlamPipe = function() {
 			console.log(e);
 		});
 
-       // process.on('uncaughtException', function(err) {
-            // handle the error safely
-         //   console.log(err)
-        //})
+	   // process.on('uncaughtException', function(err) {
+			// handle the error safely
+		 //   console.log(err)
+		//})
 
 		//  Start the app on the specific interface (and port).
 			var server = self.http.listen(self.port, self.ipaddress, function() {
@@ -163,7 +201,7 @@ var GlamPipe = function() {
 }
 
 
-    
+	
 var glampipe = new GlamPipe();
 
 

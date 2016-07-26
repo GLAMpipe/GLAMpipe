@@ -312,6 +312,13 @@ exports.getProject = function (doc_id, res) {
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) { res.json(data) });
 }
 
+exports.addUser = function (req, cb) {
+    var user = {"username": req.body.username, "password": req.body.password};
+    mongoquery.insert ("users", user, function(data) {
+        console.log("user \"" + req.body.username + "\" created!");
+        cb({"status": "ok"});
+    });
+}
 
 exports.getNodes = function (res) {
 	//mongoquery.find({}, "nodes", function(data) { res.json(data) });
@@ -935,15 +942,15 @@ exports.runNode = function (req, res, io) {
 												if(d != null) {
 													io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
 													console.log("CONTENT:", d);
-													next();
+													return next();
 
 												} else {
 
 													fs.readFile(sandbox.out.filename, function (err,data) {
 														if (err) {
-															console.log(err);
+															console.log("file not found:", err);
 															io.sockets.emit("error", err);
-															next();	// continue despite the error
+															return next();	// skip if file not found
 														}
 														// upload file
 														client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
@@ -1764,7 +1771,12 @@ exports.downloadFile = function (node, sandbox, cb ) {
 		return cb(sandbox);
 	} 
 
-	
+	if(sandbox.out.url.search("http") != 0) {
+		sandbox.context.error = "URL not starting with 'http'";
+		return cb(sandbox);
+    }
+    
+    
 	var filePath = path.join(node.dir, sandbox.out.file); 
 	var file = fs.createWriteStream(filePath);
 	var sendReq = request.get(sandbox.out.url);

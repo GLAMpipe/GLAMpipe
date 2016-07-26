@@ -88,7 +88,21 @@ function init() {
             }
         });
     });
-    
+
+    $( "#adduser" ).click(function( event ) {
+        var data = {};
+        data.username = $("#username").val();
+        data.password = $("#password").val();
+        $.post("/add/user", data, function(returnedData) {
+            if(returnedData.status == "ok") {
+                $("#info").text("User ready!");
+            } else {
+                alert("Could not create user!");
+            }
+        });
+    });
+
+
     // if there was an init error, then show that
     switch (error.status) {
         case "nodepath_error":
@@ -152,7 +166,13 @@ function init() {
             <a href="/node-viewer">node viewer</a>
         </div>
         
-    
+        <!-- NODES -->
+        <div class="source node">
+            <h2>ADD USER</h2>
+            <input id="username" name="username" placeholder="username"/>
+            <input id="password" name="password" placeholder="password"/>
+            <button id="adduser">add user</button>
+        </div>    
 
 
         <div class="warning" id="info"></div>

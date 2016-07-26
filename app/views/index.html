@@ -128,6 +128,21 @@
 </head>
 <body onload="onLoad();">
 
+	<div>
+	<input id="username" name="username"/><button id="login">login</button>
+	
+	</div>
+
+<script>
+	$("#login").click(function() {
+		var data = {"username":"testi","password":"testi"};
+            $.post("/login", data, function(returnedData) {
+                console.log('created node');
+
+            });
+	});
+</script>
+
 	<!-- PROJECT HEADER -->
 	<div id="project_header">
 		<h2 class="inline_header">Projects</h2>

@@ -1,6 +1,6 @@
 var proxy 	= require("../app/proxy.js");
 
-module.exports = function(express, glampipe) {
+module.exports = function(express, glampipe, passport) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
@@ -14,6 +14,21 @@ module.exports = function(express, glampipe) {
         next();
 	});
 
+
+	var isAuthenticated = function (req, res, next) {
+		console.log("CHEKCIN");
+	  if (req.isAuthenticated())
+		return next();
+	  res.redirect('/');
+	}
+
+	// TÄLLÄ SUOJATAAN ROUTE !!!!!
+	express.post('/login', passport.authenticate('local', { session: false }), function(req, res) {
+		// If this function gets called, authentication was successful.
+		// `req.user` contains the authenticated user.
+		console.log("logged in", req.user.username)
+		//res.redirect('/users/' + req.user.username);
+	  });
 
     // SETUP AND STATUS
 	express.get('/status', function (req, res) {
@@ -180,6 +195,12 @@ module.exports = function(express, glampipe) {
 	express.post('/edit/collection/addtoset/:id', function (req, res) {
 		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
 	});
+
+	// USERS
+	express.post('/add/user', function (req, res) {
+		glampipe.core.addUser(req, function(data) {res.send(data)});
+	});
+
 
 	// UPLOAD
 	express.post('/upload/file', upload.single('file'), function (req, res) {
