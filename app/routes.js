@@ -93,7 +93,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/project/:id', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
+		res.sendFile(path.join(__dirname, 'views', 'project.html'));
 	});
 
 	express.post('/create/project', function (req, res) {

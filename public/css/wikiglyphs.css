@@ -1,0 +1,468 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: "WikiFont-Glyphs";
+  src:url("WikiFont-Glyphs.eot"); /* IE9 Compat Modes */
+  src:url("WikiFont-Glyphs.eot?#iefix") format("embedded-opentype"),  /* IE6-IE8 */
+    url("WikiFont-Glyphs.woff") format("woff"), /* Modern Browsers */
+    url("WikiFont-Glyphs.woff2") format("woff2"),
+    url("WikiFont-Glyphs.ttf") format("truetype"), /* Safari, Android, iOS */
+    url("WikiFont-Glyphs.svg#wikiglyph") format("svg"); /* Legacy iOS */
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+[data-icon]:before {
+  font-family: "WikiFont-Glyphs" !important;
+  content: attr(data-icon);
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="wikiglyph-"]:before,
+[class*=" wikiglyph-"]:before {
+  font-family: "WikiFont-Glyphs" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wikiglyph[dir='rtl'] {
+  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
+  -webkit-transform: scale(-1, 1);
+  -moz-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
+
+.wikiglyph-move:before {
+  content: "\e013";
+}
+.wikiglyph-cog:before,
+.wikiglyph-gear:before {
+  content: "\e014";
+}
+.wikiglyph-ellipses:before {
+  content: "\e015";
+}
+.wikiglyph-message:before,
+.wikiglyph-envelope:before {
+  content: "\e016";
+}
+.wikiglyph-key:before {
+  content: "\e017";
+}
+.wikiglyph-lock:before {
+  content: "\e018";
+}
+.wikiglyph-unlock:before {
+  content: "\e019";
+}
+.wikiglyph-browser:before,
+.wikiglyph-web:before { 
+  content: "\e020";
+}
+.wikiglyph-keyboard:before {
+  content: "\e022";
+}
+.wikiglyph-ribbon-prize:before,
+.wikiglyph-ribbon:before {
+  content: "\e023";
+}
+.wikiglyph-play:before {
+  content: "\e024";
+}
+.wikiglyph-stop:before {
+  content: "\e025";
+}
+.wikiglyph-beta:before, 
+.wikiglyph-star-circle:before {
+  content: "\e026";
+}
+.wikiglyph-beta-launch:before,  
+.wikiglyph-rocket:before {
+  content: "\e027";
+}
+.wikiglyph-upload:before {
+  content: "\e028";
+}
+.wikiglyph-download:before {
+  content: "\e029";
+}
+.wikiglyph-new-window:before {
+  content: "\e030";
+}
+.wikiglyph-log-out:before {
+  content: "\e031";
+}
+.wikiglyph-map:before {
+  content: "\e032";
+}
+.wikiglyph-bell:before {
+  content: "\e033";
+}
+.wikiglyph-bell-on:before,
+.wikiglyph-ring:before {
+  content: "\e034";
+}
+.wikiglyph-vision-simulator:before {
+  content: "\e035";
+}
+.wikiglyph-full-moon:before {
+  content: "\e038";
+}
+.wikiglyph-moon:before {
+  content: "\e039";
+}
+.wikiglyph-large-text:before {
+  content: "\e040";
+}
+.wikiglyph-smaller-text:before {
+  content: "\e041";
+}
+.wikiglyph-clip:before {
+  content: "\e042";
+}
+.wikiglyph-close-input:before,
+.wikiglyph-x-circle:before {
+  content: "\e050";
+}
+.wikiglyph-cross:before,
+.wikiglyph-x:before {
+  content: "\e051";
+}
+.wikiglyph-check:before,
+.wikiglyph-tick:before {
+  content: "\e052";
+}
+.wikiglyph-caret-down:before {
+  content: "\e053";
+}
+.wikiglyph-caret-up:before {
+  content: "\e054";
+}
+.wikiglyph-caret-left:before {
+  content: "\e055";
+}
+.wikiglyph-caret-right:before {
+  content: "\e056";
+}
+.wikiglyph-arrow-left:before {
+  content: "\e057";
+}
+.wikiglyph-triangle-down:before {
+  content: "\e061";
+}
+.wikiglyph-triangle-up:before {
+  content: "\e062";
+}
+.wikiglyph-triangle-right:before {
+  content: "\e063";
+}
+.wikiglyph-triangle-left:before {
+  content: "\e064";
+}
+.wikiglyph-plus:before {
+  content: "\e065";
+}
+.wikiglyph-minus:before {
+  content: "\e066";
+}
+.wikiglyph-article:before {
+  content: "\e100";
+}
+.wikiglyph-article-check:before {
+  content: "\e101";
+}
+.wikiglyph-article-search:before {
+  content: "\e102";
+}
+.wikiglyph-stripe-menu:before,
+.wikiglyph-stripe-compact:before {
+  content: "\e110";
+}
+.wikiglyph-stripe-toc:before {
+  content: "\e111";
+}
+.wikiglyph-stripe-flow:before,
+.wikiglyph-stripe-expanded:before {
+  content: "\e112";
+}
+.wikiglyph-stripe-summary:before {
+  content: "\e113";
+}
+.wikiglyph-view-compact:before {
+  content: "\e114";
+}
+.wikiglyph-view-details:before {
+  content: "\e115";
+}
+.wikiglyph-flag:before {
+  content: "\e134";
+}
+.wikiglyph-flag-undo:before {
+  content: "\e135";
+}
+.wikiglyph-user-avatar:before,
+.wikiglyph-user-bust:before {
+  content: "\e160";
+}
+.wikiglyph-user-active:before,
+.wikiglyph-user-smile:before {
+  content: "\e161";
+}
+.wikiglyph-user-inactive:before,
+.wikiglyph-user-sleep:before {
+  content: "\e162";
+}
+.wikiglyph-edit-lock:before,
+.wikiglyph-pencil-lock-full:before {
+  content: "\e222";
+}
+.wikiglyph-quotes:before {
+  content: "\e223";
+}
+.wikiglyph-quotes-add:before {
+  content: "\e224";
+}
+.wikiglyph-speech-bubble:before {
+  content: "\e225";
+}
+.wikiglyph-speech-bubble-add:before {
+  content: "\e226";
+}
+.wikiglyph-speech-bubbles:before {
+  content: "\e227";
+}
+.wikiglyph-user-talk:before,
+.wikiglyph-speech-bubble-smile:before {
+  content: "\e228";
+}
+.wikiglyph-image:before {
+  content: "\e229";
+}
+.wikiglyph-image-add:before {
+  content: "\e230";
+}
+.wikiglyph-image-lock:before,
+.wikiglyph-image-lock-full:before {
+  content: "\e231";
+}
+.wikiglyph-photo-gallery:before,
+.wikiglyph-gallery:before {
+  content: "\e232";
+}
+.wikiglyph-map-pin:before,
+.wikiglyph-pin:before {
+  content: "\e233";
+}
+.wikiglyph-map-pin-add:before {
+  content: "\e234";
+}
+.wikiglyph-template-add:before {
+  content: "\e235";
+}
+.wikiglyph-cite-article:before {
+  content: "\e238";
+}
+.wikiglyph-book:before {
+  content: "\e239";
+}
+.wikiglyph-journal:before {
+  content: "\e240";
+}
+.wikiglyph-newspaper:before,
+.wikiglyph-news:before {
+  content: "\e241";
+}
+.wikiglyph-link:before {
+  content: "\e242";
+}
+.wikiglyph-signature:before {
+  content: "\e243";
+}
+.wikiglyph-list-numbered:before,
+.wikiglyph-list-sorted:before,
+.wikiglyph-list-ordered:before {
+  content: "\e244";
+}
+.wikiglyph-list-bullet:before,
+.wikiglyph-list-unsorted:before,
+.wikiglyph-list-unordered:before {
+  content: "\e245";
+}
+.wikiglyph-indent-left:before {
+  content: "\e246";
+}
+.wikiglyph-indent-right:before {
+  content: "\e247";
+}
+.wikiglyph-wikitext-no:before {
+  content: "\e248";
+}
+.wikiglyph-wikitext:before {
+  content: "\e249";
+}
+.wikiglyph-folder-placeholder:before {
+  content: "\e250";
+}
+.wikiglyph-edit-lock-1:before,
+.wikiglyph-pencil-lock-pt1:before { 
+  content: "\e302";
+}
+.wikiglyph-edit-lock-2:before,
+.wikiglyph-pencil-lock-pt2:before {
+  content: "\e303";
+}
+.wikiglyph-quotes-add-1:before {
+  content: "\e304";
+}
+.wikiglyph-quotes-add-2:before {
+  content: "\e305";
+}
+.wikiglyph-image-add-1:before {
+  content: "\e306";
+}
+.wikiglyph-image-add-2:before {
+  content: "\e307";
+}
+.wikiglyph-image-lock-1:before {
+  content: "\e308";
+}
+.wikiglyph-image-lock-2:before {
+  content: "\e309";
+}
+.wikiglyph-map-pin-add-1:before,
+.wikiglyph-map-pin-add-pt1:before {
+  content: "\e310";
+}
+.wikiglyph-map-pin-add-2:before,
+.wikiglyph-map-pin-add-pt2:before {
+  content: "\e311";
+}
+.wikiglyph-template-add-1:before,
+.wikiglyph-template-add-pt1:before {
+  content: "\e312";
+}
+.wikiglyph-template-add-2:before,
+.wikiglyph-template-add-pt2:before {
+  content: "\e313";
+}
+.wikiglyph-wikimedia-commons:before {
+  content: "\e500";
+}
+.wikiglyph-wikipedia:before,
+.wikiglyph-w:before {
+  content: "\e501";
+}
+.wikiglyph-wikitrail:before {
+  content: "\504";
+}
+.wikiglyph-heart:before {
+  content: "\e001";
+}
+.wikiglyph-star:before {
+  content: "\e002";
+}
+.wikiglyph-unstar:before {
+  content: "\e003";
+}
+.wikiglyph-star-half:before {
+  content: "\e043";
+}
+.wikiglyph-watchlist:before, 
+.wikiglyph-star-list:before{
+  content: "\e004";
+}
+.wikiglyph-sun:before {
+  content: "\e005";
+}
+.wikiglyph-funnel:before {
+  content: "\e006";
+}
+.wikiglyph-eye-closed:before,
+.wikiglyph-eye-lid:before {
+  content: "\e008";
+}
+.wikiglyph-printer:before {
+  content: "\e009";
+}
+.wikiglyph-puzzle:before {
+  content: "\e010";
+}
+.wikiglyph-clock:before {
+  content: "\e011";
+}
+.wikiglyph-dice:before {
+  content: "\e012";
+}
+.wikiglyph-magnifying-glass:before {
+  content: "\e000";
+}
+.wikiglyph-eye:before {
+  content: "\e007";
+}
+.wikiglyph-trash:before {
+  content: "\e130";
+}
+.wikiglyph-trash-undo:before,
+.wikiglyph-trash-slash:before {
+  content: "\e131";
+}
+.wikiglyph-bookmark:before {
+  content: "\e237";
+}
+.wikiglyph-block:before {
+  content: "\e132";
+}
+.wikiglyph-block-undo:before,
+.wikiglyph-block-slash:before {
+  content: "\e133";
+}
+.wikiglyph-public-domain:before {
+  content: "\e503";
+}
+.wikiglyph-edit:before,
+.wikiglyph-pencil:before {
+  content: "\e220";
+}
+.wikiglyph-edit-undo:before,
+.wikiglyph-pencil-revert-full:before {
+  content: "\e221";
+}
+.wikiglyph-edit-undo-2:before,
+.wikiglyph-pencil-revert-pt2:before {
+  content: "\e301";
+}
+.wikiglyph-edit-undo-1:before,
+.wikiglyph-pencil-revert-pt1:before {
+  content: "\e300";
+}
+.wikiglyph-bright-full:before {
+  content: "\e036";
+}
+.wikiglyph-sun-moon:before {
+  content: "\e037";
+}
+.wikiglyph-cc:before {
+  content: "\e502";
+}
+.wikiglyph-cite:before {
+  content: "\e236";
+}
+.wikiglyph-translation:before {
+  content: "\e021";
+}
