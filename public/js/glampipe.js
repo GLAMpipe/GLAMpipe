@@ -1,7 +1,7 @@
 
 var glamPipe = function () {
 	var self = this;
-	this.currentProject = "575ee8fa045443e80d097a8d"
+	this.currentProject = ""
 	this.currentCollectionSet = 0
 	
 	this.projectPipeDiv = "#project-pipe"
@@ -14,8 +14,20 @@ var glamPipe = function () {
 	this.transforms = []
 	this.exports = []
 	this.collectionSets = []
-	
-	
+
+	this.data = new dataHolder()
+
+	this.loadData = function () {
+		self.data.getAndRenderData(self.collections[0]);
+	}
+
+	this.renderData = function () {
+		if(self.data.length != 0)
+			self.data.loadData(self.collections[0]);
+		else
+			self.data.render();
+	}
+
 	this.login = function (username, password) {
 		alert(login)
 	}
@@ -38,7 +50,20 @@ var glamPipe = function () {
 	
 	
 	this.addProject = function (projectName) {
-		alert("not implemented!");
+		if ($(".create_project #title").val().trim() == "")
+			alert("Please give a title for the project!");
+		else {
+			var title = $(".create_project #title").val().trim();
+			var data = {"title": title};
+			$.post("/create/project", data, function(returnedData) {
+				if(!returnedData.error) {
+					console.log('created project', returnedData.project);
+					window.location.href = "/project/" + returnedData.project._id;
+				} else {
+					alert(returnedData.error);
+				}
+			});
+		}
 	}
 	
 	this.loadNodes = function() {
@@ -54,14 +79,16 @@ var glamPipe = function () {
 		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
 			if(typeof project !== "undefined") { 
 				var nodes = project.nodes;
-				for(var i = 0; i< nodes.length; i++) {
-					var d = nodes[i];
-					// create separate array of collections so that we can group nodes
-					if(nodes[i].type == "collection")
-						self.collections.push(nodes[i]);
-					else
-						self.nodes.push(nodes[i]);
+				if(nodes) {
+					for(var i = 0; i< nodes.length; i++) {
+						var d = nodes[i];
+						// create separate array of collections so that we can group nodes
+						if(nodes[i].type == "collection")
+							self.collections.push(nodes[i]);
+						else
+							self.nodes.push(nodes[i]);
 
+					}
 				}
 				self.setPageTitle(project.title);
 				self.sortNodes();
@@ -222,15 +249,14 @@ var glamPipe = function () {
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
 
+
 	this.createNode = function (e) {
         var data = {};
         var params = {};
         var obj = $(e.target);
         // node array index
         var index = obj.data("index")
-        var collection = self.collections[self.currentCollectionSet]._id;
         var node = self.nodeRepository.getNodeByIndex(index);
-        alert(node.id)
         
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
@@ -240,7 +266,6 @@ var glamPipe = function () {
         data.params = params;
         data.nodeid= node.nodeid;
         data.project = self.currentProject;
-        //data.input_node = nodes.currentNode; 
 
         if(node.type == "collection") {
             $.post("/create/collection/node", data, function(returnedData) {
@@ -249,7 +274,7 @@ var glamPipe = function () {
                 //nodes.reloadProject();
             });
         } else {
-            data.collection = collection;
+            data.collection = self.collections[self.currentCollectionSet].collection;
             $.post("/create/node", data, function(returnedData) {
                 console.log('created node');
                 $("#node_creator").hide();

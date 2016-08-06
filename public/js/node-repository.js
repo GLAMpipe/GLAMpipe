@@ -94,7 +94,7 @@ var nodeRepository = function () {
         
         html += node.views.params;
         
-        html += "    <a href='project.html'>"
+        html += "    <a href='#'>"
         html += "   <div data-index='" + index + "'  class='button create-node'>Create node</div>"
         html += "  </a> </div>"
         html += "</div>"

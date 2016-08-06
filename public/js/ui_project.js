@@ -49,4 +49,12 @@ $( document ).ready(function() {
 		e.preventDefault();
 	})
 
+
+
+	// create node
+	$(document).on('click','.box.collection', function(e) {
+		gp.loadData();
+		e.preventDefault();
+	})
+
 });

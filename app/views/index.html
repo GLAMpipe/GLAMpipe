@@ -9,6 +9,7 @@
 
 <script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/data.js"></script>
 <script type="text/javascript" src="/js/glampipe.js"></script>
 <script type="text/javascript" src="/js/ui.js"></script>
 
@@ -26,24 +27,31 @@
           <div><span class="title inlinetitle">Choose a project</span></div>
         </div>
         <div class="infotext">Choose the project you wish to work on or create a new one.</div>
-        <div id="projectList" class="optionlist"> <a href="project.html">
-          <div class="listoption">
-            <p class="listtitle">BL Pics</p>
-            <p class="listtext">See if these could be a good source</p>
-          </div>
-          </a> <a href="project.html">
-          <div class="listoption">
-            <p class="listtitle">Testing with Finna</p>
-            <p class="listtext">API seems to work well</p>
-          </div>
-          </a><a href="empty.html">
-          <div class="listoption">
-            <p class="listtitle">Your new project</p>
-            <p class="listtext">See here how a new project works</p>
-          </div>
-          </a> </div>
-          <div id="create_project" class="button">Create a project</div>
+        <div id="projectList" class="optionlist"> 
+        <!-- projects are listed here -->
+        </div>
+
       </div>
+      
+      
+
+    <div class="fatbox create_project">
+      <div class="inlinetitleblock">
+        <div><span class="title inlinetitle">Create project</span></div>
+      </div>
+      <div class="infotext">Project contains your data, transforms, downloads etc.</div>
+      <div class="optionlist">
+        <div class="listoption">
+          <p class="listtitle">Title</p>
+          <p class="listtext">
+            <label for="title"></label>
+            <input type="text" name="title" id="title" />
+          </p>
+        </div>
+        <div id="create_project" class="button">Create project</div>
+      </div>
+    </div>
+
     </pipe>
     <workspace>
     </workspace>
