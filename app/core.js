@@ -1159,7 +1159,13 @@ function initNode (nodeRequest, res, io, project) {
 				
 			if(node.params.out_field)
 				node.out_field = node.params.out_field;
-				
+
+			// settings html is on client side and therefore it is not aware of node content
+			// so we write params to settings view so that client side script can be acces parameters of node (urls and so on)
+			if( node.views.settings) {
+				node.views.settings = node.views.settings.replace("[[params]]", "var params = " + JSON.stringify(node.params) + ";\n");
+			}
+
 			node.params.collection = nodeRequest.collection;
 			
 			// copy static data view to project node's view if defined

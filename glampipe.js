@@ -20,6 +20,8 @@ var GlamPipe = function() {
 	//  Scope.
 	var self = this;
 
+	// TODO: this is bad, fix with npm install ssl-root-cas
+	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 	/*  ================================================================  */
 	/*  Helper functions.                                                 */
@@ -29,16 +31,23 @@ var GlamPipe = function() {
 	 *  Set up server IP address and port # using env variables/defaults.
 	 */
 	self.setupVariables = function() {
+		// assume that we are running in OpenShift
 		//  Set the environment variables we need.
 		self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
 		self.port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
 
+		// if we are not in OpenShift, then check if we are inside Docker
 		if (typeof self.ipaddress === "undefined") {
-			//  Log errors on OpenShift but continue w/ 127.0.0.1 - this
-			//  allows us to run/test the app locally.
-			console.warn('No OPENSHIFT_NODEJS_IP var, using 127.0.0.1');
-			self.ipaddress = "127.0.0.1";
+			// There should be MONGO env variables present if we were running inside docker
+			if(process.env.MONGO_PORT_27017_TCP_ADDR) {
+				console.log("Think I'm running in Docker, using 0.0.0.0");
+				self.ipaddress = "0.0.0.0";
+			} else {
+				console.log("Running locally, using 127.0.0.1");
+				self.ipaddress = "127.0.0.1";
+			}
 		};
+
 	};
 
 

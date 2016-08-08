@@ -12,8 +12,10 @@ exports.proxyJSON = function (url, query, res) {
 	var headers = {
 		'User-Agent':       'GLAMpipe/0.0.1',
 	}
+	
+	if(query)
+		url = url + query;
 
-    url = url + query;
     console.log("PROXY:", url);
 
 	 var options = {
