@@ -474,25 +474,34 @@ $( document ).ready(function() {
         $.getJSON("/get/collection/fields/" + nodes.pickCollection, function(data) { 
             if(data.error)
                 alert(data.error);
-                    
+
+
             var html = "<ul>";
                 for (key in data) {
-                    if (data[key] instanceof Array) {
-                        html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='array'>ARRAY</span></li>";
-                    } else if (typeof data[key] === "object" ) {
-                        var p = key;
-                        var a = [p];
-                        if (data[key] === null) {
-                            html +=  "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='null'>null</span></li>";
-                        } else {
-                            var tree = makeDynFieldsfromObject(data[key], a, obj);
-                            html +=  "<li>"+ p + "<ul>" + tree + "</ul></li>";
-                        }
-                    } else {
-                        html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
-                    }
+                    
+                    html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='array'>"+data[key].type+"</span></li>";
+
                 }
             html += "</ul>"
+                    
+            //var html = "<ul>";
+                //for (key in data) {
+                    //if (data[key] instanceof Array) {
+                        //html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='array'>ARRAY</span></li>";
+                    //} else if (typeof data[key] === "object" ) {
+                        //var p = key;
+                        //var a = [p];
+                        //if (data[key] === null) {
+                            //html +=  "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='null'>null</span></li>";
+                        //} else {
+                            //var tree = makeDynFieldsfromObject(data[key], a, obj);
+                            //html +=  "<li>"+ p + "<ul>" + tree + "</ul></li>";
+                        //}
+                    //} else {
+                        //html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
+                    //}
+                //}
+            //html += "</ul>"
             
             // open dialog
             $("#dynamic_fields").empty();

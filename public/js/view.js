@@ -59,6 +59,12 @@ var nodes = {};
                     return "";},
             sort_value: "",
             fields: "",
+            fields_func: function () {
+				if(this.fields != "")
+					return "&fields=" + this.fields;
+				else
+					return "";
+			},
             reverse: 0
 		};
 
@@ -72,7 +78,7 @@ var nodes = {};
 		this.collection = ko.observableArray(); // Initial items
 		this.loadData = function () {
             console.log(this.params.sort());
-			$.getJSON("/get/collection/" + node.collection + this.params.skip() + this.params.sort(), function(data) { 
+			$.getJSON("/get/collection/" + node.collection + this.params.skip() + this.params.sort() + this.params.fields_func(), function(data) { 
 				self.collection([]);
 				for(var i = 0; i< data.length; i++) {
 					data[i].vcc = self.params.skip_value + i + 1;
@@ -114,7 +120,6 @@ var nodes = {};
 
         this.createParamsURL = function () {
             var query = "";
-            
             query += this.params.fields ? "?fields=" + this.params.fields + "&": "?"
             query += "sort=" + this.params.sort_value;
             query += "&reverse=" + this.params.reverse;
@@ -135,7 +140,7 @@ var nodes = {};
         };
 
         this.parseURL = function () {
-
+			var self = this;
             // get fields from URL and update field list in UI
             var fields = getURLParameter("fields");
             if (fields != null) {
@@ -198,7 +203,7 @@ var nodes = {};
         this.keyValue = function (data, event) {
             
             var html = ""; 
-            if(typeof data === "object") {
+            if(data && typeof data === "object") {
                 if(data.constructor.name == "Array") {
                     for (var i = 0; i < data.length; i++ ) {
                         html += "<div class='array_array'>"+data[i]+"</div>";
@@ -313,9 +318,9 @@ var nodes = {};
 		var path = location.pathname.split("/");
 
 		nodes = new dataList();
+		ko.applyBindings(nodes);
 		nodes.nodeId = path[path.length -1];
         nodes.parseURL();
-		ko.applyBindings(nodes);
 		nodes.loadData(nodes);
 		
 		$("#selected_fields").on("click", "button", function() {

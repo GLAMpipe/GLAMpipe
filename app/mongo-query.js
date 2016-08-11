@@ -83,6 +83,21 @@ exports.findOne = function (query, collectionname, callback) {
 	});   
 }
 
+exports.findOneProjection = function (query, projection, collectionname, callback) {
+    
+	var collection = db.collection(collectionname);
+
+    
+	collection.findOne(query, projection, function (err, result) {
+		if (err) {
+			console.log("ERROR:", err);
+			callback(null)
+		} else {
+			callback(result);
+		}
+	});   
+}
+
 
 exports.findOneById = function (doc_id, collectionname, callback) {
 	exports.findOne ({_id: mongojs.ObjectId(doc_id)}, collectionname, function (data) {

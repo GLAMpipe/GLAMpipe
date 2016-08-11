@@ -271,7 +271,8 @@ exports.createProject = function (title, res) {
 					"dir": title_dir,
 					"prefix": "p" + meta.project_count + "_" + collectionName ,
 					"collection_count": 0,
-					"node_count":0
+					"node_count":0,
+					"schemas": []
 				};
 				mongoquery.insertProject (project, function(data) {
 					console.log("project \"" + title + "\" created!");
@@ -438,6 +439,14 @@ exports.runNode = function (req, res, io) {
 					updatequery: null,
 					error: null,
 					console:console,
+					schema: [],
+					key_type: [],
+					addkey: function (key, type) {
+						if(this.schema.indexOf(key) < 0) {
+							this.schema.push(key);
+							this.key_type.push(type);
+						}
+					},
 					say: function(ch, msg) {
 						console.log(ch.toUpperCase() + ":", msg);
 						io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
@@ -482,29 +491,42 @@ exports.runNode = function (req, res, io) {
 									function (callback) {
 
 										exports.callAPI(sandbox.out.url, function(error, response, body) {
-											sandbox.context.error = error;
-											sandbox.context.response = response;
-											sandbox.context.data = body;
-											sandbox.out.url = "";
-											runNodeScriptInContext("run", node, sandbox, io);
-											
-											if(sandbox.context.node_error) 
-												return callback(sandbox.context.node_error, null);
-											
-											
-											// add source id to data (expects out.value to be an array)
-											if(sandbox.out.value != null) {
-												for (var i = 0; i < sandbox.out.value.length; i++ ) {
-													// flatten
-													//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
-													sandbox.out.value[i][MP.source] = node._id;
-												}
-											
+											if(error) {
+												sandbox.out.say("error", error);
+											} else {
+												sandbox.context.error = error;
+												sandbox.context.response = response;
+												sandbox.context.data = body;
+												sandbox.out.url = "";
+												sandbox.out.schema = [];
+												runNodeScriptInContext("run", node, sandbox, io);
+												console.log("SCHEMA:", sandbox.out.schema);
+												mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
+													if(error)
+														console.log(error);
+													else
+														console.log("SCHEMA saved");
+												})
 												
-												// insert data
-												mongoquery.insert(node.collection, sandbox.out.value, function() {
-													callback(null, sandbox.out.url);
-												});
+												
+												if(sandbox.context.node_error) 
+													return callback(sandbox.context.node_error, null);
+												
+												
+												// add source id to data (expects out.value to be an array)
+												if(sandbox.out.value != null) {
+													for (var i = 0; i < sandbox.out.value.length; i++ ) {
+														// flatten
+														//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
+														sandbox.out.value[i][MP.source] = node._id;
+													}
+												
+													
+													// insert data
+													mongoquery.insert(node.collection, sandbox.out.value, function() {
+														callback(null, sandbox.out.url);
+													});
+												}
 											}
 										});
 									}
@@ -894,6 +916,60 @@ exports.runNode = function (req, res, io) {
 				break;
 
 
+				case "detect":
+
+
+					switch (node.subtype) {
+						
+						case "language":
+							// find everything
+							mongoquery.find2({}, node.collection, function(err, docs) {
+								sandbox.context.doc_count = docs.length;
+								console.log(docs.length);
+								runNodeScriptInContext("init", node, sandbox, io);
+								var cld = require("cld");
+								
+								// run node once per record
+								async.eachSeries(docs, function iterator(doc, next) {
+
+									sandbox.context.doc = doc;
+									sandbox.context.count++;
+									sandbox.out.value = null;  // reset output
+									var input = node.params.in_field;
+									
+									if (doc[input] && doc[input].constructor.name == "Array") {
+										async.eachSeries(doc[input], function iterator(value, nextvalue) {
+											sandbox.context.data = [];
+											cld.detect(value, function(err, result) {
+												sandbox.context.data.push(result);
+												console.log("LANG:",result);
+												nextvalue();
+											});
+										}, function done() {
+											run.runInContext(sand);
+											var setter = {};
+											setter[node.out_field] = sandbox.out.value;
+											console.log(setter);
+											mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+										})
+										
+									} else {
+										next();
+									}
+
+									
+
+									
+								}, function done () {
+									runNodeScriptInContext("finish", node, sandbox, io);
+									exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
+								});
+							});
+							break;
+						}
+
+				break;
+
 				case "upload":
 
 					switch (node.subtype) {
@@ -1161,7 +1237,7 @@ function initNode (nodeRequest, res, io, project) {
 				node.out_field = node.params.out_field;
 
 			// settings html is on client side and therefore it is not aware of node content
-			// so we write params to settings view so that client side script can be acces parameters of node (urls and so on)
+			// so we inject node.params to settings view so that client side script can acces parameters of node (urls and so on)
 			if( node.views.settings) {
 				node.views.settings = node.views.settings.replace("[[params]]", "var params = " + JSON.stringify(node.params) + ";\n");
 			}
@@ -1475,23 +1551,21 @@ exports.getCollectionByField = function (req, res) {
 
 
 exports.getCollectionFields = function (collection_id, cb) {
-	mongoquery.findOne({}, collection_id, function(data) {
-		if(!data) {
-			cb({"error":"collection is empty!"});
-		} else {
-			cb (data);
-		}
-		
-		//return;
-		//var keys = {};
-		//for (key in data) {
-			//var type = typeof data[key];
+	
+	// first we check if there is a schema for collection
 
-			//keys[key] = typeof data[key];
+		mongoquery.findOneProjection({"schemas.collection": collection_id}, {"schemas.$":1},  "mp_projects", function(project) {
+			
+			var data = {};
+			for (var i = 0; i <  project.schemas[0].keys.length; i++) {
+				var type = project.schemas[0].types[i];
+				data[project.schemas[0].keys[i]] = {"type":type};
+			}
+			cb(data);
+			
+		})
+	// if not, then use pioneer method and grab first record
 
-		//}
-		//cb(keys);
-	});
 }
 
 
@@ -1531,11 +1605,11 @@ exports.editCollectionAddToSet = function (collection_id, req, callback) {
 
 exports.nodeView = function  (req, cb) {
 	fs = require('fs')
-	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
+	fs.readFile("./app/views/view.html", 'utf8', function (err,view_html) {
 		if (err) {
 			return console.log(err);
 		}
-		nodeview.createNodeView(data, req, false, function (html) {
+		nodeview.createNodeView(view_html, req, false, function (html) {
 			cb(html);
 		});
 
@@ -1674,6 +1748,8 @@ exports.callAPI = function (url, callback) {
 	if (typeof url === "undefined" || url == "")
 		callback("URL not set", null, null);
 
+	console.log("REQUEST:", url);
+
 	var headers = {
 		'User-Agent':       'GLAMpipe/0.0.1',
 	}
@@ -1686,13 +1762,17 @@ exports.callAPI = function (url, callback) {
 	};
 
 	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
+		console.log(response.statusCode);
+		if (error) {
+			console.log("ERROR:", error);
+			callback(error, response, body);
+		} else if (response.statusCode == 200) {
 			//console.log(body); 
+			console.log("SERVER RESPONSE:", response.statusCode);
 			callback(null, response, body);
 		} else {
-			console.log(error);
-			callback(error, response, body);
-			return;
+			console.log("SERVER RESPONSE:", response.statusCode);
+			callback("bad response from server:" + response.statusCode, response, body);
 		}
 	});
 }
