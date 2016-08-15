@@ -6,6 +6,7 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
+var node_runner = require("../app/node-runner.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -949,11 +950,12 @@ exports.runNode = function (req, res, io) {
 											run.runInContext(sand);
 											var setter = {};
 											setter[node.out_field] = sandbox.out.value;
-											console.log(setter);
+											console.log("SETTER:", setter);
 											mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 										})
 										
 									} else {
+										console.log("ABSTRACT NOT FOUND");
 										next();
 									}
 
@@ -962,7 +964,7 @@ exports.runNode = function (req, res, io) {
 									
 								}, function done () {
 									runNodeScriptInContext("finish", node, sandbox, io);
-									exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
+									//exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
 								});
 							});
 							break;
@@ -973,6 +975,10 @@ exports.runNode = function (req, res, io) {
 				case "upload":
 
 					switch (node.subtype) {
+						
+						case "data":
+							node_runner.updateData(node,sandbox, io);
+						break;
 						
 						case "mediawiki_bot":
 						
@@ -1550,24 +1556,6 @@ exports.getCollectionByField = function (req, res) {
 }
 
 
-exports.getCollectionFields = function (collection_id, cb) {
-	
-	// first we check if there is a schema for collection
-
-		mongoquery.findOneProjection({"schemas.collection": collection_id}, {"schemas.$":1},  "mp_projects", function(project) {
-			
-			var data = {};
-			for (var i = 0; i <  project.schemas[0].keys.length; i++) {
-				var type = project.schemas[0].types[i];
-				data[project.schemas[0].keys[i]] = {"type":type};
-			}
-			cb(data);
-			
-		})
-	// if not, then use pioneer method and grab first record
-
-}
-
 
 exports.getCollectionCount = function (collection_id, cb) {
 	//var collection = db.collection(collection_id);
@@ -1607,11 +1595,13 @@ exports.nodeView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,view_html) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(view_html, req, false, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(view_html, req, false, function (html) {
-			cb(html);
-		});
 
 	});
 }
@@ -1621,12 +1611,13 @@ exports.nodeEditView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/edit.html", 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(data, req, true, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(data, req, true, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
@@ -1635,12 +1626,13 @@ exports.nodeFileView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/" + req.query.view, 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(data, req, false, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(data, req, false, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
@@ -1652,12 +1644,13 @@ exports.viewCollection = function  (collectionName, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createCollectionView(data, collectionName, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createCollectionView(data, collectionName, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
@@ -1771,7 +1764,7 @@ exports.callAPI = function (url, callback) {
 			console.log("SERVER RESPONSE:", response.statusCode);
 			callback(null, response, body);
 		} else {
-			console.log("SERVER RESPONSE:", response.statusCode);
+			console.log("SERVER RESPONSE:", response);
 			callback("bad response from server:" + response.statusCode, response, body);
 		}
 	});

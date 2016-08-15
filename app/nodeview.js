@@ -1,7 +1,8 @@
-var mongojs = require('mongojs');
+var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
 var mongoquery 	= require("../app/mongo-query.js");
+var collection = require("../app/collection.js");
 
 
 var exports = module.exports = {};
@@ -85,34 +86,16 @@ exports.createCollectionView = function (data, collectionName, callback) {
 }
 
 // create knockout template based on schema written by import node
-function generateSchemaView (node, fields, edit, callback) {
+function generateSchemaView (node, display_keys, edit, callback) {
     
-	mongoquery.findOneProjection({"schemas.collection": node.collection}, {"schemas.$":1},  "mp_projects", function(project) {
+    collection.getKeys(node.collection, function(keys) {
+		
+		if(keys) {
 
-		if(project) {
-
-			var schema = project.schemas[0];
 			var data = {};
-			var fields_arr = [];
+			var display_keys_arr = [];
             var keys_html = "";
-            var html = '';
-            
-			//console.log(schema.keys);
-			
-			if (fields != null) {
-				var fields_arr = fields.split(",");
-				for (var i = 0; i <  schema.keys.length; i++) {
-					// remove keys that are not listed in "fields" TODO: maybe this should be done in query
-					if(fields_arr.indexOf(schema.keys[i]) != -1)
-						data[schema.keys[i]] = {"type":"array"};
-				}
-			} else {
-				for (var i = 0; i <  schema.keys.length; i++) {
-					data[schema.keys[i]] = {"type":"array"};
-				}
-			}
-			
-			
+            var html = "";
 
 
 			html += ''
@@ -124,10 +107,15 @@ function generateSchemaView (node, fields, edit, callback) {
 
 			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
 
-			for (var i = 0; i < schema.keys.length; i++) {
-                    keys_html += '<option value="'+schema.keys[i]+'">'+schema.keys[i]+'</option>'
+			for (var i = 0; i < keys.sorted.length; i++) {
+                    keys_html += '<option value="' + keys.sorted[i] + '">' + keys.sorted[i] + '</option>';
 			}
 
+
+			// if display_field are set, then we build knockout template using only those keys
+			if (display_keys != null) {
+				keys.sorted = display_keys.split(","); 
+			}
 
             // we put thumbnails first
             var thumb_cell = '';
@@ -141,8 +129,8 @@ function generateSchemaView (node, fields, edit, callback) {
 
 			
 
-			for (key in data) {
-					html += '			<th id="'+key+'" data-bind="click: sort">'+key+'</th>'
+			for (var i = 0; i < keys.sorted.length; i++) {
+					html += '			<th id="' + keys.sorted[i] + '" data-bind="click: sort">' + keys.sorted[i] + '</th>'
 			}
 
 			html += '			</tr>'
@@ -154,11 +142,11 @@ function generateSchemaView (node, fields, edit, callback) {
 			html += '				<td data-bind="text: vcc"></td>'
             html += thumb_cell;
             
-			for (key in data) {
-				if (data[key].type == 'array') {
+			for (var i = 0; i < keys.sorted.length; i++) {
+				if (keys.keys[keys.sorted[i]] && keys.keys[keys.sorted[i]].type == 'array') {
                         html += '           <td class="array">' 
 						//html += '				<div class="data-container" data-bind="foreach: $root.keyValueList($data[\''+key+'\'])">'
-						html += '				<div class="data-container" data-bind="foreach: '+key+'">'
+						html += '				<div class="data-container" data-bind="foreach: '+ keys.sorted[i] +'">'
                         html += '                   <div data-bind="html:$root.keyValue($data)"></div>'
                         html += '               </div>'
 						html += '           </td>'
@@ -166,10 +154,10 @@ function generateSchemaView (node, fields, edit, callback) {
                 } 
                 else {
                     // we render "_html" fields as html (for example thumbnails)
-                    if (key.indexOf("_html") !== -1)
-                        html += '				<td><div class="data-container" data-bind="html: '+key+'"></div></td>';
+                    if (keys.sorted[i].indexOf("_html") !== -1)
+                        html += '				<td><div class="data-container" data-bind="html: '+ keys.sorted[i] +'"></div></td>';
                     else
-                        html += '				<td><div class="data-container" data-field="'+key+'" data-bind="inline: '+key+',attr:{\'data-id\':$data._id}"></div></td>';
+                        html += '				<td><div class="data-container" data-field="' + keys.sorted[i] +'" data-bind="inline: '+ keys.sorted[i] +',attr:{\'data-id\':$data._id}"></div></td>';
                 }
 					
 			}
@@ -178,6 +166,7 @@ function generateSchemaView (node, fields, edit, callback) {
 				+ '		</tbody>'
 				+ '	</table>'
 				+ '</div>';
+
 
 			callback(keys_html, html);
 		} else {

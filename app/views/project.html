@@ -300,19 +300,6 @@
 		}
 	};
 
-	function runNode(settings, node_id) {
-		$("#node_msg").text("running...");
-		$("#node_msg").removeClass("done");
-		$("#node_msg").addClass("busy");
-		// save settings also locally
-		nodes.selectedNode.settings = settings;
-		$.post("/run/node/" + node_id, settings, function(data) {
-			console.log('node executed');
-			if(data.error)
-				alert(data.error);
-		});
-	}
-
 	function onLoad() {
 
 		var path = window.location.pathname.split("/");

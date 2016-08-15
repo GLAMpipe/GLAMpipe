@@ -1,4 +1,5 @@
 var proxy 	= require("../app/proxy.js");
+var collection = require("../app/collection.js");
 
 module.exports = function(express, glampipe, passport) {
     
@@ -179,8 +180,8 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.viewCollection(req.params.id, function(data) {res.send(data)});
 	});
 
-	express.get('/get/collection/fields/:id', function (req, res) {
-		glampipe.core.getCollectionFields(req.params.id, function(data) {res.send(data)});
+	express.get('/get/collection/:name/fields', function (req, res) {
+		collection.getKeys(req.params.name, function(data) {res.send(data)});
 	});
 
 
