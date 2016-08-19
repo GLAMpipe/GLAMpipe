@@ -98,6 +98,27 @@ function generateSchemaView (node, display_keys, edit, callback) {
             var html = "";
 
 
+			// RENDERS visible fields selector
+			keys_html += '<option value="*">all fields (*)</option>';
+			for (var i = 0; i < keys.sorted.length; i++) {
+                    keys_html += '<option value="' + keys.sorted[i] + '">' + keys.sorted[i] + '</option>';
+			}
+			
+			// if all field "*" is not set
+			if (display_keys != "*") {
+			
+				// if default keys are set, then we build knockout template using only those keys
+				if (node.views.default_keys != null) {
+					keys.sorted = node.views.default_keys; 
+				}
+
+				// if display_field are set, then we build knockout template using only those keys (override default keys)
+				if (display_keys != null) {
+					keys.sorted = display_keys.split(","); 
+				}
+			}
+
+
 			html += ''
 
 				+ '<div>'
@@ -106,16 +127,6 @@ function generateSchemaView (node, display_keys, edit, callback) {
 				+ '			<tr>';
 
 			html += '			<th id="vcc" data-bind="click: sort">[count]</th>'
-
-			for (var i = 0; i < keys.sorted.length; i++) {
-                    keys_html += '<option value="' + keys.sorted[i] + '">' + keys.sorted[i] + '</option>';
-			}
-
-
-			// if display_field are set, then we build knockout template using only those keys
-			if (display_keys != null) {
-				keys.sorted = display_keys.split(","); 
-			}
 
             // we put thumbnails first
             var thumb_cell = '';
@@ -128,7 +139,7 @@ function generateSchemaView (node, display_keys, edit, callback) {
 			//}
 
 			
-
+			// RENDERS table headers (sort)
 			for (var i = 0; i < keys.sorted.length; i++) {
 					html += '			<th id="' + keys.sorted[i] + '" data-bind="click: sort">' + keys.sorted[i] + '</th>'
 			}
@@ -138,7 +149,7 @@ function generateSchemaView (node, display_keys, edit, callback) {
 				+ '		<tbody data-bind="foreach: collection">'
 				+ '			<tr>';
 
-			// data cells
+			// RENDERS data cells
 			html += '				<td data-bind="text: vcc"></td>'
             html += thumb_cell;
             

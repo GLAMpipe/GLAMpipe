@@ -447,8 +447,8 @@ $( document ).ready(function() {
         
         var obj = $(e.target);
         var map = {};
-        // read input from settings
-        obj.parent().parent().find(".settings input, .settings select").each(function() {
+        // read input from settings (only direct child nodes)
+        obj.parent().parent().find(".settings > input, .settings > select").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
@@ -489,11 +489,6 @@ $( document ).ready(function() {
             $("#dynamic_fields").empty();
             $("#dynamic_fields").append(html);
             $("#dynamic_fields").dialog({
-                position: { 
-                    my: 'left top',
-                    at: 'right top',
-                    of: obj
-                },
                 title: "choose field"
             });
             
@@ -565,7 +560,7 @@ $( document ).ready(function() {
     var socket = io.connect('http://localhost');
 
     socket.on('hello', function (data) {
-        var cons = $("#tab-settings-" + data.nodeid +" .node_cons");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
             cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
@@ -576,7 +571,7 @@ $( document ).ready(function() {
 
     
     socket.on('news', function (data) {
-        var cons = $("#tab-settings-" + data.nodeid +" .node_cons");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
             cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
@@ -586,13 +581,14 @@ $( document ).ready(function() {
     });
 
     socket.on('progress', function (data) {
-        var cons = $("#tab-settings-" + data.nodeid +" .node_cons");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
+        console.log($("#tab-settings-" + data.nodeid));
         cons.append("<div class=\"progress\">" + data.msg + "</div>");
         tailScroll(cons);
     });
 
     socket.on('error', function (data) {
-        var cons = $("#tab-settings-" + data.nodeid +" .node_cons");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
             cons.append("<div class=\"bad\">" + data.msg + "</div>");
             cons.removeClass("busy");
@@ -604,7 +600,7 @@ $( document ).ready(function() {
     });
 
     socket.on('finish', function (data) {
-        var cons = $("#tab-settings-" + data.nodeid +" .node_cons");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         cons.empty();
         cons.append("<div class=\"good\">" + data.msg + "</div>");
         cons.removeClass("busy");

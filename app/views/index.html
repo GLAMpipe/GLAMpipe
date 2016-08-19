@@ -50,6 +50,8 @@
 				} else {
 					var data = {'title':self.itemToAdd()};
 					$.post("/create/project", data, function(returnedData) {
+						if(returnedData.error)
+							alert(returnedData.error);
 						self.itemToAdd(""); // Clear the text box 
 						self.allItems([]);
 						self.loadItems();

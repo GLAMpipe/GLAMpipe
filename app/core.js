@@ -6,7 +6,7 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
-var node_runner = require("../app/node-runner.js");
+var sourceAPIFetch= require("../app/node_runners/basic_fetch.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -249,13 +249,15 @@ exports.createProject = function (title, res) {
 	// create projects/project_name directory 
 	var projectPath = path.join(global.config.projectsPath, title_dir); 
 	fs.mkdir(projectPath, function(err) {
+		var error_msg = "error in project directory creation!";
 		if(err) {
-			if(err.code === "EEXIST")
-				console.log("Project directory exists");
+			if(err.code === "EEXIST") 
+				error_msg = "Project directory exists! Please use other name for the project or delete project directory: " + projectPath;
 			else
-				console.log("ERROR:", err);
-				
-			res.json({"error": "error in project directory creation!"});
+				error_msg = err;
+			
+			console.log("ERROR:", error_msg);
+			res.json({"error": error_msg});
 			return;
 		}
 		// create node output directories (blocking)
@@ -289,7 +291,13 @@ exports.deleteProject = function (doc_id, res) {
 	
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
 		console.log("PROJECT: deleting project", data.title);
-		res.json({status:'ok'});
+		// if project has collections then remove those first
+		
+		// then remove project document itself
+		mongoquery.remove(doc_id, "mp_projects", function(data) {
+			res.json(data);
+		});
+		
 	});
 	
 
@@ -486,80 +494,17 @@ exports.runNode = function (req, res, io) {
 					switch (node.subtype) {
 						
 						case "API":
-						
-							function requestLoop(){
-								async.series([
-									function (callback) {
 
-										exports.callAPI(sandbox.out.url, function(error, response, body) {
-											if(error) {
-												sandbox.out.say("error", error);
-											} else {
-												sandbox.context.error = error;
-												sandbox.context.response = response;
-												sandbox.context.data = body;
-												sandbox.out.url = "";
-												sandbox.out.schema = [];
-												runNodeScriptInContext("run", node, sandbox, io);
-												console.log("SCHEMA:", sandbox.out.schema);
-												mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
-													if(error)
-														console.log(error);
-													else
-														console.log("SCHEMA saved");
-												})
-												
-												
-												if(sandbox.context.node_error) 
-													return callback(sandbox.context.node_error, null);
-												
-												
-												// add source id to data (expects out.value to be an array)
-												if(sandbox.out.value != null) {
-													for (var i = 0; i < sandbox.out.value.length; i++ ) {
-														// flatten
-														//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
-														sandbox.out.value[i][MP.source] = node._id;
-													}
-												
-													
-													// insert data
-													mongoquery.insert(node.collection, sandbox.out.value, function() {
-														callback(null, sandbox.out.url);
-													});
-												}
-											}
-										});
-									}
+							switch (node.subsubtype) {
+								
+								case "two_rounds" :
+									sourceAPIFetch.fetchDataInitialMode (node,sandbox, io);
+								break;
+								
+								default:
+									sourceAPIFetch.fetchData(node,sandbox, io);
 
-								], function(err, result){
-									if (err) {
-										console.log(err);
-										return;
-									}
-										
-									//generate view and do *not* wait it to complete
-									if (!node.views.data)
-										exports.updateView(node, sandbox, io, function(msg) {});
-										
-									// if node provides new url, then continue loop
-									if (sandbox.out.url != "") {
-										requestLoop()
-									} else {
-										runNodeScriptInContext("finish", node, sandbox, io);
-										return;
-									}
-								}
-							)};
-
-							// start query loop
-							// remove previous data insertet by node and import file
-							var query = {}; 
-							query[MP.source] = node._id;
-							mongoquery.empty(node.collection, query, function() {
-								requestLoop();
-							});
-							
+							}
 							
 						break;
 
@@ -973,115 +918,37 @@ exports.runNode = function (req, res, io) {
 				break;
 
 				case "upload":
-
 					switch (node.subtype) {
-						
 						case "data":
-							node_runner.updateData(node,sandbox, io);
-						break;
-						
-						case "mediawiki_bot":
-						
-							var bot = require('nodemw');
-							fs = require('fs');
-							
-							// ask bot config (username, pass etc.) from node
-							runNodeScriptInContext("login", node, sandbox, io);
-							var client = new bot(sandbox.out.botconfig);
-							console.log(sandbox.context.node);
-							console.log(sandbox.out.botconfig);
-
-							client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
+							switch (node.subsubtype) {
+								case "dspace":
 								
-								if(err) {
-									io.sockets.emit("error", "Login failed!");
-									return;
-								}
-								// find everything
-								mongoquery.find2({}, node.collection, function(err, doc) {
-									sandbox.context.doc_count = doc.length;
-									runNodeScriptInContext("init", node, sandbox, io);
-									
-									// run node once per record
-									async.eachSeries(doc, function iterator(doc, next) {
-
-										sandbox.context.doc = doc;
-										sandbox.context.count++;
-										sandbox.context.data = null;
-										sandbox.context.error = null;
-										sandbox.context.skip = null;
-										
-										runNodeScriptInContext("pre_run", node, sandbox, io);
-										if(sandbox.context.skip) {
-											next();
-										} else {
-											
-											console.log("GETTING:",sandbox.out.title);
-											// get revisions (to see if page exists)
-											client.getArticle('File:' +sandbox.out.title, function (err, d) {
-												if(err)
-													console.log(err);
-												if(d != null) {
-													io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-													console.log("CONTENT:", d);
-													return next();
-
-												} else {
-
-													fs.readFile(sandbox.out.filename, function (err,data) {
-														if (err) {
-															console.log("file not found:", err);
-															io.sockets.emit("error", err);
-															return next();	// skip if file not found
-														}
-														// upload file
-														client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
-															if(err) {
-																io.sockets.emit("error", err);
-																var setter = {};
-																setter[node.out_field] = err;
-																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-															} else {
-																//console.log(data);
-																
-																// upload wikitext
-																var content = sandbox.out.wikitext;
-																console.log("STARTING TO EDIT", sandbox.out.title);
-																console.log("******REAL URL", data.imageinfo.canonicaltitle);
-																client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-																	sandbox.context.error = err;
-																	sandbox.context.data = data;
-																	runNodeScriptInContext("run", node, sandbox, io);
-																	// write commons page url to db
-																	var setter = {};
-																	setter[node.out_field] = data.imageinfo.descriptionurl;
-																	mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
-																		if(sandbox.context.abort)
-																			next(true);
-																		else
-																			next();
-																	});
-																});
-															}
-														});
-													});
-												}
-												
-											});
-									}
-										
-										
-									}, function done () {
-										runNodeScriptInContext("finish", node, sandbox, io);
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node,sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											dspace.updateData(node,sandbox, io);
+										}
 									});
-								});
-							});
+									
+									break;
+							}
 
-						break;
+							break;
 						
-					}
-				break;
+						case "file":
+							switch (node.subsubtype) {
+								case "mediawiki_bot":
+								
+									var mv_bot = require("../app/node_runners/mediawiki_bot.js");
 
+								break;
+							}
+						break;
+				}
+				break;
 
 				default:
 					sandbox.out.say("finish", "This node is not runnable");
@@ -1335,7 +1202,7 @@ exports.createCollectionNode = function (nodeRequest, res, io) {
 		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
 		nodeRequest.params.collection = nodeRequest.collection;
 		nodeRequest.node_count = data.node_count;
-		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1} }, function() {
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [nodeRequest.collection] } }, function() {
 			mongoquery.createCollection(nodeRequest.collection, function () {
 				initCollectionNode(nodeRequest, res, io);
 			});

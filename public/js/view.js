@@ -186,6 +186,17 @@ var nodes = {};
             // reload
             window.location.search = query;
         }
+
+        this.toggleAllFields = function () {
+            var self = this;
+            var fields_str = "*";
+            self.params.fields = fields_str;
+            var query = this.createParamsURL();
+            //parent.nodes.updateNodeViewURL(self.nodeId, query);
+            
+            // reload
+            window.location.search = query;
+        }
         
 		// show deep data
 		this.openCell = function (data, event) {
@@ -331,6 +342,10 @@ var nodes = {};
 		$("#field_select").on("change", function() {
 			$("#selected_fields").append("<button>"+this.value+"</button>");
             nodes.updateFields();
+		});
+		
+		$("#show_all_fields").on("change", function() {
+            nodes.toggleAllFields();
 		});
 	}
 

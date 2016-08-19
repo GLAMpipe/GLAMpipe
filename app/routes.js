@@ -127,7 +127,6 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getNodes(res);
 	});
 
-
 	express.get('/get/node/:id', function (req, res) {
 		glampipe.core.getNodeFromDir(req.params.id, res);
 	});
