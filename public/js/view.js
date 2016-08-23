@@ -6,8 +6,17 @@ var nodes = {};
 			var input = $('<textarea />',{'type': 'text', 'style' : 'display:none'});
 			span.after(input);
 			
+			var html = "";
+			var content = valueAccessor();
+			if(content.constructor.name == "Array") {
+				for(var i = 0; i < content.length; i++) {
+					html += "<div class='array'>"+content[i]+"</div>";
+				}
+			} else
+				html = content;
+			
 			ko.applyBindingsToNode(input.get(0), { value: valueAccessor()});
-			ko.applyBindingsToNode(span.get(0), { text: valueAccessor()});
+			ko.applyBindingsToNode(span.get(0), { html: html});
 			
 			span.click(function(){
 				input.width(span.width());
@@ -210,19 +219,20 @@ var nodes = {};
 			details.append(table);
 
 		}
+
         
         this.keyValue = function (data, event) {
-            
             var html = ""; 
             if(data && typeof data === "object") {
                 if(data.constructor.name == "Array") {
+
                     for (var i = 0; i < data.length; i++ ) {
                         html += "<div class='array_array'>"+data[i]+"</div>";
                     }
                     
                 } else {
                     html = "<div class='array_object'>\n";
-                    
+                   
                     for (var j in data) {
                         
                         if (data.hasOwnProperty(j)) {

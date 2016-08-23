@@ -6,7 +6,8 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
-var sourceAPIFetch= require("../app/node_runners/basic_fetch.js");
+var sourceAPI	= require("../app/node_runners/basic_fetch.js");
+var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -429,6 +430,7 @@ exports.runNode = function (req, res, io) {
 				context: {
 					doc: null,
 					data: null,
+					vars: {},
 					myvar: {},
 					node: node,
 					input_node: input_node,
@@ -450,7 +452,7 @@ exports.runNode = function (req, res, io) {
 					console:console,
 					schema: [],
 					key_type: [],
-					addkey: function (key, type) {
+					add_display_key: function (key, type) {
 						if(this.schema.indexOf(key) < 0) {
 							this.schema.push(key);
 							this.key_type.push(type);
@@ -489,7 +491,8 @@ exports.runNode = function (req, res, io) {
 
 				case "source":
 					runNodeScriptInContext("init", node, sandbox, io);
-					if(sandbox.context.init_error) return;
+					if(sandbox.context.init_error) 
+						return;
 					
 					switch (node.subtype) {
 						
@@ -497,12 +500,13 @@ exports.runNode = function (req, res, io) {
 
 							switch (node.subsubtype) {
 								
+								// two phase import
 								case "two_rounds" :
-									sourceAPIFetch.fetchDataInitialMode (node,sandbox, io);
+									sourceAPI.fetchDataInitialMode (node,sandbox, io);
 								break;
 								
 								default:
-									sourceAPIFetch.fetchData(node,sandbox, io);
+									sourceAPI.fetchData(node,sandbox, io);
 
 							}
 							
@@ -519,14 +523,11 @@ exports.runNode = function (req, res, io) {
 								
 								// add source id to data
 								for (var i = 0; i < data.length; i++ ) {
-									// flatten
 									data[i][MP.source] = node._id;
 								}
 								// insert
 								mongoquery.insert(node.collection, data, function() {
 									runNodeScriptInContext("finish", node, sandbox, io);
-									//generate view and do *not* wait it to complete
-									//exports.updateView(node, sandbox, io, function(msg) {});
 								});
 								
 							}
@@ -859,6 +860,26 @@ exports.runNode = function (req, res, io) {
 						});
 					});
 
+				break;
+
+
+				case "file":
+				switch (node.subtype) {
+					case "pdf":
+						var extractReferences = require("../app/node_runners/file_pdf.js");
+						asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+					break;
+				}
+				break;
+
+
+				case "link":
+				switch (node.subtype) {
+					case "checker":
+						var checker = require("../app/node_runners/link-checker.js");
+						asyncLoop.loop(node, sandbox, checker.checkLinks);
+					break;
+				}
 				break;
 
 

@@ -447,8 +447,8 @@ $( document ).ready(function() {
         
         var obj = $(e.target);
         var map = {};
-        // read input from settings (only direct child nodes)
-        obj.parent().parent().find(".settings > input, .settings > select").each(function() {
+        // read input from settings (only direct child nodes and not checkboxes)
+        obj.parent().parent().find(".settings > input:not([type='checkbox']), .settings > select").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
@@ -457,7 +457,12 @@ $( document ).ready(function() {
             } else {
                 map[$(this).attr("name")] = $(this).val();
             }
+       
         });
+        obj.parent().parent().find(".settings > input[type='checkbox']").each(function() {
+			if($(this).is(':checked'))
+				map[$(this).attr("name")] = $(this).val();
+		});
         // and run
         runNode(map, this.id);
         e.preventDefault();
