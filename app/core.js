@@ -556,26 +556,20 @@ exports.runNode = function (req, res, io) {
 						
 						case "file":
 						
-							function fileImport (data) {
-								// provide data to node
-								sandbox.context.data = data;
+							switch (node.subsubtype) {
 								
-								// let node pick the data it wants from result
-								runNodeScriptInContext("run", node, sandbox, io);
-
-								// insert
-								mongoquery.insert(node.collection, sandbox.out.value, function() {
-									runNodeScriptInContext("finish", node, sandbox, io);
-								});
+								case "csv":
 								
+									var csv = require("../app/node_runners/source-file-csv.js");
+									// remove previous data insertet by node and import file
+									var query = {}; 
+									query[MP.source] = node._id;
+									mongoquery.empty(node.collection, query, function() {
+										csv.importFile(node, sandbox, io);
+									});
+									
+								break;
 							}
-							
-							// remove previous data insertet by node and import file
-							var query = {}; 
-							query[MP.source] = node._id;
-							mongoquery.empty(node.collection, query, function() {
-								exports.importFile(node, fileImport);
-							});
 								
 						
 						break;
@@ -1035,6 +1029,52 @@ function getPrevNode(project, node) {
 	}
 }
 
+
+
+exports.uploadFile = function (req, res ) {
+	
+	switch (req.file.mimetype) {
+		case "text/xml":
+			console.log("File type: XML");
+			return res.json({"error":"XML import not implemented yet!"});
+		break;
+		
+		case "application/json":
+			console.log("File type: JSON");
+			return res.json({"error":"JSON import not implemented yet!"});
+		break;
+		
+		case "text/tab-separated-values":
+			console.log("File type: tab separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		case "text/csv":
+			console.log("File type: comma separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		default:
+			console.log("File type: unidentified!");
+			return res.json({"error":"File type unidentified!"});
+	}
+}
 
 
 /**
@@ -1543,80 +1583,7 @@ exports.viewCollection = function  (collectionName, cb) {
 }
 
 
-exports.uploadFile = function (req, res ) {
-	
-	switch (req.file.mimetype) {
-		case "text/xml":
-			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented yet!"});
-		break;
-		
-		case "application/json":
-			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented yet!"});
-		break;
-		
-		case "text/tab-separated-values":
-			console.log("File type: tab separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
-		case "text/csv":
-			console.log("File type: comma separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
-		default:
-			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified!"});
-	}
-}
 
-
-exports.importFile = function (node, callback) {
-	switch (node.params.mimetype) {
-		case "text/xml":
-			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented yet!"});
-		break;
-		case "application/json":
-			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented yet!"});
-		break;
-		case "text/tab-separated-values":
-			console.log("File type: tab separated values");
-			importTSV("tsv", node, function(data) {
-				callback(data);
-			})
-		break;
-		case "text/csv":
-			console.log("File type: comma separated values");
-			importTSV("csv", node, function(data) {
-				callback(data);
-			})
-		break;
-		default:
-			console.log("File type: unidentified!");
-			//return res.json({"error":"File type unidentified!"});
-			return;
-	}
-}
 
 /**
  * Make an external API request
