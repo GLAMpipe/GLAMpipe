@@ -46,12 +46,17 @@ function loop (node, sandbox, onDoc) {
 
 	// find everything
 	mongoquery.find2({}, node.collection, function (err, docs) {
+		
 		sandbox.context.doc_count = docs.length;
+	
 		runNodeScriptInContext("init", node, sandbox);
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
 
+			sandbox.context.doc = doc;
+			sandbox.context.count++;
+			
 			// call document processing function
 			onDoc(doc, sandbox, function processed () {
 				if(sandbox.out.setter != null) {
@@ -63,8 +68,6 @@ function loop (node, sandbox, onDoc) {
 				console.log(setter);
 				mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 			});
-
-
 
 		}, function done () {
 			runNodeScriptInContext("finish", node, sandbox);

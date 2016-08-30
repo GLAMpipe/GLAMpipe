@@ -9,7 +9,7 @@ const MP 		= require("../../config/const.js");
 var exports = module.exports = {};
 
 /*
- * Makes a request and return response to node script
+ * 
  * 
  * */
 exports.checkLinks = function (doc, sandbox, next) {
