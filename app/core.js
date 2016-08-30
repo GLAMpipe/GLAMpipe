@@ -373,23 +373,33 @@ exports.getNodeFromFile = function (node_id, res) {
 	});
 }
 
-function getProp(obj, desc) { 
-	var arr = desc.split('.'); 
-	while(arr.length && (obj = obj[arr.shift()])); 
-	if(typeof obj === 'undefined') return ''; 
-	return obj; 
+function getProp(obj, desc, index) { 
+	
+	// if array, then give value by optional index
+	if (obj.constructor.name == "Array") {
+		if(index) {
+			if(obj[index])
+				return obj[index];
+			else
+				return obj[0]
+		} else {
+			// if index is not given or its not founde, then give first one
+			return obj[0];
+		}
+		
+	// this object, find dotted value (like dc.type.uri)	
+	} else {
+	
+		var arr = desc.split('.'); 
+		while(arr.length && (obj = obj[arr.shift()])); 
+		if(typeof obj === 'undefined') return ''; 
+		return obj; 
+	}
 }
 
 /**
  * run project node based on node type
- * SOURCE - API
- * - calls metapipe.callAPI 
- * - executes script in node's scripts.run
- * SOURCE -FILE
- * - calls metapipe.importFile 
- * - executes script in node's scripts.run 
- * DEFAULT
- * - applies node's scripts.run to each record
+ * - this is THE MAIN SWITCH of GLAMpipe
  */ 
 exports.runNode = function (req, res, io) {
 	console.log('Running node:', req.params.id);
@@ -796,34 +806,8 @@ exports.runNode = function (req, res, io) {
 
 				case "download":
 						
-					// find everything
-					mongoquery.find2({}, node.collection, function(err, doc) {
-						sandbox.context.doc_count = doc.length;
-						runNodeScriptInContext("init", node, sandbox, io);
-						
-						// run node once per record
-						async.eachSeries(doc, function iterator(doc, next) {
-							
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.url = null;
-							sandbox.context.error = null;
-							
-							// ask url and file name from node
-							runNodeScriptInContext("pre_run", node, sandbox, io);
-							exports.downloadFile(node, sandbox, function(sandbox) {
-								run.runInContext(sand);
-								// write file location to db
-								var setter = {};
-								setter[node.out_field] = sandbox.out.value;
-								console.log(setter);
-								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-							})
-							
-						}, function done() {
-							runNodeScriptInContext("finish", node, sandbox, io);
-						});
-					});
+					var downloader = require("../app/node_runners/download-file.js");
+					asyncLoop.loop(node, sandbox, downloader.downloadFile);
 
 				break;
 
@@ -850,7 +834,6 @@ exports.runNode = function (req, res, io) {
 							
 						}, function done () {
 							runNodeScriptInContext("finish", node, sandbox, io);
-							exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
 						});
 					});
 
@@ -920,6 +903,7 @@ exports.runNode = function (req, res, io) {
 
 								break;
 							}
+							
 						break;
 				}
 				break;
@@ -1651,70 +1635,7 @@ exports.readDir = function (dirname, onFileList, onError) {
 }
 
 
-exports.downloadFile = function (node, sandbox, cb ) {
-	var fs = require("fs");
-	var request = require("request")
 
-	if (typeof sandbox.out.url === "undefined") {
-		sandbox.context.error = "URL missing";
-		return cb(sandbox);
-	} 
-	if(sandbox.out.url == null || sandbox.out.url == "") {
-		sandbox.context.error = "URL missing";
-		return cb(sandbox);
-	} 
-
-	if(sandbox.out.url.search("http") != 0) {
-		sandbox.context.error = "URL not starting with 'http'";
-		return cb(sandbox);
-    }
-    
-    
-	var filePath = path.join(node.dir, sandbox.out.file); 
-	var file = fs.createWriteStream(filePath);
-	var sendReq = request.get(sandbox.out.url);
-
-	// verify response code
-	sendReq.on('response', function(response) {
-		if(response.statusCode === 200) {
-			sandbox.context.response = response;
-			sendReq.pipe(file);
-
-			file.on('finish', function() {
-				file.close(function () {
-					cb(sandbox);
-				}); 
-			});
-
-			file.on('error', function(err) { 
-				fs.unlink(filePath); // Delete the file async. 
-				console.log(err);
-				sandbox.context.error = err;
-
-				if (cb) {
-					return cb(sandbox);
-				}
-			});
-			
-		} else {
-		   sandbox.context.error = "file not found on server!";
-		   return cb(sandbox);
-		}
-
-	});
-
-	// check for request errors
-	sendReq.on('error', function (err) {
-		fs.unlink(filePath);
-		console.log(err);
-		sandbox.context.error = err;
-		return cb(sandbox);
-
-	});
-
-
-
-}
 
 function insertNodeActionField (collection, doc_id, field, value) {
 	

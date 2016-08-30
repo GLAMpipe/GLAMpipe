@@ -26,6 +26,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 		async.eachSeries(data, function (record, callback) {
 			
 			var new_record = {};
+			new_record[MP.source] = node._id;
 
 			// create arrays for every key with clean field name
 			for(var prop in record) {
@@ -41,7 +42,6 @@ exports.importFile = function  (node, sandbox, io, cb) {
 					
 					// add language code as a separate field
 					if(codes != null) {
-						new_record[prop_clean] = [];
 						new_record[prop_clean + "__lang"] = [];	
 					}
 
@@ -85,6 +85,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 		}, function done () {
 			console.log("Found "+ counter + " records");
+			runNodeScriptInContext("finish", node, sandbox, io);
 		})
 	})
 
