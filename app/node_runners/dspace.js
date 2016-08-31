@@ -95,16 +95,11 @@ exports.updateData = function (node, sandbox, io) {
 				}
 				//cb(sandbox)
 			});
-
-			
-
 			
 		}, function done () {
 			runNodeScriptInContext("finish", node, sandbox, io);
 		});
 	});
-
-
 }
 
 

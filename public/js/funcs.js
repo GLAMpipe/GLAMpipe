@@ -76,8 +76,10 @@ function makeDynFieldsfromObject (data, parents, obj) {
 
 // console effect from here: http://jsfiddle.net/manuel/zejCD/1/
 function tailScroll(cons) {
-    var height = cons.get(0).scrollHeight;
-    cons.animate({
-        scrollTop: height
-    }, 50);
+	if(cons && cons.get) {
+		var height = cons.get(0).scrollHeight;
+		cons.animate({
+			scrollTop: height
+		}, 50);
+	}
 }

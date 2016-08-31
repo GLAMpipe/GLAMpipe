@@ -459,7 +459,7 @@ $( document ).ready(function() {
        
         });
         
-        // handle checkboxes separately
+        // handle checkboxes separately. Checbox is included only if it is checked
         obj.parent().parent().find(".settings > input[type='checkbox'], .settings table input[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				map[$(this).attr("name")] = $(this).val();
@@ -572,7 +572,7 @@ $( document ).ready(function() {
             cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             cons.append(data + "</br>");
-            tailScroll(cons) ;
+            //tailScroll(cons) ;
         }
     });
 
@@ -583,7 +583,7 @@ $( document ).ready(function() {
             cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
             cons.append(data + "</br>");
-            tailScroll(cons) 
+            //tailScroll(cons) 
         }
     });
 

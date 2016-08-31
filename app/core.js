@@ -383,7 +383,7 @@ function getProp(obj, desc, index) {
 			else
 				return obj[0]
 		} else {
-			// if index is not given or its not founde, then give first one
+			// if index is not given or its not found, then give the first one
 			return obj[0];
 		}
 		

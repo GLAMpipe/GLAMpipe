@@ -29,11 +29,9 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 		var counter = 0;
 		sandbox.out.value = []
 		
-		console.log("DOWNLOADS:", downloads);
-		
 		async.eachSeries(downloads, function iterator(download, next) {
 
-			console.log("downloading:", download);
+			//console.log("downloading:", download);
 			
 			// dry run
 			if(node.settings.dry_run) {
@@ -42,7 +40,13 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 			
 			// actual run
 			} else {
-				download(node, sandbox, next);
+				fileExists(node, download, function(error, filePath) {
+					
+					if(error == null) {
+						downloadAndSave(node, download, next);
+					} else
+						next();
+				});			
 			}
 			
 		}, function done() {
@@ -60,6 +64,7 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 }
 
 
+
 function checkUrl (download) {
 	
 	if(download.url == null || download.url == "") {
@@ -70,24 +75,47 @@ function checkUrl (download) {
 	
 }
 
-function download (node, download, next) {
 
+
+function fileExists (node, download, cb) {
+
+	if(download.filename == "") {
+		download.error = "no file name";
+		return cb("no file name");
+	}
+
+	var filePath = path.join(node.dir, download.filename);
+
+	fs.stat(filePath, function(err, stat) {
+		if(err == null) {
+			console.log("FILE EXISTS:", filePath);
+			cb("FILE EXISTS");
+		} else if(err.code == 'ENOENT') {
+			cb(null, filePath)
+		} else {
+			console.log('Error with file stats: ', err.code);
+			cb(err.code);
+		}
+	});
+}
+
+
+
+function downloadAndSave (node, download, next) {
+	
 	checkUrl(download);
 	if(download.error)
 		return next();
 
-	if(download.filename == "") {
-		download.error("no file name");
-		return next();
-	}
-		
+	var request = require("request");
+	
 	var filePath = path.join(node.dir, download.filename); 
 	var file = fs.createWriteStream(filePath);
-
 	var sendReq = request.get(download.url);
 
 	// verify response code
 	sendReq.on('response', function(response) {
+		
 		download.response = response;
 		
 		if(response.statusCode === 200) {
@@ -96,8 +124,7 @@ function download (node, download, next) {
 
 			file.on('finish', function() {
 				file.close(function () {
-					counter++;
-					next(sandbox);
+					next();
 				}); 
 			});
 
@@ -105,12 +132,14 @@ function download (node, download, next) {
 				fs.unlink(filePath); // Delete the file async. 
 				console.log(err);
 				download.error = err;
-				return next(sandbox);
+				return next();
 			});
 			
 		} else {
-		   download.error = "file not found on server!";
-		   return next(sandbox);
+			fs.unlink(filePath);
+			download.error = "file not found on server!";
+			console.log("file not found on server!");
+			return next();
 		}
 
 	});
@@ -120,7 +149,7 @@ function download (node, download, next) {
 		fs.unlink(filePath);
 		console.log(err);
 		download.error = err;
-		return next(sandbox);
+		return next();
 
 	});
 	
