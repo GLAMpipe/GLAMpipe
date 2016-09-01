@@ -50,6 +50,39 @@ exports.login = function (node, sandbox, io, cb) {
 }
 
 
+exports.uploadItem = function (doc, sandbox, next) {
+	
+	console.log("upload item");
+	sandbox.run.runInContext(sandbox);
+	console.log(JSON.stringify(sandbox.out.setter.upload));
+
+
+	var collection = "2ce4a104-da33-499d-a2dd-ad54eecd01e7";
+
+	 var options = {
+		url: "http://siljo.lib.jyu.fi:8080/rest/collections/" +collection+ "/items/",
+		json: sandbox.out.setter.upload,
+		jar:true
+	};
+	
+	var request = require("request");
+	//require('request').debug = true;
+
+	// make actual HTTP request
+	request.post(options, function (error, response, body) {
+		if (error) 
+			console.log(error);
+		else {
+			console.log(options.url);
+			console.log("update response:", body);
+			next();
+		}
+	});
+
+
+
+}
+
 
 
 exports.updateData = function (node, sandbox, io) {

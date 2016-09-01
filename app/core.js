@@ -106,68 +106,6 @@ exports.initNodes = function (io, callback) {
 
 
 
-exports.readNodes_old = function (io, nodePath, descriptions, callback) {
-		
-	readFiles(nodePath, function(filename, content, next) {
-		
-		try {
-			var node = JSON.parse(content);
-			node.type_desc = descriptions[node.type];
-			
-			// join "pretty" settings
-			if(node.views.settings instanceof Array)
-				node.views.settings = node.views.settings.join("");	
-				
-			// join "pretty" params
-			if(node.views.params instanceof Array)
-				node.views.params = node.views.params.join("");	
-
-			// join "pretty" data view
-			if(node.views.data_static instanceof Array)
-				node.views.data_static = node.views.data_static.join("");
-
-			// join "pretty" scripts
-			for (key in node.scripts) {
-				if(node.scripts[key] instanceof Array)
-					node.scripts[key] = node.scripts[key].join("");
-			}
-				
-			mongoquery.insert("mp_nodes",node , function(error) {
-				if(error.length) {
-					console.log(error);
-				} else {
-					console.log("LOAD: " + filename + " loaded");
-					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
-					next();
-				}
-			})
-			
-		} catch(e) {
-			console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
-			io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
-			next(); // continue anyway
-		}
-
-	}, function onError (error) {
-		if( error.code == "ENOENT") {
-			console.log("ERROR: No nodes present in " + nodePath);
-			//console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
-		} else {
-			console.log(error);
-		}
-		return callback(error);
-
-		
-	}, function onDone () {
-		console.log("INIT: nodes loaded from " + nodePath);
-		console.log("******************************************");
-		callback(null);
-	});
-	  
-}
-
-
-
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
@@ -496,6 +434,7 @@ exports.runNode = function (req, res, io) {
 				sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
 				return;
 			}
+			
 			switch (node.type) {
 
 
@@ -658,49 +597,36 @@ exports.runNode = function (req, res, io) {
 
 				
 				case "export":
-
-					// make sure that we have an export filename
-					if(node.params.file == "") {
-						console.log("ERROR: filename missing!");
-						io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
-						return;
+					sandbox.run = run;
+				
+					switch (node.subtype) {
+						
+						case "file":
+							require("../app/node_runners/export-file.js").collectionToFile(node, sandbox, io);
+						break;
+						
+						case "API":
+						
+							switch (node.subsubtype) {
+								
+								case "dspace":
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node,sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											asyncLoop.loop(node, sandbox, dspace.uploadItem);
+										}
+									});
+									
+								break;
+							}
+						
+						break;
 					}
 
-					// we stream directly to file
-					var fs = require('fs');
-					var filePath = path.join(node.dir, node.params.file);
-					var wstream = fs.createWriteStream(filePath);
-					
 
-		
-					// find everything
-					mongoquery.find2({}, node.collection, function (err, doc) {
-						
-						// tell node how many records was found
-						sandbox.context.doc_count = doc.length;
-						sandbox.context.doc_eka = doc[0];
-						runNodeScriptInContext("init", node, sandbox, io);
-						wstream.write(sandbox.out.value);
-
-						async.eachSeries(doc, function iterator(doc, next) {
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.value = null;
-							run.runInContext(sand);
-							//runNodeScriptInContext("run", node, sandbox, io);
-							if (sandbox.out.error !== null)  return;
-							wstream.write(sandbox.out.value)
-							next();
-							
-						}, function done() {
-							runNodeScriptInContext("finish", node, sandbox, io);
-							wstream.write(sandbox.out.value);
-							wstream.end();
-
-							//mongoquery.markNodeAsExecuted(node);
-							return;
-						});
-					});
 
 				break;
 
@@ -1576,49 +1502,6 @@ exports.callAPI = function (url, callback) {
 
 
 
-/**
- * Apply node script to records
- * - applies node function (scripts.run) to a certain field of all records
- * - writes result to user defined field
- * - data in and out goes through "sandbox"
- */
-exports.exportXML = function (node, callback) {
-	var count = 0;
-	
-	if(typeof node.collection  === "undefined") {
-		console.log("ERROR: collection not found");
-		callback("ERROR: collection not found");
-		return;
-	}
-	
-	var onDoc = function (doc) {
-		console.log(doc.WD);
-		console.log(node.settings.WD);
-		vm.runInNewContext(node.scripts.run, sandbox, "node.script.run");
-	}
-	
-	var onError = function (error) {
-		console.log(error);
-	}
-	
-	var onDone = function() {
-		callback();
-	}
-	
-	mongoquery.find2({}, node.collection, function (err, doc) {
-		console.log("documents found:", doc.length);
-		console.log(node.params);
-		
-		async.eachSeries(doc, function iterator(doc, next) {
-			onDoc(doc);
-			next();
-		}, function done() {
-			callback(null, count);
-		});
-		
-	}); 
-}
-
 
 
 
@@ -1632,89 +1515,6 @@ exports.readDir = function (dirname, onFileList, onError) {
 		}
 		onFileList(filenames);
 	});
-}
-
-
-
-
-function insertNodeActionField (collection, doc_id, field, value) {
-	
-}
-
-function importXML(file) {
-	
-}
-
-
-function importTSV (mode, node, cb) {
-	
-	var streamCSV = require("node-stream-csv");
-
-	var records = [];
-	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
-	streamCSV({
-		filename: file,
-		mode: mode,
-		dontguess: true },
-		function onEveryRecord (record) {
-			var count = 0;
-			var empty = 0;
-			for(var prop in record) {
-
-				if (record.hasOwnProperty(prop)) {
-					// clean up key names (remove -. and convert spaces to underscores)
-					prop_trimmed = prop.trim();
-					prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');
-					if(prop != prop_clean) {
-						record[prop_clean] = record[prop];
-						delete record[prop];
-					}
-
-					count++;
-					if(typeof record[prop_clean] === "undefined" || record[prop_clean] == "")
-						empty++;
-				}
-			}
-			// check for totally empty records
-			//if(empty != count)
-			
-			// mark origin of data
-			record[MP.source] = node._id;
-			records.push(record);
-		},
-		function onReady () {
-			cb(records);
-		}
-	);
-}
-
-
-
-function importJSON(filename, collection, res, cb) {
-	fs = require('fs')
-	fs.readFile("uploads/" + filename + ".json", 'utf8', function (err,data) {
-		if (err) {
-			return console.log(err);
-		}
-		var json = JSON.parse(data);
-		mongoquery.save(collection, json, function() {cb(collection);});
-		
-
-
-	});
-}
-
-
-function writeJSON2File (filename, records, callback) {
-
-	require('fs').writeFile(
-		"uploads/" + filename + ".json",
-		JSON.stringify(records, null, ' '),
-		function write2DB (err) {
-			callback();
-		}
-	)
-
 }
 
 

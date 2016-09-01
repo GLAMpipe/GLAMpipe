@@ -15,6 +15,8 @@ exports.fetchData = function (node, sandbox, io, cb) {
 	var query = {}; 
 	query[MP.source] = node._id;
 	mongoquery.empty(node.collection, query, function() {
+		// init will give us an initial url
+		runNodeScriptInContext("init", node, sandbox, io);
 		console.log("URL:", sandbox.out.url)
 		requestLoop(node, sandbox, io, cb);
 	});
@@ -26,6 +28,7 @@ exports.fetchData = function (node, sandbox, io, cb) {
  * Fetch item metadata from multiple collections
  */
 exports.fetchDataInitialMode = function (node, sandbox, io) {
+	
 	var async = require("async");
 
 	// remove previous data inserted by node and start query loop
@@ -157,7 +160,6 @@ function callAPI (url, callback) {
 	};
 
 	request(options, function (error, response, body) {
-		console.log(response.statusCode);
 		if (error) {
 			//console.log("ERROR:", error);
 			callback(error, response, body);
