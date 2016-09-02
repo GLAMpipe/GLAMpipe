@@ -52,6 +52,7 @@ exports.fetchDataInitialMode = function (node, sandbox, io) {
 			});
 			
 		}, function done() {
+			console.log("ALL REQUESTS DONE");
 			runNodeScriptInContext("finish", node, sandbox, io);
 		});
 	});
@@ -112,6 +113,10 @@ function requestLoop(node, sandbox, io, cb) {
 						mongoquery.insert(node.collection, sandbox.out.value, function() {
 							callback(null, sandbox.out.url);
 						});
+						
+					// we found nothing, proceed anyway	
+					} else {
+						callback(null, sandbox.out.url);
 					}
 				}
 			});
