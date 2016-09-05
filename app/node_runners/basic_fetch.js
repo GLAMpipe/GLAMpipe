@@ -3,6 +3,7 @@ const vm 		= require('vm');
 var path        = require('path');
 var mongoquery 	= require("../../app/mongo-query.js");
 var collection = require("../../app/collection.js");
+var nodescript = require("../../app/run-node-script.js");
 const MP 		= require("../../config/const.js");
 
 
@@ -16,7 +17,7 @@ exports.fetchData = function (node, sandbox, io, cb) {
 	query[MP.source] = node._id;
 	mongoquery.empty(node.collection, query, function() {
 		// init will give us an initial url
-		runNodeScriptInContext("init", node, sandbox, io);
+		nodescript.runNodeScriptInContext("init", node, sandbox, io);
 		console.log("URL:", sandbox.out.url)
 		requestLoop(node, sandbox, io, cb);
 	});
@@ -36,11 +37,11 @@ exports.fetchDataInitialMode = function (node, sandbox, io) {
 	query[MP.source] = node._id;
 	mongoquery.empty(node.collection, query, function() {
 		// init will give us a array of collections
-		runNodeScriptInContext("init", node, sandbox, io);
+		nodescript.runNodeScriptInContext("init", node, sandbox, io);
 		
 		// then we fetch records per collection with async
 		async.eachSeries(sandbox.context.vars.collections, function iterator(collection, next) {
-			runNodeScriptInContext("pre_run", node, sandbox, io);
+			nodescript.runNodeScriptInContext("pre_run", node, sandbox, io);
 			console.log(sandbox.context.vars.collections);
 			console.log("INITIAL URL:", sandbox.out.url);
 			console.log("ROUND "+ sandbox.context.vars.initial_round_counter +" *************");
@@ -53,7 +54,7 @@ exports.fetchDataInitialMode = function (node, sandbox, io) {
 			
 		}, function done() {
 			console.log("ALL REQUESTS DONE");
-			runNodeScriptInContext("finish", node, sandbox, io);
+			nodescript.runNodeScriptInContext("finish", node, sandbox, io);
 		});
 	});
 }
@@ -85,7 +86,8 @@ function requestLoop(node, sandbox, io, cb) {
 					sandbox.context.data = body;
 					sandbox.out.url = "";
 					sandbox.out.schema = [];
-					runNodeScriptInContext("run", node, sandbox, io);
+					nodescript.runNodeScriptInContext("run", node, sandbox, io);
+					console.log("insert array:", sandbox.out.value.length);
 					//console.log("SCHEMA:", sandbox.out.schema);
 					//console.log("COLLECTIONS:", sandbox.context.vars.collections);
 					mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
@@ -103,8 +105,6 @@ function requestLoop(node, sandbox, io, cb) {
 					// add source id to data (expects out.value to be an array)
 					if(sandbox.out.value != null) {
 						for (var i = 0; i < sandbox.out.value.length; i++ ) {
-							// flatten
-							//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
 							sandbox.out.value[i][MP.source] = node._id;
 						}
 					
@@ -137,7 +137,7 @@ function requestLoop(node, sandbox, io, cb) {
 			if(cb)
 				cb();
 			else {
-				runNodeScriptInContext("finish", node, sandbox, io);
+				nodescript.runNodeScriptInContext("finish", node, sandbox, io);
 				return;
 			}
 		}
@@ -180,18 +180,4 @@ function callAPI (url, callback) {
 }
 
 
-function runNodeScriptInContext (script, node, sandbox, io) {
-	try {
-		vm.runInNewContext(node.scripts[script], sandbox);
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			console.log("Syntax error in node.scripts."+script+"!", e);
-			io.sockets.emit("error", "Syntax error in node.scripts."+script+"!</br>" + e);
-			throw new NodeScriptError("syntax error:" + e.message);
-		} else {
-			console.log("Error in node.scripts."+script+"!",e);
-			io.sockets.emit("error", "Error in node.scripts."+script+"!</br>" + e);
-			throw new NodeScriptError(e.message);
-		}
-	}
-}
+

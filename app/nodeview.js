@@ -157,8 +157,8 @@ function generateSchemaView (node, display_keys, edit, callback) {
 				if (keys.keys[keys.sorted[i]] && keys.keys[keys.sorted[i]].type == 'array') {
                         html += '           <td class="array">' 
 						//html += '				<div class="data-container" data-bind="foreach: $root.keyValueList($data[\''+key+'\'])">'
-						html += '				<div class="data-container" data-bind="foreach: '+ keys.sorted[i] +'.sort()">'
-                        html += '                   <div data-bind="html:$root.keyValue($data)"></div>'
+						html += '				<div class="data-container" data-bind="inline: '+ keys.sorted[i] +'">'
+                       // html += '                   <div data-bind="html:$root.keyValue($data)"></div>'
                         html += '               </div>'
 						html += '           </td>'
 

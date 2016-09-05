@@ -8,12 +8,19 @@ var nodes = {};
 			
 			var html = "";
 			var content = valueAccessor();
-			if(content.constructor.name == "Array") {
+			var maxStrLength = 60;
+			if(content != null && content.constructor.name == "Array") {
+				content.sort();
 				for(var i = 0; i < content.length; i++) {
-					html += "<div class='array'>"+content[i]+"</div>";
+					
+					if(content[i] != null && content[i].length > maxStrLength)
+						var short = content[i].substring(0, maxStrLength) + "...";
+					else 
+						short = content[i];
+					html += "<div class='array'><span>["+i+"] </span>" + short + "</div>";
 				}
 			} else
-				html = content;
+				html = null;
 			
 			ko.applyBindingsToNode(input.get(0), { value: valueAccessor()});
 			ko.applyBindingsToNode(span.get(0), { html: html});
@@ -274,7 +281,9 @@ var nodes = {};
             return html;
         }
 
-        
+        this.arrayHandler = function (data, event) {
+			return "koira";
+		}
 
         this.keyValueList = function (data, key) {
             var list = [];

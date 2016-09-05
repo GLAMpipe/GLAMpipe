@@ -16,11 +16,11 @@ exports.login = function (node, sandbox, io, cb) {
 
 	// ask login details (email, password) from node
 	runNodeScriptInContext("login", node, sandbox, io);
-	console.log(sandbox.out.config);
+	console.log(sandbox.out.login_url);
 
 	 var options = {
 		headers: {'content-type' : 'application/x-www-form-urlencoded'},
-		url: sandbox.out.url,
+		url: sandbox.out.login_url,
 		method: 'POST',
 		form: sandbox.out.config.login,
 		json: true,
@@ -32,7 +32,7 @@ exports.login = function (node, sandbox, io, cb) {
 		
 		var options = {
 			headers: {'content-type' : 'application/json'},
-			url: "http://siljo.lib.jyu.fi:8080/rest/status",
+			url: sandbox.out.status_url,
 			method: 'GET',
 			json: true,
 			jar:true
@@ -53,14 +53,13 @@ exports.login = function (node, sandbox, io, cb) {
 exports.uploadItem = function (doc, sandbox, next) {
 	
 	console.log("upload item");
+	
+	// let node create an uploaded item
 	sandbox.run.runInContext(sandbox);
 	console.log(JSON.stringify(sandbox.out.setter.upload));
 
-
-	var collection = "2ce4a104-da33-499d-a2dd-ad54eecd01e7";
-
 	 var options = {
-		url: "http://siljo.lib.jyu.fi:8080/rest/collections/" +collection+ "/items/",
+		url: sandbox.out.url,
 		json: sandbox.out.setter.upload,
 		jar:true
 	};
