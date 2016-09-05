@@ -36,10 +36,10 @@ exports.find2 = function (query, collectionname, callback) {
 	});   
 }
 
-exports.findFields = function (query, fields,  collectionname, callback) {
+exports.findFields = function (query, fields, sort, collectionname, callback) {
 
 	var collection = db.collection(collectionname);
-	collection.find(query, fields, function (err, result) {
+	collection.find(query, fields).sort(sort, function (err, result) {
 		callback(err, result);
 	});   
 }
@@ -149,7 +149,7 @@ exports.insertProject = function (doc, callback) {
 			callback({'error':err})
 		} else {
 			console.log('Inserted');
-			callback();
+			callback(result);
 		}
 	}); 
 }

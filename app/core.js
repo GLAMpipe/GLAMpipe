@@ -206,7 +206,7 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(meta) {
-				var collectionName = title_dir.substring(0,20).toLowerCase(); // limit 20 chars
+				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 20 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -218,7 +218,7 @@ exports.createProject = function (title, res) {
 				};
 				mongoquery.insertProject (project, function(data) {
 					console.log("project \"" + title + "\" created!");
-					res.json({"status": "project created"});
+					res.json({"status": "project created", "project": data});
 				});
 			});
 		});
@@ -243,7 +243,7 @@ exports.deleteProject = function (doc_id, res) {
 }
 
 exports.getProjectTitles = function  (res) {
-	mongoquery.findFields({}, {title:true}, "mp_projects", function(err, data) { 
+	mongoquery.findFields({}, {title:true}, {title:1}, "mp_projects", function(err, data) { 
 		if (!err)
 			res.json(data) ;
 		else 
@@ -1342,6 +1342,41 @@ exports.getCollection = function (req, query, res) {
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
+}
+
+
+/**
+ * Get paged collection data for DataTable
+ * - gives records between skip and skip + limit
+ */
+exports.getCollectionTableData = function (req, query, res) {
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 15;
+
+	var skip = parseInt(req.query.skip);
+	if (skip <= 0 || isNaN(skip))
+		skip = 0;
+
+	var sort = req.query.sort
+	if(sort === 'undefined')  // by default sort by _id (mongoid)
+		sort = "_id";
+
+	var reverse = false
+	var r = parseInt(req.query.reverse);
+	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
+		reverse = true;
+
+	var params = {
+		collection: req.params.id,
+		query: query,
+		limit: limit,
+		skip: skip,
+		sort: req.query.sort,
+		reverse: reverse
+	}
+	mongoquery.findAll(params, function(data) { res.json({data:data}) });
 }
 
 exports.getCollectionByField = function (req, res) {

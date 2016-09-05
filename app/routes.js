@@ -5,8 +5,8 @@ module.exports = function(express, glampipe, passport) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings
-                                                            // this allows us to start everything normally still 
+    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
+                                                            // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 
     // INFO to console
@@ -94,7 +94,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/project/:id', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
+		res.sendFile(path.join(__dirname, 'views', 'project.html'));
 	});
 
 	express.post('/create/project', function (req, res) {
@@ -168,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// DATA
 	express.get('/get/collection/:id', function (req, res) {
-		glampipe.core.getCollection(req, {}, res);
+		glampipe.core.getCollectionTableData(req, {}, res);
 	});
 
 	express.get('/get/collection/byfield/:id', function (req, res) {

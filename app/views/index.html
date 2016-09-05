@@ -1,188 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>GLAMpipe</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i" rel="stylesheet">
+<link rel="stylesheet" href="/css/wikiglyphs.css">
+<title>GLAMpipe style</title>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
 
-<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="js/knockout.js"></script>
+<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
 <script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="/js/funcs.js"></script>
+<script type="text/javascript" src="/js/data.js"></script>
+<script type="text/javascript" src="/js/glampipe.js"></script>
+<script type="text/javascript" src="/js/ui.js"></script>
 
-<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
-<style>
-	
-</style>
-<script>
-
-	function compare(a,b) {
-		if (a.title < b.title)
-			return -1;
-		if (a.title > b.title)
-			return 1;
-		return 0;
-	}
-
-	var BetterListModel = function () {
-		var self = this;
-		this.itemToAdd = ko.observable("");
-		this.allItems = ko.observableArray(); // Initial items
-		this.loadItems = function () {
-			$.getJSON("/get/project/titles", function(data) { 
-				data.sort(compare);
-				self.allItems([]);
-				for(var i = 0; i< data.length; i++) {
-					self.allItems.push(data[i]);
-				}
-				
-			})
-		}
-		
-	 
-		this.addItem = function () {
-			var match = ko.utils.arrayFirst(self.allItems(), function(item) {
-				return self.itemToAdd() === item.title;
-			});
-			
-			if ((this.itemToAdd() != ""))  {// Prevent blanks 
-				if(match) {
-					alert("Project title \"" + self.itemToAdd() + "\" exists!");
-				} else {
-					var data = {'title':self.itemToAdd()};
-					$.post("/create/project", data, function(returnedData) {
-						if(returnedData.error)
-							alert(returnedData.error);
-						self.itemToAdd(""); // Clear the text box 
-						self.allItems([]);
-						self.loadItems();
-					});
-				}
-			}
-		};
-	 
-		this.removeSelected = function () {
-			this.allItems.removeAll(this.selectedItems());
-			this.selectedItems([]); // Clear selection
-		};
-	 
-		this.sortItems = function() {
-			this.allItems.sort();
-		};
-		
-		this.delete = function () {
-			
-		};
-	};
-
-	function onLoad()
-	{
-		
-		$( "#dialog-confirm" ).hide();
-		
-		var projects = new BetterListModel();
-		ko.applyBindings(projects);
-		projects.loadItems();
-
-		// check if server is ok. If not, then show error setup
-		$.getJSON("/status", function(data) { 
-			console.log(data);
-			if(data.status != "ok")
-				$('#iframe_view').attr('src', "/setup");
-		})
-
-		$("#show_project_creator").on("click", function() {
-			$("#new_project").show();
-		});
-
-
-		// DELETE PROJECT
-		// hmm, not using data-bind...
-		$(document).on('click', ".delete_icon", function(e) {
-			$( "#dialog-confirm" ).dialog({
-			  resizable: false,
-			  height:160,
-			  modal: true,
-			  buttons: {
-				"Delete project": function() {
-					$( this ).dialog( "close" );
-					var docid = $(e.target).attr("docid");
-					var data = {};
-					$.post("/delete/project/" + docid, data, function(returnedData) {
-						if(returnedData.error)
-							alert("Could not remove project!" + returnedData.error);
-						else
-							projects.loadItems();
-						
-					});
-				},
-				Cancel: function() {
-				  $( this ).dialog( "close" );
-				}
-			  }
-			});
-		})
-
-
-	}
-		
-	
-</script>
 </head>
-<body onload="onLoad();">
 
-	<div>
-	<input id="username" name="username"/><button id="login">login</button>
-	
-	</div>
+<body class="vbox">
+  <header> <span class="title sitetitle">GLAMpipe</span> </header>
+  <content class="main hbox space-between">
+    <pipe>
+      <div class="pageheader">
+        <div class="title pagetitle">Projects</div>
+      </div>
+      <div class="fatbox">
+        <div class="inlinetitleblock">
+          <div><span class="title inlinetitle">Choose a project</span></div>
+        </div>
+        <div class="infotext">Choose the project you wish to work on or create a new one.</div>
+        <div id="projectList" class="optionlist"> 
+        <!-- projects are listed here -->
+        </div>
 
-<script>
-	$("#login").click(function() {
-		var data = {"username":"testi","password":"testi"};
-            $.post("/login", data, function(returnedData) {
-                console.log('created node');
+      </div>
+      
+      
 
-            });
-	});
-</script>
+    <div class="fatbox create_project">
+      <div class="inlinetitleblock">
+        <div><span class="title inlinetitle">Create project</span></div>
+      </div>
+      <div class="infotext">Project contains your data, transforms, downloads etc.</div>
+      <div class="optionlist">
+        <div class="listoption">
+          <p class="listtitle">Title</p>
+          <p class="listtext">
+            <label for="title"></label>
+            <input type="text" name="title" id="title" />
+          </p>
+        </div>
+        <div id="create_project" class="button">Create project</div>
+      </div>
+    </div>
 
-	<!-- PROJECT HEADER -->
-	<div id="project_header">
-		<h2 class="inline_header">Projects</h2>
-		 <button id="show_project_creator" class="right" >add project</button>
-		 
-	</div>
-
-	<a href="/setup" target="_blank" class="button" >setup</a>
-
-	<!-- PROJECTS -->
-	<div class="collection_pipe">
-		<div class="projects">
-			<div id="new_project" class="hidden node source">
-				<h2>Create project</h2>
-				<form data-bind="submit:addItem">
-					<input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' />
-					<button type="submit" data-bind="enable: itemToAdd().length > 0">Add</button>
-				</form>
-			</div>
-		
-			<ul data-bind="foreach: allItems">
-				<li>
-					<a href="#" data-bind="text: title, attr: {href: 'project/' + _id}"></a><span data-bind="attr:{docid:_id}" class="right delete_icon">X</span>
-				</li>
-			</ul>
-		</div>
-	</div>
-	
-	<!-- VIEW TABS -->
-	<div id="collection_view">
-		<div class="IframeWrapper">
-			<iframe id="iframe_view" class="iframetab" src="http://artturimatias.github.io/GLAMpipe/"></iframe>
-		</div>
-	</div>
-
-	<div id="dialog-confirm" title="Really delete project?">
-	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Removing project removes data from database. Are you sure?</p>
-	</div>
-
-	</body>
+    </pipe>
+    <workspace>
+    </workspace>
+  </content>
+</body>
 </html>
