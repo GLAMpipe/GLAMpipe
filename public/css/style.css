@@ -149,6 +149,7 @@ pipe {
 
 .sectionicon {
 	margin-left: auto;
+	display:none;
 }
 
 .box {
@@ -307,6 +308,17 @@ a .listoption:hover {
 	margin: 0px;
 }
 
+
+.collection {
+	border-left:solid rgba(1, 4, 9, 0.2) 10px;
+	width:325px;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+}
+
+.collection:hover {
+	border-left:solid rgba(1, 4, 9, 1) 10px;
+}
 
 .source {
 	border-left:solid rgba(52,123,255,0.2) 10px;
@@ -510,11 +522,17 @@ div.panel.show {
   background-color: #333;
 }
 
+table.documents thead td {
+	font-weight:bold;
+}
 
+table.documents td {
 
-table.dataTable td {
-  overflow: hidden; /* this is what fixes the expansion */
-  text-overflow: ellipsis; /* not supported in all browsers, but I accepted the tradeoff */
-  white-space: nowrap;
-  width: 120px;
+}
+
+table.documents td div {
+	max-width:220px;
+	max-height:3em;
+	overflow: hidden;
+	margin-right: 3em;
 }

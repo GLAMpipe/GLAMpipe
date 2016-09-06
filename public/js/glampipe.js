@@ -3,6 +3,7 @@ var glamPipe = function () {
 	var self = this;
 	this.currentProject = ""
 	this.currentCollectionSet = 0
+	this.currentNodes = []
 	
 	this.projectPipeDiv = "#project-pipe"
 	this.collectionSwitchDiv = "#collection-node-switch"
@@ -17,7 +18,8 @@ var glamPipe = function () {
 
 	this.data = new dataHolder()
 
-	this.loadData = function () {
+	this.loadData = function (node) {
+		self.currentNodes[self.currentCollectionSet] = node;
 		self.data.getAndRenderData(self.collections[0]);
 	}
 
@@ -31,7 +33,32 @@ var glamPipe = function () {
 	this.login = function (username, password) {
 		alert(login)
 	}
-	
+
+	this.setVisibleFields = function (opt) {
+		$("#selected_fields").append("<button> "+ opt.value + "</button>");	
+		self.currentNodes[self.currentCollectionSet].visible_keys.push(opt.value);
+		self.data.getAndRenderData(self.collections[0]);
+	}
+
+	// render node settings and execute its settings.js
+	this.openSettings = function (node) {
+		
+		self.currentNodes[self.currentCollectionSet] = node;
+		
+		$("workspace .settingstitle").text("Settings for " + node.title);
+		$("workspace .settings").empty();
+		$("workspace .settings").append(node.views.settings);
+		
+		if(node.scripts.settings) {
+			var settingsScript = new Function('node', node.scripts.settings);
+			settingsScript(node);
+		}
+		
+		$("workspace .settings").append("<div class='box'><button class='run-node' data-id='"+node._id+"'>run</button></div>");
+	}
+
+
+
 	
 	this.getProjects = function (div) {
 		$.getJSON("/get/project/titles", function(data) { 
@@ -81,12 +108,17 @@ var glamPipe = function () {
 				var nodes = project.nodes;
 				if(nodes) {
 					for(var i = 0; i< nodes.length; i++) {
-						var d = nodes[i];
+						
+						var node = new glamPipeNode(nodes[i]);
+						// extra properties TODO: make node object properly
+						nodes[i].settings = {};
+						nodes[i].visible_keys = [];
+						
 						// create separate array of collections so that we can group nodes
 						if(nodes[i].type == "collection")
-							self.collections.push(nodes[i]);
+							self.collections.push(node);
 						else
-							self.nodes.push(nodes[i]);
+							self.nodes.push(node);
 
 					}
 				}
@@ -135,14 +167,15 @@ var glamPipe = function () {
 		self.setCollectionCounter();
 		
 		// nodes are orgnised by collection
-		for (var i = 0; i < self.collections.length; i++) {
+		//for (var i = 0; i < self.collections.length; i++) {
 			//self.collectionSets.push(self.renderCollectionSet())
-			$("pipe").append(self.renderCollectionSet(i, self.collections[i]));
-		}
-		
+			//$("pipe").append(self.renderCollectionSet(i, self.collections[i]));
+		//}
+		$("pipe").append(self.renderCollectionSet(0, self.collections[0]));
+		//self.currentCollectionSet
 		// hide other collection except the first one
-		$("collectionset").hide();
-		$("collectionset[id='set0']").show();
+		//$("collectionset").hide();
+		//$("collectionset[id='set0']").show();
 
 	}
 
@@ -151,24 +184,24 @@ var glamPipe = function () {
 		var html = "";
 		html += "<collectionset id='set"+count+"'>"
 		
-		html += self.renderProjectNode(collection);
+		html += collection.renderNode();
 		
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Sources and lookups</span> <a class='add-node' data-type='source' href='#'>Add source</a></div>"
+		html += "	<div><span class='title sectiontitle'>Source</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder'></div>"
 		 
 		html += self.renderNodes(collection.sources);
 		  
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Transforms and others</span> <a class='add-node' data-type='transform' href='addnode.html'>Add transform</a></div>"
+		html += "	<div><span class='title sectiontitle'>Process</span> <a class='add-node' data-type='transform' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder'></div>"
 		
 		html += self.renderNodes(collection.transforms);
 		
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Exports and uploads</span> <a class='add-node' data-type='export' href='addnode.html'>Add export</a></div>"
+		html += "	<div><span class='title sectiontitle'>Export</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder'></div>"
 
@@ -184,17 +217,38 @@ var glamPipe = function () {
 		
 		var html = "";
 		for (var i = 0; i < nodes.length; i++) {
-			html += self.renderProjectNode(nodes[i]);
+			html += nodes[i].renderNode();
 		}
 		return html;
 		
 	}
 
+	this.getNode = function (clickEvent) {
+		var nodeid = $(clickEvent.target).data("id");
+
+		if(nodeid == null) 
+			nodeid = $(clickEvent.target).closest(".node").data("id");
+			
+		// find from regular ndes
+		for (var i = 0; i < self.nodes.length; i++) {
+			if(self.nodes[i]._id == nodeid)
+				return self.nodes[i];
+			
+		}
+		// find from collections
+		for (var i = 0; i < self.collections.length; i++) {
+			if(self.collections[i]._id == nodeid)
+				return self.collections[i];
+			
+		}		
+		return null;
+	}
+
 
 	this.renderProjectNode = function (node) {
-		var html = "<div class='box " + node.type + "'>"
+		var html = "<div class='box node " + node.type + "' data-id='" + node._id + "'>"
 		html +=   "  <div class='boxleft'>"
-		html +=   "    <div class='boxtag'>" + node.type + "</div>"
+		html +=   "    <div class='boxtag'>" + node.type + " > " + node.subtype + "</div>"
 		html +=   "    <div class='title boxtitle'>"+node.title+"</div>"
 		html +=   "    <div class='boxtext'>" + node.description + "</div>"
 		html +=   "  </div>"
@@ -248,6 +302,8 @@ var glamPipe = function () {
 
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
+
+
 
 
 	this.createNode = function (e) {

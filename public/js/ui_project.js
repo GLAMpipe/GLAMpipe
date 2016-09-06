@@ -6,6 +6,10 @@ $( document ).ready(function() {
 	
 	gp.loadProject("#projectList");
 
+	// hide node settings panel on start
+	$("workspace .settings").hide();
+	$("workspace .settingscontainer").hide();
+
 	$("#create_project").on("click", function (e) {
 		gp.addProject("pam");
 	});
@@ -22,6 +26,21 @@ $( document ).ready(function() {
 	$("#collection-next").on("click", function (e) {
 		gp.nextCollection();
 	});
+
+
+	// hide/show node settings
+	$(".settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
+		$(this).removeClass("wikiglyph-caret-up");
+		$(this).addClass("wikiglyph-caret-down");
+		$("workspace .settings").hide();
+	});
+
+	$(".settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
+		$(this).removeClass("wikiglyph-caret-down");
+		$(this).addClass("wikiglyph-caret-up");
+		$("workspace .settings").show();
+	});
+
 
 
 	// dynamic bindings
@@ -49,11 +68,25 @@ $( document ).ready(function() {
 		e.preventDefault();
 	})
 
+	// run node
+	$("workspace").on('click','.run-node', function(e) {
+		var node = gp.getNode(e);
+		gp.runNode(node);
+		e.preventDefault();
+	})
 
+	$("workspace").on('change','#field-selector', function(e) {
+		gp.setVisibleFields(this);
+	})
 
-	// create node
-	$(document).on('click','.box.collection', function(e) {
-		gp.loadData();
+	// open project node 
+	$(document).on('click','.box.node', function(e) {
+		var node = gp.getNode(e);
+		if(node) {
+			node.open();
+		}
+			
+
 		e.preventDefault();
 	})
 
