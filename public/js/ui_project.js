@@ -14,8 +14,15 @@ $( document ).ready(function() {
 		gp.addProject("pam");
 	});
 
+
+	// COLLECTION CHOOSER
 	$("#collection-chooser").on("click", function (e) {
-		gp.showCollections();
+		gp.showCollections(e);
+		e.preventDefault();
+	});
+
+	$(".col_choose").on("click", function (e) {
+		alert("jop");
 		e.preventDefault();
 	});
 
@@ -28,7 +35,7 @@ $( document ).ready(function() {
 	});
 
 
-	// hide/show node settings
+	// hide/show node settings TODO: move to node
 	$(".settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
@@ -69,25 +76,25 @@ $( document ).ready(function() {
 	})
 
 	// run node
-	$("workspace").on('click','.run-node', function(e) {
-		var node = gp.getNode(e);
-		gp.runNode(node);
+	$(document).on('click','.run-node', function(e) {
+		gp.runNode(e);
 		e.preventDefault();
 	})
 
-	$("workspace").on('change','#field-selector', function(e) {
-		gp.setVisibleFields(this);
-	})
 
 	// open project node 
 	$(document).on('click','.box.node', function(e) {
-		var node = gp.getNode(e);
-		if(node) {
-			node.open();
-		}
-			
-
+		gp.openNode(e);
+		e.stopPropagation();
 		e.preventDefault();
 	})
+
+	// remove node
+	$(document).on('click','.node  .wikiglyph-cross', function(e) {
+		gp.removeNode(e);
+		e.stopPropagation();
+		e.preventDefault();
+	})
+
 
 });

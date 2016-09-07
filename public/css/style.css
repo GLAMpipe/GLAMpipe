@@ -531,8 +531,12 @@ table.documents td {
 }
 
 table.documents td div {
-	max-width:220px;
+	max-width:320px;
 	max-height:3em;
 	overflow: hidden;
 	margin-right: 3em;
+}
+
+#field-selector {
+	float:right;
 }

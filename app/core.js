@@ -1393,7 +1393,7 @@ exports.getCollectionCount = function (collection_id, cb) {
 	//var collection = db.collection(collection_id);
 	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
 	mongoquery.countDocs(collection_id, {}, function (result) {
-		cb(result);
+		cb({count:result});
 	});
 }
 

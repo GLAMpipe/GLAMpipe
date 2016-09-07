@@ -2,7 +2,8 @@
 var glamPipe = function () {
 	var self = this;
 	this.currentProject = ""
-	this.currentCollectionSet = 0
+	this.currentCollectionSet = 0;
+	this.currentCollection = null;
 	this.currentNodes = []
 	
 	this.projectPipeDiv = "#project-pipe"
@@ -11,55 +12,13 @@ var glamPipe = function () {
 	
 	this.collections = []
 	this.nodes = []
-	this.sources = []
-	this.transforms = []
-	this.exports = []
-	this.collectionSets = []
-
-	this.data = new dataHolder()
-
-	this.loadData = function (node) {
-		self.currentNodes[self.currentCollectionSet] = node;
-		self.data.getAndRenderData(self.collections[0]);
-	}
-
-	this.renderData = function () {
-		if(self.data.length != 0)
-			self.data.loadData(self.collections[0]);
-		else
-			self.data.render();
-	}
 
 	this.login = function (username, password) {
 		alert(login)
 	}
 
-	this.setVisibleFields = function (opt) {
-		$("#selected_fields").append("<button> "+ opt.value + "</button>");	
-		self.currentNodes[self.currentCollectionSet].visible_keys.push(opt.value);
-		self.data.getAndRenderData(self.collections[0]);
-	}
 
-	// render node settings and execute its settings.js
-	this.openSettings = function (node) {
-		
-		self.currentNodes[self.currentCollectionSet] = node;
-		
-		$("workspace .settingstitle").text("Settings for " + node.title);
-		$("workspace .settings").empty();
-		$("workspace .settings").append(node.views.settings);
-		
-		if(node.scripts.settings) {
-			var settingsScript = new Function('node', node.scripts.settings);
-			settingsScript(node);
-		}
-		
-		$("workspace .settings").append("<div class='box'><button class='run-node' data-id='"+node._id+"'>run</button></div>");
-	}
-
-
-
-	
+	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
 		$.getJSON("/get/project/titles", function(data) { 
 			data.sort(compare);
@@ -92,16 +51,24 @@ var glamPipe = function () {
 			});
 		}
 	}
+
+
+	// PROJECT
 	
+	
+	// loads node repository
 	this.loadNodes = function() {
 		this.nodeRepository = new nodeRepository();
 		this.nodeRepository.loadNodes();
 	}
 
-	this.loadProject = function (nodesModel) {
+	this.loadProject = function () {
 		
 		var path = window.location.pathname.split("/");
 		self.currentProject = path[path.length - 1];
+		
+		self.collections = [];
+		self.nodes = [];
 		
 		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
 			if(typeof project !== "undefined") { 
@@ -110,9 +77,6 @@ var glamPipe = function () {
 					for(var i = 0; i< nodes.length; i++) {
 						
 						var node = new glamPipeNode(nodes[i]);
-						// extra properties TODO: make node object properly
-						nodes[i].settings = {};
-						nodes[i].visible_keys = [];
 						
 						// create separate array of collections so that we can group nodes
 						if(nodes[i].type == "collection")
@@ -123,8 +87,16 @@ var glamPipe = function () {
 					}
 				}
 				self.setPageTitle(project.title);
-				self.sortNodes();
-				self.renderProjectNodes();
+				
+				// set first collection as current collection
+				if(self.collections.length) {
+					self.currentCollection = self.collections[self.currentCollectionSet];
+				}
+				
+				self.setCollectionCounter();
+				
+				// render current collection set and its nodes
+				self.renderCollectionSet();
 			}
 		})
 	}
@@ -133,95 +105,25 @@ var glamPipe = function () {
 		$(self.pageTitleDiv).text(title);
 	}
 
-	this.sortNodes = function () {
-		// nodes are orgnised by collection
-		for (var i = 0; i < self.collections.length; i++) {
-			var collection = self.collections[i];
-			collection.sources = [];
-			collection.transforms = [];
-			collection.exports = [];
-			collection.nodes = [];
-			
-			for (var j = 0; j < self.nodes.length; j++) {
-				var node = self.nodes[j];
-				if (node.collection == collection.collection) {
-					
-					if(node.type == "source")
-						collection.sources.push(node);
 
-					else if(node.type == "transform")
-						collection.transforms.push(node);
-						
-					else if(node.type == "export" || node.type == "upload")
-						collection.exports.push(node);
-						
-					else
-						collection.nodes.push(node);
-				}
-			}
-		}
-	}
-	
-	this.renderProjectNodes = function () {
-		// set collection counter/switcher
-		self.setCollectionCounter();
-		
-		// nodes are orgnised by collection
-		//for (var i = 0; i < self.collections.length; i++) {
-			//self.collectionSets.push(self.renderCollectionSet())
-			//$("pipe").append(self.renderCollectionSet(i, self.collections[i]));
-		//}
-		$("pipe").append(self.renderCollectionSet(0, self.collections[0]));
-		//self.currentCollectionSet
-		// hide other collection except the first one
-		//$("collectionset").hide();
-		//$("collectionset[id='set0']").show();
 
+	// NODES
+	this.openNode = function (e) {
+		var node = self.getNode(e);
+		if(node)
+			node.open();
+		else
+			alert("node id not found");
 	}
 
-
-	this.renderCollectionSet = function (count, collection) {
-		var html = "";
-		html += "<collectionset id='set"+count+"'>"
-		
-		html += collection.renderNode();
-		
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Source</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
-		 
-		html += self.renderNodes(collection.sources);
-		  
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Process</span> <a class='add-node' data-type='transform' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
-		
-		html += self.renderNodes(collection.transforms);
-		
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Export</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
-
-		html += self.renderNodes(collection.exports);
-
-		html += "</collectionset>"
-		
-		return html;
-		
+	this.runNode = function (e) {
+		var node = self.getNode(e);
+		if(node)
+			node.run();
+		else
+			alert("node id not found");
 	}
-	
-	this.renderNodes = function (nodes) {
-		
-		var html = "";
-		for (var i = 0; i < nodes.length; i++) {
-			html += nodes[i].renderNode();
-		}
-		return html;
-		
-	}
+
 
 	this.getNode = function (clickEvent) {
 		var nodeid = $(clickEvent.target).data("id");
@@ -229,60 +131,21 @@ var glamPipe = function () {
 		if(nodeid == null) 
 			nodeid = $(clickEvent.target).closest(".node").data("id");
 			
-		// find from regular ndes
+		// find from regular nodes
 		for (var i = 0; i < self.nodes.length; i++) {
-			if(self.nodes[i]._id == nodeid)
+			if(self.nodes[i].source._id == nodeid)
 				return self.nodes[i];
 			
 		}
 		// find from collections
 		for (var i = 0; i < self.collections.length; i++) {
-			if(self.collections[i]._id == nodeid)
+			if(self.collections[i].source._id == nodeid)
 				return self.collections[i];
 			
 		}		
 		return null;
 	}
 
-
-	this.renderProjectNode = function (node) {
-		var html = "<div class='box node " + node.type + "' data-id='" + node._id + "'>"
-		html +=   "  <div class='boxleft'>"
-		html +=   "    <div class='boxtag'>" + node.type + " > " + node.subtype + "</div>"
-		html +=   "    <div class='title boxtitle'>"+node.title+"</div>"
-		html +=   "    <div class='boxtext'>" + node.description + "</div>"
-		html +=   "  </div>"
-		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"
-		html +=   "</div>"
-		return html;
-	}
-	
-	this.setCollectionCounter  = function () {
-		$(self.collectionSwitchDiv).text((self.currentCollectionSet + 1) + " / " + self.collections.length)
-	}
-	
-	this.showCollections = function () {
-		alert("not implemented");
-	}
-
-	this.prevCollection = function () {
-		if (self.currentCollectionSet != 0) {
-			$("collectionset").hide();
-			self.currentCollectionSet-- 
-			self.setCollectionCounter();
-			$("collectionset[id='set"+self.currentCollectionSet+"']").show();
-		}
-	}
-
-	this.nextCollection = function () {
-		if (self.currentCollectionSet != self.collections.length -1) {
-			$("collectionset").hide();
-			self.currentCollectionSet++ 
-			self.setCollectionCounter();
-			$("collectionset[id='set"+self.currentCollectionSet+"']").show();
-		}
-	}
-	
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
 		var types = [];
@@ -327,16 +190,147 @@ var glamPipe = function () {
             $.post("/create/collection/node", data, function(returnedData) {
                 console.log('created node');
                 $("#node_creator").hide();
-                //nodes.reloadProject();
-            });
-        } else {
-            data.collection = self.collections[self.currentCollectionSet].collection;
-            $.post("/create/node", data, function(returnedData) {
-                console.log('created node');
-                $("#node_creator").hide();
+                // point currentCollectionSet to last collection
+                self.currentCollectionSet = self.collections.length;
                 self.loadProject();
             });
+        } else {
+			// set parent collection
+			if(self.currentCollection == null) 
+				alert("parent collection is missing");
+			else {data.collection = self.currentCollection.source._id;
+				$.post("/create/node", data, function(returnedData) {
+					console.log('created node');
+					$("#node_creator").hide();
+					//self.addNode();
+				});
+			}
         }
+	}
+
+
+
+	this.removeNode = function (event) {
+        var obj = $(event.target);
+        console.log("remove node");
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          modal: true,
+          buttons: {
+            "Delete node": function() {
+                $( this ).dialog( "close" );
+                var params = {node:data._id, project:self.currentProject};
+                $.post("/delete/node/", params, function(retData) {
+                    console.log('node deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+                        self.resetSettings();
+                        self.currentNode = null;
+                        self.currentCollection = null;
+                        self.currentNodePosition = null;
+                        self.reloadProject();
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+	}
+
+	// renders node boxes sorted by types (source, process etc.)
+	this.renderCollectionSet = function () {
+		
+		console.log("rendering collection ", self.currentCollection.source._id);
+		
+		var collection = self.currentCollection;
+		var html = "";
+		html += "<collectionset>"
+		
+		html += collection.renderNode();
+		
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Source</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder'></div>"
+		 
+		html += self.renderNodes(collection,["source", "lookup"]);
+		  
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Process</span> <a class='add-node' data-type='transform' href='addnode.html'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder'></div>"
+		
+		html += self.renderNodes(collection, ["transform"]);
+		
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Export</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder'></div>"
+
+		html += self.renderNodes(collection, ["export"]);
+
+		html += "</collectionset>"
+		
+		
+		$("pipe .holder").empty();
+		$("pipe .holder").append(html);
+		
+	}
+	
+	
+	
+	this.renderNodes = function (collection, types) {
+	
+		var html = "";
+		for (var i = 0; i < self.nodes.length; i++) {
+			var node = self.nodes[i];
+			if (node.source.collection == collection.source._id) {
+				if(types.indexOf(node.source.type) != -1)
+					html += node.renderNode();
+			}
+		}
+		return html;
+	}
+
+
+	// COLLECTION CHOOSER
+	this.showCollections = function (e) {
+		console.log(self.collections);
+		
+		//var obj = $(e.target).parent();
+		//for (var i = 0; i < self.collections.length; i++) {
+			//obj.append("<div class='col_choose'>collection:" + self.collections[i].source.title + "</div");
+		//}
+	}
+
+	
+	this.setCollectionCounter  = function () {
+		$(self.collectionSwitchDiv).text((self.currentCollectionSet + 1) + " / " + self.collections.length)
+	}
+	
+	
+	this.prevCollection = function () {
+		if (self.currentCollectionSet != 0) {
+			self.currentCollectionSet--;
+			
+			self.setCollectionCounter();
+			self.currentCollection = self.collections[self.currentCollectionSet]; 
+			self.renderCollectionSet();
+		}
+	}
+
+	this.nextCollection = function () {
+		if (self.currentCollectionSet != self.collections.length -1) {
+			self.currentCollectionSet++;
+			 
+			self.setCollectionCounter();
+			self.currentCollection = self.collections[self.currentCollectionSet];
+			self.renderCollectionSet();
+		}
 	}
 
 }
