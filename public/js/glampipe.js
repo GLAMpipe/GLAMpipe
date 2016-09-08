@@ -1,17 +1,20 @@
 
 var glamPipe = function () {
 	var self = this;
-	this.currentProject = ""
+	this.currentProject = "";
 	this.currentCollectionSet = 0;
 	this.currentCollection = null;
-	this.currentNodes = []
+	this.currentNodes = {}; // active nodes per collection
+
+	this.pickedCollectionId = "";
 	
-	this.projectPipeDiv = "#project-pipe"
-	this.collectionSwitchDiv = "#collection-node-switch"
-	this.pageTitleDiv = "#page-title",
+	this.projectPipeDiv = "#project-pipe";
+	this.collectionSwitchDiv = "#collection-node-switch";
+	this.pageTitleDiv = "#page-title";
+	this.nodeHolderDiv = "node-pipe .holder";
 	
-	this.collections = []
-	this.nodes = []
+	this.collections = [];
+	this.nodes = [];
 
 	this.login = function (username, password) {
 		alert(login)
@@ -91,6 +94,7 @@ var glamPipe = function () {
 				// set first collection as current collection
 				if(self.collections.length) {
 					self.currentCollection = self.collections[self.currentCollectionSet];
+					self.pickedCollectionId = self.currentCollection.source._id; // default collection for dynamic field picker
 				}
 				
 				self.setCollectionCounter();
@@ -108,8 +112,12 @@ var glamPipe = function () {
 
 
 	// NODES
+	
+	// renders node settings and data
 	this.openNode = function (e) {
+		self.renderDataHeader();
 		var node = self.getNode(e);
+		self.currentNodes[self.currentCollection.source.collection] = node;
 		if(node)
 			node.open();
 		else
@@ -198,53 +206,26 @@ var glamPipe = function () {
 			// set parent collection
 			if(self.currentCollection == null) 
 				alert("parent collection is missing");
-			else {data.collection = self.currentCollection.source._id;
+			else {data.collection = self.currentCollection.source.collection;
+				console.log("currentCollection on node create:", self.currentCollection.source.collection);
 				$.post("/create/node", data, function(returnedData) {
-					console.log('created node');
+					console.log(data);
 					$("#node_creator").hide();
 					//self.addNode();
+					self.loadProject();
 				});
 			}
         }
 	}
 
-
-
-	this.removeNode = function (event) {
-        var obj = $(event.target);
-        console.log("remove node");
-        $( "#dialog-confirm" ).dialog({
-          resizable: false,
-          height:160,
-          modal: true,
-          buttons: {
-            "Delete node": function() {
-                $( this ).dialog( "close" );
-                var params = {node:data._id, project:self.currentProject};
-                $.post("/delete/node/", params, function(retData) {
-                    console.log('node deleted');
-                    if(retData.error)
-                        alert(retData.error);
-                    else {
-                        self.resetSettings();
-                        self.currentNode = null;
-                        self.currentCollection = null;
-                        self.currentNodePosition = null;
-                        self.reloadProject();
-                    }
-                });
-            },
-            Cancel: function() {
-              $( this ).dialog( "close" );
-            }
-          }
-        });
+	this.renderDataHeader = function () {
+		$("#data-header").empty().append(self.currentCollection.source.title);
 	}
+
+
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
-		
-		console.log("rendering collection ", self.currentCollection.source._id);
 		
 		var collection = self.currentCollection;
 		var html = "";
@@ -276,8 +257,8 @@ var glamPipe = function () {
 		html += "</collectionset>"
 		
 		
-		$("pipe .holder").empty();
-		$("pipe .holder").append(html);
+		$(self.nodeHolderDiv).empty();
+		$(self.nodeHolderDiv).append(html);
 		
 	}
 	
@@ -288,7 +269,7 @@ var glamPipe = function () {
 		var html = "";
 		for (var i = 0; i < self.nodes.length; i++) {
 			var node = self.nodes[i];
-			if (node.source.collection == collection.source._id) {
+			if (node.source.collection == collection.source.collection) {
 				if(types.indexOf(node.source.type) != -1)
 					html += node.renderNode();
 			}
@@ -319,7 +300,14 @@ var glamPipe = function () {
 			
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet]; 
+			self.pickedCollectionId = self.currentCollection.source.collection;
 			self.renderCollectionSet();
+			if(self.currentNodes[self.currentCollection.source.collection])
+				self.currentNodes[self.currentCollection.source.collection].open(); 
+			else
+				self.currentCollection.open();
+				
+			console.log("currentCollection = ", self.currentCollection.source.collection);
 		}
 	}
 
@@ -329,8 +317,195 @@ var glamPipe = function () {
 			 
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
+			self.pickedCollectionId = self.currentCollection.source.collection;
 			self.renderCollectionSet();
+			if(self.currentNodes[self.currentCollection.source.collection])
+				self.currentNodes[self.currentCollection.source.collection].open(); 
+			else
+				self.currentCollection.open();
+								
+			console.log("currentCollection = ", self.currentCollection.source.collection);
 		}
+	}
+
+
+	this.openDynamicFieldSelector = function (event) {
+		var obj = $(event.target);
+		self.currentInput = obj;   // put input to global variable so that we can update it later
+		
+		var collectionId = self.pickedCollectionId;
+		if(collectionId == null)
+			collectionId = self.currentCollection.source.collection;
+		
+		
+        // fetch fields
+        $.getJSON("/get/collection/" + self.pickedCollectionId + "/fields", function(data) { 
+            if(data.error)
+                alert(data.error);
+
+
+            var html = "<ul>";
+                for (var i = 0; i < data.sorted.length; i++) {
+                    var key = data.keys[data.sorted[i]];
+                    html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</li>";
+
+                }
+            html += "</ul>"
+                
+            
+            // open dialog
+            $("#dynamic-fields").empty();
+            $("#dynamic-fields").append(html);
+            $("#dynamic-fields").dialog({
+                title: "choose field"
+            });
+				
+			self.pickedCollectionId = null; // reset
+        })
+	}
+
+
+	this.openDynamicCollectionSelector = function (event) {
+
+        var obj = $(event.target);
+        self.currentInput = obj; 
+
+        
+        
+        
+        var html = "<ul>";
+        for(var i = 0; i < self.collections.length; i++) {
+            var node = self.collections[i];
+            if(node.source._id != self.currentCollection.source._id) {
+				var parts = node.source.collection.split("_");
+				if(parts[parts.length - 1] != "")
+					var cName = parts[parts.length - 1];
+				else
+					var cName = node.source.collection;
+                html += '<li class="pick_collection" data-field="source_collection" data-val="'+node.source.collection+'">' + cName + '</li>';
+            }
+        }
+        html += "</ul>";
+        
+        if(self.collections.length == 1)
+			html = "No other collections";
+
+        // open dialog
+        $("#dynamic-fields").empty();
+        $("#dynamic-fields").append(html);
+        $("#dynamic-fields").dialog({
+            position: { 
+                my: 'left top',
+                at: 'right top',
+                of: obj
+            },
+            title: "choose collection"
+        });
+	}
+	
+	
+	this.pickField = function (event) {
+        var obj = $(event.target);
+        
+        self.currentInput.val(obj.data("val"));
+        self.currentInput.change();
+        self.currentInput = null;
+        
+        $("#dynamic-fields").dialog("close");
+	}
+
+
+	this.pickCollection = function (event) {
+        var obj = $(event.target);
+        
+        self.currentInput.val(obj.data("val"));
+        self.currentInput.change();
+        self.currentInput = null;
+        
+        // we pick fields from different collection than where we are adding the node
+        self.pickedCollectionId = obj.data("val");
+        
+        $("#dynamic-fields").dialog("close");
+	}
+
+
+	this.removeNode = function (event) {
+        var obj = $(event.target);
+        console.log("remove node");
+        var node_id = obj.closest(".node").data("id");
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          title:"Deleting node",
+          modal: true,
+          buttons: {
+            "Delete node": function() {
+                $( this ).dialog( "close" );
+                var params = {node:node_id, project:self.currentProject};
+                $.post("/delete/node/", params, function(retData) {
+                    console.log('node deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+                        self.loadProject();
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+	}
+
+
+	this.uploadFileAndCreateNode = function (event) {
+
+        var params = {};
+        var obj = $(event.target);
+
+        
+        // read params
+        obj.find("input,textarea, select").not("input[type=button],input[type=submit]").each(function(){
+            params[$(this).attr("name")] = $(this).val(); 
+        });
+        e.preventDefault();
+        var obj = $(e.target);
+        var nodeId = obj.data("nodeid");
+        var fd = new FormData(this);
+        fd.append("project",nodes.currentProject);
+        
+        // upload file 
+        $.ajax({
+            url: "/upload/file",
+            type: "POST",
+            dataType: "json",
+            data:  fd,
+            contentType: false, 
+            cache: false,
+            processData:false,
+            success: function(data)
+            {
+                if (data.error) {
+                    alert(data.error);
+                    $('#loading').hide();
+                } else {
+                    // create actual node
+                    data.params = params;
+                    data.params.filename = data.filename;
+                    data.params.mimetype = data.mimetype;
+                    data.nodeid = nodeId;
+                    data.project = nodes.currentProject;
+                    data.input_node = nodes.currentNode; 
+                    data.collection = nodes.currentCollection; 
+                    $.post("/create/node", data, function(returnedData) {
+                        console.log('created node');
+                        $("#node_creator").hide();
+                        nodes.reloadProject();
+                    });
+                }
+            }	        
+       });
 	}
 
 }

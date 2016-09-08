@@ -30,7 +30,6 @@ var nodeRepository = function () {
         // render node types
         for (var i = 0; i < self.nodes.length; i++) {
             
-            console.log(self.nodes[i]);
             var node = self.nodes[i]._id;
             if(types.indexOf(node.type) != -1) {
                 html += "  <div class='optionlist'>"

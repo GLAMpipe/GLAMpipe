@@ -7,11 +7,44 @@ var glamPipeNode = function (node) {
 	this.maxArrayLenghtDisplay = 5;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
 	
+	this.dataDisplayDiv = "data-workspace data data-display";
+	this.dataControlsDiv = "data-workspace data data-controls";
+
+	this.params = {
+		skip:function() {return "?skip="+this.skip_value;}, 
+		skip_value: 0, 
+		skip_func: function (val) {
+			this.skip_value = this.skip_value + val;
+			if (this.skip_value <= 0)
+				this.skip_value = 0;
+			if(this.skip_value > self.data.count)
+				this.skip_value = this.skip_value - val;
+			},
+		sort:function() {
+			var r = 0;
+			if(self.params.reverse)
+				r = 1;
+			
+			if(this.sort_value != "")
+				return "&reverse="+r+"&sort="+this.sort_value;
+			else
+				return "";},
+		sort_value: "",
+		fields: "",
+		fields_func: function () {
+			if(this.fields != "")
+				return "&fields=" + this.fields;
+			else
+				return "";
+		},
+		reverse: 0
+	};
+	
 	if(node.views.default_keys)
 		self.data.visible_keys = node.views.default_keys;
 		
-	if(node.type == "collection")
-		self.source.collection = node._id;
+	//if(node.type == "collection")
+		//self.source.collection = node._id;
 	
 	// render node to project view (left column)
 	this.renderNode = function () {
@@ -31,23 +64,25 @@ var glamPipeNode = function (node) {
 	this.renderSettings = function () {
 		
 		
-		$("workspace .settingstitle").text("Settings for " + self.source.title);
-		$("workspace .settings").empty();
-		$("workspace .settings").append(self.source.views.settings);
+		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
+		$("data-workspace .settings").empty();
+		$("data-workspace .settings").append(self.source.views.settings);
 		
 		if(self.source.scripts.settings) {
 			var settingsScript = new Function('node', self.source.scripts.settings);
 			settingsScript(self.source);
 		}
 		
-		$("workspace .settings").append("<div class='box'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		$("data-workspace .settings").append("<div class='box'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
 	}
 
 
 	// create html table for data display
 	this.loadAndRenderData = function () {
 		
+		self.renderTableControls();
 		self.loadCollectionKeys(function() { 
+			self.renderFieldSelector();
 			self.loadCollectionData(function() {
 				self.renderTablePage();
 				self.renderCollectionCount();
@@ -58,13 +93,65 @@ var glamPipeNode = function (node) {
 	}
 
 
+	this.nextTablePage = function () {
+		self.params.skip_func(15);
+		self.loadCollectionData(function() {
+			self.renderTablePage();
+			self.renderCollectionCount();
+		});			
+	}
 
+
+	this.prevTablePage = function () {
+		self.params.skip_func(-15);
+		self.loadCollectionData(function() {
+			self.renderTablePage();
+			self.renderCollectionCount();
+		});			
+	}
+
+
+	this.sortTableColumn = function (field) {
+		
+		if(this.params.sort_value == field.trim()) {
+			if(this.params.reverse) {
+				this.params.reverse = 0;
+			} else {
+				this.params.reverse = 1;
+			}
+		} else {
+			this.params.sort_value = field.trim();
+			this.params.reverse = 0;
+		}
+		
+		this.params.skip_value = 0;
+		
+		self.loadCollectionData(function() {
+			self.renderTablePage();
+			self.renderCollectionCount();
+		});	
+	}
+
+	this.renderTableControls = function () {
+
+		var html = "<div class='boxright'> ";
+		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true'></div>";
+		html += "    <div id='data-prev' class='wikiglyph wikiglyph-caret-left icon' aria-hidden='true'></div>";
+		html += "    <div id='data-switch'>0 / 0</div>";
+		html += "    <div id='data-next' class='wikiglyph wikiglyph-caret-right icon' aria-hidden='true'></div>";
+	    html += "  </div>";
+	    html += "  <div id='field-sel'></div>";
+	    $(self.dataControlsDiv).empty().append(html);
+
+	}
+
+	// displays data in table format
 	this.renderTablePage = function () {
 
 		if(self.data.visible_keys.length)
 			var visible_keys = self.data.visible_keys;
 		else
-			var visible_keys = self.data.keys.sorted.splice(0,5);
+			var visible_keys = self.data.keys.sorted.slice(0,5);
 
 		
 
@@ -81,30 +168,44 @@ var glamPipeNode = function (node) {
 		
 		html += "</tbody></table>" ;
 
-		$("workspace data").empty();
-		$("workspace data").append("<div id='count'></div>");
-		
-		self.renderFieldSelector();
-		
-		$("workspace data").append("<div id='selected_fields'></div>");
-		$("workspace data").append(html);
+		$(self.dataDisplayDiv).empty();
+		$(self.dataDisplayDiv).append("<div id='count'></div>");
+		$(self.dataDisplayDiv).append(html);
 		
 		
 		// set dynamic bindings for workspace
-		$( "workspace" ).unbind();
-		$("workspace").on('click','.wikiglyph-cross', function(e) {
+		$( "data-workspace" ).unbind();
+		
+		// removing field from visible fields
+		$("data-workspace").on('click','.wikiglyph-cross', function(e) {
 			self.removeVisibleFields($(e.target).parent().text());
 			e.preventDefault();
 		})
 		
-		// visible fields selector
-		$("workspace").on('change','#field-selector', function(e) {
+		// adding field to visible fields
+		$("data-workspace").on('change','#field-selector', function(e) {
 			self.setVisibleFields(this);
 		})			
 
+		// next page of data
+		$("data-workspace").on('click','.wikiglyph-caret-right', function(e) {
+			self.nextTablePage();
+		})
+
+		// previous page of data
+		$("data-workspace").on('click','.wikiglyph-caret-left', function(e) {
+			self.prevTablePage();
+		})
+
+		// previous page of data
+		$("data-workspace").on('click','table thead td', function(e) {
+			self.sortTableColumn($(e.target).text());
+		})
 
 	}
 	
+
+
 
 	this.renderFieldSelector = function () {
 
@@ -115,7 +216,7 @@ var glamPipeNode = function (node) {
 		}
 
 		var fieldSelect = $("<select id='field-selector'>" + options + "<select>");
-		$("workspace data").append(fieldSelect);
+		$("data-workspace data data-controls #field-sel").append(fieldSelect);
 		
 
 		
@@ -127,7 +228,7 @@ var glamPipeNode = function (node) {
 		if(self.data.visible_keys.length)
 			var visible_keys = self.data.visible_keys;
 		else
-			var visible_keys = self.data.keys.sorted.splice(0,5);
+			var visible_keys = self.data.keys.sorted.slice(0,5);
 
 		var html = "";
 
@@ -202,12 +303,12 @@ var glamPipeNode = function (node) {
 	// render data with node spesific settings and display node settings
 	this.open = function () {
 		if(self.source.type == "collection") {
-			$("workspace .settingscontainer").hide();
+			$("data-workspace .settingscontainer").hide();
 			self.loadAndRenderData();
 		} else {
 			self.renderSettings();
 			self.loadAndRenderData();
-			$("workspace .settingscontainer").show();
+			$("data-workspace .settingscontainer").show();
 		}
 			
 	}
@@ -231,7 +332,7 @@ var glamPipeNode = function (node) {
 		
         var settings = {};
         // read input from settings (only direct child nodes and not checkboxes)
-        $("workspace .settings > input:not([type='checkbox']), .settings > select, .settings table input:not([type='checkbox']), .settings table select").each(function() {
+        $("data-workspace .settings > input:not([type='checkbox']), .settings > select, .settings table input:not([type='checkbox']), .settings table select").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
@@ -243,7 +344,7 @@ var glamPipeNode = function (node) {
         });
         
         // handle checkboxes separately. Checbox is included only if it is checked
-        $("workspace .settings > input[type='checkbox'], .settings table input[type='checkbox']").each(function() {
+        $("data-workspace .settings > input[type='checkbox'], .settings table input[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).val();
 		});
@@ -259,7 +360,7 @@ var glamPipeNode = function (node) {
 
 	this.loadCollectionData = function (cb) {
 		
-		$.getJSON("/get/collection/" + self.source.collection, function (docs) {
+		$.getJSON("/get/collection/" + self.source.collection + self.params.skip() + self.params.sort() + self.params.fields_func(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
 		});
@@ -274,7 +375,11 @@ var glamPipeNode = function (node) {
 
 	this.renderCollectionCount = function () {
 		$.getJSON("/get/collection/count/" + self.source.collection , function(data) { 
-			$("workspace #count").text("(" + data.count + " docs)");
+			self.data.count = parseInt(data.count);
+			var skip = self.params.skip_value  + 15;
+			if(skip > self.data.count)
+				skip = self.data.count;
+			$("data-workspace #data-switch").text( self.params.skip_value + " - " + skip + " of " + self.data.count );
 		})
 	}
 

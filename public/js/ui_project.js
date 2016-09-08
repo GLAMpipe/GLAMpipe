@@ -7,8 +7,8 @@ $( document ).ready(function() {
 	gp.loadProject("#projectList");
 
 	// hide node settings panel on start
-	$("workspace .settings").hide();
-	$("workspace .settingscontainer").hide();
+	$("data-workspace .settings").hide();
+	$("data-workspace .settingscontainer").hide();
 
 	$("#create_project").on("click", function (e) {
 		gp.addProject("pam");
@@ -39,13 +39,13 @@ $( document ).ready(function() {
 	$(".settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
-		$("workspace .settings").hide();
+		$("data-workspace .settings").hide();
 	});
 
 	$(".settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
 		$(this).removeClass("wikiglyph-caret-down");
 		$(this).addClass("wikiglyph-caret-up");
-		$("workspace .settings").show();
+		$("data-workspace .settings").show();
 	});
 
 
@@ -95,6 +95,26 @@ $( document ).ready(function() {
 		e.stopPropagation();
 		e.preventDefault();
 	})
+
+	// open dynamic field picker
+    $(document).on('click','.dynamic_field', function(e) {
+		gp.openDynamicFieldSelector(e);
+    });
+
+	// pick field
+    $(document).on('click','.pick_field', function(e) {
+		gp.pickField(e)
+    });
+
+	// open dynamic collection picker
+    $(document).on('click','.dynamic_collection', function(e) {
+		gp.openDynamicCollectionSelector(e);
+    })
+
+	// pick collection
+    $(document).on('click','.pick_collection', function(e) {
+		gp.pickCollection(e)
+    });
 
 
 });

@@ -206,7 +206,7 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(meta) {
-				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 20 chars
+				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -1009,11 +1009,14 @@ exports.createNode = function (nodeRequest, res, io) {
  
 function initNode (nodeRequest, res, io, project) {
 
-	console.log("nEW", mongojs.ObjectId());
+	console.log("New node id:", mongojs.ObjectId());
 	console.log("nodeparams:", nodeRequest);
 	
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
+		console.log("inserting");
+		console.log(node.collection);
+		
 		mongoquery.update("mp_projects",
 			{_id:mongojs.ObjectId(node.project)},
 			{$push:{nodes: node}},
@@ -1028,6 +1031,7 @@ function initNode (nodeRequest, res, io, project) {
 			node.input_node = nodeRequest.input_node;
 			node.project = nodeRequest.project
 			node.collection = nodeRequest.collection;
+			console.log("node.collection:", node.collection);
 			node.number = nodeRequest.node_count;
 			node.dirsuffix = ""; // node can set this in "hello" script
 			
@@ -1129,7 +1133,9 @@ exports.createCollectionNode = function (nodeRequest, res, io) {
 		// cleanup name
 		collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
 		
+		//						  project count
 		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
+		
 		nodeRequest.params.collection = nodeRequest.collection;
 		nodeRequest.node_count = data.node_count;
 		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [nodeRequest.collection] } }, function() {
@@ -1153,8 +1159,6 @@ function initCollectionNode (nodeRequest, res, io) {
 				node.params = {};
 			node.collection = nodeRequest.collection;
 			node.number = nodeRequest.node_count;
-			node.x = "350";
-			node.y = "0";
 			
 			runNodeScript("hello", node, nodeRequest, io);
 			

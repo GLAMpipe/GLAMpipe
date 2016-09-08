@@ -17,7 +17,7 @@
 <script type="text/javascript" src="/js/ui_project.js"></script>
 <!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/dt-1.10.12/b-1.2.1/b-colvis-1.2.1/cr-1.3.2/fc-3.2.2/fh-3.1.2/kt-2.1.2/r-2.1.0/rr-1.1.2/sc-1.4.2/se-1.2.0/datatables.min.css"/> -->
  
-
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
 <link href="/css/style.css" rel="stylesheet" type="text/css" />
 </head>
 
@@ -25,16 +25,15 @@
 <header><a href="/"><span class="title sitetitle">GLAMpipe</span></a></header>
 
 <content class="main hbox space-between">
-  <pipe>
+  <node-pipe>
     <div class="pageheader">
       <div id="page-title" class="title pagetitle"></div>
     </div>
     
     <div class="sectiontitleblock">
       <div id="collectionList"><span class="title sectiontitle">Collections</span> <a class="add-node" data-type="collection" href="#">Add collection</a></div>
-      <div class="boxright"> <a href="collections.html">
+      <div class="boxright"> 
         <div id="collection-chooser" class="wikiglyph wikiglyph-stripe-menu icon" aria-hidden="true"></div>
-        </a>
         <div id="collection-prev" class="wikiglyph wikiglyph-caret-left icon" aria-hidden="true"></div>
         <div id="collection-node-switch">0 / 0</div>
         <div id="collection-next" class="wikiglyph wikiglyph-caret-right icon" aria-hidden="true"></div>
@@ -42,8 +41,8 @@
     </div>
     <div class="holder"></div>
     
-  </pipe>
-  <workspace>
+  </node-pipe>
+  <data-workspace>
 	  <div class="settingscontainer">
 		<div class="settingsheader">
 		  <div class="title settingstitle">Settings for ...</div>
@@ -51,8 +50,14 @@
 		</div>
 		<div class="settings"></div>
 	  </div>
-	  <data></data>
-  </workspace>
+	  <data>
+		<div id="data-header"></div>
+		<data-controls></data-controls>
+		<data-display></data-display>
+	  </data>
+  </data-workspace>
 </content>
+<div id="dynamic-fields"></div>
+<div id="dialog-confirm">Are you sure?</div>
 </body>
 </html>
