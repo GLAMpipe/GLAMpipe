@@ -79,7 +79,7 @@ var glamPipe = function () {
 				if(nodes) {
 					for(var i = 0; i< nodes.length; i++) {
 						
-						var node = new glamPipeNode(nodes[i]);
+						var node = new glamPipeNode(nodes[i], self);
 						
 						// create separate array of collections so that we can group nodes
 						if(nodes[i].type == "collection")

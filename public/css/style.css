@@ -15,7 +15,7 @@ body {
 	font-family: 'Open Sans', sans-serif;
 	font-size: 13px;
 	font-weight:300;
-	color:#444;
+	color:#000;
 	background-color: #444;
 	padding: 0px;
 }
@@ -42,7 +42,7 @@ th, td {
 tr:hover {background-color: #fefefe}
 
 td:first-child, th:first-child {
-	padding-left:20px;
+	//padding-left:20px;
 }
 
 .vbox {
@@ -538,6 +538,11 @@ table.documents td div {
 	max-height:3em;
 	overflow: hidden;
 	margin-right: 3em;
+}
+
+table.documents tbody td div:hover {
+    //background-color:#BFCCCB;
+    cursor:pointer;
 }
 
 #field-selector {

@@ -1,6 +1,7 @@
 
-var glamPipeNode = function (node) {
+var glamPipeNode = function (node, gp) {
 	var self = this;
+    this.gp = gp;
 	this.source = node;
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
 	this.settings = {};
@@ -92,6 +93,9 @@ var glamPipeNode = function (node) {
 		
 	}
 
+    this.expandTable = function () {
+        $("data-workspace table.documents tbody td div").css({"max-height":"200px", "overflow-y":"auto"});
+    }
 
 	this.nextTablePage = function () {
 		self.params.skip_func(15);
@@ -135,6 +139,8 @@ var glamPipeNode = function (node) {
 	this.renderTableControls = function () {
 
 		var html = "<div class='boxright'> ";
+        html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye icon' aria-hidden='true'></div>";
+        html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true'></div>";
 		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true'></div>";
 		html += "    <div id='data-prev' class='wikiglyph wikiglyph-caret-left icon' aria-hidden='true'></div>";
 		html += "    <div id='data-switch'>0 / 0</div>";
@@ -197,9 +203,19 @@ var glamPipeNode = function (node) {
 			self.prevTablePage();
 		})
 
+		// expand table view
+		$("data-workspace").on('click','.wikiglyph-eye', function(e) {
+			self.expandTable();
+		})
+
 		// previous page of data
 		$("data-workspace").on('click','table thead td', function(e) {
 			self.sortTableColumn($(e.target).text());
+		})
+
+		// show cell content
+		$("data-workspace").on('click','table tbody td div', function(e) {
+			self.showCell(e);
 		})
 
 	}
@@ -355,7 +371,28 @@ var glamPipeNode = function (node) {
 
 
 
-
+    this.showCell = function(event) {
+        var obj = $(event.target);
+        var col = obj.parent().parent().children().index(obj.parent());
+        var colNameIndex = col + 1;
+        var row = obj.parent().parent().parent().children().index(obj.parent().parent());
+        var doc = self.data.docs[row];
+        
+        var table = obj.parents("table");
+        var key = table.find("thead tr td:nth-child(" + colNameIndex + ")").text().trim();
+        var cellValue = self.nl2br(doc[key]);
+        
+        console.log('Row: ' + row + ', Column: ' + col + ',key:' + key);
+        $("#cell-display").empty().append(cellValue);
+        $("#cell-display").dialog({
+            position: { 
+                my: 'left top',
+                at: 'right top',
+                of: obj
+            },
+            title: "cell data"
+        });
+    }
 
 
 	this.loadCollectionData = function (cb) {
@@ -382,5 +419,10 @@ var glamPipeNode = function (node) {
 			$("data-workspace #data-switch").text( self.params.skip_value + " - " + skip + " of " + self.data.count );
 		})
 	}
+
+    this.nl2br = function (str, is_xhtml) {   
+        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+        return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+    }
 
 }

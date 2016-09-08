@@ -2,7 +2,7 @@
 module.exports.initDBConnect = function () {
 
 	// default to a 'localhost' configuration:
-	var connection_string = '127.0.0.1:27017/meta';
+	var connection_string = '127.0.0.1:27017/metapipe';
 	
 	// if OPENSHIFT env variables are present, use the available connection info:
 	if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
