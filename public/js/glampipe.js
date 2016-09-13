@@ -104,19 +104,13 @@ var glamPipe = function () {
 		self.nodes = [];
 		
 		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
+			
 			if(typeof project !== "undefined") { 
 				var nodes = project.nodes;
+				
 				if(nodes) {
 					for(var i = 0; i< nodes.length; i++) {
-						
-						var node = new glamPipeNode(nodes[i], self);
-						
-						// create separate array of collections so that we can group nodes
-						if(nodes[i].type == "collection")
-							self.collections.push(node);
-						else
-							self.nodes.push(node);
-
+						self.addProjectNode(new glamPipeNode(nodes[i], self));
 					}
 				}
 				self.setPageTitle(project.title);
@@ -133,6 +127,15 @@ var glamPipe = function () {
 				self.renderCollectionSet();
 			}
 		})
+	}
+
+
+	this.addProjectNode = function (node) {
+		// create separate array of collections so that we can group nodes
+		if(node.source.type == "collection")
+			self.collections.push(node);
+		else
+			self.nodes.push(node);		
 	}
 
 	this.setPageTitle = function (title) {
@@ -156,9 +159,11 @@ var glamPipe = function () {
 
 	this.runNode = function (e) {
 		var node = self.getNode(e);
-		if(node)
+		if(node) {
+			$("#node-messages").empty();
+			$("#node-messages").addClass("busy");
 			node.run();
-		else
+		} else
 			alert("node id not found");
 	}
 
@@ -198,8 +203,8 @@ var glamPipe = function () {
 		if (obj.data("type") == "export")
 			types = ["export", "upload"]
 
-		if (obj.data("type") == "transform")
-			types = ["transform"]
+		if (obj.data("type") == "process")
+			types = ["process"]
 
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
@@ -221,8 +226,6 @@ var glamPipe = function () {
 			return;
 		}
         
-        
-        
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
             params[$(this).attr("name")] = $(this).val(); 
@@ -235,7 +238,7 @@ var glamPipe = function () {
         if(node.type == "collection") {
             $.post("/create/collection/node", data, function(returnedData) {
                 console.log('created node');
-                $("#node_creator").hide();
+                $(".holder.params").empty();
                 // point currentCollectionSet to last collection
                 self.currentCollectionSet = self.collections.length;
                 self.loadProject();
@@ -247,10 +250,13 @@ var glamPipe = function () {
 			else {data.collection = self.currentCollection.source.collection;
 				console.log("currentCollection on node create:", self.currentCollection.source.collection);
 				$.post("/create/node", data, function(returnedData) {
-					console.log(data);
-					$("#node_creator").hide();
-					//self.addNode();
-					self.loadProject();
+					console.log("node create:", returnedData);
+					var node = new glamPipeNode(returnedData, self);
+					self.addProjectNode(node);
+					self.currentNodes[self.currentCollection.source.collection] = node;
+					self.renderCollectionSet();
+					node.open();
+					$("data-workspace .settingscontainer .settings").show();
 				});
 			}
         }
@@ -272,21 +278,21 @@ var glamPipe = function () {
 		html += collection.renderNode();
 		
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Source</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+		html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder params'></div>"
 		 
 		html += self.renderNodes(collection,["source", "lookup"]);
 		  
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Process</span> <a class='add-node' data-type='transform' href='addnode.html'>Add</a></div>"
+		html += "	<div><span class='title sectiontitle'>Processing</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder params'></div>"
 		
-		html += self.renderNodes(collection, ["transform"]);
+		html += self.renderNodes(collection, ["process"]);
 		
 		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Export</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+		html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 		html += "  </div><div class='holder params'></div>"
 
@@ -533,7 +539,6 @@ var glamPipe = function () {
                     data.collection = self.currentCollection.source.collection; 
                     $.post("/create/node", data, function(returnedData) {
                         console.log('created upload node');
-                        $("#node_creator").hide();
                         self.loadProject();
                     });
                 }

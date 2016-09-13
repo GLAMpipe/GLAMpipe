@@ -155,8 +155,8 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.deleteNode(req.body, res, glampipe.io);
 	});
 
-	express.post('/set/node/position', function (req, res) {
-		glampipe.core.setNodePosition(req.body, res);
+	express.post('/set/node/:id/visible-fields', function (req, res) {
+		glampipe.core.setVisibleFields(req.params.id, res);
 	});
 
 	express.post('/run/node/:id', function (req, res) {

@@ -309,38 +309,6 @@ a .listoption:hover {
 }
 
 
-.collection {
-	border-left:solid rgba(1, 4, 9, 0.2) 10px;
-	width:325px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.collection:hover {
-	border-left:solid rgba(1, 4, 9, 1) 10px;
-}
-
-.source {
-	border-left:solid rgba(52,123,255,0.2) 10px;
-	width:325px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.source:hover {
-	border-left:solid rgba(52,123,255,1) 10px;
-}
-
-.transform {
-	border-left:solid #EAD9A5 10px;
-	width:325px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.transform:hover {
-	border-left:solid #BDA14F 10px;
-}
 
 .settingsheader {
 	background-color: rgba(255,255,255,0.5);
@@ -452,7 +420,7 @@ div.panel.show {
     transition-duration: 0.2s;
 }
 
-.panel-show .transform:hover {
+.panel-show .process:hover {
 	border-left:solid rgba(255,181,13,1) 5px;
 	padding-left:5px;
 	-webkit-transition-duration: 0.2s; /* Safari */
@@ -464,6 +432,41 @@ div.panel.show {
 	padding-left:5px;
 	-webkit-transition-duration: 0.2s; /* Safari */
     transition-duration: 0.2s;
+}
+
+
+.collection {
+	border-left:solid rgba(1, 4, 9, 0.2) 10px;
+	width:325px;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+	background-color: #bfd2f3;
+}
+
+.collection:hover {
+	border-left:solid rgba(1, 4, 9, 1) 10px;
+}
+
+.source {
+	border-left:solid rgba(52,123,255,0.2) 10px;
+	width:325px;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+}
+
+.source:hover {
+	border-left:solid rgba(52,123,255,1) 10px;
+}
+
+.process {
+	border-left:solid #EAD9A5 10px;
+	width:325px;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+}
+
+.process:hover {
+	border-left:solid #BDA14F 10px;
 }
 
 .query:hover {
@@ -480,11 +483,15 @@ div.panel.show {
     transition-duration: 0.2s;
 }
 
-.export:hover {
-	border-left:solid rgba(143,215,239,1) 5px;
+.export{
+	border-left:solid rgb(189, 232, 246)  10px;
 	padding-left:5px;
 	-webkit-transition-duration: 0.2s; /* Safari */
     transition-duration: 0.2s;
+}
+
+.export:hover {
+	border-left:solid rgba(143,215,239,1) 10px;
 }
 
 .download:hover {
@@ -598,3 +605,18 @@ input.middle_input {
 	font-weight:bold;
 }
 
+.progress {
+ background-color:#BFCCCB;
+}
+
+.good {
+ background-color:#BFCCCA;
+}
+
+.bad {
+ background-color:red;
+}
+
+.busy {
+	background-color:orange;
+}

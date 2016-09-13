@@ -738,52 +738,44 @@ exports.runNode = function (req, res, io) {
 				break;
 
 
-				case "transform":
-					
-					// find everything
-					mongoquery.find2({}, node.collection, function(err, docs) {
-						sandbox.context.doc_count = docs.length;
-						console.log(docs.length);
-						runNodeScriptInContext("init", node, sandbox, io);
+				case "process":
+				
+					switch (node.subtype) {
 						
-						// run node once per record
-						async.eachSeries(docs, function iterator(doc, next) {
+						case "files":
+						
+							switch (node.subsubtype) {
+								
+								case "pdf":
+									var extractReferences = require("../app/node_runners/file_pdf.js");
+									asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+								break;
+							}
+							break;	
 
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.value = null;  // reset output
-							run.runInContext(sand);
-							var setter = {};
-							setter[node.out_field] = sandbox.out.value;
-							//console.log(setter);
-							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+						case "fields":
+						
+							switch (node.subsubtype) {
+								
+								case "link_checker":
+									var checker = require("../app/node_runners/link-checker.js");
+									asyncLoop.loop(node, sandbox, checker.checkLinks);
+								break;
 							
-						}, function done () {
-							runNodeScriptInContext("finish", node, sandbox, io);
-						});
-					});
+								default:
+								
+									asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+											run.runInContext(sandbox);
+											next();
+										});
+	
+								}
+							break;
+					}				
+
 
 				break;
 
-
-				case "file":
-				switch (node.subtype) {
-					case "pdf":
-						var extractReferences = require("../app/node_runners/file_pdf.js");
-						asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
-					break;
-				}
-				break;
-
-
-				case "link":
-				switch (node.subtype) {
-					case "checker":
-						var checker = require("../app/node_runners/link-checker.js");
-						asyncLoop.loop(node, sandbox, checker.checkLinks);
-					break;
-				}
-				break;
 
 
 				case "detect":
@@ -977,15 +969,13 @@ exports.updateView = function (node, sandbox, io, callback) {
 
 
 /**
- * updates project nodes x and y
+ * updates nodes visible fields
 */ 
-exports.setNodePosition = function (params, res) {
+exports.setVisibleFields = function (nodeid, params, res) {
 
-	var xx = params.x.replace(/px/,"");
-	var yy = params.y.replace(/px/,"");
-	mongoquery.editProjectNode(params.id, {"x": xx, "y": yy},
+	mongoquery.editProjectNode(nodeid, {"visible_keys": params.keys},
 		function() {
-			res.json({"status":"node position updated"});
+			res.json({"status":"node updated"});
 		}
 	);
 }
@@ -1078,7 +1068,7 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({"error": err});
 							} else {
 								console.log("node created");
-								res.json({"status": "node created"})
+								res.json(node)
 							}
 						});
 					}
@@ -1102,10 +1092,10 @@ function initNode (nodeRequest, res, io, project) {
 								setter[node.init_fields[i]] = "";
 							}
 							mongoquery.update(node.collection,{}, {$set: setter }, function() {
-								res.json({"status": "node created"});
+								res.json(node);
 							})  
 						} else {
-							res.json({"status": "node created"});
+							res.json(node);
 						} 
 					}
 				});

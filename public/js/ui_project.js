@@ -122,8 +122,59 @@ $( document ).ready(function() {
 			 // simply clear all params holders
 			$(".holder.params").empty();
 			$(".holder.collection-params").empty();
-			console.log("pam")
 		}
 	});
+
+
+
+    // websocket stuff
+    var socket = io.connect('http://localhost');
+    var progressDisplay = $("#node-progress");
+    var finishDisplay = $("#node-finished");
+    var genericDisplay = $("#generic-messages");
+
+    socket.on('hello', function (data) {
+        progressDisplay.empty();
+        finishDisplay.empty();
+        if(data.nodeid) {
+            progressDisplay.append("<div class=\"error\">" + data.msg + "</div>");
+        } else {
+            genericDisplay.append(data + "</br>");
+            //tailScroll(cons) ;
+        }
+    });
+
+    
+    socket.on('news', function (data) {
+        if(data.nodeid) {
+            progressDisplay.prepend("<div class=\"error\">" + data.msg + "</div>");
+        } else {
+            genericDisplay.prepend(data + "</br>");
+        }
+    });
+
+    socket.on('progress', function (data) {
+        progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+    });
+
+    socket.on('error', function (data) {
+        if(data.nodeid) {
+            progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
+            progressDisplay.removeClass("busy");
+            progressDisplay.addClass("done");
+        } else {
+            genericDisplay.append("<div class=\"bad\">" + data + "</div>");
+        }
+    });
+
+    socket.on('finish', function (data) {
+        finishDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+        progressDisplay.removeClass("busy");
+        progressDisplay.addClass("done");
+        progressDisplay.hide();
+        $(".settings").hide();
+
+    });
+
 
 });

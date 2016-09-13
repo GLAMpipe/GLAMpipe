@@ -96,6 +96,8 @@ var nodeRepository = function () {
 				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";		
 				html += node.views.params;
 				html += "</form>";		
+			} else {
+				html += node.views.params;
 			}
 		} else {
 			html += node.views.params;
