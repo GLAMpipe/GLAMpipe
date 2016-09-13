@@ -10,11 +10,6 @@ $( document ).ready(function() {
 	$("data-workspace .settings").hide();
 	$("data-workspace .settingscontainer").hide();
 
-	$("#create_project").on("click", function (e) {
-		gp.addProject("pam");
-	});
-
-
 	// COLLECTION CHOOSER
 	$("#collection-chooser").on("click", function (e) {
 		gp.showCollections(e);
@@ -63,9 +58,9 @@ $( document ).ready(function() {
 		e.preventDefault();
 	})
 
-	// open node settings on new node
+	// open node parameters for new node
 	$(document).on('click','.listoption', function(e) {
-		gp.nodeRepository.openNodeSettings(e);
+		gp.nodeRepository.openNodeParameters(e);
 		e.preventDefault();
 	})
 
@@ -116,5 +111,19 @@ $( document ).ready(function() {
 		gp.pickCollection(e)
     });
 
+    // handler for file upload node creation
+    $(document).on('submit', "#uploadfile", function(e) {
+
+    });
+
+	// esc closes some dialogs
+	$(document).keyup(function(e) {
+		 if (e.keyCode == 27) { 
+			 // simply clear all params holders
+			$(".holder.params").empty();
+			$(".holder.collection-params").empty();
+			console.log("pam")
+		}
+	});
 
 });

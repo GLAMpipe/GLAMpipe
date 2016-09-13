@@ -93,8 +93,11 @@ var glamPipeNode = function (node, gp) {
 		
 	}
 
-    this.expandTable = function () {
-        $("data-workspace table.documents tbody td div").css({"max-height":"200px", "overflow-y":"auto"});
+    this.expandTable = function (yes) {
+		if(yes)
+			$("data-workspace table.documents tbody td div").css({"max-height":"600px", "overflow-y":"auto"});
+		else
+			$("data-workspace table.documents tbody td div").css({"max-height":"3em", "overflow-y":"hidden"});
     }
 
 	this.nextTablePage = function () {
@@ -139,7 +142,7 @@ var glamPipeNode = function (node, gp) {
 	this.renderTableControls = function () {
 
 		var html = "<div class='boxright'> ";
-        html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye icon' aria-hidden='true'></div>";
+        html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true'></div>";
         html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true'></div>";
 		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true'></div>";
 		html += "    <div id='data-prev' class='wikiglyph wikiglyph-caret-left icon' aria-hidden='true'></div>";
@@ -205,7 +208,16 @@ var glamPipeNode = function (node, gp) {
 
 		// expand table view
 		$("data-workspace").on('click','.wikiglyph-eye', function(e) {
-			self.expandTable();
+			self.expandTable(false);
+			$(e.target).removeClass("wikiglyph-eye");
+			$(e.target).addClass("wikiglyph-eye-lid");
+		})
+
+		// expand table view
+		$("data-workspace").on('click','.wikiglyph-eye-lid', function(e) {
+			self.expandTable(true);
+			$(e.target).removeClass("wikiglyph-eye-lid");
+			$(e.target).addClass("wikiglyph-eye");
 		})
 
 		// previous page of data

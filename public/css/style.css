@@ -533,8 +533,7 @@ table.documents td {
 
 }
 
-table.documents td div {
-	max-width:320px;
+table.documents tbody td div {
 	max-height:3em;
 	overflow: hidden;
 	margin-right: 3em;
@@ -581,3 +580,21 @@ input.middle_input {
 	width:15em;
     margin-left:5px;
 }
+
+
+#projectList .listoption:hover {
+	background-color:#F2F2F2;
+}
+
+
+#projectList .wikiglyph {
+	float:right;
+	font-size:12px;
+	margin-top:12px;
+}
+
+.wikiglyph-cross:hover {
+	color:red;
+	font-weight:bold;
+}
+

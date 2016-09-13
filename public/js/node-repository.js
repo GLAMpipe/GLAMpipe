@@ -42,7 +42,6 @@ var nodeRepository = function () {
                 // render subtypes
                 for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
                     var sub = self.nodes[i].subtypes[j];
-                    console.log(sub.sub.subtype);
                     
                     html += "<button class='accordion sub "+node.type+"'>" + sub.sub.subtype + "</button>"
                     html += "<div class='panel'>"
@@ -75,7 +74,7 @@ var nodeRepository = function () {
          return self.plainNodes[parseInt(index)];
     }
 
-    this.openNodeSettings = function (e) {
+    this.openNodeParameters = function (e) {
         var obj = $(e.target);
         var index = "";
         if(obj.data("index") == null)
@@ -90,15 +89,28 @@ var nodeRepository = function () {
         html += "  <div class='inlinetitleblock'>"
         html += "    <div><span class='title inlinetitle'>" + node.description + "</span></div>"
         html += "  </div>"
-        
-        html += node.views.params;
+
+		// we need to create form for file import (upload)
+        if(node.type == "source") {
+            if(node.subtype == "file") {
+				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";		
+				html += node.views.params;
+				html += "</form>";		
+			}
+		} else {
+			html += node.views.params;
+		}
         
         html += "    <a href='#'>"
         html += "   <div data-index='" + index + "'  class='button create-node'>Create node</div>"
         html += "  </a> </div>"
         html += "</div>"
         
-        $(obj.parents(".holder").empty()).append(html);
+        var params = $(html);
+        if( $(obj.parents(".holder.params")).length != 0)
+			$(obj.parents(".holder.params").empty()).append(params);
+		else
+			$(".holder.collection-params").empty().append(params);
     }
 
 

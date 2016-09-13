@@ -11,7 +11,7 @@ var glamPipe = function () {
 	this.projectPipeDiv = "#project-pipe";
 	this.collectionSwitchDiv = "#collection-node-switch";
 	this.pageTitleDiv = "#page-title";
-	this.nodeHolderDiv = "node-pipe .holder";
+	this.nodeHolderDiv = "node-pipe .nodeset";
 	
 	this.collections = [];
 	this.nodes = [];
@@ -24,9 +24,11 @@ var glamPipe = function () {
 	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
 		$.getJSON("/get/project/titles", function(data) { 
+			$(div).empty();
 			data.sort(compare);
 			for(var i = 0; i< data.length; i++) {
-				var listOption = "<a href='project/" + data[i]._id + "'>\n";
+				var listOption = "<div data-id=" + data[i]._id + " class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
+				listOption += "<a href='project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
@@ -55,6 +57,34 @@ var glamPipe = function () {
 		}
 	}
 
+	this.removeProject = function (event) {
+		console.log("starting to remove node:", $(event.target).data("id"));
+        var project_id =  $(event.target).data("id");
+
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          title:"Deleting project",
+          modal: true,
+          buttons: {
+            "Delete project": function() {
+                $( this ).dialog( "close" );
+                var params = {};
+                $.post("/delete/project/" + project_id, params, function(retData) {
+                    console.log('project deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+                        self.getProjects("#projectList");
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+	} 
 
 	// PROJECT
 	
@@ -94,7 +124,7 @@ var glamPipe = function () {
 				// set first collection as current collection
 				if(self.collections.length) {
 					self.currentCollection = self.collections[self.currentCollectionSet];
-					self.pickedCollectionId = self.currentCollection.source._id; // default collection for dynamic field picker
+					self.pickedCollectionId = self.currentCollection.source.collection; // default collection for dynamic field picker
 				}
 				
 				self.setCollectionCounter();
@@ -185,6 +215,14 @@ var glamPipe = function () {
         var index = obj.data("index")
         var node = self.nodeRepository.getNodeByIndex(index);
         
+        // check if are importing file 
+        if(node.type == "source" && node.subtype == "file") {
+			self.uploadFileAndCreateNode(obj, node);
+			return;
+		}
+        
+        
+        
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
             params[$(this).attr("name")] = $(this).val(); 
@@ -236,21 +274,21 @@ var glamPipe = function () {
 		html += "  <div class='sectiontitleblock'>"
 		html += "	<div><span class='title sectiontitle'>Source</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
+		html += "  </div><div class='holder params'></div>"
 		 
 		html += self.renderNodes(collection,["source", "lookup"]);
 		  
 		html += "  <div class='sectiontitleblock'>"
 		html += "	<div><span class='title sectiontitle'>Process</span> <a class='add-node' data-type='transform' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
+		html += "  </div><div class='holder params'></div>"
 		
 		html += self.renderNodes(collection, ["transform"]);
 		
 		html += "  <div class='sectiontitleblock'>"
 		html += "	<div><span class='title sectiontitle'>Export</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
 		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder'></div>"
+		html += "  </div><div class='holder params'></div>"
 
 		html += self.renderNodes(collection, ["export"]);
 
@@ -333,10 +371,8 @@ var glamPipe = function () {
 		var obj = $(event.target);
 		self.currentInput = obj;   // put input to global variable so that we can update it later
 		
-		var collectionId = self.pickedCollectionId;
-		if(collectionId == null)
-			collectionId = self.currentCollection.source.collection;
-		
+		if(self.pickedCollectionId == null)
+			self.pickedCollectionId = self.currentCollection.source.collection;
 		
         // fetch fields
         $.getJSON("/get/collection/" + self.pickedCollectionId + "/fields", function(data) { 
@@ -459,21 +495,19 @@ var glamPipe = function () {
 	}
 
 
-	this.uploadFileAndCreateNode = function (event) {
+	this.uploadFileAndCreateNode = function (obj, node) {
 
         var params = {};
-        var obj = $(event.target);
-
         
-        // read params
-        obj.find("input,textarea, select").not("input[type=button],input[type=submit]").each(function(){
+        // read params. These are send to actual node creation
+        obj.parents(".holder").find("input,textarea, select").not("input[type=button],input[type=submit]").each(function(){
             params[$(this).attr("name")] = $(this).val(); 
         });
-        e.preventDefault();
-        var obj = $(e.target);
-        var nodeId = obj.data("nodeid");
-        var fd = new FormData(this);
-        fd.append("project",nodes.currentProject);
+
+		// read form for file upload
+        var form = $("#uploadfile")[0];
+        var fd = new FormData(form);
+        fd.append("project",self.currentProject);
         
         // upload file 
         $.ajax({
@@ -494,14 +528,13 @@ var glamPipe = function () {
                     data.params = params;
                     data.params.filename = data.filename;
                     data.params.mimetype = data.mimetype;
-                    data.nodeid = nodeId;
-                    data.project = nodes.currentProject;
-                    data.input_node = nodes.currentNode; 
-                    data.collection = nodes.currentCollection; 
+                    data.nodeid = node.nodeid;
+                    data.project = self.currentProject;
+                    data.collection = self.currentCollection.source.collection; 
                     $.post("/create/node", data, function(returnedData) {
-                        console.log('created node');
+                        console.log('created upload node');
                         $("#node_creator").hide();
-                        nodes.reloadProject();
+                        self.loadProject();
                     });
                 }
             }	        
