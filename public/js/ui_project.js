@@ -2,8 +2,7 @@
 $( document ).ready(function() {
 	
 	var gp = new glamPipe();
-	gp.loadNodes()
-	
+	gp.loadNodes();
 	gp.loadProject("#projectList");
 
 	// hide node settings panel on start

@@ -148,7 +148,7 @@ var glamPipe = function () {
 	
 	// renders node settings and data
 	this.openNode = function (e) {
-		self.renderDataHeader();
+		//self.renderDataHeader();
 		var node = self.getNode(e);
 		self.currentNodes[self.currentCollection.source.collection] = node;
 		if(node)

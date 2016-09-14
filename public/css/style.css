@@ -620,3 +620,16 @@ input.middle_input {
 .busy {
 	background-color:orange;
 }
+
+.flex {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	height:400px;
+	width:850px;
+}
+
+.flex div {
+	width:200px;
+	height: 1em;
+}
