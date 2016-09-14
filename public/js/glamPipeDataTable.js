@@ -2,7 +2,7 @@
 var dataTable = function (node) {
 	var self = this;
 	this.node = node;
-	this.keys = {"all_keys": [], "visible_keys": []};
+	this.keys = {"all_keys": [], "visible_keys": null};
 	this.docCount = 0;
 	
 	this.hiddenKeys = ["__mp_source", "_id"];
@@ -67,16 +67,17 @@ var dataTable = function (node) {
 		else 
 			self.keys.visible_keys.splice(self.keys.visible_keys.indexOf(key), 1);
 			
+		self.render();
 	}
 	
 
 
-    this.expandTable = function (yes) {
+	this.expandTable = function (yes) {
 		if(yes)
 			$("data-workspace table.documents tbody td div").css({"max-height":"600px", "overflow-y":"auto"});
 		else
 			$("data-workspace table.documents tbody td div").css({"max-height":"3em", "overflow-y":"hidden"});
-    }
+	}
 
 
 
@@ -125,40 +126,43 @@ var dataTable = function (node) {
 
 	this.renderControls = function () {
 
-		var html = "<div class='boxright'> ";
-        html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true'></div>";
-        html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true'></div>";
-		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true'></div>";
+		var html = "<div class='boxright' style='float:right'> ";
+		html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
+		html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true' title='search (not implemented)'></div>";
+		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true' title='visible fields'></div>";
+		html += "  </div>";
+		html += "  <div class='boxright'> ";
 		html += "    <div id='data-prev' class='wikiglyph wikiglyph-caret-left icon' aria-hidden='true'></div>";
 		html += "    <div id='data-switch'>0 / 0</div>";
 		html += "    <div id='data-next' class='wikiglyph wikiglyph-caret-right icon' aria-hidden='true'></div>";
-	    html += "  </div>";
-	    html += "  <div id='field-selector'></div>";
-	    $(self.dataControlsDiv).empty().append(html);
+		html += "  </div>";
+		html += "  <div id='field-selector'></div>"; // field selector dialog
+		$(self.dataControlsDiv).empty().append(html);
 
 	}
 
 
-
 	this.getVisibleFields = function () {
 
-
-		
-		if(self.keys.visible_keys.length)
-			return self.keys.visible_keys;
-		else {
+		if(self.keys.visible_keys == null) {
 			// if there are no visible keys, then try default keys
 			if(self.node.source.views.default_keys) {
-				return self.node.source.views.default_keys;		
+				self.keys.visible_keys = self.node.source.views.default_keys;		
 			// if there are no default keys, then visible keys are first 5 keys 
 			} else {
 				var keys = self.keys.all_keys.sorted.slice(0,5);
 				var c = self.keys.all_keys.sorted.filter(function(item) {
 					return self.hiddenKeys.indexOf(item) === -1;
 				});
-				return c.slice(0,5);
+				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
 			}
 		}
+		if(self.keys.visible_keys.indexOf("row") === -1) {
+			self.keys.visible_keys.splice(0, 0, "row");
+			return self.keys.visible_keys;
+		} else
+			return self.keys.visible_keys;
+			
 	} 
 
 
@@ -171,7 +175,7 @@ var dataTable = function (node) {
 		
 		// RENDER KEYS
 		for (var i = 0; i < visible_keys.length; i++) {
-			html += "<td><div>" +  visible_keys[i] + " <span class='wikiglyph wikiglyph-cross icon boxicon'></span></div></td>";
+			html += "<td><div>" +  visible_keys[i] + "</div></td>";
 		}
 		
 		html += "</tr></thead><tbody>"
@@ -188,22 +192,23 @@ var dataTable = function (node) {
 
 	}
 	
-	
+	this.getRowIndex = function (index) {
+		return self.params.skip_value + index + 1;
+	}
 
 	this.renderDataTable = function () {
 
 		var visible_keys = self.getVisibleFields();
+
 		var html = "";
 		
 		for(var j = 0; j < self.node.data.docs.length; j++) {
 			html += "<tr>";
 			for(var k = 0; k < visible_keys.length; k++) {
-				
-				if(self.node.data.docs[j][visible_keys[k]]) {
-					html += "<td>" + self.renderCell(self.node.data.docs[j][visible_keys[k]]) + "</td>";
-				} else {
-					html += "<td><div><div></td>";
-				}
+				if(visible_keys[k] == "row")
+					html += "<td>" + self.getRowIndex(j) + "</td>";
+				else
+					html += "<td>" + self.renderCell(self.node.data.docs[j], visible_keys[k]) + "</td>";
 			}
 			html += "</tr>";
 			
@@ -213,13 +218,16 @@ var dataTable = function (node) {
 
 
 
-	this.renderCell = function (data, index) {
+	this.renderCell = function (doc, key, index) {
+		
 		var html = "";
+		var data = doc[key];
+		
 		
 		if(data) {
 			if (Array.isArray(data)) {
 				for(var i = 0; i < data.length; i++) {
-					html += self.renderCell(data[i], i);
+					html += self.renderCell(data[i], key, i);
 					if(i > self.maxArrayLenghtDisplay) {
 						var left = i - self.maxArrayLenghtDisplay;
 						html += "<div>" + left + " more ...</div>"
@@ -243,28 +251,28 @@ var dataTable = function (node) {
 
 	
 
-    this.showCell = function(event) {
-        var obj = $(event.target);
-        var col = obj.parent().parent().children().index(obj.parent());
-        var colNameIndex = col + 1;
-        var row = obj.parent().parent().parent().children().index(obj.parent().parent());
-        var doc = self.node.data.docs[row];
-        
-        var table = obj.parents("table");
-        var key = table.find("thead tr td:nth-child(" + colNameIndex + ")").text().trim();
-        var cellValue = self.nl2br(doc[key]);
-        
-        console.log('Row: ' + row + ', Column: ' + col + ',key:' + key);
-        $("#cell-display").empty().append(cellValue);
-        $("#cell-display").dialog({
-            position: { 
-                my: 'left top',
-                at: 'right top',
-                of: obj
-            },
-            title: "cell data"
-        });
-    }
+	this.showCell = function(event) {
+		var obj = $(event.target);
+		var col = obj.parent().parent().children().index(obj.parent());
+		var colNameIndex = col + 1;
+		var row = obj.parent().parent().parent().children().index(obj.parent().parent());
+		var doc = self.node.data.docs[row];
+		
+		var table = obj.parents("table");
+		var key = table.find("thead tr td:nth-child(" + colNameIndex + ")").text().trim();
+		var cellValue = self.nl2br(doc[key]);
+		
+		console.log('Row: ' + row + ', Column: ' + col + ',key:' + key);
+		$("#cell-display").empty().append(cellValue);
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			title: "cell data"
+		});
+	}
 
 
 
@@ -291,17 +299,17 @@ var dataTable = function (node) {
 		}
 		html += "</div>";
 		
-        $("#field-selector").empty().append(html);
-        $("#field-selector").dialog({
+		$("#field-selector").empty().append(html);
+		$("#field-selector").dialog({
 			height:"500",
 			width: "900",
-            position: { 
-                my: 'left top',
-                at: 'right top',
-                of: obj
-            },
-            title: "Select fields you want to see."
-        });
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			title: "Select fields you want to see."
+		});
 	}
 
 	this.setEventListeners = function () {
@@ -375,9 +383,9 @@ var dataTable = function (node) {
 
 
 
-    this.nl2br = function (str, is_xhtml) {   
-        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
-        return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
-    }
+	this.nl2br = function (str, is_xhtml) {   
+		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+	}
 
 }
