@@ -65,6 +65,7 @@ var glamPipeNode = function (node, gp) {
 		
 		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 		$("data-workspace .settings").empty();
+		$("data-workspace .settings").append("<div class='box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
 		$("data-workspace .settings").append(self.source.views.settings);
 		
 		if(self.source.scripts.settings) {
@@ -72,7 +73,7 @@ var glamPipeNode = function (node, gp) {
 			settingsScript(self.source);
 		}
 		
-		$("data-workspace .settings").append("<div class='box'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		
 	}
 
 	
@@ -95,8 +96,8 @@ var glamPipeNode = function (node, gp) {
 	this.getSettings = function (node) {
 		
         var settings = {};
-        // read input from settings (only direct child nodes and not checkboxes)
-        $("data-workspace .settings > input:not([type='checkbox']), .settings > select, .settings table input:not([type='checkbox']), .settings table select").each(function() {
+        // read input from settings (only inputs with class "params")
+        $("data-workspace .settings input.params:not([type='checkbox']), .settings  select.params").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
@@ -108,7 +109,7 @@ var glamPipeNode = function (node, gp) {
         });
         
         // handle checkboxes separately. Checbox is included only if it is checked
-        $("data-workspace .settings > input[type='checkbox'], .settings table input[type='checkbox']").each(function() {
+        $("data-workspace .settings input.params[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).val();
 		});

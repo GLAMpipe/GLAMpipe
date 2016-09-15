@@ -4,7 +4,7 @@ var glamPipe = function () {
 	this.currentProject = "";
 	this.currentCollectionSet = 0;
 	this.currentCollection = null;
-	this.currentNodes = {}; // active nodes per collection
+	this.currentNodes = {}; // active node per collection
 
 	this.pickedCollectionId = "";
 	
@@ -119,6 +119,7 @@ var glamPipe = function () {
 				if(self.collections.length) {
 					self.currentCollection = self.collections[self.currentCollectionSet];
 					self.pickedCollectionId = self.currentCollection.source.collection; // default collection for dynamic field picker
+					self.currentCollection.open();
 				}
 				
 				self.setCollectionCounter();
@@ -155,6 +156,10 @@ var glamPipe = function () {
 			node.open();
 		else
 			alert("node id not found");
+	}
+
+	this.openCurrentNode = function () {
+		self.currentNodes[self.currentCollection.source.collection].open();
 	}
 
 	this.runNode = function (e) {
@@ -473,7 +478,6 @@ var glamPipe = function () {
 
 	this.removeNode = function (event) {
         var obj = $(event.target);
-        console.log("remove node");
         var node_id = obj.closest(".node").data("id");
         $( "#dialog-confirm" ).dialog({
           resizable: false,

@@ -172,6 +172,7 @@ $( document ).ready(function() {
         progressDisplay.addClass("done");
         progressDisplay.hide();
         $(".settings").hide();
+        gp.openCurrentNode();
 
     });
 
