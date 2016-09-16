@@ -97,7 +97,7 @@ var glamPipeNode = function (node, gp) {
 		
         var settings = {};
         // read input from settings (only inputs with class "params")
-        $("data-workspace .settings input.params:not([type='checkbox']), .settings  select.params").each(function() {
+        $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
@@ -109,7 +109,7 @@ var glamPipeNode = function (node, gp) {
         });
         
         // handle checkboxes separately. Checbox is included only if it is checked
-        $("data-workspace .settings input.params[type='checkbox']").each(function() {
+        $("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).val();
 		});

@@ -16,11 +16,11 @@ exports.login = function (node, sandbox, io, cb) {
 
 	// ask login details (email, password) from node
 	runNodeScriptInContext("login", node, sandbox, io);
-	console.log(sandbox.out.login_url);
+	console.log("DSpace login url:" ,sandbox.out.login_url);
 
 	 var options = {
 		headers: {'content-type' : 'application/x-www-form-urlencoded'},
-		url: sandbox.out.login_url,
+		url: sandbox.out.config.url,
 		method: 'POST',
 		form: sandbox.out.config.login,
 		json: true,
@@ -32,7 +32,7 @@ exports.login = function (node, sandbox, io, cb) {
 		
 		var options = {
 			headers: {'content-type' : 'application/json'},
-			url: sandbox.out.status_url,
+			url: sandbox.out.config.status_url,
 			method: 'GET',
 			json: true,
 			jar:true
@@ -103,6 +103,8 @@ exports.updateData = function (node, sandbox, io) {
 
 
 			var abs =  doc.dc_title + " (Editoitu RESTin kautta) ";
+			
+			// this is how metadata object looks like
 			var metadata = [{"key":"dc.title", "value":abs, "language": "fi"},{"key":"dc.title", "value":abs, "language": "en"}];
 			
 			//next();
