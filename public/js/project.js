@@ -231,7 +231,7 @@ var nodeList = function () {
         // for transform node show only node's out_field
         //alert(data.iframe_src == null);
         if(data.iframe_src == null) {
-            if(data.type == "transform" || data.type == "lookup" || data.type == "download")
+            if(data.type == "transform" || data.type == "lookup" || data.type == "download" || data.type == "detect")
                 url += "?fields=" + data.out_field;
         } else {
             url += data.iframe_src; 
@@ -447,17 +447,24 @@ $( document ).ready(function() {
         
         var obj = $(e.target);
         var map = {};
-        // read input from settings
-        obj.parent().parent().find(".settings input, .settings select").each(function() {
+        // read input from settings (only direct child nodes and not checkboxes)
+        obj.parent().parent().find(".settings > input:not([type='checkbox']), .settings > select, .settings table input:not([type='checkbox']), .settings table select").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
-                //map[nameSplitted[0]] = $(this).val();
                 (map[nameSplitted[0]] || (map[nameSplitted[0]] = [])).push($(this).val());
             } else {
                 map[$(this).attr("name")] = $(this).val();
             }
+       
         });
+        
+        // handle checkboxes separately. Checbox is included only if it is checked
+        obj.parent().parent().find(".settings > input[type='checkbox'], .settings table input[type='checkbox']").each(function() {
+			if($(this).is(':checked'))
+				map[$(this).attr("name")] = $(this).val();
+		});
+		
         // and run
         runNode(map, this.id);
         e.preventDefault();
@@ -471,38 +478,24 @@ $( document ).ready(function() {
         nodes.currentInput = obj;   // put input to global variable so that we can update it later
         
         // fetch fields
-        $.getJSON("/get/collection/fields/" + nodes.pickCollection, function(data) { 
+        $.getJSON("/get/collection/" + nodes.pickCollection + "/fields", function(data) { 
             if(data.error)
                 alert(data.error);
-                    
+
+
             var html = "<ul>";
-                for (key in data) {
-                    if (data[key] instanceof Array) {
-                        html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='array'>ARRAY</span></li>";
-                    } else if (typeof data[key] === "object" ) {
-                        var p = key;
-                        var a = [p];
-                        if (data[key] === null) {
-                            html +=  "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"<span class='null'>null</span></li>";
-                        } else {
-                            var tree = makeDynFieldsfromObject(data[key], a, obj);
-                            html +=  "<li>"+ p + "<ul>" + tree + "</ul></li>";
-                        }
-                    } else {
-                        html += "<li class='pick_field' title='"+data[key]+"' data-field='"+ obj.attr("name") +"' data-val='"+key+"'>"+key+"</li>";
-                    }
+                for (var i = 0; i < data.sorted.length; i++) {
+                    var key = data.keys[data.sorted[i]];
+                    html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "<span class='array'>" + key.type + "</span></li>";
+
                 }
             html += "</ul>"
+                
             
             // open dialog
             $("#dynamic_fields").empty();
             $("#dynamic_fields").append(html);
             $("#dynamic_fields").dialog({
-                position: { 
-                    my: 'left top',
-                    at: 'right top',
-                    of: obj
-                },
                 title: "choose field"
             });
             
@@ -574,50 +567,51 @@ $( document ).ready(function() {
     var socket = io.connect('http://localhost');
 
     socket.on('hello', function (data) {
-        var console = $("#tab-settings-" + data.nodeid +" .node_console");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
-            console.append("<div class=\"error\">" + data.msg + "</div>");
+            cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
-            console.append(data + "</br>");
-            tailScroll(console) ;
+            cons.append(data + "</br>");
+            //tailScroll(cons) ;
         }
     });
 
     
     socket.on('news', function (data) {
-        var console = $("#tab-settings-" + data.nodeid +" .node_console");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
-            console.append("<div class=\"error\">" + data.msg + "</div>");
+            cons.append("<div class=\"error\">" + data.msg + "</div>");
         } else {
-            console.append(data + "</br>");
-            tailScroll(console) 
+            cons.append(data + "</br>");
+            //tailScroll(cons) 
         }
     });
 
     socket.on('progress', function (data) {
-        var console = $("#tab-settings-" + data.nodeid +" .node_console");
-        console.append("<div class=\"progress\">" + data.msg + "</div>");
-        tailScroll(console);
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
+        console.log($("#tab-settings-" + data.nodeid));
+        cons.append("<div class=\"progress\">" + data.msg + "</div>");
+        tailScroll(cons);
     });
 
     socket.on('error', function (data) {
-        var console = $("#tab-settings-" + data.nodeid +" .node_console");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
         if(data.nodeid) {
-            console.append("<div class=\"bad\">" + data.msg + "</div>");
-            console.removeClass("busy");
-            console.addClass("done");
+            cons.append("<div class=\"bad\">" + data.msg + "</div>");
+            cons.removeClass("busy");
+            cons.addClass("done");
         } else {
-            $("#console").append("<div class=\"bad\">" + data + "</div>");
-            tailScroll(console);
+            $("#cons").append("<div class=\"bad\">" + data + "</div>");
+            tailScroll(cons);
         }
     });
 
     socket.on('finish', function (data) {
-        var console = $("#tab-settings-" + data.nodeid +" .node_console");
-        console.empty();
-        console.append("<div class=\"good\">" + data.msg + "</div>");
-        console.removeClass("busy");
-        console.addClass("done");
+        var cons = $("#tab-settings-" + data.nodeid +" .node_console");
+        cons.empty();
+        cons.append("<div class=\"good\">" + data.msg + "</div>");
+        cons.removeClass("busy");
+        cons.addClass("done");
         // refresh data view
         reloadIframe ();
     });

@@ -36,10 +36,10 @@ exports.find2 = function (query, collectionname, callback) {
 	});   
 }
 
-exports.findFields = function (query, fields,  collectionname, callback) {
+exports.findFields = function (query, fields, sort, collectionname, callback) {
 
 	var collection = db.collection(collectionname);
-	collection.find(query, fields, function (err, result) {
+	collection.find(query, fields).sort(sort, function (err, result) {
 		callback(err, result);
 	});   
 }
@@ -74,6 +74,21 @@ exports.findOne = function (query, collectionname, callback) {
 
     
 	collection.findOne(query ,function (err, result) {
+		if (err) {
+			console.log("ERROR:", err);
+			callback(null)
+		} else {
+			callback(result);
+		}
+	});   
+}
+
+exports.findOneProjection = function (query, projection, collectionname, callback) {
+    
+	var collection = db.collection(collectionname);
+
+    
+	collection.findOne(query, projection, function (err, result) {
 		if (err) {
 			console.log("ERROR:", err);
 			callback(null)
@@ -134,7 +149,7 @@ exports.insertProject = function (doc, callback) {
 			callback({'error':err})
 		} else {
 			console.log('Inserted');
-			callback();
+			callback(result);
 		}
 	}); 
 }

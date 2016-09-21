@@ -260,7 +260,7 @@ ul.node_types li:hover {
 
 
 .file h2 {
-	background-color: #333;
+	border-color: #333;
 }
 
 .file h3 {
@@ -628,9 +628,13 @@ html {
 }
 
 td.array {
-    
     border: 1px solid #5C5C5C;
     background-color: #EFEABA;
+}
+
+div.array {
+	background-color: #EFEABA;
+	margin:1px;
 }
 
 td .data-container {

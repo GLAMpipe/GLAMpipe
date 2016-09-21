@@ -1,11 +1,11 @@
 
 function runNode(settings, node_id) {
-    var cons = $("#tabs-" + node_id + " .node_console");
-    cons.empty();
-    $(".node_console").empty();
-    cons.append("running...");
-    cons.removeClass("done");
-    cons.addClass("busy");
+    //var cons = $(".node_console");
+    //cons.empty();
+    //$(".node_console").empty();
+    //cons.append("running...");
+    //cons.removeClass("done");
+    //cons.addClass("busy");
     
     // save settings also locally
     nodes.selectedNode.settings = settings;
@@ -75,9 +75,11 @@ function makeDynFieldsfromObject (data, parents, obj) {
 }
 
 // console effect from here: http://jsfiddle.net/manuel/zejCD/1/
-function tailScroll(console) {
-    var height = console.get(0).scrollHeight;
-    console.animate({
-        scrollTop: height
-    }, 50);
+function tailScroll(cons) {
+	if(cons && cons.get) {
+		var height = cons.get(0).scrollHeight;
+		cons.animate({
+			scrollTop: height
+		}, 50);
+	}
 }

@@ -1,0 +1,144 @@
+
+var glamPipeNode = function (node, gp) {
+	var self = this;
+    this.gp = gp;
+	this.source = node;
+	this.data = {"keys": [], "docs": [], "visible_keys": []};
+	this.settings = {};
+	this.maxArrayLenghtDisplay = 5;
+	this.initialVisibleKeysLength = 5; // by default how many fields are shown
+	
+	this.dataDisplayDiv = "data-workspace data data-display";
+	this.dataControlsDiv = "data-workspace data data-controls";
+	
+	this.display = new dataTable(this); // default data renderer
+		
+	//if(node.type == "collection")
+		//self.source.collection = node._id;
+
+
+	// execute node 
+	this.run = function () {
+		
+		self.settings = self.getSettings(node);
+		console.log("RUNNING node with params: ", self.settings);
+		
+		$.post("/run/node/" + self.source._id, self.settings, function(data) {
+			console.log(data);
+			if(data.error)
+				alert(data.error);
+		});
+	}
+
+
+
+	// render data with node spesific settings and display node settings
+	this.open = function () {
+		if(self.source.type == "collection") {
+			$("data-workspace .settingscontainer").hide();
+			self.display.render();
+		} else {
+			self.renderSettings();
+			self.display.render();
+			$("data-workspace .settingscontainer").show();
+		}
+			
+	}
+	
+	// render node to project view (left column)
+	this.renderNode = function () {
+		var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
+		html +=   "  <div class='boxleft'>"
+		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + "</div>"
+		html +=   "    <div class='title boxtitle'>" + self.source.title+"</div>"
+		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
+		html +=   "  </div>"
+		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"
+		html +=   "</div>"
+		return html;
+	}
+
+
+	// render node settings and execute its settings.js
+	this.renderSettings = function () {
+		
+		
+		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
+		$("data-workspace .settings").empty();
+		$("data-workspace .settings").append("<div class='box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		$("data-workspace .settings").append(self.source.views.settings);
+		
+		if(self.source.scripts.settings) {
+			var settingsScript = new Function('node', self.source.scripts.settings);
+			settingsScript(self.source);
+		}
+		
+		
+	}
+
+	
+
+
+
+
+	// create html table for data display
+	this.loadAndRenderData = function () {
+		
+		self.loadCollectionKeys(function() { 
+			self.loadCollectionData(function() {
+				self.display.render();
+			});	
+		})		
+	}
+
+
+
+	this.getSettings = function (node) {
+		
+        var settings = {};
+        // read input from settings (only inputs with class "params")
+        $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
+            var nameSplitted = $(this).attr("name").split("[");
+            // if input name has form "set[something1]", then we want to gather all of them to array
+            if(nameSplitted.length > 1) {
+                (settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
+            } else {
+                settings[$(this).attr("name")] = $(this).val();
+            }
+       
+        });
+        
+        // handle checkboxes separately. Checbox is included only if it is checked
+        $("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
+			if($(this).is(':checked'))
+				settings[$(this).attr("name")] = $(this).val();
+		});
+		
+		return settings;	
+	}
+	
+
+
+	this.loadCollectionData = function (params, cb) {
+		
+		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func(), function (docs) {
+			self.data.docs = docs.data;
+			cb();
+		});
+	}
+
+	this.loadCollectionKeys = function (cb) {
+		$.getJSON("/get/collection/" + self.source.collection + "/fields", function(keys) {
+			self.data.keys = keys;
+			cb();
+		})
+	}
+
+
+
+    this.nl2br = function (str, is_xhtml) {   
+        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+        return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+    }
+
+}

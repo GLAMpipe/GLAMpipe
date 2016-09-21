@@ -31,7 +31,7 @@ exports.proxyJSON = function (url, query, res) {
 			res.json(body);
 		} else {
 			console.log("error", error);
-			res.json({"error":"could get data via proxy"});
+			res.json({"error":"could not get data via proxy!"});
 			return;
 		}
 	});

@@ -1,11 +1,12 @@
 var proxy 	= require("../app/proxy.js");
+var collection = require("../app/collection.js");
 
 module.exports = function(express, glampipe, passport) {
     
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings
-                                                            // this allows us to start everything normally still 
+    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
+                                                            // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 
     // INFO to console
@@ -93,7 +94,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/project/:id', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
+		res.sendFile(path.join(__dirname, 'views', 'project.html'));
 	});
 
 	express.post('/create/project', function (req, res) {
@@ -126,7 +127,6 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getNodes(res);
 	});
 
-
 	express.get('/get/node/:id', function (req, res) {
 		glampipe.core.getNodeFromDir(req.params.id, res);
 	});
@@ -155,8 +155,8 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.deleteNode(req.body, res, glampipe.io);
 	});
 
-	express.post('/set/node/position', function (req, res) {
-		glampipe.core.setNodePosition(req.body, res);
+	express.post('/set/node/:id/visible-fields', function (req, res) {
+		glampipe.core.setVisibleFields(req.params.id, res);
 	});
 
 	express.post('/run/node/:id', function (req, res) {
@@ -168,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// DATA
 	express.get('/get/collection/:id', function (req, res) {
-		glampipe.core.getCollection(req, {}, res);
+		glampipe.core.getCollectionTableData(req, {}, res);
 	});
 
 	express.get('/get/collection/byfield/:id', function (req, res) {
@@ -179,8 +179,8 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.viewCollection(req.params.id, function(data) {res.send(data)});
 	});
 
-	express.get('/get/collection/fields/:id', function (req, res) {
-		glampipe.core.getCollectionFields(req.params.id, function(data) {res.send(data)});
+	express.get('/get/collection/:name/fields', function (req, res) {
+		collection.getKeys(req.params.name, function(data) {res.send(data)});
 	});
 
 

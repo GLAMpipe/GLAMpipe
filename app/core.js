@@ -6,6 +6,8 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
+var sourceAPI	= require("../app/node_runners/basic_fetch.js");
+var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -104,68 +106,6 @@ exports.initNodes = function (io, callback) {
 
 
 
-exports.readNodes_old = function (io, nodePath, descriptions, callback) {
-		
-	readFiles(nodePath, function(filename, content, next) {
-		
-		try {
-			var node = JSON.parse(content);
-			node.type_desc = descriptions[node.type];
-			
-			// join "pretty" settings
-			if(node.views.settings instanceof Array)
-				node.views.settings = node.views.settings.join("");	
-				
-			// join "pretty" params
-			if(node.views.params instanceof Array)
-				node.views.params = node.views.params.join("");	
-
-			// join "pretty" data view
-			if(node.views.data_static instanceof Array)
-				node.views.data_static = node.views.data_static.join("");
-
-			// join "pretty" scripts
-			for (key in node.scripts) {
-				if(node.scripts[key] instanceof Array)
-					node.scripts[key] = node.scripts[key].join("");
-			}
-				
-			mongoquery.insert("mp_nodes",node , function(error) {
-				if(error.length) {
-					console.log(error);
-				} else {
-					console.log("LOAD: " + filename + " loaded");
-					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
-					next();
-				}
-			})
-			
-		} catch(e) {
-			console.log(colors.red("ERROR: JSON is malformed in %s"), filename);
-			io.sockets.emit("error", "ERROR: JSON is malformed in " + filename);
-			next(); // continue anyway
-		}
-
-	}, function onError (error) {
-		if( error.code == "ENOENT") {
-			console.log("ERROR: No nodes present in " + nodePath);
-			//console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
-		} else {
-			console.log(error);
-		}
-		return callback(error);
-
-		
-	}, function onDone () {
-		console.log("INIT: nodes loaded from " + nodePath);
-		console.log("******************************************");
-		callback(null);
-	});
-	  
-}
-
-
-
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
@@ -248,13 +188,15 @@ exports.createProject = function (title, res) {
 	// create projects/project_name directory 
 	var projectPath = path.join(global.config.projectsPath, title_dir); 
 	fs.mkdir(projectPath, function(err) {
+		var error_msg = "error in project directory creation!";
 		if(err) {
-			if(err.code === "EEXIST")
-				console.log("Project directory exists");
+			if(err.code === "EEXIST") 
+				error_msg = "Project directory exists! Please use other name for the project or delete project directory: " + projectPath;
 			else
-				console.log("ERROR:", err);
-				
-			res.json({"error": "error in project directory creation!"});
+				error_msg = err;
+			
+			console.log("ERROR:", error_msg);
+			res.json({"error": error_msg});
 			return;
 		}
 		// create node output directories (blocking)
@@ -264,18 +206,19 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(meta) {
-				var collectionName = title_dir.substring(0,20).toLowerCase(); // limit 20 chars
+				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
 					"dir": title_dir,
 					"prefix": "p" + meta.project_count + "_" + collectionName ,
 					"collection_count": 0,
-					"node_count":0
+					"node_count":0,
+					"schemas": []
 				};
 				mongoquery.insertProject (project, function(data) {
 					console.log("project \"" + title + "\" created!");
-					res.json({"status": "project created"});
+					res.json({"status": "project created", "project": data});
 				});
 			});
 		});
@@ -287,14 +230,20 @@ exports.deleteProject = function (doc_id, res) {
 	
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
 		console.log("PROJECT: deleting project", data.title);
-		res.json({status:'ok'});
+		// if project has collections then remove those first
+		
+		// then remove project document itself
+		mongoquery.remove(doc_id, "mp_projects", function(data) {
+			res.json(data);
+		});
+		
 	});
 	
 
 }
 
 exports.getProjectTitles = function  (res) {
-	mongoquery.findFields({}, {title:true}, "mp_projects", function(err, data) { 
+	mongoquery.findFields({}, {title:true}, {title:1}, "mp_projects", function(err, data) { 
 		if (!err)
 			res.json(data) ;
 		else 
@@ -362,23 +311,33 @@ exports.getNodeFromFile = function (node_id, res) {
 	});
 }
 
-function getProp(obj, desc) { 
-	var arr = desc.split('.'); 
-	while(arr.length && (obj = obj[arr.shift()])); 
-	if(typeof obj === 'undefined') return ''; 
-	return obj; 
+function getProp(obj, desc, index) { 
+	
+	// if array, then give value by optional index
+	if (obj.constructor.name == "Array") {
+		if(index) {
+			if(obj[index])
+				return obj[index];
+			else
+				return obj[0]
+		} else {
+			// if index is not given or its not found, then give the first one
+			return obj[0];
+		}
+		
+	// this object, find dotted value (like dc.type.uri)	
+	} else {
+	
+		var arr = desc.split('.'); 
+		while(arr.length && (obj = obj[arr.shift()])); 
+		if(typeof obj === 'undefined') return ''; 
+		return obj; 
+	}
 }
 
 /**
  * run project node based on node type
- * SOURCE - API
- * - calls metapipe.callAPI 
- * - executes script in node's scripts.run
- * SOURCE -FILE
- * - calls metapipe.importFile 
- * - executes script in node's scripts.run 
- * DEFAULT
- * - applies node's scripts.run to each record
+ * - this is THE MAIN SWITCH of GLAMpipe
  */ 
 exports.runNode = function (req, res, io) {
 	console.log('Running node:', req.params.id);
@@ -419,6 +378,7 @@ exports.runNode = function (req, res, io) {
 				context: {
 					doc: null,
 					data: null,
+					vars: {},
 					myvar: {},
 					node: node,
 					input_node: input_node,
@@ -438,6 +398,14 @@ exports.runNode = function (req, res, io) {
 					updatequery: null,
 					error: null,
 					console:console,
+					schema: [],
+					key_type: [],
+					add_display_key: function (key, type) {
+						if(this.schema.indexOf(key) < 0) {
+							this.schema.push(key);
+							this.key_type.push(type);
+						}
+					},
 					say: function(ch, msg) {
 						console.log(ch.toUpperCase() + ":", msg);
 						io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
@@ -466,77 +434,30 @@ exports.runNode = function (req, res, io) {
 				sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
 				return;
 			}
+			
 			switch (node.type) {
 
 
 				case "source":
 					runNodeScriptInContext("init", node, sandbox, io);
-					if(sandbox.context.init_error) return;
+					if(sandbox.context.init_error) 
+						return;
 					
 					switch (node.subtype) {
 						
 						case "API":
-						
-							function requestLoop(){
-								async.series([
-									function (callback) {
 
-										exports.callAPI(sandbox.out.url, function(error, response, body) {
-											sandbox.context.error = error;
-											sandbox.context.response = response;
-											sandbox.context.data = body;
-											sandbox.out.url = "";
-											runNodeScriptInContext("run", node, sandbox, io);
-											
-											if(sandbox.context.node_error) 
-												return callback(sandbox.context.node_error, null);
-											
-											
-											// add source id to data (expects out.value to be an array)
-											if(sandbox.out.value != null) {
-												for (var i = 0; i < sandbox.out.value.length; i++ ) {
-													// flatten
-													//sandbox.out.value[i] = flatten(sandbox.out.value[i], {delimiter:"__"});
-													sandbox.out.value[i][MP.source] = node._id;
-												}
-											
-												
-												// insert data
-												mongoquery.insert(node.collection, sandbox.out.value, function() {
-													callback(null, sandbox.out.url);
-												});
-											}
-										});
-									}
+							switch (node.subsubtype) {
+								
+								// two phase import
+								case "two_rounds" :
+									sourceAPI.fetchDataInitialMode (node,sandbox, io);
+								break;
+								
+								default:
+									sourceAPI.fetchData(node,sandbox, io);
 
-								], function(err, result){
-									if (err) {
-										console.log(err);
-										return;
-									}
-										
-									//generate view and do *not* wait it to complete
-									if (!node.views.data)
-										exports.updateView(node, sandbox, io, function(msg) {});
-										
-									// if node provides new url, then continue loop
-									if (sandbox.out.url != "") {
-										requestLoop()
-									} else {
-										runNodeScriptInContext("finish", node, sandbox, io);
-										return;
-									}
-								}
-							)};
-
-							// start query loop
-							// remove previous data insertet by node and import file
-							var query = {}; 
-							query[MP.source] = node._id;
-							mongoquery.empty(node.collection, query, function() {
-								requestLoop();
-							});
-							
+							}
 							
 						break;
 
@@ -551,14 +472,11 @@ exports.runNode = function (req, res, io) {
 								
 								// add source id to data
 								for (var i = 0; i < data.length; i++ ) {
-									// flatten
 									data[i][MP.source] = node._id;
 								}
 								// insert
 								mongoquery.insert(node.collection, data, function() {
 									runNodeScriptInContext("finish", node, sandbox, io);
-									//generate view and do *not* wait it to complete
-									//exports.updateView(node, sandbox, io, function(msg) {});
 								});
 								
 							}
@@ -587,26 +505,20 @@ exports.runNode = function (req, res, io) {
 						
 						case "file":
 						
-							function fileImport (data) {
-								// provide data to node
-								sandbox.context.data = data;
+							switch (node.subsubtype) {
 								
-								// let node pick the data it wants from result
-								runNodeScriptInContext("run", node, sandbox, io);
-
-								// insert
-								mongoquery.insert(node.collection, sandbox.out.value, function() {
-									runNodeScriptInContext("finish", node, sandbox, io);
-								});
+								case "csv":
 								
+									var csv = require("../app/node_runners/source-file-csv.js");
+									// remove previous data insertet by node and import file
+									var query = {}; 
+									query[MP.source] = node._id;
+									mongoquery.empty(node.collection, query, function() {
+										csv.importFile(node, sandbox, io);
+									});
+									
+								break;
 							}
-							
-							// remove previous data insertet by node and import file
-							var query = {}; 
-							query[MP.source] = node._id;
-							mongoquery.empty(node.collection, query, function() {
-								exports.importFile(node, fileImport);
-							});
 								
 						
 						break;
@@ -685,49 +597,36 @@ exports.runNode = function (req, res, io) {
 
 				
 				case "export":
-
-					// make sure that we have an export filename
-					if(node.params.file == "") {
-						console.log("ERROR: filename missing!");
-						io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
-						return;
+					sandbox.run = run;
+				
+					switch (node.subtype) {
+						
+						case "file":
+							require("../app/node_runners/export-file.js").collectionToFile(node, sandbox, io);
+						break;
+						
+						case "API":
+						
+							switch (node.subsubtype) {
+								
+								case "dspace":
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node,sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											asyncLoop.loop(node, sandbox, dspace.uploadItem);
+										}
+									});
+									
+								break;
+							}
+						
+						break;
 					}
 
-					// we stream directly to file
-					var fs = require('fs');
-					var filePath = path.join(node.dir, node.params.file);
-					var wstream = fs.createWriteStream(filePath);
-					
 
-		
-					// find everything
-					mongoquery.find2({}, node.collection, function (err, doc) {
-						
-						// tell node how many records was found
-						sandbox.context.doc_count = doc.length;
-						sandbox.context.doc_eka = doc[0];
-						runNodeScriptInContext("init", node, sandbox, io);
-						wstream.write(sandbox.out.value);
-
-						async.eachSeries(doc, function iterator(doc, next) {
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.value = null;
-							run.runInContext(sand);
-							//runNodeScriptInContext("run", node, sandbox, io);
-							if (sandbox.out.error !== null)  return;
-							wstream.write(sandbox.out.value)
-							next();
-							
-						}, function done() {
-							runNodeScriptInContext("finish", node, sandbox, io);
-							wstream.write(sandbox.out.value);
-							wstream.end();
-
-							//mongoquery.markNodeAsExecuted(node);
-							return;
-						});
-					});
 
 				break;
 
@@ -833,173 +732,99 @@ exports.runNode = function (req, res, io) {
 
 				case "download":
 						
-					// find everything
-					mongoquery.find2({}, node.collection, function(err, doc) {
-						sandbox.context.doc_count = doc.length;
-						runNodeScriptInContext("init", node, sandbox, io);
-						
-						// run node once per record
-						async.eachSeries(doc, function iterator(doc, next) {
-							
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.url = null;
-							sandbox.context.error = null;
-							
-							// ask url and file name from node
-							runNodeScriptInContext("pre_run", node, sandbox, io);
-							exports.downloadFile(node, sandbox, function(sandbox) {
-								run.runInContext(sand);
-								// write file location to db
-								var setter = {};
-								setter[node.out_field] = sandbox.out.value;
-								console.log(setter);
-								mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-							})
-							
-						}, function done() {
-							runNodeScriptInContext("finish", node, sandbox, io);
-						});
-					});
+					var downloader = require("../app/node_runners/download-file.js");
+					asyncLoop.loop(node, sandbox, downloader.downloadFile);
 
 				break;
 
 
-				case "transform":
-					
-					// find everything
-					mongoquery.find2({}, node.collection, function(err, docs) {
-						sandbox.context.doc_count = docs.length;
-						console.log(docs.length);
-						runNodeScriptInContext("init", node, sandbox, io);
+				case "process":
+				
+					switch (node.subtype) {
 						
-						// run node once per record
-						async.eachSeries(docs, function iterator(doc, next) {
+						case "files":
+						
+							switch (node.subsubtype) {
+								
+								case "pdf":
+									var extractReferences = require("../app/node_runners/file_pdf.js");
+									asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+								break;
+							}
+							break;	
 
-							sandbox.context.doc = doc;
-							sandbox.context.count++;
-							sandbox.out.value = null;  // reset output
-							run.runInContext(sand);
-							var setter = {};
-							setter[node.out_field] = sandbox.out.value;
-							//console.log(setter);
-							mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+						case "fields":
+						
+							switch (node.subsubtype) {
+								
+								case "link_checker":
+									var checker = require("../app/node_runners/link-checker.js");
+									asyncLoop.loop(node, sandbox, checker.checkLinks);
+								break;
 							
-						}, function done () {
-							runNodeScriptInContext("finish", node, sandbox, io);
-							exports.updateView(node, sandbox, io, function(msg) {console.log("NODE: view created", msg);});
-						});
-					});
+								default:
+								
+									asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+											run.runInContext(sandbox);
+											next();
+										});
+	
+								}
+							break;
+					}				
+
 
 				break;
 
 
-				case "upload":
+
+				case "detect":
+
 
 					switch (node.subtype) {
 						
-						case "mediawiki_bot":
+						case "language":
 						
-							var bot = require('nodemw');
-							fs = require('fs');
-							
-							// ask bot config (username, pass etc.) from node
-							runNodeScriptInContext("login", node, sandbox, io);
-							var client = new bot(sandbox.out.botconfig);
-							console.log(sandbox.context.node);
-							console.log(sandbox.out.botconfig);
+							var detect = require("../app/node_runners/field-detect-language.js");
+							asyncLoop.loop(node, sandbox, detect.language);
+							break;
+						}
 
-							client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
-								
-								if(err) {
-									io.sockets.emit("error", "Login failed!");
-									return;
-								}
-								// find everything
-								mongoquery.find2({}, node.collection, function(err, doc) {
-									sandbox.context.doc_count = doc.length;
-									runNodeScriptInContext("init", node, sandbox, io);
-									
-									// run node once per record
-									async.eachSeries(doc, function iterator(doc, next) {
-
-										sandbox.context.doc = doc;
-										sandbox.context.count++;
-										sandbox.context.data = null;
-										sandbox.context.error = null;
-										sandbox.context.skip = null;
-										
-										runNodeScriptInContext("pre_run", node, sandbox, io);
-										if(sandbox.context.skip) {
-											next();
-										} else {
-											
-											console.log("GETTING:",sandbox.out.title);
-											// get revisions (to see if page exists)
-											client.getArticle('File:' +sandbox.out.title, function (err, d) {
-												if(err)
-													console.log(err);
-												if(d != null) {
-													io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-													console.log("CONTENT:", d);
-													return next();
-
-												} else {
-
-													fs.readFile(sandbox.out.filename, function (err,data) {
-														if (err) {
-															console.log("file not found:", err);
-															io.sockets.emit("error", err);
-															return next();	// skip if file not found
-														}
-														// upload file
-														client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
-															if(err) {
-																io.sockets.emit("error", err);
-																var setter = {};
-																setter[node.out_field] = err;
-																mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-															} else {
-																//console.log(data);
-																
-																// upload wikitext
-																var content = sandbox.out.wikitext;
-																console.log("STARTING TO EDIT", sandbox.out.title);
-																console.log("******REAL URL", data.imageinfo.canonicaltitle);
-																client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-																	sandbox.context.error = err;
-																	sandbox.context.data = data;
-																	runNodeScriptInContext("run", node, sandbox, io);
-																	// write commons page url to db
-																	var setter = {};
-																	setter[node.out_field] = data.imageinfo.descriptionurl;
-																	mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
-																		if(sandbox.context.abort)
-																			next(true);
-																		else
-																			next();
-																	});
-																});
-															}
-														});
-													});
-												}
-												
-											});
-									}
-										
-										
-									}, function done () {
-										runNodeScriptInContext("finish", node, sandbox, io);
-									});
-								});
-							});
-
-						break;
-						
-					}
 				break;
 
+				case "upload":
+					switch (node.subtype) {
+						case "data":
+							switch (node.subsubtype) {
+								case "dspace":
+								
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node,sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											dspace.updateData(node,sandbox, io);
+										}
+									});
+									
+									break;
+							}
+
+							break;
+						
+						case "file":
+							switch (node.subsubtype) {
+								case "mediawiki_bot":
+								
+									var mv_bot = require("../app/node_runners/mediawiki_bot.js");
+
+								break;
+							}
+							
+						break;
+				}
+				break;
 
 				default:
 					sandbox.out.say("finish", "This node is not runnable");
@@ -1067,6 +892,52 @@ function getPrevNode(project, node) {
 
 
 
+exports.uploadFile = function (req, res ) {
+	
+	switch (req.file.mimetype) {
+		case "text/xml":
+			console.log("File type: XML");
+			return res.json({"error":"XML import not implemented yet!"});
+		break;
+		
+		case "application/json":
+			console.log("File type: JSON");
+			return res.json({"error":"JSON import not implemented yet!"});
+		break;
+		
+		case "text/tab-separated-values":
+			console.log("File type: tab separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		case "text/csv":
+			console.log("File type: comma separated values");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
+		
+		default:
+			console.log("File type: unidentified!");
+			return res.json({"error":"File type unidentified!"});
+	}
+}
+
+
 /**
  * Generate/update data view for node
  * - if views.data_static is defined in node, then copy that to views.data
@@ -1098,15 +969,13 @@ exports.updateView = function (node, sandbox, io, callback) {
 
 
 /**
- * updates project nodes x and y
+ * updates nodes visible fields
 */ 
-exports.setNodePosition = function (params, res) {
+exports.setVisibleFields = function (nodeid, params, res) {
 
-	var xx = params.x.replace(/px/,"");
-	var yy = params.y.replace(/px/,"");
-	mongoquery.editProjectNode(params.id, {"x": xx, "y": yy},
+	mongoquery.editProjectNode(nodeid, {"visible_keys": params.keys},
 		function() {
-			res.json({"status":"node position updated"});
+			res.json({"status":"node updated"});
 		}
 	);
 }
@@ -1130,11 +999,14 @@ exports.createNode = function (nodeRequest, res, io) {
  
 function initNode (nodeRequest, res, io, project) {
 
-	console.log("nEW", mongojs.ObjectId());
+	console.log("New node id:", mongojs.ObjectId());
 	console.log("nodeparams:", nodeRequest);
 	
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
+		console.log("inserting");
+		console.log(node.collection);
+		
 		mongoquery.update("mp_projects",
 			{_id:mongojs.ObjectId(node.project)},
 			{$push:{nodes: node}},
@@ -1149,6 +1021,7 @@ function initNode (nodeRequest, res, io, project) {
 			node.input_node = nodeRequest.input_node;
 			node.project = nodeRequest.project
 			node.collection = nodeRequest.collection;
+			console.log("node.collection:", node.collection);
 			node.number = nodeRequest.node_count;
 			node.dirsuffix = ""; // node can set this in "hello" script
 			
@@ -1161,7 +1034,7 @@ function initNode (nodeRequest, res, io, project) {
 				node.out_field = node.params.out_field;
 
 			// settings html is on client side and therefore it is not aware of node content
-			// so we write params to settings view so that client side script can be acces parameters of node (urls and so on)
+			// so we inject node.params to settings view so that client side script can acces parameters of node (urls and so on)
 			if( node.views.settings) {
 				node.views.settings = node.views.settings.replace("[[params]]", "var params = " + JSON.stringify(node.params) + ";\n");
 			}
@@ -1195,7 +1068,7 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({"error": err});
 							} else {
 								console.log("node created");
-								res.json({"status": "node created"})
+								res.json(node)
 							}
 						});
 					}
@@ -1219,10 +1092,10 @@ function initNode (nodeRequest, res, io, project) {
 								setter[node.init_fields[i]] = "";
 							}
 							mongoquery.update(node.collection,{}, {$set: setter }, function() {
-								res.json({"status": "node created"});
+								res.json(node);
 							})  
 						} else {
-							res.json({"status": "node created"});
+							res.json(node);
 						} 
 					}
 				});
@@ -1250,10 +1123,12 @@ exports.createCollectionNode = function (nodeRequest, res, io) {
 		// cleanup name
 		collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
 		
+		//						  project count
 		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
+		
 		nodeRequest.params.collection = nodeRequest.collection;
 		nodeRequest.node_count = data.node_count;
-		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1} }, function() {
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [nodeRequest.collection] } }, function() {
 			mongoquery.createCollection(nodeRequest.collection, function () {
 				initCollectionNode(nodeRequest, res, io);
 			});
@@ -1274,8 +1149,6 @@ function initCollectionNode (nodeRequest, res, io) {
 				node.params = {};
 			node.collection = nodeRequest.collection;
 			node.number = nodeRequest.node_count;
-			node.x = "350";
-			node.y = "0";
 			
 			runNodeScript("hello", node, nodeRequest, io);
 			
@@ -1465,6 +1338,41 @@ exports.getCollection = function (req, query, res) {
 	mongoquery.findAll(params, function(data) { res.json(data) });
 }
 
+
+/**
+ * Get paged collection data for DataTable
+ * - gives records between skip and skip + limit
+ */
+exports.getCollectionTableData = function (req, query, res) {
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 15;
+
+	var skip = parseInt(req.query.skip);
+	if (skip <= 0 || isNaN(skip))
+		skip = 0;
+
+	var sort = req.query.sort
+	if(sort === 'undefined')  // by default sort by _id (mongoid)
+		sort = "_id";
+
+	var reverse = false
+	var r = parseInt(req.query.reverse);
+	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
+		reverse = true;
+
+	var params = {
+		collection: req.params.id,
+		query: query,
+		limit: limit,
+		skip: skip,
+		sort: req.query.sort,
+		reverse: reverse
+	}
+	mongoquery.findAll(params, function(data) { res.json({data:data}) });
+}
+
 exports.getCollectionByField = function (req, res) {
 
 	var query = {};
@@ -1474,32 +1382,12 @@ exports.getCollectionByField = function (req, res) {
 }
 
 
-exports.getCollectionFields = function (collection_id, cb) {
-	mongoquery.findOne({}, collection_id, function(data) {
-		if(!data) {
-			cb({"error":"collection is empty!"});
-		} else {
-			cb (data);
-		}
-		
-		//return;
-		//var keys = {};
-		//for (key in data) {
-			//var type = typeof data[key];
-
-			//keys[key] = typeof data[key];
-
-		//}
-		//cb(keys);
-	});
-}
-
 
 exports.getCollectionCount = function (collection_id, cb) {
 	//var collection = db.collection(collection_id);
 	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
 	mongoquery.countDocs(collection_id, {}, function (result) {
-		cb(result);
+		cb({count:result});
 	});
 }
 
@@ -1531,13 +1419,15 @@ exports.editCollectionAddToSet = function (collection_id, req, callback) {
 
 exports.nodeView = function  (req, cb) {
 	fs = require('fs')
-	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
+	fs.readFile("./app/views/view.html", 'utf8', function (err,view_html) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(view_html, req, false, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(data, req, false, function (html) {
-			cb(html);
-		});
 
 	});
 }
@@ -1547,12 +1437,13 @@ exports.nodeEditView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/edit.html", 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(data, req, true, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(data, req, true, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
@@ -1561,12 +1452,13 @@ exports.nodeFileView = function  (req, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/" + req.query.view, 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createNodeView(data, req, false, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createNodeView(data, req, false, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
@@ -1578,90 +1470,18 @@ exports.viewCollection = function  (collectionName, cb) {
 	fs = require('fs')
 	fs.readFile("./app/views/view.html", 'utf8', function (err,data) {
 		if (err) {
-			return console.log(err);
+			console.log(err);
+			return cb(err);
+		} else {
+			nodeview.createCollectionView(data, collectionName, function (html) {
+				cb(html);
+			});
 		}
-		nodeview.createCollectionView(data, collectionName, function (html) {
-			cb(html);
-		});
-
 	});
 }
 
 
-exports.uploadFile = function (req, res ) {
-	
-	switch (req.file.mimetype) {
-		case "text/xml":
-			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented yet!"});
-		break;
-		
-		case "application/json":
-			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented yet!"});
-		break;
-		
-		case "text/tab-separated-values":
-			console.log("File type: tab separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
-		case "text/csv":
-			console.log("File type: comma separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
-		default:
-			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified!"});
-	}
-}
 
-
-exports.importFile = function (node, callback) {
-	switch (node.params.mimetype) {
-		case "text/xml":
-			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented yet!"});
-		break;
-		case "application/json":
-			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented yet!"});
-		break;
-		case "text/tab-separated-values":
-			console.log("File type: tab separated values");
-			importTSV("tsv", node, function(data) {
-				callback(data);
-			})
-		break;
-		case "text/csv":
-			console.log("File type: comma separated values");
-			importTSV("csv", node, function(data) {
-				callback(data);
-			})
-		break;
-		default:
-			console.log("File type: unidentified!");
-			//return res.json({"error":"File type unidentified!"});
-			return;
-	}
-}
 
 /**
  * Make an external API request
@@ -1673,6 +1493,8 @@ exports.callAPI = function (url, callback) {
 
 	if (typeof url === "undefined" || url == "")
 		callback("URL not set", null, null);
+
+	console.log("REQUEST:", url);
 
 	var headers = {
 		'User-Agent':       'GLAMpipe/0.0.1',
@@ -1686,13 +1508,17 @@ exports.callAPI = function (url, callback) {
 	};
 
 	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
+		console.log(response.statusCode);
+		if (error) {
+			console.log("ERROR:", error);
+			callback(error, response, body);
+		} else if (response.statusCode == 200) {
 			//console.log(body); 
+			console.log("SERVER RESPONSE:", response.statusCode);
 			callback(null, response, body);
 		} else {
-			console.log(error);
-			callback(error, response, body);
-			return;
+			console.log("SERVER RESPONSE:", response);
+			callback("bad response from server:" + response.statusCode, response, body);
 		}
 	});
 }
@@ -1704,49 +1530,6 @@ exports.callAPI = function (url, callback) {
 
 
 
-
-/**
- * Apply node script to records
- * - applies node function (scripts.run) to a certain field of all records
- * - writes result to user defined field
- * - data in and out goes through "sandbox"
- */
-exports.exportXML = function (node, callback) {
-	var count = 0;
-	
-	if(typeof node.collection  === "undefined") {
-		console.log("ERROR: collection not found");
-		callback("ERROR: collection not found");
-		return;
-	}
-	
-	var onDoc = function (doc) {
-		console.log(doc.WD);
-		console.log(node.settings.WD);
-		vm.runInNewContext(node.scripts.run, sandbox, "node.script.run");
-	}
-	
-	var onError = function (error) {
-		console.log(error);
-	}
-	
-	var onDone = function() {
-		callback();
-	}
-	
-	mongoquery.find2({}, node.collection, function (err, doc) {
-		console.log("documents found:", doc.length);
-		console.log(node.params);
-		
-		async.eachSeries(doc, function iterator(doc, next) {
-			onDoc(doc);
-			next();
-		}, function done() {
-			callback(null, count);
-		});
-		
-	}); 
-}
 
 
 
@@ -1761,152 +1544,6 @@ exports.readDir = function (dirname, onFileList, onError) {
 		}
 		onFileList(filenames);
 	});
-}
-
-
-exports.downloadFile = function (node, sandbox, cb ) {
-	var fs = require("fs");
-	var request = require("request")
-
-	if (typeof sandbox.out.url === "undefined") {
-		sandbox.context.error = "URL missing";
-		return cb(sandbox);
-	} 
-	if(sandbox.out.url == null || sandbox.out.url == "") {
-		sandbox.context.error = "URL missing";
-		return cb(sandbox);
-	} 
-
-	if(sandbox.out.url.search("http") != 0) {
-		sandbox.context.error = "URL not starting with 'http'";
-		return cb(sandbox);
-    }
-    
-    
-	var filePath = path.join(node.dir, sandbox.out.file); 
-	var file = fs.createWriteStream(filePath);
-	var sendReq = request.get(sandbox.out.url);
-
-	// verify response code
-	sendReq.on('response', function(response) {
-		if(response.statusCode === 200) {
-			sandbox.context.response = response;
-			sendReq.pipe(file);
-
-			file.on('finish', function() {
-				file.close(function () {
-					cb(sandbox);
-				}); 
-			});
-
-			file.on('error', function(err) { 
-				fs.unlink(filePath); // Delete the file async. 
-				console.log(err);
-				sandbox.context.error = err;
-
-				if (cb) {
-					return cb(sandbox);
-				}
-			});
-			
-		} else {
-		   sandbox.context.error = "file not found on server!";
-		   return cb(sandbox);
-		}
-
-	});
-
-	// check for request errors
-	sendReq.on('error', function (err) {
-		fs.unlink(filePath);
-		console.log(err);
-		sandbox.context.error = err;
-		return cb(sandbox);
-
-	});
-
-
-
-}
-
-function insertNodeActionField (collection, doc_id, field, value) {
-	
-}
-
-function importXML(file) {
-	
-}
-
-
-function importTSV (mode, node, cb) {
-	
-	var streamCSV = require("node-stream-csv");
-
-	var records = [];
-	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
-	streamCSV({
-		filename: file,
-		mode: mode,
-		dontguess: true },
-		function onEveryRecord (record) {
-			var count = 0;
-			var empty = 0;
-			for(var prop in record) {
-
-				if (record.hasOwnProperty(prop)) {
-					// clean up key names (remove -. and convert spaces to underscores)
-					prop_trimmed = prop.trim();
-					prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');
-					if(prop != prop_clean) {
-						record[prop_clean] = record[prop];
-						delete record[prop];
-					}
-
-					count++;
-					if(typeof record[prop_clean] === "undefined" || record[prop_clean] == "")
-						empty++;
-				}
-			}
-			// check for totally empty records
-			//if(empty != count)
-			
-			// mark origin of data
-			record[MP.source] = node._id;
-			records.push(record);
-		},
-		function onReady () {
-			cb(records);
-		}
-	);
-}
-
-
-
-function importJSON(filename, collection, res, cb) {
-	fs = require('fs')
-	fs.readFile("uploads/" + filename + ".json", 'utf8', function (err,data) {
-		if (err) {
-			return console.log(err);
-		}
-		var json = JSON.parse(data);
-		mongoquery.save(collection, json, function() {cb(collection);});
-		
-
-
-	});
-}
-
-
-function writeJSON2File (filename, records, callback) {
-
-	require('fs').writeFile(
-		"uploads/" + filename + ".json",
-		JSON.stringify(records, null, ' '),
-		function write2DB (err) {
-			callback();
-		}
-	)
-
 }
 
 
