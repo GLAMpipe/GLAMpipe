@@ -42,6 +42,6 @@
 			"<input id='detect_field_language_out' name='suffix'/ value='_detected_lang'>"   
         ],
                     
-        "settings": ["no params"]
+        "settings": ["no settings"]
     }
 }

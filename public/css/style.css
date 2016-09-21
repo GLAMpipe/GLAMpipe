@@ -653,3 +653,7 @@ data-workspace  .settings {
 .right {
 	float:right;
 }
+
+label {
+	display:block;
+}

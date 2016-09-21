@@ -29,7 +29,7 @@
         "params":"<label>file name</label><input name=\"file\"/>",
         "settings": [
             "<label>separator </label><input name=\"sep\" value=\",\"/>",
-            "<label>array separator </label><input name=\"arr_sep\" value=\"|\"/>"
+            "<label>array separator </label><input class=\"node-settings\" name=\"arr_sep\" value=\"|\"/>"
         ]
     }
 }

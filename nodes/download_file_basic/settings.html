@@ -1,0 +1,43 @@
+<label>From where? (url)</label>
+<input class="node-settings" name="base_url" class="short_input"/> + 
+<input id="download_simple_in" name="in_field" class="node-settings dynamic_field middle_input"/>
+
+<label>How to name files? </label> 
+<select class="node-settings" name="filename_type"> 
+    <option value="url" selected="selected">use last part of link (direct download URL)</option> 
+    <option value="record" >filename can be found on records</option> 
+    <option value="own">make your own</option>
+</select> 
+                    
+<label>Filename can be found on records (remember to choose this from options above)</label> 
+<input class="node-settings" name="filename__record" class="dynamic_field middle_input " /><span class=""> </span><br>
+
+<label>Make your own filename (remember to choose this from options above)</label> 
+<input class="node-settings" name="file__1" class="short_input "/> + 
+<input class="node-settings" name="file__2" class="dynamic_field middle_input " /><span class=""> + </span><br>
+<input class="node-settings" name="file__3" class="short_input "/><span class=""> + </span>
+<input class="node-settings" name="file__4" class="dynamic_field middle_input " /><span class=""> + </span><br>
+<input class="node-settings" name="file__5" class="short_input "/><span class=""> +  </span>
+<input class="node-settings" name="file__6" class="dynamic_field middle_input " /><span class=""> + </span><br>
+                    
+<select class="node-settings" name="counter" class=""> 
+    <option value="no" selected="selected">no counter</option>
+    <option value="yes">document counter</option> 
+</select> *)
+
+<div>*) using document counter prevents duplicate file names</div>
+                    
+                    
+<label>Here you can add a static file extension if needed (like .jpg) </label> 
+<input class="node-settings" name="file__ext" class="short_input "/> 
+                    
+<label>file names and path are written to</label>
+<input class="node-settings" name="out_suffix" value="_download"></input>
+
+<label>Dry run (does not download, just shows the file names)</label>
+<input class="node-settings" type="checkbox" name="dry_run" checked="checked" />
+
+<script> 
+	$('#download_simple_in').change(function() {
+		$('#download_simple_out').text($('#download_simple_in').val() + '_download'); }); 
+</script>

@@ -62,7 +62,7 @@
 		"settings":
 		[
 			"<div class='help'>If you do not want to fetch all records, then define page maximum page count below.</div>",
-			"<label>max page count</label>leave empty for all<input name='sample_to'/>"
+			"<label>max page count</label>leave empty for all<input class='node-settings' name='sample_to'/>"
 		],
         "default_keys": ["title", "description"]    
     }

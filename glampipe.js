@@ -40,7 +40,7 @@ var GlamPipe = function() {
 		if (typeof self.ipaddress === "undefined") {
 			// There should be MONGO env variables present if we were running inside docker
 			if(process.env.MONGO_PORT || process.env.DOCKER) {
-				console.log("Think I'm running in Docker, using 0.0.0.0");
+				console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
 				self.ipaddress = "0.0.0.0";
 				self.dataPath = "/glampipe";
 			} else {
@@ -155,26 +155,28 @@ var GlamPipe = function() {
 		
 		self.core 	= require("./app/core.js");
 	   
-		self.core.initDB(function () {
-			self.core.createProjectsDir(self.dataPath, function(error) {
-		
-				if(error) {
-					console.log(colors.red("DATAPATH not set"));
-					global.config.projectsPath = path.join(self.dataPath, "projects");
-					cb("ERROR");
-				} else {
-					global.config.dataPath = self.dataPath;
-					global.config.projectsPath = path.join(self.dataPath, "projects");
+		self.core.initDB(function (error) {
 
-					// Create the express server and routes.
-					self.initializeServer();
-					console.log("INIT done");
-					cb(); 
+			self.core.initNodes (null, function() {
 
-				}
+				self.core.createProjectsDir(self.dataPath, function(error) {
+			
+					if(error) {
+						console.log(colors.red("DATAPATH not set"));
+						global.config.projectsPath = path.join(self.dataPath, "projects");
+						cb("ERROR");
+					} else {
+						global.config.dataPath = self.dataPath;
+						global.config.projectsPath = path.join(self.dataPath, "projects");
+
+						// Create the express server and routes.
+						self.initializeServer();
+						console.log("INIT done");
+						cb(); 
+					}
+				});
 			});
 		});
-
 	};
 
 

@@ -32,7 +32,7 @@
                     
         "settings": [
                     "<label>Dry run (does not download, just shows the file names)</label>",
-					"<input type='checkbox' name='dry_run' checked='checked' />"
+					"<input class='node-settings' type='checkbox' name='dry_run' checked='checked' />"
                     ]
     }
 }

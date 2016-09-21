@@ -1,19 +1,20 @@
 
-// pdfx output as json
-var data = context.data;
 
-out.setter = {};
+out.value = [];
 
-if(context.data.error) {
-	out.value.push(context.data.error);
+function process (element, index) {
 	
-} else if (context.data.response.statusCode == 200) {
-	out.value.push("200");
-	context.vars.success_counter++;
-} else {
-	out.value.push(context.data.response.statusCode + "");
+	if(element.error) {
+		out.value.push(element.error);
+	} else if (element.response.statusCode == 200) {
+		out.value.push("200");
+		context.vars.success_counter++;
+	} else {
+		out.value.push(element.response.statusCode + "");
+	}
 }
 
-
+// process array
+context.data.forEach(process);
 
 

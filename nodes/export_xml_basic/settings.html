@@ -15,9 +15,9 @@
            var table=$('<table><th>current name</th><th>new name</th></table>');
            for(var f in rec){
                if(rec[f] !== null && typeof rec[f] === "object" && f != "_id") {
-                   var field=$('<tr><td>' +f+ '</td><td><input name="_mapkey_'+f+'"/>A</td></tr>');
+                   var field=$('<tr><td>' +f+ '</td><td><input class="node-settings" name="_mapkey_'+f+'"/>A</td></tr>');
                } else {
-                   var field=$('<tr><td>' +f+ '</td><td><input name="_mapkey_'+f+'"/></td></tr>');
+                   var field=$('<tr><td>' +f+ '</td><td><input class="node-settings" name="_mapkey_'+f+'"/></td></tr>');
                }
                table.append(field);
            }

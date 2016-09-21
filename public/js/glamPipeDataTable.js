@@ -51,13 +51,16 @@ var dataTable = function (node) {
 	
 		self.node.loadCollectionKeys(function() { 
 			self.keys.all_keys = self.node.data.keys;
-			self.renderControls();
+			
+			self.node.loadCollectionData(self.params, function() {
+				self.renderTablePage();
+				self.renderControls();
+				self.renderCollectionCount();
+				self.setEventListeners();
+			});	
 		});
 		
-		self.node.loadCollectionData(self.params, function() {
-			self.renderTablePage();
-			self.renderCollectionCount();
-		});	
+
 	}
 
 
@@ -186,7 +189,6 @@ var dataTable = function (node) {
 		if(self.editMode)
 			$("data-workspace table tbody td div.edit").css('display','inline');
 		
-		self.setEventListeners();
 
 	}
 	

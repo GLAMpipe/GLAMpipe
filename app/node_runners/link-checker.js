@@ -26,15 +26,16 @@ exports.checkLinks = function (doc, sandbox, next) {
 	
 	if(sandbox.out.urls && sandbox.out.urls.constructor.name == "Array") {
 		
-		async.eachSeries(sandbox.out.urls, function iterator(url, next) {
+		sandbox.context.data = [];
+		async.eachSeries(sandbox.out.urls, function iterator(url, nextURL) {
 			
 			headRequest (url, function (err, response) {
-				sandbox.context.data = {"error": err, "response": response};
-				sandbox.run.runInContext(sandbox);
-				next();
+				sandbox.context.data.push({"error": err, "response": response});
+				nextURL();
 			})
 			
 		}, function done () {
+			sandbox.run.runInContext(sandbox);
 			next();
 		});
 
@@ -51,7 +52,7 @@ function headRequest (url, callback) {
 	var request = require("request");
 
 	if (typeof url === "undefined" || url == "")
-		callback("URL not set", null, null);
+		return callback("URL not set", null);
 
 	console.log("REQUEST:", url);
 

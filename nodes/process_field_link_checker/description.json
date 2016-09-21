@@ -2,6 +2,7 @@
     "nodeid": "process_fields_link_checker",
     "type": "process",
     "subtype": "fields",
+    "subsubtype": "link_checker",
     "title": "URL checker",
     "status": "usable",
     "usage":"",

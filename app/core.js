@@ -20,19 +20,25 @@ var positionOffset = 60;
  * - makes sure that "project_count" exists
  */
 exports.initDB = function (callback) {
-	mongoquery.findOne({},"mp_settings", function(data) { 
-
-		if(data) {
-			console.log("DB: mp_settings exists");
-			callback();
+	mongoquery.findOne({},"mp_settings", function(err, data) { 
+		if(err) {
+			console.log("INITDB failed!");
+			callback(err);
 		} else {
-			console.log("DB: creating project counter");
-			mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
-				if(result.error)
-					console.log("ERROR: could not create project counter!");
-				else 
-					callback();
-			});
+			if(data) {
+				console.log("DB: mp_settings exists");
+				callback();
+			} else {
+				console.log("DB: creating project counter");
+				mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
+					if(result.error) {
+						console.log("ERROR: could not create project counter!");
+						callback(result.error);
+					}
+					else 
+						callback();
+				});
+			}
 		}
 	});
 }
@@ -87,7 +93,7 @@ exports.initNodes = function (io, callback) {
 				console.log("NOTICE: node type descriptions not found from " + dataPath);
 				desc = {};
 			} else 
-				// if there are nodes in host, then use them
+				
 				var desc = JSON.parse(data);
 				console.log("INIT: Loading nodes from " + path.join(dataPath, "nodes/") );
 				exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
@@ -204,7 +210,7 @@ exports.createProject = function (title, res) {
 		} 
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
-			mongoquery.findOne({}, "mp_settings", function(meta) {
+			mongoquery.findOne({}, "mp_settings", function(err, meta) {
 				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
@@ -344,7 +350,7 @@ exports.runNode = function (req, res, io) {
 	
 	try {
 
-		mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
+		mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(err, project) {
 			if(!project) {
 				console.log("node not found");
 				io.sockets.emit("error", "node not found");
@@ -485,7 +491,7 @@ exports.runNode = function (req, res, io) {
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
 								// we must check if input key is array or not
-								mongoquery.findOne({}, node.params.source_collection, function (record) {
+								mongoquery.findOne({}, node.params.source_collection, function (err, record) {
 									if(record) {
 										if(record[node.params.in_field]) {
 											var array = record[node.params.in_field].constructor.name == "Array";
@@ -1015,7 +1021,7 @@ function initNode (nodeRequest, res, io, project) {
 	}
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
 			node.input_node = nodeRequest.input_node;
 			node.project = nodeRequest.project
@@ -1138,7 +1144,7 @@ exports.createCollectionNode = function (nodeRequest, res, io) {
 function initCollectionNode (nodeRequest, res, io) {
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
 			node.input_node = "";
 			node.project = nodeRequest.project;
@@ -1180,7 +1186,7 @@ function initCollectionNode (nodeRequest, res, io) {
  */
 exports.deleteNode = function (params, res, io) {
 
-	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(project) {
+	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(err, project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", params.node);
 			var node = project.nodes[index];
@@ -1568,7 +1574,8 @@ exports.readNodes = function (io, nodePath, descriptions, callback) {
 				console.log(error);
 			} else {
 				console.log("LOADED: " + filename );
-				io.sockets.emit("progress", "LOAD: " + filename + " loaded");
+				if(io)
+					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
 				next();
 			}
 		})

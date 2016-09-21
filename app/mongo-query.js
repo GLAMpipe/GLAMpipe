@@ -3,7 +3,6 @@ var mongojs = require('mongojs');
 var async = require("async");
 var database = require('../config/database');
 
-console.log(database.initDBConnect());
 var db = mongojs(database.initDBConnect());
 
 db.on("error", function(e) {
@@ -76,9 +75,9 @@ exports.findOne = function (query, collectionname, callback) {
 	collection.findOne(query ,function (err, result) {
 		if (err) {
 			console.log("ERROR:", err);
-			callback(null)
+			callback(err, result)
 		} else {
-			callback(result);
+			callback(err, result);
 		}
 	});   
 }
@@ -100,7 +99,7 @@ exports.findOneProjection = function (query, projection, collectionname, callbac
 
 
 exports.findOneById = function (doc_id, collectionname, callback) {
-	exports.findOne ({_id: mongojs.ObjectId(doc_id)}, collectionname, function (data) {
+	exports.findOne ({_id: mongojs.ObjectId(doc_id)}, collectionname, function (err, data) {
 		callback(data);
 	})
 }
@@ -386,19 +385,19 @@ exports.editProjectNode = function (doc_id, params, callback) {
 exports.getProject = function (title, callback) {
 	console.log("getProject called for project ",title );
 	var query = {"title":title};
-	exports.findOne(query, "mp_projects", function(msg) {callback(msg)} );
+	exports.findOne(query, "mp_projects", function(err, msg) {callback(msg)} );
 }
 
 exports.getFunc = function (id, callback) {
 	console.log('getFunc called for func ',id );
 	var query = {"_id":mongojs.ObjectId(id)};
-	exports.findOne(query, 'functions', function(msg) {callback(msg)} );
+	exports.findOne(query, 'functions', function(err, msg) {callback(msg)} );
 }
 
 exports.getSource = function (id, callback) {
 	console.log('getSource called ',id );
 	var query = {"_id":mongojs.ObjectId(id)};
-	exports.findOne(query, 'sources', function(msg) {callback(msg)} );
+	exports.findOne(query, 'sources', function(err, msg) {callback(msg)} );
 }
 
 exports.getAllProjects = function (callback) {
