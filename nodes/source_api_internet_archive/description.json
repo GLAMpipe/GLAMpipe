@@ -1,0 +1,77 @@
+{
+    "nodeid": "source_api_internet_archive",
+    "title": "Internet Archive",
+    "type": "source",
+    "subtype": "API",
+    "status": "works",
+    "description": "Fetch data from IA based on query constructed with IA's advanced query.",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', '<h2>Hello, You just IA source node!</h2>'); "
+        ],
+        
+        "bye": "out.say('news', 'Deleted IA source node!  Bye!'); ",
+        
+        "init": 
+        [
+			"var u = '&fl[]=identifier&fl[]=title&fl[]=description&fl[]=collection&fl[]=source&fl[]=creator&rows='+context.node.params.docs_per_page+'&output=json'; ",
+            "out.url = 'https://archive.org/advancedsearch.php?q=' + context.node.params.query + u;",
+            " /* since out.url gets wiped every run, lets save query in other veriable*/",
+            "context.query_url = out.url; ",
+            "out.say ('news', 'starting to fetch query ' + out.url);",
+            
+            "if(context.node.settings.sample_to != null) ",
+            "    context.node.sample_to = parseInt(context.node.settings.sample_to); ",
+            "else",
+            "    context.node.sample_to = 9999999999; "
+        ],
+        
+        "run":
+        [
+			"if (context.data.responseHeader) {",
+			"    var numFound = parseInt(context.data.response.numFound, 10);",
+			"    var start = parseInt(context.data.response.start, 10);", 
+			"    var totalPages = Math.ceil(numFound/context.node.params.docs_per_page); ", 
+			"    out.value = context.data.response.docs; ",
+			
+            "   var currentPage = start/context.node.params.docs_per_page + 1; ", 
+            "   out.say ('progress', 'working on page ' + currentPage + '/' + totalPages);",
+            "   out.say ('progress', context.query_url);",
+
+            "   if(start < numFound) {",
+            "        /* stop if sample is set and count is bigger than sample */",
+            "       if(currentPage >= context.node.sample_to) {",
+            "          out.url = ''; ",
+            "       } else {",
+            "           currentPage++; ",
+            "           out.url = context.query_url + '&page=' + currentPage; ",
+            "       }",
+            "   }",
+
+
+
+			"} else {",
+			"    out.say('error', 'Your query failed! Please check query'); ",
+			"}"
+        ],
+        
+		"finish":"out.say('finish', 'Data fetched Internet Archive'); "
+    },
+    
+    "views": {
+        "params":[
+                    "<label>Write or copy query here</label> Construct your query here:<br><a target='_blank' href='https://archive.org/advancedsearch.php'>advanced search</a>",
+                    "<input name='query'/>",
+                    "<label>records per page</label>",
+                    "<input name='docs_per_page' value='50'/>"
+                 ],
+		"settings":
+		[
+			"<div class='help'>If you do not want to fetch all records, then define page maximum page count below.</div>",
+			"<label>max page count</label>leave empty for all<input name='sample_to'/>"
+		]
+    }
+
+}

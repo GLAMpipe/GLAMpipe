@@ -1,0 +1,38 @@
+{
+    "nodeid": "download_file_basic",
+    "type": "download",
+    "subtype": "basic",
+    "title": "file",
+    "status": "usable",
+    "description": "Download file from URL.",
+
+
+    "scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a download node'); ",
+			"context.node.out_field = context.node.params.in_field + context.node.params.out_suffix; "
+		],
+        
+        "bye": "out.say('news', 'Deleted donwload node. Downloaded files will remain. Bye!'); ",
+        
+        "init":
+        [
+            "context.base_url = context.node.params.base_url; ",
+            "context.in_field = context.node.params.in_field; ",
+            "    /* lets make counter for succesful downloads */",
+            "context.node.download_counter = 0; ",
+            "out.say('progress', 'I have ' + context.doc_count + ' files to download!'); "
+        ],
+                
+        "finish":"out.say('finish', '<h2>Downloaded '+context.node.download_counter+' files!</h2>');"
+    },
+    
+    "views": {
+                    
+        "settings": [
+                    "<label>Dry run (does not download, just shows the file names)</label>",
+					"<input type='checkbox' name='dry_run' checked='checked' />"
+                    ]
+    }
+}

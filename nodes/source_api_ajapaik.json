@@ -1,0 +1,51 @@
+{
+	"nodeid": "source_api_ajapaik",
+	"type": "source",
+	"subtype": "API",
+	"title": "Ajapaik",
+    "status": "test",
+	"usage":"",
+	"description": "Import images from Ajapaik",
+	
+	"scripts": {
+		"hello": "out.say('news', 'You added a Ajapaik import node'); ",
+        "bye": "out.say('finish', 'Bye!'); ",
+		
+		"init":	[
+
+				"var base_url = 'http://api.ajapaik.ee/api-v1.php?action=';",
+				"out.url = base_url + context.node.params.source ;",
+				"out.say('news', out.url); "
+				],
+                
+		"run":
+		[
+            "if (context.error) { ",
+			"   out.say('error', context.error); ",
+			"   context.node_error = context.error; ",
+			"} else if (context.data) { ",
+			"    out.value = context.data.result;",
+			"} else ",
+            "   context.node_error = 'server responded with empty document!'; "
+		],
+        
+		"finish":"out.say('finish', context.data.count + ' Ajapaik images found!' ); "
+	},
+	
+	"views": {
+		"params":
+		[
+            "<label>Choose organisation</label>",
+            "<select name=\"source\">",
+            "    <option value='photo&source_id=59'>The British Library</option>",
+            "    <option value='photo&source_id=81'>Museovirasto</option>",
+            "    <option value='photo&source_id=57'>SLS</option>",
+            "</select>"
+		],
+        
+		"settings":
+		[
+			"no settings"
+		]
+	}
+}

@@ -37,38 +37,31 @@ exports.initDB = function (callback) {
 	});
 }
 
-exports.initDir = function (callback) {
+exports.createProjectsDir = function (dataPath, callback) {
 	fs = require('fs');
-	var dataPath = "";
 
-	mongoquery.findOne({},"mp_settings", function(data) { 
-		if(data.data_path == "") {
-			callback(null);
-		} else {
-			// if we are not running on OPENSHIFT
-			if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
-				// then use datapath from "mp_settings" collection
-				dataPath = data.data_path;
-			// else use OPENSHIFT data dir
-			} else 
-				dataPath = process.env.OPENSHIFT_DATA_DIR;
-				
-			// create "projects" directory
-			fs.mkdir(path.join(dataPath, "projects"), function(err) {
-				if(err) {
-					if(err.code === "EEXIST") {
-						console.log("INIT: projects directory exists");
-						callback(dataPath);
-					} else
-						console.log("ERROR:", err);
-					return;
-				}
-				console.log("INIT: output directory created");
-				callback(dataPath);
-			});
-			
+	// if we are not running on OPENSHIFT
+	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
+		// then use datapath from "mp_settings" collection
+		dataPath = "/glampipe";
+	// else use OPENSHIFT data dir
+	} else 
+		dataPath = process.env.OPENSHIFT_DATA_DIR;
+		
+	// create "projects" directory
+	fs.mkdir(path.join(dataPath, "projects"), function(err) {
+		if(err) {
+			if(err.code === "EEXIST") {
+				console.log("INIT: projects directory exists");
+				callback();
+			} else
+				callback("ERROR:", err);
+			return;
 		}
+		console.log("INIT: output directory created");
+		callback();
 	});
+			
 
 }
 
@@ -82,7 +75,8 @@ exports.initDir = function (callback) {
 
 exports.initNodes = function (io, callback) {
 
-	var dataPath = global.config.dataPath;
+	//var dataPath = global.config.dataPath;
+	var dataPath = "/src/app"; // use bundled nodes
 		
 	mongoquery.drop("mp_nodes", function() {
 
@@ -93,10 +87,17 @@ exports.initNodes = function (io, callback) {
 				console.log("NOTICE: node type descriptions not found from " + dataPath);
 				desc = {};
 			} else 
+				// if there are nodes in host, then use them
 				var desc = JSON.parse(data);
 				console.log("INIT: Loading nodes from " + path.join(dataPath, "nodes/") );
 				exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
-					callback(null);     
+					if(error){
+						// otherwise default nodes (included in the image)
+						console.log("ERROR: Loading nodes failed!");
+						callback(error);
+
+					} else
+						callback(null);     
 				});        
 		});
 	});
@@ -109,12 +110,9 @@ exports.initNodes = function (io, callback) {
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
-	var sandbox = { 
-		out: {
+	var download = { 
 			url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
-			file:"master.zip"
-		},
-		context:{}
+			filename:"master.zip"
 	};
 				
 	var node = {dir:dataPath};
@@ -122,17 +120,18 @@ exports.downloadNodes = function (io, cb) {
 	// download nodes
 	console.log("DOWNLOADING: nodes from github");
 	io.sockets.emit("progress", "DOWNLOADING: nodes from github");
-	console.log(sandbox.out.url);
-	exports.downloadFile(node, sandbox, function (err) {
-		if(err.context.error) {
-			console.log(err.context.error);
-			io.sockets.emit("error", err.context.error);
-			cb(err.context.error);
+
+	var downloader = require("../app/node_runners/download-file.js");
+	downloader.downloadAndSave(node, download, function (err) {
+		if(err) {
+			console.log(err);
+			io.sockets.emit("error", err);
+			cb(err);
 			
 		} else {
 			const Zip = require("adm-zip");
 			var zip = new Zip(path.join(dataPath, "master.zip"));
-			console.log("EXTRACTING: master.zip");
+			console.log("EXTRACTING: master.zip to " + dataPath + "/nodes/");
 			zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
 			io.sockets.emit("progress", "DOWNLOADING: done!");
 			cb();

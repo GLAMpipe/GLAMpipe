@@ -39,12 +39,13 @@ var GlamPipe = function() {
 		// if we are not in OpenShift, then check if we are inside Docker
 		if (typeof self.ipaddress === "undefined") {
 			// There should be MONGO env variables present if we were running inside docker
-			if(process.env.MONGO_PORT_27017_TCP_ADDR) {
+			if(process.env.MONGO_PORT || process.env.DOCKER) {
 				console.log("Think I'm running in Docker, using 0.0.0.0");
 				self.ipaddress = "0.0.0.0";
+				self.dataPath = "/glampipe";
 			} else {
 				console.log("Running locally, using 127.0.0.1");
-				self.ipaddress = "127.0.0.1";
+				self.ipaddress = "127.0.0.0";
 			}
 		};
 
@@ -155,18 +156,15 @@ var GlamPipe = function() {
 		self.core 	= require("./app/core.js");
 	   
 		self.core.initDB(function () {
-			self.core.initDir(function(dataPath) {
-				
-				if(!dataPath) {
-					self.dataPath = "fakedir";
-					console.log(colors.red("ERROR: DATAPATH not set"));
-					self.initError = {"status":"datapath_error", "msg":"datapath not found!"};
-					self.initializeServer();
-					cb();
+			self.core.createProjectsDir(self.dataPath, function(error) {
+		
+				if(error) {
+					console.log(colors.red("DATAPATH not set"));
+					global.config.projectsPath = path.join(self.dataPath, "projects");
+					cb("ERROR");
 				} else {
-					self.dataPath = dataPath;
-					global.config.dataPath = dataPath;
-					global.config.projectsPath = path.join(dataPath, "projects");
+					global.config.dataPath = self.dataPath;
+					global.config.projectsPath = path.join(self.dataPath, "projects");
 
 					// Create the express server and routes.
 					self.initializeServer();
@@ -216,8 +214,11 @@ var glampipe = new GlamPipe();
 
 try {
 	 
-	glampipe.initialize(function() {
-		glampipe.start();
+	glampipe.initialize(function(error) {
+		if(error)
+			console.log("could not start GLAMpipe!");
+		else
+			glampipe.start();
 	});
 	
 } catch (e) {

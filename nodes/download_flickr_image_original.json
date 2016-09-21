@@ -1,0 +1,49 @@
+{
+    "nodeid": "download_flickr_image_original",
+    "type": "download",
+    "subtype": "Flickr",
+    "title": "original images",
+    "status": "works",
+    "description": "Downloads original images from Flickr.",
+
+
+    "scripts": {
+        "hello":
+        [
+            "out.say('news', 'You added a download node'); ",
+            "context.node.out_field = 'downloaded_original'; "
+        ],
+        
+        "init":
+        [
+            "out.say('progress', 'I have ' + context.doc_count + ' images to download!'); "
+        ],
+        
+        "pre_run": 
+        [
+			"var url = context.doc['url_o']; ",
+			"var splitted = url.split('/'); ",
+			"out.url = url; ",
+			"out.file = splitted[splitted.length - 1]; ",
+			"out.say('progress', out.url); "
+        ],
+        
+        "run": 
+        [
+			"out.value = context.node.dir + out.file; "
+        ],
+        
+        "finish":"out.say('finish', 'Images downloaded!')"
+    },
+    
+    "views": {
+        "params":
+        [
+            "no params. HINT: If you want to name files diffrently, use generic download node and choose \"url_o\" as input field."
+        ],
+        "settings": 
+        [
+            "no settings"
+        ]
+    }
+}

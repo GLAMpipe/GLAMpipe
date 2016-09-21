@@ -1,14 +1,14 @@
 FROM node:argon
 RUN apt-get update && apt-get install -y vim
-RUN mkdir -p /usr/src
-WORKDIR /usr/src
+RUN mkdir -p /src/app
 
 # Install app dependencies
-COPY package.json /usr/src/
-RUN npm install -g
+COPY package.json /src/app
+WORKDIR /src/app
+RUN npm install 
 
 # Bundle app source
-#COPY . /usr/src/app
+COPY . /src/app
 
 
 EXPOSE 3000

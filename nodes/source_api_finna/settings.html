@@ -1,0 +1,44 @@
+<h1>FINNA</h1> 
+
+
+<label>Tee haluamasi haku Finnassa ja kopioi sitten URL tähän:</label>
+<p><input id='source_api_finna_search' name='search'></input></p>
+<div id='source_api_finna_search_url'>Urlia ei ole asetettu</div>
+
+<label>montako sivua haetaan (20 tietuetta/sivu) 0 tarkoittaa hae kaikki</label>
+<input id='source_api_finna_limit' name='limit' value='2'></input>
+
+<label>Valitse lisenssi</label>
+<select id='source_api_finna_license' name='license'>
+    <option value=''>ei rajausta</option>
+    <option value='usage_rights_str_mv:usage_B'>Saa muokata, myös kaupallinen</option>
+    <option value='usage_rights_str_mv:usage_C'>Muutoksia tekemättä, myös kaupallinen</option>
+    <option value='usage_rights_str_mv:usage_D'>Saa muokata, ei-kaupallinen</option>
+</select>
+
+
+<script>
+    $('#source_api_finna_search').on('keyup', function() { 
+       $('#source_api_finna_search_url').empty(); 
+       var a = $('<a>' + $(this).val() + '</a>');
+       a.attr('href', $(this).val());
+       $('#source_api_finna_search_url').append(a); 
+   });
+
+    $('#source_api_finna_hae').on('click', function() { 
+        var params = {}; 
+        params.url = 'https://api.finna.fi/v1/search?'; 
+        var search = $('#source_api_finna_search').val(); 
+        var license = $('#source_api_finna_license').val(); 
+        var query = search.split('?'); 
+        if(query.length == 2) { 
+           params.query = query[1];
+           console.log(params.url + params.search); 
+           $.post('http://localhost:3000/proxy/', params, function(data) { 
+               alert(data.resultCount);  
+           }) 
+       } else { 
+           alert('Haku on viallinen! Kopioitko osoiterivin oikein?'); 
+       } 
+    })
+</script>

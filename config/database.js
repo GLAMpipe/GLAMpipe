@@ -14,11 +14,14 @@ module.exports.initDBConnect = function () {
 	}
 
 	// if MONGO env variables are present (i.e. mongo is running in docker), use them:
-	if(process.env.MONGO_PORT_27017_TCP_ADDR) {
+	if(process.env.MONGO_PORT) {
 		console.log(process.env.MONGO_NAME);
 		connection_string = process.env.MONGO_PORT_27017_TCP_ADDR + ':' +
 		process.env.MONGO_PORT_27017_TCP_PORT + '/' +
 		'metapipe';
+	} else if (process.env.DOCKER)  {
+		connection_string = "mongo:27017/metapipe"
+
 	}
 	
 	console.log("MongoDB connection: ", connection_string);

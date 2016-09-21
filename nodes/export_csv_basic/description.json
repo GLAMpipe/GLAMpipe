@@ -1,0 +1,35 @@
+{
+    "nodeid": "export_csv_basic",
+    "type": "export",
+    "subtype": "file",
+    "title": "CSV",
+    "status": "works",
+    "description": "Export collection as CSV file. Exports arrays but do not export objects.",
+
+
+    "scripts": {
+        "hello": "out.say('news', 'You added a CSVexport node'); context.node.title = context.node.params.file; ",
+        "bye": "out.say('news', 'Deleted CSV export node. Bye!'); ",
+        
+        "finish":
+        [
+            "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.file + '\"');"
+        ],
+        
+        "view": 
+        [
+            "var c = context; ",
+            "out.html = '<h2>I (export node) worked hard</h2>'; ",
+            "out.html += '<a href=\"/export/'+c.node.project_dir + '/' + c.node.number + '_' + c.node.nodeid + '/' + c.node.params.file + '\">download result</a>'; "
+        ]
+    },
+    
+    "views": {
+
+        "params":"<label>file name</label><input name=\"file\"/>",
+        "settings": [
+            "<label>separator </label><input name=\"sep\" value=\",\"/>",
+            "<label>array separator </label><input name=\"arr_sep\" value=\"|\"/>"
+        ]
+    }
+}

@@ -1,0 +1,37 @@
+{
+    "nodeid": "process_fields_link_checker",
+    "type": "process",
+    "subtype": "fields",
+    "title": "URL checker",
+    "status": "usable",
+    "usage":"",
+    "description": "Check if URL exists and saves response codes (NOTE: currently source field must be an array)",
+    
+    "scripts": {
+        "hello": 
+        [ 
+			"out.say('news', 'You added a link checker node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+		],
+        "bye": "out.say('finish', 'Bye!'); ",
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; "
+		],
+		
+		"pre_run": "out.urls = context.doc[context.node.params.in_field];" ,
+		
+        "finish": 
+        [
+			"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
+		]
+    },
+    
+    "views": {
+        "settings":"no settings"
+    
+    }
+  
+}

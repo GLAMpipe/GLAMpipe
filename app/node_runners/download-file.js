@@ -43,7 +43,7 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 				fileExists(node, download, function(error, filePath) {
 					
 					if(error == null) {
-						downloadAndSave(node, download, next);
+						exports.downloadAndSave(node, download, next);
 					} else
 						next();
 				});			
@@ -101,7 +101,7 @@ function fileExists (node, download, cb) {
 
 
 
-function downloadAndSave (node, download, next) {
+exports.downloadAndSave = function (node, download, next) {
 	
 	checkUrl(download);
 	if(download.error)

@@ -1,0 +1,43 @@
+{
+	"nodeid": "lookup_internet_archive_metadata",
+	"title": "Internet Archive metadata",
+	"type": "lookup",
+	"subtype": "API",
+	"description": "Fetch metadata of individual items from Internet Archive.",
+
+	"scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created ' +context.node.title + ' node'); ",
+			"context.node.out_field = 'metadata'; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+        
+		"init": "out.say('progress', 'Starting to fetch metadata from Internet Archive...');",
+		
+		"pre_run":
+		[
+			"var base_url = 'https://archive.org/metadata/'; ",
+			"out.pre_value = base_url + context.doc['identifier']; "
+		],
+		
+		"run":
+        [
+			"if(context.response.statusCode == 200) {",
+            "    /* create details url (can be used in source field commons upload) */ ",
+			"    context.data.ia_details_url = 'https://archive.org/details/' + context.doc['identifier']; ",
+			"    out.value = context.data; ",
+			"} else ",
+			"    out.say('error', 'Request failed!'); "
+        ],
+			
+		"finish":"out.say('finish', 'Internet Archive metadata fetched'); "
+	},
+	
+	"views": {
+		"params":"no parameters",
+		"settings":"no settings"
+	}
+
+}

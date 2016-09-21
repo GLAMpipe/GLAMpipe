@@ -1,0 +1,56 @@
+{
+	"nodeid": "lookup_file_size",
+	"type": "lookup",
+	"subtype": "file",
+	"title": "Read file sizes",
+	"description": "Read file sizes.",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a file size node');"
+		],
+		
+        "bye": "out.say('news', 'Deleted node.  Bye!'); ",
+        
+		"init":"out.say('progress', 'Starting to read file sizes...'); out.field = context.node.params.out_field; ",
+		
+		"pre_run": 
+		[
+			"var d = context.doc; ",
+			"var s = context.node.params; ",
+			"var ext = ''; ",
+			"var fpath = ''; ",
+			
+			"if (s.ext != '') ",
+			"    ext = d[s.ext]; ",
+			
+			"if(s.dir != '' && s.file != '') ",
+			"    fpath = context.path.join(d[s.dir], d[s.file]); ",
+			"else if (s.dir != '') ",
+			"    fpath = d[s.dir]; ",
+			"else if (s.file != '') ",
+			"    fpath = d[s.file]; ",
+			
+			"out.pre_value = fpath + s.comma + ext; "
+		],
+		
+		"run":"out.value = context.filestats.size; ",
+		
+		"finish":"out.say('finish', 'file sizes read!');"
+	},
+	
+	"views": {
+		"settings":"no settings",
+		"params":
+		[
+			"<div>You can combine full file path with these inputs. If full path is available, then just select it as an input field and leave rest empty.</div>",
+			"<label>directory  </label><input name='dir' class='dynamic_field'/> ",
+			"<label>file name </label><input name='file' class='dynamic_field'/> ",
+			"<label>comma?</label><input name='comma' class='short_input'/> ",
+			"<label>extension</label><input name='ext' class='dynamic_field'/> ",
+			"<label>output</label><input name='out_field' value='file_size'/> "
+		]
+	}
+
+}

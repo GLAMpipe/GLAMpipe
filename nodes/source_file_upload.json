@@ -1,0 +1,45 @@
+{
+	"nodeid": "source_file_upload",
+	"type": "source",
+	"subtype": "file",
+	"title": "Upload csv",
+    "status": "usable",
+	"description": "import file csv or tsv file",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a file import');",
+			"context.node.title = context.node.params.file; "
+		],
+		
+        "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
+        
+		"init":"out.say('progress', context.node.title);",
+		
+		"run":
+		[
+			"if(context.node.settings.sample_to != '') {",
+			"    var from = parseInt(context.node.settings.sample_from); ",
+			"    var to = parseInt(context.node.settings.sample_to); ",
+			"    out.value = context.data.slice(from, to); ",
+			"} else {",
+			"    out.value = context.data;",
+			"} "
+		],
+		
+		"finish":"out.say('finish', '<h2>Data imported</h2> from file ' + context.node.params.file);"
+		
+	},
+	
+	"views": {
+		"params":"<label>Select your file (csv, tsv, xml or json) </label><input type=\"file\" name=\"file\" id=\"file\" required /> ",
+		"settings":
+		[
+			"<div class='help'>You can take just sample from records</div>",
+			"<label>get records from</label><input name='sample_from' value='0'/>",
+			"<label>to</label>leave empty for all<input name='sample_to'/>"
+		]
+	}
+
+}

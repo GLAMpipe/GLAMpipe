@@ -1,0 +1,56 @@
+{
+	"nodeid": "transform_field_regexp_search",
+	"title": "Regular expression search",
+	"type": "transform",
+	"subtype": "string manipulation",
+	"description": "Extract some piece from string by regular expression",
+	"scripts": {
+	
+		"hello":
+		[ 
+			"out.say('news', 'You added a REGEXP node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+		],
+		
+        "bye": "out.say('news', 'Deleted REGEXP node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting Extracting...');"
+		],
+		
+		"run": 
+		[
+			"var reg = new RegExp(context.node.settings.regexp); ",
+            "var val = context.doc[context.node.params.in_field]; ",
+            "var result = reg.exec(val); ",
+            "if(result) {",
+            "   out.console.log('length:', result.length); ",
+            "   out.console.log('data:', result[result.length-1]); ",
+			"   out.value = String(result[result.length-1]); ",
+            "}"
+		],
+		
+		"finish": "out.say('finish', 'REGEXP done!');"
+	},
+	
+	"views": {
+		"params":
+		[
+			"<label>Note title</label> <input name='title'/>",
+			"<label>in field:</label> <input class='dynamic_field' name='in_field'/>",
+			"<label>output field suffix:</label> <input name='suffix'/ value='_regexp'>"
+		],
+        "settings":
+        [
+			"<div class='help'>Using of regular expression requires some understanding of the concept. ",
+			"<br>Good place to practise is here:",
+			"<a target='_blank' href='https://regex101.com/'>https://regex101.com/</a> </div>", 
+            "<label>regular expression like '[^-]*' </label>",
+            "<input name='regexp'/>",
+            "<label>regular expression flags like 'gi' </label>",
+            "<input name='flags'/>"
+        ]
+	}
+}

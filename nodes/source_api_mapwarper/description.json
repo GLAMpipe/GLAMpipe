@@ -1,0 +1,70 @@
+{
+    "nodeid": "source_api_mapwarper",
+    "title": "Map Warper",
+    "type": "source",
+    "subtype": "API",
+    "status": "usable",
+    "description": "Fetch all maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', '<h2>Hello, You just added a warper node!</h2>'); ",
+			"var title = context.node.params.warper.replace('http://', ''); ",
+			"context.node.title = title; "
+        ],
+        
+        "bye": "out.say('news', 'Deleted mapwarper source node!  This does NOT remove data. Bye!'); ",
+        
+        "init": 
+        [
+            "out.url = context.node.params.warper + '/maps.json';",
+            "out.say ('news', context.node.params.warper + '/maps.json');",
+            "if(context.node.settings.sample_to != null) ",
+            "    context.node.sample_to = parseInt(context.node.settings.sample_to); "
+        ],
+        
+        "run":
+        [
+            "if(context.data.stat) {",
+            "   var current_page = parseInt(context.data.current_page, 10);",
+            "   var total_pages = parseInt(context.data.total_pages, 10);",
+            "   var next_page = current_page + 1;",
+            
+            "   if(context.data.stat != 'fail') {",
+            "       out.value = context.data.items; ",
+            "   }",
+            
+            "   out.say ('progress', 'working on page ' + current_page + '/' + total_pages);",
+            
+            "   if(current_page < total_pages) {",
+            "       out.url = context.node.params.warper + '/maps.json?page=' + next_page; ",
+            "   }",
+            "    /* stop if sample is set and current page is bigger than sample */",
+            "   if(context.node.sample_to) {",
+            "       if(current_page >= context.node.sample_to)",
+            "          out.url = ''; ",
+            "   }",
+            "}"
+        ],
+        "finish":"out.say('finish', 'Map data fetched from ' + context.node.params.warper); "
+    },
+    
+    "views": {
+        "params":[
+                    "<label>Choose warper</label>",
+                    "<select name=\"warper\">",
+                    "    <option value='http://warper.wmflabs.org/'>warper.wmflabs.org</option>",
+                    "    <option value='http://mapwarper.net/'>mapwarper.net</option>",
+                    "    <option value='http://maps.nypl.org/warper/'>maps.nypl.org/warper</option>",
+                    "</select>"
+                 ],
+		"settings":
+		[
+			"<div class='help'>If you do not want to fetch all records, then define page maximum page count below.</div>",
+			"<label>max page count</label>leave empty for all<input name='sample_to'/>"
+		],
+        "default_keys": ["title", "description"]    
+    }
+
+}
