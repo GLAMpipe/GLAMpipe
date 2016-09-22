@@ -1,5 +1,5 @@
 FROM node:argon
-RUN apt-get update && apt-get install -y vim
+RUN apt-get update && apt-get install -y vim 
 RUN mkdir -p /src/app
 
 # Install app dependencies

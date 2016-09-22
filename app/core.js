@@ -626,6 +626,18 @@ exports.runNode = function (req, res, io) {
 									});
 									
 								break;
+								
+								case "dspace_update":
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node,sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											asyncLoop.loop(node, sandbox, dspace.updateData);
+										}
+									});
+								break;
 							}
 						
 						break;
@@ -766,9 +778,13 @@ exports.runNode = function (req, res, io) {
 									var checker = require("../app/node_runners/link-checker.js");
 									asyncLoop.loop(node, sandbox, checker.checkLinks);
 								break;
+
+								case "detect_language":
+									var detect = require("../app/node_runners/field-detect-language.js");
+									asyncLoop.loop(node, sandbox, detect.language);
+								break;
 							
 								default:
-								
 									asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
 											run.runInContext(sandbox);
 											next();
@@ -781,21 +797,6 @@ exports.runNode = function (req, res, io) {
 
 				break;
 
-
-
-				case "detect":
-
-
-					switch (node.subtype) {
-						
-						case "language":
-						
-							var detect = require("../app/node_runners/field-detect-language.js");
-							asyncLoop.loop(node, sandbox, detect.language);
-							break;
-						}
-
-				break;
 
 				case "upload":
 					switch (node.subtype) {

@@ -65,17 +65,45 @@ var glamPipeNode = function (node, gp) {
 		
 		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 		$("data-workspace .settings").empty();
-		$("data-workspace .settings").append("<div class='box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		$("data-workspace .settings").append("<div class='params box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
 		$("data-workspace .settings").append(self.source.views.settings);
+		$("data-workspace .settings .params").append(self.source.params);
+		
+		// render parameters
+		var params_table = "<table><tbody>";
+		for(key in self.source.params) {
+			params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
+		}
+		params_table += "</tbody></table>";
+		$("data-workspace .settings .params").append(params_table);
 		
 		if(self.source.scripts.settings) {
 			var settingsScript = new Function('node', self.source.scripts.settings);
 			settingsScript(self.source);
 		}
 		
+		self.setSettingValues();
 		
 	}
 
+
+    this.setSettingValues = function () {
+		var data = self.source;
+        for(var prop in data.settings) {
+            if(typeof data.settings[prop] == "boolean") {
+                $("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+            } else {
+                if(data.settings[prop].constructor.name === "Array") {
+                    for(var i = 0; i < data.settings[prop].length; i++) {
+                        var n = i+1;
+                        $("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
+                    }
+                } else {
+                    $("input[name='"+prop+"']").val(data.settings[prop]);
+                }
+            }
+        }
+    }
 	
 
 

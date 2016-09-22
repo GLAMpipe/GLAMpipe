@@ -657,3 +657,17 @@ data-workspace  .settings {
 label {
 	display:block;
 }
+
+/* PARAMETERS TABLE */
+
+.params table {
+	margin-left:10px;
+}
+
+.params table thead {
+	font-weight:bold;
+}
+
+.params table td:nth-child(1) {
+font-weight:bold;
+}

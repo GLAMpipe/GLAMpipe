@@ -1,4 +1,6 @@
 
+// Node create an array of download objects {url:, filename:}
+
 // TODO: not very smart if input has multiple urls in array
 
 var c = context; 
@@ -8,7 +10,7 @@ out.urls = [];
 if(input.constructor.name == "Array") {
 	for (var i = 0; i < input.length; i++) {
 		var download = {};
-		download.filename = generateFileName(input, i);		
+		download.filename = generateFileName(input[i], input, i);		
 		download.url = context.base_url + input[i];
 		out.urls.push(download); 
 	}
@@ -21,41 +23,43 @@ if(input.constructor.name == "Array") {
 
 
 
-function generateFileName (input, index) {
+function generateFileName (url, input, index) {
 
 	var filename = "";
 
-	// do not create file names for empty input
-	if(input[i] == "")
+	// do not create file names for empty urls
+	if(url == "")
 		return "";
 
-	/* create file name */ 
-	if (c.node.params.filename_type == "url") {  
-		var split = input[i].split("/"); 
+	// use last part of URL as a filename 
+	if (c.node.settings.filename_type == "url") {  
+		var split = url.split("/"); 
 		filename = split[split.length-1]; 
 
-	} else if (c.node.params.filename_type == "record") {  
-		filename = c.get(c.doc, c.node.params.filename__record); 
+	// use document field as a filename
+	} else if (c.node.settings.filename_type == "record") {  
+		filename = c.get(c.doc, c.node.settings.filename__record); 
 
+	// construct filaname from multiple fields
 	// TODO: maybe one could use language codes here, like title in english
-	} else if (c.node.params.filename_type == "own") {  
-		filename = c.node.params.file__1; 
-		filename += c.get(c.doc, c.node.params.file__2); 
-		filename += c.node.params.file__3; 
-		filename += c.get(c.doc, c.node.params.file__4); 
-		filename += c.node.params.file__5; 
-		filename += c.get(c.doc, c.node.params.file__6); 
-		if(c.node.params.counter == "yes") 
+	} else if (c.node.settings.filename_type == "own") {  
+		filename = c.node.settings.file__1; 
+		filename += c.get(c.doc, c.node.settings.file__2); 
+		filename += c.node.settings.file__3; 
+		filename += c.get(c.doc, c.node.settings.file__4); 
+		filename += c.node.settings.file__5; 
+		filename += c.get(c.doc, c.node.settings.file__6); 
+		if(c.node.settings.counter == "yes") 
 		   filename += c.count; 
 	}
 
 	// if input is array with more than one items, then we must add index to filename
-	if(input && input.length > 1)
+	if(index)
 		filename += "_" + index;
 
 	/* static file extension */ 
-	if (c.node.params.file__ext != "") {
-		var ext = c.node.params.file__ext.replace(".", ""); 
+	if (c.node.settings.file__ext.trim() != "") {
+		var ext = c.node.settings.file__ext.replace(".", ""); 
 		filename += "." + ext; 
 	}
 
