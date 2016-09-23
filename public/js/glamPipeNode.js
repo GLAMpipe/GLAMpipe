@@ -30,10 +30,68 @@ var glamPipeNode = function (node, gp) {
 		});
 	}
 
+	
+	
+	this.runFinished = function () {
+		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
+        $(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+        $(".settings").hide();
+        
+        var input = self.getInputFields();
+        var output = self.getOutputFields();
+        
+        self.open({input_keys:input, output_keys:output});
+	}
 
+	// getter for input/output fields of the node (used as config for data rendering)
+	this.getConfig = function () {
+		if(self.source.type != "collection" && self.source.type != "source") {
+			var input = self.getInputFields();
+			var output = self.getOutputFields();
+			return {input_keys:input, output_keys:output};
+		} else
+			return null;
+	}
+	
+
+	this.getOutputFields = function () {
+		
+		if(self.source.out_field)
+			return [self.source.out_field];
+			
+		if(self.source.params.out_field)
+			return [self.source.params.out_field];
+			
+		if(self.source.params.suffix)
+			if(self.source.params.in_field)
+				return [self.source.params.in_field + self.source.params.suffix];
+				
+		return [];
+				
+	}
+
+
+	this.getInputFields = function () {
+		
+		// field1, field2, etc. are input key names
+		// other fields hold string constants
+		
+		var keys = [];
+		// inputs can be in params or settings
+		for(var key in self.source.params) {
+			if(/^field]/.test(key))
+				keys.push(self.source.params[key]);
+		}
+		for(var key in self.source.settings) {
+			//if(/^field]/.test(key))
+			if(self.source.settings[key] != "")
+				keys.push(self.source.settings[key]);
+		}
+		return keys;
+	}
 
 	// render data with node spesific settings and display node settings
-	this.open = function () {
+	this.open = function (config) {
 		if(self.source.type == "collection") {
 			$("data-workspace .settingscontainer").hide();
 			self.display.render();

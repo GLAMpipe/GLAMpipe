@@ -671,3 +671,7 @@ label {
 .params table td:nth-child(1) {
 font-weight:bold;
 }
+
+.output {
+	background-color:yellow
+}

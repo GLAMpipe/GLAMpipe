@@ -171,8 +171,7 @@ $( document ).ready(function() {
         progressDisplay.removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();
-        $(".settings").hide();
-        gp.openCurrentNode();
+        gp.nodeRunFinished(data); 
 
     });
 

@@ -11,7 +11,7 @@ var metadata = [];
 
 function getLanguageValue (language, index) {
 	// if index is given (i.e. input is array), we try to get correspondent index from language
-	if(index && language && language.constructor.name === "Array") {
+	if(typeof index !== "undefined" && language && language.constructor.name == "Array") {
 		if(language[index])
 			return language[index];
 		else 
@@ -26,6 +26,7 @@ function getLanguageValue (language, index) {
 	} 
 }
 
+// replace "_" with "." if checkbox is checked
 if(context.node.params.convert)
 	original_field = original_field.replace(/_/g, ".");
 
@@ -33,14 +34,12 @@ if(context.node.params.convert)
 if(update_value && update_value.constructor.name == "Array") {
 	
 	for (var i = 0; i < update_value.length; i++) {
-		
 		var lang = getLanguageValue(language_value, i);
 		var meta = {"key": original_field, "value":update_value[i], "language": lang};
 		metadata.push(meta);		
 	}
 	
 } else {
-	
 	var lang = getLanguageValue(language_value);
 	var meta = {"key": original_field, "value":update_value, "language": lang};
 	metadata.push(meta);

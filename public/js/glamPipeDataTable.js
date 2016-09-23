@@ -49,18 +49,25 @@ var dataTable = function (node) {
 	// asks data from node and then renders table
 	this.render = function () {
 	
-		self.node.loadCollectionKeys(function() { 
-			self.keys.all_keys = self.node.data.keys;
-			
+		if(self.node.getConfig()) {
 			self.node.loadCollectionData(self.params, function() {
 				self.renderTablePage();
 				self.renderControls();
 				self.renderCollectionCount();
 				self.setEventListeners();
-			});	
-		});
-		
-
+			});		
+		} else {
+			self.node.loadCollectionKeys(function() { 
+				self.keys.all_keys = self.node.data.keys;
+				
+				self.node.loadCollectionData(self.params, function() {
+					self.renderTablePage();
+					self.renderControls();
+					self.renderCollectionCount();
+					self.setEventListeners();
+				});	
+			});
+		}
 	}
 
 
@@ -139,8 +146,16 @@ var dataTable = function (node) {
 	}
 
 
-	this.getVisibleFields = function () {
+	this.getVisibleFields = function (config) {
 
+		// if node has input/output field, then use them as visible fields
+		if(config) {
+			console.log("has config");
+			var keys = config.input_keys;
+			return keys.concat(config.output_keys);
+		}
+
+		// otherwise let the user decide what to see
 		if(self.keys.visible_keys == null) {
 			// if there are no visible keys, then try default keys
 			if(self.node.source.views.default_keys) {
@@ -167,7 +182,8 @@ var dataTable = function (node) {
 	// displays data in table format
 	this.renderTablePage = function () {
 
-		var visible_keys = self.getVisibleFields();
+		var config = self.node.getConfig();
+		var visible_keys = self.getVisibleFields(config);
 		var html = "<table id='data' class='documents'><thead><tr>";
 		
 		// RENDER KEYS
@@ -201,8 +217,11 @@ var dataTable = function (node) {
 		if(self.node.data.docs.length == 0)
 			return "<h2>This collection is empty</h2><p>Add source node to get something to look at :)</p>";
 
-		var visible_keys = self.getVisibleFields();
+		var config = self.node.getConfig();
+		var visible_keys = self.getVisibleFields(config);
 		console.log(visible_keys)
+
+		// we render output fields with class "output"
 
 		var html = "";
 		
@@ -212,8 +231,17 @@ var dataTable = function (node) {
 			for(var k = 0; k < visible_keys.length; k++) {
 				if(visible_keys[k] == "row") // "row" is not an actual key, just an internal row counter
 					html += "<td>" + self.getRowIndex(j) + "</td>";
-				else
-					html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]]) + "</td>";
+				else {
+					if(config) { 
+						if(config.output_keys.indexOf(visible_keys[k]) !== -1) {
+							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "output") + "</td>";
+						} else {
+							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "") + "</td>";
+						}
+					} else {
+						html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "") + "</td>";
+					}
+				}
 			}
 			html += "</tr>";
 			
@@ -223,14 +251,14 @@ var dataTable = function (node) {
 
 
 
-	this.renderCell = function (data, index) {
+	this.renderCell = function (data, index, className) {
 		
 		var html = "";
 		
 		if(data) {
 			if (Array.isArray(data)) {
 				for(var i = 0; i < data.length; i++) {
-					html += self.renderCell(data[i], i);
+					html += self.renderCell(data[i], i, className);
 					if(i > self.maxArrayLenghtDisplay) {
 						var left = i - self.maxArrayLenghtDisplay;
 						html += "<div class='more'>" + left + " more ...</div>"
@@ -239,10 +267,10 @@ var dataTable = function (node) {
 						
 				}
 			} else if (typeof data == "string" || typeof data == "number") {
-				if(typeof index !== "undefined")
-					html += "<div>["+index+"] " + data + "</div>";
+				if(index)
+					html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
 				else
-					html += "<div>" + data + "</div>";
+					html += "<div class='"+className+"'>" + data + "</div>";
 			} else {
 				html += "<div>object</div>";
 			}

@@ -172,6 +172,12 @@ var glamPipe = function () {
 			alert("node id not found");
 	}
 
+	// called by "finished" websocket message
+	this.nodeRunFinished = function (data) {
+		var node = self.getRegularNode(data.nodeid);
+		node.runFinished();
+		// self.openCurrentNode(); // we should open finished node
+	}
 
 	this.getNode = function (clickEvent) {
 		var nodeid = $(clickEvent.target).data("id");
@@ -192,6 +198,13 @@ var glamPipe = function () {
 			
 		}		
 		return null;
+	}
+
+	this.getRegularNode = function (nodeid) {
+		for (var i = 0; i < self.nodes.length; i++) {
+			if(self.nodes[i].source._id == nodeid)
+				return self.nodes[i];
+		}
 	}
 
 	this.showNodeList = function (e) {
