@@ -267,7 +267,7 @@ var dataTable = function (node) {
 						
 				}
 			} else if (typeof data == "string" || typeof data == "number") {
-				if(index)
+				if(index != null)
 					html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
 				else
 					html += "<div class='"+className+"'>" + data + "</div>";

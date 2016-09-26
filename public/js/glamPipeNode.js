@@ -20,10 +20,10 @@ var glamPipeNode = function (node, gp) {
 	// execute node 
 	this.run = function () {
 		
-		self.settings = self.getSettings(node);
-		console.log("RUNNING node with params: ", self.settings);
+		self.source.settings = self.getSettings(node);
+		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post("/run/node/" + self.source._id, self.settings, function(data) {
+		$.post("/run/node/" + self.source._id, self.source.settings, function(data) {
 			console.log(data);
 			if(data.error)
 				alert(data.error);
@@ -75,16 +75,22 @@ var glamPipeNode = function (node, gp) {
 		
 		// field1, field2, etc. are input key names
 		// other fields hold string constants
-		
+
+		// one input field
+		if(self.source.in_field)
+			return [self.source.in_field];
+			
+		if(self.source.params.in_field)
+			return [self.source.params.in_field];
+
 		var keys = [];
 		// inputs can be in params or settings
 		for(var key in self.source.params) {
-			if(/^field]/.test(key))
+			if(/^field/.test(key))
 				keys.push(self.source.params[key]);
 		}
 		for(var key in self.source.settings) {
-			//if(/^field]/.test(key))
-			if(self.source.settings[key] != "")
+			if(/^field/.test(key))
 				keys.push(self.source.settings[key]);
 		}
 		return keys;
@@ -150,6 +156,7 @@ var glamPipeNode = function (node, gp) {
         for(var prop in data.settings) {
             if(typeof data.settings[prop] == "boolean") {
                 $("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+                $("input[name='"+prop+"']").change();
             } else {
                 if(data.settings[prop].constructor.name === "Array") {
                     for(var i = 0; i < data.settings[prop].length; i++) {
@@ -158,6 +165,8 @@ var glamPipeNode = function (node, gp) {
                     }
                 } else {
                     $("input[name='"+prop+"']").val(data.settings[prop]);
+                    $("select[name='"+prop+"']").val(data.settings[prop]);
+                    $("select[name='"+prop+"']").change();
                 }
             }
         }

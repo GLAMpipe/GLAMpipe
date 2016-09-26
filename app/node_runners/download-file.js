@@ -52,7 +52,11 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 		}, function done() {
 			sandbox.run.runInContext(sandbox);
 			var setter = {};
-			setter[node.out_field] = sandbox.out.value;
+			if(sandbox.out.setter)
+				setter = sandbox.out.setter;
+			else
+				setter[node.out_field] = sandbox.out.value;
+				
 			mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, cb);			
 		})
 		

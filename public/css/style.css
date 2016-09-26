@@ -673,5 +673,5 @@ font-weight:bold;
 }
 
 .output {
-	background-color:yellow
+	border-left: 5px solid #94c080;
 }

@@ -10,7 +10,8 @@ out.urls = [];
 if(input.constructor.name == "Array") {
 	for (var i = 0; i < input.length; i++) {
 		var download = {};
-		download.filename = generateFileName(input[i], input, i);		
+		download.filename = generateFileName(input[i], input, i);	
+		out.console.log(download.filename);	
 		download.url = context.base_url + input[i];
 		out.urls.push(download); 
 	}
@@ -39,6 +40,8 @@ function generateFileName (url, input, index) {
 	// use document field as a filename
 	} else if (c.node.settings.filename_type == "record") {  
 		filename = c.get(c.doc, c.node.settings.filename__record); 
+		out.console.log(filename)
+		out.console.log(c.node.settings.filename__record)
 
 	// construct filaname from multiple fields
 	// TODO: maybe one could use language codes here, like title in english
@@ -69,13 +72,13 @@ function generateFileName (url, input, index) {
 	}
 
 	/* fallback */ 
-	if (filename == "") 
-		filename = c.count; 
+	if (filename == "" || filename == null || typeof filename !== "string") 
+		filename = c.count.toString(); 
 	
 
 
 	/* remove characters that might confuse OS */ 
-	return filename.replace(/[\/]\,\./g, "_"); 
+	return filename.replace(/[\/]\,\./g, "_").trim(); 
 	 
 		
 }

@@ -2,8 +2,8 @@
     "nodeid": "process_file_pdf_extract_references",
     "type": "process",
     "subtype": "files",
-    "subsubtype": "pdf",
-    "title": "References",
+    "subsubtype": "extract_references",
+    "title": "PDF References",
     "status": "usable",
     "usage":"",
     "description": "Extracts references from academic article",
@@ -19,7 +19,7 @@
 			"out.add_display_key('extracted_references_pdf', 'array'); "
 		],
 		
-		"pre_run": "out.value = context.doc[context.node.params.in_field];" ,
+		"pre_run": "out.value = context.doc[context.node.params.in_field][0];" ,
 		
         "finish":"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
     },

@@ -316,11 +316,16 @@ exports.getNodeFromFile = function (node_id, res) {
 	});
 }
 
-function getProp(obj, desc, index) { 
+// try to give some sensible value
+function getProp(doc, keyname, index) { 
+	
+	var obj = doc[keyname];
+	if(obj == null)
+		return "";
 	
 	// if array, then give value by optional index
-	if (obj.constructor.name == "Array") {
-		if(index) {
+	if (obj.constructor.name === "Array") {
+		if(index != null) {
 			if(obj[index])
 				return obj[index];
 			else
@@ -330,10 +335,10 @@ function getProp(obj, desc, index) {
 			return obj[0];
 		}
 		
-	// this object, find dotted value (like dc.type.uri)	
+	// this is object, find dotted value (like dc.type.uri)	
 	} else {
 	
-		var arr = desc.split('.'); 
+		var arr = keyname.split('.'); 
 		while(arr.length && (obj = obj[arr.shift()])); 
 		if(typeof obj === 'undefined') return ''; 
 		return obj; 
@@ -763,7 +768,7 @@ exports.runNode = function (req, res, io) {
 						
 							switch (node.subsubtype) {
 								
-								case "pdf":
+								case "extract_references":
 									var extractReferences = require("../app/node_runners/file_pdf.js");
 									asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
 								break;
