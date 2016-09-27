@@ -8,12 +8,14 @@ var dataTable = function (node) {
 	this.hiddenKeys = ["__mp_source", "_id"];
 	this.maxArrayLenghtDisplay = 2;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
+	this.maxInputLength = 30; // limit whether input rendered as input or textarea on cell edit
 	
 	this.dataDisplayDiv 	= "data-workspace data data-display";
 	this.dataControlsDiv 	= "data-workspace data data-controls";
 	this.keySelectorDiv 	= "#field-selector";
 
 	this.editMode = false;
+	this.expandCells = false;
 
 	this.params = {
 		skip:function() {return "?skip="+this.skip_value;}, 
@@ -255,27 +257,24 @@ var dataTable = function (node) {
 		
 		var html = "";
 		
-		if(data) {
-			if (Array.isArray(data)) {
-				for(var i = 0; i < data.length; i++) {
-					html += self.renderCell(data[i], i, className);
-					if(i > self.maxArrayLenghtDisplay) {
-						var left = i - self.maxArrayLenghtDisplay;
-						html += "<div class='more'>" + left + " more ...</div>"
-						break;
-					}
-						
+		if (Array.isArray(data)) {
+			for(var i = 0; i < data.length; i++) {
+				html += self.renderCell(data[i], i, className);
+				
+				if(!self.expandCells && i > self.maxArrayLenghtDisplay) {
+					var left = data.length - i -1;
+					html += "<div class='more'>" + left + " more ...</div>"
+					break;
 				}
-			} else if (typeof data == "string" || typeof data == "number") {
-				if(index != null)
-					html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
-				else
-					html += "<div class='"+className+"'>" + data + "</div>";
-			} else {
-				html += "<div>object</div>";
+					
 			}
+		} else if (typeof data == "string" || typeof data == "number" || data === null) {
+			if(index != null)
+				html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
+			else
+				html += "<div class='"+className+"'>" + data + "</div>";
 		} else {
-			html += "<div></div>";
+			html += "<div>object</div>";
 		}
 		return html;
 	}
@@ -296,13 +295,15 @@ var dataTable = function (node) {
 		var html = "";
 		if(Array.isArray(value)) {
 			for(var i = 0; i < value.length; i++) {
-				html += "<input value='"+value[i]+"'></input>";
+				html += self.renderTextInput(key+"[]", value[i]);
 			}
 		} else {
-			html = self.nl2br(doc[key]);
+			html += self.renderTextInput(key, value);
 		}
 		
-		console.log('Row: ' + row + ', Column: ' + col + ',key:' + key);
+		html += "<button data-doc_id='"+doc._id+"' class='save'>save</button>";
+		
+		console.log('Editing row: ' + row + ', column: ' + col + ',key:' + key);
 		$("#cell-display").empty().append(html);
 		$("#cell-display").dialog({
 			position: { 
@@ -312,6 +313,54 @@ var dataTable = function (node) {
 			},
 			title: "cell data"
 		});
+	}
+
+
+
+	this.renderTextInput = function (key, value) {
+		var html = "";
+		if(value.length > self.maxInputLength) {
+			html = "<textarea name='"+  key +"'>"+self.nl2br(value)+"</textarea>";
+		} else {
+			html += "<input name='"+ key +"'value='"+ value +"'></input>";
+		}
+		return html;
+	}
+
+
+
+	this.saveCellEdit = function (event) {
+		var doc_id = $(event.target).data("doc_id");
+		console.log("start listing values");
+		var data = {field:""};
+		
+		// get field name
+		var name = $("#cell-display input, #cell-display textarea").first().attr("name");
+		// if input name has form "set[something1]", then we want to gather all of them to array
+		var nameSplitted = name.split("[");
+		if(nameSplitted.length > 1) 
+				data.value = [];
+		
+		$("#cell-display input, #cell-display textarea").each(function(i) {
+            
+            // if input name has form "set[something1]", then we want to gather all of them to array
+            if(nameSplitted.length > 1) {
+                data.value.push($(this).val());
+            } else {
+                data.value = $(this).val();
+            }
+		})
+		data.field = nameSplitted[0];
+		data.doc_id = doc_id;
+		console.log(data);
+		if(data.field == "_id")
+			alert("Can not edit the internal ID of the document!")
+		else
+			self.node.gp.updateDocument(data, function () {
+				$("#cell-display").dialog("close");
+				self.render();
+			});
+		
 	}
 
 
@@ -392,6 +441,7 @@ var dataTable = function (node) {
 	this.setEventListeners = function () {
 		// unset dynamic bindings for workspace
 		$( "data-workspace" ).unbind();
+		$( "#cell-display" ).unbind();
 		
 		
 		// ****************************** CONTROLS *************************
@@ -445,13 +495,18 @@ var dataTable = function (node) {
 		// shrink all cells
 		$("data-workspace").on('click','.wikiglyph-eye', function(e) {
 			self.expandTable(false);
+			self.expandCells = false;
+			self.renderTablePage();
 			$(e.target).removeClass("wikiglyph-eye");
 			$(e.target).addClass("wikiglyph-eye-lid");
 		})
 
 		// expand all cells
 		$("data-workspace").on('click','.wikiglyph-eye-lid', function(e) {
+			console.log("eye-lid clicked");
 			self.expandTable(true);
+			self.expandCells = true;
+			self.renderTablePage();
 			$(e.target).removeClass("wikiglyph-eye-lid");
 			$(e.target).addClass("wikiglyph-eye");
 		})
@@ -469,10 +524,14 @@ var dataTable = function (node) {
 
 		// ****************************** DATA display *************************
 
-		// show cell content
+		// edit cell content
 		$("data-workspace").on('click','table tbody td div.edit', function(e) {
 			self.editCell(e);
 		})
+		
+		$("#cell-display").on("click", ".save", function(e) {
+			self.saveCellEdit(e);
+		});
 		
 	
 		

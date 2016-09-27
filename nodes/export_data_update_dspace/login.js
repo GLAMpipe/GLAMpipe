@@ -11,5 +11,5 @@ var config = {
 }; 
 
 out.config = config;	
-out.say("progress", "Trying to login to Dspace..."); 
+out.say("progress", "Trying to login to DSpace..."); 
  

@@ -402,6 +402,14 @@ var glamPipe = function () {
 	}
 
 
+	this.updateDocument = function (data, cb) {
+		$.post( "/edit/collection/" + self.currentCollection.source.collection, data, function( response ) {
+			
+			console.log(response);
+			cb();
+		})
+	}
+
 	this.openDynamicFieldSelector = function (event) {
 		var obj = $(event.target);
 		self.currentInput = obj;   // put input to global variable so that we can update it later

@@ -1,6 +1,6 @@
 {
-    "nodeid": "export_data_dspace",
-    "title": "DSpace upload",
+    "nodeid": "export_data_dspace_upload",
+    "title": "DSpace add items",
     "type": "export",
     "subtype": "API",
     "subsubtype": "dspace_upload",

@@ -619,9 +619,9 @@ exports.runNode = function (req, res, io) {
 						
 							switch (node.subsubtype) {
 								
-								case "dspace":
+								case "dspace_upload":
 									var dspace = require("../app/node_runners/dspace.js");
-									dspace.login(node,sandbox, io, function(error) {
+									dspace.login(node, sandbox, io, function(error) {
 										if(error)
 											console.log("ERROR: login failed");
 										else {
@@ -634,7 +634,7 @@ exports.runNode = function (req, res, io) {
 								
 								case "dspace_update":
 									var dspace = require("../app/node_runners/dspace.js");
-									dspace.login(node,sandbox, io, function(error) {
+									dspace.login(node, sandbox, io, function(error) {
 										if(error)
 											console.log("ERROR: login failed");
 										else {
