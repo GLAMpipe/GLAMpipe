@@ -16,7 +16,11 @@ function splitValue (val) {
 
 function pushField (item, value, key_mapped, key_plain, language) {
 
-	if(value.trim() != "") { 
+	if(typeof value === "string")
+		value = value.trim();
+
+	// do not add key if there is no mapped key
+	if(key_mapped.trim() != "" && value !== null && value !== "") { 
 		// if array separator is set, then split values
 		if(context.node.settings.array_separator != "") {
 			

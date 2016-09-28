@@ -905,6 +905,8 @@ function getPrevNode(project, node) {
 
 exports.uploadFile = function (req, res ) {
 	
+	console.log("req.file:", req.file);
+	
 	switch (req.file.mimetype) {
 		case "text/xml":
 			console.log("File type: XML");
@@ -941,10 +943,23 @@ exports.uploadFile = function (req, res ) {
 				description: req.body.description
 			})
 		break;
+
+		case "text/plain":
+			console.log("File type: plain text");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
 		
 		default:
 			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified!"});
+			return res.json({"error":"File type unidentified! " + req.file.mimetype});
 	}
 }
 
@@ -1387,7 +1402,7 @@ exports.getCollectionTableData = function (req, query, res) {
 exports.getCollectionByField = function (req, res) {
 
 	var query = {};
-	query[req.query.field] = req.query.value;
+	query[req.query.field] = {$regex:req.query.value, $options: 'i'};
 	
 	exports.getCollection (req, query, res);
 }

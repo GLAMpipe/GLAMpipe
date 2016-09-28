@@ -257,6 +257,7 @@ var dataTable = function (node) {
 		
 		var html = "";
 		
+		// render arrays recursively
 		if (Array.isArray(data)) {
 			for(var i = 0; i < data.length; i++) {
 				html += self.renderCell(data[i], i, className);
@@ -268,30 +269,134 @@ var dataTable = function (node) {
 				}
 					
 			}
+		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			if(index != null)
 				html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
 			else
 				html += "<div class='"+className+"'>" + data + "</div>";
+		// render objects
 		} else {
-			html += "<div>object</div>";
+			if(index != null)
+				html += "<div data-index="+index+" class='object-cell'>["+index+"] object</div>";
+			else
+				html += "<div class='object-cell'>object</div>";
 		}
 		return html;
 	}
 
 	
+	this.getDocByTableClick = function (event) {
+		var obj = $(event.target);
+		var row = obj.parent().parent().parent().children().index(obj.parent().parent());
+		return self.node.data.docs[row]; // row gives document from *current* data set		
+	}
 
-	this.editCell = function(event) {
+	this.getKeyByTableClick = function (event) {
 		var obj = $(event.target);
 		var col = obj.parent().parent().children().index(obj.parent());
 		var colNameIndex = col + 1;
-		var row = obj.parent().parent().parent().children().index(obj.parent().parent());
-		var doc = self.node.data.docs[row];
-		
 		var table = obj.parents("table");
-		var key = table.find("thead tr td:nth-child(" + colNameIndex + ")").text().trim();
+		return table.find("thead tr td:nth-child(" + colNameIndex + ")").text().trim();
+	}
+
+	this.renderObject = function (event) {
+
+		var obj = $(event.target);
+		var index = obj.data("index");
 		
+		var doc = self.getDocByTableClick(event);
+		var key = self.getKeyByTableClick(event);
 		var value = doc[key];
+		if(value && Array.isArray(value) && index !== null)
+			value = value[index];
+		
+		var html = self.object2Html(value);
+		$("#cell-display").empty().append(html);
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			width:400,
+			maxHeight: 400,
+			title: "cell data"
+		});
+
+	}
+
+	this.object2Html = function (value, key) {
+		var html = "";
+
+		// arrays
+		if(Array.isArray(value)) {
+			if(key)
+				html += "<li><span class='bold'>" + key + "</span>:<ul>";
+			else
+				html += "<li><ul>";
+			for(var i=0; i < value.length; i++) {
+				html += "<li>[" + i + "]";
+				html += self.object2Html(value[i], key);
+				html += "</li>";
+			}
+			html += "</ul></li>"
+		
+		// primitive values	
+		} else if(value === null || typeof value === "string" || typeof value === "number") {
+			if(key)
+				html += "<li><span class='bold'>" + key + "</span>: " + value + "</li>";
+			else
+				html += "<li>" + value + "</li>";
+				
+		//objects
+		} else if(typeof value === "object") {
+			html += "<ul>";
+			for(key in value) {
+				html += self.object2Html(value[key], key);
+			}
+			html += "</ul>";	
+		}
+
+
+		return html;
+	}
+
+	this.openSearchDialog = function () {
+
+		html = "<select name='search_key'>";
+		for(var i = 0; i < self.node.data.keys.sorted.length; i++) {
+			html += "<option>" + self.node.data.keys.sorted[i] + "</option>";
+		}
+		html += "</select>";
+		html += " includes <input id='data-search-field' name='search_term'/>";
+		
+		html += "<div>You can use regular expressions.</div>";
+		html += "<button>search</button>";
+		
+		
+		var obj = $("#data-search");
+		$("#cell-display").empty().append(html);
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			width:400,
+			maxHeight: 400,
+			title: "search"
+		});
+		
+	}
+
+	this.editCell = function(event) {
+		
+		var obj = $(event.target);
+		var doc = self.getDocByTableClick(event);
+		var key = self.getKeyByTableClick(event);
+		var value = doc[key];
+		
 		var html = "";
 		if(Array.isArray(value)) {
 			for(var i = 0; i < value.length; i++) {
@@ -303,7 +408,7 @@ var dataTable = function (node) {
 		
 		html += "<button data-doc_id='"+doc._id+"' class='save'>save</button>";
 		
-		console.log('Editing row: ' + row + ', column: ' + col + ',key:' + key);
+		//console.log('Editing row: ' + row + ', column: ' + col + ',key:' + key);
 		$("#cell-display").empty().append(html);
 		$("#cell-display").dialog({
 			position: { 
@@ -516,6 +621,17 @@ var dataTable = function (node) {
 			self.expandCell(e);
 		})
 
+		// open search
+		$("data-workspace").on('click','.wikiglyph-magnifying-glass', function(e) {
+			console.log("search clicked");
+			self.openSearchDialog();
+		})
+
+		// make search
+		$("data-workspace").on('keyup','#data-search-field', function(e) {
+			console.log($(this).val());
+		})	
+
 		// sort per column
 		$("data-workspace").on('click','table thead td', function(e) {
 			self.sortTableColumn($(e.target).text());
@@ -533,7 +649,9 @@ var dataTable = function (node) {
 			self.saveCellEdit(e);
 		});
 		
-	
+		$("data-workspace").on("click", ".object-cell", function(e) {
+			self.renderObject(e);
+		});
 		
 	}
 

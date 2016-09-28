@@ -675,3 +675,18 @@ font-weight:bold;
 .output {
 	border-left: 5px solid #94c080;
 }
+
+.object-cell {
+	background-color:#E7EAEA;
+	padding:2px;
+	margin: 2px;
+}
+
+.object-cell:hover {
+	background-color:#94c080;
+	cursor:pointer;
+}
+
+.bold {
+	font-weight:bold;
+}

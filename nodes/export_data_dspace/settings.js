@@ -21,7 +21,7 @@ $("#export_data_dspace_url_pre").change(function(e){
            var table = $('<table><th>current name</th><th>new name</th></table>');
            for(var f in rec){
 			   if(ignoreFields.indexOf(f) == -1 && f.indexOf("__lang") == -1) {
-					var field=$('<tr><td><div>' +f+ '</div></td><td><input name="_mapkey_'+f+'"/></td></tr>');
+					var field=$('<tr><td><div>' +f+ '</div></td><td><input class="node-settings" name="_mapkey_'+f+'"/></td></tr>');
 					table.append(field);
 				}
            }

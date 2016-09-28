@@ -191,7 +191,7 @@ var glamPipeNode = function (node, gp) {
 	this.getSettings = function (node) {
 		
         var settings = {};
-        // read input from settings (only inputs with class "params")
+        // read input from settings (only inputs with class "node-settings")
         $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
