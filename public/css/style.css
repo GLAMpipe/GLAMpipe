@@ -542,8 +542,10 @@ table.documents td {
 
 table.documents tbody td div {
 	max-height:3em;
+	max-width:350px;
 	overflow: hidden;
 	margin-left: 2em;
+	overflow-wrap: break-word;
 }
 
 table.documents tbody td div.edit {
@@ -608,6 +610,7 @@ input.middle_input {
 .wikiglyph-cross:hover {
 	color:red;
 	font-weight:bold;
+	cursor:pointer;
 }
 
 .progress {
@@ -690,3 +693,21 @@ font-weight:bold;
 .bold {
 	font-weight:bold;
 }
+
+.italic {
+	font-style:italic;
+}
+
+#filters > div > div {
+	display:inline;
+}
+
+#filters > div {
+	border: 1px solid orange;
+	padding:2px;
+}
+
+#filters .wikiglyph-cross {
+	margin-left: 1em;
+}
+

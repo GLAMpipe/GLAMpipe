@@ -1369,7 +1369,11 @@ exports.getCollection = function (req, query, res) {
  * Get paged collection data for DataTable
  * - gives records between skip and skip + limit
  */
-exports.getCollectionTableData = function (req, query, res) {
+exports.getCollectionTableData = function (req, res) {
+
+	// create search query
+	var query = createSearchQuery(req);
+	
 
 	var limit = parseInt(req.query.limit);
 	if (limit < 0 || isNaN(limit))
@@ -1397,6 +1401,27 @@ exports.getCollectionTableData = function (req, query, res) {
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json({data:data}) });
+}
+
+function createSearchQuery (req) {
+	
+	var query = {};
+	if(req.query.query_fields) {
+		// create an AND query if there are several query fields
+		if(req.query.query_fields.length > 0) {
+			var ands = [];
+			for(var i = 0; i < req.query.query_fields.length; i++) {
+				var search = {};
+				search[req.query.query_fields[i]] = {$regex:req.query.query_values[i], $options: 'i'};
+				ands.push(search);
+			}
+			query.$and = ands;
+		// otherwise create query for one field
+		} else {
+			query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+		}
+	}
+	return query;
 }
 
 exports.getCollectionByField = function (req, res) {

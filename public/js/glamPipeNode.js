@@ -216,7 +216,7 @@ var glamPipeNode = function (node, gp) {
 
 	this.loadCollectionData = function (params, cb) {
 		
-		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func(), function (docs) {
+		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func() + params.search(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
 		});

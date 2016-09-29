@@ -16,6 +16,7 @@ var dataTable = function (node) {
 
 	this.editMode = false;
 	this.expandCells = false;
+	this.currentField = null; // column clicked by user
 
 	this.params = {
 		skip:function() {return "?skip="+this.skip_value;}, 
@@ -43,6 +44,15 @@ var dataTable = function (node) {
 				return "&fields=" + this.fields;
 			else
 				return "";
+		},
+		search_value:{keys:[], values:[]},
+		search: function () {
+			var str = "";
+			for(var i = 0; i < this.search_value.keys.length; i++) {
+				str += "&query_fields[]=" + this.search_value.keys[i];  
+				str += "&query_values[]=" + this.search_value.values[i];  
+			}
+			return str;
 		},
 		reverse: 0
 	};
@@ -72,7 +82,7 @@ var dataTable = function (node) {
 		}
 	}
 
-
+	
 
 	this.expandTable = function (yes) {
 		if(yes)
@@ -131,12 +141,24 @@ var dataTable = function (node) {
 
 
 	this.renderControls = function () {
-		var html = "<div class='boxright' style='float:right'> ";
+		
+		// filters
+		var html = "  <div class='boxright' style='float:right'> ";
+		html += "      <div id='filters'>";
+		html += self.renderFilters();
+		html += "      </div>";
+		html += "  </div>";
+		html += "  <div style='clear:both'></div>";
+		
+		// edit, search, visible fields buttons 
+		html += "<div class='boxright' style='float:right'> ";
 		html += "    <div id='data-expand' class='wikiglyph wikiglyph-edit icon' aria-hidden='true' title='edit'></div>";
 		html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
 		html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true' title='search (not implemented)'></div>";
 		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true' title='visible fields'></div>";
 		html += "  </div>";
+		
+		// paging controls
 		html += "  <div class='boxright'> ";
 		html += "    <div id='data-prev' class='wikiglyph wikiglyph-caret-left icon' aria-hidden='true'></div>";
 		html += "    <div id='data-switch'>0 / 0</div>";
@@ -147,6 +169,17 @@ var dataTable = function (node) {
 
 	}
 
+
+	this.renderFilters = function () {
+		
+		var html = "";
+		for(var i = 0; i < self.params.search_value.keys.length; i++) {
+			var field = self.params.search_value.keys[i];
+			var value = self.params.search_value.values[i];
+			html += "<div style='display:flex'> <div> <span class='bold'>"+field+"</span> contains <span class='italic'>"+value+"</span></div><div class='wikiglyph-cross' data-index='"+i+"'></div></div>";
+		}
+		return html;
+	}
 
 	this.getVisibleFields = function (config) {
 
@@ -364,15 +397,22 @@ var dataTable = function (node) {
 
 	this.openSearchDialog = function () {
 
-		html = "<select name='search_key'>";
+		var text = window.getSelection().toString();
+
+		html = "<div class='search-dialog'>";
+		html = "  <select id='data-search-field'>";
 		for(var i = 0; i < self.node.data.keys.sorted.length; i++) {
-			html += "<option>" + self.node.data.keys.sorted[i] + "</option>";
+			if(self.node.data.keys.sorted[i] == self.currentField)
+				html += "  <option selected='selected'>" + self.node.data.keys.sorted[i] + "</option>";
+			else
+				html += "  <option>" + self.node.data.keys.sorted[i] + "</option>";
 		}
-		html += "</select>";
-		html += " includes <input id='data-search-field' name='search_term'/>";
+		html += "  </select>";
+		html += "  includes <input id='data-search-value' value='"+text+"'/>";
 		
-		html += "<div>You can use regular expressions.</div>";
-		html += "<button>search</button>";
+		html += "  <div>You can use regular expressions.</div>";
+		html += "  <div class='button add-filter'>add search as filter</div>";
+		html += "</div>";
 		
 		
 		var obj = $("#data-search");
@@ -483,7 +523,7 @@ var dataTable = function (node) {
 	this.showVisibleKeysSelector = function (event) {
 		var visible_keys = self.getVisibleFields();
 		var obj = $(event.target);
-		var html = "<button class='toggle_all'>invert selection</button><button class='unselect_all'>unselect all</button>";
+		var html = "<div class='button toggle_all'>invert selection</div><div class='button unselect_all'>unselect all</div>";
 		html += "<hr/><div class='flex visible-keys'>";
 		for(var i = 0; i < self.keys.all_keys.sorted.length; i++) {
 			if(visible_keys.indexOf(self.keys.all_keys.sorted[i]) === -1)
@@ -542,6 +582,23 @@ var dataTable = function (node) {
 		self.collectVisibleFiels();	
 	}
 
+	this.addFilter = function () {
+		var field = $("#data-search-field").val();
+		var value = $("#data-search-value").val();
+		self.params.search_value.keys.push(field);
+		self.params.search_value.values.push(value);
+		this.params.skip_value = 0; // reset offset
+		self.render();
+
+	}
+
+	this.removeFilter = function (event) {
+		var index = parseInt($(event.target).data(index));
+		self.params.search_value.keys.splice(index,1);
+		self.params.search_value.values.splice(index,1);
+		this.params.skip_value = 0; // reset offset
+		self.render();
+	}
 
 	this.setEventListeners = function () {
 		// unset dynamic bindings for workspace
@@ -550,11 +607,6 @@ var dataTable = function (node) {
 		
 		
 		// ****************************** CONTROLS *************************
-		// removing field from visible fields
-		$("data-workspace").on('click','.wikiglyph-cross', function(e) {
-			self.removeVisibleFields($(e.target).parent().text());
-			e.preventDefault();
-		})
 		
 		// adding field to visible fields
 		$("data-workspace").on('change','#field-selector', function(e) {
@@ -599,7 +651,7 @@ var dataTable = function (node) {
 
 		// shrink all cells
 		$("data-workspace").on('click','.wikiglyph-eye', function(e) {
-			self.expandTable(false);
+			//self.expandTable(false);
 			self.expandCells = false;
 			self.renderTablePage();
 			$(e.target).removeClass("wikiglyph-eye");
@@ -609,7 +661,7 @@ var dataTable = function (node) {
 		// expand all cells
 		$("data-workspace").on('click','.wikiglyph-eye-lid', function(e) {
 			console.log("eye-lid clicked");
-			self.expandTable(true);
+			//self.expandTable(true);
 			self.expandCells = true;
 			self.renderTablePage();
 			$(e.target).removeClass("wikiglyph-eye-lid");
@@ -619,23 +671,48 @@ var dataTable = function (node) {
 		// expand individual cell
 		$("data-workspace").on('click','table tbody td div.more', function(e) {
 			self.expandCell(e);
-		})
+		});
 
 		// open search
 		$("data-workspace").on('click','.wikiglyph-magnifying-glass', function(e) {
 			console.log("search clicked");
 			self.openSearchDialog();
-		})
+		});
 
 		// make search
-		$("data-workspace").on('keyup','#data-search-field', function(e) {
+		$("#cell-display").on('keyup','.search-dialog input', function(e) {
 			console.log($(this).val());
-		})	
+			self.searchAndRenderTable($(this).val());
+		});	
 
+		// add filter
+		$("#cell-display").on('click','div.add-filter', function(e) {
+			self.addFilter();
+		});
+
+		// remove filter
+		$("#filters").on('click','.wikiglyph-cross', function(e) {
+			self.removeFilter(e);
+		});
+
+		// set current key when user click in a cell (for search)
+		$("#data").on('click', 'td div', function(e) {
+			var key = self.getKeyByTableClick(e);
+			if(key)
+				self.currentField = key;
+		});
+
+		// user selected text in table
+		$("#data").on('select', 'td div', function(e) {
+			var key = self.getKeyByTableClick(e);
+			if(key)
+				self.currentField = key;
+		});
+		
 		// sort per column
 		$("data-workspace").on('click','table thead td', function(e) {
 			self.sortTableColumn($(e.target).text());
-		})
+		});
 
 
 		// ****************************** DATA display *************************
@@ -643,7 +720,7 @@ var dataTable = function (node) {
 		// edit cell content
 		$("data-workspace").on('click','table tbody td div.edit', function(e) {
 			self.editCell(e);
-		})
+		});
 		
 		$("#cell-display").on("click", ".save", function(e) {
 			self.saveCellEdit(e);

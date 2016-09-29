@@ -17,6 +17,7 @@ var exports = module.exports = {};
 // *********************************************************************
 
 exports.findAll = function (params, callback) {
+	console.log(params.query);
 	var collection = db.collection(params.collection);
 	var sort = {};
 	var sort_order = 1;

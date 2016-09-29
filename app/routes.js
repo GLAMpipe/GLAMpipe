@@ -168,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// DATA
 	express.get('/get/collection/:id', function (req, res) {
-		glampipe.core.getCollectionTableData(req, {}, res);
+		glampipe.core.getCollectionTableData(req, res);
 	});
 
 	express.get('/get/collection/byfield/:id', function (req, res) {
