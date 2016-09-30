@@ -1,0 +1,30 @@
+
+<label>username </label><input class="node-settings" type="text" name="username" id="username" required />
+<label>password</label><input class="node-settings" type="password" name="password" id="password"/>
+
+<label>predefined servers</label>
+<select id="export_data_dspace_url_pre" name="url_pre">
+	<option value="">predefined servers</option>
+    <option value="http://siljo.lib.jyu.fi:8080/rest">http://siljo.lib.jyu.fi:8080/rest</option>
+</select>
+
+<label>server url, choose above or type</label>
+<input class="node-settings" id="export_data_dspace_url" name="url" />
+
+<label>In which collection do you want to save items (id)?</label>
+
+<button id="export_data_dspace_fetch">Choose collection</button>
+<input class="node-settings" id="export_data_dspace_collection" name="collection" />
+<div id="export_data_dspace_data"></div>
+
+
+<label>Separator for multiple values in CSV</label>
+<input class="node-settings" name="array_separator" value="||"/>
+
+
+
+<label>Select mapping </label>
+<button id="xml_basic_fetch" class="fetch_record">fetch fields</button>
+<button id="xml_basic_copy" class="fetch_record">copy fields</button>
+
+

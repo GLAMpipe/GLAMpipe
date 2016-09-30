@@ -54,8 +54,8 @@ exports.uploadItem = function (doc, sandbox, next) {
 	
 	console.log("upload item");
 	
-	// let node create an uploaded item
-	sandbox.run.runInContext(sandbox);
+	// let node create an upload item
+	sandbox.pre_run.runInContext(sandbox);
 	console.log(JSON.stringify(sandbox.out.setter.upload));
 
 	 var options = {
@@ -69,11 +69,14 @@ exports.uploadItem = function (doc, sandbox, next) {
 
 	// make actual HTTP request
 	request.post(options, function (error, response, body) {
-		if (error) 
+		sandbox.context.data = body;
+		if (error) {
 			console.log(error);
-		else {
+			next();
+		} else {
 			console.log(options.url);
 			console.log("update response:", body);
+			sandbox.run.runInContext(sandbox);
 			next();
 		}
 	});
@@ -84,57 +87,32 @@ exports.uploadItem = function (doc, sandbox, next) {
 
 
 
-exports.updateData = function (node, sandbox, io) {
-	var async 		= require("async");
-	console.log("Ready to update!");
+exports.updateData = function (doc, sandbox, next) {
 
-	// find everything
-	mongoquery.find2({}, node.collection, function(err, docs) {
-		sandbox.context.doc_count = docs.length;
-		console.log(docs.length);
-		runNodeScriptInContext("init", node, sandbox, io);
-		
-		// run node once per record
-		async.eachSeries(docs, function iterator(doc, next) {
+	// let node create an update item
+	sandbox.pre_run.runInContext(sandbox);
+	
+	 var options = {
+		url: sandbox.out.url,
+		json: sandbox.out.value,
+		jar:true
+	};
+	
+	var request = require("request");
+	//require('request').debug = true;
 
-			sandbox.context.doc = doc;
-			sandbox.context.count++;
-			sandbox.out.value = null;  // reset output
-
-
-			var abs =  doc.dc_title + " (Editoitu RESTin kautta) ";
-			
-			// this is how metadata object looks like
-			var metadata = [{"key":"dc.title", "value":abs, "language": "fi"},{"key":"dc.title", "value":abs, "language": "en"}];
-			
-			//next();
-
-			 var options = {
-				url: "http://siljo.lib.jyu.fi:8080/rest/items/" + doc.uuid + "/metadata",
-				json: metadata,
-				jar:true
-			};
-			
-			var request = require("request");
-			//require('request').debug = true;
-
-			// make actual HTTP request
-			request.put(options, function (error, response, body) {
-				if (error) 
-					console.log(error);
-				else {
-					console.log(options.url);
-					console.log("update response:", body);
-					next();
-				}
-				//cb(sandbox)
-			});
-			
-		}, function done () {
-			runNodeScriptInContext("finish", node, sandbox, io);
-		});
+	// make actual HTTP request
+	request.put(options, function (error, response) {
+		if (error) 
+			console.log(error);
+		else {
+			console.log("URL:", options.url);
+			console.log("update response:", response.statusMessage);
+			next();
+		}
 	});
 }
+
 
 
 function runNodeScriptInContext (script, node, sandbox, io) {

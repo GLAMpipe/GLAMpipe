@@ -1,0 +1,24 @@
+{
+	"nodeid": "collection_basic",
+	"type": "collection",
+	"subtype": "basic",
+	"title": "basic collection",
+    "status": "usable",
+	"usage":"",
+	"description": "Creates a new collection (table)",
+	
+	"scripts": {
+		"hello": "out.say('news', 'You added a collection node'); context.node.title = context.node.params.title",
+        "bye": "out.say('finish', 'Deleted collection node. Collection ' + context.node.params.collection + ' is deleted too. Bye!'); ",
+		"finish":"out.say('finish', 'Collection created'); "
+	},
+	
+	"views": {
+		"params":
+		[
+			"<label>Collection title </label><input type=\"text\" name=\"title\" id=\"title\" required />",
+			"<label>Data description </label><textarea name=\"description\" id=\"description\" ></textarea>"
+		],
+		"settings":"no settings"
+	}
+}

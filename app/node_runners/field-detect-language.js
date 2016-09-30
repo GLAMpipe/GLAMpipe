@@ -19,7 +19,6 @@ exports.language = function (doc, sandbox, next) {
 	var context = sandbox.context; // shortening things a little bit
 	var input = context.node.params.in_field;
 
-	sandbox.out.urls = null;  // reset urls
 	sandbox.out.value = [];  // reset output
 
 	if (doc[input] && doc[input].constructor.name == "Array") {
@@ -29,6 +28,7 @@ exports.language = function (doc, sandbox, next) {
 		async.eachSeries(doc[input], function iterator(value, nextvalue) {
 			
 			cld.detect(value, function(err, result) {
+				console.log("detection result", result);
 				sandbox.context.data.push(result);
 				nextvalue();
 			});

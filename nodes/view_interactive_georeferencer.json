@@ -1,0 +1,39 @@
+{
+	"nodeid": "view_interactive_georeferencer",
+	"type": "view",
+	"subtype": "interactive",
+    "status": "works",
+	"title": "Georeferencer for maps",
+	"description": "Add control point to maps.",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a georeferencer node');"
+		],
+		
+        "bye": "out.say('news', 'Deleted georeferencer node. Bye!'); ",
+		"init":"out.say('progress', context.node.title);",
+		
+		"run":"out.value = context.data;",
+		
+		"finish":"out.say('finish', 'Data grouped from collection ' + context.node.params.source_collection);",
+        
+        "view": [
+            "out.htmlfile = 'view_interactive_georeferencer.html';"
+        ]
+	},
+	
+	"views": {
+		"params": [
+			"<label>map url</label>must be jpg or png",
+			"<input class='dynamic_field' name='image_url' /> ",
+			"<label>map title</label>",
+			"<input class='dynamic_field' name='map_title' /> ",
+			"<label>out field</label>",
+			"<input name='out_field' value='control_points' /> "
+		],
+		"settings":"no settings"
+	}
+
+}

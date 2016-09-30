@@ -1,0 +1,96 @@
+{
+	"nodeid": "transform_field_extract",
+	"title": "Extract",
+	"type": "transform",
+	"subtype": "string manipulation",
+    "status": "usable",
+	"description": "Extract some piece from string",
+	"scripts": {
+		"hello":
+		[ 
+			"out.say('news', 'You added a Extract node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('news', 'Deleted extract node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting Extracting...');"
+		],
+		
+		"run": 
+		[
+
+            "function extract (val) { ",
+            "   var extracted = []; ",
+            "   if (val.constructor && val.constructor.name === 'Array' ) {",
+            "       for (var i = 0; i < val.length; i++) { ",
+            "           var extracted2 = extract(val[i]); ",
+            "           /* push result  */",
+            "           for (var j = 0; j < extracted2.length; j++) {",
+            "               extracted.push(extracted2[j]); ",
+            "           }",
+            "       }",
+            "   } else { ", 
+            "       if(context.node.settings.from != '') {",
+			"           var start = val.split(context.node.settings.from); ",
+            "           if(start.length > 1) {",
+            "               if(context.node.settings.end != '') {",
+            "                   var end = start[1].split(context.node.settings.end); ",
+            "                   if(end.length > 1) ",
+            "                       extracted.push(end[0]); ",
+            
+            "               /* end is empty  */",
+            "               } else {",
+            "                   extracted.push(start[1]); ",
+            "               }",
+            "           }",
+            
+            "       /* start is empty  */",
+            "       } else {",
+            "           var start = val;",
+            "           if(context.node.settings.end != '') {",
+            "               var end = start.split(context.node.settings.end); ",
+            "               if(end.length > 1) ",
+            "                   extracted.push(end[0]); ",
+            
+            "            /* end is empty  */",
+            "           } else { ",
+            "                   extracted.push(start); ",
+            "           }",
+            "       }",
+            
+
+            "   }",
+            "   return extracted;",
+            "}",
+            
+            "var val = context.doc[context.node.params.in_field]; ",
+
+            "if (val != null) ",
+            "    out.value = extract(val);" 
+
+
+		],
+		
+		"finish": "out.say('finish', 'Extract done!');"
+	},
+	
+	"views": {
+		"params":
+		[
+			"<label>Note title</label> <input name='title'/>",
+			"<label>in field:</label> <input class='dynamic_field' name='in_field'/>",
+			"<label>output field suffix:</label> <input name='out_field'/ value='extracted'>"
+		],
+        "settings":
+        [
+            "<label>read from this sequence</label>",
+            "<input name='from'/>",
+            "<label>read until this or these characters appear</label>",
+            "<input name='end'/>"
+        ]
+	}
+}

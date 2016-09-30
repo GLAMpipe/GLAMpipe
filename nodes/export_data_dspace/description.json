@@ -1,0 +1,27 @@
+{
+    "nodeid": "export_data_dspace_upload",
+    "title": "DSpace add items",
+    "type": "export",
+    "subtype": "API",
+    "subsubtype": "dspace_upload",
+    "status": "usable",
+    "description": "Create new items via REST API",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a DSpace node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', 'Data uploaded'); "
+    },
+    
+    "views": {
+        "params": "no params"
+
+    }
+
+}

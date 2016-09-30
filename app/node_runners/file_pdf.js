@@ -20,8 +20,10 @@ exports.extractReferences = function (doc, sandbox, next) {
 	
 	// ask node pdf location
 	sandbox.pre_run.runInContext(sandbox);
+	console.log(sandbox.out.value);
 
 	const spawn = require('child_process').spawn;
+	// feed pdf location to pdfx with json option (-j)
 	const ls = spawn('pdfx', [sandbox.out.value, '-j']);
 
 
@@ -35,10 +37,16 @@ exports.extractReferences = function (doc, sandbox, next) {
 	});
 
 	splitter.on("done", function() {
-		console.log(result_arr.join("\n"));
-		var result = JSON.parse(result_arr.join("\n"));
-		console.log(result.metadata.Pages);
-		sandbox.context.data = result; 
+		try {
+			var result = JSON.parse(result_arr.join("\n"));
+			console.log("pages:",result.metadata.Pages);
+			sandbox.context.data = result; 
+		// if json parse fails, then there were some kind of error in extraction
+		} catch (e) {
+			console.log(e);
+			sandbox.context.data = {error: "ERROR"};
+		}
+		
 		sandbox.run.runInContext(sandbox);
 		next();
 		

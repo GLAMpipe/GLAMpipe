@@ -1,0 +1,33 @@
+{
+    "nodeid": "process_file_pdf_extract_references",
+    "type": "process",
+    "subtype": "files",
+    "subsubtype": "extract_references",
+    "title": "PDF References",
+    "status": "usable",
+    "usage":"",
+    "description": "Extracts references from academic article",
+    
+    "scripts": {
+        "hello": "out.say('news', 'You added a reference extract node'); ",
+        "bye": "out.say('finish', 'Bye!'); ",
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; ",
+			"out.add_display_key('extracted_references_url', 'array'); ",
+			"out.add_display_key('extracted_references_pdf', 'array'); "
+		],
+		
+		"pre_run": "out.value = context.doc[context.node.params.in_field][0];" ,
+		
+        "finish":"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
+    },
+    
+    "views": {
+        "default_keys": ["name", "handle"],
+        "settings":"no settings"
+    
+    }
+  
+}

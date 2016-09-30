@@ -172,6 +172,12 @@ var glamPipe = function () {
 			alert("node id not found");
 	}
 
+	// called by "finished" websocket message
+	this.nodeRunFinished = function (data) {
+		var node = self.getRegularNode(data.nodeid);
+		node.runFinished();
+		// self.openCurrentNode(); // we should open finished node
+	}
 
 	this.getNode = function (clickEvent) {
 		var nodeid = $(clickEvent.target).data("id");
@@ -194,6 +200,13 @@ var glamPipe = function () {
 		return null;
 	}
 
+	this.getRegularNode = function (nodeid) {
+		for (var i = 0; i < self.nodes.length; i++) {
+			if(self.nodes[i].source._id == nodeid)
+				return self.nodes[i];
+		}
+	}
+
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
 		var types = [];
@@ -210,6 +223,10 @@ var glamPipe = function () {
 
 		if (obj.data("type") == "process")
 			types = ["process"]
+
+		if (obj.data("type") == "download")
+			types = ["download"]
+
 
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
@@ -295,6 +312,13 @@ var glamPipe = function () {
 		html += "  </div><div class='holder params'></div>"
 		
 		html += self.renderNodes(collection, ["process"]);
+
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Downloads</span> <a class='add-node' data-type='download' href='addnode.html'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder params'></div>"
+
+		html += self.renderNodes(collection, ["download"]);
 		
 		html += "  <div class='sectiontitleblock'>"
 		html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
@@ -377,6 +401,14 @@ var glamPipe = function () {
 		}
 	}
 
+
+	this.updateDocument = function (data, cb) {
+		$.post( "/edit/collection/" + self.currentCollection.source.collection, data, function( response ) {
+			
+			console.log(response);
+			cb();
+		})
+	}
 
 	this.openDynamicFieldSelector = function (event) {
 		var obj = $(event.target);

@@ -20,20 +20,84 @@ var glamPipeNode = function (node, gp) {
 	// execute node 
 	this.run = function () {
 		
-		self.settings = self.getSettings(node);
-		console.log("RUNNING node with params: ", self.settings);
+		self.source.settings = self.getSettings(node);
+		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post("/run/node/" + self.source._id, self.settings, function(data) {
+		$.post("/run/node/" + self.source._id, self.source.settings, function(data) {
 			console.log(data);
 			if(data.error)
 				alert(data.error);
 		});
 	}
 
+	
+	
+	this.runFinished = function () {
+		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
+        $(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+        $(".settings").hide();
+        
+        var input = self.getInputFields();
+        var output = self.getOutputFields();
+        
+        self.open({input_keys:input, output_keys:output});
+	}
 
+	// getter for input/output fields of the node (used as config for data rendering)
+	this.getConfig = function () {
+		if(self.source.type != "collection" && self.source.type != "source") {
+			var input = self.getInputFields();
+			var output = self.getOutputFields();
+			return {input_keys:input, output_keys:output};
+		} else
+			return null;
+	}
+	
+
+	this.getOutputFields = function () {
+		
+		if(self.source.out_field)
+			return [self.source.out_field];
+			
+		if(self.source.params.out_field)
+			return [self.source.params.out_field];
+			
+		if(self.source.params.suffix)
+			if(self.source.params.in_field)
+				return [self.source.params.in_field + self.source.params.suffix];
+				
+		return [];
+				
+	}
+
+
+	this.getInputFields = function () {
+		
+		// field1, field2, etc. are input key names
+		// other fields hold string constants
+
+		// one input field
+		if(self.source.in_field)
+			return [self.source.in_field];
+			
+		if(self.source.params.in_field)
+			return [self.source.params.in_field];
+
+		var keys = [];
+		// inputs can be in params or settings
+		for(var key in self.source.params) {
+			if(/^field/.test(key))
+				keys.push(self.source.params[key]);
+		}
+		for(var key in self.source.settings) {
+			if(/^field/.test(key))
+				keys.push(self.source.settings[key]);
+		}
+		return keys;
+	}
 
 	// render data with node spesific settings and display node settings
-	this.open = function () {
+	this.open = function (config) {
 		if(self.source.type == "collection") {
 			$("data-workspace .settingscontainer").hide();
 			self.display.render();
@@ -65,17 +129,48 @@ var glamPipeNode = function (node, gp) {
 		
 		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 		$("data-workspace .settings").empty();
-		$("data-workspace .settings").append("<div class='box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		$("data-workspace .settings").append("<div class='params box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
 		$("data-workspace .settings").append(self.source.views.settings);
+		$("data-workspace .settings .params").append(self.source.params);
+		
+		// render parameters
+		var params_table = "<table><tbody>";
+		for(key in self.source.params) {
+			params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
+		}
+		params_table += "</tbody></table>";
+		$("data-workspace .settings .params").append(params_table);
 		
 		if(self.source.scripts.settings) {
 			var settingsScript = new Function('node', self.source.scripts.settings);
 			settingsScript(self.source);
 		}
 		
+		self.setSettingValues();
 		
 	}
 
+
+    this.setSettingValues = function () {
+		var data = self.source;
+        for(var prop in data.settings) {
+            if(typeof data.settings[prop] == "boolean") {
+                $("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+                $("input[name='"+prop+"']").change();
+            } else {
+                if(data.settings[prop].constructor.name === "Array") {
+                    for(var i = 0; i < data.settings[prop].length; i++) {
+                        var n = i+1;
+                        $("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
+                    }
+                } else {
+                    $("input[name='"+prop+"']").val(data.settings[prop]);
+                    $("select[name='"+prop+"']").val(data.settings[prop]);
+                    $("select[name='"+prop+"']").change();
+                }
+            }
+        }
+    }
 	
 
 
@@ -96,7 +191,7 @@ var glamPipeNode = function (node, gp) {
 	this.getSettings = function (node) {
 		
         var settings = {};
-        // read input from settings (only inputs with class "params")
+        // read input from settings (only inputs with class "node-settings")
         $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
@@ -121,7 +216,7 @@ var glamPipeNode = function (node, gp) {
 
 	this.loadCollectionData = function (params, cb) {
 		
-		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func(), function (docs) {
+		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
 		});

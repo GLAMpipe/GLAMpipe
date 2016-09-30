@@ -20,55 +20,54 @@ var positionOffset = 60;
  * - makes sure that "project_count" exists
  */
 exports.initDB = function (callback) {
-	mongoquery.findOne({},"mp_settings", function(data) { 
-
-		if(data) {
-			console.log("DB: mp_settings exists");
-			callback();
+	mongoquery.findOne({},"mp_settings", function(err, data) { 
+		if(err) {
+			console.log("INITDB failed!");
+			callback(err);
 		} else {
-			console.log("DB: creating project counter");
-			mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
-				if(result.error)
-					console.log("ERROR: could not create project counter!");
-				else 
-					callback();
-			});
+			if(data) {
+				console.log("DB: mp_settings exists");
+				callback();
+			} else {
+				console.log("DB: creating project counter");
+				mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
+					if(result.error) {
+						console.log("ERROR: could not create project counter!");
+						callback(result.error);
+					}
+					else 
+						callback();
+				});
+			}
 		}
 	});
 }
 
-exports.initDir = function (callback) {
+exports.createProjectsDir = function (dataPath, callback) {
 	fs = require('fs');
-	var dataPath = "";
 
-	mongoquery.findOne({},"mp_settings", function(data) { 
-		if(data.data_path == "") {
-			callback(null);
-		} else {
-			// if we are not running on OPENSHIFT
-			if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
-				// then use datapath from "mp_settings" collection
-				dataPath = data.data_path;
-			// else use OPENSHIFT data dir
-			} else 
-				dataPath = process.env.OPENSHIFT_DATA_DIR;
-				
-			// create "projects" directory
-			fs.mkdir(path.join(dataPath, "projects"), function(err) {
-				if(err) {
-					if(err.code === "EEXIST") {
-						console.log("INIT: projects directory exists");
-						callback(dataPath);
-					} else
-						console.log("ERROR:", err);
-					return;
-				}
-				console.log("INIT: output directory created");
-				callback(dataPath);
-			});
-			
+	// if we are not running on OPENSHIFT
+	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
+		// then use datapath from "mp_settings" collection
+		dataPath = "/glampipe";
+	// else use OPENSHIFT data dir
+	} else 
+		dataPath = process.env.OPENSHIFT_DATA_DIR;
+		
+	// create "projects" directory
+	fs.mkdir(path.join(dataPath, "projects"), function(err) {
+		if(err) {
+			if(err.code === "EEXIST") {
+				console.log("INIT: projects directory exists");
+				callback();
+			} else
+				callback("ERROR:", err);
+			return;
 		}
+		console.log("INIT: output directory created");
+		callback();
 	});
+			
 
 }
 
@@ -82,7 +81,8 @@ exports.initDir = function (callback) {
 
 exports.initNodes = function (io, callback) {
 
-	var dataPath = global.config.dataPath;
+	//var dataPath = global.config.dataPath;
+	var dataPath = "/src/app"; // use bundled nodes
 		
 	mongoquery.drop("mp_nodes", function() {
 
@@ -93,10 +93,17 @@ exports.initNodes = function (io, callback) {
 				console.log("NOTICE: node type descriptions not found from " + dataPath);
 				desc = {};
 			} else 
+				
 				var desc = JSON.parse(data);
 				console.log("INIT: Loading nodes from " + path.join(dataPath, "nodes/") );
 				exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
-					callback(null);     
+					if(error){
+						// otherwise default nodes (included in the image)
+						console.log("ERROR: Loading nodes failed!");
+						callback(error);
+
+					} else
+						callback(null);     
 				});        
 		});
 	});
@@ -109,12 +116,9 @@ exports.initNodes = function (io, callback) {
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
-	var sandbox = { 
-		out: {
+	var download = { 
 			url:"https://github.com/artturimatias/metapipe-nodes/archive/master.zip",
-			file:"master.zip"
-		},
-		context:{}
+			filename:"master.zip"
 	};
 				
 	var node = {dir:dataPath};
@@ -122,17 +126,18 @@ exports.downloadNodes = function (io, cb) {
 	// download nodes
 	console.log("DOWNLOADING: nodes from github");
 	io.sockets.emit("progress", "DOWNLOADING: nodes from github");
-	console.log(sandbox.out.url);
-	exports.downloadFile(node, sandbox, function (err) {
-		if(err.context.error) {
-			console.log(err.context.error);
-			io.sockets.emit("error", err.context.error);
-			cb(err.context.error);
+
+	var downloader = require("../app/node_runners/download-file.js");
+	downloader.downloadAndSave(node, download, function (err) {
+		if(err) {
+			console.log(err);
+			io.sockets.emit("error", err);
+			cb(err);
 			
 		} else {
 			const Zip = require("adm-zip");
 			var zip = new Zip(path.join(dataPath, "master.zip"));
-			console.log("EXTRACTING: master.zip");
+			console.log("EXTRACTING: master.zip to " + dataPath + "/nodes/");
 			zip.extractEntryTo("metapipe-nodes-master/nodes/", dataPath + "/nodes/", false, true);
 			io.sockets.emit("progress", "DOWNLOADING: done!");
 			cb();
@@ -205,7 +210,7 @@ exports.createProject = function (title, res) {
 		} 
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
-			mongoquery.findOne({}, "mp_settings", function(meta) {
+			mongoquery.findOne({}, "mp_settings", function(err, meta) {
 				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
@@ -311,11 +316,16 @@ exports.getNodeFromFile = function (node_id, res) {
 	});
 }
 
-function getProp(obj, desc, index) { 
+// try to give some sensible value
+function getProp(doc, keyname, index) { 
+	
+	var obj = doc[keyname];
+	if(obj == null)
+		return "";
 	
 	// if array, then give value by optional index
-	if (obj.constructor.name == "Array") {
-		if(index) {
+	if (obj.constructor.name === "Array") {
+		if(index != null) {
 			if(obj[index])
 				return obj[index];
 			else
@@ -325,10 +335,10 @@ function getProp(obj, desc, index) {
 			return obj[0];
 		}
 		
-	// this object, find dotted value (like dc.type.uri)	
+	// this is object, find dotted value (like dc.type.uri)	
 	} else {
 	
-		var arr = desc.split('.'); 
+		var arr = keyname.split('.'); 
 		while(arr.length && (obj = obj[arr.shift()])); 
 		if(typeof obj === 'undefined') return ''; 
 		return obj; 
@@ -345,7 +355,7 @@ exports.runNode = function (req, res, io) {
 	
 	try {
 
-		mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(project) {
+		mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(err, project) {
 			if(!project) {
 				console.log("node not found");
 				io.sockets.emit("error", "node not found");
@@ -486,7 +496,7 @@ exports.runNode = function (req, res, io) {
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
 								// we must check if input key is array or not
-								mongoquery.findOne({}, node.params.source_collection, function (record) {
+								mongoquery.findOne({}, node.params.source_collection, function (err, record) {
 									if(record) {
 										if(record[node.params.in_field]) {
 											var array = record[node.params.in_field].constructor.name == "Array";
@@ -609,9 +619,9 @@ exports.runNode = function (req, res, io) {
 						
 							switch (node.subsubtype) {
 								
-								case "dspace":
+								case "dspace_upload":
 									var dspace = require("../app/node_runners/dspace.js");
-									dspace.login(node,sandbox, io, function(error) {
+									dspace.login(node, sandbox, io, function(error) {
 										if(error)
 											console.log("ERROR: login failed");
 										else {
@@ -620,6 +630,18 @@ exports.runNode = function (req, res, io) {
 										}
 									});
 									
+								break;
+								
+								case "dspace_update":
+									var dspace = require("../app/node_runners/dspace.js");
+									dspace.login(node, sandbox, io, function(error) {
+										if(error)
+											console.log("ERROR: login failed");
+										else {
+											console.log("LOGIN GOOD");
+											asyncLoop.loop(node, sandbox, dspace.updateData);
+										}
+									});
 								break;
 							}
 						
@@ -746,7 +768,7 @@ exports.runNode = function (req, res, io) {
 						
 							switch (node.subsubtype) {
 								
-								case "pdf":
+								case "extract_references":
 									var extractReferences = require("../app/node_runners/file_pdf.js");
 									asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
 								break;
@@ -761,9 +783,13 @@ exports.runNode = function (req, res, io) {
 									var checker = require("../app/node_runners/link-checker.js");
 									asyncLoop.loop(node, sandbox, checker.checkLinks);
 								break;
+
+								case "detect_language":
+									var detect = require("../app/node_runners/field-detect-language.js");
+									asyncLoop.loop(node, sandbox, detect.language);
+								break;
 							
 								default:
-								
 									asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
 											run.runInContext(sandbox);
 											next();
@@ -776,21 +802,6 @@ exports.runNode = function (req, res, io) {
 
 				break;
 
-
-
-				case "detect":
-
-
-					switch (node.subtype) {
-						
-						case "language":
-						
-							var detect = require("../app/node_runners/field-detect-language.js");
-							asyncLoop.loop(node, sandbox, detect.language);
-							break;
-						}
-
-				break;
 
 				case "upload":
 					switch (node.subtype) {
@@ -894,6 +905,8 @@ function getPrevNode(project, node) {
 
 exports.uploadFile = function (req, res ) {
 	
+	console.log("req.file:", req.file);
+	
 	switch (req.file.mimetype) {
 		case "text/xml":
 			console.log("File type: XML");
@@ -930,10 +943,23 @@ exports.uploadFile = function (req, res ) {
 				description: req.body.description
 			})
 		break;
+
+		case "text/plain":
+			console.log("File type: plain text");
+			return res.json({
+				"status": "ok",
+				filename:req.file.filename,
+				mimetype:req.file.mimetype,
+				title: req.body.title,
+				nodeid: req.body.nodeid,
+				project: req.body.project,
+				description: req.body.description
+			})
+		break;
 		
 		default:
 			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified!"});
+			return res.json({"error":"File type unidentified! " + req.file.mimetype});
 	}
 }
 
@@ -1016,7 +1042,7 @@ function initNode (nodeRequest, res, io, project) {
 	}
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
 			node.input_node = nodeRequest.input_node;
 			node.project = nodeRequest.project
@@ -1139,7 +1165,7 @@ exports.createCollectionNode = function (nodeRequest, res, io) {
 function initCollectionNode (nodeRequest, res, io) {
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(node) {
+	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
 			node.input_node = "";
 			node.project = nodeRequest.project;
@@ -1181,7 +1207,7 @@ function initCollectionNode (nodeRequest, res, io) {
  */
 exports.deleteNode = function (params, res, io) {
 
-	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(project) {
+	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(err, project) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", params.node);
 			var node = project.nodes[index];
@@ -1343,7 +1369,11 @@ exports.getCollection = function (req, query, res) {
  * Get paged collection data for DataTable
  * - gives records between skip and skip + limit
  */
-exports.getCollectionTableData = function (req, query, res) {
+exports.getCollectionTableData = function (req, res) {
+
+	// create search query
+	var query = createSearchQuery(req);
+	
 
 	var limit = parseInt(req.query.limit);
 	if (limit < 0 || isNaN(limit))
@@ -1373,20 +1403,41 @@ exports.getCollectionTableData = function (req, query, res) {
 	mongoquery.findAll(params, function(data) { res.json({data:data}) });
 }
 
+function createSearchQuery (req) {
+	
+	var query = {};
+	if(req.query.query_fields) {
+		// create an AND query if there are several query fields
+		if(req.query.query_fields.length > 1) {
+			var ands = [];
+			for(var i = 0; i < req.query.query_fields.length; i++) {
+				var search = {};
+				search[req.query.query_fields[i]] = {$regex:req.query.query_values[i], $options: 'i'};
+				ands.push(search);
+			}
+			query.$and = ands;
+		// otherwise create query for one field
+		} else {
+			query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+		}
+	}
+	return query;
+}
+
 exports.getCollectionByField = function (req, res) {
 
 	var query = {};
-	query[req.query.field] = req.query.value;
+	query[req.query.field] = {$regex:req.query.value, $options: 'i'};
 	
 	exports.getCollection (req, query, res);
 }
 
 
 
-exports.getCollectionCount = function (collection_id, cb) {
-	//var collection = db.collection(collection_id);
-	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
-	mongoquery.countDocs(collection_id, {}, function (result) {
+exports.getCollectionCount = function (req, cb) {
+	
+	var query = createSearchQuery(req);
+	mongoquery.countDocs(req.params.id, query, function (result) {
 		cb({count:result});
 	});
 }
@@ -1569,7 +1620,8 @@ exports.readNodes = function (io, nodePath, descriptions, callback) {
 				console.log(error);
 			} else {
 				console.log("LOADED: " + filename );
-				io.sockets.emit("progress", "LOAD: " + filename + " loaded");
+				if(io)
+					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
 				next();
 			}
 		})

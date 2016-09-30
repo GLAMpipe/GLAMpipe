@@ -1,0 +1,33 @@
+{
+	"nodeid": "source_group",
+	"type": "source",
+	"subtype": "group",
+    "status": "usable",
+	"title": "Group fields",
+	"description": "Group by values",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a cluster node');"
+		],
+		
+        "bye": "out.say('news', 'Deleted group node. Bye!'); ",
+		"init":"out.say('progress', context.node.title);",
+		
+		"run":"out.value = context.data;",
+		
+		"finish":"out.say('finish', 'Data grouped from collection ' + context.node.params.source_collection);"
+	},
+	
+	"views": {
+		"params": [
+			"<label>collection </label>",
+			"<input class='dynamic_collection' name='source_collection' /> ",
+			"<label>field to be grouped </label>",
+			"<input class='dynamic_field' name='in_field' /> "
+		],
+		"settings":"no settings"
+	}
+
+}

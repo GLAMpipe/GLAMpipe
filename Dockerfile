@@ -1,15 +1,15 @@
 FROM node:argon
-RUN apt-get update && apt-get install -y vim
-RUN mkdir -p /usr/src
-WORKDIR /usr/src
+RUN apt-get update && apt-get install -y vim build-essential ruby-dev rubygems python-pip && pip install pdfx && gem install specific_install &&  gem specific_install https://github.com/EbookGlue/libsvm-ruby-swig.git && gem install pdf-extract
+RUN mkdir -p /src/app
 
 # Install app dependencies
-COPY package.json /usr/src/
-RUN npm install -g
+COPY package.json /src/app
+WORKDIR /src/app
+RUN npm install 
 
 # Bundle app source
-#COPY . /usr/src/app
+COPY . /src/app
 
 
 EXPOSE 3000
-#CMD [ "npm", "start" ]
+#CMD [ "node", "glampipe.js" ]

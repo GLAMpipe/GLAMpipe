@@ -43,7 +43,7 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 				fileExists(node, download, function(error, filePath) {
 					
 					if(error == null) {
-						downloadAndSave(node, download, next);
+						exports.downloadAndSave(node, download, next);
 					} else
 						next();
 				});			
@@ -52,7 +52,11 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 		}, function done() {
 			sandbox.run.runInContext(sandbox);
 			var setter = {};
-			setter[node.out_field] = sandbox.out.value;
+			if(sandbox.out.setter)
+				setter = sandbox.out.setter;
+			else
+				setter[node.out_field] = sandbox.out.value;
+				
 			mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, cb);			
 		})
 		
@@ -101,7 +105,7 @@ function fileExists (node, download, cb) {
 
 
 
-function downloadAndSave (node, download, next) {
+exports.downloadAndSave = function (node, download, next) {
 	
 	checkUrl(download);
 	if(download.error)

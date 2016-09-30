@@ -12,44 +12,44 @@ https://github.com/artturimatias/metapipe-nodes
 toddler
 
 
-## install on Linux (Debian-based distros)
+## installation
 
-1. These commands should give you all you need to install Metapipe:
+GLAMpipe is installed via [Docker compose](https://docs.docker.com/compose/). So first you need to install Docker:
+https://docs.docker.com/engine/installation/
 
-	    apt-get install mongodb
-	    apt-get install git
-	    apt-get install nodejs
-	    apt-get install npm
+1. Create a data directory for GLAMpipe, open terminal and change to that directory.
+
+	    cd directory_you_just_created
 
 
-2. Now its time to install GLAMpipe. Start by fetching code:
+2. Next download a docker compose file:
 
-	    git clone https://github.com/artturimatias/GLAMpipe.git
-Then move to directory that was created:
 
-	    cd GLAMpipe
+	    https://raw.githubusercontent.com/artturimatias/GLAMpipe/compose/docker-compose.yml
+Copy content from here and save it as "docker-compose.yml"
+Or, if you have curl installed, you can download it directly:
 
-4. You need to install all the extra stuff that GLAMpipe needs. It's easy, just type:
+	    curl -O https://raw.githubusercontent.com/artturimatias/GLAMpipe/compose/docker-compose.yml
 
-	    npm install
-Then type:
+3. Then install GLAMpipe. It's easy, just type:
 
-	    nodejs glampipe.js
-You should see something like this:
+	    docker-compose up
+
+This takes a while at first time since it load few hundred megabytes of data (next time the start up is almost instant). But finally you should see something like this:
 
 	    GLAMpipe running!
 	    copy this to your web browser -> http://localhost:3000
 
-5. Finally you must make some settings. Aim your browser address to address shown. You should see page saying like this:
-
-		ERROR: "datapath is not set!"
-You need to create a directory where GLAMpipe can save content. After you have created it, type *full path* to the text box and click "set data path".
-Then fetch nodes from github by clicking "fetch nodes". 
-After that finishes, click "(re)load nodes to GLAMpipe". This will import nodes to database.
-
  If everything went well, You are all set! 
+ You can stop GLAMpipe by pressing CTRL + C
  
-##problems
-If things still don't work, than make sure that you have MongoDB
-a) installed
-b)  running 
+##Upgrading
+Just type
+
+	docker-compose pull
+and then
+
+	docker-compose up	
+ 
+##What did I just do?
+You run docker compose file (docker-compose.yml) that setups a database container (mongodb) and GLAMpipe container and linked them together. 

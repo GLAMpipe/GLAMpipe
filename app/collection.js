@@ -16,11 +16,11 @@ exports.getKeys = function (collection_name, cb) {
 	var key_list = {};
 	
 	// first we take the first record and extract key names from that
-	mongoquery.findOne({}, collection_name, function(doc) {
+	mongoquery.findOne({}, collection_name, function(err, doc) {
 		for (key in doc) {
 			key_list[key] = {};
 		}
-		console.log(doc);
+		//console.log(doc);
 		// then we look for schema and apply that top of list of keys 
 		mongoquery.findOneProjection({"schemas.collection": collection_name}, {"schemas.$":1},  "mp_projects", function(project) {
 			if(project && project.schemas && project.schemas.length) {

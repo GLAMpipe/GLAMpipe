@@ -1,0 +1,59 @@
+{
+	"nodeid": "transform_field_manipulation_combine",
+	"title": "Combine fields",
+	"type": "transform",
+	"subtype": "field manipulation",
+    "status": "usable",
+	"description": "Combine string fields with arbitrary strings",
+	"scripts": {
+		"hello":
+		[
+			"out.say('news', 'You added a combine node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('news', 'Deleted combine node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting...');"
+		],
+		
+		"run": 
+		[
+			"var get = context.get; ",
+			"var doc = context.doc; ",
+            "var settings = context.node.settings; ",
+			"var arr = []; ",
+			"arr.push(settings.prefix); ",
+            "arr.push(get(doc, settings.field1)); ",
+			"arr.push(settings.after_field1); ",
+            "arr.push(get(doc, settings.field2)); ",
+			"arr.push(settings.after_field2); ",
+            "arr.push(get(doc, settings.field3)); ",
+			"arr.push(settings.suffix); ",
+			"out.value = arr.join(''); "
+		],
+		
+		"finish": "out.say('finish', 'Fields combined to ' +context.node.out_field+ '!');"
+		
+
+	},
+	
+	"views": {
+		"params": [
+			"<label>description</label> <input name='title' />",
+			"<label>where to save the result?</label> <input name='out_field'/ value='combined'/>"
+		],
+		
+		"settings":
+		[
+			"<label>select fields:</label>",
+			"<input class='short_input' name='prefix'/> + <input class='dynamic_field middle_input' name='field1'/> + <br>",
+			"<input class='short_input' name='after_field1'/> + <input class='dynamic_field middle_input' name='field2'/> + <br>",
+			"<input class='short_input' name='after_field2'/> + <input class='dynamic_field middle_input' name='field3'/> + <br>",
+			"<input class='short_input' name='suffix'/>"
+		]
+	}
+}

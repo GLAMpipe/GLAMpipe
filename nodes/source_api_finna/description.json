@@ -1,0 +1,18 @@
+{
+    "nodeid": "source_api_finna",
+    "title": "FINNA",
+    "type": "source",
+    "subtype": "API",
+    "status": "test",
+    "description": "Fetch online materials data from FINNA. ",
+
+    "scripts": {
+        "hello": "out.say('news', '<h2>Hello, You just added a FINNA node!</h2>'); ",
+        "bye": "out.say('news', 'Deleted FINNA source node!  Bye!'); ",
+        "finish":"out.say('finish', 'Tiedot haettu FINNAsta!'); "
+    },
+    
+    "views": {
+        "params":"no params"
+    }
+}

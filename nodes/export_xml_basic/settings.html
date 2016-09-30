@@ -1,0 +1,34 @@
+
+<label>record element name </label><input name="root" value="record"/>
+<h3>mapping</h3>
+<label>Select mapping </label>
+<button id="xml_basic_fetch" class="fetch_record">fetch fields</button>
+<button id="xml_basic_copy" class="fetch_record">copy fields</button>
+
+
+<script>
+   $("#xml_basic_fetch").click(function(e){
+       var obj=$(e.target);
+       var url="/get/collection/"+nodes.currentCollection+"?skip=0&limit=1";
+       $.getJSON(url, function(data){
+           var rec=data[0];
+           var table=$('<table><th>current name</th><th>new name</th></table>');
+           for(var f in rec){
+               if(rec[f] !== null && typeof rec[f] === "object" && f != "_id") {
+                   var field=$('<tr><td>' +f+ '</td><td><input class="node-settings" name="_mapkey_'+f+'"/>A</td></tr>');
+               } else {
+                   var field=$('<tr><td>' +f+ '</td><td><input class="node-settings" name="_mapkey_'+f+'"/></td></tr>');
+               }
+               table.append(field);
+           }
+           obj.parent().append(table);
+       })
+   });
+   $("#xml_basic_copy").click(function(e){
+       var obj=$(e.target);
+       obj.parent().find("table tr").each(function(index) {
+           var field = $( this ).find("td").text();
+           $( this ).find("input").val(field);
+       });
+   });
+</script>

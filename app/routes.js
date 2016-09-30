@@ -168,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// DATA
 	express.get('/get/collection/:id', function (req, res) {
-		glampipe.core.getCollectionTableData(req, {}, res);
+		glampipe.core.getCollectionTableData(req, res);
 	});
 
 	express.get('/get/collection/byfield/:id', function (req, res) {
@@ -185,7 +185,7 @@ module.exports = function(express, glampipe, passport) {
 
 
 	express.get('/get/collection/count/:id', function (req, res) {
-		glampipe.core.getCollectionCount(req.params.id, function(data) {res.send(data)});
+		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});
 	});
 
 	express.post('/edit/collection/:id', function (req, res) {
