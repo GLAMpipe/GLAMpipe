@@ -34,12 +34,7 @@
 	},
 	
 	"views": {
-		"settings":
-		[
-			"<div class='help'>You can take just sample from records</div>",
-			"<label>get records from</label><input name='sample_from' value='0'/>",
-			"<label>to</label>leave empty for all<input name='sample_to'/>"
-		]
+
 	}
 
 }

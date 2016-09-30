@@ -1408,7 +1408,7 @@ function createSearchQuery (req) {
 	var query = {};
 	if(req.query.query_fields) {
 		// create an AND query if there are several query fields
-		if(req.query.query_fields.length > 0) {
+		if(req.query.query_fields.length > 1) {
 			var ands = [];
 			for(var i = 0; i < req.query.query_fields.length; i++) {
 				var search = {};
@@ -1434,10 +1434,10 @@ exports.getCollectionByField = function (req, res) {
 
 
 
-exports.getCollectionCount = function (collection_id, cb) {
-	//var collection = db.collection(collection_id);
-	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
-	mongoquery.countDocs(collection_id, {}, function (result) {
+exports.getCollectionCount = function (req, cb) {
+	
+	var query = createSearchQuery(req);
+	mongoquery.countDocs(req.params.id, query, function (result) {
 		cb({count:result});
 	});
 }

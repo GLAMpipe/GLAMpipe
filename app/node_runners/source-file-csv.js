@@ -23,6 +23,17 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 	var parser = parse({delimiter: ',', columns:true}, function (err, data) {
 		
+		console.log("INITIAL IMPORT COUNT:", data.length);
+		
+		// if sample is set, then import only sample
+		if(node.settings.sample_to) {
+			console.log("TAKING SAMPLE OF:", node.settings.sample_to);
+			var from = parseInt(node.settings.sample_from);
+			var sample = parseInt(node.settings.sample_to);
+			if(!isNaN(sample) && !isNaN(from))
+				data = data.slice(from, from + sample);
+		}
+		
 		async.eachSeries(data, function (record, callback) {
 			
 			var new_record = {};

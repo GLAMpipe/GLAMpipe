@@ -511,12 +511,17 @@ var dataTable = function (node) {
 
 
 	this.renderCollectionCount = function () {
-		$.getJSON("/get/collection/count/" + self.node.source.collection , function(data) { 
+		// filtered count
+		$.getJSON("/get/collection/count/" + self.node.source.collection + "?" + self.params.search(), function(data) { 
 			self.docCount = parseInt(data.count);
 			var skip = self.params.skip_value  + 15;
 			if(skip > self.docCount)
 				skip = self.docCount;
 			$("data-workspace #data-switch").text( self.params.skip_value + " - " + skip + " of " + self.docCount );
+		})
+		// total count
+		$.getJSON("/get/collection/count/" + self.node.source.collection, function(data) { 
+			$(".nodeset .node.collection .boxtext").text( data.count + " documents" );
 		})
 	}
 

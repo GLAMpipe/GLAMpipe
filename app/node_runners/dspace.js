@@ -55,7 +55,7 @@ exports.uploadItem = function (doc, sandbox, next) {
 	console.log("upload item");
 	
 	// let node create an upload item
-	sandbox.run.runInContext(sandbox);
+	sandbox.pre_run.runInContext(sandbox);
 	console.log(JSON.stringify(sandbox.out.setter.upload));
 
 	 var options = {
@@ -69,11 +69,14 @@ exports.uploadItem = function (doc, sandbox, next) {
 
 	// make actual HTTP request
 	request.post(options, function (error, response, body) {
-		if (error) 
+		sandbox.context.data = body;
+		if (error) {
 			console.log(error);
-		else {
+			next();
+		} else {
 			console.log(options.url);
 			console.log("update response:", body);
+			sandbox.run.runInContext(sandbox);
 			next();
 		}
 	});

@@ -17,7 +17,6 @@ var exports = module.exports = {};
 // *********************************************************************
 
 exports.findAll = function (params, callback) {
-	console.log(params.query);
 	var collection = db.collection(params.collection);
 	var sort = {};
 	var sort_order = 1;
@@ -106,9 +105,10 @@ exports.findOneById = function (doc_id, collectionname, callback) {
 }
 
 exports.countDocs = function (collectionname, query, callback) {
+	
 	var collection = db.collection(collectionname);
 
-	collection.count({}, function(err, count) {
+	collection.count(query, function(err, count) {
 		if(err) {
 			console.log(err);
 			callback("error in count");
