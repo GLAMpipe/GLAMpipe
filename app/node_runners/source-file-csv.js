@@ -16,13 +16,20 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 	var fs = require('fs');
 	var parse = require('csv-parse');
+	var utf8 = require('to-utf-8');
 	var transform = require('stream-transform');
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var async = require('async');
 	var counter = 0;
 
-	var parser = parse({delimiter: ',', columns:true}, function (err, data) {
+	var parser = parse({delimiter: node.settings.separator, columns:true}, function (err, data) {
 		
+		if(err) {
+			console.log("ERROR:", err);
+			io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err});
+			return;
+		}
+			
 		console.log("INITIAL IMPORT COUNT:", data.length);
 		
 		// if sample is set, then import only sample
@@ -100,7 +107,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 		})
 	})
 
-	fs.createReadStream(file).pipe(parser);
+	fs.createReadStream(file).pipe(utf8()).pipe(parser);
 
 }
 
