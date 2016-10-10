@@ -1,0 +1,27 @@
+{
+	"nodeid": "process_field_create_wikitext_template",
+	"title": "Create wikitext",
+	"type": "process",
+	"subtype": "field",
+	"description": "Produce wikitext output based on template",
+	"scripts": {
+		"hello": "out.say('news', 'You added a wikitext node'); ",
+		
+        "bye": "out.say('news', 'Deleted wikitext node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting converting to wikitext...'); ",
+			"/* set output field */",
+			"out.field = context.node.params.out_field; "
+		],
+
+		"finish": "out.say('finish', 'wikitext conversion done!');"
+
+	},
+	
+	"views": {
+
+
+	}
+}
