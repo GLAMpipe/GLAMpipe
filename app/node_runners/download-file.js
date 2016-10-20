@@ -22,7 +22,7 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 	sandbox.pre_run.runInContext(sandbox);
 	var downloads = sandbox.out.urls;
 
-
+	// pre_run should give always downloads array
 	if (downloads && downloads.constructor.name == "Array") {
 		
 		sandbox.context.data = [];

@@ -1094,7 +1094,11 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({"error": err});
 							} else {
 								console.log("node created");
-								res.json(node)
+								res.json({
+									status:'node created', 
+									id:node._id, 
+									collection:node.collection
+								})
 							}
 						});
 					}
@@ -1118,10 +1122,18 @@ function initNode (nodeRequest, res, io, project) {
 								setter[node.init_fields[i]] = "";
 							}
 							mongoquery.update(node.collection,{}, {$set: setter }, function() {
-								res.json(node);
+								res.json({
+									status:'node created', 
+									id:node._id, 
+									collection:node.collection
+								});
 							})  
 						} else {
-							res.json(node);
+							res.json({
+								status:'node created', 
+								id:node._id, 
+								collection:node.collection
+							});
 						} 
 					}
 				});
@@ -1146,12 +1158,18 @@ function initNode (nodeRequest, res, io, project) {
 exports.createCollectionNode = function (nodeRequest, res, io) {
 
 	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(data) {
+		
+		// make sure that params exist even if they were not given
+		if(nodeRequest.params == null)
+			nodeRequest.params = {};
+			
 		// cleanup name
-		collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+		var collectionName = "";
+		if(nodeRequest.params.title)
+			collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
 		
 		//						  project count
 		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
-		
 		nodeRequest.params.collection = nodeRequest.collection;
 		nodeRequest.node_count = data.node_count;
 		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [nodeRequest.collection] } }, function() {
@@ -1188,7 +1206,7 @@ function initCollectionNode (nodeRequest, res, io) {
 						res.json({"error": error});
 					} else {
 						console.log("node created");
-						res.json({"status": "node created"})
+						res.json({"status": "node created", "collection":node.collection})
 					}
 
 			})

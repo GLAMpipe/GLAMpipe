@@ -55,7 +55,7 @@ for (mapkey in context.node.settings) {
 		var value = context.doc[key_plain];
 
 		// loop over value arrays
-	   if (value !== null && value.constructor.name === "Array") {
+	   if (value != null && value.constructor.name === "Array") {
 		   for (var i = 0; i < value.length; i++ ) { 
 			   	if(context.doc[key_plain + "__lang"])
 					language = context.doc[key_plain + "__lang"][i];
