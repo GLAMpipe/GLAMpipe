@@ -140,20 +140,16 @@ exports.createCollection = function (collectionname, callback) {
 }
 
 exports.insertProject = function (doc, callback) {
+	
+	exports.insert("mp_projects", doc, callback);
 
-	var collection = db.collection('mp_projects');
-
-	collection.insert(doc ,function (err, result) {
-		if (err) {
-			console.log(err);
-			callback({'error':err})
-		} else {
-			console.log('Inserted');
-			callback(result);
-		}
-	}); 
 }
 
+exports.runLog = function (doc, callback) {
+	
+	exports.insert("mp_runlog", doc, callback);
+	
+}
 
 exports.insert = function (collectionname, doc, callback) {
 
@@ -162,10 +158,10 @@ exports.insert = function (collectionname, doc, callback) {
 	collection.insert(doc ,function (err, result) {
 		if (err) {
 			console.log(err);
-			callback({'error':err})
+			callback(err, result)
 		} else {
-			//console.log('inserted to', collectionname);
-			callback({});
+			console.log('inserted to', collectionname);
+			callback(null, result);
 		}
 	}); 
 }

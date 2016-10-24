@@ -14,6 +14,13 @@ var exports 	= module.exports = {};
 
 var positionOffset = 60;
 
+
+exports.createPipe = function (req) {
+	console.log(req.body);
+	return 'Pipe created';
+}
+
+
 /**
  * Create metapipe collection on start up
  * - "metapipe" is only collection that must exist
@@ -30,8 +37,8 @@ exports.initDB = function (callback) {
 				callback();
 			} else {
 				console.log("DB: creating project counter");
-				mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(result) {
-					if(result.error) {
+				mongoquery.insert("mp_settings", {"project_count":0, "data_path":""}, function(error, result) {
+					if(error) {
 						console.log("ERROR: could not create project counter!");
 						callback(result.error);
 					}
@@ -221,7 +228,7 @@ exports.createProject = function (title, res) {
 					"node_count":0,
 					"schemas": []
 				};
-				mongoquery.insertProject (project, function(data) {
+				mongoquery.insertProject (project, function(err, data) {
 					console.log("project \"" + title + "\" created!");
 					res.json({"status": "project created", "project": data});
 				});
@@ -268,7 +275,7 @@ exports.getProject = function (doc_id, res) {
 
 exports.addUser = function (req, cb) {
     var user = {"username": req.body.username, "password": req.body.password};
-    mongoquery.insert ("users", user, function(data) {
+    mongoquery.insert ("users", user, function(err, data) {
         console.log("user \"" + req.body.username + "\" created!");
         cb({"status": "ok"});
     });
@@ -350,8 +357,9 @@ function getProp(doc, keyname, index) {
  * - this is THE MAIN SWITCH of GLAMpipe
  */ 
 exports.runNode = function (req, res, io) {
+
 	console.log('Running node:', req.params.id);
-	io.sockets.emit("news", "NODE: running node " + req.params.id);
+	//io.sockets.emit("news", "NODE: running node " + req.params.id);
 	
 	try {
 
@@ -379,8 +387,6 @@ exports.runNode = function (req, res, io) {
 			})
 
 			console.log("NODE: running", node.type);
-			
-
 
 
 			// context for node scripts
@@ -417,8 +423,11 @@ exports.runNode = function (req, res, io) {
 						}
 					},
 					say: function(ch, msg) {
-						console.log(ch.toUpperCase() + ":", msg);
+						console.log(ch.toUpperCase() + "AAAAAAA:", msg);
 						io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
+						mongoquery.runLog({"mode": ch, "ts": new Date(), "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
+							console.log("logged");
+						});
 					}
 				},
 				say: io.sockets.emit
@@ -485,7 +494,7 @@ exports.runNode = function (req, res, io) {
 									data[i][MP.source] = node._id;
 								}
 								// insert
-								mongoquery.insert(node.collection, data, function() {
+								mongoquery.insert(node.collection, data, function(err, result) {
 									runNodeScriptInContext("finish", node, sandbox, io);
 								});
 								
@@ -555,7 +564,7 @@ exports.runNode = function (req, res, io) {
 									
 									// insert
 									if(sandbox.out.value.length > 0) {
-										mongoquery.insert(node.collection, sandbox.out.value, function() {
+										mongoquery.insert(node.collection, sandbox.out.value, function(err, result) {
 											runNodeScriptInContext("finish", node, sandbox, io);
 											//generate view and do *not* wait it to complete
 											exports.updateView(node, sandbox, io, function(msg) {});
@@ -1097,7 +1106,8 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({
 									status:'node created', 
 									id:node._id, 
-									collection:node.collection
+									collection:node.collection,
+									nodeid: node.nodeid
 								})
 							}
 						});
@@ -1125,14 +1135,16 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({
 									status:'node created', 
 									id:node._id, 
-									collection:node.collection
+									collection:node.collection, 
+									nodeid: node.nodeid
 								});
 							})  
 						} else {
 							res.json({
 								status:'node created', 
 								id:node._id, 
-								collection:node.collection
+								collection:node.collection,
+								nodeid: node.nodeid
 							});
 						} 
 					}
@@ -1206,7 +1218,11 @@ function initCollectionNode (nodeRequest, res, io) {
 						res.json({"error": error});
 					} else {
 						console.log("node created");
-						res.json({"status": "node created", "collection":node.collection})
+						res.json({
+							"status": "node created", 
+							"collection":node.collection, 
+							"nodeid": node.nodeid
+							})
 					}
 
 			})
@@ -1550,7 +1566,28 @@ exports.viewCollection = function  (collectionName, cb) {
 }
 
 
-
+exports.getNodeLog = function (req, cb) {
+	
+	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
+		result.forEach(function(row, i) {
+			if(row.ts) {
+				var date = new Date(row.ts);
+				var y =  date.getUTCFullYear();
+				var m =  date.getMonth() + 1;
+				var d =  date.getDate();
+				var h =  date.getHours();
+				var mm =  date.getMinutes();
+				var s =  date.getSeconds();
+				var ss =  date.getMilliseconds();
+				row.timestamp = y + "-" + m + "-" + d + " " + h + ":" + mm + ":" + s + "-" + ss;
+			}
+			
+		});
+		
+		cb(result);
+	})
+	
+}
 
 /**
  * Make an external API request
@@ -1633,9 +1670,9 @@ exports.readNodes = function (io, nodePath, descriptions, callback) {
 		
 	readFiles(nodePath, function onNodeContent (filename, node, next) {
 		// save node.json to db
-		mongoquery.insert("mp_nodes",node , function(error) {
-			if(error.length) {
-				console.log(error);
+		mongoquery.insert("mp_nodes",node , function(err, result) {
+			if(err) {
+				console.log(err);
 			} else {
 				console.log("LOADED: " + filename );
 				if(io)

@@ -143,6 +143,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.nodeFileView(req, function(data) {res.send(data)});
 	});
 
+	express.get('/node/status/:id', function (req, res) {
+		glampipe.core.getNodeLog(req, function(data) {res.send(data)});
+	});
+
 	express.post('/create/node', function (req, res) {
 		glampipe.core.createNode(req.body, res, glampipe.io);
 	});
@@ -196,6 +200,7 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
 	});
 
+
 	// USERS
 	express.post('/add/user', function (req, res) {
 		glampipe.core.addUser(req, function(data) {res.send(data)});
@@ -213,6 +218,12 @@ module.exports = function(express, glampipe, passport) {
 		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
 	});
 
+
+	// PIPES
+	express.post('/create/pipe', function (req, res) {
+		glampipe.core.createPipe(req, function(data) {res.send(data)});
+	});
+	
 
 	// NODE EDITOR
 	express.get('/node-viewer', function (req, res) {
