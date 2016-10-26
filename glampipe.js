@@ -190,6 +190,11 @@ var GlamPipe = function() {
 		self.http.on("error", function(e) {
 			console.log(e);
 		});
+		
+		// we listen our own websocket messages so that we 
+		self.wsClient = require('socket.io-client')('http://localhost:3000');
+		self.wsClient.on('connect', function(){console.log("SOCKET: GLAMpipe wsClient connected!");});
+
 
 	   // process.on('uncaughtException', function(err) {
 			// handle the error safely

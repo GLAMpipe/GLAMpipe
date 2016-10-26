@@ -101,6 +101,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.createProject(req.body.title, res);
 	});
 
+	express.post('/run/project/:id', function (req, res) {
+		glampipe.core.runProject(req, glampipe, res);
+	});
+
 	express.get('/get/project/titles', function (req, res) {
 		glampipe.core.getProjectTitles(res);
 	});
@@ -143,7 +147,7 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.nodeFileView(req, function(data) {res.send(data)});
 	});
 
-	express.get('/node/status/:id', function (req, res) {
+	express.get('/node/log/:id', function (req, res) {
 		glampipe.core.getNodeLog(req, function(data) {res.send(data)});
 	});
 
@@ -164,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.post('/run/node/:id', function (req, res) {
-		glampipe.core.runNode(req, res, glampipe.io);
+		glampipe.core.runNode(req, glampipe.io);
 		res.json({status:"started"});
 	});
 
