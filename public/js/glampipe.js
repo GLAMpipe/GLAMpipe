@@ -271,9 +271,10 @@ var glamPipe = function () {
 				alert("parent collection is missing");
 			else {data.collection = self.currentCollection.source.collection;
 				console.log("currentCollection on node create:", self.currentCollection.source.collection);
+				
 				$.post("/create/node", data, function(returnedData) {
 					console.log("node create:", returnedData);
-					var node = new glamPipeNode(returnedData, self);
+					var node = new glamPipeNode(returnedData.node, self);
 					self.addProjectNode(node);
 					self.currentNodes[self.currentCollection.source.collection] = node;
 					self.renderCollectionSet();

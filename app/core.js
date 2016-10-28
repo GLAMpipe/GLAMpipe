@@ -496,13 +496,8 @@ function initNode (nodeRequest, res, io, project) {
 			node.input_node = nodeRequest.input_node;
 			node.project = nodeRequest.project
 			node.collection = nodeRequest.collection;
-			console.log("node.collection:", node.collection);
 			node.number = nodeRequest.node_count;
 			node.dirsuffix = ""; // node can set this in "hello" script
-			
-			console.log("SETTINGS***************")
-			console.log(nodeRequest.settings);
-			console.log("SETTINGS***************")
 			
 			if(nodeRequest.params)
 				node.params = nodeRequest.params;
@@ -555,6 +550,7 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({
 									status:'node created', 
 									id:node._id, 
+									node:node,
 									collection:node.collection,
 									nodeid: node.nodeid
 								})
@@ -584,6 +580,7 @@ function initNode (nodeRequest, res, io, project) {
 								res.json({
 									status:'node created', 
 									id:node._id, 
+									node: node,
 									collection:node.collection, 
 									nodeid: node.nodeid
 								});
@@ -592,6 +589,7 @@ function initNode (nodeRequest, res, io, project) {
 							res.json({
 								status:'node created', 
 								id:node._id, 
+								node: node, 
 								collection:node.collection,
 								nodeid: node.nodeid
 							});
