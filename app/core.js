@@ -53,7 +53,7 @@ exports.createProjectsDir = function (dataPath, callback) {
 	// if we are not running on OPENSHIFT
 	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
 		// then use datapath from "mp_settings" collection
-		dataPath = "/glampipe";
+		//dataPath = "/glampipe";
 	// else use OPENSHIFT data dir
 	} else 
 		dataPath = process.env.OPENSHIFT_DATA_DIR;
@@ -61,14 +61,17 @@ exports.createProjectsDir = function (dataPath, callback) {
 	// create "projects" directory
 	fs.mkdir(path.join(dataPath, "projects"), function(err) {
 		if(err) {
-			if(err.code === "EEXIST") {
-				console.log("INIT: projects directory exists");
-				callback();
+			if (err.code === "ENOENT") {
+				return callback(err, "dataPath directory does not exist!");
+				
+			} else if(err.code === "EEXIST") {
+				return callback();
+				
 			} else
-				callback("ERROR:", err);
-			return;
+				return callback(err, err.message);
+				
 		}
-		console.log("INIT: output directory created");
+		console.log("INIT: project directory created");
 		callback();
 	});
 			
@@ -83,24 +86,21 @@ exports.createProjectsDir = function (dataPath, callback) {
  * - inserts nodes to "mp_nodes" collection
  */
 
-exports.initNodes = function (io, callback) {
-
-	//var dataPath = global.config.dataPath;
-	var dataPath = "/src/app"; // use bundled nodes
+exports.initNodes = function (nodePath, io, callback) {
 		
 	mongoquery.drop("mp_nodes", function() {
 
 		fs = require('fs');
 		// read first node type descriptions
-		fs.readFile(path.join(dataPath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
+		fs.readFile(path.join(nodePath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
 			if(err) {
-				console.log("NOTICE: node type descriptions not found from " + dataPath);
+				console.log("NOTICE: node type descriptions not found from " + nodePath);
 				desc = {};
 			} else 
 				
 				var desc = JSON.parse(data);
-				console.log("INIT: Loading nodes from " + path.join(dataPath, "nodes/") );
-				exports.readNodes(io, path.join(dataPath, "nodes/"), desc, function (error) {
+				console.log("INIT: Loading nodes from " + path.join(nodePath, "nodes/") );
+				exports.readNodes(io, path.join(nodePath, "nodes/"), desc, function (error) {
 					if(error){
 						// otherwise default nodes (included in the image)
 						console.log("ERROR: Loading nodes failed!");

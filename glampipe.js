@@ -10,6 +10,7 @@ var request			= require('request');
 var bodyParser		= require("body-parser");
 var colors 			= require('ansicolors');
 
+const conf 		= require("./config/config.js");
 
 global.config = {};
 
@@ -35,6 +36,8 @@ var GlamPipe = function() {
 		//  Set the environment variables we need.
 		self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
 		self.port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
+		
+		self.nodePath = conf.nodePath;
 
 		// if we are not in OpenShift, then check if we are inside Docker
 		if (typeof self.ipaddress === "undefined") {
@@ -45,7 +48,8 @@ var GlamPipe = function() {
 				self.dataPath = "/glampipe";
 			} else {
 				console.log("Running locally, using 127.0.0.1");
-				self.ipaddress = "127.0.0.0";
+				self.ipaddress = "127.0.0.1";
+				self.dataPath = conf.dataPath;
 			}
 		};
 
@@ -118,7 +122,7 @@ var GlamPipe = function() {
 	 */
 	self.terminator = function(sig){
 		if (typeof sig === "string") {
-			console.log('%s: Received %s - terminating sample app ...', Date(Date.now()), sig);
+			console.log('%s: Received %s - terminating GLAMpipe ...', Date(Date.now()), sig);
 			self.io.sockets.emit("error", "GLAMpipe server was shut down!!");
 			process.exit(1);
 		}
@@ -157,21 +161,21 @@ var GlamPipe = function() {
 	   
 		self.core.initDB(function (error) {
 
-			self.core.initNodes (null, function() {
+			self.core.initNodes (self.nodePath, null, function() {
 
-				self.core.createProjectsDir(self.dataPath, function(error) {
+				self.core.createProjectsDir(self.dataPath, function(error, msg) {
 			
 					if(error) {
-						console.log(colors.red("DATAPATH not set"));
-						global.config.projectsPath = path.join(self.dataPath, "projects");
-						cb("ERROR");
+						console.log(colors.red("DATAPATH problem: " + self.dataPath));
+						console.log(msg);
+						cb(error);
 					} else {
 						global.config.dataPath = self.dataPath;
 						global.config.projectsPath = path.join(self.dataPath, "projects");
 
 						// Create the express server and routes.
 						self.initializeServer();
-						console.log("INIT done");
+						console.log(colors.green("INIT done"));
 						cb(); 
 					}
 				});
@@ -192,23 +196,25 @@ var GlamPipe = function() {
 		});
 		
 		// we listen our own websocket messages so that we 
-		self.wsClient = require('socket.io-client')('http://localhost:3000');
-		self.wsClient.on('connect', function(){console.log("SOCKET: GLAMpipe wsClient connected!");});
+		//self.wsClient = require('socket.io-client')('http://localhost:3000');
+		//self.wsClient.on('connect', function(){console.log("SOCKET: GLAMpipe wsClient connected!");});
 
 
-	   // process.on('uncaughtException', function(err) {
+	    process.on('uncaughtException', function(err) {
 			// handle the error safely
-		 //   console.log(err)
-		//})
+		    console.log(err)
+		})
 
 		//  Start the app on the specific interface (and port).
 			var server = self.http.listen(self.port, self.ipaddress, function() {
 				var host = server.address().address;
 				var port = server.address().port;
-				//console.log("DATA PATH:",config.dataPath());
-				//console.log("PROJECTS PATH:",config.projectsDir());
-				console.log('GLAMpipe running!');
-				console.log('copy this to your web browser -> http://%s:%s', host, port);
+				//console.log(`Running on ${process.platform}`);
+				console.log("\n********************* G L A M p i pe *************************");
+				console.log("* DATA PATH:",self.dataPath);
+				console.log("* NODE PATH:",self.nodePath);
+				console.log("* STATUS:    running on http://%s:%s", host, port);
+				console.log("********************* G L A M p i pe *************************");
 			});
 	};
 
@@ -222,9 +228,10 @@ var glampipe = new GlamPipe();
 try {
 	 
 	glampipe.initialize(function(error) {
-		if(error)
-			console.log("could not start GLAMpipe!");
-		else
+		if(error) {
+			console.log(colors.red("Could not start GLAMpipe!"));
+			process.exit();
+		} else
 			glampipe.start();
 	});
 	

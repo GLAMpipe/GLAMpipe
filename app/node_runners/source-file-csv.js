@@ -16,7 +16,6 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 	var fs = require('fs');
 	var parse = require('csv-parse');
-	var utf8 = require('to-utf-8');
 	var transform = require('stream-transform');
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var async = require('async');
@@ -91,7 +90,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 			
 			// save to database
 			mongoquery.insert(node.collection, new_record , function(error) {
-				if(error.length) {
+				if(error) {
 					console.log(error);
 					callback();
 				} else {
@@ -107,7 +106,8 @@ exports.importFile = function  (node, sandbox, io, cb) {
 		})
 	})
 
-	fs.createReadStream(file).pipe(utf8()).pipe(parser);
+	//fs.createReadStream(file).pipe(utf8()).pipe(parser);
+	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
 
 }
 

@@ -1,7 +1,7 @@
 
 module.exports.initDBConnect = function () {
 
-	// default to a 'localhost' configuration:
+	// default 'localhost' configuration:
 	var connection_string = '127.0.0.1:27017/metapipe';
 	
 	// if OPENSHIFT env variables are present, use the available connection info:
