@@ -57,17 +57,31 @@ If you have a Linux box or you can run Linux in virtual machine, then these inst
 
     for example:
 
-        mkdir /home/YOUR_USERNAME/GLAMDATA 
+        mkdir /home/YOUR_USERNAME_HERE/GLAMpipe_DATA 
     sdf
 
         // DATAPATH
         // - where GLAMpipe can strore project data
         // default: ""
-        var dataPath = "/home/arihayri/gp_aineistot";
+        var dataPath = "/home/__YOUR_USERNAME_HERE__/GLAMpipe_DATA ;
 
-6. Try to run
+6. Install node dependencies
+
+        npm install
+
+7. Try to run
 
         node glampipe.js
+
+    You should see something like this:
+    
+        ********************* G L A M p i pe *************************
+        * DATA PATH: /home/arihayri/GLAMpipe_DATA
+        * NODE PATH: 
+        * STATUS:    running on http://127.0.0.1:3000
+        ********************* G L A M p i pe *************************
+        
+    You can stop GLAMpipe by pressing CTRL + C
 
 
 
