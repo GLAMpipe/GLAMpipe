@@ -24,8 +24,8 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	var parser = parse({delimiter: node.settings.separator, columns:true}, function (err, data) {
 		
 		if(err) {
-			console.log("ERROR:", err);
-			io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err});
+			console.log("ERROR:", err.message);
+			io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err.message});
 			return;
 		}
 			
@@ -105,6 +105,10 @@ exports.importFile = function  (node, sandbox, io, cb) {
 			runNodeScriptInContext("finish", node, sandbox, io);
 		})
 	})
+
+	parser.on('error', function(err){
+	  console.log(err.message);
+	});
 
 	//fs.createReadStream(file).pipe(utf8()).pipe(parser);
 	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);

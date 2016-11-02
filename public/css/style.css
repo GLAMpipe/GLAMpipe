@@ -622,7 +622,7 @@ input.middle_input {
 }
 
 .bad {
- background-color:red;
+ color:red;
 }
 
 .busy {
@@ -711,3 +711,6 @@ font-weight:bold;
 	margin-left: 1em;
 }
 
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}

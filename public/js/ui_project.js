@@ -153,6 +153,7 @@ $( document ).ready(function() {
     });
 
     socket.on('progress', function (data) {
+		
         progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
     });
 
@@ -164,10 +165,14 @@ $( document ).ready(function() {
         } else {
             genericDisplay.append("<div class=\"bad\">" + data + "</div>");
         }
+        websockPopup(progressDisplay, "Node run error");
     });
 
     socket.on('finish', function (data) {
+
+		
         finishDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+        websockPopup(finishDisplay, "Node done!");
         progressDisplay.removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();
@@ -175,5 +180,20 @@ $( document ).ready(function() {
 
     });
 
-
 });
+
+function websockPopup(div, title) {
+		$(div).dialog({
+			title:title,
+			modal:true,
+			resizable: false,
+			width:500,
+			dialogClass: "no-close",
+			buttons: {
+				"Ok": function() {
+				  $( this ).empty();
+				  $( this ).dialog( "close" );
+				}
+			}
+		});	
+}
