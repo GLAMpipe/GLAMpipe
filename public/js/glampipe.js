@@ -166,7 +166,7 @@ var glamPipe = function () {
 		var node = self.getNode(e);
 		if(node) {
 			$("#node-messages").empty();
-			$("#node-messages").addClass("busy");
+			$(".settings").addClass("busy");
 			node.run();
 		} else
 			alert("node id not found");

@@ -160,7 +160,7 @@ $( document ).ready(function() {
     socket.on('error', function (data) {
         if(data.nodeid) {
             progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-            progressDisplay.removeClass("busy");
+            (".settings").removeClass("busy");
             progressDisplay.addClass("done");
         } else {
             genericDisplay.append("<div class=\"bad\">" + data + "</div>");
@@ -173,7 +173,7 @@ $( document ).ready(function() {
 		
         finishDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
         websockPopup(finishDisplay, "Node done!");
-        progressDisplay.removeClass("busy");
+        $(".settings").removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();
         gp.nodeRunFinished(data); 

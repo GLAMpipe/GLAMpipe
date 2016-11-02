@@ -2,7 +2,7 @@
 	"nodeid": "process_field_create_wikitext_template",
 	"title": "Create wikitext",
 	"type": "process",
-	"subtype": "field",
+	"subtype": "fields",
 	"description": "Produce wikitext output based on template",
 	"scripts": {
 		"hello": "out.say('news', 'You added a wikitext node'); ",

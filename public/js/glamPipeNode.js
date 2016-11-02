@@ -35,7 +35,7 @@ var glamPipeNode = function (node, gp) {
 	this.runFinished = function () {
 		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
         $(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
-        $(".settings").hide();
+        //$(".settings").hide();
         
         var input = self.getInputFields();
         var output = self.getOutputFields();

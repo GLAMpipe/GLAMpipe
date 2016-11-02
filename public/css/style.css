@@ -626,7 +626,7 @@ input.middle_input {
 }
 
 .busy {
-	background-color:orange;
+	background-color:orange !important;
 }
 
 .flex {
