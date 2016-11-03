@@ -60,13 +60,13 @@ var wikiFields =
 var sel = node.params.template;
 for(var i = 0; i < wikiFields[sel].length; i++) { 
    var label = '<label>' + wikiFields[sel][i] + '</label>';  
-   var input1 = '<input name=\"_wt_1_' + wikiFields[sel][i] + '\" class=\"short_input\" /><span > + </span>'; 
-   var input2 = '<input name=\"_wt_2_' + wikiFields[sel][i] + '\" class=\"dynamic_field middle_input\" /> <span > + </span>'; 
-   var input3 = '<input name=\"_wt_3_' + wikiFields[sel][i] + '\" class=\"short_input\" /><span > + </span>'; 
-   var input4 = '<input name=\"_wt_4_' + wikiFields[sel][i] + '\" class=\"dynamic_field middle_input\" /><span > + </span>'; 
-   var input5 = '<input name=\"_wt_5_' + wikiFields[sel][i] + '\" class=\"short_input\" /><span > + </span>'; 
-   var input6 = '<input name=\"_wt_6_' + wikiFields[sel][i] + '\" class=\"dynamic_field middle_input\" /><span > + </span>'; 
-   var input7 = '<input name=\"_wt_7_' + wikiFields[sel][i] + '\" class=\"short_input\" />'; 
+   var input1 = '<input name=\"_wt_1_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" /><span > + </span>'; 
+   var input2 = '<input name=\"_wt_2_' + wikiFields[sel][i] + '\" class=\"node-settings dynamic_field middle_input\" /> <span > + </span>'; 
+   var input3 = '<input name=\"_wt_3_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" /><span > + </span>'; 
+   var input4 = '<input name=\"_wt_4_' + wikiFields[sel][i] + '\" class=\"node-settings dynamic_field middle_input\" /><span > + </span>'; 
+   var input5 = '<input name=\"_wt_5_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" /><span > + </span>'; 
+   var input6 = '<input name=\"_wt_6_' + wikiFields[sel][i] + '\" class=\"node-settings dynamic_field middle_input\" /><span > + </span>'; 
+   var input7 = '<input name=\"_wt_7_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" />'; 
     if(node.settings) {
         $('.template_map').append( label +'<input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" value=\"'+node.settings['_wt_'+wikiFields[sel][i]]+'\"/>'); 
     } else {

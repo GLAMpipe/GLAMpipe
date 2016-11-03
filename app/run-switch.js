@@ -246,7 +246,17 @@ exports.runNode = function (node, io) {
 			switch (node.subtype) {
 				
 				case "file":
-					require("../app/node_runners/export-file.js").collectionToFile(node, sandbox, io);
+				
+					switch (node.subsubtype) {
+						case "csv":
+							require("../app/node_runners/export-file-csv.js").collectionToFile(node, sandbox, io);
+							break;
+							
+						default:
+							require("../app/node_runners/export-file.js").collectionToFile(node, sandbox, io);
+							break;
+					}
+					
 				break;
 				
 				case "API":

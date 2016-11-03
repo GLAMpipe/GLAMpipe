@@ -16,8 +16,8 @@ for (key in settings) {
 /* set output on last field of series */
        if (key.indexOf('_wt_7') === 0 ) { 
            var stripped = key.replace(/_wt_7_/,''); 
-           output += '|' + stripped + ' = ' + wikifield + '\\n'; 
-           wikifield = ''; 
+           output += "|" + stripped + " = " + wikifield + "\n"; 
+           wikifield = ""; 
        } 
     }
 }
@@ -27,12 +27,18 @@ output += '}}\\n';
 var cats = c.get(context.doc, settings.categories); 
 if (cats.constructor.name === 'Array') {
     for(var i = 0; i < cats.length; i++) {
-        output += '[[Category:' + cats[i] + ']]\\n'; 
+        output += "[[Category:" + cats[i] + "]]\n"; 
     }
 }
 
 if(settings.category_all != '') 
-    output += '[[Category:' + settings.category_all + ']]\\n'; 
+    output += "[[Category:" + settings.category_all + "]]\n"; 
 
-output += '[[Category:metapipe uploads]]\\n'; 
+
+if(parseInt(context.count) % 100 == 0) 
+    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
+
+
+output += "[[Category:GLAMpipe uploads]]\n"; 
 out.value = output; 
+

@@ -20,8 +20,10 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var async = require('async');
 	var counter = 0;
+	
+	var records = []; // currently we create one huge array or records and insert that to Mongo
 
-	var parser = parse({delimiter: node.settings.separator, columns:true}, function (err, data) {
+	var parser = parse({delimiter: node.settings.separator, columns:true, skip_empty_lines:true}, function (err, data) {
 		
 		if(err) {
 			console.log("ERROR:", err.message);
@@ -53,7 +55,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 					prop_clean = cleanFieldName(prop);
 					new_record[prop_clean] = [];
 
-					// find language codes
+					// find language codes key names like "dc.title[en]"
 					var re = /\[(.|..|)\]/g;
 					var codes = re.exec(prop_trimmed);
 					
@@ -88,21 +90,27 @@ exports.importFile = function  (node, sandbox, io, cb) {
 				}
 			}
 			
-			// save to database
-			mongoquery.insert(node.collection, new_record , function(error) {
-				if(error) {
-					console.log(error);
-					callback();
-				} else {
-					counter++;
-					callback();
-				}
-			})
+
+			// next round
+			records.push(new_record);
+			counter++;
+			callback();
+
 		  
 
 		}, function done () {
-			console.log("Found "+ counter + " records");
-			runNodeScriptInContext("finish", node, sandbox, io);
+			console.log("NODE: Inserting " + counter + " records");
+			
+			// save to database
+			mongoquery.insert(node.collection, records , function(error) {
+				if(error) {
+					console.log(error);
+					runNodeScriptInContext("finish", node, sandbox, io);
+				} else {
+					runNodeScriptInContext("finish", node, sandbox, io);
+				}
+			})
+			
 		})
 	})
 
@@ -110,7 +118,6 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	  console.log(err.message);
 	});
 
-	//fs.createReadStream(file).pipe(utf8()).pipe(parser);
 	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
 
 }

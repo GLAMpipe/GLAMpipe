@@ -153,7 +153,8 @@ $( document ).ready(function() {
     });
 
     socket.on('progress', function (data) {
-		
+		progressDisplay.show();
+		progressDisplay.empty();
         progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
     });
 

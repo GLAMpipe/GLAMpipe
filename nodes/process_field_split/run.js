@@ -15,6 +15,12 @@ function split (val) {
    }
    return splitted;
 }
+
+
+
+if(parseInt(context.count) % 1000 == 0) 
+    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
+
             
 var val = context.doc[context.node.params.in_field]; 
 out.value = split(val);  

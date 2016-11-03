@@ -3,7 +3,7 @@
     "type": "export",
     "subtype": "file",
     "title": "XML",
-    "status": "works",
+    "status": "broken",
     "description": "Export collection as XML file. Very simple version. Do not export objects.",
 
 

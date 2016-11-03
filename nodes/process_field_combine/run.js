@@ -12,4 +12,8 @@ arr.push(settings.after_field2);
 arr.push(get(doc, settings.field3)); 
 arr.push(settings.suffix); 
 
+if(parseInt(context.count) % 1000 == 0) 
+    out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
+
+
 out.value = arr.join(""); 

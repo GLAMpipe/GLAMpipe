@@ -10,6 +10,7 @@
     "body-parser": "^1.14.2",
     "cld": "^2.4.6",
     "csv-parse": "^1.1.7",
+    "csv-write-stream": "^2.0.0",
     "express": "^4.13.4",
     "flat": "^2.0.0",
     "mongojs": "^2.3.0",

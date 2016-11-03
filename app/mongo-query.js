@@ -12,6 +12,10 @@ db.on("error", function(e) {
 var exports = module.exports = {};
 
 
+exports.createBulk = function () {
+	return  db.items.initializeUnorderedBulkOp();
+}
+
 // *********************************************************************
 // ******************************* FIND  *******************************
 // *********************************************************************

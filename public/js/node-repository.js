@@ -48,6 +48,8 @@ var nodeRepository = function () {
                     
                     // render nodes
                     for (var k = 0; k < sub.nodes.length; k++) {
+						if(sub.nodes[k].status == "broken")
+							continue;
                         self.plainNodes.push(sub.nodes[k]);
                         var index = self.plainNodes.length -1;
                         html += "<a data-index='" + index + "' class='open-node' href='#'>"

@@ -2,6 +2,7 @@
     "nodeid": "export_csv_basic",
     "type": "export",
     "subtype": "file",
+    "subsubtype": "csv",
     "title": "CSV",
     "status": "works",
     "description": "Export collection as CSV file. Exports arrays but do not export objects.",
@@ -28,7 +29,7 @@
 
         "params":"<label>file name</label><input name=\"file\"/>",
         "settings": [
-            "<label>separator </label><input name=\"sep\" value=\",\"/>",
+            "<label>separator </label><input class=\"node-settings\" name=\"sep\" value=\",\"/>",
             "<label>array separator </label><input class=\"node-settings\" name=\"arr_sep\" value=\"|\"/>"
         ]
     }

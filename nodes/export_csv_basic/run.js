@@ -37,4 +37,4 @@ for(f in context.doc) {
 if(parseInt(context.count) % 100 == 0) 
     out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
-out.value = row.join(c.sep) + '\\n'; 
+out.value = context.doc; 
