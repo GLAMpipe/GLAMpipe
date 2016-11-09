@@ -1,10 +1,11 @@
 {
-	"nodeid": "source_group",
+	"nodeid": "source_collection_group",
 	"type": "source",
-	"subtype": "group",
+	"subtype": "collection",
+	"subsubtype": "group_by_key",
     "status": "usable",
-	"title": "Group fields",
-	"description": "Group by values",
+	"title": "Group by field value",
+	"description": "Group records based on values in certain field (like author for example).",
 
 	"scripts": {
 		"hello": 

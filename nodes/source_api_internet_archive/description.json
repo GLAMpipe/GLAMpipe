@@ -2,7 +2,7 @@
     "nodeid": "source_api_internet_archive",
     "title": "Internet Archive",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "status": "works",
     "description": "Fetch data from IA based on query constructed with IA's advanced query.",
 

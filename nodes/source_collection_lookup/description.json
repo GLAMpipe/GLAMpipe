@@ -1,8 +1,9 @@
 {
-	"nodeid": "lookup_collection",
+	"nodeid": "source_collection_lookup",
 	"title": "Collection lookup",
-	"type": "lookup",
+	"type": "source",
 	"subtype": "collection",
+	"subsubtype": "lookup",
     "status": "works",
 	"description": "Collection lookup. Suitable for example term lookups.",
 

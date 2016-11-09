@@ -1,7 +1,7 @@
 {
     "nodeid": "source_api_dspace",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "subsubtype": "two_rounds",
     "title": "DSpace collection import",
     "status": "usable",

@@ -89,13 +89,19 @@ exports.runNode = function (node, io) {
 			
 			switch (node.subtype) {
 				
-				case "API":
+				case "web":
 
 					switch (node.subsubtype) {
 						
 						// two phase import
 						case "two_rounds" :
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
+						break;
+						
+						case "csv":
+							var downloader = require("../app/node_runners/download-file.js");
+							pre_run.runInContext(sandbox);
+							downloader.downloadAndSave (node,sandbox.out.urls[0], function() {console.log("done")});
 						break;
 						
 						default:
@@ -105,49 +111,54 @@ exports.runNode = function (node, io) {
 					
 				break;
 
-				case "group":
+				case "collection":
 				
-					function groupCB (data) {
-						// provide data to node
-						//sandbox.context.data = data;
+					switch (node.subsubtype) {
 						
-						// let node pick the data it wants from result
-						//runNodeScriptInContext("run", node, sandbox, io);
+						case "group" :
 						
-						// add source id to data
-						for (var i = 0; i < data.length; i++ ) {
-							data[i][MP.source] = node._id;
-						}
-						// insert
-						mongoquery.insert(node.collection, data, function(err, result) {
-							runNodeScriptInContext("finish", node, sandbox, io);
-						});
-						
-					}
-					
-					// remove previous data insertet by node and import file
-					var query = {}; 
-					query[MP.source] = node._id;
-					mongoquery.empty(node.collection, query, function() {
-						// we must check if input key is array or not
-						mongoquery.findOne({}, node.params.source_collection, function (err, record) {
-							if(record) {
-								if(record[node.params.in_field]) {
-									var array = record[node.params.in_field].constructor.name == "Array";
-									mongoquery.group(node, array, groupCB);
-								} else {
-									io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
-									io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+							function groupCB (data) {
+								// provide data to node
+								//sandbox.context.data = data;
+								
+								// let node pick the data it wants from result
+								//runNodeScriptInContext("run", node, sandbox, io);
+								
+								// add source id to data
+								for (var i = 0; i < data.length; i++ ) {
+									data[i][MP.source] = node._id;
 								}
+								// insert
+								mongoquery.insert(node.collection, data, function(err, result) {
+									runNodeScriptInContext("finish", node, sandbox, io);
+								});
+								
 							}
-						}) 
-					});
-						
+							
+							// remove previous data insertet by node and import file
+							var query = {}; 
+							query[MP.source] = node._id;
+							mongoquery.empty(node.collection, query, function() {
+								// we must check if input key is array or not
+								mongoquery.findOne({}, node.params.source_collection, function (err, record) {
+									if(record) {
+										if(record[node.params.in_field]) {
+											var array = record[node.params.in_field].constructor.name == "Array";
+											mongoquery.group(node, array, groupCB);
+										} else {
+											io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
+											io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+										}
+									}
+								}) 
+							});
+									
+					}
 				
 				break;
 
 				
-				case "file":
+				case "upload":
 				
 					switch (node.subsubtype) {
 						
@@ -162,6 +173,7 @@ exports.runNode = function (node, io) {
 							});
 							
 						break;
+
 					}
 						
 				
@@ -259,7 +271,7 @@ exports.runNode = function (node, io) {
 					
 				break;
 				
-				case "API":
+				case "web":
 				
 					switch (node.subsubtype) {
 						

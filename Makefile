@@ -8,6 +8,7 @@ PWD=$(shell pwd)
 build: 
 	docker create --name=glampipe_mongo mongo:3.2.10
 	docker build -t artturimatias/glampipe .
+	echo "Remember to set DATA_DIR in Makefile"
 
 start:
 	docker start glampipe_mongo	

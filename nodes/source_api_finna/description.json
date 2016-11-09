@@ -2,7 +2,7 @@
     "nodeid": "source_api_finna",
     "title": "FINNA",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "status": "test",
     "description": "Fetch online materials data from FINNA. ",
 

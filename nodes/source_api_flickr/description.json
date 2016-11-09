@@ -1,7 +1,7 @@
 {
     "nodeid": "source_api_flickr",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "title": "Flickr",
     "status": "usable",
     "usage":"",

@@ -9,7 +9,7 @@ const MP 		= require("../../config/const.js");
 var exports = module.exports = {};
 
 
-
+// saves list of files
 exports.downloadFile = function (doc, sandbox, cb ) {
 	
 	var fs = require("fs");
@@ -102,7 +102,6 @@ function fileExists (node, download, cb) {
 		}
 	});
 }
-
 
 
 exports.downloadAndSave = function (node, download, next) {

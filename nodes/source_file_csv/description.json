@@ -1,11 +1,11 @@
 {
-	"nodeid": "source_file_csv",
+	"nodeid": "source_upload_csv",
 	"type": "source",
-	"subtype": "file",
+	"subtype": "upload",
 	"subsubtype": "csv",
 	"title": "Upload csv",
     "status": "usable",
-	"description": "import csv file",
+	"description": "Upload and import csv file",
 
 	"scripts": {
 		"hello": 

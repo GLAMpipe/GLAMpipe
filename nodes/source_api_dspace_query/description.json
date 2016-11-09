@@ -1,7 +1,7 @@
 {
     "nodeid": "source_api_dspace_query",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "title": "DSpace query",
     "status": "usable",
     "usage":"",

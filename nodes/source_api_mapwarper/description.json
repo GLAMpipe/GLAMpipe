@@ -2,7 +2,7 @@
     "nodeid": "source_api_mapwarper",
     "title": "Map Warper",
     "type": "source",
-    "subtype": "API",
+    "subtype": "web",
     "status": "usable",
     "description": "Fetch all maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
 

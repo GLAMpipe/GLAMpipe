@@ -25,7 +25,6 @@ var nodeRepository = function () {
         html += "  <div class='inlinetitleblock'>";
         html += "    <div><span class='title inlinetitle'>Choose node type</span></div>"
         html += "  </div>"
-        
 
         // render node types
         for (var i = 0; i < self.nodes.length; i++) {
@@ -33,21 +32,20 @@ var nodeRepository = function () {
             var node = self.nodes[i]._id;
             if(types.indexOf(node.type) != -1) {
                 html += "  <div class='optionlist'>"
-                html += "    <button class='accordion "+node.type+"'>"
-                html += "      <p class='listtitle'>"+node.type+"</p>"
-                html += "      <p class='listtext'></p>"
-                html += "    </button>"
-                html += "    <div class='panel'>"
                 
                 // render subtypes
                 for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
                     var sub = self.nodes[i].subtypes[j];
-                    
-                    html += "<button class='accordion sub "+node.type+"'>" + sub.sub.subtype + "</button>"
-                    html += "<div class='panel'>"
+
+					html += "    <button class='accordion "+node.type+"'>"
+					html += "      <p class='listtitle'>"+cap(sub.sub.subtype)+"</p>"
+					html += "      <p class='listtext'></p>"
+					html += "    </button>"
+					html += "    <div class='panel'>"
                     
                     // render nodes
                     for (var k = 0; k < sub.nodes.length; k++) {
+						// skip nodes with status "broken"
 						if(sub.nodes[k].status == "broken")
 							continue;
                         self.plainNodes.push(sub.nodes[k]);
@@ -94,7 +92,7 @@ var nodeRepository = function () {
 
 		// we need to create form for file import (upload)
         if(node.type == "source") {
-            if(node.subtype == "file") {
+            if(node.subtype == "upload") {
 				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";		
 				html += node.views.params;
 				html += "</form>";		
@@ -118,4 +116,9 @@ var nodeRepository = function () {
     }
 
 
+}
+
+
+function cap(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 }

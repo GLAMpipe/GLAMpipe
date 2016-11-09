@@ -112,11 +112,14 @@ var glamPipeNode = function (node, gp) {
 	// render node to project view (left column)
 	this.renderNode = function () {
 		var in_field = '';
+		var subsubtype = "";
+		if(self.source.subsubtype)
+			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
 		var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>"
-		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype +"</div>"
+		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
 		html +=   "  </div>"

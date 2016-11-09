@@ -2,7 +2,7 @@
     "nodeid": "export_data_dspace_upload",
     "title": "DSpace add items",
     "type": "export",
-    "subtype": "API",
+    "subtype": "web",
     "subsubtype": "dspace_upload",
     "status": "usable",
     "description": "Create new items via REST API",

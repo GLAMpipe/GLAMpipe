@@ -2,7 +2,7 @@
     "nodeid": "export_data_update_dspace",
     "title": "DSpace metadata update",
     "type": "export",
-    "subtype": "API",
+    "subtype": "web",
     "subsubtype": "dspace_update",
     "status": "usable",
     "description": "Update DSpace data via REST API",

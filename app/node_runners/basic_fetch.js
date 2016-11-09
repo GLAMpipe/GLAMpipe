@@ -21,7 +21,6 @@ exports.fetchData = function (node, sandbox, io, cb) {
 		console.log("URL:", sandbox.out.url)
 		requestLoop(node, sandbox, io, cb);
 	});
-
 }
 
 
