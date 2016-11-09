@@ -2,7 +2,7 @@
 // DATAPATH
 // - where GLAMpipe can strore project data
 // default: ""
-var dataPath = "/home/arihayri/gp_aineistot";
+var dataPath = "/home/arihayri/GLAMpipe-data";
 
 
 // NODEPATH
