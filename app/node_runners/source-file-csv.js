@@ -5,8 +5,51 @@ var mongoquery 	= require("../../app/mongo-query.js");
 var collection = require("../../app/collection.js");
 const MP 		= require("../../config/const.js");
 
+var fs = require('fs');
+var parse = require('csv-parse');
+var transform = require('stream-transform');
+var async = require('async');
 
 var exports = module.exports = {};
+
+
+exports.readToArray = function (node, sandbox, io, cb) {
+	
+	var download = sandbox.out.urls[0];
+	var file= path.join(node.dir, download.filename);
+	//var file = path.join(global.config.dataPath, "tmp", filename);
+	var counter = 0;
+	
+	var records = []; // currently we create one huge array of records and insert that to Mongo
+
+	var parser = parse({
+		delimiter: node.settings.separator, 
+		columns:true, 
+		skip_empty_lines:true}, 
+		function (err, data) {
+		
+			if(err) {
+				console.log("ERROR:", err.message);
+				io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err.message});
+				return;
+			}
+			console.log("INITIAL IMPORT COUNT:", data.length);
+			cb(data);
+		}
+	)
+		
+
+	parser.on('error', function(err){
+	  console.log(err.message);
+	});
+
+	parser.on('finish', function(err){
+		//cb();
+	});
+
+	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
+	
+}
 
 /*
  * Parses CSV and adds language fields 
@@ -14,16 +57,16 @@ var exports = module.exports = {};
  * */
 exports.importFile = function  (node, sandbox, io, cb) {
 
-	var fs = require('fs');
-	var parse = require('csv-parse');
-	var transform = require('stream-transform');
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
-	var async = require('async');
 	var counter = 0;
 	
-	var records = []; // currently we create one huge array or records and insert that to Mongo
+	var records = []; // currently we create one huge array of records and insert that to Mongo
 
-	var parser = parse({delimiter: node.settings.separator, columns:true, skip_empty_lines:true}, function (err, data) {
+	var parser = parse({
+		delimiter: node.settings.separator, 
+		columns:true, 
+		skip_empty_lines:true}, 
+		function (err, data) {
 		
 		if(err) {
 			console.log("ERROR:", err.message);

@@ -1,5 +1,5 @@
 {
-    "nodeid": "source_api_dspace_query",
+    "nodeid": "source_web_dspace_query",
     "type": "source",
     "subtype": "web",
     "title": "DSpace query",

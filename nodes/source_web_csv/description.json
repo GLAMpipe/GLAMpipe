@@ -1,5 +1,5 @@
 {
-	"nodeid": "source_api_csv",
+	"nodeid": "source_web_csv",
 	"type": "source",
 	"subtype": "web",
 	"subsubtype": "csv",
@@ -29,7 +29,7 @@
 			"} "
 		],
 		
-		"finish":"out.say('finish', '<h2>Data imported</h2> from file ' + context.node.params.file);"
+		"finish":"out.say('finish', '<h2>Data imported</h2> from address ' + context.node.params.file_url);"
 		
 	},
 	

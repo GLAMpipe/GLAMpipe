@@ -1,5 +1,5 @@
 {
-    "nodeid": "source_api_dspace",
+    "nodeid": "source_web_dspace",
     "type": "source",
     "subtype": "web",
     "subsubtype": "two_rounds",

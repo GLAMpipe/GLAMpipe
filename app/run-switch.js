@@ -100,8 +100,45 @@ exports.runNode = function (node, io) {
 						
 						case "csv":
 							var downloader = require("../app/node_runners/download-file.js");
-							pre_run.runInContext(sandbox);
-							downloader.downloadAndSave (node,sandbox.out.urls[0], function() {console.log("done")});
+							var csv = require("../app/node_runners/source-file-csv.js");
+							pre_run.runInContext(sandbox); // ask url and user auth from node
+							var download = sandbox.out.urls[0]; // we have only one download
+							downloader.downloadAndSave (node, download, function() {
+								if(download.response.statusCode == 200) {
+									// read data from CSV
+									csv.readToArray(node, sandbox, io, function(data) {
+										// separate update key
+							
+										// query update keys from db
+										mongoquery.find2({}, node.collection,function(err, records) {
+											console.log(data);
+											records.forEach(function(record, i) {
+												console.log(record.dt);
+											})
+										})
+										
+										// compare update keys
+										
+										// save new ones to db
+										
+										// save to database
+										//mongoquery.insert(node.collection, data , function(error) {
+											//if(error) {
+												//console.log(error);
+												//runNodeScriptInContext("finish", node, sandbox, io);
+											//} else {
+												//runNodeScriptInContext("finish", node, sandbox, io);
+											//}
+										//})
+							
+							
+										data.forEach(function (record, i) {
+											//console.log(record.dt);
+										})
+									});
+								}
+								//run.runInContext(sandbox);
+							});
 						break;
 						
 						default:

@@ -171,6 +171,21 @@ node-pipe {
 	cursor:pointer;
 }
 
+
+
+.box-noflex {
+	color:#444;
+	background-color: #FFF;
+	border-radius: 5px;
+	/*height: 50px; */
+	width: 335px;
+	overflow: hidden;
+	padding: 10px 5px 10px 10px;
+	margin-bottom:10px;
+	-webkit-transition-duration: 0.1s; /* Safari */
+    transition-duration: 0.1s;
+}
+
 .boxleft {
 	-webkit-align-self: flex-start;
 	align-self: flex-start;

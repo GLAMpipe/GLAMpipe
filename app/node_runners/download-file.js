@@ -114,7 +114,18 @@ exports.downloadAndSave = function (node, download, next) {
 	
 	var filePath = path.join(node.dir, download.filename); 
 	var file = fs.createWriteStream(filePath);
-	var sendReq = request.get(download.url);
+	
+	var options = {
+		url:download.url
+	}
+	
+	// use basic authentication if node did set "auth"
+	if(download.auth)
+		options.auth = download.auth;
+	
+	console.log(options);
+	
+	var sendReq = request.get(options);
 
 	// verify response code
 	sendReq.on('response', function(response) {
