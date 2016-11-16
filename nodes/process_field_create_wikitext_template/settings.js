@@ -56,7 +56,8 @@ var wikiFields =
         'other versions'
     ]
 ]; 
-			
+
+// create inputs dynamically based template chosen			
 var sel = node.params.template;
 for(var i = 0; i < wikiFields[sel].length; i++) { 
    var label = '<label>' + wikiFields[sel][i] + '</label>';  
@@ -67,9 +68,6 @@ for(var i = 0; i < wikiFields[sel].length; i++) {
    var input5 = '<input name=\"_wt_5_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" /><span > + </span>'; 
    var input6 = '<input name=\"_wt_6_' + wikiFields[sel][i] + '\" class=\"node-settings dynamic_field middle_input\" /><span > + </span>'; 
    var input7 = '<input name=\"_wt_7_' + wikiFields[sel][i] + '\" class=\"node-settings short_input\" />'; 
-    if(node.settings) {
-        $('.template_map').append( label +'<input name=\"_wt_' + wikiFields[sel][i]+'\" class=\"dynamic_field\" value=\"'+node.settings['_wt_'+wikiFields[sel][i]]+'\"/>'); 
-    } else {
-        $('#node_set___node_id__').append( label + input1 + input2 + input3 + input4 + input5 + input6 + input7); 
-    }
+   
+   $('#node_set___node_id__').append( label + input1 + input2 + input3 + input4 + input5 + input6 + input7); 
 }

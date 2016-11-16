@@ -360,7 +360,7 @@ exports.runNode = function (req, io) {
 			console.log("saved node settings");
 		})
 
-		console.log("NODE: running", node.type);
+		console.log("NODE: running node type: ", node.type);
 		
 		try {
 			require("../app/run-switch.js").runNode(node, io);
@@ -917,6 +917,18 @@ exports.getCollectionByField = function (req, res) {
 	
 	exports.getCollection (req, query, res);
 }
+
+
+exports.getDocumentById = function (req, res) {
+
+	console.log(req.params.doc);
+	console.log(req.params.id);
+	mongoquery.findOneById(req.params.doc, req.params.id, function(result) {
+		console.log(result);
+		res.json({data:result});
+	})
+}
+
 
 
 

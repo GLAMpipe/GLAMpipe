@@ -116,7 +116,8 @@ exports.downloadAndSave = function (node, download, next) {
 	var file = fs.createWriteStream(filePath);
 	
 	var options = {
-		url:download.url
+		url:download.url,
+		followRedirect:false
 	}
 	
 	// use basic authentication if node did set "auth"

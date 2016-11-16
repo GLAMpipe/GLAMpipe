@@ -108,6 +108,19 @@ exports.findOneById = function (doc_id, collectionname, callback) {
 	})
 }
 
+
+exports.findDistinct = function (query, collectionname, key, callback) {
+	
+	var collection = db.collection(collectionname);
+	
+	collection.distinct(key, query, function(err, list) {
+		console.log(err);
+	   callback(err, list);
+	});
+	
+	
+}
+
 exports.countDocs = function (collectionname, query, callback) {
 	
 	var collection = db.collection(collectionname);

@@ -8,6 +8,7 @@ const LocalStrategy = require('passport-local').Strategy
 var express			= require('express');
 var request			= require('request');
 var bodyParser		= require("body-parser");
+var cors 			= require('cors');
 var colors 			= require('ansicolors');
 
 const conf 		= require("./config/config.js");
@@ -74,6 +75,12 @@ var GlamPipe = function() {
 		})); 
 
 		self.app.use(passport.initialize()); 
+
+
+
+		// CORS
+		self.app.use(cors());
+		self.app.options('*', cors());
 
 
 		const user = {  

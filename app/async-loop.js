@@ -51,6 +51,8 @@ function loop (node, sandbox, onDoc) {
 	
 		runNodeScriptInContext("init", node, sandbox);
 		
+		console.log(node.settings);
+		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
 

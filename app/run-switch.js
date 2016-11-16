@@ -98,47 +98,57 @@ exports.runNode = function (node, io) {
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
 						break;
 						
+						// **** DRAFT!!!****
+						
 						case "csv":
 							var downloader = require("../app/node_runners/download-file.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
 							pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
 							downloader.downloadAndSave (node, download, function() {
+								console.log(download.response.statusCode);
 								if(download.response.statusCode == 200) {
 									// read data from CSV
 									csv.readToArray(node, sandbox, io, function(data) {
-										// separate update key
 							
+										var new_records = [];
 										// query update keys from db
-										mongoquery.find2({}, node.collection,function(err, records) {
-											console.log(data);
-											records.forEach(function(record, i) {
-												console.log(record.dt);
-											})
+										mongoquery.findDistinct({}, node.collection, "dt", function(err, records) {
+												data.forEach(function(csv_item, j) {
+
+													var dt = csv_item.dt;
+													//dt = dt.replace(/[\r\n]/g, '');
+													console.log(records.indexOf(dt));
+													if(records.indexOf(dt) === -1)
+														new_records.push(csv_item);
+												})
+											
+											// new ones
+											console.log("NEW: ", new_records);
+											//save to database
+											if(new_records.length) {
+												mongoquery.insert(node.collection, new_records , function(error) {
+													if(error) {
+														console.log(error);
+														runNodeScriptInContext("finish", node, sandbox, io);
+													} else {
+														runNodeScriptInContext("finish", node, sandbox, io);
+													}
+												})
+											} else {
+												runNodeScriptInContext("finish", node, sandbox, io);
+											}
 										})
 										
-										// compare update keys
-										
-										// save new ones to db
-										
-										// save to database
-										//mongoquery.insert(node.collection, data , function(error) {
-											//if(error) {
-												//console.log(error);
-												//runNodeScriptInContext("finish", node, sandbox, io);
-											//} else {
-												//runNodeScriptInContext("finish", node, sandbox, io);
-											//}
-										//})
-							
-							
-										data.forEach(function (record, i) {
-											//console.log(record.dt);
-										})
 									});
+								} else if(download.response.statusCode == 302) {
+									io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
+
 								}
-								//run.runInContext(sandbox);
 							});
+							
+							// **** DRAFT ENDS ****
+							
 						break;
 						
 						default:

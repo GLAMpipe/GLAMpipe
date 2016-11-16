@@ -179,6 +179,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionTableData(req, res);
 	});
 
+	express.get('/get/collection/:id/doc/:doc', function (req, res) {
+		glampipe.core.getDocumentById(req, res);
+	});
+
 	express.get('/get/collection/byfield/:id', function (req, res) {
 		glampipe.core.getCollectionByField(req, res);
 	});
@@ -190,7 +194,6 @@ module.exports = function(express, glampipe, passport) {
 	express.get('/get/collection/:name/fields', function (req, res) {
 		collection.getKeys(req.params.name, function(data) {res.send(data)});
 	});
-
 
 	express.get('/get/collection/count/:id', function (req, res) {
 		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});

@@ -3,7 +3,7 @@
 	"title": "Create wikitext",
 	"type": "process",
 	"subtype": "fields",
-	"status": "broken",
+	"status": "works",
 	"description": "Produce wikitext output based on template",
 	"scripts": {
 		"hello": "out.say('news', 'You added a wikitext node'); ",
