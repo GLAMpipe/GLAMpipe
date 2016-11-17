@@ -212,7 +212,7 @@ var glamPipeNode = function (node, gp) {
         // handle checkboxes separately. Checbox is included only if it is checked
         $("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
-				settings[$(this).attr("name")] = $(this).val();
+				settings[$(this).attr("name")] = $(this).is(':checked');
 		});
 		
 		return settings;	

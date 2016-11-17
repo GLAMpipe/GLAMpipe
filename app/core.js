@@ -406,6 +406,7 @@ exports.uploadFile = function (req, res ) {
 			})
 		break;
 		
+		case "text/comma-separated-values":
 		case "text/csv":
 			console.log("File type: comma separated values");
 			return res.json({
