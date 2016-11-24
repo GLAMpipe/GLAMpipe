@@ -50,8 +50,12 @@ exports.runNode = function (node, io) {
 			say: function(ch, msg) {
 				console.log(ch.toUpperCase() + ":", msg);
 				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
-				mongoquery.runLog({"mode": ch, "ts": new Date(), "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
+				var date = new Date();
+				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
 					console.log("logged");
+					// send response
+					if(ch === "finish" && node.res) 
+						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
 				});
 			}
 		},
@@ -162,7 +166,7 @@ exports.runNode = function (node, io) {
 				
 					switch (node.subsubtype) {
 						
-						case "group" :
+						case "group_by_key" :
 						
 							function groupCB (data) {
 								// provide data to node

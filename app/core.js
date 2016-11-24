@@ -338,7 +338,7 @@ exports.getNodeFromFile = function (node_id, res) {
  * run project node based on node type
  * - this is THE MAIN SWITCH of GLAMpipe
  */ 
-exports.runNode = function (req, io) {
+exports.runNode = function (req, io, res) {
 
 	console.log('Running node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
@@ -361,6 +361,8 @@ exports.runNode = function (req, io) {
 		})
 
 		console.log("NODE: running node type: ", node.type);
+		if(res)
+			node.res = res;
 		
 		try {
 			require("../app/run-switch.js").runNode(node, io);
@@ -945,6 +947,15 @@ exports.getCollectionCount = function (req, cb) {
 exports.editCollection = function (collection_id, req, callback) {
 
 	console.log("editing", collection_id);
+	if(!req.body.doc_id)
+		return callback({error:"doc_id is missing!"});
+		
+	try {
+		var doc_id = mongojs.ObjectId(req.body.doc_id)
+	} catch (e) {
+		return callback({error:"doc_id is invalid! It must be a valid MongoDB id."});
+	}
+	
 	var setter = {};
 	setter[req.body.field] = req.body.value;
 	console.log("setter:", setter);

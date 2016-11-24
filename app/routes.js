@@ -167,11 +167,14 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.setVisibleFields(req.params.id, res);
 	});
 
-	express.post('/run/node/:id', function (req, res) {
+	express.post('/start/node/:id', function (req, res) {
 		glampipe.core.runNode(req, glampipe.io);
-		res.json({status:"started"});
+		res.json({status:"started", ts:  new Date()});
 	});
 
+	express.post('/run/node/:id', function (req, res) {
+		glampipe.core.runNode(req, glampipe.io, res);
+	});
 
 
 	// DATA
