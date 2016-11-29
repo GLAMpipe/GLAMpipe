@@ -221,6 +221,7 @@ exports.runNode = function (node, io) {
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
 								csv.importFile(node, sandbox, io);
+								//csv.importFileWithoutFieldNames(node, sandbox, io);
 							});
 							
 						break;

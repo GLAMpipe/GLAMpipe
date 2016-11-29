@@ -59,12 +59,15 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var counter = 0;
+	var columns = null;
+	if(node.settings.columns)
+		columns = true;
 	
 	var records = []; // currently we create one huge array of records and insert that to Mongo
 
 	var parser = parse({
 		delimiter: node.settings.separator, 
-		columns:true, 
+		columns:columns, 
 		skip_empty_lines:true}, 
 		function (err, data) {
 		
@@ -165,6 +168,68 @@ exports.importFile = function  (node, sandbox, io, cb) {
 
 }
 
+/*
+ * Parses CSV and adds language fields 
+ * 
+ * */
+exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
+
+	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	var counter = 0;
+	
+	var records = []; // currently we create one huge array of records and insert that to Mongo
+
+	var parser = parse({
+		delimiter: node.settings.separator, 
+		columns:null, 
+		skip_empty_lines:true}, 
+		function (err, data) {
+		
+		if(err) {
+			console.log("ERROR:", err.message);
+			io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err.message});
+			return;
+		}
+			
+		console.log("INITIAL IMPORT COUNT:", data.length);
+		console.log("columns:" + node.settings.columns);
+		//console.log( arguments.callee.toString());
+		
+		
+		async.eachSeries(data, function (record, callback) {
+			
+			var new_record = {};
+			new_record[MP.source] = node._id;
+			
+			//console.log("rivi:" + record);
+			//console.log(record);
+			
+			record.forEach(function (field, i) {
+				console.log("field" + i);
+			})
+			
+
+			
+			callback();
+
+
+		  
+
+		}, function done () {
+			console.log("NODE: Inserting " + counter + " records");
+			
+
+			
+		})
+	})
+
+	parser.on('error', function(err){
+	  console.log(err.message);
+	});
+
+	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
+
+}
 
 function cleanFieldName (field) {
 
