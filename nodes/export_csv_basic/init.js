@@ -7,4 +7,4 @@ for(f in context.doc_eka) {
     if(f != '__mp_source' && f != '_id') 
         row.push(f); 
 };
-out.value = row.join(c.sep) + '\\n'; 
+out.value = row.join(c.sep) + "\n"; 

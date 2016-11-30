@@ -4,7 +4,7 @@ var wikiFields =
     [
         'photographer',
         'title',
-        'desription',
+        'description',
         'depicted people',
         'depicted_place',
         'date',

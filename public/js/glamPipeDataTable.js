@@ -465,7 +465,8 @@ var dataTable = function (node) {
 	this.renderTextInput = function (key, value) {
 		var html = "";
 		if(value.length > self.maxInputLength) {
-			html = "<textarea name='"+  key +"'>"+self.nl2br(value)+"</textarea>";
+			//html = "<textarea name='"+  key +"'>"+self.nl2br(value)+"</textarea>";
+			html = "<textarea name='"+  key +"'>"+value+"</textarea>";
 		} else {
 			html += "<input name='"+ key +"'value='"+ value +"'></input>";
 		}

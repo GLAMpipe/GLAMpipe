@@ -1,7 +1,7 @@
 
 var c = context; 
 var templates = ['Photograph', 'Map']; 
-var output = '{{' + templates[parseInt(c.node.params.template)] + '\\n'; 
+var output = '{{' + templates[parseInt(c.node.params.template)] + "\n"; 
 var settings = context.node.settings; 
 var wikifield = ''; 
             
@@ -22,8 +22,9 @@ for (key in settings) {
     }
 }
 
-output += '}}\\n'; 
+output += "}}\n"; 
 
+// add categories from individual data fields
 var cats = c.get(context.doc, settings.categories); 
 if (cats.constructor.name === 'Array') {
     for(var i = 0; i < cats.length; i++) {
@@ -31,14 +32,18 @@ if (cats.constructor.name === 'Array') {
     }
 }
 
-if(settings.category_all != '') 
+// add categories for all images
+if(settings.category_all) 
     output += "[[Category:" + settings.category_all + "]]\n"; 
+
+
+// self promote
+output += "[[Category:GLAMpipe uploads]]\n"; 
 
 
 if(parseInt(context.count) % 100 == 0) 
     out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
-
-output += "[[Category:GLAMpipe uploads]]\n"; 
+// out put wikitext
 out.value = output; 
 

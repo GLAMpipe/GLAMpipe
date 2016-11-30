@@ -67,7 +67,7 @@ function loop (node, sandbox, onDoc) {
 					var setter = {};
 					setter[node.out_field] = sandbox.out.value;
 				}
-				//console.log("setter:", setter);
+				console.log("setter:", setter);
 				
 				mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 			});

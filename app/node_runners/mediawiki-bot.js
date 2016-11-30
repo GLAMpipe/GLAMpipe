@@ -6,10 +6,12 @@ var collection = require("../../app/collection.js");
 
 
 var exports = module.exports = {};
+console.log("inside bot");
 
-exports.uploadFileWithWikitext() {
+exports.uploadFileWithWikitext = function (node, sandbox, io) {
 
 	var bot = require('nodemw');
+	var async = require("async");
 	fs = require('fs');
 
 	// ask bot config (username, pass etc.) from node

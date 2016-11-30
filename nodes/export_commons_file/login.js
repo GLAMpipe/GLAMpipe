@@ -1,5 +1,5 @@
 var config = { 
-   "protocol": "http", 
+   "protocol": "https", 
     "server": "commons.wikimedia.beta.wmflabs.org", 
     "path": "/w",  
     "debug": true, 
@@ -10,6 +10,6 @@ var config = {
 }; 
 out.botconfig = config;
             
-var apis = ["https://commons.wikimedia.org","http://commons.wikimedia.beta.wmflabs.org"]; 
+var apis = ["https://commons.wikimedia.org","https://commons.wikimedia.beta.wmflabs.org"]; 
 out.say("progress", "Trying to login to commons..."); 
 out.url = apis[parseInt(context.node.settings.api)] +"/w/api.php?action=query&meta=tokens&type=login"; 

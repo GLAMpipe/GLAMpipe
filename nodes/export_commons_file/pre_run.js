@@ -1,4 +1,3 @@
-var apis = ["http://siljo.lib.jyu.fi:8080/", "http://siljo.lib.jyu.fi:8080/"]; 
 var title = context.doc[context.node.params.field]; 
 var source = context.doc[context.node.params.location]; 
             
@@ -12,7 +11,7 @@ if(context.get(context.doc, context.node.params.out_field) != "") {
     var filename = splitted[splitted.length -1]; 
     var s = filename.split(".");  
     var ext = s[s.length - 1]; 
-    out.say("progress", title); 
+    out.say("progress", "Starting to upload file <b>" + title + "</b>"); 
             
     if(title[title.length - 1] != ".") 
         out.title = title + "." + ext; 

@@ -6,7 +6,7 @@ var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
-var sourceAPI	= require("../app/node_runners/basic_fetch.js");
+var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
@@ -221,7 +221,6 @@ exports.runNode = function (node, io) {
 							query[MP.source] = node._id;
 							mongoquery.empty(node.collection, query, function() {
 								csv.importFile(node, sandbox, io);
-								//csv.importFileWithoutFieldNames(node, sandbox, io);
 							});
 							
 						break;
@@ -351,6 +350,15 @@ exports.runNode = function (node, io) {
 								}
 							});
 						break;
+						
+						case "mediawiki_bot":
+						
+							console.log("trying wikibot");
+							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
+							mv_bot.uploadFileWithWikitext(node, sandbox, io);
+
+						break;
+					
 					}
 				
 				break;
@@ -477,8 +485,18 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						
 						case "extract_references":
-							var extractReferences = require("../app/node_runners/file_pdf.js");
+							var extractReferences = require("../app/node_runners/file-pdf.js");
 							asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+						break;
+						
+						case "calculate_checksum":
+							var checksum = require("../app/node_runners/file-checksum.js");
+							asyncLoop.loop(node, sandbox, checksum.getHash);
+						break;
+						
+						case "check_commons":
+							var web = require("../app/node_runners/web-get-content.js");
+							asyncLoop.loop(node, sandbox, web.request);
 						break;
 					}
 					break;	
