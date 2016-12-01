@@ -114,6 +114,34 @@ exports.updateData = function (doc, sandbox, next) {
 }
 
 
+exports.addMetadataField = function (doc, sandbox, next) {
+
+	// let node create an update item
+	sandbox.pre_run.runInContext(sandbox);
+	
+	 var options = {
+		url: sandbox.out.url,
+		json: sandbox.out.value,
+		jar:true
+	};
+	
+	var request = require("request");
+	//require('request').debug = true;
+
+	// make actual HTTP request
+	request.post(options, function (error, response) {
+		sandbox.context.response = response;
+		if (error) 
+			console.log(error);
+		else {
+			console.log("DATA:", sandbox.out.value);
+			console.log("URL:", options.url);
+			console.log("update response:", response.statusMessage);
+			sandbox.run.runInContext(sandbox);
+			next();
+		}
+	});
+}
 
 function runNodeScriptInContext (script, node, sandbox, io) {
 	try {

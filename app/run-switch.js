@@ -350,6 +350,19 @@ exports.runNode = function (node, io) {
 								}
 							});
 						break;
+
+						case "dspace_addfield":
+							var dspace = require("../app/node_runners/dspace.js");
+							dspace.login(node, sandbox, io, function(error) {
+								if(error)
+									console.log("ERROR: login failed");
+								else {
+									console.log("LOGIN GOOD");
+									asyncLoop.loop(node, sandbox, dspace.addMetadataField);
+								}
+							});
+						break;
+
 						
 						case "mediawiki_bot":
 						

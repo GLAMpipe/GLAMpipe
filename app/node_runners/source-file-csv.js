@@ -68,6 +68,8 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	var parser = parse({
 		delimiter: node.settings.separator, 
 		columns:columns, 
+		relax: true,
+		trim: true, // this could be optional
 		skip_empty_lines:true}, 
 		function (err, data) {
 		
