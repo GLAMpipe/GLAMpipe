@@ -3,7 +3,7 @@ version: '2'
 
 services:
   glam:
-    image : artturimatias/glampipe:latest
+    build: .
     links:
      - mongo
     ports:
