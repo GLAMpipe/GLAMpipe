@@ -97,31 +97,48 @@ https://docs.docker.com/engine/installation/
 
 2. Next download a docker compose file:
 
+        git clone https://github.com/artturimatias/GLAMpipe.git
 
-	    https://raw.githubusercontent.com/artturimatias/GLAMpipe/compose/docker-compose.yml
-Copy content from here and save it as "docker-compose.yml"
-Or, if you have curl installed, you can download it directly:
-
-	    curl -O https://raw.githubusercontent.com/artturimatias/GLAMpipe/compose/docker-compose.yml
 
 3. Then install GLAMpipe. It's easy, just type:
 
-	    docker-compose up
+	docker-compose up
 
 This takes a while at first time since it load few hundred megabytes of data (next time the start up is almost instant). But finally you should see something like this:
 
-	    GLAMpipe running!
-	    copy this to your web browser -> http://localhost:3000
+    You should see something like this:
+    
+        ********************* G L A M p i pe *************************
+        * DATA PATH: /home/arihayri/GLAMpipe_DATA
+        * NODE PATH: 
+        * STATUS:    running on http://127.0.0.1:3000
+        ********************* G L A M p i pe *************************
+        
+    You can stop GLAMpipe by pressing CTRL + C
 
- If everything went well, You are all set! 
+
+ Just type http://localhost:3000 in your browser and you should have GLAMpipe in front of you. 
  You can stop GLAMpipe by pressing CTRL + C
  
+##Problems?
+
+When you run "docker-compose up" command first time, the mongo service might start later that GLAMpipe. This means that GLAMpipe refuses to start. Just press CTRL + C and then type again "docker-compose up".
+
+If there is still a problem with database, you can try to start mongo first:
+
+	docker-compose up -d mongo
+
+And then:
+
+	docker-compose up glam
+
 ##Upgrading
 Just type
 
-	docker-compose pull
+	git pull
 and then
 
+	docker-compose build
 	docker-compose up	
  
 
