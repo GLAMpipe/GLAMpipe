@@ -90,23 +90,21 @@ If you have a Linux box or you can run Linux in virtual machine, then these inst
 GLAMpipe can be installed via [Docker compose](https://docs.docker.com/compose/). So first you need to install Docker:
 https://docs.docker.com/engine/installation/
 
-1. Create a data directory for GLAMpipe, open terminal and change to that directory.
 
-	    cd directory_you_just_created
-
-
-2. Next download a docker compose file:
+1. Clone GLAMpipe repository:
 
         git clone https://github.com/artturimatias/GLAMpipe.git
+        cd GLAMpipe
 
 
-3. Then install GLAMpipe. It's easy, just type:
 
-	docker-compose up
+2. Then install GLAMpipe. It's easy, just type:
+
+        docker-compose build
+        docker-compose up
 
 This takes a while at first time since it load few hundred megabytes of data (next time the start up is almost instant). But finally you should see something like this:
 
-    You should see something like this:
     
         ********************* G L A M p i pe *************************
         * DATA PATH: /home/arihayri/GLAMpipe_DATA
@@ -114,13 +112,12 @@ This takes a while at first time since it load few hundred megabytes of data (ne
         * STATUS:    running on http://127.0.0.1:3000
         ********************* G L A M p i pe *************************
         
-    You can stop GLAMpipe by pressing CTRL + C
 
 
  Just type http://localhost:3000 in your browser and you should have GLAMpipe in front of you. 
  You can stop GLAMpipe by pressing CTRL + C
  
-##Problems?
+#### Possible problems with docker compose install
 
 When you run "docker-compose up" command first time, the mongo service might start later that GLAMpipe. This means that GLAMpipe refuses to start. Just press CTRL + C and then type again "docker-compose up".
 
