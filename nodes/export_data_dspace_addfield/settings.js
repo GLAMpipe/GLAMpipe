@@ -8,14 +8,15 @@ var urlInput = "#export_data_dspace_schema_add_field_url";
 $("#export_data_dspace_schema_add_field_url_pre").change(function(e){
 	var url = $('#export_data_dspace_schema_add_field_url_pre :selected').text();
 	$(urlInput).val(url);
+	fetchSchemas(url);
 	
 });
 
 
+
 // CREATE SCHEMA LIST
-$(fetchButton).click(function (e) {
+function fetchSchemas (url) {
 	
-	var url = $(urlInput).val();
 	if(url == "") {
 		alert("You must give server address!");
 	} else {
@@ -37,7 +38,7 @@ $(fetchButton).click(function (e) {
 			}
 		})
 	}
-})
+}
 
 
 

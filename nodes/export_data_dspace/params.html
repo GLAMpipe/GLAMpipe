@@ -1,0 +1,49 @@
+
+<label>Choose DSpace REST API url or write url below.</label>
+<select id="export_data_dspace_url_pre" name="url_pre">
+	<option value="">predefined servers</option>
+	<option value="http://siljo.lib.jyu.fi:8080/rest">http://siljo.lib.jyu.fi:8080/rest</option>
+	<option value="http://demo.dspace.org/rest">http://demo.dspace.org/rest</option>
+</select>
+
+<label>DSpace URL</label>
+<input id="export_data_dspace_url" name="url" required />
+<button id="export_data_dspace_test">Test</button>
+<div id="export_data_dspace_status"></div>
+
+<label>Where to write UUID?</label>
+<input name="out_uuid" value="test_uuid" required />
+
+<script>
+
+// URL SELECTION
+$("#export_data_dspace_url_pre").change(function(e){
+	var url = $('#export_data_dspace_url_pre :selected').text();
+	$('#export_data_dspace_url').val(url);
+	
+});
+
+// TEST
+$("#export_data_dspace_test").click(function (e) {
+
+	var url = $("#export_data_dspace_url").val();
+	if(url == "") {
+		alert("Set the rest api url of DSpace");
+		return;
+	}
+		
+	$("#export_data_dspace_status").empty().append("<h4>Testing " +url+" </h4>");
+
+	$.getJSON("/proxy?url=" + url + "/status", function (data) {
+		if(data.okay) {
+			$("#export_data_dspace_status").empty().append("<h4 class='good'>Server good!</h4>");
+		} else {
+			alert("API did not respond");
+			$("#export_data_dspace_status").empty().append("<h4 class='bad'>Server problem: "+url+"</h4>");
+		}
+
+	})				
+})
+
+
+</script>

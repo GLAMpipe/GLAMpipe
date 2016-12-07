@@ -19,9 +19,5 @@
         "finish":"out.say('finish', 'Data uploaded'); "
     },
     
-    "views": {
-        "params": "no params"
-
-    }
-
+    "views": {}
 }

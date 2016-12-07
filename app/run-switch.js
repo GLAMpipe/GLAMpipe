@@ -328,9 +328,10 @@ exports.runNode = function (node, io) {
 						
 						case "dspace_upload":
 							var dspace = require("../app/node_runners/dspace.js");
+							console.log("adding items");
 							dspace.login(node, sandbox, io, function(error) {
 								if(error)
-									console.log("ERROR: login failed");
+									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.loop(node, sandbox, dspace.uploadItem);
@@ -343,7 +344,7 @@ exports.runNode = function (node, io) {
 							var dspace = require("../app/node_runners/dspace.js");
 							dspace.login(node, sandbox, io, function(error) {
 								if(error)
-									console.log("ERROR: login failed");
+									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.loop(node, sandbox, dspace.updateData);
@@ -355,7 +356,7 @@ exports.runNode = function (node, io) {
 							var dspace = require("../app/node_runners/dspace.js");
 							dspace.login(node, sandbox, io, function(error) {
 								if(error)
-									console.log("ERROR: login failed");
+									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.loop(node, sandbox, dspace.addMetadataField);
@@ -363,6 +364,19 @@ exports.runNode = function (node, io) {
 							});
 						break;
 
+
+						case "dspace_addfile":
+							var dspace = require("../app/node_runners/dspace.js");
+							dspace.login(node, sandbox, io, function(error) {
+								if(error)
+									sandbox.out.say("error","login failed");
+								else {
+									console.log("LOGIN GOOD");
+									//asyncLoop.loop(node, sandbox, dspace.addFile);
+									dspace.addFile();
+								}
+							});
+						break;
 						
 						case "mediawiki_bot":
 						

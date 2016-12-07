@@ -161,7 +161,7 @@ $( document ).ready(function() {
     socket.on('error', function (data) {
         if(data.nodeid) {
             progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-            (".settings").removeClass("busy");
+            $(".settings").removeClass("busy");
             progressDisplay.addClass("done");
         } else {
             genericDisplay.append("<div class=\"bad\">" + data + "</div>");

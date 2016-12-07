@@ -23,7 +23,7 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post("/run/node/" + self.source._id, self.source.settings, function(data) {
+		$.post("/start/node/" + self.source._id, self.source.settings, function(data) {
 			console.log(data);
 			if(data.error)
 				alert(data.error);
@@ -201,6 +201,7 @@ var glamPipeNode = function (node, gp) {
         $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
             var nameSplitted = $(this).attr("name").split("[");
             // if input name has form "set[something1]", then we want to gather all of them to array
+            console.log($(this).attr("name") + ":" +  $(this).val());
             if(nameSplitted.length > 1) {
                 (settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
             } else {

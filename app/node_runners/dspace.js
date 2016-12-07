@@ -16,7 +16,7 @@ exports.login = function (node, sandbox, io, cb) {
 
 	// ask login details (email, password) from node
 	runNodeScriptInContext("login", node, sandbox, io);
-	console.log("DSpace login url:" ,sandbox.out.login_url);
+	console.log("DSpace login url:" ,sandbox.out.url);
 
 	 var options = {
 		headers: {'content-type' : 'application/x-www-form-urlencoded'},
@@ -56,11 +56,15 @@ exports.uploadItem = function (doc, sandbox, next) {
 	
 	// let node create an upload item
 	sandbox.pre_run.runInContext(sandbox);
+		
 	console.log(JSON.stringify(sandbox.out.setter.upload));
 
 	 var options = {
 		url: sandbox.out.url,
 		json: sandbox.out.setter.upload,
+		headers: {
+			"accecpt": "application/json"
+		},
 		jar:true
 	};
 	
@@ -142,6 +146,53 @@ exports.addMetadataField = function (doc, sandbox, next) {
 		}
 	});
 }
+
+exports.addFile = function (doc, sandbox, next) {
+
+	var filepath = "/home/arihayri/Documents/GLAMpipe-testausdata/kuvat/k1.png";
+	var url = "http://siljo.lib.jyu.fi:8080/rest/items/b100008c-0895-4a3f-b85f-312fd43f2393/bitstreams?name=ryijy.jpg";
+	var fs = require('fs');
+	var request = require("request");
+
+	var options = {
+		url:url,
+		jar:true,
+		headers: {
+			"accept": "application/json"
+		}
+	}
+
+
+	var req = 	request.post(options, function optionalCallback(err, response, body) {
+	  if (err) {
+		return console.error('upload failed:', err);
+	  }
+	  console.log('Upload successful!  Server responded with:', response.statusCode);
+	  console.log('Upload successful!  Server responded with:', body);
+	});
+	
+	var stats = fs.statSync(filepath)
+	console.log("filun koko:" + stats.size);
+	var size = 0;
+	
+	file_stream = fs.createReadStream(filepath);
+	file_stream.on('data', function(chunk) {
+		console.log("reading..." + chunk.length);
+		size += chunk.length;
+	});
+	file_stream.on('end', function() {
+		console.log("file is read");	
+		console.log(size);	
+		console.log((size/1000).toFixed(2));	
+	});
+	
+	//request.get("https://upload.wikimedia.org/wikipedia/commons/3/3c/Keuruun_ryijy.jpg").pipe(req);
+	file_stream.pipe(req);
+
+}
+
+
+
 
 function runNodeScriptInContext (script, node, sandbox, io) {
 	try {

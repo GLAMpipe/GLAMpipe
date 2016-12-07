@@ -73,7 +73,7 @@ for (mapkey in context.node.settings) {
 
 
 
-if(parseInt(context.count) % 100 == 0) 
+if(parseInt(context.count) % 10 == 0) 
     out.say("progress", context.node.type.toUpperCase() + ": processed " + context.count + "/" + context.doc_count);
 
 

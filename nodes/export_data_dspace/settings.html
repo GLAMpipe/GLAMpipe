@@ -1,30 +1,33 @@
 
-<label>username </label><input class="node-settings" type="text" name="username" id="username" required />
-<label>password</label><input class="node-settings" type="password" name="password" id="password"/>
-
-<label>predefined servers</label>
-<select id="export_data_dspace_url_pre" name="url_pre">
-	<option value="">predefined servers</option>
-    <option value="http://siljo.lib.jyu.fi:8080/rest">http://siljo.lib.jyu.fi:8080/rest</option>
-</select>
-
-<label>server url, choose above or type</label>
-<input class="node-settings" id="export_data_dspace_url" name="url" />
-
-<label>In which collection do you want to save items (id)?</label>
-
-<button id="export_data_dspace_fetch">Choose collection</button>
-<input class="node-settings" id="export_data_dspace_collection" name="collection" />
-<div id="export_data_dspace_data"></div>
 
 
-<label>Separator for multiple values in CSV</label>
-<input class="node-settings" name="array_separator" value="||"/>
+<div class="box-noflex dspace-hidden">
+	<h3>DSpace login</h3>
+	<label>username </label>
+	<input class="node-settings" type="text" name="username" id="username" required />
+	<label>password</label>
+	<input class="node-settings" type="password" name="password" id="password"/>
+</div>
 
+<div class="box-noflex dspace-hidden">
+	<h3>Collection</h3>
+	<label>Choose collection you want to save items (uuid)?</label>	
+	<button id="export_data_dspace_fetch_collections">Fetch collections</button>
+	<input class="node-settings" id="export_data_dspace_collection" name="collection" />
+	<div id="export_data_dspace_coll_list"></div>
+</div>
 
+<div class="box-noflex dspace-hidden">
+	<h3>Settings</h3>
+	<label>Separator for multiple values in CSV. Handy if you have values like "Matilda Lynninen, Matti Nykänen" in "author" field in your CSV file.</label>
+	<input class="node-settings" name="array_separator" value=""/>
+</div>
 
-<label>Select mapping </label>
-<button id="xml_basic_fetch" class="fetch_record">fetch fields</button>
-<button id="xml_basic_copy" class="fetch_record">copy fields</button>
-
+<div class="box-noflex dspace-hidden">
+	<h3>Mapping</h3>
+	<div>At minimum you must map some field to <b>dc.title</b>.</div>
+	<button id="xml_basic_fetch" class="fetch_record">fetch fields and schemas</button>
+	<button id="xml_basic_guess" class="fetch_record">guess mapping</button>
+	<div id="export_data_dspace_mappings"></div>
+</div>
 

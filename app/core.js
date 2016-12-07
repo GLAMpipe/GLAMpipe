@@ -706,7 +706,7 @@ exports.deleteNode = function (params, res, io) {
 			}
 
 			// allow node to say bye
-			runNodeScript("bye", node, null, io);
+			//runNodeScript("bye", node, null, io);
 
 			// check if we need to remove anything else
 			async.series([

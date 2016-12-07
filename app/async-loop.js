@@ -50,6 +50,8 @@ function loop (node, sandbox, onDoc) {
 		sandbox.context.doc_count = docs.length;
 	
 		runNodeScriptInContext("init", node, sandbox);
+		if(sandbox.context.error) // if init makes error, then halt execution
+			return;
 		
 		console.log(node.settings);
 		
