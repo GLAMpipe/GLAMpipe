@@ -33,8 +33,12 @@ if (cats.constructor.name === 'Array') {
 }
 
 // add categories for all images
-if(settings.category_all) 
-    output += "[[Category:" + settings.category_all + "]]\n"; 
+if(settings.category_all) {
+	var splitted = settings.category_all.split("'");
+	splitted.forEach(function(cat) {
+		output += "[[Category:" + cat + "]]\n"; 
+	})
+}
 
 
 // self promote

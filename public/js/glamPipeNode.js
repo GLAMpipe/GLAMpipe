@@ -120,7 +120,12 @@ var glamPipeNode = function (node, gp) {
 		var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>"
 		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
-		html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
+		
+		if(self.source.params.title && self.source.params.title != "") 
+			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
+		else
+			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
+		
 		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
 		html +=   "  </div>"
 		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"

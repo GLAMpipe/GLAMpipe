@@ -1,12 +1,12 @@
 {
-    "nodeid": "process_fields_link_checker",
-    "type": "process",
-    "subtype": "fields",
+    "nodeid": "lookup_web_link_checker",
+    "type": "lookup",
+    "subtype": "web",
     "subsubtype": "link_checker",
     "title": "URL checker",
     "status": "usable",
     "usage":"",
-    "description": "Check if URL exists and saves response codes (NOTE: currently source field must be an array)",
+    "description": "Makes HEAD requests to URLs given and saves response codes.",
     
     "scripts": {
         "hello": 
@@ -21,8 +21,6 @@
         [
 			"context.vars.success_counter = 0; "
 		],
-		
-		"pre_run": "out.urls = context.doc[context.node.params.in_field];" ,
 		
         "finish": 
         [

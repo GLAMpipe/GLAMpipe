@@ -1,7 +1,7 @@
 {
-    "nodeid": "process_file_check_commons",
-    "type": "process",
-    "subtype": "files",
+    "nodeid": "lookup_web_check_commons",
+    "type": "lookup",
+    "subtype": "web",
     "subsubtype": "check_commons",
     "title": "Check Commons",
     "status": "usable",

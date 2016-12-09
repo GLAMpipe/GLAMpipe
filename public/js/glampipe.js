@@ -215,8 +215,10 @@ var glamPipe = function () {
 			types = ["collection"]
 		
 		if (obj.data("type") == "source")
-			types = ["source", "lookup"]
-			
+			types = ["source"]
+
+		if (obj.data("type") == "lookup")
+			types = ["lookup"]
 			
 		if (obj.data("type") == "export")
 			types = ["export", "upload"]
@@ -313,6 +315,13 @@ var glamPipe = function () {
 		html += "  </div><div class='holder params'></div>"
 		
 		html += self.renderNodes(collection, ["process"]);
+
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Lookups</span> <a class='add-node' data-type='lookup' href='addnode.html'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder params'></div>"
+
+		html += self.renderNodes(collection, ["lookup"]);
 
 		html += "  <div class='sectiontitleblock'>"
 		html += "	<div><span class='title sectiontitle'>Downloads</span> <a class='add-node' data-type='download' href='addnode.html'>Add</a></div>"
