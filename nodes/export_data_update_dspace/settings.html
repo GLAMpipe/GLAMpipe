@@ -1,16 +1,15 @@
 
-<label>username </label>
-<input class="node-settings" type="text" name="username" id="username" required />
+<h3>DSpace login</h3>
+<div class="box-noflex">
+	<label>username </label>
+	<input class="node-settings" type="text" name="username" id="username" required />
+	<label>password</label>
+	<input class="node-settings" type="password" name="password" id="password"/>
+</div>
 
-<label>password</label>
-<input class="node-settings" type="password" name="password" id="password"/>
-
-<label>choose DSpace instance</label>
-<select class="node-settings" name="url">
-    <option value="http://siljo.lib.jyu.fi:8080/rest">siljo.lib.jyu.fi</option>
-    <option value="https://demo.dspace.org/rest/">DSpace demo</option>
-</select>
-
-<label>How many to update? (good for testing, leave blank for all)</label>
-<input class="node-settings" name="limit" type="text" />
+<h3>Settings</h3>
+<div class="box-noflex">
+	<label>How many to update? (good for testing, leave blank for all)</label>
+	<input class="node-settings" name="limit" type="text" />
+</div>
            
