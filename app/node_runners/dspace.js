@@ -96,6 +96,15 @@ exports.updateData = function (doc, sandbox, next) {
 	// let node create an update item
 	sandbox.pre_run.runInContext(sandbox);
 	
+	if(sandbox.out.error) {
+		console.log(sandbox.out.error);
+		sandbox.out.say("error", sandbox.out.error);
+		return;
+	}
+	
+	if(sandbox.out.value === null)
+		next();
+	
 	 var options = {
 		url: sandbox.out.url,
 		json: sandbox.out.value,
