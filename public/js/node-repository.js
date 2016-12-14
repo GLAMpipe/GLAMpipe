@@ -83,6 +83,7 @@ var nodeRepository = function () {
             index = obj.data("index")
             
         var node = self.getNodeByIndex(index);
+        console.log(node);
         
         var html = "";
         html += "<div class='fatbox'>"
@@ -113,6 +114,13 @@ var nodeRepository = function () {
 			$(obj.parents(".holder.params").empty()).append(params);
 		else
 			$(".holder.collection-params").empty().append(params);
+		
+		// TODO: get node from /get/node/nodeid so that scripts are included	
+		// execute params.js if exists
+		//if(node.scripts.params) {
+			//var paramsScript = new Function('node', node.scripts.params);
+			//paramsScript(node);
+		//}
     }
 
 

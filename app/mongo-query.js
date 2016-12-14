@@ -215,6 +215,20 @@ exports.update = function (collectionname, query, doc, callback) {
 }
 
 
+exports.updateSingle = function (collectionname, query, doc, callback) {
+
+	var collection = db.collection(collectionname);
+
+	collection.update(query, doc , {multi:false}, function (err, result) {
+		if (err) {
+			console.log(err);
+			callback(err);
+		} else {
+			callback();
+		}
+	}); 
+}
+
 // *********************************************************************
 // ******************************* DELETE ******************************
 // *********************************************************************

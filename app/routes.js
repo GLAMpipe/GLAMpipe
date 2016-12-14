@@ -151,6 +151,14 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getNodeLog(req, function(data) {res.send(data)});
 	});
 
+	express.get('/node/params/:nodeid', function (req, res) {
+		glampipe.core.getNodeParams(req, function(data) {res.send(data)});
+	});
+
+	express.post('/node/params/add/:nodeid', function (req, res) {
+		glampipe.core.setNodeParams(req, function(data) {res.send(data)});
+	});
+
 	express.post('/create/node', function (req, res) {
 		glampipe.core.createNode(req.body, res, glampipe.io);
 	});
