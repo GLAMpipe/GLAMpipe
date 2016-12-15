@@ -17,7 +17,7 @@ if(context.doc[context.node.params.in_field]) {
 				// process string
 				value = value.replace(reg, context.node.settings.replace[i]);
 				
-			} else if (value.constructor.name === "Array") {
+			} else if (Array.isArray(value)) {
 				
 				// process array
 				for (j = 0; j < value.length; j++) { 
@@ -28,7 +28,7 @@ if(context.doc[context.node.params.in_field]) {
 	}
    
    // add start and end
-   if (value.constructor.name === "Array") {
+   if (Array.isArray(value)) {
 		for (j = 0; j < value.length; j++) { 
 			if(value[j] != "")
 				value[j] = context.node.settings.add_start + value[j] + context.node.settings.add_end; 

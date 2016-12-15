@@ -30,7 +30,8 @@
     "socket.io-client": "^1.5.1",
     "stream-splitter": "^0.3.2",
     "stream-transform": "^0.1.1",
-    "to-utf-8": "^1.2.0"
+    "to-utf-8": "^1.2.0",
+    "validator": "^6.2.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -2,7 +2,7 @@
 <label>Choose DSpace REST API url or write url below.</label>
 <select id="export-data-dspace-update_url" name="url">
 	<option value="" selected disabled>predefined servers</option>
-	<option value="http://demo.dspace.org/rest">http://demo.dspace.org/rest</option>
+	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
 <button id="export-data-dspace-update_plus">+</button>
 
@@ -17,7 +17,7 @@
 
 <div id="export-data-dspace-update_status" class="status"></div>
 
-<div id="export-data-dspace_hidden" style="display:none">
+<div id="export-data-dspace-update_hidden" style="display:none">
 	<select id="export-data-dspace-update_field_sel" name="original_field">
 		<option value="" selected disabled>Choose</option>
 	</select>
@@ -30,14 +30,19 @@
 
 
 <script>
+var nodeid = "#export-data-dspace-update";
 
 // *************** CODE FOR ADDING NEW URLS starts **************
-var add_div = $("#export-data-dspace-update_addoption");
-var add_button = $("#export-data-dspace-update_add");
-var add_input = $("#export-data-dspace-update_url_add");
-var test_button = $("#export-data-dspace-update_test");
-var plus_button = $("#export-data-dspace-update_plus");
-var add_url_input = $("#export-data-dspace-update_url_add");
+var add_div       = $(nodeid + "_addoption");
+var add_button    = $(nodeid + "_add");
+var add_input     = $(nodeid + "_url_add");
+var test_button   = $(nodeid + "_test");
+var plus_button   = $(nodeid + "_plus");
+var add_url_input = $(nodeid + "_url_add");
+var dspace_status = $(nodeid + "_status");
+var url_select    = $(nodeid + "_url");
+var field_select  = $(nodeid + "_field_sel");
+var field_div     = $(nodeid + "_hidden");
 
 
 function testUrl (url, success, fail) {
@@ -101,14 +106,6 @@ plus_button.click(function () {
 
 
 
-var url_select = $("#export-data-dspace-update_url");
-var field_select = $("#export-data-dspace-update_field_sel");
-var field_div = $("#export-data-dspace_hidden");
-var dspace_status = $("#export-data-dspace-update_status");
-
-fetchParams();
-
-
 // GET USER ADDED PARAMS
 function fetchParams () {
 	$.getJSON("http://localhost:3000/node/params/export_data_dspace_update", function (data) {
@@ -119,7 +116,7 @@ function fetchParams () {
 				dspace_status.empty();
 				url_select.empty();
 				url_select.append("<option value='' selected disabled>predefined servers</option>");
-				url_select.append("<option value='http://demo.dspace.org/rest'>http://demo.dspace.org/rest</option>");
+				url_select.append("<option value='https://demo.dspace.org/rest'>https://demo.dspace.org/rest</option>");
 				data[0].url.forEach(function(url_opt) {
 					url_select.append($("<option></option>").text(url_opt).attr("value", url_opt));
 				})
@@ -163,10 +160,13 @@ function fetchFields (url) {
 
 // CHOOSE SERVER HANDLER
 $("#export-data-dspace-update_url").change(function() {
-	var url = $("#export-data-dspace-update_url :selected").text();
+	var url = $(nodeid + "_url :selected").text();
 	field_div.hide();
+	add_div.hide();
 	field_select.empty();
 	fetchFields(url);
 });
+
+fetchParams();
 
 </script>

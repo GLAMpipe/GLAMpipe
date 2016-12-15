@@ -1,33 +1,39 @@
 
 // outputs an array of metadata objects
 
-var update_value = context.doc[context.node.settings.update_field];
-var language_value = context.doc[context.node.settings.language_field];
-var original_field = context.node.params.original_field; // field to be updated
-var metadata = [];
+var uuid_value 		= context.doc[context.node.settings.uuid_field];
+var update_value 	= context.doc[context.node.settings.update_field];
+var original_value = context.doc[original_value];
+var language_value 	= context.doc[context.node.settings.language_field];
+var original_field 	= context.node.params.original_field; // field to be updated
+var metadata 		= [];
 
 
-// if new value field is not set, then raise error
-if(context.node.settings.update_field == null || context.node.settings.update_field == "") {
-	out.error = "You did not set field for new value!";
+if(!uuid_value || !context.validator.isUUID(uuid_value+""))
+	out.error = "UUID is not valid: " + uuid_value;
+
+
 // if original value and new value are the same, then we do not update
-} else if(context.node.settings.original_value) {
-	var original_value = context.doc[original_value];
+if (context.node.settings.original_value) {
+	
 	if(update_value === original_value) {
 		out.value = null;
 	} 	
 } else {
 // create new metadata object
 	createNewVal();
+	out.value = metadata;
+                                                  // UUID of item
+	out.url =  context.node.params.url + "/items/" + uuid_value + "/metadata";
 }
 
-out.value = metadata;
-                                                   // UUID of item
-out.url =  context.node.params.url + "/items/" + context.doc.uuid + "/metadata";
+
 
 
 
 // FUNCTIONS
+
+
 // input can be an array or primitive value
 function createNewVal () {
 	if(update_value && Array.isArray(update_value)) {

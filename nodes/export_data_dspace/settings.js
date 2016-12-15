@@ -3,6 +3,8 @@
 var schemas = null;
 var schema_select = "<option value=''>none</option>";
 
+// display current DSpace url nicely to user
+$("#export-data-dspace_serverinfo").text("Login for \"" +node.params.url+ "\"");
 
 // CREATE MAPPINGS
 
