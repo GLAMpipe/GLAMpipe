@@ -1,29 +1,26 @@
 
+
 <label>Choose DSpace REST API url or write url below.</label>
-<select id="export-data-dspace_url" name="url">
+<select id="source-web-dspace-query_url" name="dspace_url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
-<button id="export-data-dspace_plus">+</button>
+<button id="source-web-dspace-query_plus">+</button>
 
 <!-- add options starts -->
-<div id="export-data-dspace_addoption" style="display:none">
-	<input id="export-data-dspace_url_add" placeholder="https://demo.dspace.org/rest/" name="url_add" />
-	<button id="export-data-dspace_test" title="test DSpace rest api">test</button>
-	<button id="export-data-dspace_add" title="add url to predefined urls">add</button>
+<div id="source-web-dspace-query_addoption" style="display:none">
+	<input id="source-web-dspace-query_url_add" placeholder="https://demo.dspace.org/rest/" name="url_add" />
+	<button id="source-web-dspace-query_test" title="test DSpace rest api">test</button>
+	<button id="source-web-dspace-query_add" title="add url to predefined urls">add</button>
 </div>
 <!-- add options ends -->
 
 
-<div id="export-data-dspace_status" class="status"></div>
+<div id="source-web-dspace-query_status" class="status"></div>
 
-<div id="export-data-dspace_hidden" style="display:none">
-	<label>Where to write UUID?</label>
-	<input name="out_uuid" value="test_uuid" required />
-</div>
 
 <script>
-var nodeid = "#export-data-dspace";
+var nodeid = "#source-web-dspace-query";
 
 // *************** CODE FOR ADDING NEW URLS starts **************
 var add_div       = $(nodeid + "_addoption");
@@ -82,7 +79,7 @@ test_button.click(function (e) {
 
 add_button.click(function () {
 	//var url = "http://localhost:3000/node/export_data_dspace_update/params/add";
-	var url = "http://localhost:3000/node/params/add/export_data_dspace";
+	var url = "/node/params/add/source_web_dspace_query";
 	function success() {addUrl(url)};
 	function fail(msg) {alert("DSpace rest url seems to invalid, can not add!")};
 	testUrl(add_url_input.val(), success, fail);
@@ -99,7 +96,7 @@ plus_button.click(function () {
 
 // GET USER ADDED PARAMS
 function fetchParams () {
-	$.getJSON("http://localhost:3000/node/params/export_data_dspace", function (data) {
+	$.getJSON("/node/params/source_web_dspace_query", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -119,16 +116,20 @@ function fetchParams () {
 
 
 // CHOOSE SERVER HANDLER
-$("#export-data-dspace_url").change(function() {
+$("#source-web-dspace-query_url").change(function() {
+	add_div.hide();
 	function success() {
-		$("#export_data_dspace_status").empty().append("DSpace responded OK").addClass("good");
-		$("#export-data-dspace_hidden").show();
+		$("#source-web-dspace-query_status").empty().append("DSpace responded OK").addClass("good");
+		
 	};
 	function fail(msg) {alert("DSpace rest API not working!")};
-	testUrl($("#export-data-dspace_url :selected").val(), success, fail);
+	testUrl($("#source-web-dspace-query_url :selected").val(), success, fail);
 });
 
 
 fetchParams();
 
 </script>
+
+
+

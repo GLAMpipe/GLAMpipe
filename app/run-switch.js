@@ -4,6 +4,8 @@ var colors 		= require('ansicolors');
 var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
+var validator 	= require('validator');
+
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
@@ -12,79 +14,33 @@ const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
 
+
 exports.runNode = function (node, io) {
-
-
-	// context for node scripts
-	var sandbox = {
-		context: {
-			doc: null,
-			data: null,
-			vars: {},
-			myvar: {},
-			node: node,
-			doc_count:0,
-			count:0,
-			path: path,
-			get: getProp,
-			flat: flatten,
-			MP: MP
-		},
-		out: {
-			pre_value:"",
-			value:"",
-			url: "",
-			file:"",
-			setter:null,
-			updatequery: null,
-			error: null,
-			console:console,
-			schema: [],
-			key_type: [],
-			add_display_key: function (key, type) {
-				if(this.schema.indexOf(key) < 0) {
-					this.schema.push(key);
-					this.key_type.push(type);
-				}
-			},
-			say: function(ch, msg) {
-				console.log(ch.toUpperCase() + ":", msg);
-				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
-				var date = new Date();
-				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					console.log("logged");
-					// send response
-					if(ch === "finish" && node.res) 
-						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
-				});
-			}
-		},
-		say: io.sockets.emit
-	};
 	
-	var sand = vm.createContext(sandbox);
+	// create context for GP node
+	var sandbox = exports.createSandbox(node ,io);
+	// init node scripts
+	var init 	= CreateScriptVM(node, sandbox, "init");
+	sandbox.pre_run = CreateScriptVM(node, sandbox, "pre_run");
+	sandbox.run 	= CreateScriptVM(node, sandbox, "run");
+	sandbox.finish 	= CreateScriptVM(node, sandbox, "finish");
 	
-	// create scripts (this will catch syntax errors)
-	try {
-		var run = new vm.createScript(node.scripts.run);
-	} catch (e) {
-		console.log("ERROR:", e.stack);
-		console.log(node.scripts.run);
-		sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
-		sandbox.out.say("error", "Slap the node writer!");
+	init.runInContext(sandbox);
+	
+	// we quit in init_error
+	if(sandbox.out.init_error) {
+		console.log("*********** NODE INIT ERROR ***********************");
+		console.log("msg: " + sandbox.out.init_error);
+		io.sockets.emit("error", {"nodeid":node._id, "msg": sandbox.out.init_error});
 		return;
 	}
-	
-	try {
-		var pre_run = new vm.createScript(node.scripts.pre_run);
-	} catch (e) {
-		console.log("ERROR:", e.stack);
-		sandbox.out.say("error", "Error in node: 'pre_run' script: " + e.name +" " + e.message);
-		return;
-	}
-	
+
+	// node run "router"
 	switch (node.type) {
 
+/***************************************************************************************************************
+ *                                       SOURCE                                                                *
+ * *************************************************************************************************************/
 
 		case "source":
 			runNodeScriptInContext("init", node, sandbox, io);
@@ -301,10 +257,11 @@ exports.runNode = function (node, io) {
 
 		break;
 
-
+/***************************************************************************************************************
+ *                                       EXPORT                                                                *
+ * *************************************************************************************************************/
 		
 		case "export":
-			sandbox.run = run;
 		
 			switch (node.subtype) {
 				
@@ -395,7 +352,9 @@ exports.runNode = function (node, io) {
 
 		break;
 
-
+/***************************************************************************************************************
+ *                                       LOOKUP                                                                *
+ * *************************************************************************************************************/
 
 		case "lookup":
 
@@ -403,97 +362,34 @@ exports.runNode = function (node, io) {
 			
 			switch (node.subtype) {
 				
-				case "API":
-					runFunc = function(sandbox, node, onNodeScript, onError) {
-						callAPISerial (sandbox, node, onNodeScript, onError);
-					}
+				case "web":
+					console.log("not implemented");
+					//runFunc = function(sandbox, node, onNodeScript, onError) {
+						//callAPISerial (sandbox, node, onNodeScript, onError);
+					//}
 				break;
 				
 				case "file":
-					runFunc = function(sandbox, node, onNodeScript, onError) {
-						fileStats (sandbox, node, onNodeScript, onError);
-					}
+					console.log("not implemented");
+					//runFunc = function(sandbox, node, onNodeScript, onError) {
+						//fileStats (sandbox, node, onNodeScript, onError);
+					//}
 				break;
 				
 				case "collection":
-					// we must clear previous lookup
-				   // mongoquery.removeKey(node.params.collection, node.params.out_field, function(error) {
-						runFunc = function(sandbox, node, onNodeScript, onError) {
-							mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
-						}
-					//});
+					console.log("not implemented");
+					//runFunc = function(sandbox, node, onNodeScript, onError) {
+						//mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
+					//}
 
 				break;
 			}
 			
-			
-			var onError = function(err) {
-				console.log(err);
-				return;
-			}
-			// find everything
-			mongoquery.find2({}, node.collection, function (err, doc) {
-				
-				sandbox.context.doc_count = doc.length;
-				runNodeScriptInContext("init", node, sandbox, io);
-				if(sandbox.context.init_error) return;
-				
-				async.eachSeries(doc, function iterator(doc, next) {
-					
-					sandbox.context.doc = doc;
-					sandbox.context.count++;
-					
-					// get URL/filename from node
-					runNodeScriptInContext("pre_run", node, sandbox, io);
-					if (sandbox.context.node_error) 
-						return;
-					
-					// callback for updating record
-					var onNodeScript = function (sandbox) {
-
-						sandbox.out.updatequery = null;
-						sandbox.out.setter = null;
-						// let node pick the data it wants from result
-						run.runInContext(sand);
-						
-						//if(sandbox.context.node_error)
-							//return;
-						
-						if(sandbox.out.setter != null) {
-							var setter = sandbox.out.setter; 
-						} else {
-							var setter = {};
-							setter[node.out_field] = sandbox.out.value;
-						}
-						
-						console.log(setter);
-						
-						if(sandbox.out.updatequery != null)
-							var updatequery = sandbox.out.updatequery;
-						else
-							var updatequery = {_id:sandbox.context.doc._id};
-							
-						//setter = flatten(setter, {delimiter:"__"});
-						
-						// if node set the direct update, then use that
-						if(sandbox.out.mongoDBupdate) // TODO remove key
-							mongoquery.update(node.params.collection, updatequery ,setter, next);
-						else
-							mongoquery.update(node.collection, updatequery ,{$set:setter}, next);
-						  
-					}
-
-					runFunc (sandbox, node, onNodeScript, onError);
-
-				}, function done() {
-					runNodeScriptInContext("finish", node, sandbox, io);
-				});
-				
-			}); 
-			
-		break;
 
 
+/***************************************************************************************************************
+ *                                       DOWNLOAD                                                              *
+ * *************************************************************************************************************/
 
 		case "download":
 				
@@ -503,6 +399,9 @@ exports.runNode = function (node, io) {
 		break;
 
 
+/***************************************************************************************************************
+ *                                       PROCESS                                                               *
+ * *************************************************************************************************************/
 		case "process":
 		
 			switch (node.subtype) {
@@ -528,6 +427,7 @@ exports.runNode = function (node, io) {
 					}
 					break;	
 
+
 				case "fields":
 				
 					switch (node.subsubtype) {
@@ -544,10 +444,9 @@ exports.runNode = function (node, io) {
 					
 						default:
 							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
-									run.runInContext(sandbox);
-									next();
-								});
-
+								sandbox.run.runInContext(sandbox);
+								next();
+							});
 						}
 					break;
 			}				
@@ -555,6 +454,11 @@ exports.runNode = function (node, io) {
 
 		break;
 
+
+
+/***************************************************************************************************************
+ *                                       UPLOAD                                                                *
+ * *************************************************************************************************************/
 
 		case "upload":
 			switch (node.subtype) {
@@ -599,24 +503,99 @@ exports.runNode = function (node, io) {
 
 
 
+exports.createSandbox = function (node, io) {
 
+	// context for node scripts
+	var sandbox = {
+		context: {
+			doc: null,
+			data: null,
+			vars: {},
+			myvar: {},
+			node: node,
+			doc_count:0,
+			count:0,
+			path: path,
+			get: getProp,
+			flat: flatten,
+			validator: validator,
+			MP: MP
+		},
+		out: {
+			pre_value:"",
+			value:"",
+			url: "",
+			file:"",
+			setter:null,
+			updatequery: null,
+			error: null,
+			console:console,
+			schema: [],
+			key_type: [],
+			add_display_key: function (key, type) {
+				if(this.schema.indexOf(key) < 0) {
+					this.schema.push(key);
+					this.key_type.push(type);
+				}
+			},
+			say: function(ch, msg) {
+				console.log(ch.toUpperCase() + ":", msg);
+				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
+				var date = new Date();
+				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
+					console.log("logged");
+					// send response if needed
+					if(ch === "finish" && node.res) 
+						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
+				});
+			}
+		},
+		say: io.sockets.emit
+	};
+	
+	return vm.createContext(sandbox);
+
+}
+
+
+// currently not used
+function CreateScriptVM(node, sandbox, scriptName) {
+		
+	// create scripts (this will catch syntax errors)
+	try {
+		var run = new vm.createScript(node.scripts[scriptName]);
+	} catch (e) {
+		console.log("ERROR:", e.stack);
+		console.log(node.scripts[scriptName]);
+		sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+		sandbox.out.say("error", "Slap the node writer!");
+	}
+	return run;
+	
+
+}
 
 // try to give some sensible value
 function getProp(doc, keyname, index) { 
-	
+
 	var obj = doc[keyname];
 	if(obj == null)
 		return "";
+
+	// if string, then return that
+	if (typeof obj === "string")
+		return obj;
+
 	
 	// if array, then give value by optional index
-	if (obj.constructor.name === "Array") {
-		if(index != null) {
+	if (Array.isArray(obj)) {
+		if(index) {
 			if(obj[index])
 				return obj[index];
 			else
-				return obj[0]
+				return ""; // if index is not found, return empty string
 		} else {
-			// if index is not given or its not found, then give the first one
+			// if index is not given, then give the first one
 			return obj[0];
 		}
 		

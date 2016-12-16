@@ -1,14 +1,17 @@
 
-<select id="source_api_dspace_url_pre" name="url_pre">
-	<option value="">choose predefined server</option>
-    <option value="http://siljo.lib.jyu.fi:8080/rest">http://siljo.lib.jyu.fi:8080/rest</option>
-</select>
+<div class="help fatbox">
+Create query first with query tools, click Generate Query and then click run.
+</div>
 
-<label>or type server address yourself</label>
-<input class="node-settings" id="source_api_dspace_url" name="url" />
+<h3>DSpace login (optional, NOT IMPLEMENTED)</h3>
+<div class="box-noflex">
+	<label>username </label>
+	<input class="node-settings" type="text" name="username" id="username" required />
+	<label>password</label>
+	<input class="node-settings" type="password" name="password" id="password"/>
+</div>
 
-<button id="init">init query tools</button>
-
+<h3>DSpace query tools</h3>
 <div id="querydiv">
   <div id='metadatadiv'>
     <h3>Collection Selector</h3>
@@ -69,15 +72,14 @@
         <button class="query-button" disabled="disabled" class="activate">Generate Query</button>
       </div>
 
-    <label>Generated Query</label>
+    
     
 
 </div>
 
-<input class="node-settings" type="text" name="query" id="source_api_dspace_query"/>
+<h3>Generated query</h3>
+<div class="box-noflex">
+	<input class="node-settings" type="text" name="query" id="source_api_dspace_query"/>
+</div>
 
-<h3>Login credentials</h3>
-<label>username </label>
-<input class="node-settings" type="text" name="username" id="source_api_dspace_username" required />
-<label>password</label>
-<input class="node-settings" type="password" name="password" id="source_api_dspace_password"/>
+

@@ -15,7 +15,7 @@ var tag_close = " </" + record_tag + ">\\n";
 for(f in context.doc) {
    var tag = context.node.settings["_mapkey_" + f];
    if(tag != "") {
-       if (context.doc[f] !== null && context.doc[f].constructor.name === "Array") {
+       if (context.doc[f] !== null && Array.isArray(context.doc[f])) {
            for (var i = 0; i < context.doc[f].length; i++ ) { 
                str += "    <"+tag+">" + escape(context.doc[f][i]) + "</"+tag+">\\n";
            }

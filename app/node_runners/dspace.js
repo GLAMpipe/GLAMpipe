@@ -16,7 +16,7 @@ exports.login = function (node, sandbox, io, cb) {
 
 	// ask login details (email, password) from node
 	runNodeScriptInContext("login", node, sandbox, io);
-	console.log("DSpace login url:" ,sandbox.out.url);
+	console.log("DSpace login url:" , sandbox.out.config.url);
 
 	 var options = {
 		headers: {'content-type' : 'application/x-www-form-urlencoded'},
@@ -96,6 +96,15 @@ exports.updateData = function (doc, sandbox, next) {
 	// let node create an update item
 	sandbox.pre_run.runInContext(sandbox);
 	
+	if(sandbox.out.error) {
+		console.log(sandbox.out.error);
+		sandbox.out.say("error", sandbox.out.error);
+		return;
+	}
+	
+	if(sandbox.out.value === null)
+		next();
+	
 	 var options = {
 		url: sandbox.out.url,
 		json: sandbox.out.value,
@@ -107,11 +116,13 @@ exports.updateData = function (doc, sandbox, next) {
 
 	// make actual HTTP request
 	request.put(options, function (error, response) {
+		sandbox.context.response = response;
 		if (error) 
 			console.log(error);
 		else {
 			console.log("URL:", options.url);
 			console.log("update response:", response.statusMessage);
+			sandbox.run.runInContext(sandbox);
 			next();
 		}
 	});

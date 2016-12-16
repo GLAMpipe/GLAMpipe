@@ -19,13 +19,13 @@ for (mapkey in context.node.settings) {
 // is collection set
 if(collection == "") {
 	out.say("error", "You must choose a collection");
-	context.error = "You must choose a collection";
+	out.init_error = "You must choose a collection";
 }
 
 // is "dc.title" mapped
 if(!title_mapped) {
 	out.say("error", "You must map at least dc.title");
-	context.error = "You must map at least dc.title";
+	out.init_error = "You must map at least dc.title";
 }
 
 // upload url

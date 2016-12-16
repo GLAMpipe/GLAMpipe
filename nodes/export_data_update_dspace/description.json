@@ -15,8 +15,6 @@
 		],
 		
         "bye": "out.say('finish', 'Deleted node!'); ",
-        
-        "init": "out.say('progress', 'Starting to update...'); context.counter = 0; ",
             
         "finish":"out.say('finish', 'Data updated'); "
     },

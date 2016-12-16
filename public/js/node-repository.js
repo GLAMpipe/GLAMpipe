@@ -51,7 +51,7 @@ var nodeRepository = function () {
                         self.plainNodes.push(sub.nodes[k]);
                         var index = self.plainNodes.length -1;
                         html += "<a data-index='" + index + "' class='open-node' href='#'>"
-                        html += "<div class='listoption " + node.type + "'>"
+                        html += "<div class='listoption " + node.type + " " + sub.nodes[k].status + "'>"
                         html += "  <p class='listtitle'>" + sub.nodes[k].title + "</p>"
                         html += "  <p class='listtext'>" + sub.nodes[k].description + "</p>"
                         html += "</div>"
@@ -83,9 +83,10 @@ var nodeRepository = function () {
             index = obj.data("index")
             
         var node = self.getNodeByIndex(index);
+        console.log(node);
         
         var html = "";
-        html += "<div class='fatbox'>"
+        html += "<div class='fatbox " + node.type + " " + node.status + "'>"
         html += "  <div class='inlinetitleblock'>"
         html += "    <div><span class='title inlinetitle'>" + node.description + "</span></div>"
         html += "  </div>"
@@ -113,6 +114,13 @@ var nodeRepository = function () {
 			$(obj.parents(".holder.params").empty()).append(params);
 		else
 			$(".holder.collection-params").empty().append(params);
+		
+		// TODO: get node from /get/node/nodeid so that scripts are included	
+		// execute params.js if exists
+		//if(node.scripts.params) {
+			//var paramsScript = new Function('node', node.scripts.params);
+			//paramsScript(node);
+		//}
     }
 
 

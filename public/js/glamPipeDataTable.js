@@ -289,6 +289,8 @@ var dataTable = function (node) {
 	this.renderCell = function (data, index, className) {
 		
 		var html = "";
+		if(data == null)
+			return "<div></div>";
 		
 		// render arrays recursively
 		if (Array.isArray(data)) {
@@ -436,6 +438,8 @@ var dataTable = function (node) {
 		var doc = self.getDocByTableClick(event);
 		var key = self.getKeyByTableClick(event);
 		var value = doc[key];
+		if(!value)
+			value = "";
 		
 		var html = "";
 		if(Array.isArray(value)) {

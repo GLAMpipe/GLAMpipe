@@ -1,5 +1,5 @@
 
-// Node create an array of download objects {url:, filename:}
+// Node creates an array of download objects {url:, filename:}
 
 // TODO: not very smart if input has multiple urls in array
 
@@ -7,7 +7,7 @@ var c = context;
 var input = context.doc[context.in_field];
 out.urls = [];
 
-if(input.constructor.name == "Array") {
+if(Array.isArray(input)) {
 	for (var i = 0; i < input.length; i++) {
 		var download = {};
 		download.filename = generateFileName(input[i], input, i);	
@@ -40,7 +40,7 @@ function generateFileName (url, input, index) {
 	// use document field as a filename
 	} else if (c.node.settings.filename_type == "record") {  
 		filename = c.get(c.doc, c.node.settings.filename__record); 
-		out.console.log(filename)
+		out.console.log("uuid:" + filename)
 		out.console.log(c.node.settings.filename__record)
 
 	// construct filaname from multiple fields
@@ -67,8 +67,8 @@ function generateFileName (url, input, index) {
 	}
 
 	// some sensible max length 
-	if(filename.length > 120) {
-		filename = filename.substring(0,120);
+	if(filename.length > 250) {
+		filename = filename.substring(0,250);
 	}
 
 	/* fallback */ 
