@@ -5,7 +5,7 @@
     "subtype": "web",
     "subsubtype": "dspace_addfile",
     "tags":["dspace", "bitstream"],
-    "status": "usable",
+    "status": "rubbish",
     "description": "Adds a new bitstream(s) to a certain item based on DSpace UUID (item must exist)",
 
     "scripts": {

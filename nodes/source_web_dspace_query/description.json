@@ -11,6 +11,10 @@
         "hello": "out.say('news', 'You added a DSpace import node'); ",
         "bye": "out.say('finish', 'Bye!'); ",
         "finish":"out.say('finish', 'Data fetched to' + context.node.params.collection); "
+    },
+    
+    "views": {
+
     }
     
 }

@@ -49,14 +49,17 @@ if (context.response && context.response.statusCode == 200 ) {
 				out.add_display_key("dc_type__lang", "array");
 			}
 			
-			// BITSTREAMS
+			// BITSTREAMS expose some data from bitsream object
 			if (context.data[i].bitstreams && context.data[i].bitstreams.constructor.name == "Array") {
-				context.data[i]["bitstream_original_file"] = [];
+				context.data[i]["bitstream_original_file_url"] = [];
 				context.data[i]["bitstream_original_name"] = [];
 				context.data[i]["bitstream_original_format"] = [];
 				for (var j = 0; j < context.data[i].bitstreams.length; j++) {
 					if (context.data[i].bitstreams[j].bundleName == "ORIGINAL" && context.data[i].bitstreams[j].type == "bitstream") {
-						context.data[i]["bitstream_original_file"].push(context.node.params.dspace_url + context.data[i].bitstreams[j].retrieveLink);
+						// we must remove rest part from dspace_url (usually "/rest")
+						var splitted = context.node.params.dspace_url.split("/");
+						var dspace_url_stripped = splitted.slice(0, splitted.length-1).join("/");
+						context.data[i]["bitstream_original_file_url"].push(dspace_url_stripped + context.data[i].bitstreams[j].retrieveLink);
 						context.data[i]["bitstream_original_name"].push(context.data[i].bitstreams[j].name);
 						context.data[i]["bitstream_original_format"].push(context.data[i].bitstreams[j].format);
 					}

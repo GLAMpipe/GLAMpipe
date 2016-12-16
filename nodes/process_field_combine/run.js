@@ -26,15 +26,15 @@ if(Array.isArray(field1_value) && Array.isArray(field2_value)) {
 // if one is array
 } else if (Array.isArray(field1_value)) {
 	field1_value.forEach(function(element) {
-		arr.push(element, field2_value);
+		arr.push(join(element, field2_value));
 	})
 } else if (Array.isArray(field2_value)) {
 	field2_value.forEach(function(element) {
-		arr.push(field1_value, element);
+		arr.push(join(field1_value, element));
 	})
 // else both are strings
 } else {
-	arr = field1_value, field2_value;
+	arr = join(field1_value, field2_value);
 }
 
 
@@ -47,7 +47,7 @@ function join (val1, val2) {
 	str.push(val1);
 	str.push(settings.after_field1);
 	str.push(val2);
-	str.push(settings.after_field2);
+	//str.push(settings.after_field2);
 	str.push(settings.suffix);
 	return str.join("");
 }

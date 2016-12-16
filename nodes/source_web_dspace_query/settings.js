@@ -1,37 +1,7 @@
 
 
 var params = node.params
-
-var dspace_url = "";
-
-$("#source_api_dspace_username").hide();
-$("#source_api_dspace_password").hide();
-$("#querydiv").hide();
-$("#source_api_dspace_query").hide();
-
-// URL SELECTION
-$("#source_api_dspace_url_pre").change(function(e){
-	var url = $('#source_api_dspace_url_pre :selected').text();
-	$('#source_api_dspace_url').val(url);
-	dspace_url = url;
-	
-    var myReport=new QueryReport();
-    myReport.init();
-    
-	$("#source_api_dspace_username").show();
-	$("#source_api_dspace_password").show();	
-	$("#source_api_dspace_query").show();
-	$("#querydiv").show();
-});
-
-
-
-
-
-$("#init").click(function(){
-    var myReport=new QueryReport();
-    myReport.init();
-});
+var dspace_url = node.params.dspace_url;
 
 
 
@@ -157,7 +127,8 @@ var Report = function() {
         $("#metadatadiv").accordion({
             heightStyle: "content",
             collapsible: true,
-            active: $("#metadatadiv > h3").length - 2
+            active: false,
+            animate: false
         });
         $("#export").click(function(){
             self.export($("#itemtable tr"));
@@ -958,6 +929,9 @@ var QueryableMetadataFields = function(report) {
 }
 
 QueryableMetadataFields.prototype = Object.create(MetadataFields.prototype);
+
+var myReport=new QueryReport();
+myReport.init();
 
 
 

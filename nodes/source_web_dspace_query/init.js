@@ -18,4 +18,4 @@ if (context.vars.limit <= 0 || isNaN(context.vars.limit))
 if(context.vars.limit < context.vars.offset)
 	context.vars.offset = context.vars.limit;
 
-out.url = context.node.settings.url + "/filtered-items" + context.node.settings.query;
+out.url = base_url + "/filtered-items" + context.node.settings.query;

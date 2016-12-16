@@ -577,20 +577,25 @@ function CreateScriptVM(node, sandbox, scriptName) {
 
 // try to give some sensible value
 function getProp(doc, keyname, index) { 
-	
+
 	var obj = doc[keyname];
 	if(obj == null)
 		return "";
+
+	// if string, then return that
+	if (typeof obj === "string")
+		return obj;
+
 	
 	// if array, then give value by optional index
-	if (obj.constructor.name === "Array") {
-		if(index != null) {
+	if (Array.isArray(obj)) {
+		if(index) {
 			if(obj[index])
 				return obj[index];
 			else
-				return obj[0]
+				return ""; // if index is not found, return empty string
 		} else {
-			// if index is not given or its not found, then give the first one
+			// if index is not given, then give the first one
 			return obj[0];
 		}
 		
