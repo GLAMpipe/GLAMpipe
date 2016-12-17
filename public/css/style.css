@@ -541,11 +541,12 @@ table.documents td {
 }
 
 table.documents tbody td div {
-	max-height:3em;
+	max-height:10em;
 	max-width:350px;
-	overflow: hidden;
+	overflow: auto;
 	margin-left: 2em;
 	overflow-wrap: break-word;
+	margin-bottom:1em;
 }
 
 table.documents tbody td div.edit {

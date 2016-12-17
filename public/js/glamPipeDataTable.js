@@ -88,7 +88,7 @@ var dataTable = function (node) {
 		if(yes)
 			$("data-workspace table.documents tbody td div").css({"max-height":"600px", "overflow-y":"auto"});
 		else
-			$("data-workspace table.documents tbody td div").css({"max-height":"3em", "overflow-y":"hidden"});
+			$("data-workspace table.documents tbody td div").css({"max-height":"33em", "overflow-y":"hidden"});
 	}
 
 
@@ -297,19 +297,19 @@ var dataTable = function (node) {
 			for(var i = 0; i < data.length; i++) {
 				html += self.renderCell(data[i], i, className);
 				
-				if(!self.expandCells && i > self.maxArrayLenghtDisplay) {
-					var left = data.length - i -1;
-					html += "<div class='more'>" + left + " more ...</div>"
-					break;
-				}
+				//if(!self.expandCells && i > self.maxArrayLenghtDisplay) {
+					//var left = data.length - i -1;
+					//html += "<div class='more'>" + left + " more ...</div>"
+					//break;
+				//}
 					
 			}
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			if(index != null)
-				html += "<div class='"+className+"'>["+index+"] " + data + "</div>";
+				html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
 			else
-				html += "<div class='"+className+"'>" + data + "</div>";
+				html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
 		// render objects
 		} else {
 			if(index != null)
@@ -680,6 +680,7 @@ var dataTable = function (node) {
 
 		// expand individual cell
 		$("data-workspace").on('click','table tbody td div.more', function(e) {
+			console.log("more clicked");
 			self.expandCell(e);
 		});
 

@@ -2,7 +2,7 @@ function extract (val) {
    var extracted = []; 
    
    // check if input is array
-   if (val.constructor && val.constructor.name === "Array" ) {
+   if (Array.isArray(val) {
        for (var i = 0; i < val.length; i++) { 
            var extracted2 = extract(val[i]); 
            /* push result  */
