@@ -25,7 +25,6 @@ if (context.node.settings.original_value && Array.isArray(update_value)) {
 	if(is_same) {
 		out.value = null;
 		out.url = null;
-		out.console.log("FUCK");
 	} else {
 		out.console.log("setting values")
 		createNewVal(out.value);
