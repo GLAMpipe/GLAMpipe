@@ -329,8 +329,8 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									//asyncLoop.loop(node, sandbox, dspace.addFile);
-									dspace.addFile();
+									asyncLoop.loop(node, sandbox, dspace.addFile);
+									//dspace.addFile();
 								}
 							});
 						break;

@@ -1,6 +1,8 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
+var async = require('async');
+
 var mongoquery 	= require("../../app/mongo-query.js");
 var collection = require("../../app/collection.js");
 
@@ -101,31 +103,42 @@ exports.updateData = function (doc, sandbox, next) {
 		sandbox.out.say("error", sandbox.out.error);
 		return;
 	}
-	
-	if(sandbox.out.value === null)
+	console.log("URL:" + sandbox.out.url);
+	if(sandbox.out.value == null || sandbox.out.url === null) {
 		next();
-	
-	 var options = {
-		url: sandbox.out.url,
-		json: sandbox.out.value,
-		jar:true
-	};
-	
-	var request = require("request");
-	//require('request').debug = true;
+		console.log("HITTING NEXT BECAUSE OF NULL*******************");
+	} else {
+		console.log("out.value");
+		console.log(sandbox.out.value);
+		console.log(sandbox.out.value === null);
 
-	// make actual HTTP request
-	request.put(options, function (error, response) {
-		sandbox.context.response = response;
-		if (error) 
-			console.log(error);
-		else {
-			console.log("URL:", options.url);
-			console.log("update response:", response.statusMessage);
-			sandbox.run.runInContext(sandbox);
-			next();
-		}
-	});
+		 var options = {
+			url: sandbox.out.url,
+			json: sandbox.out.value,
+			jar:true
+		};
+		
+		console.log("options:" + options);
+		console.log(options);
+		
+		var request = require("request");
+		//require('request').debug = true;
+
+		// make actual HTTP request
+		request.put(options, function (error, response) {
+			sandbox.context.response = response;
+			if (error) 
+				console.log(error);
+			else {
+				console.log("URL:", options.url);
+				console.log("update response:", response.statusMessage);
+				sandbox.run.runInContext(sandbox);
+				next();
+			}
+		});
+	}
+
+
 }
 
 
@@ -158,47 +171,64 @@ exports.addMetadataField = function (doc, sandbox, next) {
 	});
 }
 
-exports.addFile = function (doc, sandbox, next) {
+exports.addFile = function (doc, sandbox, nextDoc) {
 
-	var filepath = "/home/arihayri/Documents/GLAMpipe-testausdata/kuvat/k1.png";
-	var url = "http://siljo.lib.jyu.fi:8080/rest/items/b100008c-0895-4a3f-b85f-312fd43f2393/bitstreams?name=ryijy.jpg";
+	// let node create an array of upload items (url, file title, file path)
+	sandbox.pre_run.runInContext(sandbox);
+
+	//var filepath = "/home/arihayri/Documents/GLAMpipe-testausdata/kuvat/gp_logo.png";
+	//var url = "https://demo.dspace.org/rest/items/0b74940e-782e-4aeb-b02b-67b96d39311d/bitstreams?name=ryijy.png";
 	var fs = require('fs');
 	var request = require("request");
 
 	var options = {
-		url:url,
 		jar:true,
 		headers: {
 			"accept": "application/json"
 		}
 	}
 
+	// loop through array asynchronously
+	async.eachSeries(sandbox.out.value, function (upload, nextEle) {
+		options.url = upload.url + "?name=" + upload.title; // file name provided here!!
+		console.log(upload);
 
-	var req = 	request.post(options, function optionalCallback(err, response, body) {
-	  if (err) {
-		return console.error('upload failed:', err);
-	  }
-	  console.log('Upload successful!  Server responded with:', response.statusCode);
-	  console.log('Upload successful!  Server responded with:', body);
-	});
-	
-	var stats = fs.statSync(filepath)
-	console.log("filun koko:" + stats.size);
-	var size = 0;
-	
-	file_stream = fs.createReadStream(filepath);
-	file_stream.on('data', function(chunk) {
-		console.log("reading..." + chunk.length);
-		size += chunk.length;
-	});
-	file_stream.on('end', function() {
-		console.log("file is read");	
-		console.log(size);	
-		console.log((size/1000).toFixed(2));	
-	});
-	
-	//request.get("https://upload.wikimedia.org/wikipedia/commons/3/3c/Keuruun_ryijy.jpg").pipe(req);
-	file_stream.pipe(req);
+
+		var req = 	request.post(options, function optionalCallback(err, response, body) {
+		  if (err) {
+			return console.error('upload failed:', err);
+		  }
+		  console.log('Upload successful!  Server responded with:', response.statusCode);
+		  console.log('Upload successful!  Server responded with:', body);
+		  nextEle();
+		});
+		
+		var stats = fs.statSync(upload.filepath)
+		console.log("filun koko:" + stats.size);
+		var size = 0;
+
+		file_stream = fs.createReadStream(upload.filepath);
+		file_stream.on('data', function(chunk) {
+			console.log("reading..." + chunk.length);
+			size += chunk.length;
+		});
+		file_stream.on('end', function() {
+			console.log("file is read");	
+			console.log(size);	
+			console.log((size/1000).toFixed(2));	
+		});
+		
+		//request.get("https://upload.wikimedia.org/wikipedia/commons/3/3c/Keuruun_ryijy.jpg").pipe(req);
+		file_stream.pipe(req);
+
+		
+	}, function done() {
+		//sandbox.run.runInContext(sandbox);
+		nextDoc();
+	})
+
+
+
 
 }
 

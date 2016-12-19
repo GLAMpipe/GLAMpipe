@@ -42,7 +42,7 @@ if(context.doc[context.node.params.in_field]) {
    out.value = value;
 
 } else { 
-   out.say("error", "Field not found"); 
+   out.value = ""; 
 }
 
 
