@@ -19,8 +19,8 @@ exports.createPipe = function (req) {
 
 
 /**
- * Create metapipe collection on start up
- * - "metapipe" is only collection that must exist
+ * Create glampipe collection on start up
+ * - "glampipe" is only collection that must exist
  * - makes sure that "project_count" exists
  */
 exports.initDB = function (callback) {

@@ -2,7 +2,7 @@
 module.exports.initDBConnect = function () {
 
 	// default 'localhost' configuration:
-	var connection_string = '127.0.0.1:27017/metapipe';
+	var connection_string = '127.0.0.1:27017/glampipe';
 	
 	// if OPENSHIFT env variables are present, use the available connection info:
 	if(process.env.OPENSHIFT_MONGODB_DB_PASSWORD){
@@ -18,9 +18,9 @@ module.exports.initDBConnect = function () {
 		console.log(process.env.MONGO_NAME);
 		connection_string = process.env.MONGO_PORT_27017_TCP_ADDR + ':' +
 		process.env.MONGO_PORT_27017_TCP_PORT + '/' +
-		'metapipe';
+		'glampipe';
 	} else if (process.env.DOCKER)  {
-		connection_string = "mongo:27017/metapipe"
+		connection_string = "mongo:27017/glampipe"
 
 	}
 	
