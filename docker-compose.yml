@@ -4,6 +4,7 @@ version: '2'
 services:
   glam:
     build: .
+    image: artturimatias/glampipe
     links:
      - mongo
     ports:
@@ -12,9 +13,9 @@ services:
     environment:
      - DOCKER=1
     volumes:
-     - $PWD/glampipe/projects:/glampipe/projects
-     - $PWD/glampipe/nodes:/glampipe/nodes
-     - $PWD/glampipe/tmp:/glampipe/tmp
+     - ./data/projects:/glampipe/projects
+     - ./data/nodes:/glampipe/nodes
+     - ./data/tmp:/glampipe/tmp
 
   mongo:
     image: mongo:3.3.10
