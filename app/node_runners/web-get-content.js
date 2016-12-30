@@ -36,3 +36,42 @@ exports.request = function (doc, sandbox, next) {
 		next();
 	});
 }
+
+
+exports.uploadFile = function (doc, sandbox, next ) {
+
+	sandbox.pre_run.runInContext(sandbox);
+
+var formData = {
+
+  input: fs.createReadStream("/home/arihayri/GLAMpipe-data/projects/jyx-vaikkarit-download/download/5_download_file_basic/123456789_42996.pdf")
+
+};
+
+	var options = {
+		jar:true,
+		headers: {
+			"accept": "application/xml",
+			"content-type": "application/pdf"
+		},
+		formData: formData
+		
+	}
+
+	var upload = sandbox.out.value;
+	options.url = upload.url; 
+	console.log(upload);
+
+
+	request.post(options, function optionalCallback(err, response, body) {
+	  if (err) {
+		return console.error('upload failed:', err);
+	  }
+	  console.log('Upload successful!  Server responded with:', response.statusCode);
+	  console.log('Upload successful!  Server response body:', body);
+	  next();
+	});
+	
+
+
+}
