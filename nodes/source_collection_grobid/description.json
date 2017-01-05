@@ -1,12 +1,12 @@
 {
-    "nodeid": "process_file_pdf_grobid",
-    "type": "process",
-    "subtype": "files",
+    "nodeid": "source_collection_grobid",
+    "type": "source",
+    "subtype": "collection",
     "subsubtype": "grobid",
     "title": "GROBID",
     "status": "rubbish",
     "usage":"",
-    "description": "Extracts references from academic article",
+    "description": "Extracts references from academic articles",
     
     "scripts": {
         "hello": "out.say('news', 'You added a reference extract node'); ",
@@ -15,18 +15,14 @@
         "init": 
         [
 			"context.vars.success_counter = 0; ",
-			"context.vars.counter = 0; ",
-			"out.add_display_key('extracted_references_url', 'array'); ",
-			"out.add_display_key('extracted_references_pdf', 'array'); "
+			"context.vars.counter = 0; "
 		],
 		
         "finish":"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
     },
     
     "views": {
-        "default_keys": ["name", "handle"],
-        "settings":"no settings"
-    
+
     }
   
 }

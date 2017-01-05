@@ -44,8 +44,12 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 					
 					if(error == null) {
 						exports.downloadAndSave(node, download, next);
-					} else
+					} else {
+						// file exist -> write file path to
+						download.error = error;
+						download.filepath = filePath;
 						next();
+					}
 				});			
 			}
 			
@@ -84,7 +88,6 @@ function checkUrl (download) {
 function fileExists (node, download, cb) {
 
 	if(download.filename == "") {
-		download.error = "no file name";
 		return cb("no file name");
 	}
 
@@ -93,7 +96,7 @@ function fileExists (node, download, cb) {
 	fs.stat(filePath, function(err, stat) {
 		if(err == null) {
 			console.log("FILE EXISTS:", filePath);
-			cb("FILE EXISTS");
+			cb("file exists", filePath);
 		} else if(err.code == 'ENOENT') {
 			cb(null, filePath)
 		} else {

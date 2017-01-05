@@ -210,6 +210,20 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});
 	});
 
+	express.get('/get/collection/:id/facet/test', function (req, res) {
+		glampipe.core.getCollectionFacetTest(req, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/:id/facet/:field', function (req, res) {
+		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/:id/facet/:field/groupby/:group', function (req, res) {
+		glampipe.core.getCollectionFacetGroupBy(req, function(data) {res.send(data)});
+	});
+
+
+
 	express.post('/edit/collection/:id', function (req, res) {
 		glampipe.core.editCollection(req.params.id, req, function(data) {res.send(data)});
 	});

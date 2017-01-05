@@ -31,7 +31,8 @@
     "stream-splitter": "^0.3.2",
     "stream-transform": "^0.1.1",
     "to-utf-8": "^1.2.0",
-    "validator": "^6.2.0"
+    "validator": "^6.2.0",
+    "xml2json": "^0.10.0"
   },
   "devDependencies": {},
   "scripts": {

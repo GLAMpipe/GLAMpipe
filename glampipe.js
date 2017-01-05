@@ -75,6 +75,7 @@ var GlamPipe = function() {
 		})); 
 
 		self.app.use(passport.initialize()); 
+		self.app.set('json spaces', 2);
 
 
 

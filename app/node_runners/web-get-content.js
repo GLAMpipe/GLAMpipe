@@ -40,38 +40,51 @@ exports.request = function (doc, sandbox, next) {
 
 exports.uploadFile = function (doc, sandbox, next ) {
 
+	sandbox.context.doc = doc;
+	sandbox.out.value = null;  // reset output
 	sandbox.pre_run.runInContext(sandbox);
+	
+	var upload = sandbox.out.value;
+	console.log(upload);
 
-var formData = {
+	if(!sandbox.out.value)
+		return next("no upload object from node!");
 
-  input: fs.createReadStream("/home/arihayri/GLAMpipe-data/projects/jyx-vaikkarit-download/download/5_download_file_basic/123456789_42996.pdf")
+	// skip if file does not exist
+	try {
+		var stats = fs.statSync(upload.filepath);
+	}
+	catch(err) {
+		return next("file does not exist");
+	}
 
-};
+	var formData = {
+		input: fs.createReadStream(upload.filepath)
+	};
+
 
 	var options = {
+		uri: upload.url,
 		jar:true,
 		headers: {
 			"accept": "application/xml",
 			"content-type": "application/pdf"
 		},
 		formData: formData
-		
 	}
 
-	var upload = sandbox.out.value;
-	options.url = upload.url; 
-	console.log(upload);
-
-
+	console.log("GROBIDing......");
 	request.post(options, function optionalCallback(err, response, body) {
-	  if (err) {
-		return console.error('upload failed:', err);
-	  }
-	  console.log('Upload successful!  Server responded with:', response.statusCode);
-	  console.log('Upload successful!  Server response body:', body);
-	  next();
+		if (err) {
+			//console.error('upload failed:', err);
+			sandbox.context.error = err;
+			sandbox.run.runInContext(sandbox);
+			next();
+		  } else {
+			  console.log('Upload successful!  Server responded with:', response.statusCode);
+			  sandbox.context.data = body;
+			  sandbox.run.runInContext(sandbox);
+			  next();
+		}
 	});
-	
-
-
 }

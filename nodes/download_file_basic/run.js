@@ -29,14 +29,18 @@ if(data.constructor.name == "Array") {
 				context.node.download_counter++;	
 				
 			} else {
-				out.say('error', 'Downloaded failed:' + data[i].url); 
+				//out.say('error', 'Downloaded failed:' + data[i].url); 
 				out.value.push("[error:" + data[i].response.statusCode + "]:" + data[i].url); 
 			}
 
 			
 		} else if (data[i].error) {
 			//out.say('progress', 'download failed: '  + data[i].error); 
-			out.value.push("[error]: " + data[i].error);
+			// if file exists, then we just output the filepath
+			if(data[i].error === "file exists") 
+				out.value.push(data[i].filepath);
+			else
+				out.value.push("[error]: " + data[i].error);
 			
 		} else {
 			out.value.push(undefined);

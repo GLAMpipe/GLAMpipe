@@ -386,6 +386,230 @@ exports.group = function (node, array, callback) {
 
 }
 
+exports.facetGroupBy = function (req, callback) {
+	var filters = [];
+	var collection = db.collection(req.params.id);
+	field = "$" + req.params.field;
+	var aggregate = [];
+	var matches =[];
+	var filter_fields = [];
+	
+	filters.forEach(function(filter) {
+		if(filter === "") return; // skip empty
+		var filter_split = filter.split(":");
+		var field_name = filter_split[0];
+		var filter_params = filter_split[1].split(",");
+		var f = {};
+		f[field_name] = {"$all":filter_params};
+		matches.push(f);
+		filter_fields.push(field_name);
+		console.log(f);
+	});
+
+	// we must include all filter fields in aggregation
+	
+	// group by this field
+	if(req.params.group) {
+		var groupBy = {
+			$group: {
+				_id:{mid:"$id"}, 
+				facet:{$first: field}
+			}
+		}
+		//filter_fields.forEach(function(fiel) {
+			//groubBy.$group[field] = {};
+		//})
+		aggregate.push(groupBy);
+	} 
+	
+	if(req.query.filter)
+		filters = req.query.filter.split(";");
+	
+
+	//console.log(matches);
+	
+	if(!matches.length)
+		var match = {$match: {}};
+	else
+		var match = {$match: {$and:matches}};
+
+	// remove empties
+	var empty_match = {};
+	empty_match[req.params.field] = {$ne:""};
+	
+	aggregate.push({$unwind:"$facet"});
+	aggregate.unshift(match);
+	aggregate.push({$group : {_id:{id:"$facet"},count: { $sum: 1 }}});
+	aggregate.push({$sort: { count: -1 }});
+
+	console.log(aggregate);
+
+	collection.aggregate(
+		aggregate
+	
+		// use $out for mongo 2.6 and newer
+		,
+		function (err, data) {
+			if(err) {
+				console.log(err);
+				// let's try non-array version
+				collection.aggregate([
+					match,
+					{$match: empty_match},
+					{$group : {_id: field, count: {$sum:1}}}, 
+					{$sort: { count: -1 }}
+					// use $out for mongo 2.6 and newer
+					],
+					function (err, data) {
+						if(err) {
+							console.log("ERRRRROOOOR");
+							callback(data);
+						} else {
+							callback(data);
+						}
+					}
+				)
+			} else {
+				callback(data);
+			}
+		}
+	) 
+}
+
+
+
+exports.facetTest = function (req, callback) {
+	var filters = [];
+	var collection = db.collection(req.params.id);
+
+
+
+	console.log(collection);
+	console.log("asdf");
+
+	collection.aggregate(
+		{$match:{
+			"gr_teoksessa":{$all:["Computers & Education"]}
+			
+			}
+		},
+		
+		{$group: 
+			{_id:"$id",
+			facet:{$first:"$dc_contributor_laitos__splitted"},
+			}
+		},
+		{$unwind:"$facet"},
+		{$group: 
+			{_id:"$facet",
+			count:{$sum:1},
+			}
+		}
+	
+		// use $out for mongo 2.6 and newer
+		,
+		function (err, data) {
+			if(err) {
+				console.log(err);
+				callback(data);
+
+			} else {
+				callback(data);
+			}
+		}
+	) 
+}
+
+
+exports.facet = function (req, callback) {
+	var filters = [];
+	var collection = db.collection(req.params.id);
+	field = "$" + req.params.field;
+	var aggregate = [];
+	groupBy = null;
+	console.log(req.query.groupby);
+	
+	// group by this field
+	if(req.query.groupby) {
+		groupBy = {
+			$group: {
+				_id:{mid:"$id"}, 
+				laitos:{$first:"$dc_contributor_laitos__splitted"}
+			}
+		}
+		aggregate.push(groupBy);
+	} 
+	
+	if(req.query.filter)
+		filters = req.query.filter.split(";");
+	
+	var matches =[];
+	filters.forEach(function(filter) {
+		if(filter === "") return; // skip empty
+		var filter_split = filter.split(":");
+		var field_name = filter_split[0];
+		var filter_params = filter_split[1].split(",");
+		var f = {};
+		f["laitos"] = {"$all":filter_params}
+		matches.push(f);
+		console.log(f);
+	});
+	//console.log(matches);
+	
+	if(!matches.length)
+		var match = {$match: {}};
+	else
+		var match = {$match: {$and:matches}};
+
+	// remove empties
+	var empty_match = {};
+	empty_match[req.params.field] = {$ne:""};
+	
+	aggregate.push({$unwind:"$laitos"});
+	aggregate.push(match);
+	aggregate.push({$group : {_id:{id:"$laitos"},count: { $sum: 1 }}});
+	aggregate.push({$sort: { count: -1 }});
+
+	collection.aggregate(
+		aggregate
+	
+		// use $out for mongo 2.6 and newer
+		,
+		function (err, data) {
+			if(err) {
+				console.log(err);
+				// let's try non-array version
+				collection.aggregate([
+					match,
+					{$match: empty_match},
+					{$group : {_id: field, count: {$sum:1}}}, 
+					{$sort: { count: -1 }}
+					// use $out for mongo 2.6 and newer
+					],
+					function (err, data) {
+						if(err) {
+							console.log("ERRRRROOOOR");
+							callback(data);
+						} else {
+							callback(data);
+						}
+					}
+				)
+			} else {
+				callback(data);
+			}
+		}
+	) 
+}
+
+
+exports.filtered = function (req, callback) {
+	
+	// filtered search
+	
+}
+
+
 exports.collectionLookup = function (sandbox, node, onNodeScript, onError) {
 
 	var collection = db.collection(node.collection);

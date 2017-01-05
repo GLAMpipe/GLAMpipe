@@ -944,6 +944,31 @@ exports.getCollectionCount = function (req, cb) {
 }
 
 
+exports.getCollectionFacet = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facet(req, function (result) {
+		cb({count:result});
+	});
+}
+
+exports.getCollectionFacetGroupBy = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facetGroupBy(req, function (result) {
+		cb({count:result});
+	});
+}
+
+
+exports.getCollectionFacetTest = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facetTest(req, function (result) {
+		cb({count:result});
+	});
+}
+
 exports.editCollection = function (collection_id, req, callback) {
 
 	console.log("editing", collection_id);
@@ -1029,6 +1054,8 @@ exports.nodeFileView = function  (req, cb) {
 exports.getNodeLog = function (req, cb) {
 	
 	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
+		if(err)
+			return cb();
 		result.forEach(function(row, i) {
 			if(row.ts) {
 				var date = new Date(row.ts);
