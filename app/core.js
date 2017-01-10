@@ -852,6 +852,57 @@ exports.getCollection = function (req, query, res) {
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
 }
+// AND search
+exports.collectionSearch = function (req, res) {
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 15;
+
+	var skip = parseInt(req.query.skip);
+	if (skip <= 0 || isNaN(skip))
+		skip = 0;
+
+	var sort = req.query.sort
+	if(sort === 'undefined')  // by default sort by _id (mongoid)
+		sort = "_id";
+
+	var reverse = false
+	var r = parseInt(req.query.reverse);
+	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
+		reverse = true;
+
+
+
+	var s = ["skip", "limit", "sort", "reverse"];
+	var query = {};
+	for (var param in req.query) {
+		console.log(param);
+		if(!s.includes(param)) {
+			if(Array.isArray(req.query[param])) {
+				query[param] = {$all:req.query[param]};
+			} else {
+				query[param] = req.query[param];
+			}
+		}
+	}
+	console.log(query);
+	//query[req.query.field] = {$regex:req.query.value, $options: 'i'};
+
+	var params = {
+		collection: req.params.id,
+		query: query,
+		limit: limit,
+		skip: skip,
+		sort: req.query.sort,
+		reverse: reverse
+	}
+
+	mongoquery.findAll(params, function (result) {
+		res.send({data:result});
+	});
+	
+}
 
 
 /**
@@ -913,6 +964,8 @@ function createSearchQuery (req) {
 	return query;
 }
 
+
+
 exports.getCollectionByField = function (req, res) {
 
 	var query = {};
@@ -968,6 +1021,8 @@ exports.getCollectionFacetTest = function (req, cb) {
 		cb({count:result});
 	});
 }
+
+
 
 exports.editCollection = function (collection_id, req, callback) {
 

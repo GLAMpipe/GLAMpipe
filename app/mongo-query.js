@@ -386,31 +386,28 @@ exports.group = function (node, array, callback) {
 
 }
 
+
 exports.facetGroupBy = function (req, callback) {
 	var filters = [];
 	var collection = db.collection(req.params.id);
-	field = "$" + req.params.field;
+	var field = "$" + req.params.field;
 	var aggregate = [];
 	var filters = [];
 	var groupBy = null;
+	var limit = 20;
 	
 	// algorithm (match ,group, count)
 	// - first match reference facets (journal/monografia)
-	// - then group by original source (JYX-item)
 	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
+	// - then group by original source (JYX-item)
 	
-	// FILTER 1:
-	if(req.query.filter) {
-		filters = createFilters(req.query.filter);
+	// FILTER:
+	if(req.query) {
+		filters = createFilters(req.query);
 
 	}
-
-	// FILTER 2:
-	//if(req.query.filter2) {
-		//filters2 = createFilters(req.query.filter2);
-	//}
 	
-	// GROUP
+	// GROUP:
 	// - we must include all filter2 fields in aggregation
 	if(req.params.groupby) {
 		groupBy = {
@@ -433,6 +430,7 @@ exports.facetGroupBy = function (req, callback) {
 	aggregate.push({$unwind:"$facet"});
 	aggregate.push({$group : {_id:"$facet",count: { $sum: 1 }}});
 	aggregate.push({$sort: { count: -1 }});
+	aggregate.push({$limit:limit});
 
 	console.log(JSON.stringify(aggregate));
 
@@ -441,7 +439,7 @@ exports.facetGroupBy = function (req, callback) {
 		,
 		function (err, data) {
 			if(err) {
-				console.log("NOT an array, trying to non-array version");
+				console.log(req.params.field + " is NOT an array, trying to non-array version");
 				// let's try non-array version
 				aggregate = [];
 				if(filters.length)
@@ -450,6 +448,7 @@ exports.facetGroupBy = function (req, callback) {
 					aggregate.push(groupBy);
 				aggregate.push({$group : {_id:"$facet",count: { $sum: 1 }}});
 				aggregate.push({$sort: { count: -1 }});
+				aggregate.push({$limit:limit});
 				collection.aggregate(
 					aggregate
 					,
@@ -470,88 +469,48 @@ exports.facetGroupBy = function (req, callback) {
 }
 
 
-function createFilters (filter) {
+function createFilters (filters) { // with $all
 	var matches = [];
-	var filters = filter.split(";");
-	filters.forEach(function(filter) {
-		if(filter === "") return; // skip empty
-		var filter_split = filter.split(":");
-		var field_name = filter_split[0];
-		var filter_params = filter_split[1].split(",");
+	for (var field in filters) {
+		if(filters[field] === "") return; // skip empty
 		var f = {};
-		f[field_name] = {"$all":filter_params};
+		
+		if(Array.isArray(filters[field]))
+			f[field] = {"$all":filters[field]};
+		else
+			f[field] = filters[field];
+			
 		matches.push(f);
 		//filter_fields.push(field_name);
 		console.log(f);
-	});
+	};
 	return matches;
 
-}
-
-exports.facetTest = function (req, callback) {
-	var filters = [];
-	var collection = db.collection(req.params.id);
-
-
-
-	console.log(collection);
-	console.log("asdf");
-
-	collection.aggregate(
-		{$match:{
-			"gr_teoksessa":{$all:["Computers & Education"]}
-			
-			}
-		},
-		
-		{$group: 
-			{_id:"$id",
-			facet:{$first:"$dc_contributor_laitos__splitted"}
-			}
-		},
-		{$unwind:"$facet"},
-		{$group: 
-			{_id:"$facet",
-			count:{$sum:1},
-			}
-		}
-	
-		// use $out for mongo 2.6 and newer
-		,
-		function (err, data) {
-			if(err) {
-				console.log(err);
-				callback(data);
-
-			} else {
-				callback(data);
-			}
-		}
-	) 
 }
 
 
 exports.facet = function (req, callback) {
 	var filters = [];
 	var collection = db.collection(req.params.id);
-	field = "$" + req.params.field;
+	var field = "$" + req.params.field;
 	var aggregate = [];
 	var matches = [];
+	var limit = 20;
 
 	
-	if(req.query.filter) {
-		matches = createFilters(req.query.filter);
+//	if(req.query.filter) {
+		matches = createFilters(req.query);
 		if(matches.length)
 			aggregate.push({$match: {$and:matches}});
-	}
+	//}
 
 	// remove empties
 //	var empty_match = {};
 //	empty_match[req.params.field] = {$ne:""};
-	
 	aggregate.push({$unwind: field});
 	aggregate.push({$group : {_id: field, count: { $sum: 1 }}});
 	aggregate.push({$sort: { count: -1 }});
+	aggregate.push({$limit:limit});
 
 	collection.aggregate(
 		aggregate
@@ -565,6 +524,7 @@ exports.facet = function (req, callback) {
 					aggregate.push({$match: {$and:matches}});	
 				aggregate.push({$group : {_id: field, count: { $sum: 1 }}});
 				aggregate.push({$sort: { count: -1 }});
+				aggregate.push({$limit:limit});
 							
 				collection.aggregate(
 					aggregate

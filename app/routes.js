@@ -190,6 +190,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionTableData(req, res);
 	});
 
+	express.get('/get/collection/:id/search', function (req, res) {
+		glampipe.core.collectionSearch(req, res);
+	});
+
 	express.get('/get/collection/:id/doc/:doc', function (req, res) {
 		glampipe.core.getDocumentById(req, res);
 	});
