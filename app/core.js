@@ -1291,9 +1291,8 @@ function readFiles(dirname, onNodeContent, onError, onDone) {
 		}
 		
 		async.eachSeries(nodedirs, function iterator(nodedir, next) {
-            console.log(nodedir);
 			fs.stat(dirname + nodedir, function(err, stat) {
-				// read each node directory but skip "config"
+				// read each node directory but skip "config" directory
 				if ( nodedir == "config") {
 					next();
 				} else if (stat.isDirectory()) { 
@@ -1351,15 +1350,17 @@ function readNodeDirectory (nodeDir, skip, cb) {
 					skip(err);
 					return;
 				}
-                console.log(nodeFiles.length);
                 if(nodeFiles.length == 1) {
                     cb(node); return;
                 }
 				// read each file and add content to node
 				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
-					js2Array(nodeDir, nodeFile, node, function() {
+					if(fs.statSync(path.join(nodeDir, nodeFile)).isDirectory()) {
 						next();
-					})
+					} else {js2Array(nodeDir, nodeFile, node, function() {
+							next();
+						})
+					}
 				// all files read. Return node object
 				}, function done() {
 					cb(node);
@@ -1394,38 +1395,6 @@ function js2Array (dirName, fileName, node, cb) {
 		cb();
 	})
 }
-
-function readFiles_old(dirname, onFileContent, onError, onDone) {
-	var fs = require("fs");
-	fs.readdir(dirname, function(err, filenames) {
-		if (err) {
-			onError(err);
-			return;
-		}
-	
-		async.eachSeries(filenames, function iterator(filename, next) {
-			//fs.stat(filename, function(err, stat) {
-				// skip directories
-				if (filename == "config" || filename == "data") { 
-					next();
-				} else {
-					fs.readFile(dirname + filename, 'utf-8', function(err, content) {
-						if (err) {
-							onError(err);
-							return;
-						}
-						onFileContent(filename, content, next);
-					});
-				}
-		   // })
-		}, function done() {
-			onDone();
-		});
-
-	});
-}
-
-
 
 
 function fileStats (sandbox, node, onScript, onError) {

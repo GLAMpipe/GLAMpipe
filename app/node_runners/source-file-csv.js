@@ -63,6 +63,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	if(node.settings.columns)
 		columns = true;
 	
+	console.log("IMPORT STARTED...");
 	var records = []; // currently we create one huge array of records and insert that to Mongo
 
 	var parser = parse({

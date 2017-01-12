@@ -210,6 +210,10 @@ module.exports = function(express, glampipe, passport) {
 		collection.getKeys(req.params.name, function(data) {res.send(data)});
 	});
 
+	express.get('/get/collection/:name/types', function (req, res) {
+		collection.getKeyTypes(req.params.name, function(data) {res.send(data)});
+	});
+
 	express.get('/get/collection/docs/search', function (req, res) {
 		// IMPLEMENT ME
 		collection.collectionSearch(req, function(data) {res.send(data)});
@@ -228,14 +232,8 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/get/collection/:id/facet/:field/groupby/:groupby', function (req, res) {
-		glampipe.core.getCollectionFacetGroupBy(req, function(data) {res.send(data)});
+		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
 	});
-
-	express.get('/get/collection/:id/facet/:field/groupby/:group', function (req, res) {
-		glampipe.core.getCollectionFacetGroupBy(req, function(data) {res.send(data)});
-	});
-
-
 
 	express.post('/edit/collection/:id', function (req, res) {
 		glampipe.core.editCollection(req.params.id, req, function(data) {res.send(data)});

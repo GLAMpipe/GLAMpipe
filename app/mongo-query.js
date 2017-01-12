@@ -177,7 +177,7 @@ exports.insert = function (collectionname, doc, callback) {
 			console.log(err);
 			callback(err, result)
 		} else {
-			console.log('inserted to', collectionname);
+			 console.log('MONGO: inserted to', collectionname);
 			callback(null, result);
 		}
 	}); 
@@ -386,17 +386,18 @@ exports.group = function (node, array, callback) {
 
 }
 
-
-exports.facetGroupBy = function (req, callback) {
+// facet counts (double grouped also)
+exports.facet = function (req, callback) {
+	var col = require("../app/collection.js");
 	var filters = [];
 	var collection = db.collection(req.params.id);
-	var field = "$" + req.params.field;
-	var aggregate = [];
+	var field = req.params.field;
 	var filters = [];
-	var groupBy = null;
+	var group_by = null;
 	var limit = 20;
+	var facet = "$facet";
 	
-	// algorithm (match ,group, count)
+	// algorithm for double grouped (match ,group, count)
 	// - first match reference facets (journal/monografia)
 	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
 	// - then group by original source (JYX-item)
@@ -404,69 +405,80 @@ exports.facetGroupBy = function (req, callback) {
 	// FILTER:
 	if(req.query) {
 		filters = createFilters(req.query);
-
 	}
 	
 	// GROUP:
-	// - we must include all filter2 fields in aggregation
 	if(req.params.groupby) {
-		groupBy = {
+		group_by = {
 			$group: {
 				_id:{mid:"$" + req.params.groupby}, 
-				facet:{$first: field}
+				facet:{$first: "$" + field}
 			}
 		}
 	} 
 	
-	// remove empties
-	var empty_match = {};
-	empty_match[req.params.field] = {$ne:""};
+	if(!group_by)
+		facet = "$" + field;
 
+	// skip empty strings
+	var empty = {};
+	empty[field] = {$ne:""};
+		
+	// check if field is array
+	col.getKeyTypes(req.params.id, function(res) {
+		if(res[field] === "array") {
+			var aggr = buildAggregate(facet, filters, group_by, empty, limit, true);
+			aggregate(collection, aggr, function(data) {
+				callback(data);
+			})
+		} else {
+			var aggr= buildAggregate(facet, filters, group_by, empty, limit, false);
+			aggregate(collection, aggr, function(data) {
+				callback(data);
+			})
+		}
+	})
+}
+
+
+
+function buildAggregate (facet, filters, group_by, empty, limit, is_array) {
+
+	var aggregate = [];
 	// build aggregate
 	if(filters.length)
 		aggregate.push({$match: {$and:filters}});
-	if(req.params.groupby)
-		aggregate.push(groupBy);
-	aggregate.push({$unwind:"$facet"});
-	aggregate.push({$group : {_id:"$facet",count: { $sum: 1 }}});
+	if(group_by)
+		aggregate.push(group_by);
+	if(is_array)
+		aggregate.push({$unwind: facet});
+	aggregate.push({$match: empty});
+	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
 	aggregate.push({$sort: { count: -1 }});
 	aggregate.push({$limit:limit});
+	return aggregate;
+}
 
-	console.log(JSON.stringify(aggregate));
 
+
+function aggregate (collection, aggregate, callback) {
+
+	//console.log(JSON.stringify(aggregate, null, 2));
 	collection.aggregate(
 		aggregate
 		,
 		function (err, data) {
 			if(err) {
-				console.log(req.params.field + " is NOT an array, trying to non-array version");
-				// let's try non-array version
-				aggregate = [];
-				if(filters.length)
-					aggregate.push({$match: {$and:filters}});
-				if(req.params.groupby)
-					aggregate.push(groupBy);
-				aggregate.push({$group : {_id:"$facet",count: { $sum: 1 }}});
-				aggregate.push({$sort: { count: -1 }});
-				aggregate.push({$limit:limit});
-				collection.aggregate(
-					aggregate
-					,
-					function (err, data) {
-						if(err) {
-							console.log("ERRRRROOOOR");
-							callback(data);
-						} else {
-							callback(data);
-						}
-					}
-				)
+				console.log("field is NOT an array");
+				callback(data);
+
 			} else {
 				callback(data);
 			}
 		}
 	) 
 }
+
 
 
 function createFilters (filters) { // with $all
@@ -486,70 +498,6 @@ function createFilters (filters) { // with $all
 	};
 	return matches;
 
-}
-
-
-exports.facet = function (req, callback) {
-	var filters = [];
-	var collection = db.collection(req.params.id);
-	var field = "$" + req.params.field;
-	var aggregate = [];
-	var matches = [];
-	var limit = 20;
-
-	
-//	if(req.query.filter) {
-		matches = createFilters(req.query);
-		if(matches.length)
-			aggregate.push({$match: {$and:matches}});
-	//}
-
-	// remove empties
-//	var empty_match = {};
-//	empty_match[req.params.field] = {$ne:""};
-	aggregate.push({$unwind: field});
-	aggregate.push({$group : {_id: field, count: { $sum: 1 }}});
-	aggregate.push({$sort: { count: -1 }});
-	aggregate.push({$limit:limit});
-
-	collection.aggregate(
-		aggregate
-		,
-		function (err, data) {
-			if(err) {
-				console.log(field + " is NOT an array, trying to non-array version");
-				// let's try non-array version
-				aggregate = [];
-				if(matches.length)
-					aggregate.push({$match: {$and:matches}});	
-				aggregate.push({$group : {_id: field, count: { $sum: 1 }}});
-				aggregate.push({$sort: { count: -1 }});
-				aggregate.push({$limit:limit});
-							
-				collection.aggregate(
-					aggregate
-					,
-					function (err, data) {
-						if(err) {
-							console.log("ERROR:" + err );
-							callback(data);
-						} else {
-							callback(data);
-						}
-					}
-				)
-			} else {
-				callback(data);
-			}
-		}
-	) 
-}
-
-
-exports.filtered = function (req, callback) {
-	
-	// filtered search
-	
 }
 
 

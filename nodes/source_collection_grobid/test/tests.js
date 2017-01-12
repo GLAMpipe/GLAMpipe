@@ -102,6 +102,7 @@ describe('GROBID-node', function() {
   it('error in GROBID output', function() {
 
 	sandbox.context.error = "error";
+	sandbox.context.response = {statusCode:200};
     node.run(sandbox.context, sandbox.out);
     chai.assert.equal(sandbox.out.value[0].status, "file error");
     chai.assert.equal(sandbox.out.value[0].gr_status, "file error");
@@ -115,10 +116,30 @@ describe('GROBID-node', function() {
     chai.assert.equal(sandbox.out.value[0].status, "extraction error");
     chai.assert.equal(sandbox.out.value[0].gr_status, "extraction error");
   });
+
+  it('invalid xml', function() {
+
+	sandbox.context.data = "giberisha ";
+	delete sandbox.context.error;
+    node.run(sandbox.context, sandbox.out);
+    chai.assert.equal(sandbox.out.value[0].status, "file error");
+    chai.assert.equal(sandbox.out.value[0].gr_status, "file error");
+  });
+
+
+  it('bad server response', function() {
+
+	sandbox.context.response = {statusCode:500};
+	delete sandbox.context.error;
+    node.run(sandbox.context, sandbox.out);
+    chai.assert.equal(sandbox.out.value[0].status, "file error");
+    chai.assert.equal(sandbox.out.value[0].gr_status, "file error");
+  });
   
    it('just one monograph', function() {
 
 	sandbox.context.data = xml2;
+	sandbox.context.response = {statusCode:200};
     node.run(sandbox.context, sandbox.out);
     //console.log(sandbox.out.value);
     chai.assert.deepEqual(sandbox.out.value, result2);

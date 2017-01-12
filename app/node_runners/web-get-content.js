@@ -43,12 +43,16 @@ exports.uploadFile = function (doc, sandbox, next ) {
 	sandbox.context.doc = doc;
 	sandbox.out.value = null;  // reset output
 	sandbox.pre_run.runInContext(sandbox);
-	
-	var upload = sandbox.out.value;
-	console.log(upload);
+
 
 	if(!sandbox.out.value)
 		return next("no upload object from node!");
+
+	var upload = sandbox.out.value;
+	//console.log(upload);
+	console.log("UPLOADING:");
+	console.log("file: " + upload.filepath);
+	console.log("url: " + upload.url);
 
 	// skip if file does not exist
 	try {
@@ -66,7 +70,7 @@ exports.uploadFile = function (doc, sandbox, next ) {
 	var options = {
 		uri: upload.url,
 		jar:true,
-		headers: {
+		headers: { // TODO: these should be set by node
 			"accept": "application/xml",
 			"content-type": "application/pdf"
 		},
@@ -82,6 +86,7 @@ exports.uploadFile = function (doc, sandbox, next ) {
 			next();
 		  } else {
 			  console.log('Upload successful!  Server responded with:', response.statusCode);
+			  sandbox.context.response = response;
 			  sandbox.context.data = body;
 			  sandbox.run.runInContext(sandbox);
 			  next();

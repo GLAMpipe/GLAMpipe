@@ -4,32 +4,43 @@
 out.value = null;
 var outputs = [];
 
-if(!context.error) {
+if(!context.error && context.response.statusCode == 200) {
 	var data = context.data;
-	var json = context.parser.toJson(data);
-	//console.log(json);
-	var refs = JSON.parse(json);
-	
-	context.vars.success_counter++;
+	try {
+		var json = context.parser.toJson(data);
+		//console.log(json);
+		var refs = JSON.parse(json);
 
-	if(refs.TEI.text.back.div.listBibl.biblStruct) {
-		if(Array.isArray(refs.TEI.text.back.div.listBibl.biblStruct)) {
-			refs.TEI.text.back.div.listBibl.biblStruct.forEach(function(ref) {
+		
+		context.vars.success_counter++;
+
+		if(refs.TEI.text.back.div.listBibl.biblStruct) {
+			if(Array.isArray(refs.TEI.text.back.div.listBibl.biblStruct)) {
+				refs.TEI.text.back.div.listBibl.biblStruct.forEach(function(ref) {
+					var output = createRef(context.doc);	
+					extractData(ref, output);
+					outputs.push(output);
+				})
+			} else {
 				var output = createRef(context.doc);	
-				extractData(ref, output);
-				outputs.push(output);
-			})
+				extractData(refs.TEI.text.back.div.listBibl.biblStruct, output);
+				outputs.push(output);				
+			}
 		} else {
-			var output = createRef(context.doc);	
-			extractData(refs.TEI.text.back.div.listBibl.biblStruct, output);
-			outputs.push(output);				
+			var output = createRef(context.doc);
+			output.status = "extraction error";
+			output.gr_status = "extraction error";
+			outputs.push(output);	
 		}
-	} else {
+		
+		
+	
+	} catch (e) {
 		var output = createRef(context.doc);
-		output.status = "extraction error";
-		output.gr_status = "extraction error";
-		outputs.push(output);	
-	}
+		output.status = "file error";
+		output.gr_status = "file error";
+		outputs.push(output);
+	}	
 	
 	out.value = outputs;
 		
