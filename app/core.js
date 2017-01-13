@@ -834,7 +834,7 @@ exports.getCollection = function (req, query, res) {
 		skip = 0;
 
 	var sort = req.query.sort
-	if(sort === 'undefined')  // by default sort by _id (mongoid)
+	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
 		sort = "_id";
 
 	var reverse = false

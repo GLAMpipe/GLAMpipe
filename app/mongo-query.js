@@ -394,9 +394,18 @@ exports.facet = function (req, callback) {
 	var field = req.params.field;
 	var filters = [];
 	var group_by = null;
-	var limit = 20;
+	var sort = {};
 	var facet = "$facet";
-	
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 20;
+
+	if(typeof req.query.sort !== 'undefined')  // by default sort by _id 
+		sort[req.query.sort] = 1;
+	else
+		sort.count = -1;
+		
 	// algorithm for double grouped (match ,group, count)
 	// - first match reference facets (journal/monografia)
 	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
@@ -427,12 +436,12 @@ exports.facet = function (req, callback) {
 	// check if field is array
 	col.getKeyTypes(req.params.id, function(res) {
 		if(res[field] === "array") {
-			var aggr = buildAggregate(facet, filters, group_by, empty, limit, true);
+			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
 			aggregate(collection, aggr, function(data) {
 				callback(data);
 			})
 		} else {
-			var aggr= buildAggregate(facet, filters, group_by, empty, limit, false);
+			var aggr= buildAggregate(facet, filters, group_by, empty, limit, sort, false);
 			aggregate(collection, aggr, function(data) {
 				callback(data);
 			})
@@ -442,7 +451,7 @@ exports.facet = function (req, callback) {
 
 
 
-function buildAggregate (facet, filters, group_by, empty, limit, is_array) {
+function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array) {
 
 	var aggregate = [];
 	// build aggregate
@@ -454,7 +463,7 @@ function buildAggregate (facet, filters, group_by, empty, limit, is_array) {
 		aggregate.push({$unwind: facet});
 	aggregate.push({$match: empty});
 	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
-	aggregate.push({$sort: { count: -1 }});
+	aggregate.push({$sort: sort});
 	aggregate.push({$limit:limit});
 	return aggregate;
 }
@@ -484,7 +493,10 @@ function aggregate (collection, aggregate, callback) {
 function createFilters (filters) { // with $all
 	var matches = [];
 	for (var field in filters) {
-		if(filters[field] === "") return; // skip empty
+		// skip empty values and "limit" field
+		if(filters[field] === "") continue; 
+		if(field === "limit" || field === "sort") continue;
+			
 		var f = {};
 		
 		if(Array.isArray(filters[field]))
