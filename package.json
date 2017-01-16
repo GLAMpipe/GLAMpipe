@@ -31,9 +31,14 @@
     "stream-splitter": "^0.3.2",
     "stream-transform": "^0.1.1",
     "to-utf-8": "^1.2.0",
-    "validator": "^6.2.0"
+    "validator": "^6.2.0",
+    "xml2json": "^0.10.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eval": "^0.1.1",
+    "mocha": "^3.2.0"
+  },
   "scripts": {
     "start": "node glampipe.js",
     "test": "echo \"Error: no test specified\" && exit 1"

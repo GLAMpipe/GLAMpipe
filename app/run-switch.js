@@ -5,6 +5,7 @@ var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
 var validator 	= require('validator');
+var parser 		= require('xml2json');
 
 var mongoquery 	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
@@ -159,7 +160,12 @@ exports.runNode = function (node, io) {
 									}
 								}) 
 							});
-									
+						break;
+						
+						case "grobid":
+							var web = require("../app/node_runners/web-get-content.js");
+							asyncLoop.sourceLoop(node, sandbox, web.uploadFile);
+						break;			
 					}
 				
 				break;
@@ -424,6 +430,11 @@ exports.runNode = function (node, io) {
 							var web = require("../app/node_runners/web-get-content.js");
 							asyncLoop.loop(node, sandbox, web.request);
 						break;
+						
+						case "grobid":
+							var web = require("../app/node_runners/web-get-content.js");
+							asyncLoop.loop(node, sandbox, web.uploadFile);
+						break;
 					}
 					break;	
 
@@ -519,6 +530,7 @@ exports.createSandbox = function (node, io) {
 			get: getProp,
 			flat: flatten,
 			validator: validator,
+			parser: parser,
 			MP: MP
 		},
 		out: {

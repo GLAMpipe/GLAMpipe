@@ -190,6 +190,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionTableData(req, res);
 	});
 
+	express.get('/get/collection/:id/search', function (req, res) {
+		glampipe.core.collectionSearch(req, res);
+	});
+
 	express.get('/get/collection/:id/doc/:doc', function (req, res) {
 		glampipe.core.getDocumentById(req, res);
 	});
@@ -206,8 +210,29 @@ module.exports = function(express, glampipe, passport) {
 		collection.getKeys(req.params.name, function(data) {res.send(data)});
 	});
 
+	express.get('/get/collection/:name/types', function (req, res) {
+		collection.getKeyTypes(req.params.name, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/docs/search', function (req, res) {
+		// IMPLEMENT ME
+		collection.collectionSearch(req, function(data) {res.send(data)});
+	});
+
 	express.get('/get/collection/count/:id', function (req, res) {
 		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/:id/facet/test', function (req, res) {
+		glampipe.core.getCollectionFacetTest(req, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/:id/facet/:field', function (req, res) {
+		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
+	});
+
+	express.get('/get/collection/:id/facet/:field/groupby/:groupby', function (req, res) {
+		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
 	});
 
 	express.post('/edit/collection/:id', function (req, res) {

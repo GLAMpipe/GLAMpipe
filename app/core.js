@@ -834,7 +834,7 @@ exports.getCollection = function (req, query, res) {
 		skip = 0;
 
 	var sort = req.query.sort
-	if(sort === 'undefined')  // by default sort by _id (mongoid)
+	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
 		sort = "_id";
 
 	var reverse = false
@@ -851,6 +851,57 @@ exports.getCollection = function (req, query, res) {
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
+}
+// AND search
+exports.collectionSearch = function (req, res) {
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 15;
+
+	var skip = parseInt(req.query.skip);
+	if (skip <= 0 || isNaN(skip))
+		skip = 0;
+
+	var sort = req.query.sort
+	if(sort === 'undefined')  // by default sort by _id (mongoid)
+		sort = "_id";
+
+	var reverse = false
+	var r = parseInt(req.query.reverse);
+	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
+		reverse = true;
+
+
+
+	var s = ["skip", "limit", "sort", "reverse"];
+	var query = {};
+	for (var param in req.query) {
+		console.log(param);
+		if(!s.includes(param)) {
+			if(Array.isArray(req.query[param])) {
+				query[param] = {$all:req.query[param]};
+			} else {
+				query[param] = req.query[param];
+			}
+		}
+	}
+	console.log(query);
+	//query[req.query.field] = {$regex:req.query.value, $options: 'i'};
+
+	var params = {
+		collection: req.params.id,
+		query: query,
+		limit: limit,
+		skip: skip,
+		sort: req.query.sort,
+		reverse: reverse
+	}
+
+	mongoquery.findAll(params, function (result) {
+		res.send({data:result});
+	});
+	
 }
 
 
@@ -913,6 +964,8 @@ function createSearchQuery (req) {
 	return query;
 }
 
+
+
 exports.getCollectionByField = function (req, res) {
 
 	var query = {};
@@ -942,6 +995,33 @@ exports.getCollectionCount = function (req, cb) {
 		cb({count:result});
 	});
 }
+
+
+exports.getCollectionFacet = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facet(req, function (result) {
+		cb({count:result});
+	});
+}
+
+exports.getCollectionFacetGroupBy = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facetGroupBy(req, function (result) {
+		cb({count:result});
+	});
+}
+
+
+exports.getCollectionFacetTest = function (req, cb) {
+	
+	//var query = createSearchQuery(req);
+	mongoquery.facetTest(req, function (result) {
+		cb({count:result});
+	});
+}
+
 
 
 exports.editCollection = function (collection_id, req, callback) {
@@ -1029,6 +1109,8 @@ exports.nodeFileView = function  (req, cb) {
 exports.getNodeLog = function (req, cb) {
 	
 	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
+		if(err)
+			return cb();
 		result.forEach(function(row, i) {
 			if(row.ts) {
 				var date = new Date(row.ts);
@@ -1209,9 +1291,8 @@ function readFiles(dirname, onNodeContent, onError, onDone) {
 		}
 		
 		async.eachSeries(nodedirs, function iterator(nodedir, next) {
-            console.log(nodedir);
 			fs.stat(dirname + nodedir, function(err, stat) {
-				// read each node directory but skip "config"
+				// read each node directory but skip "config" directory
 				if ( nodedir == "config") {
 					next();
 				} else if (stat.isDirectory()) { 
@@ -1269,15 +1350,17 @@ function readNodeDirectory (nodeDir, skip, cb) {
 					skip(err);
 					return;
 				}
-                console.log(nodeFiles.length);
                 if(nodeFiles.length == 1) {
                     cb(node); return;
                 }
 				// read each file and add content to node
 				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
-					js2Array(nodeDir, nodeFile, node, function() {
+					if(fs.statSync(path.join(nodeDir, nodeFile)).isDirectory()) {
 						next();
-					})
+					} else {js2Array(nodeDir, nodeFile, node, function() {
+							next();
+						})
+					}
 				// all files read. Return node object
 				}, function done() {
 					cb(node);
@@ -1312,38 +1395,6 @@ function js2Array (dirName, fileName, node, cb) {
 		cb();
 	})
 }
-
-function readFiles_old(dirname, onFileContent, onError, onDone) {
-	var fs = require("fs");
-	fs.readdir(dirname, function(err, filenames) {
-		if (err) {
-			onError(err);
-			return;
-		}
-	
-		async.eachSeries(filenames, function iterator(filename, next) {
-			//fs.stat(filename, function(err, stat) {
-				// skip directories
-				if (filename == "config" || filename == "data") { 
-					next();
-				} else {
-					fs.readFile(dirname + filename, 'utf-8', function(err, content) {
-						if (err) {
-							onError(err);
-							return;
-						}
-						onFileContent(filename, content, next);
-					});
-				}
-		   // })
-		}, function done() {
-			onDone();
-		});
-
-	});
-}
-
-
 
 
 function fileStats (sandbox, node, onScript, onError) {

@@ -177,7 +177,7 @@ exports.insert = function (collectionname, doc, callback) {
 			console.log(err);
 			callback(err, result)
 		} else {
-			console.log('inserted to', collectionname);
+			 console.log('MONGO: inserted to', collectionname);
 			callback(null, result);
 		}
 	}); 
@@ -385,6 +385,138 @@ exports.group = function (node, array, callback) {
 	}
 
 }
+
+// facet counts (double grouped also)
+exports.facet = function (req, callback) {
+	var col = require("../app/collection.js");
+	var filters = [];
+	var collection = db.collection(req.params.id);
+	var field = req.params.field;
+	var filters = [];
+	var group_by = null;
+	var sort = {};
+	var facet = "$facet";
+
+	var limit = parseInt(req.query.limit);
+	if (limit < 0 || isNaN(limit))
+		limit = 20;
+
+	if(typeof req.query.sort !== 'undefined')  // by default sort by _id 
+		sort[req.query.sort] = 1;
+	else
+		sort.count = -1;
+		
+	// algorithm for double grouped (match ,group, count)
+	// - first match reference facets (journal/monografia)
+	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
+	// - then group by original source (JYX-item)
+	
+	// FILTER:
+	if(req.query) {
+		filters = createFilters(req.query);
+	}
+	
+	// GROUP:
+	if(req.params.groupby) {
+		group_by = {
+			$group: {
+				_id:{mid:"$" + req.params.groupby}, 
+				facet:{$first: "$" + field}
+			}
+		}
+	} 
+	
+	if(!group_by)
+		facet = "$" + field;
+
+	// skip empty strings
+	var empty = {};
+	empty[field] = {$ne:""};
+		
+	// check if field is array
+	col.getKeyTypes(req.params.id, function(res) {
+		if(res[field] === "array") {
+			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
+			aggregate(collection, aggr, function(data) {
+				callback(data);
+			})
+		} else {
+			var aggr= buildAggregate(facet, filters, group_by, empty, limit, sort, false);
+			aggregate(collection, aggr, function(data) {
+				callback(data);
+			})
+		}
+	})
+}
+
+
+
+function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array) {
+
+	var aggregate = [];
+	// build aggregate
+	if(filters.length)
+		aggregate.push({$match: {$and:filters}});
+	if(group_by)
+		aggregate.push(group_by);
+	if(is_array)
+		aggregate.push({$unwind: facet});
+	aggregate.push({$match: empty});
+	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
+	aggregate.push({$sort: sort});
+	aggregate.push({$limit:limit});
+	return aggregate;
+}
+
+
+
+function aggregate (collection, aggregate, callback) {
+
+	//console.log(JSON.stringify(aggregate, null, 2));
+	collection.aggregate(
+		aggregate
+		,
+		function (err, data) {
+			if(err) {
+				console.log("field is NOT an array");
+				callback(data);
+
+			} else {
+				callback(data);
+			}
+		}
+	) 
+}
+
+
+
+function createFilters (filters) { // with $all
+	var matches = [];
+	for (var field in filters) {
+		// skip empty values and "limit" field
+		if(filters[field] === "") continue; 
+		if(field === "limit" || field === "sort") continue;
+			
+		var f = {};
+		
+		if(Array.isArray(filters[field])) {
+			var values = [];
+			filters[field].forEach(function(value) {
+				values.push(decodeURIComponent(value));
+			})
+			f[field] = {"$all": values};
+		} else {
+			f[field] = decodeURIComponent(filters[field])
+		}
+			
+		matches.push(f);
+		//filter_fields.push(field_name);
+		console.log(f);
+	};
+	return matches;
+
+}
+
 
 exports.collectionLookup = function (sandbox, node, onNodeScript, onError) {
 
