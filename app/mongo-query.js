@@ -499,10 +499,15 @@ function createFilters (filters) { // with $all
 			
 		var f = {};
 		
-		if(Array.isArray(filters[field]))
-			f[field] = {"$all":filters[field]};
-		else
-			f[field] = filters[field];
+		if(Array.isArray(filters[field])) {
+			var values = [];
+			filters[field].forEach(function(value) {
+				values.push(decodeURIComponent(value));
+			})
+			f[field] = {"$all": values};
+		} else {
+			f[field] = decodeURIComponent(filters[field])
+		}
 			
 		matches.push(f);
 		//filter_fields.push(field_name);
