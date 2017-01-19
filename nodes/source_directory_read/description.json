@@ -1,0 +1,21 @@
+{
+	"nodeid": "source_directory_scan",
+	"type": "source",
+	"subtype": "directory",
+	"title": "Recursive directory scan",
+	"description": "Recursive directory scan",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a directory scan');"
+		],
+        "bye": "out.say('news', 'Deleted directory scan node. Data removed. Bye!'); ",
+		"init":"out.say('progress', context.node.title);",
+
+		"finish":"out.say('finish', '<h2>Data imported</h2> from directory ' + context.node.params.root);"
+	},
+	
+	"views": {}
+
+}

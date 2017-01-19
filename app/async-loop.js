@@ -19,30 +19,26 @@ exports.loop = function (node, sandbox, onDoc) {
 			console.log("SCHEMA saved");
 	})
 }
-
+// source loop clears collection in the beginning
 exports.sourceLoop = function (node, sandbox, onDoc) {
 
 	// find everything from source collection
 	mongoquery.find2({}, node.params.source_collection, function (err, docs) {
-		
 		// empty node collection
 		mongoquery.empty(node.collection, {}, function() {
 			
 			sandbox.context.doc_count = docs.length;
-			console.log(node.settings);
 			
 			// run node once per record
 			require("async").eachSeries(docs, function iterator (doc, next) {
-
 				sandbox.context.doc = doc;
 				sandbox.context.count++;
 				
 				// call document processing function
 				onDoc(doc, sandbox, function processed (error) {
-					if(!error && sandbox.out.value && sandbox.out.value.length)
+					if(!error && sandbox.out.value)
 						mongoquery.insert(node.collection, sandbox.out.value, next);
 					else {
-						console.log("ERROR: " + error);
 						next();
 					}
 				});
@@ -56,6 +52,7 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 	});
 }
 
+// loop updates existing documents
 function loop (node, sandbox, onDoc) {
 
 	// find everything

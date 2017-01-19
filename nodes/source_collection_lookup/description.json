@@ -4,7 +4,7 @@
 	"type": "source",
 	"subtype": "collection",
 	"subsubtype": "lookup",
-    "status": "works",
+    "status": "rubbish",
 	"description": "Collection lookup. Suitable for example term lookups.",
 
 	"scripts": {

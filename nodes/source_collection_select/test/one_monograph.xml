@@ -1,0 +1,48 @@
+<TEI
+    xmlns="http://www.tei-c.org/ns/1.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML">
+    <teiHeader/>
+    <text>
+        <front/>
+        <body/>
+        <back>
+            <div>
+                <listBibl>
+                    <biblStruct coords="16,141.08,467.15,337.12,9.00;16,141.08,476.49,337.06,9.00;16,141.07,485.82,334.10,9.00"  xml:id="b0">
+                        <monogr>
+                            <title level="m" type="main">I am a monograph</title>
+                            <author>
+                                <persName>
+                                    <forename type="first">First</forename>
+                                    <surname>Author</surname>
+                                </persName>
+                            </author>
+                            <author>
+                                <persName>
+                                    <forename type="first">Second</forename>
+                                    <surname>Author</surname>
+                                </persName>
+                            </author>
+                            <author>
+                                <persName>
+                                    <surname>Author</surname>
+                                </persName>
+                            </author>
+
+                            <editor>) Daniel Garber and Michael Ayers</editor>
+                            <imprint>
+                                <date type="published" when="1998" />
+                                <publisher>Cambridge University Press</publisher>
+                                <biblScope unit="page" from="833" to="867" />
+                                <pubPlace>Cambridge</pubPlace>
+                            </imprint>
+                        </monogr>
+                    </biblStruct>
+
+
+                </listBibl>
+            </div>
+        </back>
+    </text>
+</TEI>

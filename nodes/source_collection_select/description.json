@@ -1,0 +1,28 @@
+{
+    "nodeid": "source_collection_select",
+    "type": "source",
+    "subtype": "collection",
+    "subsubtype": "select",
+    "title": "select",
+    "status": "rubbish",
+    "usage":"",
+    "description": "Creates a new collection based on select criteria",
+    
+    "scripts": {
+        "hello": "out.say('news', 'You added a select node'); ",
+        "bye": "out.say('finish', 'Bye!'); ",
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; ",
+			"context.vars.counter = 0; "
+		],
+		
+        "finish":"out.say('finish', 'Added ' + context.vars.success_counter + ' records!'); "
+    },
+    
+    "views": {
+
+    }
+  
+}

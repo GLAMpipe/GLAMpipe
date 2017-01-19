@@ -357,19 +357,27 @@ exports.runNode = function (req, io, res) {
 
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
-			console.log("saved node settings");
+
+			console.log("\n>>>>>>>>>>>>>>>>>>>>>> NODE >>>>>>>>>>>>>>>>>>>>>>>>");
+			console.log("title: " + node.title);
+			console.log("type: ", node.type);
+			console.log("params:");
+			console.log(node.params);
+			console.log("settings:");
+			console.log(node.settings);
+			console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+			
+			if(res)
+				node.res = res;
+			
+			try {
+				require("../app/run-switch.js").runNode(node, io);
+			} catch (e) {
+				console.log(e.message);
+				io.sockets.emit("error", e.message);
+			}
 		})
 
-		console.log("NODE: running node type: ", node.type);
-		if(res)
-			node.res = res;
-		
-		try {
-			require("../app/run-switch.js").runNode(node, io);
-		} catch (e) {
-			console.log(e.message);
-			io.sockets.emit("error", e.message);
-		}
 	})
 }
 
