@@ -1,6 +1,8 @@
 var proxy 	= require("../app/proxy.js");
 var collection = require("../app/collection.js");
 
+var users = require("../app/controllers/routes/users.js");
+
 module.exports = function(express, glampipe, passport) {
     
 	var multer 		= require("multer");
@@ -9,7 +11,7 @@ module.exports = function(express, glampipe, passport) {
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 
-    // INFO to console
+    // print all request to console
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
         next();
@@ -17,13 +19,12 @@ module.exports = function(express, glampipe, passport) {
 
 
 	var isAuthenticated = function (req, res, next) {
-		console.log("CHEKCIN");
+		console.log("CHECKING...");
 	  if (req.isAuthenticated())
 		return next();
 	  res.redirect('/');
 	}
 
-	// TÄLLÄ SUOJATAAN ROUTE !!!!!
 	express.post('/login', passport.authenticate('local', { session: false }), function(req, res) {
 		// If this function gets called, authentication was successful.
 		// `req.user` contains the authenticated user.
@@ -243,30 +244,25 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
 	});
 
-
 	// USERS
-	express.post('/add/user', function (req, res) {
-		glampipe.core.addUser(req, function(data) {res.send(data)});
-	});
-
+	express.route("/users")
+		.get(users.getUsers)
+		.post(users.addUser);
 
 	// UPLOAD
 	express.post('/upload/file', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
 	});
 
-
     // DOWNLOAD
 	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
 		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
 	});
 
-
 	// PIPES
 	express.post('/create/pipe', function (req, res) {
 		glampipe.core.createPipe(req, function(data) {res.send(data)});
 	});
-	
 
 	// NODE EDITOR
 	express.get('/node-viewer', function (req, res) {

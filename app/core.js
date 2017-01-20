@@ -282,13 +282,6 @@ exports.getProject = function (doc_id, res) {
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) { res.json(data) });
 }
 
-exports.addUser = function (req, cb) {
-    var user = {"username": req.body.username, "password": req.body.password};
-    mongoquery.insert ("users", user, function(err, data) {
-        console.log("user \"" + req.body.username + "\" created!");
-        cb({"status": "ok"});
-    });
-}
 
 exports.getNodes = function (res) {
 	//mongoquery.find({}, "nodes", function(data) { res.json(data) });
