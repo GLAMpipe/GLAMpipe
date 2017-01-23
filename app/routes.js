@@ -19,18 +19,32 @@ module.exports = function(express, glampipe, passport) {
 
 
 	var isAuthenticated = function (req, res, next) {
-		console.log("CHECKING...");
 	  if (req.isAuthenticated())
 		return next();
 	  res.redirect('/');
 	}
 
-	express.post('/login', passport.authenticate('local', { session: false }), function(req, res) {
-		// If this function gets called, authentication was successful.
-		// `req.user` contains the authenticated user.
-		console.log("logged in", req.user.username)
-		//res.redirect('/users/' + req.user.username);
+
+	express.get('/auth', isAuthenticated, function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'login.html'));
+	});
+
+	express.get('/login', function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'login.html'));
+	});
+
+	express.post('/login', passport.authenticate('local-login', { session: true }), function(req, res) {
+		console.log("logged in", req.user.id)
+		res.redirect('/users/' + req.user.id);
 	  });
+
+
+	// process the signup form
+	express.post('/signup', passport.authenticate('local-signup', {
+		successRedirect : '/profile', // redirect to the secure profile section
+		failureRedirect : '/signup' // redirect back to the signup page if there is an error
+	
+	}));
 
     // SETUP AND STATUS
 	express.get('/status', function (req, res) {

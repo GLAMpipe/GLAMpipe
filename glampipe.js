@@ -1,17 +1,16 @@
 
 const fs			= require('fs');
 const path			= require('path');
-const env			= process.env;
 const passport      = require('passport'); 
-const LocalStrategy = require('passport-local').Strategy
-
 var express			= require('express');
+var session      	= require('express-session');
 var request			= require('request');
 var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
 
-const conf 		= require("./config/config.js");
+const conf 			= require("./config/config.js");
+const env			= process.env;
 
 global.config = {};
 
@@ -74,50 +73,27 @@ var GlamPipe = function() {
 			extended: true
 		})); 
 
-		self.app.use(passport.initialize()); 
-		self.app.set('json spaces', 2);
 
+		self.app.set('json spaces', 2); // pretty print
 
 
 		// CORS
 		self.app.use(cors());
 		self.app.options('*', cors());
 
-
-		const user = {  
-			username: 'testi',
-			password: 'testi',
-			id: 1
-		}
-
-		passport.use(new LocalStrategy(  
-		  function(username, password, done) {
-			findUser(username, function (err, user) {
-				console.log(username);
-				
-				if (err) {
-					return done(err)
-				}
-				if (!user) {
-					return done(null, false)
-				}
-				if (password !== user.password  ) {
-					return done(null, false)
-				}
-					return done(null, user)
-			})
-		  }
-		))
-
-		function findUser (username, cb) {
-			cb(null,user);
-			
-		}
-		self.passport = passport;
+		// USER AUTHENTICATION
+		self.app.use(session({
+			secret: 'justsomethingvalidhere', // session secret
+			resave: true,
+			saveUninitialized: true
+		}));
+		
+		require('./config/passport')(passport); // pass passport for configuration
+		self.app.use(passport.initialize()); 		
+		self.app.use(passport.session()); // persistent login sessions
 
 		self.http 		= require('http').Server(self.app);
 		self.io 		= require('socket.io')(self.http);
-
 		require('./app/routes.js')(self.app, self, passport);
 
 	};
