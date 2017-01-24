@@ -8,11 +8,8 @@ var request			= require('request');
 var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
-
-const conf 			= require("./config/config.js");
 const env			= process.env;
-
-global.config = {};
+global.config = require("./config/config.js");
 
 
 
@@ -24,35 +21,24 @@ var GlamPipe = function() {
 	// TODO: this is bad, fix with npm install ssl-root-cas
 	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-	/*  ================================================================  */
-	/*  Helper functions.                                                 */
-	/*  ================================================================  */
-
 	/**
-	 *  Set up server IP address and port # using env variables/defaults.
+	 *  Set up server IP address and port 
 	 */
 	self.setupVariables = function() {
-		// assume that we are running in OpenShift
-		//  Set the environment variables we need.
-		self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-		self.port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
-		
-		self.nodePath = conf.nodePath;
 
-		// if we are not in OpenShift, then check if we are inside Docker
-		if (typeof self.ipaddress === "undefined") {
-			// There should be MONGO env variables present if we were running inside docker
-			if(process.env.MONGO_PORT || process.env.DOCKER) {
-				console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
-				self.ipaddress = "0.0.0.0";
-				self.dataPath = "/glampipe";
-			} else {
-				console.log("Running locally, using 127.0.0.1");
-				self.ipaddress = "127.0.0.1";
-				self.dataPath = conf.dataPath;
-			}
-		};
+		self.port      = 3000;
+		self.nodePath = global.config.nodePath;
 
+		// There should be MONGO env variables present if we were running inside docker
+		if(process.env.MONGO_PORT || process.env.DOCKER) {
+			console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
+			self.ipaddress = "0.0.0.0";
+			self.dataPath = "/glampipe";
+		} else {
+			console.log("Running locally, using 127.0.0.1");
+			self.ipaddress = "127.0.0.1";
+			self.dataPath = global.config.dataPath;
+		}
 	};
 
 
@@ -138,9 +124,6 @@ var GlamPipe = function() {
 	 */
 	self.initialize = function(cb) {
 		self.setupVariables();
-		//self.populateCache();
-		//self.setupTerminationHandlers();
-		
 		self.core 	= require("./app/core.js");
 	   
 		self.core.initDB(function (error) {
@@ -193,7 +176,6 @@ var GlamPipe = function() {
 			var server = self.http.listen(self.port, self.ipaddress, function() {
 				var host = server.address().address;
 				var port = server.address().port;
-				//console.log(`Running on ${process.platform}`);
 				console.log("\n********************* G L A M p i pe *************************");
 				console.log("* DATA PATH:",self.dataPath);
 				console.log("* NODE PATH:",self.nodePath);

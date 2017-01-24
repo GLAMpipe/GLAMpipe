@@ -2,7 +2,7 @@
 
 let mongojs = require('mongojs');
 var bcrypt   = require('bcrypt-nodejs');
-let database = require('../../../config/database');
+let database = require('../../config/database');
 let db = mongojs(database.initDBConnect());
 let collection = db.collection("users");
 
@@ -46,17 +46,17 @@ class User {
 	
 
 	// find all users
-	static find(query, cb) {
-
-		collection.find(query, {"local.email":1}, function (err, result) {
+	static findAll(req, res) {
+		collection.find({}, {"local.email":1}, function (err, result) {
 			if (err) {
 				console.log(err);
-				cb([])
+				res.json([])
 			} else {
-				cb(result);
+				res.json(result);
 			} 
 		}); 
 	}
+
 
 	// find user by email
 	static findOne(email, cb) {
@@ -64,7 +64,6 @@ class User {
 			if (err) {
 				cb(err)
 			} else if(result) {
-				console.log(result);
 				var user = new User(result.local.email, result.local.password);
 				user.id = result._id; 
 				cb(null, user);
@@ -73,6 +72,21 @@ class User {
 			}
 		}); 
 	}
+
+	static findById(id, cb) {
+		collection.findOne({"_id":mongojs.ObjectId(id)}, function (err, result) {
+			if (err) {
+				cb(err)
+			} else if(result) {
+				var user = new User(result.local.email);
+				user.id = result._id; 
+				cb(null, user);
+			} else {
+				cb(null, null);
+			}
+		}); 
+	}
+
 	
 	static removeAll(cb) {
 		collection.remove({}, function (err, result) {

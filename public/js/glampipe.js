@@ -16,11 +16,6 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
-	this.login = function (username, password) {
-		alert(login)
-	}
-
-
 	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
 		$.getJSON("/get/project/titles", function(data) { 
@@ -38,7 +33,18 @@ var glamPipe = function () {
 		})
 	}
 	
-	
+	this.getLoginStatus = function (div) {
+		$.getJSON("/auth", function(data) { 
+			if(data.error)
+				if(data.error === "desktop installation")
+					$(div).empty();
+				else
+					$(div).html("<a href='/login'>login</a>");
+			else
+				$(div).html("<a href='/logout'>" +data.email + "</a>");
+			
+		})
+	}	
 	
 	this.addProject = function (projectName) {
 		if ($(".create_project #title").val().trim() == "")

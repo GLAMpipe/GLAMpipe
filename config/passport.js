@@ -3,7 +3,7 @@ var LocalStrategy    = require('passport-local').Strategy;
 
 
 // load up the user model
-var User       = require('../app/controllers/models/user.js');
+var User       = require('../app/controllers/user.js');
 
 // load the auth variables
 //var configAuth = require('./auth'); // use this one for testing
@@ -23,10 +23,9 @@ module.exports = function(passport) {
 
     // used to deserialize the user
     passport.deserializeUser(function(id, done) {
-		done(null,"er")
-       // User.findById(id, function(err, user) {
-         //   done(err, user);
-        //});
+        User.findById(id, function(err, user) {
+			done(err, user);
+        });
     });
 
     // =========================================================================
@@ -73,7 +72,6 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     },
     function(req, email, password, done) {
-		console.log(email);
         if (email)
             email = email.toLowerCase(); // Use lower-case e-mails to avoid case-sensitive e-mail matching
 

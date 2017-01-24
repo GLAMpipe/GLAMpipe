@@ -634,7 +634,7 @@ input.middle_input {
 	background-image:url(/images/thumbs-down.svg);
 	background-repeat: no-repeat;
 	background-position: center right; 
-	background-size: 40px;
+	background-size: 25px;
 }
 
 
@@ -723,4 +723,8 @@ font-weight:bold;
 
 .no-close .ui-dialog-titlebar-close {
   display: none;
+}
+
+#login {
+	float:right;
 }

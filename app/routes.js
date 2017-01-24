@@ -1,7 +1,7 @@
-var proxy 	= require("../app/proxy.js");
-var collection = require("../app/collection.js");
-
-var users = require("../app/controllers/routes/users.js");
+var proxy 		= require("../app/proxy.js");
+var collection 	= require("../app/collection.js");
+var User 		= require("../app/controllers/user.js");
+const conf 		= require("../config/config.js");
 
 module.exports = function(express, glampipe, passport) {
     
@@ -10,43 +10,73 @@ module.exports = function(express, glampipe, passport) {
     var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
-
-    // print all request to console
+	
+    // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
         next();
 	});
 
+	var freeRoutes = ["/", "/get/project/titles", "/login", "/signup"];
 
-	var isAuthenticated = function (req, res, next) {
-	  if (req.isAuthenticated())
-		return next();
-	  res.redirect('/');
+	var isLoggedIn = function (req, res, next) {
+		if (req.isAuthenticated())
+			return next();
+		res.redirect('/');
 	}
 
+	var isLoggedInAPI = function (req, res, next) {
+		if(freeRoutes.includes(req.path)) return next();
+		if (req.isAuthenticated())
+			return next();
+		res.json({error:"not authenticated!"});
+	}
 
-	express.get('/auth', isAuthenticated, function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'login.html'));
-	});
-
+	// protect routes
+	if(config.isServerInstallation)
+		express.all('*', isLoggedInAPI);
+	
+	// USERS
 	express.get('/login', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'login.html'));
+		if(global.config.isServerInstallation)
+			res.sendFile(path.join(__dirname, 'views', 'login.html'));
+		else
+			res.redirect('/');
+			
 	});
 
 	express.post('/login', passport.authenticate('local-login', { session: true }), function(req, res) {
 		console.log("logged in", req.user.id)
-		res.redirect('/users/' + req.user.id);
-	  });
+		res.redirect("/");
+	});
 
-
-	// process the signup form
 	express.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/profile', // redirect to the secure profile section
-		failureRedirect : '/signup' // redirect back to the signup page if there is an error
+		successRedirect : '/login',
+		failureRedirect : '/' 
 	
 	}));
 
+	express.get('/auth', function (req, res) {
+		if(global.config.isServerInstallation)
+			res.json({email:req.user.local.email});
+		else
+			res.json({error:"desktop installation"});
+		
+	});
+
+	express.get('/logout', function (req, res) {
+        req.logout();
+        res.redirect('/');
+	});
+
+	express.route("/users").get(User.findAll);
+
+
     // SETUP AND STATUS
+	express.get('/config', function (req, res) {
+		res.json(config);
+	});
+    
 	express.get('/status', function (req, res) {
         if(glampipe.initError)
             res.json(glampipe.initError);
@@ -258,11 +288,6 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
 	});
 
-	// USERS
-	express.route("/users")
-		.get(users.getUsers)
-		.post(users.addUser);
-
 	// UPLOAD
 	express.post('/upload/file', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
@@ -293,3 +318,5 @@ module.exports = function(express, glampipe, passport) {
 	});
     
 }
+
+

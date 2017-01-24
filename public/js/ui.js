@@ -3,6 +3,7 @@ $( document ).ready(function() {
 	
     var gp = new glamPipe();
 	gp.getProjects("#projectList");
+	gp.getLoginStatus("#login");
 	 
 	$("#create_project").on("click", function () {
 		gp.addProject("pam");
