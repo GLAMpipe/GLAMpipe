@@ -390,7 +390,7 @@ exports.group = function (node, array, callback) {
 exports.facet = function (req, callback) {
 	var col = require("../app/collection.js");
 	var filters = [];
-	var collection = db.collection(req.params.id);
+	var collection = db.collection(req.params.collection);
 	var field = req.params.field;
 	var filters = [];
 	var group_by = null;
@@ -434,7 +434,7 @@ exports.facet = function (req, callback) {
 	empty[field] = {$ne:""};
 		
 	// check if field is array
-	col.getKeyTypes(req.params.id, function(res) {
+	col.getKeyTypes(req.params.collection, function(res) {
 		if(res[field] === "array") {
 			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
 			aggregate(collection, aggr, function(data) {

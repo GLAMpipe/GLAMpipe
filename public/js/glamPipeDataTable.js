@@ -13,6 +13,7 @@ var dataTable = function (node) {
 	this.dataDisplayDiv 	= "data-workspace data data-display";
 	this.dataControlsDiv 	= "data-workspace data data-controls";
 	this.keySelectorDiv 	= "#field-selector";
+	this.baseAPI = "/api/v1";
 
 	this.editMode = false;
 	this.expandCells = false;
@@ -517,7 +518,7 @@ var dataTable = function (node) {
 
 	this.renderCollectionCount = function () {
 		// filtered count
-		$.getJSON("/get/collection/count/" + self.node.source.collection + "?" + self.params.search(), function(data) { 
+		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count/?" + self.params.search(), function(data) { 
 			self.docCount = parseInt(data.count);
 			var skip = self.params.skip_value  + 15;
 			if(skip > self.docCount)
@@ -525,7 +526,7 @@ var dataTable = function (node) {
 			$("data-workspace #data-switch").text( self.params.skip_value + " - " + skip + " of " + self.docCount );
 		})
 		// total count
-		$.getJSON("/get/collection/count/" + self.node.source.collection, function(data) { 
+		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count/", function(data) { 
 			$(".nodeset .node.collection .boxtext").text( data.count + " documents" );
 		})
 	}

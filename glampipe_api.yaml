@@ -1,0 +1,146 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: "1.0.0"
+  title: GLAMpipe API
+host: localhost:3000
+basePath: /api
+
+# Describe your paths here
+paths:
+  # This is a path endpoint. Change it.
+  /v1/projects:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Lists `Project` objects.
+
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          schema:
+            title: ArrayOfProjects
+            type: array
+            items:
+              title: Project
+              type: object
+              properties:
+                name:
+                  type: string
+                collection_count:
+                  type: integer
+                node_count:
+                  type: integer
+                _id:
+                  type: string
+
+    post:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Get project by id.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Project title
+          in: body
+          required: true
+          schema:
+            title: project
+            properties:
+                title:
+                  type: string
+
+            
+
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          schema:
+            title: Project
+            type: object
+            properties:
+                name:
+                  type: string
+                collection_count:
+                  type: integer
+                node_count:
+                  type: integer
+                _id:
+                  type: string
+                nodes:
+                  type: array
+                  items:
+                    title: Node
+
+                  
+  /v1/projects/{id}:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Get project by id.
+      produces:
+        - application/json
+      parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          schema:
+            title: Project
+            type: object
+            properties:
+                name:
+                  type: string
+                collection_count:
+                  type: integer
+                node_count:
+                  type: integer
+                _id:
+                  type: string
+                nodes:
+                  type: array
+                  items:
+                    title: Node
+                           
+    delete:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Get project by id.
+      produces:
+        - application/json
+      parameters:
+      - name: id
+        in: path
+        type: string
+        required: true
+
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response                         
+

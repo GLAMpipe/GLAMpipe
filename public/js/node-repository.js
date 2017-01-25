@@ -3,9 +3,10 @@ var nodeRepository = function () {
 	var self = this;
 	this.nodes = []
     this.plainNodes = []
+    this.baseAPI = "/api/v1";
 	
 	this.loadNodes = function () {
-		$.getJSON("/get/nodes", function(data) { 
+		$.getJSON(self.baseAPI + "/nodes", function(data) { 
 			for(var i = 0; i< data.length; i++) {
 				self.nodes.push(data[i]);
 			}

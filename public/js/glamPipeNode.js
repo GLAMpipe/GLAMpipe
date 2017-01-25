@@ -10,6 +10,7 @@ var glamPipeNode = function (node, gp) {
 	
 	this.dataDisplayDiv = "data-workspace data data-display";
 	this.dataControlsDiv = "data-workspace data data-controls";
+	this.baseAPI = "/api/v1";
 	
 	this.display = new dataTable(this); // default data renderer
 		
@@ -23,7 +24,7 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post("/start/node/" + self.source._id, self.source.settings, function(data) {
+		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error)
 				alert(data.error);
@@ -228,14 +229,14 @@ var glamPipeNode = function (node, gp) {
 
 	this.loadCollectionData = function (params, cb) {
 		
-		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
+		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/docs/" + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
 		});
 	}
 
 	this.loadCollectionKeys = function (cb) {
-		$.getJSON("/get/collection/" + self.source.collection + "/fields", function(keys) {
+		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/fields", function(keys) {
 			self.data.keys = keys;
 			cb();
 		})

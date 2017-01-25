@@ -1,4 +1,39 @@
 
+
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
+$.put = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'PUT',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 var glamPipe = function () {
 	var self = this;
 	this.currentProject = "";
@@ -7,6 +42,7 @@ var glamPipe = function () {
 	this.currentNodes = {}; // active node per collection
 
 	this.pickedCollectionId = "";
+	this.baseAPI = "/api/v1"; 
 	
 	this.projectPipeDiv = "#project-pipe";
 	this.collectionSwitchDiv = "#collection-node-switch";
@@ -18,7 +54,7 @@ var glamPipe = function () {
 
 	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
-		$.getJSON("/get/project/titles", function(data) { 
+		$.getJSON(self.baseAPI + "/projects/titles", function(data) { 
 			$(div).empty();
 			data.sort(compare);
 			for(var i = 0; i< data.length; i++) {
@@ -34,7 +70,7 @@ var glamPipe = function () {
 	}
 	
 	this.getLoginStatus = function (div) {
-		$.getJSON("/auth", function(data) { 
+		$.getJSON(self.baseAPI + "/auth", function(data) { 
 			if(data.error)
 				if(data.error === "desktop installation")
 					$(div).empty();
@@ -52,7 +88,7 @@ var glamPipe = function () {
 		else {
 			var title = $(".create_project #title").val().trim();
 			var data = {"title": title};
-			$.post("/create/project", data, function(returnedData) {
+			$.put(self.baseAPI + "/projects", data, function(returnedData) {
 				if(!returnedData.error) {
 					console.log('created project', returnedData.project);
 					window.location.href = "/project/" + returnedData.project._id;
@@ -76,7 +112,7 @@ var glamPipe = function () {
             "Delete project": function() {
                 $( this ).dialog( "close" );
                 var params = {};
-                $.post("/delete/project/" + project_id, params, function(retData) {
+                $.delete(self.baseAPI + "/projects/" + project_id, params, function(retData) {
                     console.log('project deleted');
                     if(retData.error)
                         alert(retData.error);
@@ -109,7 +145,7 @@ var glamPipe = function () {
 		self.collections = [];
 		self.nodes = [];
 		
-		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
+		$.getJSON(self.baseAPI + "/projects/" + self.currentProject + "/nodes", function(project) { 
 			
 			if(typeof project !== "undefined") { 
 				var nodes = project.nodes;
@@ -243,8 +279,7 @@ var glamPipe = function () {
 
 
 	this.createNode = function (e) {
-        var data = {};
-        var params = {};
+        var data = {params:{}};
         var obj = $(e.target);
         // node array index
         var index = obj.data("index")
@@ -258,15 +293,11 @@ var glamPipe = function () {
         
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
-            params[$(this).attr("name")] = $(this).val(); 
+            data.params[$(this).attr("name")] = $(this).val(); 
         });
         
-        data.params = params;
-        data.nodeid= node.nodeid;
-        data.project = self.currentProject;
-
         if(node.type == "collection") {
-            $.post("/create/collection/node", data, function(returnedData) {
+            $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid + "?type=collection", data, function(returnedData) {
                 console.log('created node');
                 $(".holder.params").empty();
                 // point currentCollectionSet to last collection
@@ -280,7 +311,7 @@ var glamPipe = function () {
 			else {data.collection = self.currentCollection.source.collection;
 				console.log("currentCollection on node create:", self.currentCollection.source.collection);
 				
-				$.post("/create/node", data, function(returnedData) {
+				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
 					console.log("node create:", returnedData);
 					var node = new glamPipeNode(returnedData.node, self);
 					self.addProjectNode(node);
@@ -434,7 +465,7 @@ var glamPipe = function () {
 			self.pickedCollectionId = self.currentCollection.source.collection;
 		
         // fetch fields
-        $.getJSON("/get/collection/" + self.pickedCollectionId + "/fields", function(data) { 
+        $.getJSON(self.baseAPI + "/collections/" + self.pickedCollectionId + "/fields", function(data) { 
             if(data.error)
                 alert(data.error);
 
@@ -536,7 +567,7 @@ var glamPipe = function () {
             "Delete node": function() {
                 $( this ).dialog( "close" );
                 var params = {node:node_id, project:self.currentProject};
-                $.post("/delete/node/", params, function(retData) {
+                $.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
                     console.log('node deleted');
                     if(retData.error)
                         alert(retData.error);
@@ -569,7 +600,7 @@ var glamPipe = function () {
         
         // upload file 
         $.ajax({
-            url: "/upload/file",
+            url: self.baseAPI + "/upload",
             type: "POST",
             dataType: "json",
             data:  fd,
@@ -586,10 +617,9 @@ var glamPipe = function () {
                     data.params = params;
                     data.params.filename = data.filename;
                     data.params.mimetype = data.mimetype;
-                    data.nodeid = node.nodeid;
                     data.project = self.currentProject;
                     data.collection = self.currentCollection.source.collection; 
-                    $.post("/create/node", data, function(returnedData) {
+                    $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
                         console.log('created upload node');
                         self.loadProject();
                     });
