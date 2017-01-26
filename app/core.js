@@ -49,15 +49,7 @@ exports.initDB = function (callback) {
 
 exports.createProjectsDir = function (dataPath, callback) {
 	fs = require('fs');
-
-	// if we are not running on OPENSHIFT
-	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
-		// then use datapath from "mp_settings" collection
-		//dataPath = "/glampipe";
-	// else use OPENSHIFT data dir
-	} else 
-		dataPath = process.env.OPENSHIFT_DATA_DIR;
-		
+	
 	// create "projects" directory
 	fs.mkdir(path.join(dataPath, "projects"), function(err) {
 		if(err) {
@@ -114,9 +106,6 @@ exports.initNodes = function (nodePath, io, callback) {
 }
 
 
-
-
-
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
@@ -148,6 +137,7 @@ exports.downloadNodes = function (io, cb) {
 		}
 	})
 }
+
 
 exports.sendErrorPage = function (res, error) {
 	fs = require('fs');

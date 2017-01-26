@@ -16,7 +16,7 @@ var MP = "__mp";
 // MODE (server/desktop)
 // - false = do not use authentication
 // - true = use local authentication
-var isServerInstallation = false;
+var isServerInstallation = true;
 
 var exports = module.exports = {};
 

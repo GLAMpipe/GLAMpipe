@@ -18,6 +18,11 @@ out.value = null;
 
 if(Array.isArray(input_value)) {
 	
+	input_value.forEach(function(value) {
+		if(compare(value, select_value))
+			out.value = context.doc;
+	})
+	
 } else {
 	
 	out.value = compare(input_value, select_value);

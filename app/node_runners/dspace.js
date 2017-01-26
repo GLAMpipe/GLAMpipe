@@ -40,10 +40,11 @@ exports.login = function (node, sandbox, io, cb) {
 			jar:true
 		};
 		// confirm login
+		console.log("CONFIRMING LOGIN...");
 		callAPIlogin (options, sandbox, function(sandbox) {
 			console.log(sandbox.context.data );
 			if(sandbox.context.data.authenticated)
-				cb();
+				cb(null);
 			else 
 				cb("Authentication failed");
 		});
@@ -59,7 +60,7 @@ exports.uploadItem = function (doc, sandbox, next) {
 	// let node create an upload item
 	sandbox.pre_run.runInContext(sandbox);
 		
-	console.log(JSON.stringify(sandbox.out.setter.upload));
+	//console.log(JSON.stringify(sandbox.out.setter.upload));
 
 	 var options = {
 		url: sandbox.out.url,
@@ -104,7 +105,7 @@ exports.updateData = function (doc, sandbox, next) {
 		return;
 	}
 	console.log("URL:" + sandbox.out.url);
-	if(sandbox.out.value == null || sandbox.out.url === null) {
+	if(sandbox.out.value === null || sandbox.out.url === null) {
 		next();
 		console.log("HITTING NEXT BECAUSE OF NULL*******************");
 	} else {
@@ -127,9 +128,11 @@ exports.updateData = function (doc, sandbox, next) {
 		// make actual HTTP request
 		request.put(options, function (error, response) {
 			sandbox.context.response = response;
-			if (error) 
-				console.log(error);
-			else {
+			if (error) {
+				console.log("ERROR in request: " + error);
+				sandbox.run.runInContext(sandbox);
+				next();
+			} else {
 				console.log("URL:", options.url);
 				console.log("update response:", response.statusMessage);
 				sandbox.run.runInContext(sandbox);

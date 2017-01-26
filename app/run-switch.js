@@ -243,7 +243,7 @@ exports.runNode = function (node, io) {
 				
 					switch (node.subsubtype) {
 						
-						case "dspace_upload":
+						case "dspace_additem":
 							var dspace = require("../app/node_runners/dspace.js");
 							console.log("adding items");
 							dspace.login(node, sandbox, io, function(error) {

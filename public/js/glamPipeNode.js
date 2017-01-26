@@ -26,8 +26,10 @@ var glamPipeNode = function (node, gp) {
 		
 		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run", self.source.settings, function(data) {
 			console.log(data);
-			if(data.error)
+			if(data.error) {
+				$(".settings").removeClass("busy");
 				alert(data.error);
+			}
 		});
 	}
 

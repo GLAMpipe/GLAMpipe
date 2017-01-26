@@ -17,16 +17,15 @@ module.exports = function(express, glampipe, passport) {
         next();
 	});
 
-	var freeRoutes = ["/", "/get/project/titles", "/login", "/signup"];
+	// make login api open
+	var openPOSTRoutes = ["/api/v1/login"];
 
-	var isLoggedIn = function (req, res, next) {
-		if (req.isAuthenticated())
-			return next();
-		res.redirect('/');
-	}
-
+	// authentication checker 
 	var isLoggedInAPI = function (req, res, next) {
-		if(freeRoutes.includes(req.path)) return next();
+		// open some POST routes
+		if(openPOSTRoutes.includes(req.path)) return next();
+		//GET routes are all open
+		if(req.method === "GET" && req.path !== "/api/v1/auth") return next();
 		if (req.isAuthenticated())
 			return next();
 		res.json({error:"not authenticated!"});
@@ -34,26 +33,59 @@ module.exports = function(express, glampipe, passport) {
 
 	// protect routes
 	if(config.isServerInstallation)
-		express.all('*', isLoggedInAPI);
+		express.all('/api/v1/*', isLoggedInAPI);
 
 
 /***************************************************************************************************************
  *                                       VIEWS                                                               *
  * *************************************************************************************************************/
 
+	// main page
 	express.get('/', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'index.html'));
 	});
 
+	// setup page
 	express.get('/setup', function (req, res) {
 		glampipe.core.sendErrorPage(res, glampipe.initError);
 	});
 
+	// project page
 	express.get('/project/:id', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'project.html'));
 	});
 
 
+/***************************************************************************************************************
+ *                                       LOGIN/SIGNUP                                                               *
+ * *************************************************************************************************************/
+
+	// login page
+	express.get('/login', function (req, res) {
+		if(global.config.isServerInstallation)
+			res.sendFile(path.join(__dirname, 'views', 'login.html'));
+		else
+			res.redirect('/');
+	});
+
+	// login handler
+	express.post('/login', passport.authenticate('local-login', { session: true }), function(req, res) {
+		console.log("logged in", req.user.id)
+		res.redirect("/");
+	});
+
+	express.get('/logout', function (req, res) {
+        req.logout();
+        res.redirect('/');
+	});
+
+	// signup handler
+	express.post('/signup', passport.authenticate('local-signup', {
+		successRedirect : '/login',
+		failureRedirect : '/' 
+	
+	}));	
+	
 	
 /***************************************************************************************************************
  *                                       API                                                              *
@@ -129,13 +161,13 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getNodeLog(req, function(data) {res.send(data)});
 	});
 
-	//express.get('/api/v1/nodes/:nodeid/params', function (req, res) {
-		//glampipe.core.getNodeParams(req, function(data) {res.send(data)});
-	//});
+	express.get('/api/v1/nodes/:nodeid/params', function (req, res) {
+		glampipe.core.getNodeParams(req, function(data) {res.send(data)});
+	});
 
-	//express.post('/node/params/add/:nodeid', function (req, res) {
-		//glampipe.core.setNodeParams(req, function(data) {res.send(data)});
-	//});
+	express.post('/api/v1/nodes/:nodeid/params', function (req, res) {
+		glampipe.core.setNodeParams(req, function(data) {res.send(data)});
+	});
 
 	express.put('/api/v1/projects/:project/nodes/:nodeid', function (req, res) {
 		glampipe.core.createNode(req, res, glampipe.io);
@@ -239,35 +271,21 @@ module.exports = function(express, glampipe, passport) {
 	});
     
 	// PROXY
-	express.get('/proxy/', function (req, res) {
+	express.get('/api/v1/proxy/', function (req, res) {
 		proxy.proxyJSON(req.query.url, req.query.query, res);
 	});
 
-	express.post('/proxy/', function (req, res) {
+	express.post('/api/v1/proxy/', function (req, res) {
 		proxy.proxyJSON(req.body.url, req.body.query, res);
 	});
 
 
 	
-	// USERS
-	express.get('/login', function (req, res) {
-		if(global.config.isServerInstallation)
-			res.sendFile(path.join(__dirname, 'views', 'login.html'));
-		else
-			res.redirect('/');
-			
-	});
-
-	express.post('/login', passport.authenticate('local-login', { session: true }), function(req, res) {
+	// API AUTH
+	express.post('/api/v1/login', passport.authenticate('local-login', { session: true }), function(req, res) {
 		console.log("logged in", req.user.id)
-		res.redirect("/");
+		res.json(req.user);
 	});
-
-	express.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/login',
-		failureRedirect : '/' 
-	
-	}));
 
 	express.get('/api/v1/auth', function (req, res) {
 		if(global.config.isServerInstallation)
@@ -277,12 +295,8 @@ module.exports = function(express, glampipe, passport) {
 		
 	});
 
-	express.get('/logout', function (req, res) {
-        req.logout();
-        res.redirect('/');
-	});
 
-	express.route("/users").get(User.findAll);
+	// express.route("/users").get(User.findAll);
 
 
 
