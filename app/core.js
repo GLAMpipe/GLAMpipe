@@ -1123,7 +1123,7 @@ exports.getNodeLog = function (req, cb) {
 
 exports.getNodeParams = function (req, cb) {
 	
-	mongoquery.find({"nodeid":req.params.nodeid}, "mp_nodes", function(err, result) {
+	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_params", function(err, result) {
 		if(err)
 			console.log(err);
 		cb(result);

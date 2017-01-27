@@ -79,7 +79,7 @@ test_button.click(function (e) {
 
 add_button.click(function () {
 	//var url = "http://localhost:3000/node/export_data_dspace_update/params/add";
-	var url = "/node/params/add/source_web_dspace";
+	var url = "/api/v1/nodes/source_web_dspace/params";
 	function success() {addUrl(url)};
 	function fail(msg) {alert("DSpace rest url seems to invalid, can not add!")};
 	testUrl(add_url_input.val(), success, fail);
@@ -96,7 +96,7 @@ plus_button.click(function () {
 
 // GET USER ADDED PARAMS
 function fetchParams () {
-	$.getJSON("/node/params/source_web_dspace", function (data) {
+	$.getJSON("/api/v1/nodes/source_web_dspace/params", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {

@@ -1,5 +1,5 @@
 {
-    "nodeid": "export_data_dspace_additem",
+    "nodeid": "export_web_dspace_additem",
     "title": "DSpace add items",
     "type": "export",
     "subtype": "web",

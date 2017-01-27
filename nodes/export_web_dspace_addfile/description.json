@@ -1,5 +1,5 @@
 {
-    "nodeid": "export_data_dspace_addfile",
+    "nodeid": "export_web_dspace_addfile",
     "title": "DSpace add bitstream",
     "type": "export",
     "subtype": "web",

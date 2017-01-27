@@ -1,5 +1,5 @@
 {
-    "nodeid": "export_data_update_dspace",
+    "nodeid": "export_web_dspace_update",
     "title": "DSpace metadata update",
     "type": "export",
     "subtype": "web",

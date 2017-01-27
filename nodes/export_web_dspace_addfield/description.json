@@ -1,5 +1,5 @@
 {
-    "nodeid": "export_data_dspace_addfield",
+    "nodeid": "export_web_dspace_addfield",
     "title": "DSpace add metadata field",
     "type": "export",
     "subtype": "web",
