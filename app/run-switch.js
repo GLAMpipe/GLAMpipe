@@ -59,56 +59,14 @@ exports.runNode = function (node, io) {
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
 						break;
 						
-						// **** DRAFT!!!****
-						
 						case "csv":
 							var downloader = require("../app/node_runners/download-file.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
-							pre_run.runInContext(sandbox); // ask url and user auth from node
+							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
 							downloader.downloadAndSave (node, download, function() {
-								console.log(download.response.statusCode);
-								if(download.response.statusCode == 200) {
-									// read data from CSV
-									csv.readToArray(node, sandbox, io, function(data) {
-							
-										var new_records = [];
-										// query update keys from db
-										mongoquery.findDistinct({}, node.collection, "dt", function(err, records) {
-												data.forEach(function(csv_item, j) {
-
-													var dt = csv_item.dt;
-													//dt = dt.replace(/[\r\n]/g, '');
-													console.log(records.indexOf(dt));
-													if(records.indexOf(dt) === -1)
-														new_records.push(csv_item);
-												})
-											
-											// new ones
-											console.log("NEW: ", new_records);
-											//save to database
-											if(new_records.length) {
-												mongoquery.insert(node.collection, new_records , function(error) {
-													if(error) {
-														console.log(error);
-														runNodeScriptInContext("finish", node, sandbox, io);
-													} else {
-														runNodeScriptInContext("finish", node, sandbox, io);
-													}
-												})
-											} else {
-												runNodeScriptInContext("finish", node, sandbox, io);
-											}
-										})
-										
-									});
-								} else if(download.response.statusCode == 302) {
-									io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
-
-								}
+								csv.importUpdates(node, sandbox, download, io);
 							});
-							
-							// **** DRAFT ENDS ****
 							
 						break;
 						
@@ -126,11 +84,6 @@ exports.runNode = function (node, io) {
 						case "group_by_key" :
 						
 							function groupCB (data) {
-								// provide data to node
-								//sandbox.context.data = data;
-								
-								// let node pick the data it wants from result
-								//runNodeScriptInContext("run", node, sandbox, io);
 								
 								// add source id to data
 								for (var i = 0; i < data.length; i++ ) {
@@ -168,9 +121,7 @@ exports.runNode = function (node, io) {
 						break;	
 
 						case "select":
-						console.log("SELECT node");
 							asyncLoop.sourceLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-								//console.log(doc);
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
@@ -192,9 +143,9 @@ exports.runNode = function (node, io) {
 						case "csv":
 						
 							var csv = require("../app/node_runners/source-file-csv.js");
-							// remove previous data insertet by node and import file
 							var query = {}; 
 							query[MP.source] = node._id;
+							// remove previous data insertet by node and import file
 							mongoquery.empty(node.collection, query, function() {
 								csv.importFile(node, sandbox, io);
 							});
@@ -245,7 +196,6 @@ exports.runNode = function (node, io) {
 						
 						case "dspace_additem":
 							var dspace = require("../app/node_runners/dspace.js");
-							console.log("adding items");
 							dspace.login(node, sandbox, io, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
@@ -290,7 +240,6 @@ exports.runNode = function (node, io) {
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.loop(node, sandbox, dspace.addFile);
-									//dspace.addFile();
 								}
 							});
 						break;

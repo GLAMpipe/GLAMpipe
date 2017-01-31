@@ -127,8 +127,6 @@ exports.downloadAndSave = function (node, download, next) {
 	if(download.auth)
 		options.auth = download.auth;
 	
-	console.log(options);
-	
 	var sendReq = request.get(options);
 
 	// verify response code

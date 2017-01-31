@@ -31,7 +31,7 @@ exports.readToArray = function (node, sandbox, io, cb) {
 			if(err) {
 				console.log("ERROR:", err.message);
 				io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err.message});
-				return;
+				return cb();
 			}
 			console.log("INITIAL IMPORT COUNT:", data.length);
 			cb(data);
@@ -50,6 +50,51 @@ exports.readToArray = function (node, sandbox, io, cb) {
 	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
 	
 }
+
+exports.importUpdates = function (node, sandbox, download, io) {
+//console.log(download.response);
+	if(download.response.statusCode == 200) {
+		// read data from CSV
+		console.log(download.response.body);
+		exports.readToArray(node, sandbox, io, function(data) {
+
+			var new_records = [];
+			// query update keys from db
+			mongoquery.findDistinct({}, node.collection, "dt", function(err, records) {
+					data.forEach(function(csv_item, j) {
+
+						var dt = csv_item.dt;
+						//dt = dt.replace(/[\r\n]/g, '');
+						console.log(records.indexOf(dt));
+						if(records.indexOf(dt) === -1)
+							new_records.push(csv_item);
+					})
+				
+				// new ones
+				console.log("NEW: ", new_records);
+				//save to database
+				if(new_records.length) {
+					mongoquery.insert(node.collection, new_records , function(error) {
+						if(error) {
+							console.log(error);
+							runNodeScriptInContext("finish", node, sandbox, io);
+						} else {
+							runNodeScriptInContext("finish", node, sandbox, io);
+						}
+					})
+				} else {
+					runNodeScriptInContext("finish", node, sandbox, io);
+				}
+			})
+			
+		});
+	} else if(download.response.statusCode == 302) {
+		io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
+
+	}
+}
+
+
 
 /*
  * Parses CSV and adds language fields 

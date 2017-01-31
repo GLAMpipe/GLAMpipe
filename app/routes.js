@@ -81,8 +81,9 @@ module.exports = function(express, glampipe, passport) {
 
 	// signup handler
 	express.post('/signup', passport.authenticate('local-signup', {
-		successRedirect : '/login',
-		failureRedirect : '/' 
+		successRedirect : '/',
+		failureRedirect : '/login',
+		failureFlash : true 
 	
 	}));	
 	

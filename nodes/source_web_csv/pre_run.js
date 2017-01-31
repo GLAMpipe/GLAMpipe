@@ -26,10 +26,6 @@ var ss =  date.getMilliseconds();
 download.filename= y + "-" + m + "-" + d + " " + h + ":" + mm + ":" + s + "-" + ss + ".csv";
 
 download.url = context.node.params.file_url;
-download.followRedirect = false; 
-
-out.console.log(download);
-
 out.urls.push(download);
 
 

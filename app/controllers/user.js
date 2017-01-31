@@ -13,13 +13,15 @@ class User {
 			email: email,
 			password: pass
 		}
+		this.id = null;
 	}
-
+	
 	setPassword(password) {
 		this.local.password = bcrypt.hashSync(password);
 	}
 
 	save(cb) {
+		var self = this;
 		if(this.validate()) {
 			console.log(this);
 			collection.update(this.local, this, {upsert:true} ,function (err, result) {
@@ -27,8 +29,8 @@ class User {
 					console.log("err :" + err);
 					cb({error: err})
 				} else {
-					 console.log('MONGO: inserted to users');
-					cb(result);
+					self.id = result.upserted[0]._id; // set id for serializer
+					cb(null);
 				}
 			}); 
 		} else {

@@ -313,6 +313,10 @@ var glamPipe = function () {
 				
 				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
 					console.log("node create:", returnedData);
+					if(returnedData.error) {
+						alert(returnedData.error);
+						return;
+					}
 					var node = new glamPipeNode(returnedData.node, self);
 					self.addProjectNode(node);
 					self.currentNodes[self.currentCollection.source.collection] = node;
