@@ -244,7 +244,7 @@ exports.deleteProject = function (doc_id, res) {
 		// if project has collections then remove those first
 		
 		// then remove project document itself
-		mongoquery.remove(doc_id, "mp_projects", function(data) {
+		mongoquery.remove(doc_id, "mp_projects", function(err, data) {
 			res.json(data);
 		});
 		
@@ -947,7 +947,10 @@ function createSearchQuery (req) {
 			query.$and = ands;
 		// otherwise create query for one field
 		} else {
-			query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+			if(req.query.query_values[0] === "")
+				query[req.query.query_fields[0]] =  "";
+			else
+				query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
 		}
 	}
 	return query;

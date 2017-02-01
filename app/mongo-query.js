@@ -243,7 +243,7 @@ exports.remove = function (doc_id, collectionname, callback) {
 			callback({'error':err})
 		} else {
 			console.log('Removed');
-			callback({status:'ok'});
+			callback(null, {status:'ok'});
 		}
 	}); 
 }
@@ -431,7 +431,7 @@ exports.facet = function (req, callback) {
 
 	// skip empty strings
 	var empty = {};
-	empty[field] = {$ne:""};
+	//empty[field] = {$ne:""};
 		
 	// check if field is array
 	col.getKeyTypes(req.params.collection, function(res) {
@@ -461,7 +461,8 @@ function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array)
 		aggregate.push(group_by);
 	if(is_array)
 		aggregate.push({$unwind: facet});
-	aggregate.push({$match: empty});
+	if(empty)
+		aggregate.push({$match: empty});
 	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
 	aggregate.push({$sort: sort});
 	aggregate.push({$limit:limit});
@@ -493,7 +494,7 @@ function aggregate (collection, aggregate, callback) {
 function createFilters (filters) { // with $all
 	var matches = [];
 	for (var field in filters) {
-		// skip empty values and "limit" field
+		// skip empty values and "limit" and "sort" fields
 		if(filters[field] === "") continue; 
 		if(field === "limit" || field === "sort") continue;
 			
@@ -514,7 +515,6 @@ function createFilters (filters) { // with $all
 		console.log(f);
 	};
 	return matches;
-
 }
 
 

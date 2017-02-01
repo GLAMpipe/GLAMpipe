@@ -120,9 +120,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.createProject(req.body.title, res);
 	});
 
-	express.post('/api/v1/projects/:id/run', function (req, res) {
-		glampipe.core.runProject(req, glampipe, res);
-	});
+	//TODO: reimplement this!
+	//express.post('/api/v1/projects/:id/run', function (req, res) {
+		//glampipe.core.runProject(req, glampipe, res);
+	//});
 
 	express.get('/api/v1/projects/titles', function (req, res) {
 		glampipe.core.getProjectTitles(res);

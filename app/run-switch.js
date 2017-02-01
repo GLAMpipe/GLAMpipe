@@ -371,6 +371,18 @@ exports.runNode = function (node, io) {
 							});
 						}
 					break;
+					
+				case "documents":
+				
+					switch (node.subsubtype) {
+						
+						case "select_delete":
+							asyncLoop.deleteLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});	
+						break;
+					}
 			}				
 
 

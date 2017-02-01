@@ -60,7 +60,7 @@ exports.importUpdates = function (node, sandbox, download, io) {
 
 			var new_records = [];
 			// query update keys from db
-			mongoquery.findDistinct({}, node.collection, "dt", function(err, records) {
+			mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
 					data.forEach(function(csv_item, j) {
 
 						var dt = csv_item.dt;

@@ -1,0 +1,15 @@
+<TEI
+    xmlns="http://www.tei-c.org/ns/1.0"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:mml="http://www.w3.org/1998/Math/MathML">
+    <teiHeader/>
+    <text>
+        <front/>
+        <body/>
+        <back>
+            <div>
+                <listBibl></listBibl>
+            </div>
+        </back>
+    </text>
+</TEI>

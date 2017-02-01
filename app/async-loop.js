@@ -52,6 +52,42 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 	});
 }
 
+
+// delete loop deletes documents
+exports.deleteLoop = function(node, sandbox, onDoc) {
+
+	// find everything
+	mongoquery.find2({}, node.collection, function (err, docs) {
+		
+		sandbox.context.doc_count = docs.length;
+		//console.log(node.settings);
+		
+		// run node once per record
+		require("async").eachSeries(docs, function iterator (doc, next) {
+
+			sandbox.context.doc = doc;
+			sandbox.context.count++;
+			
+			// call document processing function
+			onDoc(doc, sandbox, function processed () {
+				console.log("sandbox.out.value");
+				console.log(sandbox.out.value);
+				if(sandbox.out.value != null) {
+					mongoquery.remove(sandbox.out.value, node.collection, next);
+				} else {
+					next();
+				}
+				
+				
+			});
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	});
+}
+
+
 // loop updates existing documents
 function loop (node, sandbox, onDoc) {
 
@@ -85,3 +121,4 @@ function loop (node, sandbox, onDoc) {
 		});
 	});
 }
+
