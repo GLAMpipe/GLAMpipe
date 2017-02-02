@@ -413,8 +413,9 @@ exports.facet = function (req, callback) {
 	
 	// FILTER:
 	if(req.query) {
-		filters = createFilters(req.query);
+		filters = createFilters(req.query, req.query.allow_empty);
 	}
+	console.log(filters);
 	
 	// GROUP:
 	if(req.params.groupby) {
@@ -491,12 +492,14 @@ function aggregate (collection, aggregate, callback) {
 
 
 
-function createFilters (filters) { // with $all
+function createFilters (filters, allow_empty) { // with $all
 	var matches = [];
 	for (var field in filters) {
 		// skip empty values and "limit" and "sort" fields
-		if(filters[field] === "") continue; 
-		if(field === "limit" || field === "sort") continue;
+		if(!allow_empty)
+			if(filters[field] === "") continue; 
+			
+		if(field === "limit" || field === "sort" || field === "allow_empty") continue;
 			
 		var f = {};
 		

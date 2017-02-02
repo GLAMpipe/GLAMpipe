@@ -276,10 +276,15 @@ exports.runNode = function (node, io) {
 			switch (node.subtype) {
 				
 				case "web":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//callAPISerial (sandbox, node, onNodeScript, onError);
-					//}
+				
+					switch (node.subsubtype) {
+				
+						case "link_checker":
+							var checker = require("../app/node_runners/link-checker.js");
+							asyncLoop.loop(node, sandbox, checker.checkLinks);
+						break;
+					}
+
 				break;
 				
 				case "file":

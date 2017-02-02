@@ -20,6 +20,9 @@ function split (val) {
 			var result = val.split(/\r?\n/);
 		else
 			var result = val.split(context.node.settings.separator);
+			
+		if(context.node.settings.trim)
+			result = result.map(function(e){return e.trim();});
 
 		// remove empty lines if "skip empty" is set
 		if(context.node.settings.skip_empty) 
