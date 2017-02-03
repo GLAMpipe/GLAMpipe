@@ -413,7 +413,7 @@ exports.facet = function (req, callback) {
 	
 	// FILTER:
 	if(req.query) {
-		filters = createFilters(req.query, req.query.allow_empty);
+		filters = createFilters(req.query, req.query.op, req.query.allow_empty);
 	}
 	console.log(filters);
 	
@@ -492,14 +492,20 @@ function aggregate (collection, aggregate, callback) {
 
 
 
-function createFilters (filters, allow_empty) { // with $all
+function createFilters (filters, operator, allow_empty) { // with $all
 	var matches = [];
+	
+	if(operator === "and")
+		operator = "$all";
+	else if(operator === "or")
+		operator = "$in";
+		
 	for (var field in filters) {
 		// skip empty values and "limit" and "sort" fields
 		if(!allow_empty)
 			if(filters[field] === "") continue; 
 			
-		if(field === "limit" || field === "sort" || field === "allow_empty") continue;
+		if(field === "limit" || field === "sort" || field === "allow_empty" || field === "op") continue;
 			
 		var f = {};
 		
@@ -508,7 +514,7 @@ function createFilters (filters, allow_empty) { // with $all
 			filters[field].forEach(function(value) {
 				values.push(decodeURIComponent(value));
 			})
-			f[field] = {"$all": values};
+			f[field] = {"$in": values};
 		} else {
 			f[field] = decodeURIComponent(filters[field])
 		}

@@ -282,7 +282,7 @@ exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
 function cleanFieldName (field) {
 
 	// clean up key names (remove -. and convert spaces to underscores)
-	prop_trimmed = field.trim();
+	prop_trimmed = field.trim().toLowerCase();
 	prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');					
 	
 	// remove language code from field name

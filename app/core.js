@@ -1104,7 +1104,9 @@ exports.getNodeLog = function (req, cb) {
 	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
 		if(err)
 			return cb();
+			
 		result.forEach(function(row, i) {
+			delete row.settings.password; // let's not send passwords...
 			if(row.ts) {
 				var date = new Date(row.ts);
 				var y =  date.getUTCFullYear();
