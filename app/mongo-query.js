@@ -499,6 +499,8 @@ function createFilters (filters, operator, allow_empty) { // with $all
 		operator = "$all";
 	else if(operator === "or")
 		operator = "$in";
+	else
+		operator = "$all";
 		
 	for (var field in filters) {
 		// skip empty values and "limit" and "sort" fields
@@ -514,7 +516,9 @@ function createFilters (filters, operator, allow_empty) { // with $all
 			filters[field].forEach(function(value) {
 				values.push(decodeURIComponent(value));
 			})
-			f[field] = {"$in": values};
+			var sel = {};
+			sel[operator] = values;
+			f[field] = sel;
 		} else {
 			f[field] = decodeURIComponent(filters[field])
 		}
