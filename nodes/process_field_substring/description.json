@@ -1,10 +1,11 @@
 {
-	"nodeid": "process_field_extract",
-	"title": "Regexp extract",
+	"nodeid": "process_field_substring",
+	"title": "Substring",
 	"type": "process",
 	"subtype": "fields",
+	"subsubtype": "string manipulation",
     "status": "usable",
-	"description": "Extract string based on regular expression",
+	"description": "Extract string from certain character(s) to certain character(s).",
 	"scripts": {
 		"hello":
 		[ 

@@ -19,7 +19,63 @@ exports.loop = function (node, sandbox, onDoc) {
 			console.log("SCHEMA saved");
 	})
 }
-// source loop clears collection in the beginning
+
+
+
+// mongoLoop runs mongo queries per document (lookupLoop)
+exports.mongoLoop = function (node, sandbox, onDoc) {
+
+	// find everything
+	mongoquery.find2({}, node.collection, function (err, docs) {
+		
+		sandbox.context.doc_count = docs.length;
+		console.log(node.settings);
+		console.log("collection: " + node.collection);
+		
+		// run node once per record
+		require("async").eachSeries(docs, function iterator (doc, next) {
+
+			sandbox.context.doc = doc;
+			sandbox.context.count++;
+			console.log("collection: " + node.collection);
+			//onsole.log(doc.basename);
+			
+			// call document processing function
+			onDoc(doc, sandbox, function processed () {
+
+				console.log("search:", sandbox.out.query);
+				// skip if there is no query
+				if(!sandbox.out.query)
+					next();
+				
+				// search here. We assume that key is unique
+				 mongoquery.find2(sandbox.out.query, node.params.source_collection, function (err, docs) {
+					if(docs[0]) {
+						var set_value = {};
+						set_value[node.params.out_field] = docs[0][node.params.copy_field]
+						var setter = {$set:set_value}
+						
+					} else {
+						var set_value = {};
+						set_value[node.params.out_field] = "";
+						var setter = {$set:set_value}
+					}
+					console.log(setter);
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, setter, next);
+				 }) 
+				
+				// update here
+				//mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, setter, next);
+				//next();
+			});
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	});
+}
+
+// source loop creates a new collection. Clears collection in the beginning
 exports.sourceLoop = function (node, sandbox, onDoc) {
 
 	// find everything from source collection

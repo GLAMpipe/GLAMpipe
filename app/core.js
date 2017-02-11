@@ -504,7 +504,6 @@ function initNode (req, res, io, project) {
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
 		console.log("inserting");
-		console.log(node.collection);
 		
 		mongoquery.update("mp_projects",
 			{_id:mongojs.ObjectId(node.project)},

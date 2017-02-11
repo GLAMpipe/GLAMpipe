@@ -21,22 +21,6 @@
         "finish":"out.say('finish', 'Files uploaded'); "
     },
     
-    "views": {
-        "data_static":"<button data-bind=\"click: prevPage\">prev</button>\n<button data-bind=\"click: nextPage\">next</button>\n\n<div>\n<table>\n<thead>\n<tr>\n<th id=\"vcc\" data-bind=\"click: sort\">[count]</th>\n<th id=\"id\" data-bind=\"click: sort\">id</th>\n<th id=\"title\" data-bind=\"click: sort\">title</th>\n<th id=\"description\" >description</th>\n<th id=\"link\" >link</th>\n </tr>\n</thead>\n\n<tbody data-bind=\"foreach: collection\">\n<tr>\n<td data-bind=\"text: vcc\"></td>\n<td data-bind=\"text: id\"></td>\n<td >\n<img data-bind=\"attr:{src: id_photo_sizes.size[1].source}\"></img>\n</td>\n<td data-bind=\"text: title\"></td>\n\n </tr>\n </tbody>\n </table>\n</div>\n",
-
-        "settings":
-        [
-            "<label>username </label><input class=\"node-settings\" type=\"text\" name=\"username\" id=\"username\" required />",
-            "<label>password</label><input class=\"node-settings\" type='password' name=\"password\" id=\"password\"/>",
-            "<label>choose site (practise with beta)</label>",
-            "<select class=\"node-settings\" name='api'>",
-            "    <option value='0'>beta</option>",
-            "    <option value='1'>production</option>",
-            "</select>",
-            "<label>How many to upload? (leave blank for all)</label>",
-            "<input class=\"node-settings\" name='limit' />"
-           
-        ]
-    }
+    "views": {}
 
 }

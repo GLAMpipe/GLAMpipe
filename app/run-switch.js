@@ -388,6 +388,21 @@ exports.runNode = function (node, io) {
 							});	
 						break;
 					}
+					break;
+					
+				case "lookups":
+				
+					switch (node.subsubtype) {
+						
+						case "collection":
+							asyncLoop.mongoLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});
+						break;				
+
+					}
+					break;
 			}				
 
 

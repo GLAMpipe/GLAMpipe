@@ -244,7 +244,7 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
 	});
 
-	express.post('/edit/collection/:id', function (req, res) {
+	express.post('/edit/collection/:collection', function (req, res) {
 		glampipe.core.editCollection(req, function(data) {res.send(data)});
 	});
 

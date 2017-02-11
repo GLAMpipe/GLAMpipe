@@ -43,6 +43,12 @@ function compare (input, select) {
 		
 	}
 	
+	var reg = new RegExp(select);
+	if(input.match(reg))
+		return context.doc;
+	else
+		return null;
+	
 	if(input == select) // == is intentional (user can only insert strings)
 		return context.doc;
 	else 

@@ -1,6 +1,8 @@
+
+var apis = ["commons.wikimedia.beta.wmflabs.org", "commons.wikimedia.org"]; 
 var config = { 
    "protocol": "https", 
-    "server": "commons.wikimedia.beta.wmflabs.org", 
+    "server": apis[parseInt(context.node.settings.api)], 
     "path": "/w",  
     "debug": true, 
     "username": context.node.settings.username, 
@@ -10,6 +12,6 @@ var config = {
 }; 
 out.botconfig = config;
             
-var apis = ["https://commons.wikimedia.org","https://commons.wikimedia.beta.wmflabs.org"]; 
+
 out.say("progress", "Trying to login to commons..."); 
 out.url = apis[parseInt(context.node.settings.api)] +"/w/api.php?action=query&meta=tokens&type=login"; 
