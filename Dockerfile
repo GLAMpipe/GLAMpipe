@@ -8,7 +8,7 @@ WORKDIR /src/app
 RUN npm install 
 
 # Bundle app source
-COPY . /src/app
+COPY . /src/app/
 
 
 EXPOSE 3000
