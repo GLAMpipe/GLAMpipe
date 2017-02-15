@@ -37,7 +37,6 @@ exports.readToArray = function (node, sandbox, io, cb) {
 			cb(data);
 		}
 	)
-		
 
 	parser.on('error', function(err){
 	  console.log(err.message);
@@ -51,30 +50,31 @@ exports.readToArray = function (node, sandbox, io, cb) {
 	
 }
 
+
+
+// import online CSV
 exports.importUpdates = function (node, sandbox, download, io) {
-//console.log(download.response);
+	
 	if(download.response.statusCode == 200) {
 		// read data from CSV
-		console.log(download.response.body);
 		exports.readToArray(node, sandbox, io, function(data) {
 
 			var new_records = [];
 			// query update keys from db
 			mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
-					data.forEach(function(csv_item, j) {
+				// loop over parsed CSV data
+				data.forEach(function(csv_item, j) {
 
-						var dt = csv_item.dt;
-						//dt = dt.replace(/[\r\n]/g, '');
-						console.log(records.indexOf(dt));
-						if(records.indexOf(dt) === -1)
-							new_records.push(csv_item);
-					})
+					var update_key = csv_item[node.settings.update_key];
+					if(records.indexOf(update_key) === -1) {
+						csv_item.__mp_source = node._id;
+						new_records.push(cleanKeys(csv_item)); // make sure all keys are lowercase
+					}
+				})
 				
-				// new ones
-				console.log("NEW: ", new_records);
 				//save to database
 				if(new_records.length) {
-					mongoquery.insert(node.collection, new_records , function(error) {
+					mongoquery.insert(node.collection, new_records, function(error) {
 						if(error) {
 							console.log(error);
 							runNodeScriptInContext("finish", node, sandbox, io);
@@ -256,12 +256,7 @@ exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
 				console.log("field" + i);
 			})
 			
-
-			
 			callback();
-
-
-		  
 
 		}, function done () {
 			console.log("NODE: Inserting " + counter + " records");
@@ -277,6 +272,17 @@ exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
 
 	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
 
+}
+
+function cleanKeys (record) {
+	var new_rec = {}
+	for(var prop in record) {
+		if (record.hasOwnProperty(prop)) {
+			var prop_clean = cleanFieldName(prop);
+			new_rec[prop_clean] = record[prop];
+		}
+	}
+	return new_rec;
 }
 
 function cleanFieldName (field) {

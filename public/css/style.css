@@ -208,6 +208,8 @@ node-pipe {
 .boxtitle {
 	margin:3px 0px 0px 0px;
 	font-weight:bold;
+    width: 300px;
+    overflow-wrap: break-word;
 }
 
 .inlinetitle {
