@@ -22,16 +22,30 @@ module.exports = function(express, glampipe, passport) {
 
 	// authentication checker 
 	var isLoggedInAPI = function (req, res, next) {
+		
+		var pass = false;
+		conf.IP_passes.some(function(IP_pass) {
+			if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && req.ip === IP_pass.ip) {
+				pass = true;
+				console.log("INFO: allowed by IP_pass: " + IP_pass.label)
+			}
+		})
+		
+		if(pass)
+			return next();
+
+
 		// open some POST routes
 		if(openPOSTRoutes.includes(req.path)) return next();
 		//GET routes are all open
 		if(req.method === "GET" && req.path !== "/api/v1/auth") return next();
 		if (req.isAuthenticated())
 			return next();
+			
 		res.json({error:"not authenticated!"});
 	}
 
-	// protect routes
+	// protect API routes
 	if(config.isServerInstallation)
 		express.all('/api/v1/*', isLoggedInAPI);
 
