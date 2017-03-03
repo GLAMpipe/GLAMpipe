@@ -1,45 +1,35 @@
+
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
-DATA_DIR := /home/arihayri/GLAMpipe-data
-NODE_DIR := /home/arihayri/GLAMpipe-data
+DATA_DIR := /home/arihayri/GLAMpipe-data-docker
+DATA_DIR := $(shell pwd)/data
+NODE_DIR := /home/arihayri/GLAMpipe-data-docker
 PWD=$(shell pwd)
 
+all: build
 
-build: 
-	docker create --name=glampipe_mongo mongo:3.2.10
-	docker build -t artturimatias/glampipe .
-	echo "Remember to set DATA_DIR in Makefile"
 
-start:
-	docker start glampipe_mongo	
-	docker run -it --rm --link glampipe_mongo:mongo --name glam -v $(DATA_DIR)/projects/:/glampipe/projects \
-		-v $(NODE_DIR)/nodes:/glampipe/nodes \
-		-v $(DATA_DIR)/tmp:/glampipe/tmp \
-		-p 3000:3000  artturimatias/glampipe bash 
-	
+clean:
+	docker rm -f $(CONTAINERS)
+	docker rmi -f $(IMAGES)
+
 build_mongo:
-	docker create --name=glampipe_mongo mongo:3.2.10	
+	docker run -d --name=mongo mongo
 
 start_mongo:
-	docker start glampipe_mongo	
+	docker start mongo
 
 stop_mongo:
-	docker stop glampipe_mongo	
+	docker stop mongo      
 
 build_glampipe:
 	docker build -t artturimatias/glampipe .
 
 
 start_glampipe:
-	docker run -it --rm --link glampipe_mongo:mongo --name glampipe -v $(DATA_DIR)/projects/:/glampipe/projects \
-		-v $(NODE_DIR)/nodes:/glampipe/nodes \
-		-v $(DATA_DIR)/tmp:/glampipe/tmp \
-		-p 3000:3000  artturimatias/glampipe bash 
-
-
-clean:
-	docker rm -f $(CONTAINERS)
-	docker rmi -f $(IMAGES)
+	docker run -it --rm --link mongo:mongo --name glam \
+		-v $(DATA_DIR):/glampipe \
+		-p 3000:3000  artturimatias/glampipe bash
 
 
 .PHONY: clean build_mongo start_mongo build_glampipe start_glampipe
