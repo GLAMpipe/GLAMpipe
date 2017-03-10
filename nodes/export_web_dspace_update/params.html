@@ -31,6 +31,7 @@
 
 <script>
 var nodeid = "#export-data-dspace-update";
+var params_url = "/api/v1/nodes/source_web_dspace/params"
 
 // *************** CODE FOR ADDING NEW URLS starts **************
 var add_div       = $(nodeid + "_addoption");
@@ -90,12 +91,9 @@ test_button.click(function (e) {
 })	
 
 add_button.click(function () {
-	var url = "/api/v1/nodes/export_web_dspace_update/params";
-	function success() {addUrl(url)};
+	function success() {addUrl(params_url)};
 	function fail(msg) {alert("DSpace rest url seems to invalid, can not add!")};
 	testUrl(add_url_input.val(), success, fail);
-	
-
 })	
 
 plus_button.click(function () {
@@ -107,7 +105,7 @@ plus_button.click(function () {
 
 // GET USER ADDED PARAMS
 function fetchParams () {
-	$.getJSON("/api/v1/nodes/export_web_dspace_update/params", function (data) {
+	$.getJSON(params_url, function (data) {
 		if(data.error)
 			alert(data.error);
 		else {

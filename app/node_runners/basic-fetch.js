@@ -41,13 +41,15 @@ exports.fetchDataInitialMode = function (node, sandbox, io) {
 		// then we fetch records per collection with async
 		async.eachSeries(sandbox.context.vars.collections, function iterator(collection, next) {
 			nodescript.runNodeScriptInContext("pre_run", node, sandbox, io);
-			console.log(sandbox.context.vars.collections);
+			console.log("WORKING WITH COLLECTION:" + collection);
 			console.log("INITIAL URL:", sandbox.out.url);
-			console.log("ROUND "+ sandbox.context.vars.initial_round_counter +" *************");
+			console.log("ROUND "+ sandbox.context.vars.initial_round_counter + " / "+ sandbox.context.vars.collections.length +" *************");
+			console.log("entering requestLoop");
 			
 			requestLoop (node, sandbox, io, function() {
 				sandbox.context.vars.initial_round_counter++;
 				sandbox.context.vars.round_counter = 0;
+				console.log("returning from requestloop\n\n");
 				next();
 			});
 			
@@ -89,12 +91,12 @@ function requestLoop(node, sandbox, io, cb) {
 					//console.log("insert array:", sandbox.out.value.length);
 					//console.log("SCHEMA:", sandbox.out.schema);
 					//console.log("COLLECTIONS:", sandbox.context.vars.collections);
-					mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
-						if(error)
-							console.log(error);
-						else
-							console.log("SCHEMA saved");
-					})
+					//mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
+						//if(error)
+							//console.log(error);
+						//else
+						//	console.log("SCHEMA saved");
+					//})
 					
 					
 					if(sandbox.context.node_error) 
@@ -130,6 +132,7 @@ function requestLoop(node, sandbox, io, cb) {
 			
 		// if node provides new url, then continue loop
 		if (sandbox.out.url != "") {
+			console.log("calling requestLoop from requestLoop");
 			requestLoop(node, sandbox, io, cb)
 		} else {
 			

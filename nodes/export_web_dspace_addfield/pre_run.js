@@ -6,12 +6,22 @@ function getVal (val) {
 	return val;
 }
 
-var metafield = {};
-var schema = getVal(context.doc[context.node.settings.schema]);
 
-metafield.name = getVal(context.doc[context.node.settings.name]);
-metafield.element = getVal(context.doc[context.node.settings.element]);
+var metafield = {};
+var schema = "";
+var field = getVal(context.doc[context.node.settings.metadatafield]);
+
+var splitted = field.split(".");
+if(splitted.length === 2) {
+	schema = splitted[0];
+	metafield.element = splitted[1];
+} else if(splitted.length === 3) {
+	schema = splitted[0];
+	metafield.element = splitted[1];
+	metafield.qualifier = splitted[2];	
+} 
+
 metafield.description = getVal(context.doc[context.node.settings.description]);
 
-out.url = context.node.settings.url + "/registries/schema/" + schema + "/metadata-fields";
+out.url = context.node.params.url + "/registries/schema/" + schema + "/metadata-fields";
 out.value = metafield;

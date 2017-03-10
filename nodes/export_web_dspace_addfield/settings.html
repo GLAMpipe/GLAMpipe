@@ -1,5 +1,5 @@
 
-<h3>DSpace login</h3>
+<h3>DSpace login (<span id="server_url"></span>)</h3>
 <div class="box-noflex">
 	<label>username </label>
 	<input class="node-settings" type="text" name="username" id="username" required />
@@ -7,31 +7,17 @@
 	<label>password</label>
 	<input class="node-settings" type="password" name="password" id="password"/>
 
-	<label>predefined servers</label>
-	<select id="export_data_dspace_schema_add_field_url_pre" name="url_pre">
-		<option value="">predefined servers</option>
-		<option value="http://siljo.lib.jyu.fi:8080/rest">http://siljo.lib.jyu.fi:8080/rest</option>
-		<option value="http://demo.dspace.org/rest">http://demo.dspace.org/rest</option>
-	</select>
-
-	<label>server url, choose above or type</label>
-	<input class="node-settings" id="export_data_dspace_schema_add_field_url" name="url" />
 </div>
 
 
 <h3>Metadata fields</h3>
 <div class="box-noflex">
-	<label>choose schema name field (eg. "dc")</label>
-	<input class="node-settings dynamic_field" name="schema" />
-	<label>choose full field name (eg. "dc.author")</label>
-	<input class="node-settings dynamic_field" name="name" />
-	<label>choose element field (eg. "author")</label>
-	<input class="node-settings dynamic_field" name="element" />
+	<label>choose field name field </label>
+	<input class="node-settings dynamic_field" name="metadatafield" />
 	<label>choose description field</label>
 	<input class="node-settings dynamic_field" name="description" />
 
-	<button id="export_data_dspace_schema_add_field_fetch">List existing schemas</button>
-	<div id="export_data_dspace_schema_add_field_display"></div>
+	<div id="export_web_dspace_schema_add_field_display"></div>
 </div>
 
 

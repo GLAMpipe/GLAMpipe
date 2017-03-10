@@ -1,11 +1,14 @@
 
 var config = { 
 	"protocol": "http", 
-	"url": context.node.settings.url + "/login", 
-	"status_url" : context.node.settings.url + "/status",
+	"url": context.node.params.url + "/login", 
+	"status_url" : context.node.params.url + "/status",
 	"debug": true, 
 	"dryRun": false, 
-	"login": {"email": context.node.settings.username, "password": context.node.settings.password},
+	"login": {
+		"email": context.node.settings.username, 
+		"password": context.node.settings.password
+	},
 	"userAgent": "GLAMpipe 0.0.1"       
 }; 
 

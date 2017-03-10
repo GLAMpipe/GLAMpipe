@@ -60,7 +60,7 @@ exports.uploadFileWithWikitext = function (node, sandbox, io) {
 								return next();
 
 							} else {
-
+								console.log("sandbox.out.filename: "+ sandbox.out.filename);
 								fs.readFile(sandbox.out.filename, function (err,data) {
 									if (err) {
 										console.log("file not found:", err);

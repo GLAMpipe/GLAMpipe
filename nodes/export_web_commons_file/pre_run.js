@@ -32,8 +32,10 @@ if(context.get(context.doc, context.node.params.out_field) != "" ) {
     title = title.replace(".tif","");
 }
     
-            
-    out.filename = context.doc[context.node.params.location]
+    if(Array.isArray(context.doc[context.node.params.location]))        
+		out.filename = context.doc[context.node.params.location][0]
+	else
+		out.filename = context.doc[context.node.params.location]
     out.title = title;
     out.wikitext = context.doc[context.node.params.wikitext]; 
 

@@ -289,7 +289,7 @@ function cleanFieldName (field) {
 
 	// clean up key names (remove -. and convert spaces to underscores)
 	prop_trimmed = field.trim().toLowerCase();
-	prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');					
+	prop_clean = prop_trimmed.replace(/[\s.]/g, '_');					
 	
 	// remove language code from field name
 	return  prop_clean.replace(/\[(.|..|)\]/g, '');
