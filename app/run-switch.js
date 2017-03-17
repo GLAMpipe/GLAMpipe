@@ -193,7 +193,12 @@ exports.runNode = function (node, io) {
 				case "web":
 				
 					switch (node.subsubtype) {
-						
+		
+						case "omeka_additem":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.loop(node, sandbox, web.postJSON);
+						break;
+										
 						case "dspace_additem":
 							var dspace = require("../app/node_runners/dspace.js");
 							dspace.login(node, sandbox, io, function(error) {
