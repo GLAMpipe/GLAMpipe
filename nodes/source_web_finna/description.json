@@ -9,7 +9,7 @@
     "scripts": {
         "hello": "out.say('news', '<h2>Hello, You just added a FINNA node!</h2>'); ",
         "bye": "out.say('news', 'Deleted FINNA source node!  Bye!'); ",
-        "finish":"out.say('finish', 'Tiedot haettu FINNAsta!'); "
+        "finish":"out.say('finish', 'Tiedot haettu FINNAsta! (' + context.var.total_count +')' ); "
     },
     
     "views": {
