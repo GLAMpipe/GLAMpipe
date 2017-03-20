@@ -1,10 +1,18 @@
 
-var response = context.response;
-
-if(response.statusCode == 200) {
+// increase success counter
+if(context.response && context.response.statusCode == 200) {
 	context.success_counter++;
-	//out.setter = {"item_upload_handle": response.handle, "item_upload_uuid": response.uuid};
+} else {
+	
 }
-out.value = response.statusCode;
+
+// set output
+if(context.response) {
+	out.value = context.response.statusCode;
+} else if (context.error) {
+	out.value = context.error;
+} else {
+	out.value = "ERROR";
+}
 
 

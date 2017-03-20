@@ -18,6 +18,10 @@
 
 <div id="export-data-dspace-addfile_status" class="status"></div>
 
+<div id="export-data-dspace-addfile_hidden" style="display:none">
+	<label>Where to write result</label>
+	<input name="out_field" value="upload_response" required />
+</div>
 
 <script>
 var nodeid = "#export-data-dspace-addfile";
@@ -117,6 +121,7 @@ $("#export-data-dspace-addfile_url").change(function() {
 	add_div.hide();
 	function success() {
 		$("#export-data-dspace-addfile_status").empty().append("DSpace responded OK").addClass("good");
+		$("#export-data-dspace-addfile_hidden").show();
 	};
 	function fail(msg) {alert("DSpace rest API not working!")};
 	testUrl($("#export-data-dspace-addfile_url :selected").val(), success, fail);
