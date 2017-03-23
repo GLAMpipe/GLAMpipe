@@ -2,7 +2,7 @@
     "nodeid": "source_web_flickr",
     "type": "source",
     "subtype": "web",
-    "title": "Flickr",
+    "title": "Flickr: import",
     "status": "usable",
     "usage":"",
     "description": "Import image metadata from Flickr (requires an <a target=\"_blank\" href=\"https://www.flickr.com/services/api/misc.api_keys.html\">API key</a>)",

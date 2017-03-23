@@ -24,7 +24,7 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run", self.source.settings, function(data) {
+		$.post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
 				$(".settings").removeClass("busy");
@@ -126,7 +126,7 @@ var glamPipeNode = function (node, gp) {
 		
 		if(self.source.params.title && self.source.params.title != "") 
 			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
-		else
+		else 
 			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 		
 		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"

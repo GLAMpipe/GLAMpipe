@@ -1,10 +1,10 @@
 {
     "nodeid": "source_web_mapwarper",
-    "title": "Map Warper",
+    "title": "Map Warper: import",
     "type": "source",
     "subtype": "web",
     "status": "usable",
-    "description": "Fetch all maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
+    "description": "Fetch <b>all</b> maps (data only, not images) from <a target=\"_blank\" href=\"https://github.com/timwaters/mapwarper\">Map Warper</a> instance.",
 
     "scripts": {
         "hello": 

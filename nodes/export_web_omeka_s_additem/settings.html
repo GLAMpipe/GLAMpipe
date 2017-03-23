@@ -1,0 +1,28 @@
+
+<h3 id="export-web-omeka_serverinfo">Omeka API keys</h3>
+
+<div class="box-noflex">
+	
+	<label>key identity</label>
+	<input class="node-settings" type="text" name="key_identity" id="key_identity" required />
+	<label>key credential</label>
+	<input class="node-settings" type="password" name="key_credential" id="key_credential"/>
+</div>
+
+<h3>Item set (optional)</h3>
+<div class="box-noflex">
+	<label>Choose item set that you want to save items to.</label>	
+	<button id="export-web-omeka_fetch_collections">Fetch item sets</button>
+	<input class="node-settings" id="export-web-omeka_collection" name="collection" />
+	<div id="export-web-omeka_coll_list"></div>
+</div>
+
+
+<h3>Mapping</h3>
+<div class="box-noflex">
+	<div>At minimum you must map some field to <b>dcterms.title</b>.</div>
+	<button id="xml_basic_fetch" class="fetch_record">fetch fields and schemas</button>
+	<button id="xml_basic_guess" class="fetch_record">guess mapping</button>
+	<div id="export-web-omeka_mappings"></div>
+</div>
+

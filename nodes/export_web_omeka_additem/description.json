@@ -1,11 +1,13 @@
+
+
 {
     "nodeid": "export_web_omeka_additem",
-    "title": "Omeka add items",
+    "title": "Omeka Classic: create items",
     "type": "export",
     "subtype": "web",
     "subsubtype": "omeka_additem",
     "status": "usable",
-    "description": "Create new items via REST API",
+    "description": "Creates new items via REST api",
 
     "scripts": {
         "hello": 
@@ -21,3 +23,4 @@
     
     "views": {}
 }
+

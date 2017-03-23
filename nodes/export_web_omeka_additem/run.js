@@ -1,4 +1,11 @@
 
+/*
+TODO:
+- check that user has at least "title" field mapped
+- tags and collection not working
+*/
+
+
 var response = context.data;
 
 if(response) {

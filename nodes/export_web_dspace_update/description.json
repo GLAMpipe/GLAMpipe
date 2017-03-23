@@ -1,6 +1,6 @@
 {
     "nodeid": "export_web_dspace_update",
-    "title": "DSpace metadata update",
+    "title": "DSpace 6: update metadata field",
     "type": "export",
     "subtype": "web",
     "subsubtype": "dspace_update",

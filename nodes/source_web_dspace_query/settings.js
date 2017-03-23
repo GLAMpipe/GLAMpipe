@@ -661,7 +661,7 @@ var QueryReport = function() {
              }	
         }
         // replace first & with ?
-        console.log(str);
+        //console.log(str);
         $("#source_api_dspace_query").val(str);
         
     }

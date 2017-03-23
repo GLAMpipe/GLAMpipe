@@ -1,6 +1,6 @@
 {
     "nodeid": "source_web_finna",
-    "title": "FINNA",
+    "title": "FINNA: query import",
     "type": "source",
     "subtype": "web",
     "status": "test",

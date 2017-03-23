@@ -1,6 +1,6 @@
 {
     "nodeid": "export_web_dspace_addfile",
-    "title": "DSpace add bitstream",
+    "title": "DSpace 6: add bitstreams",
     "type": "export",
     "subtype": "web",
     "subsubtype": "dspace_addfile",

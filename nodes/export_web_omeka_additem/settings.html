@@ -1,20 +1,26 @@
 
-<h3 id="export-web-omeka_serverinfo">Omeka API keys</h3>
+<h3 id="export-web-omeka_serverinfo">Omeka API key</h3>
 
 <div class="box-noflex">
 	
-	<label>key identity</label>
-	<input class="node-settings" type="text" name="key_identity" id="key_identity" required />
-	<label>key credential</label>
-	<input class="node-settings" type="password" name="key_credential" id="key_credential"/>
+	<label>API key</label>
+	<input class="node-settings" type="text" name="apikey" id="apikey" required />
+
 </div>
 
-<h3>Item set (optional)</h3>
+<h3>Collection (optional)</h3>
 <div class="box-noflex">
-	<label>Choose item set that you want to save items to.</label>	
-	<button id="export-web-omeka_fetch_collections">Fetch item sets</button>
+	<label>Choose collection that you want to save items to.</label>	
+	<button id="export-web-omeka_fetch_collections">Fetch collections</button>
 	<input class="node-settings" id="export-web-omeka_collection" name="collection" />
 	<div id="export-web-omeka_coll_list"></div>
+</div>
+
+
+<h3>Tags (optinal)</h3>
+<div class="box-noflex">
+	<label>Write tags as a comma separated list.</label>
+	<input class="node-settings"  name="tags" />
 </div>
 
 

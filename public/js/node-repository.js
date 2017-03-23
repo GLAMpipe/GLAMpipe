@@ -44,16 +44,25 @@ var nodeRepository = function () {
 					html += "    </button>"
 					html += "    <div class='panel'>"
                     
+                    sub.nodes.sort(sortByTitle);
+                    
                     // render nodes
                     for (var k = 0; k < sub.nodes.length; k++) {
 						// skip nodes with status "broken"
 						if(sub.nodes[k].status == "broken")
 							continue;
+							
                         self.plainNodes.push(sub.nodes[k]);
                         var index = self.plainNodes.length -1;
+                        var s = sub.nodes[k].title.split(":");
+						if(s.length === 2) 
+							var title = "<span class='bold'>" + s[0] + "</span>:" + s[1];
+						else
+							var title = sub.nodes[k].title;
+						
                         html += "<a data-index='" + index + "' class='open-node' href='#'>"
                         html += "<div class='listoption " + node.type + " " + sub.nodes[k].status + "'>"
-                        html += "  <p class='listtitle'>" + sub.nodes[k].title + "</p>"
+                        html += "  <p class='listtitle'>" + title + "</p>"
                         html += "  <p class='listtext'>" + sub.nodes[k].description + "</p>"
                         html += "</div>"
                         html += "</a>"
@@ -94,7 +103,7 @@ var nodeRepository = function () {
 
 		// we need to create form for file import (upload)
         if(node.type == "source") {
-            if(node.subtype == "upload") {
+            if(node.subtype == "file") {
 				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";		
 				html += node.views.params;
 				html += "</form>";		
@@ -130,4 +139,12 @@ var nodeRepository = function () {
 
 function cap(string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+}
+
+function sortByTitle (a,b) {
+  if (a.title.toLowerCase() < b.title.toLowerCase())
+    return -1;
+  if (a.title.toLowerCase() > b.title.toLowerCase())
+    return 1;
+  return 0;	
 }

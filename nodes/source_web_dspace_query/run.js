@@ -65,13 +65,12 @@ if (context.response && context.response.statusCode == 200 ) {
 		// OUTPUT
 		out.value = context.data.items;
 		
-		var limit = context.vars.limit - c.vars.round_counter * c.vars.offset;
-		if (limit >= c.vars.offset)
-			limit = c.vars.offset;
-
-         /* check if there is any data left on the server */
-        if(context.data.length == context.vars.offset && context.vars.record_counter < context.vars.limit) 
-             out.url = context.node.settings.url + "/filtered-items" + context.node.settings.query + '&limit=' + limit + '&offset=' + c.vars.round_counter * c.vars.offset; 
+		// URL for next round
+		var offset = c.vars.round_counter * c.vars.limit;
+        if(context.data["unfiltered-item-count"] == context.vars.limit)  /* check if there is any data left on the server */
+             out.url = context.node.params.dspace_url + "/filtered-items" + context.node.settings.query + '&limit=' + c.vars.limit + '&offset=' + c.vars.round_counter * c.vars.limit; 
+             
+        out.say("progress", "Items fetched: " + context.vars.record_counter); 
 
 	} else {
 		out.say("progress", "no items found");

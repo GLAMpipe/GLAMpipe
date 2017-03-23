@@ -29,4 +29,4 @@ if(!title_mapped) {
 }
 */
 // upload url
-out.url = rest_url + "/items?key_identity=" +context.node.settings.key_identity + "&key_credential=" + context.node.settings.key_credential ;
+out.url = rest_url + "/items?key=" +context.node.settings.apikey;

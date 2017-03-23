@@ -1,14 +1,15 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
+var database 	= require('../../config/database');
 var mongoquery 	= require("../../app/mongo-query.js");
-var collection = require("../../app/collection.js");
+var collection 	= require("../../app/collection.js");
 const MP 		= require("../../config/const.js");
 
-var fs = require('fs');
-var parse = require('csv-parse');
-var transform = require('stream-transform');
-var async = require('async');
+var fs 			= require('fs');
+var parse 		= require('csv-parse');
+var transform 	= require('stream-transform');
+var async 		= require('async');
 
 var exports = module.exports = {};
 
@@ -92,6 +93,58 @@ exports.importUpdates = function (node, sandbox, download, io) {
 		io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
 
 	}
+}
+
+
+exports.importFile_stream = function  (node, sandbox, io, cb) {
+
+	var fs = require('fs');
+	var parse = require('csv-parse');
+	var transform = require('stream-transform');
+
+	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	var db = "mongodb://" + database.initDBConnect();
+	var columns = null;
+	var count = 0;
+	if(node.settings.columns)
+		columns = true;
+
+	var parser = parse(
+	{
+		delimiter: node.settings.separator, 
+		columns:columns, 
+		relax: true,
+		trim: true, // this could be optional
+		skip_empty_lines:true
+	})
+	
+	var input = fs.createReadStream(file);
+	var options = { db: db, collection: node.collection }
+	var streamToMongo = require('stream-to-mongo')(options);
+
+	parser.on('data', function(c){
+		count++;
+		if(!(count % 1000)) console.log(count)
+	});
+
+	parser.on('finish', function(){
+		console.log("PARSING DONE");
+	})
+
+	streamToMongo.on('finish', function(){
+		console.log("IMPORTING DONE! Imported " + count);
+		runNodeScriptInContext("finish", node, sandbox, io);
+	})
+
+	var transformer = transform(function(record){
+		sandbox.context.data = record;
+		runNodeScriptInContext("run", node, sandbox, io);
+		sandbox.out.value[MP.source] = node._id;
+		return sandbox.out.value;
+	})
+
+	input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+	
 }
 
 

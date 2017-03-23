@@ -5,6 +5,7 @@ var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
+var buildquery 	= require("../app/query-builder.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -840,51 +841,12 @@ exports.getCollection = function (req, query, res) {
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
 }
-// AND search
+
+
+
 exports.collectionSearch = function (req, res) {
 
-	var limit = parseInt(req.query.limit);
-	if (limit < 0 || isNaN(limit))
-		limit = 15;
-
-	var skip = parseInt(req.query.skip);
-	if (skip <= 0 || isNaN(skip))
-		skip = 0;
-
-	var sort = req.query.sort
-	if(sort === 'undefined')  // by default sort by _id (mongoid)
-		sort = "_id";
-
-	var reverse = false
-	var r = parseInt(req.query.reverse);
-	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
-		reverse = true;
-
-
-
-	var s = ["skip", "limit", "sort", "reverse"];
-	var query = {};
-	for (var param in req.query) {
-		console.log(param);
-		if(!s.includes(param)) {
-			if(Array.isArray(req.query[param])) {
-				query[param] = {$all:req.query[param]};
-			} else {
-				query[param] = req.query[param];
-			}
-		}
-	}
-	console.log(query);
-	//query[req.query.field] = {$regex:req.query.value, $options: 'i'};
-
-	var params = {
-		collection: req.params.collection,
-		query: query,
-		limit: limit,
-		skip: skip,
-		sort: req.query.sort,
-		reverse: reverse
-	}
+	var params = buildquery.search(req);
 
 	mongoquery.findAll(params, function (result) {
 		res.send({data:result});
@@ -892,7 +854,7 @@ exports.collectionSearch = function (req, res) {
 	
 }
 
-
+// TODO: update this
 /**
  * Get paged collection data for DataTable
  * - gives records between skip and skip + limit
@@ -982,7 +944,9 @@ exports.getDocumentById = function (req, res) {
 exports.getCollectionCount = function (req, cb) {
 	
 	var query = createSearchQuery(req);
-	mongoquery.countDocs(req.params.collection, query, function (result) {
+	var params = buildquery.search(req);
+	console.log(query)
+	mongoquery.countDocs(req.params.collection, params.query, function (result) {
 		cb({count:result});
 	});
 }

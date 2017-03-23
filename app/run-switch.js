@@ -136,7 +136,7 @@ exports.runNode = function (node, io) {
 				break;
 
 				
-				case "upload":
+				case "file":
 				
 					switch (node.subsubtype) {
 						
@@ -147,7 +147,7 @@ exports.runNode = function (node, io) {
 							query[MP.source] = node._id;
 							// remove previous data insertet by node and import file
 							mongoquery.empty(node.collection, query, function() {
-								csv.importFile(node, sandbox, io);
+								csv.importFile_stream(node, sandbox, io);
 							});
 							
 						break;
@@ -510,8 +510,7 @@ exports.createSandbox = function (node, io) {
 				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
 				var date = new Date();
 				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					console.log("logged");
-					// send response if needed
+					// send http response if needed (i.e. node was executed by "run" instead of "start")
 					if(ch === "finish" && node.res) 
 						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
 				});

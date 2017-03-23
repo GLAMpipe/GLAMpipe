@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i" rel="stylesheet">
+<link rel="stylesheet" href="/css/wikiglyphs.css">
+<title>GLAMpipe style</title>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
+
+<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/data.js"></script>
+<script type="text/javascript" src="/js/glampipe.js"></script>
+<script type="text/javascript" src="/js/ui.js"></script>
+
+</head>
+
+<body class="vbox">
+  <header> <span class="title sitetitle">GLAMpipe</span> 
+	<span id="login"><a href="/login">login</a></span>
+  </header>
+  <content class="main hbox space-between">
+    <node-pipe>
+      <div class="pageheader">
+        <div class="title pagetitle">Projects</div>
+      </div>
+      <div class="fatbox">
+        <div class="inlinetitleblock">
+          <div><span class="title inlinetitle">Choose a project</span></div>
+        </div>
+        <div class="infotext">Choose the project you wish to work on or create a new one.</div>
+        <div id="projectList" class="optionlist"> 
+        <!-- projects are listed here -->
+        </div>
+
+      </div>
+      
+      
+
+    <div class="fatbox create_project">
+      <div class="inlinetitleblock">
+        <div><span class="title inlinetitle">Create project</span></div>
+      </div>
+      <div class="infotext">Project contains your data, transforms, downloads etc.</div>
+      <div class="optionlist">
+        <div class="listoption">
+          <p class="listtitle">Title</p>
+          <p class="listtext">
+            <label for="title"></label>
+            <input type="text" name="title" id="title" />
+          </p>
+        </div>
+        <div id="create_project" class="button">Create project</div>
+      </div>
+    </div>
+
+    </node-pipe>
+    <data-workspace>
+		<h1>Welcome to GLAMpipe!</h1>
+		<p>
+		GLAMpipe is a tool for cultural data processing.
+		</p>
+		<h2>What is GLAMpipe</h2>
+		<ul>
+		  <li>operates on collections, documents and nodes (not tables and cells)</li>
+		  <li>for tasks that require human intervention (i.e. task that can not be fully automatised)</li>
+		  <li>is able to handle multiple values in different languages</li>
+		</ul>
+		
+		<h2>What's so special in cultural data?</h2>
+		<p>In technicals sense the main difference when compared to scintific data, is that cultural data often has multiple values per field and that there are language codes.</p>
+    </data-workspace>
+  </content>
+  <div id="dialog-confirm" style="display:none">Are you sure?</div>
+</body>
+</html>

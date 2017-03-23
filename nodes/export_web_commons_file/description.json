@@ -1,6 +1,6 @@
 {
     "nodeid": "export_commons_file",
-    "title": "upload files to commons",
+    "title": "WM Commons: upload files",
     "type": "export",
     "subtype":"web",
     "subsubtype": "mediawiki_bot",

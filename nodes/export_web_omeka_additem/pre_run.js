@@ -1,45 +1,22 @@
 
-var item = {}
+var item = {
+			"item_type":1,
+			"public": true,
+			"tags": [],
+			"element_texts": []
+			}
 
-function splitValue (val) { 
-   if( typeof val == "string") { 
-       var arr = val.split("||"); 
-       return arr 
-   } else if ( typeof val == "number") {
-       return val; 
-   }
-}
 
-/*
-    "dcterms:title": [
-        {
-            "type": "literal",
-            "property_id": 1,
-            "property_label": "Title",
-            "@value": "Dear API, please save me!"
-        }
-    ],
-*/
-
-function pushField (item, value, key_mapped, key_plain, language) {
+function pushField (item, value, key_mapped, key_plain) {
 
 	if(typeof value === "string")
 		value = value.trim();
 
 	// do not add key if there is no mapped key
 	if(key_mapped.trim() != "" && value !== null && value !== "") { 
-
-			
-		//var field = {"key": key_mapped, "value": value, "language": language};
-		var field_splitted = key_mapped.split("--");
-		var field_id = field_splitted[1];
-		var field_name = field_splitted[0];
 		
-		var field = {"@value": value, "type":"literal", "property_id": field_id};
-		if(item[field_name] && Array.isArray(item[field_name]))
-			item[field_name].push(field);
-		else
-			item[field_name] = [field];
+		var field = {"text": value, "html": false, "element": {"id": key_mapped}};
+		item.element_texts.push(field);
 		
 	}
 }
@@ -58,20 +35,25 @@ for (mapkey in context.node.settings) {
 		// loop over value arrays
 	   if (value != null && value.constructor.name === "Array") {
 		   for (var i = 0; i < value.length; i++ ) { 
-			   	if(context.doc[key_plain + "__lang"])
-					language = context.doc[key_plain + "__lang"][i];
-				pushField(item, value[i], key_mapped, key_plain, language);	
+				pushField(item, value[i], key_mapped, key_plain);	
 		   }
 		   
 	   } else { 
-			if(context.doc[key_plain + "__lang"])
-				language = context.doc[key_plain + "__lang"];
-			pushField(item, value, key_mapped, key_plain, language);	
+			pushField(item, value, key_mapped, key_plain);	
 	   }
    }
 
 } 
 
+// set collection
+if(context.node.settings.collection  && context.node.settings.collection != "")
+	item.collection = context.node.settings.collection;
+
+// set tags
+if(context.node.settings.tags && context.node.settings.tags != "") {
+	var tags = context.node.settings.tags.split(",");
+	item.tags = tags;
+}
 
 
 if(parseInt(context.count) % 10 == 0) 

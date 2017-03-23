@@ -57,7 +57,7 @@ $("#export-web-omeka_fetch_collections").click(function (e) {
 	$("#export-web-omeka_coll_list").append("<h3>Fetching...</h3>");
 	$("#export-web-omeka_coll_list").show();
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/item_sets", function (data) {
+	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/collections", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -71,7 +71,7 @@ $("#export-web-omeka_fetch_collections").click(function (e) {
 
 
 // collection click handler
-$("#export-web-omeka_coll_list").on("click", "li.collection", function (event) {
+$("#export-web-omeka_coll_list").on("click", "li", function (event) {
 	event.stopPropagation();
 	$("#export-web-omeka_collection").val($(this).data("id"));
 	$("#export-web-omeka_coll_list").hide();
@@ -80,13 +80,14 @@ $("#export-web-omeka_coll_list").on("click", "li.collection", function (event) {
 
 // CREATE SCHEMA LIST
 function fetchSchemas (cb) {
-
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/properties", function (data) {
+	//http://localhost:8088/api/elements?pretty_print&element_set=1
+	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/elements", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
+			data.sort(sortByName);
 			data.forEach(function(field) {
-				schema_select += "<option value='"+field['o:term']+"--"+field['o:id']+"'>" + field['o:term'] + "</options>"; 
+				schema_select += "<option value='" + field['id'] + "'>" + field['name'] + "</options>"; 
 			})
 			 
 		}
@@ -98,12 +99,25 @@ function fetchSchemas (cb) {
 function display (data) {
 	var html = "<ul>";
 	for(var i = 0; i < data.length; i++) {
-		html += "<li data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</li>";
+		var title = getCollTitle(data[i]['element_texts']);
+		html += "<li data-id='" + data[i]['id'] + "'>" + title + "</li>";
 
 	}
 	html += "</ul>";
 	return html;
-	
-	
 }
 
+function getCollTitle (data) {
+	for(var i = 0; i < data.length; i++) {
+		if (data[i].element.name == "Title")
+			return data[i].text;
+	}
+}
+
+function sortByName (a,b) {
+  if (a.name.toLowerCase() < b.name.toLowerCase())
+    return -1;
+  if (a.name.toLowerCase() > b.name.toLowerCase())
+    return 1;
+  return 0;	
+}

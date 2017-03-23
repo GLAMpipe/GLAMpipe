@@ -3,7 +3,7 @@
 	"type": "source",
 	"subtype": "web",
 	"subsubtype": "csv",
-	"title": "Online CSV",
+	"title": "Online CSV: import",
     "status": "usable",
 	"description": "Import data from online CSV",
 

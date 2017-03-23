@@ -219,6 +219,7 @@ exports.addFile = function (doc, sandbox, nextDoc) {
 			//size += chunk.length;
 		});
 
+		// if there is no file, write error to document
 		file_stream.on('error', function() {
 			console.log("file is NOT THERE");	
 			sandbox.context.error = {type:"error", msg:"FILE not found", file:upload};

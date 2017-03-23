@@ -177,7 +177,7 @@ exports.insert = function (collectionname, doc, callback) {
 			console.log(err);
 			callback(err, result)
 		} else {
-			 console.log('MONGO: inserted to', collectionname);
+			// console.log('MONGO: inserted to', collectionname);
 			callback(null, result);
 		}
 	}); 

@@ -31,6 +31,7 @@
     "socket.io": "^1.4.5",
     "socket.io-client": "^1.5.1",
     "stream-splitter": "^0.3.2",
+    "stream-to-mongo": "^0.1.5",
     "stream-transform": "^0.1.1",
     "to-utf-8": "^1.2.0",
     "validator": "^6.2.0",

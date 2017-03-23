@@ -1,0 +1,9 @@
+.filter-or ul li {
+    list-style: none outside none;
+    margin-left:-40px;
+}
+
+.container {
+	width:90%;
+	
+}
