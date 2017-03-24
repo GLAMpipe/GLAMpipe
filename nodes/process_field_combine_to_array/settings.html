@@ -1,18 +1,45 @@
+<div class="todo">DEVELOPER TODO: make adding fields dynamic and make it to remember values</div>
 <div class="box-noflex">
-	
-	<label>field1:</label> 
+	<h3>input fields</h3>
+	<label>field 1:</label> 
 	<input class="dynamic_field node-settings" name="in_field[]"/>
 
-	<label>field2:</label> 
+	<label>field 2:</label> 
 	<input class="dynamic_field node-settings" name="in_field[]"/>
 
+	<label>field 3:</label> 
+	<input class="dynamic_field node-settings" name="in_field[]"/>
 
-	<label>Trim</label>
-	<input type="checkbox" class="node-settings " name="trim" checked="checked" />
+	<label>field 4:</label> 
+	<input class="dynamic_field node-settings" name="in_field[]"/>
+</div>
+
+<div class="box-noflex">
+	<h3>options</h3>
+	<div class="checkbox_holder">
+		<input type="checkbox" class="node-settings " name="trim" checked="checked" />	
+		<label>Trim</label>
+	</div>
+
+	<div class="checkbox_holder">
+		<input type="checkbox" class="node-settings " name="lowercase" checked="checked" />
+		<label>Lower case</label>
+	</div>
 	
-	<label>Lower case</label>
-	<input type="checkbox" class="node-settings " name="lowercase" checked="checked" />
-	
-	<label>Remove duplicates</label>
-	<input type="checkbox" class="node-settings " name="removeduplicates" checked="checked" />
+	<div class="checkbox_holder">
+		<input type="checkbox" class="node-settings " name="remove_duplicate" checked="checked" />
+		<label>Remove duplicates</label>
+	</div>
+
+	<div class="checkbox_holder">
+		<input type="checkbox" class="node-settings " name="remove_empty"/>
+		<label>Remove empties</label>
+	</div>
+
+	<div class="checkbox_holder">
+		<input type="checkbox" class="node-settings " name="onlyone" checked="checked" />
+		<label>Fill target field with only one value. </label>
+		<div>When this is selected only the first non-empty value is copied to target field. This can be handy for cases where there are different language versions of the text and you need to make sure that there is at least some version of the text available.</div>
+	</div>
+
 </div>

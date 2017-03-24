@@ -1,16 +1,16 @@
-var in_field = context.node.params.in_field;
+var in_field = context.node.settings.in_field;
 var output = [];
 
 function combine (value) { 
    if(Array.isArray(value)) {
 	   value.forEach(function(row) {
 		   row = preprocess(row);
-		   if(!output.includes(row))
+		   if(row)
 				output.push(row);
 	   })
    } else {
 	   value = preprocess(value);
-	   if(!output.includes(value))
+	   if(value)
 			output.push(value);
    } 
   
@@ -18,10 +18,21 @@ function combine (value) {
 
 // lowercase and trim if wanted
 function preprocess (value) {
+	// lowercase
 	if(context.node.settings.lowercase && typeof value === "string")
 		value = value.toLowerCase();
+	// trim
 	if(context.node.settings.trim && typeof value === "string")
 		value = value.trim();
+	// remove empty
+	if(context.node.settings.remove_empty && value == "")
+		value = null;
+	// only one value 
+	if(context.node.settings.onlyone && output.length == 1)
+		value = null;
+	// remove duplicates
+	if(context.node.settings.remove_duplicate && output.includes(value))
+		value = null;
 	
 	return value;
 }
@@ -32,7 +43,7 @@ if(Array.isArray(in_field)) {
 		combine(context.doc[field]);
 	})
 } else {
-	var val = context.doc[context.node.params.in_field]; 	
+	var val = context.doc[context.node.settings.in_field]; 	
 }
 
 

@@ -1,8 +1,10 @@
-function refjyx (gp_url, collection) {
+function refjyx (gp_url, collection, filters, item_table) {
 	
 	var self 					= this;
 	this.collection 			= collection;
 	this.url 					= gp_url;
+	this.filters 				= filters;
+	this.item_table 			= item_table;
 	this.collection_url 		= this.url + "/collections/" + this.collection
 	this.get_facet_url 			= this.collection_url + "/facet/";
 	this.get_count_url 			= this.collection_url + "/count";
@@ -12,77 +14,23 @@ function refjyx (gp_url, collection) {
 	this.facetsDiv 				= "#facets"; // display for selected facets
 
 
-	this.filters = [
-		{
-			title:"Minkä sidosryhmän/-ryhmien kanssa opinnäytetyö on tehty?",
-			description: "",
-			mode: "checkbox",
-			key: "yvv_contractresearch_collaborator",
-			op: "or",
-			values: [
-				{
-					value:"business", title:"Yritykset", checked: false
-				},
-				{
-					value:"community", title:"voittoa tavoittelemattomat yhteisöt", checked: false
-				},
-				{
-					value:"finance", title:"Rahoitus- ja vakuutuslaitokset", checked: false
-				},
-				{
-					value:"public", title:"Julkisyhteisöt", checked: false
-				}
-			]
-		},
-		{
-			title:"Minkä osapuolen aloitteesta opinnäytetyö tehtiin?",
-			description: "",
-			mode: "checkbox",
-			key: "yvv_contractresearch_initiative",
-			op: "or",
-			values: [
-				{
-					value:"order", title:"yrityksen tms. tilaamana ", checked: false
-				},
-				{
-					value:"student", title:"opiskelijan omasta kiinnostuksesta ", checked: false
-				},
-				{
-					value:"university", title:"yliopiston tarjoamana ", checked: false
-				}
-			]
-		},
-		{
-			title:"Minkä osapuolen aloitteesta opinnäytetyö tehtiin?",
-			description: "",
-			mode: "facet",
-			key: "dc_contributor_oppiaine",
-			op: "and",
-			values: []
-		}		
-	];
-
-	this.init = function () {
-		
-		// read facets from DOM (simple grouping)
-		//readFacets("facet-and");
-		this.renderFilters(".sidebar-right");	
-		this.renderFacets(".sidebar-left");
-
-	}
-
 	this.renderFilters = function (div) {
 		
 		self.filters.forEach(function(filter) {
-			var html = "<div class='filter-"+filter.op+"' id='"+filter.key+"'>";
-			html += "<h3>" + filter.title + "</h3><ul>";
-			if(filter.mode == "checkbox") {
-				filter.values.forEach(function(value) {
-					html += "<li><input type='checkbox'  value='"+value.value+"'/>"+value.title+"</li>"
-				})
+			if(filter.mode == "filter") {
+				var html = "<div class='filter-"+filter.op+"' id='"+filter.key+"'>";
+				html += "<h3>" + filter.title + "</h3><ul>";
+				if(filter.render == "checkbox") {
+					filter.values.forEach(function(value) {
+						if(value.checked)
+							html += "<li><input type='checkbox' checked='checked' value='"+value.value+"'/>"+value.title+"</li>"
+						else
+							html += "<li><input type='checkbox'  value='"+value.value+"'/>"+value.title+"</li>"
+					})
+				}
+				html += "</ul></div>";
+				$(div).append(html);
 			}
-			html += "</ul></div>";
-			$(div).append(html);
 		})
 		
  		
@@ -119,164 +67,91 @@ function refjyx (gp_url, collection) {
 		checked.forEach(function(filter) {
 			query.push(id + "[]=" + filter);
 		})
+		if(query.length == 0)
+			return "";
 		var query = query.join("&");
 		query += "&op=or";
 		console.log(query);
+		return query;
 	}
 
 
-	this.getFilteredSet = function () {
+
+
+	this.renderFilteredSet = function (target) {
 
 		var filters = "?" + self.getFilteredQuery();
-		var params = "&limit=500&sort=dc_title&op=or";
-		var html = "<table>";
-		html += "<tr><th>title</th><th>collaborator</th><th>initiative</th><th>linkki</th></tr>"
+		var params = "&limit=500&sort=dc_title";
+		var html = "<table><tr>";
+		self.item_table.headers.forEach(function(header) {
+			html += "<th>" + header + "</th>";
+		})
+		html += "</tr>";
+		
+		if(filters == "?") {
+			html += "</table>";
+			$(target).empty().append(html);	
+			return;		
+		}
+		
 		$.getJSON(this.get_filtered_items_url + filters + params, function (response) {
 			response.data.forEach(function(item) {
+				self.item_table.rows.forEach(function(row) {
+					if(row.render)
+						html += "  <td><div class='strong'>" + row.render(item) + "</div></td>";
+					else if(row.key)
+						html += "  <td><div class='strong'>" + self.joinArray(item[row.key]) + "</div></td>";
+					else
+						html += "  <td><div class='strong'></div></td>";
+				})
 				html += "<tr>"
-				html += "  <td><div class='strong'>" + item.dc_title + "</div></td>";
-				
-				html += "  <td>";
-				if(item.yvv_contractresearch_collaborator)
-					html += "  <div>" + self.joinArray(item.yvv_contractresearch_collaborator)+ "</div>";
-				html += "  </td>";
-				
-				html += "  <td>";
-				if(item.yvv_contractresearch_initiative)
-					html += "  <div>" + self.joinArray(item.yvv_contractresearch_initiative)+ "</div>";
-				html += "  </td>";
-
-
-				html += "  <td>";
-				if(item.dc_identifier_urn)
-					html += "  <div>" + self.makeURNLink(item.dc_identifier_urn, "linkki")+ "</div>";
-				html += "  </td>";
-					
-				html += "</tr>";
-				
 			})
 			html += "</table>";
-			$("#items").empty().append(html);
-			
-			
+			$(target).empty().append(html);
 		})
-		
 	}
+
+
 
 	this.renderFacets = function (div) {
 		self.filters.forEach(function(filter) {
 			if(filter.mode == "facet") {
-				self.getFacetValues(filter);
+				self.renderFacet(filter, div);
 			}
 		})
 	}
 
-	this.getFacetValues = function (facet) {
+	this.renderFacet = function (facet, target) {
 
+		var items = [];
 		var filters = "?" + self.getFilteredQuery();
-		var params = "&limit=500&sort=dc_title&op=or";
-		var html = "<tr><th>title</th><th>collaborator</th><th>initiative</th><th>linkki</th></tr>"
+		if(filters == "?") {
+			$("#" + facet.key).find("ul").empty();	
+			return;
+		}
+		var params = "&limit=200&op=or";
 		$.getJSON(self.get_facet_url + encodeURIComponent(facet.key) + filters + params, function (response) {
 			console.log(response);
-		})
-		
-	}
+			response.count.forEach(function(item) {
+				if(facet.render == "list") {
+					items.push($("<li></li>").text(item._id + " (" + item.count + ")"));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	this.readFacets = function (facetGroup) {
-		var s = "div" + self[facetGroup].itemDiv  +" div";
-		console.log(s)
-		$("div" + self[facetGroup].itemDiv  +" div").each(function(index) {
-			var sort = (typeof $(this).data("sort") !== "undefined" ? $(this).data("sort") : null);
-			var limit = (typeof $(this).data("limit") !== "undefined" ? $(this).data("limit") : 20);
-			var mode = (typeof $(this).data("mode") !== "undefined" ? $(this).data("mode") : "facet");
-			self.facets.push({
-				field:$(this).attr("id"), 
-				values: [], 
-				path: self[facetGroup].path,
-				render: self[facetGroup].render,
-				map: self[facetGroup].map,
-				mapto: self[facetGroup].mapto,
-				sort: sort,
-				limit: limit,
-				mode: mode
-			});
-		})		
-	}
-
-	this.addFilter = function(value, field) {
-		var index = self.facets.findIndex(function(facet) {return facet.field == field });
-		if(index !== -1) {
-			if(!self.facets[index].values.includes(value)) {
-				self.facets[index].values.push(value);
-				self.renderChosenFacets();
-				self.getFacets();
-				self.getFilteredSet();
-			}
-		} else {
-			console.log("not found " + field);
-			console.log("not found " + index);
-		}
-	}
-
-	this.resetFilters = function () {
-		self.facets.forEach(function(facet) {
-			facet.values = [];
-		})
-	}
-
-	this.removeFilter = function(value, field) {
-		var index = self.facets.findIndex(function(facet) {return facet.field == field});
-		if(index !== -1) {
-			self.facets[index].values.splice(self.facets.indexOf(value),1);
-		} 
-		self.renderChosenFacets();
-		self.getFacets();
-		self.getFilteredSet();
-	}
-
-	this.renderChosenFacets = function () {
-		$(self.facetsDiv).empty();
-		self.facets.forEach(function(facet) {
-			facet.values.forEach(function(value) {
-				$(self.facetsDiv).append($("<div>").attr("data-id",facet.field).addClass("facet").text(decodeURIComponent(value)).append(" <i class='glyphicon glyphicon-remove'></i>"));
-			})
-		});
-
-	}
-
-	
-
-	this.getFacets = function () {
-		
-		var filters_arr = [];
-		//self.getFilters(filters_arr);
-		var filters = "?" + filters_arr.join("&");
-		
-		self.facets.forEach(function(facet) {
-			if(facet.mode !== "list") // 
-				self.getFacet(facet,  filters);
-			else 
-				self.getFacet(facet,  "");
+				} else {
+					items.push($("<li><a></a></li>").find("a").text(item._id + " (" + item.count + ")").data("facet", item._id).attr("href","#").end());
+				}
 				
+			})
+			
+			if(document.getElementById(facet.key)) {
+				$("#" + facet.key).find("ul").empty().append(items);
+			} else {
+				var holder = $("<div id='"+facet.key+"'><h3>"+facet.title+"</h3></div>");
+				holder.append($("<ul>").addClass("facet-list").append(items));
+				$(target).append(holder);
+			}
 		})
+		
 	}
-
-
 
 
 	this.joinArray = function (arr) {
@@ -284,81 +159,21 @@ function refjyx (gp_url, collection) {
 			return arr.filter(Boolean).join(",");
 	}
 
-	this.makeURNLink = function (arr, link) {
-		if(Array.isArray(arr)) {
-			var arr = arr.filter(Boolean);
-			return "<a href='http://urn.fi/"+arr[0]+"'>" + link + "</a>";
-		} else {
-			return "<a href='http://urn.fi/" +arr+ "'>" + link + "</a>";
-		}	
-	}
-
-	this.getFacet = function (facet, filters) {
-		
-		var target = "#" + facet.field;
-		$(target).empty().append("loading...");
-		var params = []
-		if(facet.sort)
-			params.push("sort=" + facet.sort);
-			
-		if(facet.limit)
-			params.push("limit=" + facet.limit);
-			
-		params = params.join("&");
-		if(filters === "")
-			params = "?" + params;
-		else
-			params = "&" + params;
-			
-		// get items and render	
-		$.getJSON(self.get_facet_url + encodeURIComponent(facet.field) + facet.path + filters + params, function (response) {
-			if(response.error)
-				alert(response.error);
-			else {
-				if(facet.render) {
-					facet.render(response.count);
-				} else {
-					$(target).empty();
-					var items = [];
-					response.count.forEach(function(item) {
-						// map values
-						if(facet.map) {
-							var index = facet.map.indexOf(item._id);
-							if(index !== -1)
-								items.push($("<li><a></a></li>").find("a").text(facet.mapto[index] + " (" + item.count + ")").data("facet", item._id).attr("href","#").end());
-
-						} else {
-							// create html
-							if(item._id === "") 
-								items.push($("<li><a></a></li>").find("a").text("EI ARVOA (" + item.count + ")").data("facet", item._id).attr("href","#").end());
-							else
-								items.push($("<li><a></a></li>").find("a").text(item._id + " (" + item.count + ")").data("facet", item._id).attr("href","#").end());
-						}
-					})
-					$(target).append($("<ul>").addClass("facet-list").append(items));
-					//$(target).parent().accordion("refresh");
-				}
-			}
-			
-		}).fail(function(jqXHR) {
-			if (jqXHR.status == 404) {
-				alert("GLAMpipe is not responding (404)!");
-			} else {
-				console.log("ERROR in request");
-			}
-		});
-		
-	}
-
 	
-	this.getCount = function (targetDiv) {
+	this.renderFilteredCount = function (target) {
 
+		var filters = "?" + self.getFilteredQuery();
+		
+		if(filters == "?") {
+			$(target).text("Lukumäärä: 0");	
+			return;
+		}
 		// get items and render	
-		$.getJSON(self.get_count_url, function (response) {
+		$.getJSON(self.get_count_url + filters, function (response) {
 			if(response.error)
 				alert(response.error);
 			else {
-				$(targetDiv).text("RINNAKKAISJULKAISUPROSENTIT (" + response.count + ")");
+				$(target).text("Lukumäärä: " + response.count );
 			}
 			
 		}).fail(function(jqXHR) {

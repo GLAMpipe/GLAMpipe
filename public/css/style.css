@@ -730,3 +730,7 @@ font-weight:bold;
 #login {
 	float:right;
 }
+
+.checkbox_holder label {
+	display:inline;
+}

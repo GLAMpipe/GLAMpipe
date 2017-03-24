@@ -325,6 +325,8 @@ exports.getNodeFromFile = function (node_id, res) {
 exports.runNode = function (req, io, res) {
 
 	console.log('Running node:', req.params.id);
+	if(req.query.doc)
+		console.log("DOOOOOOOOOC " + req.query.doc )
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 
 	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(err, project) {
@@ -338,6 +340,7 @@ exports.runNode = function (req, io, res) {
 		node.settings = req.body;
 		node.project = project._id;
 		node.project_dir = project.dir;
+		node.req = req;
 
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {

@@ -3,7 +3,18 @@
     margin-left:-40px;
 }
 
+.facet-list li {
+    list-style: square outside none;
+    margin-left:-20px;
+}
+
 .container {
 	width:90%;
 	
+}
+
+.info {
+	font-weight:bold;
+	color:#f1563f;
+	font-size: 140%;
 }
