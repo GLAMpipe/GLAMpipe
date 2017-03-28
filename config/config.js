@@ -18,6 +18,8 @@ var MP = "__mp";
 // - true = use local authentication
 var isServerInstallation = false;
 
+var url = "http://localhost";
+
 
 // IP passes
 // one can define IPs that are allowed to execute certain API paths
@@ -37,6 +39,7 @@ exports.source =  MP + "_source";
 exports.loadNodesFromGithub = false;
 exports.dataPath = dataPath;
 exports.nodePath = nodePath;
+exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.IP_passes = IP_passes;
 

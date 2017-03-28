@@ -23,9 +23,14 @@ module.exports = function(express, glampipe, passport) {
 	// authentication checker 
 	var isLoggedInAPI = function (req, res, next) {
 		
+		// check and set ip in case we are behind proxy
+		var ip = req.ip;
+		if(req.headers['x-real-ip'])
+			ip = req.headers['x-real-ip']
+
 		var pass = false;
 		conf.IP_passes.some(function(IP_pass) {
-			if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && req.ip === IP_pass.ip) {
+			if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && ip === IP_pass.ip) {
 				pass = true;
 				console.log("INFO: allowed by IP_pass: " + IP_pass.label)
 			}
@@ -115,7 +120,7 @@ module.exports = function(express, glampipe, passport) {
 
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
-		res.json(config);
+		res.json({url:conf.url});
 	});
     
 	express.get('/api/v1/status', function (req, res) {
@@ -201,6 +206,11 @@ module.exports = function(express, glampipe, passport) {
 	//express.post('/set/node/:id/visible-fields', function (req, res) {
 		//glampipe.core.setVisibleFields(req.params.id, res);
 	//});
+
+	express.post('/api/v1/nodes/:id/start', function (req, res) {
+		glampipe.core.runNode(req, glampipe.io);
+		res.json({status:"started", ts:  new Date()});
+	});
 
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
 		glampipe.core.runNode(req, glampipe.io);

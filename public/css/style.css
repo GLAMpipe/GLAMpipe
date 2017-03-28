@@ -673,6 +673,10 @@ label {
 	display:block;
 }
 
+.settingscontainer label {
+	display:inline;
+}
+
 /* PARAMETERS TABLE */
 
 .params table {

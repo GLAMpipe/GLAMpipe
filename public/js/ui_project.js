@@ -125,10 +125,8 @@ $( document ).ready(function() {
 		}
 	});
 
-
-
     // websocket stuff
-    var socket = io.connect('http://localhost');
+    var socket = io.connect();
     var progressDisplay = $("#node-progress");
     var finishDisplay = $("#node-finished");
     var genericDisplay = $("#generic-messages");
