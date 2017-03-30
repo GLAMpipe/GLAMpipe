@@ -954,6 +954,14 @@ exports.getCollectionCount = function (req, cb) {
 	});
 }
 
+exports.getCollectionCountRegExp = function (req, cb) {
+	
+	var query = createSearchQuery(req);
+	mongoquery.countDocs(req.params.collection, query, function (result) {
+		cb({count:result});
+	});
+}
+
 
 exports.getCollectionFacet = function (req, cb) {
 	

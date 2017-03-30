@@ -1,0 +1,29 @@
+{
+    "nodeid": "process_field_count_chars",
+    "title": "Count characters",
+    "type": "process",
+    "subtype": "fields",
+    "status": "usable",
+    "description": "Count characters of certain field.",
+    "scripts": {
+    
+        "hello": 
+        [
+            "out.say('news', 'You added a coount node'); ",
+            "/* set output field */",
+            "context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+        ],
+        
+        "bye": "out.say('news', 'Deleted node. Bye!'); ",
+        
+        "init":
+        [
+            "out.say('progress', 'Count started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Count done!');"
+    },
+    
+    "views": {}
+}

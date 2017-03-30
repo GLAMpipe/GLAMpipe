@@ -257,6 +257,10 @@ module.exports = function(express, glampipe, passport) {
 		//collection.collectionSearch(req, function(data) {res.send(data)});
 	//});
 
+	express.get('/api/v1/collections/:collection/count/regexp', function (req, res) {
+		glampipe.core.getCollectionCountRegExp(req, function(data) {res.send(data)});
+	});
+
 	express.get('/api/v1/collections/:collection/count', function (req, res) {
 		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});
 	});
