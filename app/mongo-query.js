@@ -1,7 +1,9 @@
 
-var mongojs = require('mongojs');
-var async = require("async");
-var database = require('../config/database');
+var mongojs 	= require('mongojs');
+var async 		= require("async");
+const util 		= require('util');
+var database 	= require('../config/database');
+var buildquery 	= require("./query-builder.js");
 
 var db = mongojs(database.initDBConnect());
 
@@ -396,6 +398,11 @@ exports.facet = function (req, callback) {
 	var group_by = null;
 	var sort = {};
 	var facet = "$facet";
+	const AS_ARRAY = true;
+	var skip = ["skip", "limit", "sort", "reverse", "op"]; 
+	
+	var operators = buildquery.operators(req);
+	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
 
 	var limit = parseInt(req.query.limit);
 	if (limit < 0 || isNaN(limit))
@@ -410,12 +417,6 @@ exports.facet = function (req, callback) {
 	// - first match reference facets (journal/monografia)
 	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
 	// - then group by original source (JYX-item)
-	
-	// FILTER:
-	if(req.query) {
-		filters = createFilters(req.query, req.query.op, req.query.allow_empty);
-	}
-	console.log(filters);
 	
 	// GROUP:
 	if(req.params.groupby) {
@@ -436,6 +437,7 @@ exports.facet = function (req, callback) {
 		
 	// check if field is array
 	col.getKeyTypes(req.params.collection, function(res) {
+		console.log("\nFACET QUERY:" + req.url);
 		if(res[field] === "array") {
 			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
 			aggregate(collection, aggr, function(data) {
@@ -467,6 +469,9 @@ function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array)
 	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
 	aggregate.push({$sort: sort});
 	aggregate.push({$limit:limit});
+	
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, 4, true));
+	console.log("\n");
 	return aggregate;
 }
 
@@ -488,46 +493,6 @@ function aggregate (collection, aggregate, callback) {
 			}
 		}
 	) 
-}
-
-
-
-function createFilters (filters, operator, allow_empty) { // with $all
-	var matches = [];
-	
-	if(operator === "and")
-		operator = "$all";
-	else if(operator === "or")
-		operator = "$in";
-	else
-		operator = "$all";
-		
-	for (var field in filters) {
-		// skip empty values and "limit" and "sort" fields
-		if(!allow_empty)
-			if(filters[field] === "") continue; 
-			
-		if(field === "limit" || field === "sort" || field === "allow_empty" || field === "op") continue;
-			
-		var f = {};
-		
-		if(Array.isArray(filters[field])) {
-			var values = [];
-			filters[field].forEach(function(value) {
-				values.push(decodeURIComponent(value));
-			})
-			var sel = {};
-			sel[operator] = values;
-			f[field] = sel;
-		} else {
-			f[field] = decodeURIComponent(filters[field])
-		}
-			
-		matches.push(f);
-		//filter_fields.push(field_name);
-		console.log(f);
-	};
-	return matches;
 }
 
 

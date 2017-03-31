@@ -1,3 +1,4 @@
+const util 		= require('util');
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -20,37 +21,9 @@ exports.search = function (req, res) {
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
 		reverse = true;
 
-	var operators = {};
-	if(req.query.op && Array.isArray(req.query.op)) {
-		req.query.op.forEach(function(op) {
-			var s = op.split(":");
-			if(s.length === 2) {
-				if(s[1] === "or") 
-					operators[s[0]] = "$in";
-				else if(s[1] === "and") 
-					operators[s[0]] = "$all";
-			}
-		})
-	}
-
-	var s = ["skip", "limit", "sort", "reverse", "op"];
-	var query = {};
-	for (var param in req.query) {
-		if(!s.includes(param)) {
-			if(Array.isArray(req.query[param])) {
-				var q = {};
-				if(operators[param])
-					q[operators[param]] = req.query[param];
-				else
-					q = {$in:req.query[param]};
-				query[param] = q;
-			} else {
-				query[param] = req.query[param];
-			}
-		}
-	}
-	console.log(query);
-	//query[req.query.field] = {$regex:req.query.value, $options: 'i'};
+	var skipped = ["skip", "limit", "sort", "reverse", "op"]; 	// skip search options
+	var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
+	var query = exports.filters(req, operators, skipped);
 
 	var params = {
 		collection: req.params.collection,
@@ -60,8 +33,62 @@ exports.search = function (req, res) {
 		sort: req.query.sort,
 		reverse: reverse
 	}
+
+	console.log("SEARCH:\n" + util.inspect(params, false, 4, true));
 	
 	return params;
-
-
 }
+
+exports.filters = function (req, operators, skip, as_array) {
+	var query = {};
+	var arr = [];
+	for (var param in req.query) {
+		if(!skip.includes(param)) {
+			if(Array.isArray(req.query[param])) {
+				var q = {};
+				if(operators[param])
+					q[operators[param]] = req.query[param];
+				else
+					q = {$in:req.query[param]};
+					
+				if(as_array) 
+					arr.push({[param]:q});
+				else
+					query[param] = q;
+					
+			} else {
+				if(as_array)
+					arr.push({[param]:req.query[param]})
+				else
+					query[param] = req.query[param];
+			}
+		}
+	}
+	
+	if(as_array) {
+		//console.log("FILTERS:\n" + util.inspect(arr, false, 4, true));
+		return arr;
+	} else {	
+		//console.log("FILTERS:\n" + util.inspect(query, false, 4, true));
+		return query;
+	}
+}
+
+exports.operators = function (req) {
+	var operators = {};
+	if(req.query.op && Array.isArray(req.query.op)) {
+		req.query.op.forEach(function(op) {
+			var splitted = op.split(":");
+			if(splitted.length === 2) {
+				if(splitted[1] === "or") 
+					operators[splitted[0]] = "$in";
+				else if(splitted[1] === "and") 
+					operators[splitted[0]] = "$all";
+			}
+		})
+	} 
+	//console.log("OPERATORS:\n" + util.inspect(operators, false, 4, true));
+	return operators;
+}
+
+
