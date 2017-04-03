@@ -470,7 +470,7 @@ function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array)
 	aggregate.push({$sort: sort});
 	aggregate.push({$limit:limit});
 	
-	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, 4, true));
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
 	console.log("\n");
 	return aggregate;
 }

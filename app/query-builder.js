@@ -49,7 +49,7 @@ exports.filters = function (req, operators, skip, as_array) {
 				if(operators[param])
 					q[operators[param]] = req.query[param];
 				else
-					q = {$in:req.query[param]};
+					q = {$all:req.query[param]};  // default AND
 					
 				if(as_array) 
 					arr.push({[param]:q});
