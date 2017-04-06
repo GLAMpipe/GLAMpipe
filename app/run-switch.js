@@ -340,12 +340,7 @@ exports.runNode = function (node, io) {
 						
 						case "calculate_checksum":
 							var checksum = require("../app/node_runners/file-checksum.js");
-							asyncLoop.loop(node, sandbox, checksum.getHash);
-						break;
-						
-						case "check_commons":
-							var web = require("../app/node_runners/web-get-content.js");
-							asyncLoop.loop(node, sandbox, web.request);
+							asyncLoop.fieldLoop(node, sandbox, checksum.getHash);
 						break;
 						
 						case "grobid":
@@ -374,7 +369,7 @@ exports.runNode = function (node, io) {
 							asyncLoop.loop(node, sandbox, detect.language);
 						break;
 					
-						default:
+						default: // syncronous nodes
 							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
@@ -404,7 +399,18 @@ exports.runNode = function (node, io) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
-						break;				
+						break;	
+
+						case "web":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.fieldLoop(node, sandbox, web.getJSON);
+						break;
+
+						default:
+							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});			
 
 					}
 					break;
@@ -460,6 +466,23 @@ exports.runNode = function (node, io) {
 		}
 		break;
 
+
+/***************************************************************************************************************
+ *                                       VIEW                                                              *
+ * *************************************************************************************************************/
+
+		case "view":
+			switch (node.subtype) {
+				case "facet":
+					var facet = require("../app/node_runners/view-facet.js");
+					facet.writeConfig(node, sandbox);
+				break;
+			}
+
+
+		break;
+
+
 		default:
 			sandbox.out.say("finish", "This node is not runnable");
 			return;
@@ -491,7 +514,6 @@ exports.createSandbox = function (node, io) {
 		out: {
 			pre_value:"",
 			value:"",
-			url: "",
 			file:"",
 			setter:null,
 			updatequery: null,

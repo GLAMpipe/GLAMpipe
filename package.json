@@ -18,6 +18,7 @@
     "express-session": "^1.15.0",
     "flat": "^2.0.0",
     "form-data": "^2.1.2",
+    "fs-sync": "^1.0.4",
     "mongojs": "^2.3.0",
     "multer": "^1.1.0",
     "node-stream-csv": "0.0.2",

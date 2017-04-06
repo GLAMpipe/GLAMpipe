@@ -271,6 +271,8 @@ var glamPipe = function () {
 		if (obj.data("type") == "download")
 			types = ["download"]
 
+		if (obj.data("type") == "view")
+			types = ["view"]
 
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
@@ -377,6 +379,13 @@ var glamPipe = function () {
 		html += "  </div><div class='holder params'></div>"
 
 		html += self.renderNodes(collection, ["export"]);
+
+		html += "  <div class='sectiontitleblock'>"
+		html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
+		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+		html += "  </div><div class='holder params'></div>"
+
+		html += self.renderNodes(collection, ["view"]);
 
 		html += "</collectionset>"
 		

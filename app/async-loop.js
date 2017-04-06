@@ -178,3 +178,60 @@ function loop (node, sandbox, onDoc) {
 	});
 }
 
+
+// loop updates existing documents and call node asynchronously on every row of array
+exports.fieldLoop = function (node, sandbox, onDoc) {
+
+	// find everything
+	mongoquery.find2({}, node.collection, function (err, docs) {
+		
+		sandbox.context.doc_count = docs.length;
+		console.log(onDoc);
+		
+		// run node once per record
+		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
+
+			sandbox.context.doc = doc;
+			sandbox.out.value = null;
+			sandbox.context.count++;
+			sandbox.pre_run.runInContext(sandbox);
+			console.log("sandbox.out.pre_value: " + sandbox.out.pre_value);
+			
+			// check if pre_value is array
+			if(Array.isArray(sandbox.out.pre_value)) {
+				var result = [];
+				
+				// loop over field array
+				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
+
+					// call document processing function
+					onDoc(row, sandbox, function processed () {
+						console.log(row);
+						sandbox.run.runInContext(sandbox); // sets "context.out.value"
+						result.push(sandbox.out.value);
+						nextFieldRow();
+					});
+
+				}, function done () {
+					var setter = {};
+					setter[node.out_field] = result;
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
+				});
+				
+			} else {
+				console.log("not array");
+				// call document processing function
+				onDoc(sandbox.out.pre_value, sandbox, function processed () {
+					sandbox.run.runInContext(sandbox); // sets "context.out.value"
+					var setter = {};
+					setter[node.out_field] = sandbox.out.value;
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
+				});
+			}
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	});
+}
+

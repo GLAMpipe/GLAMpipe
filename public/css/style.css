@@ -677,6 +677,10 @@ label {
 	display:inline;
 }
 
+.settingscontainer block-labels label {
+	display:block;
+}
+
 /* PARAMETERS TABLE */
 
 .params table {

@@ -1,0 +1,17 @@
+{
+	"nodeid": "view_facet",
+	"type": "view",
+	"subtype": "facet",
+	"title": "Faceted view",
+	"status": "test",
+	"description": "Creates faceted view",
+
+	"scripts": {
+		"hello": "out.say('news', 'You added a view node');",
+		
+        "bye": "out.say('news', 'Deleted view node. Bye!'); ",
+        
+        "finish": "out.say('finish', 'Facet view  created!');"
+        
+	}
+}

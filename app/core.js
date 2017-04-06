@@ -180,7 +180,7 @@ exports.setDataPath = function (params, glampipe, res) {
 
 exports.createProject = function (title, res) {
 	
-	var dirs = ["download", "export", "source"];
+	var dirs = ["download", "export", "source", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
@@ -555,7 +555,7 @@ function initNode (req, res, io, project) {
 			node._id = mongojs.ObjectId();
 			
 			// create output directory for nodes that do file output
-			if(node.type == "download" || node.type == "export" || node.type == "source") {
+			if(node.type == "download" || node.type == "export" || node.type == "source" || node.type == "view") {
 				var fs = require("fs");
 				var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
 				fs.mkdir(dir, function(err) {

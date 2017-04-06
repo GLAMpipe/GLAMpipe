@@ -76,7 +76,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// facet view
 	express.get('/views/data/facets/:nodeid', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facets.html'));
+		res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facet.html'));
 	});	
 
 

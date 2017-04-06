@@ -1,3 +1,8 @@
+/*
+note on language extract:
+array rows must match between values and language codes!
+
+*/
 
 var record = context.data;
 var new_record = {};
@@ -8,54 +13,107 @@ if(!(context.vars.count % 1000))
 	
 context.vars.count++;
 
+// FIRST ROUND
 // create arrays for every key with clean field name
 for(var prop in record) {
 
 	if (record.hasOwnProperty(prop)) {
 
 		prop_clean = cleanFieldName(prop);
+		var values = processValue(record[prop]);
 		
-		// extract language codes 
+		// if field exists already, then concat values to existing array
+		if(new_record[prop_clean]) {
+			new_record[prop_clean] = new_record[prop_clean].concat(values);
+		// else create field and copy values to new array
+		} else {
+			new_record[prop_clean]  = values;
+		}
+
 		if(context.node.settings.extract_language) {
 
-			new_record[prop_clean] = [];
-			new_record[prop_clean + "__lang"] = [];
-			
-		} else {
-			new_record[prop_clean] = [record[prop]];
-		}
-	}
-}
-
-
-// push values to arrays
-for(var prop in record) {
-
-	if (record.hasOwnProperty(prop) && context.node.settings.extract_language) {
-
-		// fist push value
-		prop_clean = cleanFieldName(prop);
-		new_record[prop_clean].push(record[prop]);
-												
-		// check for language code ([en], [fi] etc.)
-		var re = /\[(.|..|)\]/g;
-		prop_trimmed = prop.trim().toLowerCase();
-		var codes = re.exec(prop_trimmed);
-		
-		// then push language code (i.e. what is inside square brackets)
-		if(codes != null) {
-			if(codes[1] != "") {
-				new_record[prop_clean + "__lang"].push(codes[1]);
-			} else {
-				new_record[prop_clean + "__lang"].push("");
+			var code = getLanguageCode(prop);
+			if(code != null) {
+				// create languag array with empty strings if needed
+				if(!new_record[prop_clean + "__lang"]) {
+					new_record[prop_clean + "__lang"] = createLanguageArray(values.length, new_record[prop_clean].length);
+				} 
+				
+				// push language code for every new value (i.e. what is inside square brackets)
+				for(var i = 0; i < values.length; i++) {
+					new_record[prop_clean + "__lang"].push(code);
+				}
 			}
-		} else {
-			new_record[prop_clean + "__lang"].push(""); 
 		}
 	}
 }
 
 
+function createLanguageArray(new_len, all_len) {
+	
+	 /* we must fill *new* lang field with empty strings if there are previous values
+	 * this means that there was already a field or fields without language code */
+	var arr = [];
+	if(new_len < all_len) {
+		var count = all_len - new_len;
+		for(var i = 0; i < count; i++) {
+			arr.push("");
+		}
+	}
+	return arr;
+		
+}
+
+
+function getLanguageCode(name) {
+		// check for language code ([en], [fi] etc.)
+		var code = null;
+		var re = /\[(.|..|)\]/g;
+		name_trimmed = name.trim().toLowerCase();
+		var codes = re.exec(name_trimmed);
+		if(codes != null && Array.isArray(codes) && codes.length > 0) {
+			if(codes[1] != "")
+				code = codes[1];
+		}
+		return code;	
+}
+
+
+function processValue (value) {
+	if(context.node.settings.split != "") {
+		var arr = value.split(context.node.settings.split);
+		
+		// trim
+		if(context.node.settings.trim) {
+			arr = arr.map(function (e) {
+				return e.trim();
+			});
+		}
+		
+		// skip empty
+		if(context.node.settings.skip) {
+			arr = arr.filter(Boolean)
+		}
+		
+		return arr;
+		
+	} else {
+		// skip
+		if(context.node.settings.skip)
+			if(value == "")
+				return [];
+		// trim
+		if(context.node.settings.trim) {
+			value = value.trim();
+			if(context.node.settings.skip)
+				if(value == "")
+					return [];
+			return [value];
+		}
+		else
+			return [value];
+	}	
+}
 
 function cleanFieldName (field) {
 
