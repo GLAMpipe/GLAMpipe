@@ -8,58 +8,55 @@
 
     <!--[if lt IE 7]></base><![endif]-->
 
+	<link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
 
 
-	<link href="css/bootstrap.css" rel="stylesheet">
-
-	<link rel="stylesheet" data-name="bundle-jyunity" href="css/bootstrap_jyu.css" />
-	<link rel="stylesheet" href="css/font-awesome.css" />
-	<link href="css/overrides.css" rel="stylesheet">
+	<link href="/publicview/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" href="/publicview/css/bootstrap_jyu.css" />
+	<link rel="stylesheet" href="/publicview/css/font-awesome.css" />
+	<link href="/publicview/css/overrides.css" rel="stylesheet">
 	
-	<script src="js/jquery-2.2.4.min.js"></script>  
-	<script src="js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="config.js" ></script>
-	<script type="text/javascript" src="js/facets.js" ></script>
-	<script type="text/javascript" src="js/tutka.js" ></script>
+	<script src="/publicview/js/jquery-2.2.4.min.js"></script>  
+	<script src="/publicview/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/publicview/facet_config.js" ></script>
+	<script type="text/javascript" src="/publicview/js/facets.js" ></script>
+	<script type="text/javascript" src="/publicview/js/tutka.js" ></script>
 
-    <title>Dublin Core tyypit</title>
+	<!-- this config overrides config above when viewing inside GLAMpipe -->
+	<!-- [CONFIG] -->
+    <title>[TITLE]</title>
 
 </head>
 
-<body class="flex template-view portaltype-portal-view site-fi section-opiskelu subsection-opiskelijalle-2 icons-off thumbs-off frontend viewpermission-view userrole-anonymous pat-markspeciallinks mosaic-grid pat-plone patterns-loaded">
+<body class="flex ">
 	
 
 <header class="site-header container-fluid hidden-print">
   <div class="site-brand-container container">
     <div class="row">
       <div class="col-2 col-sm-2 col-md-10 col-xl-7 site-logo-container">
-        <a class="site-logo" href="https://www.jyu.fi/"></a>
+        <a class="site-logo"></a>
         <p class="hidden-sm-down site-name">
-          <a href="https://osc.jyu.fi/fi/">OSC/verkkopalvelut</a>
+          <a href="/">GLAMpipe</a>
           
             <span class="separator">|</span>
-            <a href="index.html">JYX-admin </a>
+            [PROJECT] 
 
             <span class="separator">|</span>
-            <a href="">Dublin Core -tyypit</a>
+            [COLLECTION]
           
         </p>
       </div>
       
       <div class="col-7 col-sm-8 hidden-md-up site-name-container no-gutters site-name-animate">
         <p class="site-name site-name-sm">
-          <a href="https://www.jyu.fi/">OSC/verkkopalvelut</a>
+          <a target="_blank" href="http://glampipe.org">GLAMpipe</a>
         </p>
         <p class="site-name site-name-sm">
-          <a href="https://www.jyu.fi/hytk/fi">Dublin Core -tyypit</a>
+          <a href="">facet</a>
         </p>
       </div>
-      <div class="hidden-lg-down col-xl-4 site-links-search-container">
-        <div class="site-links-container">
-          <a href="https://www.jyu.fi/person-search">Yhteystiedot</a>
-        </div>
 
-      </div>
     </div>
   </div>
 </header>	
@@ -81,11 +78,9 @@
 		
 		<!-- MAIN -->
 		<div class="col-md-12 col-lg-9 col-xl-7 main">
-			<h1>Artikkelien Dublin Core tyypit</h1>
-			<div class="info">
-				<p>Sovellus listaa JYXissä käytetty Dublin Core tyypit (dc.type).</p>
-			</div>
-		
+			<h1>Facet view</h1>
+			<div class="info" id="pageinfo"></div>
+			<div id="item-count"></div>
 			<div id="items"></div>
 		</div>
 	
@@ -102,8 +97,8 @@
 		<!-- RIGHT -->
 		<div class="col-md-12 col-xl-2 sidebar sidebar-right hidden-print">
 			
-			<div class="filters"></div>
 			<div class="info"></div>
+			<div class="filters"></div>
 			
 		</div>
 	</div>	
@@ -114,15 +109,8 @@
 <footer class="site-footer hidden-print">
   <div class="container-fluid">
     <div class="row site-brand-container">
-      <a class="site-logo" href="https://www.jyu.fi/">
-      </a>
-
-
-
-      <a class="site-name" href="https://osc.jyu.fi/fi/">JYU/Avoimen tiedon keskus</a>
+      <a class="site-name" href="http://glampipe.org">GLAMpipe</a>
     </div>
-
-
   </div>
 </footer>
 

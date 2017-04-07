@@ -3,7 +3,7 @@
 	"type": "view",
 	"subtype": "chart",
 	"title": "Count chart",
-	"status": "test",
+	"status": "rubbish",
 	"description": "Count records by certain field and draw chart",
 
 	"scripts": {

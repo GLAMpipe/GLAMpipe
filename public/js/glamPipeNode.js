@@ -181,6 +181,9 @@ var glamPipeNode = function (node, gp) {
                     $("input[name='"+prop+"']").val(data.settings[prop]);
                     $("select[name='"+prop+"']").val(data.settings[prop]);
                     $("select[name='"+prop+"']").change();
+                    
+                    // textarea
+                    $("textarea[name='"+prop+"']").val(data.settings[prop]);
                 }
             }
         }
@@ -222,6 +225,11 @@ var glamPipeNode = function (node, gp) {
         $("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).is(':checked');
+		});
+
+        // handle textareas separately. Checbox is included only if it is checked
+        $("data-workspace .settings textarea.node-settings").each(function() {
+				settings[$(this).attr("name")] = $(this).val();
 		});
 		
 		return settings;	

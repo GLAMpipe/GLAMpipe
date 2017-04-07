@@ -673,12 +673,20 @@ label {
 	display:block;
 }
 
-.settingscontainer label {
-	display:inline;
+
+.settingscontainer .block-labels label {
+	display:block;
 }
 
-.settingscontainer block-labels label {
-	display:block;
+.settingscontainer .group {
+	margin-bottom: 20px;
+	padding-left: 10px;
+	border-left: 5px solid #bfd2f3;
+}
+
+.settingscontainer textarea {
+	width: 90%;
+	height: 120px;
 }
 
 /* PARAMETERS TABLE */
@@ -692,7 +700,7 @@ label {
 }
 
 .params table td:nth-child(1) {
-font-weight:bold;
+	font-weight:bold;
 }
 
 .output {
@@ -740,5 +748,9 @@ font-weight:bold;
 }
 
 .checkbox_holder label {
+	display:inline;
+}
+
+.inline {
 	display:inline;
 }

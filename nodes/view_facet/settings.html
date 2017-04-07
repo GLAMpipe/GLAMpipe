@@ -1,45 +1,202 @@
 
+<h3>view</h3>
+<div class="box-noflex">
+	<div>
+		<label>page title</label> 
+		<input class="node-settings" name="pagetitle"/>
+	</div>	
+	<div>
+		<label>page text</label>
+		<textarea class="node-settings" name="pageinfo"></textarea>
+	</div>
+	
+	<p class="info">Set facets, run node and then click the button below.</p>
+	<a id="view_facet_link" target="_blank" href="">
+		<div class="button" >Open faceted view</div>
+	</a>
+	
+</div>
 
 <h3>facets</h3>
-<div class="box-noflex block-labels">
-	<h4>left</h4>
-	<div>
-		<label>label:</label> 
-		<input class="node-settings" name="label[]"/>	
-	</div>
-	<div>
-		<label>field:</label> 
-		<input class="dynamic_field node-settings" name="in_field[]"/>
-	</div>
-
-	<h4>right</h4>
-	<div>
-		<label>field:</label> 
-		<input class="dynamic_field node-settings" name="in_field[]"/>
-	</div>
-	<div>
-		<label>label:</label> 
-		<input class="node-settings" name="label[]"/>
-	</div>
-
-</div>
-
-
-<h3>item view</h3>
 <div class="box-noflex">
-	<h4>left</h4>
-	<div>
-		<input class="node-settings" name="key"/>	
+	
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="label_1"/>	
+		</div>
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="in_field_1"/>
+		</div>	
+
+		<select class="node-settings" name="display_1">
+			<option value="left">on the left</option>
+			<option value="right">on the right</option>
+		</select>
+
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="collapsed_1"  />	
+			<label class="inline">collapsed by default</label>
+		</div>
 	</div>
+
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="label_2"/>
+		</div>
+
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="in_field_2"/>
+		</div>
+		
+		<select class="node-settings" name="display_2">
+			<option value="left">on the left</option>
+			<option value="right">on the right</option>
+		</select>
+		
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="collapsed_2"/>	
+			<label>collapsed by default</label>
+		</div>
+	</div>
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="label_3"/>
+		</div>
+
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="in_field_3"/>
+		</div>
+		
+		<select class="node-settings" name="display_3">
+			<option value="left">on the left</option>
+			<option value="right">on the right</option>
+		</select>
+		
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="collapsed_3"/>	
+			<label>collapsed by default</label>
+		</div>
+	</div>
+
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="label_4"/>
+		</div>
+
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="in_field_4"/>
+		</div>
+		
+		<select class="node-settings" name="display_4">
+			<option value="left">on the left</option>
+			<option value="right">on the right</option>
+		</select>
+		
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="collapsed_4"/>	
+			<label>collapsed by default</label>
+		</div>
+	</div>
+
 </div>
 
 
-<h3>options</h3>
+<h3>item table</h3>
 <div class="box-noflex">
-	<div class="checkbox_holder">
-		<input type="checkbox" class="node-settings " name="trim" checked="checked" />	
-		<label>Trim</label>
+	
+	<div class="info">
+		Here you can define what is shown as a result.
+	</div>
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="render_label_1"/>
+		</div>
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="render_1"/>
+		</div>
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="render_link_1" />	
+			<label>render as link</label>
+		</div>
+		<div>
+			<label>start of the link if the value is not a full link:</label> 
+			<input class="node-settings" name="render_link_start_1"/>
+		</div>
+	</div>
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="render_label_2"/>
+		</div>
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="render_2"/>
+		</div>
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="render_link_2" />	
+			<label>render as link</label>
+		</div>
+		<div>
+			<label>start of the link if the value is not a full link:</label> 
+			<input class="node-settings" name="render_link_start_2"/>
+		</div>
+	</div>
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="render_label_3"/>
+		</div>
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="render_3"/>
+		</div>
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="render_link_3" />	
+			<label>render as link</label>
+		</div>
+		<div>
+			<label>start of the link if the value is not a full link:</label> 
+			<input class="node-settings" name="render_link_start_3"/>
+		</div>
+	</div>
+
+
+	<div class="group">
+		<div>
+			<label>label:</label> 
+			<input class="node-settings" name="render_label_4"/>
+		</div>
+		<div>
+			<label>field:</label> 
+			<input class="dynamic_field node-settings" name="render_4"/>
+		</div>
+		<div class="hbox">
+			<input type="checkbox" class="node-settings " name="render_link_4" />	
+			<label>render as link</label>
+		</div>
+		<div>
+			<label>start of the link if the value is not a full link:</label> 
+			<input class="node-settings" name="render_link_start_4"/>
+		</div>
 	</div>
 
 
 </div>
+
+

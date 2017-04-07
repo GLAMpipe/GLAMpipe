@@ -54,7 +54,7 @@ var GlamPipe = function() {
 
 		self.app = express();
 		self.app.use(express.static('public'));
-		self.app.use("/publicview", express.static('app/views/public'));
+		self.app.use("/publicview", express.static('app/views/datapublic'));
 		self.app.use( bodyParser.json() );       // to support JSON-encoded bodies
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 			extended: true

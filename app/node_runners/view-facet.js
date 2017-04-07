@@ -6,10 +6,20 @@ exports.writeConfig = function (node, sandbox, cb) {
 
 	var fsync = require('fs-sync');
 	// copy html, css and js to node directory
-	var source = "/home/arihayri/projects/GLAMpipe/app/views/dataviews/facet";
+	var p = __dirname.replace("node_runners","");
+	var source = path.join(p, 'views', 'datapublic');
 	fsync.copy(source, node.dir);
+	
+	// repare html and save index.html
+	var html = fsync.read(path.join(p, 'views', 'dataviews', 'facet', 'index.html'))
+	
+	// change paths to same directory where index.html is
+	html = html.replace(/\/publicview\//g, "");
+	
+	html = prepareHTML(html, node);
+	fsync.write(path.join(node.dir, "index.html"), html);
 
-	var file = path.join(node.dir, "config.js");
+	var file = path.join(node.dir, "facet_config.js");
 	sandbox.run.runInContext(sandbox);
 	var data = "var config = " +JSON.stringify(sandbox.out.value, null, 4);
 
@@ -22,4 +32,41 @@ exports.writeConfig = function (node, sandbox, cb) {
 		 }
 	});
 
+}
+
+
+exports.getFacetIndexHTML = function (req, res) {
+	
+	var fsync = require("fs-sync");
+	var path = require("path");
+	
+	var core 	= require("./../../app/core.js");
+	core.getNode(req.params.nodeid, function(err, node) {
+		if(err) {
+			console.log("FACET VIEW: node not found! nodeid = " + req.params.nodeid);
+			return res.send("<h2>View not found!</h2>");
+		}
+		
+		var p = __dirname.replace("node_runners","");
+		var html = fsync.read(path.join(p, 'views', 'dataviews', 'facet', 'index.html'))
+		
+		if(fsync.exists(path.join(node.dir, 'facet_config.js')))
+			var config = fsync.read(path.join(node.dir, 'facet_config.js'))
+		else
+			return res.send("<h2>You must run node first!</h2>");
+
+		// we must override default config when viewing inside GLAMpipe
+		html = html.replace("<!-- [CONFIG] -->", "<script>\n" + config + "</script>");
+		html = prepareHTML(html, node);
+		res.send(html);
+	})
+}
+ 
+ 
+function prepareHTML (html, node) {
+	var collection = node.collection.split("_");
+	collection = collection[collection.length-1];
+	html = html.replace("[PROJECT]", "<a href='/project/"+node.project+"'>" + node.project_title + "</a>");
+	html = html.replace("[COLLECTION]", collection);
+	return html;
 }

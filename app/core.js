@@ -206,7 +206,7 @@ exports.createProject = function (title, res) {
 		// update project count and create project
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(err, meta) {
-				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
+				var collectionName = title_dir.substring(0,60).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -329,19 +329,16 @@ exports.runNode = function (req, io, res) {
 		console.log("DOOOOOOOOOC " + req.query.doc )
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(err, project) {
-		if(!project) {
+	exports.getNode(req.params.id, function(err, node) {
+		if(err) {
 			console.log("node not found");
 			io.sockets.emit("error", "node not found");
 			return;
 		}
-		var index = indexByKeyValue(project.nodes, "_id", req.params.id);
-		var node = project.nodes[index];
+		
 		node.settings = req.body;
-		node.project = project._id;
-		node.project_dir = project.dir;
-		node.req = req;
-
+		node.req = req;	
+		
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
 
@@ -368,10 +365,21 @@ exports.runNode = function (req, io, res) {
 	})
 }
 
+exports.getNode = function (node_id, cb) {
 
-
-
-
+	mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
+		if(!project) {
+			return cb("not found", null);
+		}
+		var index = indexByKeyValue(project.nodes, "_id", node_id);
+		var node = project.nodes[index];
+		node.project = project._id;
+		node.project_title = project.title;
+		node.project_dir = project.dir;
+		cb(null, node);	
+	})
+	
+}
 
 
 
