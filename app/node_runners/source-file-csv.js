@@ -118,7 +118,7 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 		skip_empty_lines:true
 	})
 	
-	var input = fs.createReadStream(file);
+	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
 	var options = { db: db, collection: node.collection }
 	var streamToMongo = require('stream-to-mongo')(options);
 
