@@ -1,9 +1,10 @@
 var in_field = context.node.settings.in_field;
 var output = [];
 
-function combine (value) { 
-   if(Array.isArray(value)) {
-	   value.forEach(function(row) {
+function combine (field) { 
+	var value =	context.doc[field];
+    if(Array.isArray(value)) {
+	   value.forEach(function(row, index) {
 		   row = preprocess(row);
 		   if(row)
 				output.push(row);
@@ -13,11 +14,10 @@ function combine (value) {
 	   if(value)
 			output.push(value);
    } 
-  
 }
 
 // lowercase and trim if wanted
-function preprocess (value) {
+function preprocess (value, index) {
 	// lowercase
 	if(context.node.settings.lowercase && typeof value === "string")
 		value = value.toLowerCase();
@@ -37,10 +37,37 @@ function preprocess (value) {
 	return value;
 }
 
+function getPreferredLang(field) {
+	var value =	context.doc[field]; 
+	var lang = context.node.settings.preferred_lang;
+	if(Array.isArray(value)) {		
+		for(var i = 0; i < value.length; i++) {
+			if(context.doc[field + "__lang"] && context.doc[field + "__lang"][i]) {
+				if(context.doc[field + "__lang"][i] === lang) {
+					output.push(preprocess(value[i]));
+					return true;
+				}
+			}			
+		}
+	} else {
+		if(context.doc[field + "__lang"]) {
+			if(context.doc[field + "__lang"] === lang) {
+				output.push(preprocess(value));
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 if(Array.isArray(in_field)) {
 	in_field.forEach(function(field) {
-		combine(context.doc[field]);
+		if(context.node.settings.preferred_lang !== "" && getPreferredLang(field)) {
+			
+		} else {
+			combine(field);
+		}
 	})
 } else {
 	var val = context.doc[context.node.settings.in_field]; 	

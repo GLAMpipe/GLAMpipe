@@ -1,4 +1,10 @@
 /* {_id:{$in:context.doc.ids}}  */
-out.updatequery = {}; 
-out.updatequery[context.node.settings.match] = {$in:context.doc[context.node.settings.search]}; 
-context.data = updatequery;
+
+var updatequery = {}; 
+var search = context.doc[context.node.settings.local_key];
+updatequery[context.node.settings.lookup_key] = {$in:context.doc[context.node.settings.local_key]}; 
+
+if(typeof search !== "undefined")
+	out.pre_value = updatequery;
+else
+	out.pre_value = null;

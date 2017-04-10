@@ -248,6 +248,13 @@ module.exports = function(express, glampipe, passport) {
 
 	express.get('/api/v1/collections/:collection/fields', function (req, res) {
 		collection.getKeys(req.params.collection, function(data) {res.send(data)});
+		//collection.getAllCollectionKeys(req.params.collection, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/collections/:collection/schema', function (req, res) {
+		require("../app/schema.js").getCollectionSchema(req.params.collection, function(data) {res.send(data)})
+		//collection.getSchema(req.params.collection, function(data) {res.send(data)});
+		//collection.getAllCollectionKeys(req.params.collection, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/collections/:collection/types', function (req, res) {

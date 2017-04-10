@@ -4,6 +4,7 @@ var path        = require('path');
 var mongoquery 	= require("../../app/mongo-query.js");
 var collection = require("../../app/collection.js");
 var nodescript = require("../../app/run-node-script.js");
+var schema 		= require("../../app/schema.js");
 const MP 		= require("../../config/const.js");
 
 
@@ -54,7 +55,9 @@ exports.fetchDataInitialMode = function (node, sandbox, io) {
 			});
 			
 		}, function done() {
-			console.log("ALL REQUESTS DONE");
+			console.log("ALL REQUESTS DONE!\n\n");
+			console.log("creating schema");
+			schema.createCollectionSchema(node, null);
 			nodescript.runNodeScriptInContext("finish", node, sandbox, io);
 		});
 	});
@@ -88,16 +91,6 @@ function requestLoop(node, sandbox, io, cb) {
 					sandbox.out.url = "";
 					sandbox.out.schema = [];
 					nodescript.runNodeScriptInContext("run", node, sandbox, io);
-					//console.log("insert array:", sandbox.out.value.length);
-					//console.log("SCHEMA:", sandbox.out.schema);
-					//console.log("COLLECTIONS:", sandbox.context.vars.collections);
-					//mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
-						//if(error)
-							//console.log(error);
-						//else
-						//	console.log("SCHEMA saved");
-					//})
-					
 					
 					if(sandbox.context.node_error) 
 						return callback(sandbox.context.node_error, null);

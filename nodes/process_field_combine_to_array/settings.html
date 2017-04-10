@@ -12,6 +12,9 @@
 
 	<label>field 4:</label> 
 	<input class="dynamic_field node-settings" name="in_field[]"/>
+	
+	<label>preferred language </label> 
+	<input class="node-settings" name="preferred_lang"/>
 </div>
 
 <div class="box-noflex">
@@ -32,12 +35,12 @@
 	</div>
 
 	<div class="checkbox_holder">
-		<input type="checkbox" class="node-settings " name="remove_empty"/>
+		<input type="checkbox" class="node-settings " name="remove_empty" checked="checked" />
 		<label>Remove empties</label>
 	</div>
 
 	<div class="checkbox_holder">
-		<input type="checkbox" class="node-settings " name="onlyone" checked="checked" />
+		<input type="checkbox" class="node-settings " name="onlyone" />
 		<label>Fill target field with only one value. </label>
 		<div>When this is selected only the first non-empty value is copied to target field. This can be handy for cases where there are different language versions of the text and you need to make sure that there is at least some version of the text available.</div>
 	</div>

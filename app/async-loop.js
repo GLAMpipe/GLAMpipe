@@ -37,32 +37,39 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
-			console.log("collection: " + node.collection);
 			//onsole.log(doc.basename);
+			sandbox.pre_run.runInContext(sandbox);
 			
 			// call document processing function
 			onDoc(doc, sandbox, function processed () {
-
-				console.log("search:", sandbox.out.query);
-				// skip if there is no query
-				if(!sandbox.out.query)
-					next();
 				
-				// search here. We assume that key is unique
-				 mongoquery.find2(sandbox.out.query, node.params.source_collection, function (err, docs) {
-					if(docs[0]) {
-						var set_value = {};
-						set_value[node.params.out_field] = docs[0][node.params.copy_field]
-						var setter = {$set:set_value}
-						
-					} else {
-						var set_value = {};
-						set_value[node.params.out_field] = "";
-						var setter = {$set:set_value}
-					}
-					console.log(setter);
+				//console.log("search:", sandbox.out.pre_value);
+				// we always set value even if there is no query
+				if(!sandbox.out.pre_value) {
+					var set_value = {};
+					set_value[node.params.out_field] = "";
+					var setter = {$set:set_value}
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, setter, next);
-				 }) 
+				} else {
+					
+					// search here. We assume that key is unique
+					 mongoquery.find2(sandbox.out.pre_value, node.params.source_collection, function (err, docs) {
+						if(err)
+							console.log(err);
+						if(docs.length) {
+							var set_value = {};
+							set_value[node.params.out_field] = docs[0][node.params.copy_field]
+							var setter = {$set:set_value}
+							
+						} else {
+							var set_value = {};
+							set_value[node.params.out_field] = "";
+							var setter = {$set:set_value}
+						}
+						//console.log(setter);
+						mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, setter, next);
+					 }) 
+				 }
 				
 				// update here
 				//mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, setter, next);

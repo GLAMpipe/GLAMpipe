@@ -102,14 +102,12 @@ exports.runNode = function (node, io) {
 							mongoquery.empty(node.collection, query, function() {
 								// we must check if input key is array or not
 								mongoquery.findOne({}, node.params.source_collection, function (err, record) {
-									if(record) {
-										if(record[node.params.in_field]) {
-											var array = record[node.params.in_field].constructor.name == "Array";
-											mongoquery.group(node, array, groupCB);
-										} else {
-											io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
-											io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
-										}
+									if(!err && record) {
+										//var array = record[node.params.in_field].constructor.name == "Array";
+										mongoquery.group(node, true, groupCB);
+									} else {
+										io.sockets.emit("error", {"nodeid":node._id, "msg":"Record or field not found!"});
+										io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
 									}
 								}) 
 							});

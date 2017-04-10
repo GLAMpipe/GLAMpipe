@@ -353,7 +353,7 @@ exports.group = function (node, array, callback) {
 	var project2 = { count:1, ids: 1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
 
-
+	// we fist try group with array
 	if(array) {
 		collection.aggregate([
 			{$project: project},
@@ -364,9 +364,27 @@ exports.group = function (node, array, callback) {
 			// use $out for mongo 2.6 and newer
 			],
 			function (err, data) {
-				if(err)
-					console.log(err);
-				callback(data);
+				if(err) {
+					
+					// did not work, try with non-array
+					console.log("trying witn non-array");
+					collection.aggregate([
+						// {"$match": {"author":{"$ne": ""}} },
+						{$project: project},
+						{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
+						{$project: project2 },
+						{$sort: { count: -1 }}
+						// use $out for mongo 2.6 and newer
+						],
+						function (err, data) {
+							if(err)
+								console.log(err);
+							callback(data);
+						}
+					)
+				} else {
+					callback(data);
+				}
 			}
 		)
 	} else {
@@ -565,6 +583,7 @@ exports.dropCollection = function (collectionName, callback) {
 exports.markNodeAsExecuted = function (node) {
 	
 }
+
 
 
 // creates an object for mongoquery array update wiht positional operator ($)
