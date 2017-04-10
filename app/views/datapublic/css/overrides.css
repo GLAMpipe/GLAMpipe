@@ -54,6 +54,14 @@
 	color:black;
 }
 
+.flexbox {
+    display:flex;
+}
+
+.icon:hover {
+    cursor:pointer;
+}
+
 /* facets from here: http://bootsnipp.com/snippets/4OG7n */
 
 /*    @import url(//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css);*/

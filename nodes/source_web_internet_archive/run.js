@@ -2,10 +2,10 @@
 if (context.data.responseHeader) {
     var numFound = parseInt(context.data.response.numFound, 10);
     var start = parseInt(context.data.response.start, 10);
-    var totalPages = Math.ceil(numFound/context.node.params.docs_per_page); 
+    var totalPages = Math.ceil(numFound/context.node.settings.docs_per_page); 
     out.value = context.data.response.docs;
 
-   var currentPage = start/context.node.params.docs_per_page + 1; 
+   var currentPage = start/context.node.settings.docs_per_page + 1; 
    out.say ("progress", "working on page " + currentPage + "/" + totalPages);
    out.say ("progress", context.query_url);
 

@@ -529,6 +529,13 @@ exports.closeDB = function () {
 
 
 exports.editProjectNode = function (doc_id, params, callback) {
+    
+    // we do not save passwords, user names and api keys
+    if(params.settings.username) params.settings.username = null;
+    if(params.settings.passwd) params.settings.passwd = null;
+    if(params.settings.password) params.settings.password = null;
+    if(params.settings.apikey) params.settings.apikey = null;
+
 	var collection = db.collection("mp_projects");
 	var setter = {};
 	setter.$set = createParamsObject("nodes", params);
@@ -588,13 +595,17 @@ exports.markNodeAsExecuted = function (node) {
 
 // creates an object for mongoquery array update wiht positional operator ($)
 function createParamsObject(arrayName, params) {
-	
+
 	var result = {};
 	for (var p in params) {
-		if( params.hasOwnProperty(p) ) {
+		if( params.hasOwnProperty(p) && p != "apikey") {
 		  result[arrayName + ".$." + p] =  params[p];
 		} 
 	}
+    console.log("******************************");
+    console.log(params);
+    console.log(result);
+    console.log("******************************");
 	return result;
 }
 

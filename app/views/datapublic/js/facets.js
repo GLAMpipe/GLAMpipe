@@ -7,6 +7,7 @@ function refjyx (config) {
 	this.filters 				= config.filters;
 	this.item_table 			= null;
 	this.dataRender				= null;
+    this.skip                   = 0;
 
 	this.collection_url 		= this.url + "/collections/" + this.collection
 	this.get_facet_url 			= this.collection_url + "/facet/";
@@ -185,7 +186,7 @@ function refjyx (config) {
 
 		var filters = "?" + self.getFilteredQuery();
 		//console.log(filters)
-		var params = "&limit=500";
+		var params = "&skip="+self.skip+"&limit=50";
 		if(self.config.item_table.sort) {
 			params += "&sort=" + self.config.item_table.sort;
 			if(self.config.item_table.reverse) 
@@ -322,7 +323,7 @@ function refjyx (config) {
 			if(response.error)
 				alert(response.error);
 			else {
-				$(target).text("count: " + response.count );
+				$("#data-switch").text(response.count);
 			}
 			
 		}).fail(function(jqXHR) {
@@ -335,7 +336,12 @@ function refjyx (config) {
 		
 	}
 
+    this.nextPage = function () {
+    }
 
+    this.prevPage = function () {
+    }
+    
 	this.getFacetHeadingHTML = function (facet) {	 
 		
 		var head = "<div class='panel-heading'>";

@@ -337,10 +337,12 @@ exports.runNode = function (req, io, res) {
 		}
 		
 		node.settings = req.body;
+        var copy = Object.assign({}, node.settings)
+
 		node.req = req;	
 		
 		// save node settings TODO: set callback
-		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
 
 			console.log("\n>>>>>>>>>>>>>>>>>>>>>> NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);

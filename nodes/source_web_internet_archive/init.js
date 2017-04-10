@@ -1,6 +1,6 @@
-var query = context.node.params.query.replace("https://archive.org/search.php?query=", "");
+var query = context.node.settings.query.replace("https://archive.org/search.php?query=", "");
 
-var u = '&fl[]=identifier&fl[]=title&fl[]=description&fl[]=collection&fl[]=source&fl[]=creator&rows='+context.node.params.docs_per_page+'&output=json';
+var u = '&fl[]=identifier&fl[]=title&fl[]=description&fl[]=collection&fl[]=source&fl[]=creator&rows='+context.node.settings.docs_per_page+'&output=json';
 
 out.url = 'https://archive.org/advancedsearch.php?q=' + query + u;
  /* since out.url gets wiped every run, lets save query in other variable*/

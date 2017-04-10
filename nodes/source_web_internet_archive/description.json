@@ -19,17 +19,7 @@
     },
    
     "views": {
-        "params":[
-                    "<label>Write or copy query here</label> Construct your query here:<br><a target='_blank' href='https://archive.org/advancedsearch.php'>advanced search</a>",
-                    "<input name='query'/>",
-                    "<label>records per page</label>",
-                    "<input name='docs_per_page' value='50'/>"
-                 ],
-        "settings":
-        [
-            "<div class='help'>If you do not want to fetch all records, then define page maximum page count below.</div>",
-            "<label>max page count</label>leave empty for all<input class='node-settings' name='sample_to'/>"
-        ]
+        "params": "no params"
     }
 
 }

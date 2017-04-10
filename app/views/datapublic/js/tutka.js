@@ -59,6 +59,15 @@ $( document ).ready(function() {
 		$(e.currentTarget).parents(".panel").find(".sort-switch").removeClass("hidden");
 	})
 
+    // paging handler
+	$("#data-prev").on("click", function (e) {
+		admin.prevPage();
+	});
+
+	$("#data-next").on("click", function (e) {
+		admin.nextPage();
+	});
+
 });
 
 
