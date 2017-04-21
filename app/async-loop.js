@@ -9,8 +9,40 @@ const MP 		= require("../config/const.js");
 var exports = module.exports = {};
 
 exports.loop = function (node, sandbox, onDoc) {
+	
+	// ONE DOC
+	if(node.req && node.req.params.doc) {
+		console.log("NODE: single doc")
+			
+		mongoquery.findOneById (node.req.params.doc, node.collection, function (doc) {
 
-	loop (node, sandbox, onDoc);
+		if(doc) {
+				
+				sandbox.context.doc = doc;
+				
+				// call document processing function
+				console.log("CALLING onDoc");
+				onDoc(doc, sandbox, function processed () {
+					console.log("sandbox.out:" + sandbox.out);
+					if(sandbox.out.setter != null) {
+						var setter = sandbox.out.setter; 
+					} else {
+						var setter = {};
+						setter[node.out_field] = sandbox.out.value;
+					}
+					
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
+						sandbox.finish.runInContext(sandbox);
+					});
+				});	
+			}		
+		})
+
+		
+	// LOOP ALL DOCS
+	} else {
+		loop (node, sandbox, onDoc);
+	}
 	
 	mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
 		if(error)

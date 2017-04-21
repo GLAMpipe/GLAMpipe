@@ -598,6 +598,11 @@ input.middle_input {
     margin-left:5px;
 }
 
+input.long_input {
+
+	width:90%;
+    margin-left:5px;
+}
 
 #projectList .listoption:hover {
 	background-color:#F2F2F2;

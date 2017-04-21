@@ -39,6 +39,99 @@ exports.runNode = function (node, io) {
 	// node run "router"
 	switch (node.type) {
 
+
+/***************************************************************************************************************
+ *                                       METANODE                                                                *
+ * *************************************************************************************************************/
+
+		// hard-coded demo
+		case "meta":
+			
+			runNodeScriptInContext("init", node, sandbox, io);
+			if(sandbox.context.init_error) 
+				return;
+			
+			// THIS COMES FROM NODE ****************
+			//var nodes = [
+				//{
+					//collection: node.collection,
+					//nodeid: "process_field_split",
+					//params: {
+						//in_field: node.params.in_field,
+						//out_field:"meta1_split"
+					//},
+					//settings: {
+						//separator: node.settings.separator
+					//}
+				//},
+				//{
+					//collection: node.collection,
+					//nodeid: "process_field_count_chars",
+					//params: {
+						//in_field:"meta1_split",
+						//out_field:"meta1_count"
+					//},
+					//settings: {
+						
+					//}
+				//}
+			//]
+			
+			var nodes = node.metaparams;
+			nodes[0].settings = node.settings;
+			// ***************************************
+
+			var count = 0;
+
+			// run subnodes
+			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
+				console.log("THIS IS SUBNODE");
+				var baseurl = "http://localhost:3000";
+				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
+				console.log(url);	
+				console.log("subnode settings: " + nodes[count].settings);
+				
+				var settings = nodes[count].settings;
+				count++;
+				
+				
+				
+				// POST
+				 var options = {
+					url: url,
+					json: settings,
+					headers: {
+						"accecpt": "application/json"
+					},
+					jar:true
+				};
+				
+				var request = require("request");
+				//require('request').debug = true;
+
+				// make actual HTTP request
+				request.post(options, function (error, response, body) {
+					sandbox.context.data = body;
+					if (error) {
+						console.log(error);
+						next();
+					} else {
+						console.log(options.url);
+						console.log("update response:", body);
+						//sandbox.run.runInContext(sandbox);
+						next();
+					}
+				});
+	
+							
+			}, function done () {
+				console.log("METANODE: done all nodes!");
+			})
+				
+			break;
+
+
+
 /***************************************************************************************************************
  *                                       SOURCE                                                                *
  * *************************************************************************************************************/

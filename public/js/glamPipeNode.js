@@ -33,6 +33,20 @@ var glamPipeNode = function (node, gp) {
 		});
 	}
 
+
+	this.runSingle = function (doc_id) {
+		
+		self.source.settings = self.getSettings(node);
+		console.log("RUNNING node with settings: ", self.source.settings);
+		
+		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
+			console.log(data);
+			if(data.error) {
+				$(".settings").removeClass("busy");
+				alert(data.error);
+			}
+		});
+	}
 	
 	
 	this.runFinished = function () {

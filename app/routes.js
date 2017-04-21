@@ -214,9 +214,8 @@ module.exports = function(express, glampipe, passport) {
 		res.json({status:"started", ts:  new Date()});
 	});
 
-	express.post('/api/v1/nodes/:id/start', function (req, res) {
-		glampipe.core.runNode(req, glampipe.io);
-		res.json({status:"started", ts:  new Date()});
+	express.post('/api/v1/nodes/:id/run/:doc', function (req, res) {
+		glampipe.core.runNode(req, glampipe.io, res);
 	});
 
 	express.post('/api/v1/nodes/:id/run', function (req, res) {

@@ -231,6 +231,14 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+exports.addFieldToCollection = function (collectionname, field, cb) {
+	var add = {};
+	add[field] = null;
+	var update = {$set:add}
+	exports.update(collectionname, {}, update, cb);
+	
+}
+
 // *********************************************************************
 // ******************************* DELETE ******************************
 // *********************************************************************
@@ -531,10 +539,12 @@ exports.closeDB = function () {
 exports.editProjectNode = function (doc_id, params, callback) {
     
     // we do not save passwords, user names and api keys
-    if(params.settings.username) params.settings.username = null;
-    if(params.settings.passwd) params.settings.passwd = null;
-    if(params.settings.password) params.settings.password = null;
-    if(params.settings.apikey) params.settings.apikey = null;
+    if(params.settings) {
+		if(params.settings.username) params.settings.username = null;
+		if(params.settings.passwd) params.settings.passwd = null;
+		if(params.settings.password) params.settings.password = null;
+		if(params.settings.apikey) params.settings.apikey = null;
+	}
 
 	var collection = db.collection("mp_projects");
 	var setter = {};

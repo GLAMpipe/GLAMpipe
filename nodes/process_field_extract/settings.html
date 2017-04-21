@@ -1,6 +1,13 @@
 <div class="box-noflex">
+	
+	<select id="process_field_extract_pre">
+		<option>year (four digits)</option>
+		<option>person names</option>
+	</select>
+	
 	<label>regular expression (add "/" YOUR REGEXP "/g" for global match</label>
-	<input class="node-settings" name="regexp"/>
+	<input class="node-settings long_input" name="regexp"/>
 
-	<input type="checkbox" class="node-settings" name="global"/> all values
+	<input type="checkbox" class="node-settings" name="global"/>
+	<label>global</label>
 </div>

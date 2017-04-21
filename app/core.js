@@ -325,8 +325,6 @@ exports.getNodeFromFile = function (node_id, res) {
 exports.runNode = function (req, io, res) {
 
 	console.log('Running node:', req.params.id);
-	if(req.query.doc)
-		console.log("DOOOOOOOOOC " + req.query.doc )
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 
 	exports.getNode(req.params.id, function(err, node) {
@@ -337,9 +335,10 @@ exports.runNode = function (req, io, res) {
 		}
 		
 		node.settings = req.body;
-        var copy = Object.assign({}, node.settings)
-
 		node.req = req;	
+		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
+		// from it without affecting settings that are used by node
+        var copy = Object.assign({}, node.settings) 
 		
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
@@ -469,12 +468,15 @@ exports.createNode = function (req, res, io) {
 		mongoquery.findOneById(req.params.project, "mp_projects", function(project) {
 			req.node_count = project.node_count;
 			mongoquery.update("mp_projects",{_id:mongojs.ObjectId(req.params.project)}, {$inc: { node_count: 1} }, function() {
-				initNode(req, res, io, project);
+				initNode(req, io, project, function(data) {
+					res.json(data);
+				});
 			});
 		});
-		
 	}
 }
+
+
 
 
 
@@ -504,16 +506,76 @@ exports.createCollectionNode = function (req, res, io) {
 }
 
 
+
+function createMetaSubNodes (node, io, cb) {
+	
+	//var nodes = [
+		//{
+			//collection: node.collection,
+			//nodeid: "process_field_split",
+			//params: {
+				//in_field: node.params.in_field,
+				//out_field:"meta1_split"
+				//}
+		//},
+		//{
+			//collection: node.collection,
+			//nodeid: "process_field_count_chars",
+			//params: {
+				//in_field:"meta1_split",
+				//out_field:"meta1_count"
+				//}
+		//}
+	//]
+	
+	var nodes = node.metaparams;
+	
+	var nodelist = [];
+	//nodes.reverse();
+
+	// create nodes
+	require("async").eachSeries(nodes, function iterator (nodeitem, next) {
+		console.log("CREATING SUBNODE");
+		var req = {params:{}, body:{}};
+		req.body.params = nodeitem.params;
+		req.body.collection = nodeitem.collection;
+		req.params.project = node.project;
+		req.params.nodeid = nodeitem.nodeid;
+		req.node_count = node.number;
+		req.node_count++;
+		
+		mongoquery.findOneById(node.project, "mp_projects", function(project) {
+			mongoquery.update("mp_projects",{_id:mongojs.ObjectId(node.project)}, {$inc: { node_count: 1} }, function() {
+				initNode(req, io, project, function(data) {
+					nodelist.push(data.id);
+
+					console.log("data.id:" + data.id)
+					next();
+				});
+			});
+		});		
+	}, function done () {
+		console.log("DONE ASYNC CREATING OF SUBNODES")
+		// write node ids to metanode
+		mongoquery.editProjectNode(node._id, {"metanodes":nodelist}, function() {
+			cb();
+		})
+		
+	});
+	
+
+}
+
 /**
  * Create default project node
  * - adds params defined by user to the stock node
  * - saves result to project record (under "nodes")
  */
  
-function initNode (req, res, io, project) {
+function initNode (req, io, project, callback) {
 
 	console.log("New node id:", mongojs.ObjectId());
-	console.log("nodeparams:", req.body.params);
+	console.log("nodeparams:", req.params);
 	
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
@@ -523,7 +585,12 @@ function initNode (req, res, io, project) {
 			{_id:mongojs.ObjectId(node.project)},
 			{$push:{nodes: node}},
 			function(error) {
-				cb(error);
+				// if node is metanode, then we must continue to subnode creation
+				if (node.type == "meta") {
+					createMetaSubNodes(node, io, cb);
+				} else {
+				  cb(error);
+			  }
 		})
 	}
 	
@@ -539,9 +606,7 @@ function initNode (req, res, io, project) {
 				node.params = req.body.params;
 			else
 				node.params = {};
-				
-			if(node.params.out_field)
-				node.out_field = node.params.out_field;
+
 
 			// node creation can also include settings for running node 
 			if(req.body.settings)
@@ -561,80 +626,64 @@ function initNode (req, res, io, project) {
 				node.views.data = node.views.data_static;
 			
 			runNodeScript("hello", node, req, io);
+			runNodeScript("metanodes", node, req, io);
+
+			// "out_field" overrides "_suffix" set by hello script
+			if(node.params.out_field)
+				node.out_field = node.params.out_field;
+				
+			// add output field to all records
+			if(node.out_field && node.out_field !== "") {
+				mongoquery.addFieldToCollection(node.collection, node.out_field, function(){
+					console.log(node.out_field + " added to collection");
+				});
+			}
 			
 			node._id = mongojs.ObjectId();
 			
 			// create output directory for nodes that do file output
 			if(node.type == "download" || node.type == "export" || node.type == "source" || node.type == "view") {
-				var fs = require("fs");
-				var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
-				fs.mkdir(dir, function(err) {
-					if(err) {
-						console.log("ERROR:", err);
-						io.sockets.emit("error", "Could not create node's output directory!");
-						return res.json({"error":"Could not create node's output directory!"});
-							
-					} else {
-						console.log("INIT: output directory created");
-						node.dir = dir;
-						insertNode(node, function(err) {
-							if(err) {
-								console.log(err);
-								res.json({"error": err});
-							} else {
-								console.log("node created");
-								res.json({
-									status:'node created', 
-									id:node._id, 
-									node:node,
-									collection:node.collection,
-									nodeid: node.nodeid
-								})
-							}
-						});
-					}
-				});
 
+				createNodeDirs(node, project, function(err) {
+					insertNode(node, function(err) {
+						if(err) {
+							console.log(err);
+							callback({"error": err});
+						} else {
+							console.log("node created");
+							callback({
+								status:'node created', 
+								id:node._id, 
+								node:node,
+								collection:node.collection,
+								nodeid: node.nodeid
+							})
+						}
+					});					
+				})
+
+				
 			// otherwise just insert node 
 			} else {
 				insertNode(node, function (err) {
 					if(err) {
 						console.log(err);
-						res.json({"error": err});
+						callback({"error": err});
 					} else {
+						
 						console.log("node created");
 						
-						
-						// interactive nodes are not run, so we
-						// initialize empty field for all records
-						if (node.init_fields) {
-							var setter = {};
-							for (var i = 0; i < node.init_fields.length; i++) {
-								setter[node.init_fields[i]] = "";
-							}
-							mongoquery.update(node.collection,{}, {$set: setter }, function() {
-								res.json({
-									status:'node created', 
-									id:node._id, 
-									node: node,
-									collection:node.collection, 
-									nodeid: node.nodeid
-								});
-							})  
-						} else {
-							res.json({
-								status:'node created', 
-								id:node._id, 
-								node: node, 
-								collection:node.collection,
-								nodeid: node.nodeid
-							});
-						} 
+						callback({
+							status:'node created', 
+							id:node._id, 
+							node: node, 
+							collection:node.collection,
+							nodeid: node.nodeid
+						});
+					
 					}
 				});
 			}
-			
-
 
 		} else {
 			console.log("ERROR: node not found");
@@ -642,6 +691,26 @@ function initNode (req, res, io, project) {
 	});
 }
 
+
+
+function createNodeDirs (node, project, cb) {
+	
+	var fs = require("fs");
+	var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
+	fs.mkdir(dir, function(err) {
+		if(err) {
+			console.log("ERROR:", err);
+			io.sockets.emit("error", "Could not create node's output directory!");
+			cb({"error":"Could not create node's output directory!"});
+			//return res.json({"error":"Could not create node's output directory!"});
+				
+		} else {
+			console.log("INIT: output directory created");
+			node.dir = dir;
+			cb(null);
+		}
+	});	
+}
 
 
 function initCollectionNode (req, res, io) {
@@ -747,7 +816,7 @@ exports.deleteNode = function (req, res, io) {
 
 				// if node is a transform node, then remove its output field
 				function (callback) {
-					if((node.type == "transform" || node.type == "lookup") && node.out_field != null) {
+					if(node.out_field && node.out_field !== "") {
 						var field = {};
 						var query = {};
 						field[node.out_field] = 1;

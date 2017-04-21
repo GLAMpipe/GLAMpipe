@@ -187,8 +187,9 @@ var dataTable = function (node) {
 		// if node has input/output field, then use them as visible fields
 		if(config) {
 			console.log("has config");
-			var keys = config.input_keys;
-			return keys.concat(config.output_keys);
+			var keys = config.input_keys.concat(config.output_keys);
+			keys.unshift("row");
+			return keys;
 		}
 
 		// otherwise let the user decide what to see
@@ -205,6 +206,7 @@ var dataTable = function (node) {
 				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
 			}
 		}
+		
 		if(self.keys.visible_keys.indexOf("row") === -1) {
 			self.keys.visible_keys.splice(0, 0, "row");
 			return self.keys.visible_keys;
@@ -264,10 +266,15 @@ var dataTable = function (node) {
 		for(var j = 0; j < self.node.data.docs.length; j++) {
 			//console.log(self.node.data.docs[j]);
 			html += "<tr>";
+	
 			for(var k = 0; k < visible_keys.length; k++) {
-				if(visible_keys[k] == "row") // "row" is not an actual key, just an internal row counter
-					html += "<td>" + self.getRowIndex(j) + "</td>";
-				else {
+				if(visible_keys[k] == "row") { // "row" is not an actual key, just an internal row counter
+					if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
+						html += "<td><div class='button run_single'>run <span>"+ self.getRowIndex(j) +"</span></div></td>";
+					else
+						html += "<td>" + self.getRowIndex(j) + "</td>";
+					
+				} else {
 					if(config) { 
 						if(config.output_keys.indexOf(visible_keys[k]) !== -1) {
 							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "output") + "</td>";
@@ -465,6 +472,11 @@ var dataTable = function (node) {
 		});
 	}
 
+
+	this.runSingle = function(event) {
+		var doc = self.getDocByTableClick(event);
+		self.node.runSingle(doc._id);	
+	}
 
 
 	this.renderTextInput = function (key, value) {
@@ -733,7 +745,12 @@ var dataTable = function (node) {
 		$("data-workspace").on('click','table tbody td div.edit', function(e) {
 			self.editCell(e);
 		});
-		
+
+		// run node with single document
+		$("data-workspace").on('click','table tbody td div.run_single', function(e) {
+			self.runSingle(e);
+		});
+	
 		$("#cell-display").on("click", ".save", function(e) {
 			self.saveCellEdit(e);
 		});
