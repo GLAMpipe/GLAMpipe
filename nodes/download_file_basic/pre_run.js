@@ -10,21 +10,21 @@ out.urls = [];
 if(Array.isArray(input)) {
 	for (var i = 0; i < input.length; i++) {
 		var download = {};
-		download.filename = generateFileName(input[i], input, i);	
+		download.filename = generateFileName(input[i], i);	
 		out.console.log(download.filename);	
 		download.url = context.base_url + input[i];
 		out.urls.push(download); 
 	}
 } else {
 	var download = {};
-	download.filename = generateFileName();
+	download.filename = generateFileName(input);
 	download.url = context.base_url + input;
 	out.urls.push(download);
 }
 
 
 
-function generateFileName (url, input, index) {
+function generateFileName (url, index) {
 
 	var filename = "";
 

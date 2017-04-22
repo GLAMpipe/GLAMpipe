@@ -15,13 +15,10 @@ exports.loop = function (node, sandbox, onDoc) {
 		console.log("NODE: single doc")
 			
 		mongoquery.findOneById (node.req.params.doc, node.collection, function (doc) {
-
-		if(doc) {
-				
+			if(doc) {
 				sandbox.context.doc = doc;
-				
+				sandbox.context.doc_count = 1;
 				// call document processing function
-				console.log("CALLING onDoc");
 				onDoc(doc, sandbox, function processed () {
 					console.log("sandbox.out:" + sandbox.out);
 					if(sandbox.out.setter != null) {
@@ -31,14 +28,17 @@ exports.loop = function (node, sandbox, onDoc) {
 						setter[node.out_field] = sandbox.out.value;
 					}
 					
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
+					if(sandbox.context.skip)
 						sandbox.finish.runInContext(sandbox);
-					});
+					else {
+						mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
+							sandbox.finish.runInContext(sandbox);
+						});
+					}
 				});	
 			}		
 		})
 
-		
 	// LOOP ALL DOCS
 	} else {
 		loop (node, sandbox, onDoc);
@@ -207,8 +207,10 @@ function loop (node, sandbox, onDoc) {
 					setter[node.out_field] = sandbox.out.value;
 				}
 				//console.log("setter:", setter);
-				
-				mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+				if(sandbox.context.skip)
+					next();
+				else
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 			});
 
 		}, function done () {
@@ -218,11 +220,18 @@ function loop (node, sandbox, onDoc) {
 }
 
 
-// loop updates existing documents and call node asynchronously on every row of array
+// loop updates existing documents and call node asynchronously *on every row* of array
 exports.fieldLoop = function (node, sandbox, onDoc) {
 
+	var query = {};
+	// ONE DOC
+	if(node.req && node.req.params.doc) {
+		console.log("NODE: single doc")
+		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
+	}
+
 	// find everything
-	mongoquery.find2({}, node.collection, function (err, docs) {
+	mongoquery.find2(query, node.collection, function (err, docs) {
 		
 		sandbox.context.doc_count = docs.length;
 		console.log(onDoc);

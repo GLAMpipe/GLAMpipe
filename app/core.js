@@ -969,7 +969,7 @@ exports.getCollectionTableData = function (req, res) {
 		query: query,
 		limit: limit,
 		skip: skip,
-		sort: req.query.sort,
+		sort: sort,
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json({data:data}) });

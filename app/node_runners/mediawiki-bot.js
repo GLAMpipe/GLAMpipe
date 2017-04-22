@@ -8,6 +8,93 @@ var collection = require("../../app/collection.js");
 var exports = module.exports = {};
 console.log("inside bot");
 
+exports.login = function (node, sandbox, io, cb) {
+
+	var bot = require('nodemw');
+	var async = require("async");
+	fs = require('fs');
+
+	// ask bot config (username, pass etc.) from node
+	runNodeScriptInContext("login", node, sandbox, io);
+	var client = new bot(sandbox.out.botconfig);
+	//console.log(sandbox.context.node);
+	console.log(sandbox.out.botconfig);
+
+	client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
+		
+		if(err) {
+			io.sockets.emit("error", "Login failed!");
+			cb(err);
+		} else {
+            sandbox.client = client;
+            cb(null);
+        }
+    })
+
+}
+
+exports.uploadFile = function (doc, sandbox, next) {
+
+    sandbox.context.doc = doc;
+    sandbox.context.count++;
+    sandbox.context.data = null;
+    sandbox.context.error = null;
+    sandbox.context.skip = null;
+    
+    //runNodeScriptInContext("pre_run", node, sandbox, io);
+    sandbox.pre_run.runInContext(sandbox);
+    if(sandbox.context.skip) {
+        console.log("skip!!!");
+        next();
+    } else {
+        
+        console.log("GETTING:",sandbox.out.title);
+        if(!sandbox.out.title) {
+            next();
+        } else {
+            // get revisions (to see if page exists)
+            sandbox.client.getArticle('File:' +sandbox.out.title, function (err, d) {
+                if(err)
+                    console.log(err);
+                if(d != null) {
+                    io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
+                    console.log("CONTENT:", d);
+                    return next();
+
+                } else {
+                    console.log("sandbox.out.filename: "+ sandbox.out.filename);
+                    fs.readFile(sandbox.out.filename, function (err,data) {
+                        if (err) {
+                            console.log("file not found:", err);
+                            io.sockets.emit("error", err);
+                            return next();	// skip if file not found
+                        } 
+                        // upload file
+                        sandbox.client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
+                            if(err) {
+                                io.sockets.emit("error", err);
+                            } else {
+                                // upload wikitext
+                                var content = sandbox.out.wikitext;
+                                console.log("STARTING TO EDIT", sandbox.out.title);
+                                console.log("******REAL URL", data.imageinfo.canonicaltitle);
+                                sandbox.client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
+                                    sandbox.context.error = err;
+                                    sandbox.context.data = data;
+                                    sandbox.run.runInContext(sandbox);
+                                    next();
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    }
+}
+
+
+
 exports.uploadFileWithWikitext = function (node, sandbox, io) {
 
 	var bot = require('nodemw');

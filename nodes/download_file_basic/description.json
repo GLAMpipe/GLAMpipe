@@ -22,17 +22,11 @@
             "context.in_field = context.node.params.in_field; ",
             "    /* lets make counter for succesful downloads */",
             "context.node.download_counter = 0; ",
-            "out.say('progress', 'I have ' + context.doc_count + ' files to download!'); "
+            "out.say('progress', 'Starting to download!'); "
         ],
                 
         "finish":"out.say('finish', '<h2>Downloaded '+context.node.download_counter+' files!</h2>');"
     },
     
-    "views": {
-                    
-        "settings": [
-                    "<label>Dry run (does not download, just shows the file names)</label>",
-					"<input class='node-settings' type='checkbox' name='dry_run' checked='checked' />"
-                    ]
-    }
+    "views": {}
 }

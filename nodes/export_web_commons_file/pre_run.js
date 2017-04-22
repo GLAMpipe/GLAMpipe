@@ -27,10 +27,13 @@ if(context.get(context.doc, context.node.params.out_field) != "" ) {
         
     // remove extension because upload adds it
     var title = context.doc[context.node.params.title];
+    if(Array.isArray(title))
+        title = title[0];
+        
     if(title) {
-    title = title.replace(".jpg","");
-    title = title.replace(".tif","");
-}
+       // title = title.replace(".jpg","");
+      //  title = title.replace(".tif","");
+    }
     
     if(Array.isArray(context.doc[context.node.params.location]))        
 		out.filename = context.doc[context.node.params.location][0]

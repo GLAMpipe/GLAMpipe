@@ -94,8 +94,6 @@ exports.runNode = function (node, io) {
 				var settings = nodes[count].settings;
 				count++;
 				
-				
-				
 				// POST
 				 var options = {
 					url: url,
@@ -341,10 +339,16 @@ exports.runNode = function (node, io) {
 						break;
 						
 						case "mediawiki_bot":
-						
-							console.log("trying wikibot");
 							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
-							mv_bot.uploadFileWithWikitext(node, sandbox, io);
+							mv_bot.login(node, sandbox, io, function(error) {
+								if(error)
+									sandbox.out.say("finish","login failed");
+								else {
+									console.log("LOGIN GOOD");
+									asyncLoop.loop(node, sandbox, mv_bot.uploadFile);
+								}
+							});
+							//mv_bot.uploadFileWithWikitext(node, sandbox, io);
 
 						break;
 						

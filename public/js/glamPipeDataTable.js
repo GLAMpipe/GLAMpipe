@@ -270,7 +270,7 @@ var dataTable = function (node) {
 			for(var k = 0; k < visible_keys.length; k++) {
 				if(visible_keys[k] == "row") { // "row" is not an actual key, just an internal row counter
 					if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-						html += "<td><div class='button run_single'>run <span>"+ self.getRowIndex(j) +"</span></div></td>";
+						html += "<td><div data-id='"+self.node.data.docs[j]._id+"' class='button run_single'>run <span>"+ self.getRowIndex(j) +"</span></div></td>";
 					else
 						html += "<td>" + self.getRowIndex(j) + "</td>";
 					
@@ -474,8 +474,15 @@ var dataTable = function (node) {
 
 
 	this.runSingle = function(event) {
-		var doc = self.getDocByTableClick(event);
-		self.node.runSingle(doc._id);	
+        var doc_id = $(event.target).data("id");
+        if(typeof doc_id === "undefined")
+            doc_id = $(event.target).parent().data("id");
+        
+		//var doc = self.getDocByTableClick(event);
+        if(typeof doc_id === "undefined")
+            alert("No doc id found");
+        else
+            self.node.runSingle(doc_id);	
 	}
 
 
