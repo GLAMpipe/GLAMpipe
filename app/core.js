@@ -5,6 +5,7 @@ var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
 var mongoquery 	= require("../app/mongo-query.js");
+var buildquery 	= require("../app/query-builder.js");
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -49,15 +50,7 @@ exports.initDB = function (callback) {
 
 exports.createProjectsDir = function (dataPath, callback) {
 	fs = require('fs');
-
-	// if we are not running on OPENSHIFT
-	if (typeof process.env.OPENSHIFT_DATA_DIR === "undefined") {
-		// then use datapath from "mp_settings" collection
-		//dataPath = "/glampipe";
-	// else use OPENSHIFT data dir
-	} else 
-		dataPath = process.env.OPENSHIFT_DATA_DIR;
-		
+	
 	// create "projects" directory
 	fs.mkdir(path.join(dataPath, "projects"), function(err) {
 		if(err) {
@@ -114,9 +107,6 @@ exports.initNodes = function (nodePath, io, callback) {
 }
 
 
-
-
-
 exports.downloadNodes = function (io, cb) {
 
 	var dataPath = global.config.dataPath;
@@ -148,6 +138,7 @@ exports.downloadNodes = function (io, cb) {
 		}
 	})
 }
+
 
 exports.sendErrorPage = function (res, error) {
 	fs = require('fs');
@@ -187,9 +178,10 @@ exports.setDataPath = function (params, glampipe, res) {
 };
 
 
-exports.createProject = function (title, res) {
+exports.createProject = function (req, res) {
 	
-	var dirs = ["download", "export", "source"];
+    var title = req.body.title
+	var dirs = ["download", "export", "source", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
@@ -212,10 +204,10 @@ exports.createProject = function (title, res) {
 		for(var i = 0; i < dirs.length; i++) {
 			fs.mkdirSync(path.join(projectPath, dirs[i]));
 		} 
-		// update project count and create project
+		// update project count and create project. Project count is *permanent* counter
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(err, meta) {
-				var collectionName = title_dir.substring(0,30).toLowerCase(); // limit 30 chars
+				var collectionName = title_dir.substring(0,60).toLowerCase(); // limit 30 chars
 				collectionName = collectionName.replace(/ /g,"_");
 				var project = {
 					"title": title,
@@ -223,8 +215,14 @@ exports.createProject = function (title, res) {
 					"prefix": "p" + meta.project_count + "_" + collectionName ,
 					"collection_count": 0,
 					"node_count":0,
-					"schemas": []
+					"schemas": [],
+                    "owner": "" 
 				};
+                
+                // mark the owner
+                if(req.user && req.user.local && req.user.local.email)
+                    project.owner = req.user.local.email;
+                
 				mongoquery.insertProject (project, function(err, data) {
 					console.log("project \"" + title + "\" created!");
 					res.json({"status": "project created", "project": data});
@@ -254,7 +252,7 @@ exports.deleteProject = function (doc_id, res) {
 		// if project has collections then remove those first
 		
 		// then remove project document itself
-		mongoquery.remove(doc_id, "mp_projects", function(data) {
+		mongoquery.remove(doc_id, "mp_projects", function(err, data) {
 			res.json(data);
 		});
 		
@@ -282,13 +280,6 @@ exports.getProject = function (doc_id, res) {
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) { res.json(data) });
 }
 
-exports.addUser = function (req, cb) {
-    var user = {"username": req.body.username, "password": req.body.password};
-    mongoquery.insert ("users", user, function(err, data) {
-        console.log("user \"" + req.body.username + "\" created!");
-        cb({"status": "ok"});
-    });
-}
 
 exports.getNodes = function (res) {
 	//mongoquery.find({}, "nodes", function(data) { res.json(data) });
@@ -343,20 +334,21 @@ exports.runNode = function (req, io, res) {
 	console.log('Running node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(req.params.id)}, "mp_projects", function(err, project) {
-		if(!project) {
+	exports.getNode(req.params.id, function(err, node) {
+		if(err) {
 			console.log("node not found");
 			io.sockets.emit("error", "node not found");
 			return;
 		}
-		var index = indexByKeyValue(project.nodes, "_id", req.params.id);
-		var node = project.nodes[index];
+		
 		node.settings = req.body;
-		node.project = project._id;
-		node.project_dir = project.dir;
-
+		node.req = req;	
+		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
+		// from it without affecting settings that are used by node
+        var copy = Object.assign({}, node.settings) 
+		
 		// save node settings TODO: set callback
-		mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
 
 			console.log("\n>>>>>>>>>>>>>>>>>>>>>> NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);
@@ -381,10 +373,21 @@ exports.runNode = function (req, io, res) {
 	})
 }
 
+exports.getNode = function (node_id, cb) {
 
-
-
-
+	mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
+		if(!project) {
+			return cb("not found", null);
+		}
+		var index = indexByKeyValue(project.nodes, "_id", node_id);
+		var node = project.nodes[index];
+		node.project = project._id;
+		node.project_title = project.title;
+		node.project_dir = project.dir;
+		cb(null, node);	
+	})
+	
+}
 
 
 
@@ -451,9 +454,6 @@ exports.uploadFile = function (req, res ) {
 
 
 
-
-
-
 /**
  * updates nodes visible fields
 */ 
@@ -466,16 +466,112 @@ exports.setVisibleFields = function (nodeid, params, res) {
 	);
 }
 
-exports.createNode = function (nodeRequest, res, io) {
+exports.createNode = function (req, res, io) {
+	
+	if(req.query.type && req.query.type === "collection") {
+		exports.createCollectionNode(req, res, io);
+	} else {
 
-	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(project) {
-		nodeRequest.node_count = project.node_count;
-		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { node_count: 1} }, function() {
-			initNode(nodeRequest, res, io, project);
+		mongoquery.findOneById(req.params.project, "mp_projects", function(project) {
+			req.node_count = project.node_count;
+			mongoquery.update("mp_projects",{_id:mongojs.ObjectId(req.params.project)}, {$inc: { node_count: 1} }, function() {
+				initNode(req, io, project, function(data) {
+					res.json(data);
+				});
+			});
 		});
+	}
+}
+
+
+
+
+
+exports.createCollectionNode = function (req, res, io) {
+
+	mongoquery.findOneById(req.params.project, "mp_projects", function(data) {
+		
+		// make sure that params exist even if they were not given
+		if(req.body.params == null)
+			req.body.params = {};
+			
+		// cleanup name
+		var collectionName = "";
+		if(req.body.params.title)
+			collectionName = req.body.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+		
+		//						  project count
+		var collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
+		req.body.params.collection = collection;
+		req.node_count = data.node_count;
+		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(req.params.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [collection] } }, function() {
+			mongoquery.createCollection(collection, function () {
+				initCollectionNode(req, res, io);
+			});
+		})
 	});
 }
 
+
+
+function createMetaSubNodes (node, io, cb) {
+	
+	//var nodes = [
+		//{
+			//collection: node.collection,
+			//nodeid: "process_field_split",
+			//params: {
+				//in_field: node.params.in_field,
+				//out_field:"meta1_split"
+				//}
+		//},
+		//{
+			//collection: node.collection,
+			//nodeid: "process_field_count_chars",
+			//params: {
+				//in_field:"meta1_split",
+				//out_field:"meta1_count"
+				//}
+		//}
+	//]
+	
+	var nodes = node.metaparams;
+	
+	var nodelist = [];
+	//nodes.reverse();
+
+	// create nodes
+	require("async").eachSeries(nodes, function iterator (nodeitem, next) {
+		console.log("CREATING SUBNODE");
+		var req = {params:{}, body:{}};
+		req.body.params = nodeitem.params;
+		req.body.collection = nodeitem.collection;
+		req.params.project = node.project;
+		req.params.nodeid = nodeitem.nodeid;
+		req.node_count = node.number;
+		req.node_count++;
+		
+		mongoquery.findOneById(node.project, "mp_projects", function(project) {
+			mongoquery.update("mp_projects",{_id:mongojs.ObjectId(node.project)}, {$inc: { node_count: 1} }, function() {
+				initNode(req, io, project, function(data) {
+					nodelist.push(data.id);
+
+					console.log("data.id:" + data.id)
+					next();
+				});
+			});
+		});		
+	}, function done () {
+		console.log("DONE ASYNC CREATING OF SUBNODES")
+		// write node ids to metanode
+		mongoquery.editProjectNode(node._id, {"metanodes":nodelist}, function() {
+			cb();
+		})
+		
+	});
+	
+
+}
 
 /**
  * Create default project node
@@ -483,44 +579,45 @@ exports.createNode = function (nodeRequest, res, io) {
  * - saves result to project record (under "nodes")
  */
  
-function initNode (nodeRequest, res, io, project) {
+function initNode (req, io, project, callback) {
 
 	console.log("New node id:", mongojs.ObjectId());
-	console.log("nodeparams:", nodeRequest);
+	console.log("nodeparams:", req.params);
 	
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
 		console.log("inserting");
-		console.log(node.collection);
 		
 		mongoquery.update("mp_projects",
 			{_id:mongojs.ObjectId(node.project)},
 			{$push:{nodes: node}},
 			function(error) {
-				cb(error);
+				// if node is metanode, then we must continue to subnode creation
+				if (node.type == "meta") {
+					createMetaSubNodes(node, io, cb);
+				} else {
+				  cb(error);
+			  }
 		})
 	}
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
+	mongoquery.findOne({"nodeid":req.params.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
-			node.input_node = nodeRequest.input_node;
-			node.project = nodeRequest.project
-			node.collection = nodeRequest.collection;
-			node.number = nodeRequest.node_count;
+			node.project = req.params.project
+			node.collection = req.body.collection;
+			node.number = req.node_count;
 			node.dirsuffix = ""; // node can set this in "hello" script
 			
-			if(nodeRequest.params)
-				node.params = nodeRequest.params;
+			if(req.body.params)
+				node.params = req.body.params;
 			else
 				node.params = {};
-				
-			if(node.params.out_field)
-				node.out_field = node.params.out_field;
+
 
 			// node creation can also include settings for running node 
-			if(nodeRequest.settings)
-				node.settings = nodeRequest.settings;
+			if(req.body.settings)
+				node.settings = req.body.settings;
 
 
 			// settings html is on client side and therefore it is not aware of node content
@@ -529,87 +626,71 @@ function initNode (nodeRequest, res, io, project) {
 				node.views.settings = node.views.settings.replace("[[params]]", "var params = " + JSON.stringify(node.params) + ";\n");
 			}
 
-			node.params.collection = nodeRequest.collection;
+			node.params.collection = node.collection;
 			
 			// copy static data view to project node's view if defined
 			if(typeof node.views.data_static !== "undefined")
 				node.views.data = node.views.data_static;
 			
-			runNodeScript("hello", node, nodeRequest, io);
+			runNodeScript("hello", node, req, io);
+			runNodeScript("metanodes", node, req, io);
+
+			// "out_field" overrides "_suffix" set by hello script
+			if(node.params.out_field)
+				node.out_field = node.params.out_field;
+				
+			// add output field to all records
+			if(node.out_field && node.out_field !== "") {
+				mongoquery.addFieldToCollection(node.collection, node.out_field, function(){
+					console.log(node.out_field + " added to collection");
+				});
+			}
 			
 			node._id = mongojs.ObjectId();
 			
 			// create output directory for nodes that do file output
-			if(node.type == "download" || node.type == "export" || node.type == "source") {
-				var fs = require("fs");
-				var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
-				fs.mkdir(dir, function(err) {
-					if(err) {
-						console.log("ERROR:", err);
-						io.sockets.emit("error", "Could not create node's output directory!");
-						return res.json({"error":"Could not create node's output directory!"});
-							
-					} else {
-						console.log("INIT: output directory created");
-						node.dir = dir;
-						insertNode(node, function(err) {
-							if(err) {
-								console.log(err);
-								res.json({"error": err});
-							} else {
-								console.log("node created");
-								res.json({
-									status:'node created', 
-									id:node._id, 
-									node:node,
-									collection:node.collection,
-									nodeid: node.nodeid
-								})
-							}
-						});
-					}
-				});
+			if(node.type == "download" || node.type == "export" || node.type == "source" || node.type == "view") {
 
+				createNodeDirs(node, project, function(err) {
+					insertNode(node, function(err) {
+						if(err) {
+							console.log(err);
+							callback({"error": err});
+						} else {
+							console.log("node created");
+							callback({
+								status:'node created', 
+								id:node._id, 
+								node:node,
+								collection:node.collection,
+								nodeid: node.nodeid
+							})
+						}
+					});					
+				})
+
+				
 			// otherwise just insert node 
 			} else {
 				insertNode(node, function (err) {
 					if(err) {
 						console.log(err);
-						res.json({"error": err});
+						callback({"error": err});
 					} else {
+						
 						console.log("node created");
 						
-						
-						// interactive nodes are not run, so we
-						// initialize empty field for all records
-						if (node.init_fields) {
-							var setter = {};
-							for (var i = 0; i < node.init_fields.length; i++) {
-								setter[node.init_fields[i]] = "";
-							}
-							mongoquery.update(node.collection,{}, {$set: setter }, function() {
-								res.json({
-									status:'node created', 
-									id:node._id, 
-									node: node,
-									collection:node.collection, 
-									nodeid: node.nodeid
-								});
-							})  
-						} else {
-							res.json({
-								status:'node created', 
-								id:node._id, 
-								node: node, 
-								collection:node.collection,
-								nodeid: node.nodeid
-							});
-						} 
+						callback({
+							status:'node created', 
+							id:node._id, 
+							node: node, 
+							collection:node.collection,
+							nodeid: node.nodeid
+						});
+					
 					}
 				});
 			}
-			
-
 
 		} else {
 			console.log("ERROR: node not found");
@@ -619,56 +700,45 @@ function initNode (nodeRequest, res, io, project) {
 
 
 
-/**
- * Create source project node
- * - adds params defined by user to the stock node
- * - creates collection name
- * - saves result to project record (under "nodes")
- */
-exports.createCollectionNode = function (nodeRequest, res, io) {
-
-	mongoquery.findOneById(nodeRequest.project, "mp_projects", function(data) {
-		
-		// make sure that params exist even if they were not given
-		if(nodeRequest.params == null)
-			nodeRequest.params = {};
-			
-		// cleanup name
-		var collectionName = "";
-		if(nodeRequest.params.title)
-			collectionName = nodeRequest.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
-		
-		//						  project count
-		nodeRequest.collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;
-		nodeRequest.params.collection = nodeRequest.collection;
-		nodeRequest.node_count = data.node_count;
-		mongoquery.update("mp_projects",{_id:mongojs.ObjectId(nodeRequest.project)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [nodeRequest.collection] } }, function() {
-			mongoquery.createCollection(nodeRequest.collection, function () {
-				initCollectionNode(nodeRequest, res, io);
-			});
-		})
-	});
+function createNodeDirs (node, project, cb) {
+	
+	var fs = require("fs");
+	var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
+	fs.mkdir(dir, function(err) {
+		if(err) {
+			console.log("ERROR:", err);
+			io.sockets.emit("error", "Could not create node's output directory!");
+			cb({"error":"Could not create node's output directory!"});
+			//return res.json({"error":"Could not create node's output directory!"});
+				
+		} else {
+			console.log("INIT: output directory created");
+			node.dir = dir;
+			cb(null);
+		}
+	});	
 }
 
-function initCollectionNode (nodeRequest, res, io) {
+
+function initCollectionNode (req, res, io) {
 	
 	// copy node to project with its settings
-	mongoquery.findOne({"nodeid":nodeRequest.nodeid}, "mp_nodes", function(err, node) {
+	mongoquery.findOne({"nodeid":req.params.nodeid}, "mp_nodes", function(err, node) {
 		if(node) {
 			node.input_node = "";
-			node.project = nodeRequest.project;
-			if(nodeRequest.params)
-				node.params = nodeRequest.params;
+			node.project = req.params.project;
+			if(req.body.params)
+				node.params = req.body.params;
 			else
 				node.params = {};
 				
 			if(!node.params.title)
 				node.params.title = "";
 				
-			node.collection = nodeRequest.collection;
-			node.number = nodeRequest.node_count;
+			node.collection = req.body.params.collection;
+			node.number = req.node_count;
 			
-			runNodeScript("hello", node, nodeRequest, io);
+			runNodeScript("hello", node, req, io);
 			
 			node._id = mongojs.ObjectId();
 			mongoquery.update("mp_projects",
@@ -690,8 +760,8 @@ function initCollectionNode (nodeRequest, res, io) {
 
 			})
 		} else {
-			console.log("node " + nodeRequest.nodeid + " not found!");
-			res.json({"error": "node " + nodeRequest.nodeid + " not found"})
+			console.log("node " + req.nodeid + " not found!");
+			res.json({"error": "node " + req.nodeid + " not found"})
 		}
 	});
 }
@@ -702,11 +772,11 @@ function initCollectionNode (nodeRequest, res, io) {
  * - if collection node, then also removes collection
  * - if source node, then also removes node's data
  */
-exports.deleteNode = function (params, res, io) {
+exports.deleteNode = function (req, res, io) {
 
-	mongoquery.findOne({"_id":mongojs.ObjectId(params.project)}, "mp_projects", function(err, project) {
+	mongoquery.findOne({"_id":mongojs.ObjectId(req.params.project)}, "mp_projects", function(err, project) {
 		if(project) {
-			var index = indexByKeyValue(project.nodes, "_id", params.node);
+			var index = indexByKeyValue(project.nodes, "_id", req.params.node);
 			var node = project.nodes[index];
 			// check that there is no nodes that depends on this node
 			if(inputNode(node, project.nodes)) {
@@ -753,7 +823,7 @@ exports.deleteNode = function (params, res, io) {
 
 				// if node is a transform node, then remove its output field
 				function (callback) {
-					if((node.type == "transform" || node.type == "lookup") && node.out_field != null) {
+					if(node.out_field && node.out_field !== "") {
 						var field = {};
 						var query = {};
 						field[node.out_field] = 1;
@@ -800,8 +870,8 @@ exports.deleteNode = function (params, res, io) {
 					res.json({"error": err.message});
 				} else {
 					mongoquery.update("mp_projects",
-						{_id:mongojs.ObjectId(params.project)},
-						{$pull:{nodes: {_id:mongojs.ObjectId(params.node)}}},
+						{_id:mongojs.ObjectId(req.params.project)},
+						{$pull:{nodes: {_id:mongojs.ObjectId(req.params.node)}}},
 						function() {
 							res.json({"status": "node deleted"});
 							
@@ -851,7 +921,7 @@ exports.getCollection = function (req, query, res) {
 		reverse = true;
 
 	var params = {
-		collection: req.params.id,
+		collection: req.params.collection,
 		query: query,
 		limit: limit,
 		skip: skip,
@@ -860,51 +930,12 @@ exports.getCollection = function (req, query, res) {
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
 }
-// AND search
+
+
+
 exports.collectionSearch = function (req, res) {
 
-	var limit = parseInt(req.query.limit);
-	if (limit < 0 || isNaN(limit))
-		limit = 15;
-
-	var skip = parseInt(req.query.skip);
-	if (skip <= 0 || isNaN(skip))
-		skip = 0;
-
-	var sort = req.query.sort
-	if(sort === 'undefined')  // by default sort by _id (mongoid)
-		sort = "_id";
-
-	var reverse = false
-	var r = parseInt(req.query.reverse);
-	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
-		reverse = true;
-
-
-
-	var s = ["skip", "limit", "sort", "reverse"];
-	var query = {};
-	for (var param in req.query) {
-		console.log(param);
-		if(!s.includes(param)) {
-			if(Array.isArray(req.query[param])) {
-				query[param] = {$all:req.query[param]};
-			} else {
-				query[param] = req.query[param];
-			}
-		}
-	}
-	console.log(query);
-	//query[req.query.field] = {$regex:req.query.value, $options: 'i'};
-
-	var params = {
-		collection: req.params.id,
-		query: query,
-		limit: limit,
-		skip: skip,
-		sort: req.query.sort,
-		reverse: reverse
-	}
+	var params = buildquery.search(req);
 
 	mongoquery.findAll(params, function (result) {
 		res.send({data:result});
@@ -912,7 +943,7 @@ exports.collectionSearch = function (req, res) {
 	
 }
 
-
+// TODO: update this
 /**
  * Get paged collection data for DataTable
  * - gives records between skip and skip + limit
@@ -941,11 +972,11 @@ exports.getCollectionTableData = function (req, res) {
 		reverse = true;
 
 	var params = {
-		collection: req.params.id,
+		collection: req.params.collection,
 		query: query,
 		limit: limit,
 		skip: skip,
-		sort: req.query.sort,
+		sort: sort,
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json({data:data}) });
@@ -966,7 +997,10 @@ function createSearchQuery (req) {
 			query.$and = ands;
 		// otherwise create query for one field
 		} else {
-			query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+			if(req.query.query_values[0] === "")
+				query[req.query.query_fields[0]] =  "";
+			else
+				query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
 		}
 	}
 	return query;
@@ -986,8 +1020,8 @@ exports.getCollectionByField = function (req, res) {
 exports.getDocumentById = function (req, res) {
 
 	console.log(req.params.doc);
-	console.log(req.params.id);
-	mongoquery.findOneById(req.params.doc, req.params.id, function(result) {
+	console.log(req.params.collection);
+	mongoquery.findOneById(req.params.doc, req.params.collection, function(result) {
 		console.log(result);
 		res.json({data:result});
 	})
@@ -999,7 +1033,17 @@ exports.getDocumentById = function (req, res) {
 exports.getCollectionCount = function (req, cb) {
 	
 	var query = createSearchQuery(req);
-	mongoquery.countDocs(req.params.id, query, function (result) {
+	var params = buildquery.search(req);
+	console.log(query)
+	mongoquery.countDocs(req.params.collection, params.query, function (result) {
+		cb({count:result});
+	});
+}
+
+exports.getCollectionCountRegExp = function (req, cb) {
+	
+	var query = createSearchQuery(req);
+	mongoquery.countDocs(req.params.collection, query, function (result) {
 		cb({count:result});
 	});
 }
@@ -1032,14 +1076,38 @@ exports.getCollectionFacetTest = function (req, cb) {
 
 
 
-exports.editCollection = function (collection_id, req, callback) {
+exports.editCollection = function (req, callback) {
 
+	var collection_id = req.params.collection
 	console.log("editing", collection_id);
 	if(!req.body.doc_id)
 		return callback({error:"doc_id is missing!"});
 		
 	try {
 		var doc_id = mongojs.ObjectId(req.body.doc_id)
+	} catch (e) {
+		return callback({error:"doc_id is invalid! It must be a valid MongoDB id."});
+	}
+	
+	var setter = {};
+	setter[req.body.field] = req.body.value;
+	console.log("setter:", setter);
+	
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$set:setter}, function(result) {
+		callback(result); 
+	});
+}
+
+
+exports.editCollection2 = function (req, callback) {
+
+	var collection_id = req.params.collection
+	console.log("editing", collection_id);
+	if(!req.params.doc)
+		return callback({error:"doc_id is missing!"});
+		
+	try {
+		var doc_id = mongojs.ObjectId(req.params.doc)
 	} catch (e) {
 		return callback({error:"doc_id is invalid! It must be a valid MongoDB id."});
 	}
@@ -1119,7 +1187,9 @@ exports.getNodeLog = function (req, cb) {
 	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
 		if(err)
 			return cb();
+			
 		result.forEach(function(row, i) {
+			delete row.settings.password; // let's not send passwords...
 			if(row.ts) {
 				var date = new Date(row.ts);
 				var y =  date.getUTCFullYear();

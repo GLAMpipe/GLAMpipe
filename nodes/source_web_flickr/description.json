@@ -2,10 +2,10 @@
     "nodeid": "source_web_flickr",
     "type": "source",
     "subtype": "web",
-    "title": "Flickr",
+    "title": "Flickr: import",
     "status": "usable",
     "usage":"",
-    "description": "Import image metadata from Flickr (requires an <a target=\"_blank\" href=\"https://www.flickr.com/services/api/misc.api_keys.html\">API key</a>)",
+    "description": "Import image metadata from Flickr",
     
     "scripts": {
         "hello": "out.say('news', 'You added a Flickr import node'); ",
@@ -15,18 +15,6 @@
     
     "views": {
 
-        "params":
-        [
-            "<h1>FLICKR</h1>",
-            "<label>title</label>",
-            "<input type=\"text\" name=\"title\" id=\"title\"/>",
-            "<label>Album ID</label>",
-            "<input type=\"text\" name=\"album\" id=\"album\" required />"
-        ],
-        "settings":
-        [
-            "<label>Flickr API key </label>",
-            "<input class=\"node-settings\" type=\"text\" name=\"apikey\" id=\"apikey\" />"
-        ]
+        "params": "no params"
     }
 }

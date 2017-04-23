@@ -1,0 +1,26 @@
+{
+    "nodeid": "export_commons_file",
+    "title": "WM Commons: upload files",
+    "type": "export",
+    "subtype":"web",
+    "subsubtype": "mediawiki_bot",
+    "status": "rubbish",
+    "description": "Upload files to <a href=\"https://commons.wikimedia.org/wiki/Main_Page\" target=\"_blank\">wikimedia commons</a>",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a commons node for uploading files'); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted commons node!'); ",
+        
+        "init": "out.say('progress', 'Starting to upload URLs...'); context.counter = 0; ",
+            
+        "finish":"out.say('finish', 'Files uploaded'); "
+    },
+    
+    "views": {}
+
+}

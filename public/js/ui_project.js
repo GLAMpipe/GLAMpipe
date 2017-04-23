@@ -3,6 +3,7 @@ $( document ).ready(function() {
 	
 	var gp = new glamPipe();
 	gp.loadNodes();
+	gp.getLoginStatus("#login");
 	gp.loadProject("#projectList");
 
 	// hide node settings panel on start
@@ -124,10 +125,8 @@ $( document ).ready(function() {
 		}
 	});
 
-
-
     // websocket stuff
-    var socket = io.connect('http://localhost');
+    var socket = io.connect();
     var progressDisplay = $("#node-progress");
     var finishDisplay = $("#node-finished");
     var genericDisplay = $("#generic-messages");
@@ -172,8 +171,8 @@ $( document ).ready(function() {
     socket.on('finish', function (data) {
 
 		
-        finishDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
-        websockPopup(finishDisplay, "Node done!");
+        progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+       // websockPopup(finishDisplay, "Node done!");
         $(".settings").removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();

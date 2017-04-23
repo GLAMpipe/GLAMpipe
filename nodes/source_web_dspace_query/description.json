@@ -2,7 +2,7 @@
     "nodeid": "source_web_dspace_query",
     "type": "source",
     "subtype": "web",
-    "title": "DSpace query",
+    "title": "DSpace 6: query import",
     "status": "usable",
     "usage":"",
     "description": "Import metadata from DSpace.",
@@ -10,7 +10,7 @@
     "scripts": {
         "hello": "out.say('news', 'You added a DSpace import node'); ",
         "bye": "out.say('finish', 'Bye!'); ",
-        "finish":"out.say('finish', 'Data fetched to' + context.node.params.collection); "
+        "finish":"out.say('finish', 'Fetched ' + context.vars.record_counter + ' items'); "
     },
     
     "views": {

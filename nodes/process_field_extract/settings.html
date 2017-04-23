@@ -1,7 +1,13 @@
 <div class="box-noflex">
-	<label>read from this sequence</label>
-	<input class="node-settings" name="from"/>
+	
+	<select id="process_field_extract_pre">
+		<option>year (four digits)</option>
+		<option>person names</option>
+	</select>
+	
+	<label>regular expression (add "/" YOUR REGEXP "/g" for global match</label>
+	<input class="node-settings long_input" name="regexp"/>
 
-	<label>read until this or these characters appear</label>
-	<input class="node-settings" name="end"/>
+	<input type="checkbox" class="node-settings" name="global"/>
+	<label>global</label>
 </div>

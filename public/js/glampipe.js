@@ -1,4 +1,39 @@
 
+
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
+$.put = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'PUT',
+    success: callback,
+    data: data,
+    contentType: type
+  });
+}
+
 var glamPipe = function () {
 	var self = this;
 	this.currentProject = "";
@@ -7,6 +42,8 @@ var glamPipe = function () {
 	this.currentNodes = {}; // active node per collection
 
 	this.pickedCollectionId = "";
+	this.baseAPI = "/api/v1"; 
+	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
 	this.collectionSwitchDiv = "#collection-node-switch";
@@ -16,16 +53,13 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
-	this.login = function (username, password) {
-		alert(login)
-	}
-
-
 	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
-		$.getJSON("/get/project/titles", function(data) { 
+
+		$.getJSON(self.baseAPI + "/projects/titles", function(data) { 
 			$(div).empty();
 			data.sort(compare);
+			
 			for(var i = 0; i< data.length; i++) {
 				var listOption = "<div data-id=" + data[i]._id + " class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
 				listOption += "<a href='project/" + data[i]._id + "'>\n";
@@ -37,8 +71,89 @@ var glamPipe = function () {
 			}
 		})
 	}
-	
-	
+
+	this.getProjectsByUser = function (div, user) {
+		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th></tr>";
+		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
+			$(div).empty();
+			var projects = data.data;
+			for(var i = 0; i< projects.length; i++) {
+				html += "<tr><td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+
+				html += "<td>";
+				if(projects[i].nodes) {
+					
+					projects[i].nodes.forEach(function(node) {
+						if(node.type === "source")
+							html += "<div>" + node.title + "</div>";
+					})
+				}
+				html += "</td>";
+				
+				html += "<td><div>" + projects[i].collection_count + "</div></td>";
+				
+				html += "<td><div>";
+				if(projects[i].nodes) {
+					
+					projects[i].nodes.forEach(function(node) {
+						if(node.type !== "collection")
+							html += "<li>" + node.nodeid + "</li>";
+					})
+				}
+				html += "</div></td>";
+				
+				html += "<td>";
+				if(projects[i].nodes) {
+					
+					projects[i].nodes.forEach(function(node) {
+						if(node.type === "export")
+							html += "<div>" + node.title + "</div>";
+					})
+				}
+				html += "</td>";
+				
+				
+			}
+			$(div).append("</tr>" + html + "</table>");
+		})
+	}
+
+	this.getUsers = function (div) {
+		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=name", function(datal) { 
+			$(div).empty();
+			var data = datal.count;
+			for(var i = 0; i< data.length; i++) {
+				var listOption = "<div data-id=" + data[i]._id + " class='' aria-hidden='true'></div>";
+				listOption += "<a data-id='" + data[i]._id + "' href='#'>\n";
+				listOption += "<div class='listoption'>\n";
+				listOption += "<p class='listtitle'>" + data[i]._id + " <span>("+data[i].count+")</span></p>\n";
+				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
+				listOption += "</div></a>\n";
+				$(div).append(listOption);
+			}
+			console.log(data)
+		})
+	}
+
+	this.getLoginStatus = function (div, cb) {
+		$.getJSON(self.baseAPI + "/auth", function(data) { 
+			if(data.error) {
+				if(data.error === "desktop installation") {
+					$(div).empty();
+					self.desktop = true;
+				} else {
+					$(div).html("<a href='/login'>login</a>");
+					self.desktop = false;
+				}
+			} else {
+				$(div).html("<a href='/logout'>" +data.email + "</a>");
+				self.desktop = false;
+			}
+			if(cb)
+				cb(self.desktop);
+
+		})
+	}	
 	
 	this.addProject = function (projectName) {
 		if ($(".create_project #title").val().trim() == "")
@@ -46,7 +161,7 @@ var glamPipe = function () {
 		else {
 			var title = $(".create_project #title").val().trim();
 			var data = {"title": title};
-			$.post("/create/project", data, function(returnedData) {
+			$.put(self.baseAPI + "/projects", data, function(returnedData) {
 				if(!returnedData.error) {
 					console.log('created project', returnedData.project);
 					window.location.href = "/project/" + returnedData.project._id;
@@ -70,7 +185,7 @@ var glamPipe = function () {
             "Delete project": function() {
                 $( this ).dialog( "close" );
                 var params = {};
-                $.post("/delete/project/" + project_id, params, function(retData) {
+                $.delete(self.baseAPI + "/projects/" + project_id, params, function(retData) {
                     console.log('project deleted');
                     if(retData.error)
                         alert(retData.error);
@@ -103,7 +218,7 @@ var glamPipe = function () {
 		self.collections = [];
 		self.nodes = [];
 		
-		$.getJSON("/get/nodes/" + self.currentProject, function(project) { 
+		$.getJSON(self.baseAPI + "/projects/" + self.currentProject + "/nodes", function(project) { 
 			
 			if(typeof project !== "undefined") { 
 				var nodes = project.nodes;
@@ -216,9 +331,6 @@ var glamPipe = function () {
 		
 		if (obj.data("type") == "source")
 			types = ["source"]
-
-		if (obj.data("type") == "lookup")
-			types = ["lookup"]
 			
 		if (obj.data("type") == "export")
 			types = ["export", "upload"]
@@ -229,6 +341,11 @@ var glamPipe = function () {
 		if (obj.data("type") == "download")
 			types = ["download"]
 
+		if (obj.data("type") == "view")
+			types = ["view"]
+
+		if (obj.data("type") == "meta")
+			types = ["meta"]
 
 		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
 	}
@@ -237,30 +354,25 @@ var glamPipe = function () {
 
 
 	this.createNode = function (e) {
-        var data = {};
-        var params = {};
+        var data = {params:{}};
         var obj = $(e.target);
         // node array index
         var index = obj.data("index")
         var node = self.nodeRepository.getNodeByIndex(index);
         
         // check if are importing file 
-        if(node.type == "source" && node.subtype == "upload") {
+        if(node.type == "source" && node.subtype == "file") {
 			self.uploadFileAndCreateNode(obj, node);
 			return;
 		}
         
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
-            params[$(this).attr("name")] = $(this).val(); 
+            data.params[$(this).attr("name")] = $(this).val(); 
         });
         
-        data.params = params;
-        data.nodeid= node.nodeid;
-        data.project = self.currentProject;
-
         if(node.type == "collection") {
-            $.post("/create/collection/node", data, function(returnedData) {
+            $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid + "?type=collection", data, function(returnedData) {
                 console.log('created node');
                 $(".holder.params").empty();
                 // point currentCollectionSet to last collection
@@ -274,8 +386,12 @@ var glamPipe = function () {
 			else {data.collection = self.currentCollection.source.collection;
 				console.log("currentCollection on node create:", self.currentCollection.source.collection);
 				
-				$.post("/create/node", data, function(returnedData) {
+				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
 					console.log("node create:", returnedData);
+					if(returnedData.error) {
+						alert(returnedData.error);
+						return;
+					}
 					var node = new glamPipeNode(returnedData.node, self);
 					self.addProjectNode(node);
 					self.currentNodes[self.currentCollection.source.collection] = node;
@@ -296,47 +412,56 @@ var glamPipe = function () {
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
 		
-		var collection = self.currentCollection;
+		
 		var html = "";
 		html += "<collectionset>"
 		
-		html += collection.renderNode();
+		if(self.currentCollection) {
+			var collection = self.currentCollection;
+			html += collection.renderNode();
 		
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder params'></div>"
-		 
-		html += self.renderNodes(collection,["source", "lookup"]);
-		  
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Processing</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder params'></div>"
-		
-		html += self.renderNodes(collection, ["process"]);
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
+			 
+			html += self.renderNodes(collection,["source", "lookup"]);
+			  
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Processing</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
+			
+			html += self.renderNodes(collection, ["process"]);
 
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Lookups</span> <a class='add-node' data-type='lookup' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder params'></div>"
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Downloads</span> <a class='add-node' data-type='download' href='addnode.html'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
 
-		html += self.renderNodes(collection, ["lookup"]);
+			html += self.renderNodes(collection, ["download"]);
+			
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
 
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Downloads</span> <a class='add-node' data-type='download' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder params'></div>"
+			html += self.renderNodes(collection, ["export"]);
 
-		html += self.renderNodes(collection, ["download"]);
-		
-		html += "  <div class='sectiontitleblock'>"
-		html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-		html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-		html += "  </div><div class='holder params'></div>"
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
 
-		html += self.renderNodes(collection, ["export"]);
+			html += self.renderNodes(collection, ["view"]);
 
+			html += "  <div class='sectiontitleblock'>"
+			html += "	<div><span class='title sectiontitle'>Meta nodes</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
+			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "  </div><div class='holder params'></div>"
+
+			html += self.renderNodes(collection, ["meta"]);
+		}
 		html += "</collectionset>"
 		
 		
@@ -428,7 +553,7 @@ var glamPipe = function () {
 			self.pickedCollectionId = self.currentCollection.source.collection;
 		
         // fetch fields
-        $.getJSON("/get/collection/" + self.pickedCollectionId + "/fields", function(data) { 
+        $.getJSON(self.baseAPI + "/collections/" + self.pickedCollectionId + "/fields", function(data) { 
             if(data.error)
                 alert(data.error);
 
@@ -530,7 +655,7 @@ var glamPipe = function () {
             "Delete node": function() {
                 $( this ).dialog( "close" );
                 var params = {node:node_id, project:self.currentProject};
-                $.post("/delete/node/", params, function(retData) {
+                $.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
                     console.log('node deleted');
                     if(retData.error)
                         alert(retData.error);
@@ -563,7 +688,7 @@ var glamPipe = function () {
         
         // upload file 
         $.ajax({
-            url: "/upload/file",
+            url: self.baseAPI + "/upload",
             type: "POST",
             dataType: "json",
             data:  fd,
@@ -580,10 +705,9 @@ var glamPipe = function () {
                     data.params = params;
                     data.params.filename = data.filename;
                     data.params.mimetype = data.mimetype;
-                    data.nodeid = node.nodeid;
                     data.project = self.currentProject;
                     data.collection = self.currentCollection.source.collection; 
-                    $.post("/create/node", data, function(returnedData) {
+                    $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
                         console.log('created upload node');
                         self.loadProject();
                     });

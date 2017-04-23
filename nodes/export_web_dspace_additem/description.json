@@ -1,0 +1,23 @@
+{
+    "nodeid": "export_web_dspace_additem",
+    "title": "DSpace 6: create items",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_additem",
+    "status": "usable",
+    "description": "Create new items via REST API",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a DSpace node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', 'Data uploaded'); "
+    },
+    
+    "views": {}
+}

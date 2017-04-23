@@ -1,0 +1,26 @@
+{
+    "nodeid": "export_web_dspace_addfile",
+    "title": "DSpace 6: add bitstreams",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_addfile",
+    "tags":["dspace", "bitstream"],
+    "status": "rubbish",
+    "description": "Adds a new bitstream(s) to a certain item based on DSpace UUID (item must exist)",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a DSpace node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', context.success_counter + ' of '  + context.doc_count + ' files added!'); "
+
+    },
+    
+    "views": {}
+
+}

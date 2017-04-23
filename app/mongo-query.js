@@ -1,7 +1,9 @@
 
-var mongojs = require('mongojs');
-var async = require("async");
-var database = require('../config/database');
+var mongojs 	= require('mongojs');
+var async 		= require("async");
+const util 		= require('util');
+var database 	= require('../config/database');
+var buildquery 	= require("./query-builder.js");
 
 var db = mongojs(database.initDBConnect());
 
@@ -134,8 +136,6 @@ exports.countDocs = function (collectionname, query, callback) {
 			callback(count.toString());
 		}
 	});
-
-
 }
 
 
@@ -177,7 +177,7 @@ exports.insert = function (collectionname, doc, callback) {
 			console.log(err);
 			callback(err, result)
 		} else {
-			 console.log('MONGO: inserted to', collectionname);
+			// console.log('MONGO: inserted to', collectionname);
 			callback(null, result);
 		}
 	}); 
@@ -229,6 +229,14 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+exports.addFieldToCollection = function (collectionname, field, cb) {
+	var add = {};
+	add[field] = null;
+	var update = {$set:add}
+	exports.update(collectionname, {}, update, cb);
+	
+}
+
 // *********************************************************************
 // ******************************* DELETE ******************************
 // *********************************************************************
@@ -243,7 +251,7 @@ exports.remove = function (doc_id, collectionname, callback) {
 			callback({'error':err})
 		} else {
 			console.log('Removed');
-			callback({status:'ok'});
+			callback(null, {status:'ok'});
 		}
 	}); 
 }
@@ -351,7 +359,7 @@ exports.group = function (node, array, callback) {
 	var project2 = { count:1, ids: 1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
 
-
+	// we fist try group with array
 	if(array) {
 		collection.aggregate([
 			{$project: project},
@@ -362,9 +370,27 @@ exports.group = function (node, array, callback) {
 			// use $out for mongo 2.6 and newer
 			],
 			function (err, data) {
-				if(err)
-					console.log(err);
-				callback(data);
+				if(err) {
+					
+					// did not work, try with non-array
+					console.log("trying witn non-array");
+					collection.aggregate([
+						// {"$match": {"author":{"$ne": ""}} },
+						{$project: project},
+						{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
+						{$project: project2 },
+						{$sort: { count: -1 }}
+						// use $out for mongo 2.6 and newer
+						],
+						function (err, data) {
+							if(err)
+								console.log(err);
+							callback(data);
+						}
+					)
+				} else {
+					callback(data);
+				}
 			}
 		)
 	} else {
@@ -390,12 +416,17 @@ exports.group = function (node, array, callback) {
 exports.facet = function (req, callback) {
 	var col = require("../app/collection.js");
 	var filters = [];
-	var collection = db.collection(req.params.id);
+	var collection = db.collection(req.params.collection);
 	var field = req.params.field;
 	var filters = [];
 	var group_by = null;
 	var sort = {};
 	var facet = "$facet";
+	const AS_ARRAY = true;
+	var skip = ["skip", "limit", "sort", "reverse", "op"]; 
+	
+	var operators = buildquery.operators(req);
+	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
 
 	var limit = parseInt(req.query.limit);
 	if (limit < 0 || isNaN(limit))
@@ -410,11 +441,6 @@ exports.facet = function (req, callback) {
 	// - first match reference facets (journal/monografia)
 	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
 	// - then group by original source (JYX-item)
-	
-	// FILTER:
-	if(req.query) {
-		filters = createFilters(req.query);
-	}
 	
 	// GROUP:
 	if(req.params.groupby) {
@@ -431,10 +457,11 @@ exports.facet = function (req, callback) {
 
 	// skip empty strings
 	var empty = {};
-	empty[field] = {$ne:""};
+	//empty[field] = {$ne:""};
 		
 	// check if field is array
-	col.getKeyTypes(req.params.id, function(res) {
+	col.getKeyTypes(req.params.collection, function(res) {
+		console.log("\nFACET QUERY:" + req.url);
 		if(res[field] === "array") {
 			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
 			aggregate(collection, aggr, function(data) {
@@ -461,10 +488,14 @@ function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array)
 		aggregate.push(group_by);
 	if(is_array)
 		aggregate.push({$unwind: facet});
-	aggregate.push({$match: empty});
+	if(empty)
+		aggregate.push({$match: empty});
 	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
 	aggregate.push({$sort: sort});
 	aggregate.push({$limit:limit});
+	
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
+	console.log("\n");
 	return aggregate;
 }
 
@@ -489,35 +520,6 @@ function aggregate (collection, aggregate, callback) {
 }
 
 
-
-function createFilters (filters) { // with $all
-	var matches = [];
-	for (var field in filters) {
-		// skip empty values and "limit" field
-		if(filters[field] === "") continue; 
-		if(field === "limit" || field === "sort") continue;
-			
-		var f = {};
-		
-		if(Array.isArray(filters[field])) {
-			var values = [];
-			filters[field].forEach(function(value) {
-				values.push(decodeURIComponent(value));
-			})
-			f[field] = {"$all": values};
-		} else {
-			f[field] = decodeURIComponent(filters[field])
-		}
-			
-		matches.push(f);
-		//filter_fields.push(field_name);
-		console.log(f);
-	};
-	return matches;
-
-}
-
-
 exports.collectionLookup = function (sandbox, node, onNodeScript, onError) {
 
 	var collection = db.collection(node.collection);
@@ -533,6 +535,15 @@ exports.closeDB = function () {
 
 
 exports.editProjectNode = function (doc_id, params, callback) {
+    
+    // we do not save passwords, user names and api keys
+    if(params.settings) {
+		if(params.settings.username) params.settings.username = null;
+		if(params.settings.passwd) params.settings.passwd = null;
+		if(params.settings.password) params.settings.password = null;
+		if(params.settings.apikey) params.settings.apikey = null;
+	}
+
 	var collection = db.collection("mp_projects");
 	var setter = {};
 	setter.$set = createParamsObject("nodes", params);
@@ -589,15 +600,20 @@ exports.markNodeAsExecuted = function (node) {
 }
 
 
+
 // creates an object for mongoquery array update wiht positional operator ($)
 function createParamsObject(arrayName, params) {
-	
+
 	var result = {};
 	for (var p in params) {
-		if( params.hasOwnProperty(p) ) {
+		if( params.hasOwnProperty(p) && p != "apikey") {
 		  result[arrayName + ".$." + p] =  params[p];
 		} 
 	}
+    console.log("******************************");
+    console.log(params);
+    console.log(result);
+    console.log("******************************");
 	return result;
 }
 

@@ -2,7 +2,9 @@ var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
 var mongoquery 	= require("../app/mongo-query.js");
-
+var schema 		= require("../app/schema.js");
+const database 	= require('../config/database');
+var db 			= mongojs(database.initDBConnect());
 
 var exports = module.exports = {};
 
@@ -14,32 +16,37 @@ var exports = module.exports = {};
 exports.getKeys = function (collection_name, cb) {
 	var self = this;
 	var key_list = {};
+	var all_keys = [];
+	var source_keys = [];
+	var node_keys = []
+
+
 	
-	// first we take the first record and extract key names from that
-	mongoquery.findOne({}, collection_name, function(err, doc) {
-		for (key in doc) {
-			key_list[key] = {};
+	// all keys that are not in schema are node output fields
+	mongoquery.findOne({collection:collection_name}, "mp_schemas", function(err, doc) {
+		if(doc) {
+			all_keys = doc.keys;
+		
 		}
-		//console.log(doc);
-		// then we look for schema and apply that top of list of keys 
-		mongoquery.findOneProjection({"schemas.collection": collection_name}, {"schemas.$":1},  "mp_projects", function(project) {
-			if(project && project.schemas && project.schemas.length) {
-				for (var i = 0; i <  project.schemas[0].keys.length; i++) {
-					var type = project.schemas[0].types[i];
-					key_list[project.schemas[0].keys[i]] = {"type":type};
-				}
+		
+		// first we take the first record and extract key names from that
+		mongoquery.findOne({}, collection_name, function(err, doc) {
+			for (key in doc) {
 				
+				if(all_keys.indexOf(key) < 0) {
+					node_keys.push(key);
+					all_keys.push(key);
+				}
+				key_list[key] = {};
 			}
-			var data_arr = [];
-			var key_arr = Object.keys(key_list).sort();
-			for (var i = 0; i < key_arr; i++) {
-				data_sorted.push(data[key_arr[i]]);
-			}
-			cb({keys:key_list, sorted:key_arr});
-			
-		})
-	
+
+		cb({node_keys:node_keys,keys:key_list, sorted:all_keys.sort()});
+		
+		})		
+		
 	})
+	
+
 }
 
 /**
@@ -65,3 +72,6 @@ exports.getKeyTypes = function (collection_name, cb) {
 	})
 }
 
+exports.getSchema = function (collection_name, cb) {
+	schema.getCollectionSchema(collection_name, cb);
+}

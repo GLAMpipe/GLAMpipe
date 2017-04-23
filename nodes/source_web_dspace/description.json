@@ -3,7 +3,7 @@
     "type": "source",
     "subtype": "web",
     "subsubtype": "two_rounds",
-    "title": "DSpace collection import",
+    "title": "DSpace 6: collection import",
     "status": "usable",
     "usage":"",
     "description": "Import metadata from DSpace.",

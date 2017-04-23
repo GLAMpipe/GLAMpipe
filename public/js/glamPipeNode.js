@@ -1,7 +1,7 @@
 
 var glamPipeNode = function (node, gp) {
 	var self = this;
-    this.gp = gp;
+	this.gp = gp;
 	this.source = node;
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
 	this.settings = {};
@@ -10,6 +10,7 @@ var glamPipeNode = function (node, gp) {
 	
 	this.dataDisplayDiv = "data-workspace data data-display";
 	this.dataControlsDiv = "data-workspace data data-controls";
+	this.baseAPI = "/api/v1";
 	
 	this.display = new dataTable(this); // default data renderer
 		
@@ -23,24 +24,40 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post("/start/node/" + self.source._id, self.source.settings, function(data) {
+		$.post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
-			if(data.error)
+			if(data.error) {
+				$(".settings").removeClass("busy");
 				alert(data.error);
+			}
 		});
 	}
 
+
+	this.runSingle = function (doc_id) {
+		
+		self.source.settings = self.getSettings(node);
+		console.log("RUNNING node with settings: ", self.source.settings);
+		
+		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
+			console.log(data);
+			if(data.error) {
+				$(".settings").removeClass("busy");
+				alert(data.error);
+			}
+		});
+	}
 	
 	
 	this.runFinished = function () {
 		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
-        $(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
-        //$(".settings").hide();
-        
-        var input = self.getInputFields();
-        var output = self.getOutputFields();
-        
-        self.open({input_keys:input, output_keys:output});
+		$(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+		//$(".settings").hide();
+		
+		var input = self.getInputFields();
+		var output = self.getOutputFields();
+		
+		self.open({input_keys:input, output_keys:output});
 	}
 
 	// getter for input/output fields of the node (used as config for data rendering)
@@ -123,7 +140,7 @@ var glamPipeNode = function (node, gp) {
 		
 		if(self.source.params.title && self.source.params.title != "") 
 			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
-		else
+		else 
 			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 		
 		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
@@ -162,26 +179,29 @@ var glamPipeNode = function (node, gp) {
 	}
 
 
-    this.setSettingValues = function () {
+	this.setSettingValues = function () {
 		var data = self.source;
-        for(var prop in data.settings) {
-            if(typeof data.settings[prop] == "boolean") {
-                $("input[name='"+prop+"']").prop("checked", data.settings[prop]);
-                $("input[name='"+prop+"']").change();
-            } else {
-                if(data.settings[prop].constructor.name === "Array") {
-                    for(var i = 0; i < data.settings[prop].length; i++) {
-                        var n = i+1;
-                        $("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
-                    }
-                } else {
-                    $("input[name='"+prop+"']").val(data.settings[prop]);
-                    $("select[name='"+prop+"']").val(data.settings[prop]);
-                    $("select[name='"+prop+"']").change();
-                }
-            }
-        }
-    }
+		for(var prop in data.settings) {
+			if(typeof data.settings[prop] == "boolean") {
+				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+				$("input[name='"+prop+"']").change();
+			} else {
+				if(Array.isArray(data.settings[prop])) {
+					for(var i = 0; i < data.settings[prop].length; i++) {
+						var n = i+1;
+						$("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
+					}
+				} else {
+					$("input[name='"+prop+"']").val(data.settings[prop]);
+					$("select[name='"+prop+"']").val(data.settings[prop]);
+					$("select[name='"+prop+"']").change();
+					
+					// textarea
+					$("textarea[name='"+prop+"']").val(data.settings[prop]);
+				}
+			}
+		}
+	}
 	
 
 
@@ -201,24 +221,29 @@ var glamPipeNode = function (node, gp) {
 
 	this.getSettings = function (node) {
 		
-        var settings = {};
-        // read input from settings (only inputs with class "node-settings")
-        $("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
-            var nameSplitted = $(this).attr("name").split("[");
-            // if input name has form "set[something1]", then we want to gather all of them to array
-            console.log($(this).attr("name") + ":" +  $(this).val());
-            if(nameSplitted.length > 1) {
-                (settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
-            } else {
-                settings[$(this).attr("name")] = $(this).val();
-            }
-       
-        });
-        
-        // handle checkboxes separately. Checbox is included only if it is checked
-        $("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
+		var settings = {};
+		// read input from settings (only inputs with class "node-settings")
+		$("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
+			var nameSplitted = $(this).attr("name").split("[");
+			// if input name has form "set[something1]", then we want to gather all of them to array
+			console.log($(this).attr("name") + ":" +  $(this).val());
+			if(nameSplitted.length > 1) {
+				(settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
+			} else {
+				settings[$(this).attr("name")] = $(this).val();
+			}
+	   
+		});
+		
+		// handle checkboxes separately. Checbox is included only if it is checked
+		$("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).is(':checked');
+		});
+
+		// handle textareas separately. Checbox is included only if it is checked
+		$("data-workspace .settings textarea.node-settings").each(function() {
+				settings[$(this).attr("name")] = $(this).val();
 		});
 		
 		return settings;	
@@ -228,14 +253,14 @@ var glamPipeNode = function (node, gp) {
 
 	this.loadCollectionData = function (params, cb) {
 		
-		$.getJSON("/get/collection/" + self.source.collection + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
+		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/docs/" + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
 		});
 	}
 
 	this.loadCollectionKeys = function (cb) {
-		$.getJSON("/get/collection/" + self.source.collection + "/fields", function(keys) {
+		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/fields", function(keys) {
 			self.data.keys = keys;
 			cb();
 		})
@@ -243,9 +268,9 @@ var glamPipeNode = function (node, gp) {
 
 
 
-    this.nl2br = function (str, is_xhtml) {   
-        var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
-        return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
-    }
+	this.nl2br = function (str, is_xhtml) {   
+		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+	}
 
 }

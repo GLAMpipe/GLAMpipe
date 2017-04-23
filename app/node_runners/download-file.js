@@ -31,7 +31,7 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 		
 		async.eachSeries(downloads, function iterator(download, next) {
 
-			//console.log("downloading:", download);
+			console.log("downloading:", download);
 			
 			// dry run
 			if(node.settings.dry_run) {
@@ -54,14 +54,8 @@ exports.downloadFile = function (doc, sandbox, cb ) {
 			}
 			
 		}, function done() {
-			sandbox.run.runInContext(sandbox);
-			var setter = {};
-			if(sandbox.out.setter)
-				setter = sandbox.out.setter;
-			else
-				setter[node.out_field] = sandbox.out.value;
-				
-			mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, cb);			
+            sandbox.run.runInContext(sandbox);
+            cb();		
 		})
 		
 	} else {
@@ -126,8 +120,6 @@ exports.downloadAndSave = function (node, download, next) {
 	// use basic authentication if node did set "auth"
 	if(download.auth)
 		options.auth = download.auth;
-	
-	console.log(options);
 	
 	var sendReq = request.get(options);
 

@@ -3,7 +3,7 @@
 	"type": "source",
 	"subtype": "web",
 	"subsubtype": "csv",
-	"title": "Online CSV",
+	"title": "Online CSV: import",
     "status": "usable",
 	"description": "Import data from online CSV",
 
@@ -17,17 +17,6 @@
         "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
         
 		"init":"out.say('progress', context.node.title);",
-		
-		"run":
-		[
-			"if(context.node.settings.sample_to != '') {",
-			"    var from = parseInt(context.node.settings.sample_from); ",
-			"    var to = parseInt(context.node.settings.sample_to); ",
-			"    out.value = context.data.slice(from, to); ",
-			"} else {",
-			"    out.value = context.data;",
-			"} "
-		],
 		
 		"finish":"out.say('finish', '<h2>Data imported</h2> from address ' + context.node.params.file_url);"
 		

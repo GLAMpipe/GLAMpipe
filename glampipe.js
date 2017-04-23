@@ -1,19 +1,15 @@
 
 const fs			= require('fs');
 const path			= require('path');
-const env			= process.env;
 const passport      = require('passport'); 
-const LocalStrategy = require('passport-local').Strategy
-
 var express			= require('express');
+var session      	= require('express-session');
 var request			= require('request');
 var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
-
-const conf 		= require("./config/config.js");
-
-global.config = {};
+global.config 		= require("./config/config.js");
+const env			= process.env;
 
 
 
@@ -25,35 +21,24 @@ var GlamPipe = function() {
 	// TODO: this is bad, fix with npm install ssl-root-cas
 	process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
-	/*  ================================================================  */
-	/*  Helper functions.                                                 */
-	/*  ================================================================  */
-
 	/**
-	 *  Set up server IP address and port # using env variables/defaults.
+	 *  Set up server IP address and port 
 	 */
 	self.setupVariables = function() {
-		// assume that we are running in OpenShift
-		//  Set the environment variables we need.
-		self.ipaddress = process.env.OPENSHIFT_NODEJS_IP;
-		self.port      = process.env.OPENSHIFT_NODEJS_PORT || 3000;
-		
-		self.nodePath = conf.nodePath;
 
-		// if we are not in OpenShift, then check if we are inside Docker
-		if (typeof self.ipaddress === "undefined") {
-			// There should be MONGO env variables present if we were running inside docker
-			if(process.env.MONGO_PORT || process.env.DOCKER) {
-				console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
-				self.ipaddress = "0.0.0.0";
-				self.dataPath = "/glampipe";
-			} else {
-				console.log("Running locally, using 127.0.0.1");
-				self.ipaddress = "127.0.0.1";
-				self.dataPath = conf.dataPath;
-			}
-		};
+		self.port      = 3000;
+		self.nodePath = global.config.nodePath;
 
+		// There should be MONGO env variables present if we were running inside docker
+		if(process.env.MONGO_PORT || process.env.DOCKER) {
+			console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
+			self.ipaddress = "0.0.0.0";
+			self.dataPath = "/glampipe";
+		} else {
+			console.log("Running locally, using 127.0.0.1");
+			self.ipaddress = "127.0.0.1";
+			self.dataPath = global.config.dataPath;
+		}
 	};
 
 
@@ -69,55 +54,31 @@ var GlamPipe = function() {
 
 		self.app = express();
 		self.app.use(express.static('public'));
+		self.app.use("/publicview", express.static('app/views/datapublic'));
 		self.app.use( bodyParser.json() );       // to support JSON-encoded bodies
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 			extended: true
 		})); 
 
-		self.app.use(passport.initialize()); 
-		self.app.set('json spaces', 2);
-
-
+		self.app.set('json spaces', 2); // pretty print
 
 		// CORS
 		self.app.use(cors());
 		self.app.options('*', cors());
 
-
-		const user = {  
-			username: 'testi',
-			password: 'testi',
-			id: 1
-		}
-
-		passport.use(new LocalStrategy(  
-		  function(username, password, done) {
-			findUser(username, function (err, user) {
-				console.log(username);
-				
-				if (err) {
-					return done(err)
-				}
-				if (!user) {
-					return done(null, false)
-				}
-				if (password !== user.password  ) {
-					return done(null, false)
-				}
-					return done(null, user)
-			})
-		  }
-		))
-
-		function findUser (username, cb) {
-			cb(null,user);
-			
-		}
-		self.passport = passport;
+		// USER AUTHENTICATION
+		self.app.use(session({
+			secret: 'justsomethingvalidhere', // session secret
+			resave: true,
+			saveUninitialized: true
+		}));
+		
+		require('./config/passport')(passport); // pass passport for configuration
+		self.app.use(passport.initialize()); 		
+		self.app.use(passport.session()); // persistent login sessions
 
 		self.http 		= require('http').Server(self.app);
 		self.io 		= require('socket.io')(self.http);
-
 		require('./app/routes.js')(self.app, self, passport);
 
 	};
@@ -157,14 +118,11 @@ var GlamPipe = function() {
 	/**
 	 *  Initializes the application.
 	 * - check data path
-	 * - if data path ok, download nodes
+	 * - if data path ok, load nodes
 	 * - if nodes ok, initialize server
 	 */
 	self.initialize = function(cb) {
 		self.setupVariables();
-		//self.populateCache();
-		//self.setupTerminationHandlers();
-		
 		self.core 	= require("./app/core.js");
 	   
 		self.core.initDB(function (error) {
@@ -202,14 +160,10 @@ var GlamPipe = function() {
 		self.http.on("error", function(e) {
 			console.log(e);
 		});
-		
-		// we listen our own websocket messages so that we 
-		//self.wsClient = require('socket.io-client')('http://localhost:3000');
-		//self.wsClient.on('connect', function(){console.log("SOCKET: GLAMpipe wsClient connected!");});
-
 
 	    process.on('uncaughtException', function(err) {
 			// handle the error safely
+		    console.log("MAJOR ERROR!")
 		    console.log(err)
 		})
 
@@ -217,7 +171,6 @@ var GlamPipe = function() {
 			var server = self.http.listen(self.port, self.ipaddress, function() {
 				var host = server.address().address;
 				var port = server.address().port;
-				//console.log(`Running on ${process.platform}`);
 				console.log("\n********************* G L A M p i pe *************************");
 				console.log("* DATA PATH:",self.dataPath);
 				console.log("* NODE PATH:",self.nodePath);

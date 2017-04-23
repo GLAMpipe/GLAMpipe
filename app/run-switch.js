@@ -39,6 +39,97 @@ exports.runNode = function (node, io) {
 	// node run "router"
 	switch (node.type) {
 
+
+/***************************************************************************************************************
+ *                                       METANODE                                                                *
+ * *************************************************************************************************************/
+
+		// hard-coded demo
+		case "meta":
+			
+			runNodeScriptInContext("init", node, sandbox, io);
+			if(sandbox.context.init_error) 
+				return;
+			
+			// THIS COMES FROM NODE ****************
+			//var nodes = [
+				//{
+					//collection: node.collection,
+					//nodeid: "process_field_split",
+					//params: {
+						//in_field: node.params.in_field,
+						//out_field:"meta1_split"
+					//},
+					//settings: {
+						//separator: node.settings.separator
+					//}
+				//},
+				//{
+					//collection: node.collection,
+					//nodeid: "process_field_count_chars",
+					//params: {
+						//in_field:"meta1_split",
+						//out_field:"meta1_count"
+					//},
+					//settings: {
+						
+					//}
+				//}
+			//]
+			
+			var nodes = node.metaparams;
+			nodes[0].settings = node.settings;
+			// ***************************************
+
+			var count = 0;
+
+			// run subnodes
+			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
+				console.log("THIS IS SUBNODE");
+				var baseurl = "http://localhost:3000";
+				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
+				console.log(url);	
+				console.log("subnode settings: " + nodes[count].settings);
+				
+				var settings = nodes[count].settings;
+				count++;
+				
+				// POST
+				 var options = {
+					url: url,
+					json: settings,
+					headers: {
+						"accecpt": "application/json"
+					},
+					jar:true
+				};
+				
+				var request = require("request");
+				//require('request').debug = true;
+
+				// make actual HTTP request
+				request.post(options, function (error, response, body) {
+					sandbox.context.data = body;
+					if (error) {
+						console.log(error);
+						next();
+					} else {
+						console.log(options.url);
+						console.log("update response:", body);
+						//sandbox.run.runInContext(sandbox);
+						next();
+					}
+				});
+	
+							
+			}, function done () {
+				console.log("METANODE: done all nodes!");
+			})
+				
+			break;
+
+
+
 /***************************************************************************************************************
  *                                       SOURCE                                                                *
  * *************************************************************************************************************/
@@ -59,56 +150,14 @@ exports.runNode = function (node, io) {
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
 						break;
 						
-						// **** DRAFT!!!****
-						
 						case "csv":
 							var downloader = require("../app/node_runners/download-file.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
-							pre_run.runInContext(sandbox); // ask url and user auth from node
+							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
 							downloader.downloadAndSave (node, download, function() {
-								console.log(download.response.statusCode);
-								if(download.response.statusCode == 200) {
-									// read data from CSV
-									csv.readToArray(node, sandbox, io, function(data) {
-							
-										var new_records = [];
-										// query update keys from db
-										mongoquery.findDistinct({}, node.collection, "dt", function(err, records) {
-												data.forEach(function(csv_item, j) {
-
-													var dt = csv_item.dt;
-													//dt = dt.replace(/[\r\n]/g, '');
-													console.log(records.indexOf(dt));
-													if(records.indexOf(dt) === -1)
-														new_records.push(csv_item);
-												})
-											
-											// new ones
-											console.log("NEW: ", new_records);
-											//save to database
-											if(new_records.length) {
-												mongoquery.insert(node.collection, new_records , function(error) {
-													if(error) {
-														console.log(error);
-														runNodeScriptInContext("finish", node, sandbox, io);
-													} else {
-														runNodeScriptInContext("finish", node, sandbox, io);
-													}
-												})
-											} else {
-												runNodeScriptInContext("finish", node, sandbox, io);
-											}
-										})
-										
-									});
-								} else if(download.response.statusCode == 302) {
-									io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
-
-								}
+								csv.importUpdates(node, sandbox, download, io);
 							});
-							
-							// **** DRAFT ENDS ****
 							
 						break;
 						
@@ -126,11 +175,6 @@ exports.runNode = function (node, io) {
 						case "group_by_key" :
 						
 							function groupCB (data) {
-								// provide data to node
-								//sandbox.context.data = data;
-								
-								// let node pick the data it wants from result
-								//runNodeScriptInContext("run", node, sandbox, io);
 								
 								// add source id to data
 								for (var i = 0; i < data.length; i++ ) {
@@ -149,14 +193,12 @@ exports.runNode = function (node, io) {
 							mongoquery.empty(node.collection, query, function() {
 								// we must check if input key is array or not
 								mongoquery.findOne({}, node.params.source_collection, function (err, record) {
-									if(record) {
-										if(record[node.params.in_field]) {
-											var array = record[node.params.in_field].constructor.name == "Array";
-											mongoquery.group(node, array, groupCB);
-										} else {
-											io.sockets.emit("error", {"nodeid":node._id, "msg":"Field not found!"});
-											io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
-										}
+									if(!err && record) {
+										//var array = record[node.params.in_field].constructor.name == "Array";
+										mongoquery.group(node, true, groupCB);
+									} else {
+										io.sockets.emit("error", {"nodeid":node._id, "msg":"Record or field not found!"});
+										io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
 									}
 								}) 
 							});
@@ -168,9 +210,7 @@ exports.runNode = function (node, io) {
 						break;	
 
 						case "select":
-						console.log("SELECT node");
 							asyncLoop.sourceLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-								//console.log(doc);
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
@@ -185,18 +225,18 @@ exports.runNode = function (node, io) {
 				break;
 
 				
-				case "upload":
+				case "file":
 				
 					switch (node.subsubtype) {
 						
 						case "csv":
 						
 							var csv = require("../app/node_runners/source-file-csv.js");
-							// remove previous data insertet by node and import file
 							var query = {}; 
 							query[MP.source] = node._id;
+							// remove previous data insertet by node and import file
 							mongoquery.empty(node.collection, query, function() {
-								csv.importFile(node, sandbox, io);
+								csv.importFile_stream(node, sandbox, io);
 							});
 							
 						break;
@@ -242,10 +282,14 @@ exports.runNode = function (node, io) {
 				case "web":
 				
 					switch (node.subsubtype) {
-						
-						case "dspace_upload":
+		
+						case "omeka_additem":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.loop(node, sandbox, web.postJSON);
+						break;
+										
+						case "dspace_additem":
 							var dspace = require("../app/node_runners/dspace.js");
-							console.log("adding items");
 							dspace.login(node, sandbox, io, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
@@ -290,16 +334,21 @@ exports.runNode = function (node, io) {
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.loop(node, sandbox, dspace.addFile);
-									//dspace.addFile();
 								}
 							});
 						break;
 						
 						case "mediawiki_bot":
-						
-							console.log("trying wikibot");
 							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
-							mv_bot.uploadFileWithWikitext(node, sandbox, io);
+							mv_bot.login(node, sandbox, io, function(error) {
+								if(error)
+									sandbox.out.say("finish","login failed");
+								else {
+									console.log("LOGIN GOOD");
+									asyncLoop.loop(node, sandbox, mv_bot.uploadFile);
+								}
+							});
+							//mv_bot.uploadFileWithWikitext(node, sandbox, io);
 
 						break;
 						
@@ -327,10 +376,15 @@ exports.runNode = function (node, io) {
 			switch (node.subtype) {
 				
 				case "web":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//callAPISerial (sandbox, node, onNodeScript, onError);
-					//}
+				
+					switch (node.subsubtype) {
+				
+						case "link_checker":
+							var checker = require("../app/node_runners/link-checker.js");
+							asyncLoop.loop(node, sandbox, checker.checkLinks);
+						break;
+					}
+
 				break;
 				
 				case "file":
@@ -381,12 +435,7 @@ exports.runNode = function (node, io) {
 						
 						case "calculate_checksum":
 							var checksum = require("../app/node_runners/file-checksum.js");
-							asyncLoop.loop(node, sandbox, checksum.getHash);
-						break;
-						
-						case "check_commons":
-							var web = require("../app/node_runners/web-get-content.js");
-							asyncLoop.loop(node, sandbox, web.request);
+							asyncLoop.fieldLoop(node, sandbox, checksum.getHash);
 						break;
 						
 						case "grobid":
@@ -415,12 +464,50 @@ exports.runNode = function (node, io) {
 							asyncLoop.loop(node, sandbox, detect.language);
 						break;
 					
-						default:
+						default: // syncronous nodes
 							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
 						}
+					break;
+					
+				case "documents":
+				
+					switch (node.subsubtype) {
+						
+						case "select_delete":
+							asyncLoop.deleteLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});	
+						break;
+					}
+					break;
+					
+				case "lookups":
+				
+					switch (node.subsubtype) {
+						
+						case "collection":
+							asyncLoop.mongoLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});
+						break;	
+
+						case "web":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.fieldLoop(node, sandbox, web.getJSON);
+						break;
+
+						default:
+							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});			
+
+					}
 					break;
 			}				
 
@@ -474,6 +561,23 @@ exports.runNode = function (node, io) {
 		}
 		break;
 
+
+/***************************************************************************************************************
+ *                                       VIEW                                                              *
+ * *************************************************************************************************************/
+
+		case "view":
+			switch (node.subtype) {
+				case "facet":
+					var facet = require("../app/node_runners/view-facet.js");
+					facet.writeConfig(node, sandbox);
+				break;
+			}
+
+
+		break;
+
+
 		default:
 			sandbox.out.say("finish", "This node is not runnable");
 			return;
@@ -505,7 +609,6 @@ exports.createSandbox = function (node, io) {
 		out: {
 			pre_value:"",
 			value:"",
-			url: "",
 			file:"",
 			setter:null,
 			updatequery: null,
@@ -524,8 +627,7 @@ exports.createSandbox = function (node, io) {
 				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
 				var date = new Date();
 				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					console.log("logged");
-					// send response if needed
+					// send http response if needed (i.e. node was executed by "run" instead of "start")
 					if(ch === "finish" && node.res) 
 						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
 				});

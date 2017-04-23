@@ -1,0 +1,36 @@
+{
+    "nodeid": "process_lookup_link_checker",
+    "type": "process",
+    "subtype": "lookup",
+    "subsubtype": "link_checker",
+    "title": "URL checker",
+    "status": "usable",
+    "usage":"",
+    "description": "Makes HEAD requests to URLs given and saves response codes.",
+    
+    "scripts": {
+        "hello": 
+        [ 
+			"out.say('news', 'You added a link checker node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+		],
+        "bye": "out.say('finish', 'Bye!'); ",
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; "
+		],
+		
+        "finish": 
+        [
+			"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
+		]
+    },
+    
+    "views": {
+        "settings":"no settings"
+    
+    }
+  
+}

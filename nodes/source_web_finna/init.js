@@ -5,6 +5,7 @@ var license = context.node.settings.license;
 c.var = {}; 
 c.var.page = 1; 
 c.var.limit = 20; 
+c.var.total_count = 0;
 
 /* list of returned fields */
 var fields = ['buildings', 'formats', 'id', 'images', 'institutions', 'nonPresenterAuthors', 'summary', 'urls', 'title', 'year',  'onlineUrls']; 
@@ -17,7 +18,7 @@ var query = search.split('?');
 if (query.length == 2) { 
     
     //  remove limit 0 if exists
-    query[1] = query[1].replace('&limit=0'); 
+    query[1] = query[1].replace(/&?limit=0/,"?"); 
 
     /* add license to query if user chose it*/
     if(license != '') 

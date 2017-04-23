@@ -208,6 +208,8 @@ node-pipe {
 .boxtitle {
 	margin:3px 0px 0px 0px;
 	font-weight:bold;
+    width: 300px;
+    overflow-wrap: break-word;
 }
 
 .inlinetitle {
@@ -596,6 +598,11 @@ input.middle_input {
     margin-left:5px;
 }
 
+input.long_input {
+
+	width:90%;
+    margin-left:5px;
+}
 
 #projectList .listoption:hover {
 	background-color:#F2F2F2;
@@ -634,7 +641,7 @@ input.middle_input {
 	background-image:url(/images/thumbs-down.svg);
 	background-repeat: no-repeat;
 	background-position: center right; 
-	background-size: 40px;
+	background-size: 25px;
 }
 
 
@@ -671,6 +678,22 @@ label {
 	display:block;
 }
 
+
+.settingscontainer .block-labels label {
+	display:block;
+}
+
+.settingscontainer .group {
+	margin-bottom: 20px;
+	padding-left: 10px;
+	border-left: 5px solid #bfd2f3;
+}
+
+.settingscontainer textarea {
+	width: 90%;
+	height: 120px;
+}
+
 /* PARAMETERS TABLE */
 
 .params table {
@@ -682,7 +705,7 @@ label {
 }
 
 .params table td:nth-child(1) {
-font-weight:bold;
+	font-weight:bold;
 }
 
 .output {
@@ -723,4 +746,16 @@ font-weight:bold;
 
 .no-close .ui-dialog-titlebar-close {
   display: none;
+}
+
+#login {
+	float:right;
+}
+
+.checkbox_holder label {
+	display:inline;
+}
+
+.inline {
+	display:inline;
 }

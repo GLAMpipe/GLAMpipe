@@ -1,14 +1,15 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
+var database 	= require('../../config/database');
 var mongoquery 	= require("../../app/mongo-query.js");
-var collection = require("../../app/collection.js");
+var collection 	= require("../../app/collection.js");
 const MP 		= require("../../config/const.js");
 
-var fs = require('fs');
-var parse = require('csv-parse');
-var transform = require('stream-transform');
-var async = require('async');
+var fs 			= require('fs');
+var parse 		= require('csv-parse');
+var transform 	= require('stream-transform');
+var async 		= require('async');
 
 var exports = module.exports = {};
 
@@ -31,13 +32,12 @@ exports.readToArray = function (node, sandbox, io, cb) {
 			if(err) {
 				console.log("ERROR:", err.message);
 				io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed! May be the separator is wrong?</br>" + err.message});
-				return;
+				return cb();
 			}
 			console.log("INITIAL IMPORT COUNT:", data.length);
 			cb(data);
 		}
 	)
-		
 
 	parser.on('error', function(err){
 	  console.log(err.message);
@@ -50,6 +50,104 @@ exports.readToArray = function (node, sandbox, io, cb) {
 	fs.createReadStream(file, {encoding: node.settings.encoding}).pipe(parser);
 	
 }
+
+
+
+// import online CSV
+exports.importUpdates = function (node, sandbox, download, io) {
+	
+	if(download.response.statusCode == 200) {
+		// read data from CSV
+		exports.readToArray(node, sandbox, io, function(data) {
+
+			var new_records = [];
+			// query update keys from db
+			mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
+				// loop over parsed CSV data
+				data.forEach(function(csv_item, j) {
+
+					var update_key = csv_item[node.settings.update_key];
+					if(records.indexOf(update_key) === -1) {
+						csv_item.__mp_source = node._id;
+						new_records.push(cleanKeys(csv_item)); // make sure all keys are lowercase
+					}
+				})
+				
+				//save to database
+				if(new_records.length) {
+					mongoquery.insert(node.collection, new_records, function(error) {
+						if(error) {
+							console.log(error);
+							runNodeScriptInContext("finish", node, sandbox, io);
+						} else {
+							runNodeScriptInContext("finish", node, sandbox, io);
+						}
+					})
+				} else {
+					runNodeScriptInContext("finish", node, sandbox, io);
+				}
+			})
+			
+		});
+	} else if(download.response.statusCode == 302) {
+		io.sockets.emit("error", {nodeid:node.nodeid, msg:"Import failed (server said 302)! Check your password and username and CSV url"});
+
+	}
+}
+
+
+exports.importFile_stream = function  (node, sandbox, io, cb) {
+
+	var fs = require('fs');
+	var parse = require('csv-parse');
+	var transform = require('stream-transform');
+
+	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	var db = "mongodb://" + database.initDBConnect();
+	var columns = null;
+	var count = 0;
+	if(node.settings.columns)
+		columns = true;
+
+	var parser = parse(
+	{
+		delimiter: node.settings.separator, 
+		columns:columns, 
+		relax: true,
+		trim: true, // this could be optional
+		skip_empty_lines:true
+	})
+	
+	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
+	var options = { db: db, collection: node.collection }
+	var streamToMongo = require('stream-to-mongo')(options);
+
+	parser.on('data', function(c){
+		count++;
+		if(!(count % 1000)) console.log(count)
+	});
+
+	parser.on('finish', function(){
+		console.log("PARSING DONE");
+	})
+
+	streamToMongo.on('finish', function(){
+		console.log("IMPORTING DONE! Imported " + count);
+		runNodeScriptInContext("finish", node, sandbox, io);
+	})
+
+	var transformer = transform(function(record){
+		sandbox.context.data = record;
+		runNodeScriptInContext("run", node, sandbox, io);
+		sandbox.out.value[MP.source] = node._id;
+		return sandbox.out.value;
+	})
+
+	input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+	
+}
+
+
 
 /*
  * Parses CSV and adds language fields 
@@ -211,12 +309,7 @@ exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
 				console.log("field" + i);
 			})
 			
-
-			
 			callback();
-
-
-		  
 
 		}, function done () {
 			console.log("NODE: Inserting " + counter + " records");
@@ -234,11 +327,22 @@ exports.importFileWithoutFieldNames = function  (node, sandbox, io, cb) {
 
 }
 
+function cleanKeys (record) {
+	var new_rec = {}
+	for(var prop in record) {
+		if (record.hasOwnProperty(prop)) {
+			var prop_clean = cleanFieldName(prop);
+			new_rec[prop_clean] = record[prop];
+		}
+	}
+	return new_rec;
+}
+
 function cleanFieldName (field) {
 
 	// clean up key names (remove -. and convert spaces to underscores)
-	prop_trimmed = field.trim();
-	prop_clean = prop_trimmed.replace(/[\s-.]/g, '_');					
+	prop_trimmed = field.trim().toLowerCase();
+	prop_clean = prop_trimmed.replace(/[\s.]/g, '_');					
 	
 	// remove language code from field name
 	return  prop_clean.replace(/\[(.|..|)\]/g, '');

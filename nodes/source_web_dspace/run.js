@@ -76,6 +76,8 @@ if (context.response && context.response.statusCode == 200 ) {
          /* check if there is any data left on the server */
         if(context.data.length == context.vars.offset && context.vars.record_counter < context.vars.limit) 
              out.url = c.node.params.dspace_url + "/collections/" + collection_id + context.vars.query_path + '&limit=' + limit + '&offset=' + c.vars.round_counter * c.vars.offset; 
+             
+		 out.say("progress", "Items fetched: " + context.vars.record_counter);
 
 	} else {
 		out.say("progress", "no items found");

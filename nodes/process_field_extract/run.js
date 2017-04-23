@@ -2,7 +2,7 @@ function extract (val) {
    var extracted = []; 
    
    // check if input is array
-   if (Array.isArray(val) {
+   if (Array.isArray(val)) {
        for (var i = 0; i < val.length; i++) { 
            var extracted2 = extract(val[i]); 
            /* push result  */
@@ -13,35 +13,10 @@ function extract (val) {
        
    // if not array, then assume string
    } else {  
-       if(context.node.settings.from != "") {
-			var start = val.split(context.node.settings.from); 
-			if(start.length > 1) {
-               if(context.node.settings.end != "") {
-                   var end = start[1].split(context.node.settings.end); 
-                   if(end.length > 1) 
-                       extracted.push(end[0]); 
-            
-               /* end is empty  */
-               } else {
-                   extracted.push(start[1]); 
-               }
-           }
-            
-       /* start is empty  */
-       } else {
-           var start = val;
-           if(context.node.settings.end != "") {
-               var end = start.split(context.node.settings.end); 
-               if(end.length > 1) 
-                   extracted.push(end[0]); 
-            
-            /* end is empty  */
-           } else { 
-                   extracted.push(start); 
-           }
-       }
-            
 
+	   var reg = new RegExp(context.node.settings.regexp);
+	   return val.match(reg);
+         
    }
    return extracted;
 }
@@ -50,3 +25,22 @@ var val = context.doc[context.node.params.in_field];
 
 if (val != null) 
     out.value = extract(val);
+
+
+
+const regex = /([A-ZÅÄÖ][\wåäö"-]+|\sde\b|\sla\b|\von\b)(\s[A-ZÅÄÖ"][\wåäö"-]*|\sde\b|\sla\b|\von\b)*/g;
+const str = ``;
+let m;
+/*
+while ((m = regex.exec(str)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+    }
+    
+    // The result can be accessed through the `m`-variable.
+    m.forEach((match, groupIndex) => {
+        console.log(`Found match, group ${groupIndex}: ${match}`);
+    });
+}
+*/

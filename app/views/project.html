@@ -23,7 +23,11 @@
 </head>
 
 <body class="vbox">
-<header><a href="/"><span class="title sitetitle">GLAMpipe</span></a></header>
+<header><a href="/"><span class="title sitetitle">GLAMpipe</span></a>
+	<span id="login"><a href="/login">login</a></span>
+	<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
+</header>
+
 
 <content class="main hbox space-between">
   <node-pipe>
@@ -52,12 +56,12 @@
 		  <div class="title settingstitle">Settings for ...</div>
 		  <div class="wikiglyph wikiglyph-caret-down icon boxicon" aria-hidden="true"></div>
 		</div>
+		
+		<div id="node-finished"></div> <!-- out.say('finish') in node script prints here. Usually when node is ready -->
 		<div class="settings"></div>  <!-- settings for running node are rendered here -->
 	  </div>
 	  
 	  <data>
-		<div id="node-finished"></div> <!-- out.say('finish') in node script prints here. Usually when node is ready -->
-		<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
 		<div id="data-header"></div>
 		<data-controls></data-controls> <!-- paging controls, visible keys etc. -->
 		<data-display></data-display> <!-- data display (currentlly on table form).-->

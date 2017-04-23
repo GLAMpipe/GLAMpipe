@@ -1,0 +1,26 @@
+{
+    "nodeid": "export_web_dspace_update",
+    "title": "DSpace 6: update metadata field",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_update",
+    "status": "usable",
+    "description": "Update DSpace data via REST API",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a DSpace node for data updates'); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', 'Data updated'); "
+    },
+    
+    "views": {
+
+    }
+
+}

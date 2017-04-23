@@ -1,0 +1,26 @@
+{
+    "nodeid": "export_web_dspace_addfield",
+    "title": "DSpace 6: add metadata field",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_addfield",
+    "tags":["dspace", "schema"],
+    "status": "usable",
+    "description": "Adds a new field to a certain metadata schema (schema must exist)",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a DSpace node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', context.success_counter + ' of '  + context.doc_count + ' fields added!'); "
+
+    },
+    
+    "views": {}
+
+}

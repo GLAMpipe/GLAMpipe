@@ -18,6 +18,11 @@ out.value = null;
 
 if(Array.isArray(input_value)) {
 	
+	input_value.forEach(function(value) {
+		if(compare(value, select_value))
+			out.value = context.doc;
+	})
+	
 } else {
 	
 	out.value = compare(input_value, select_value);
@@ -37,6 +42,12 @@ function compare (input, select) {
 			return (input < select ? context.doc : null)
 		
 	}
+	
+	var reg = new RegExp(select);
+	if(input.match(reg))
+		return context.doc;
+	else
+		return null;
 	
 	if(input == select) // == is intentional (user can only insert strings)
 		return context.doc;

@@ -12,15 +12,22 @@ if(context.response && context.response.statusCode == 200 && context.data.result
              createDocs(context.data.records);
          }
 
-         out.value = out_records; 
-      
-         var limit = parseInt(context.node.settings.limit); 
-         if (limit <= 0 || isNaN(limit)) 
-             limit = 999999999; 
-      
-         /* check if there is any data left on the server */
-        if(c.var.page <= pageCount && c.var.page <= limit) 
-             out.url = c.var.url + '&page=' + c.var.page; 
+        // check that we do have some records
+        if(out_records.length === 0) {
+            out.value = null;
+            out.say('error', 'Your query failed! No records in the set');
+        } else {
+            out.value = out_records; 
+            c.var.total_count += out_records.length;
+             var limit = parseInt(context.node.settings.limit); 
+             if (limit <= 0 || isNaN(limit)) 
+                 limit = 999999999; 
+          
+             /* check if there is any data left on the server */
+            if(c.var.page <= pageCount && c.var.page <= limit) 
+                 out.url = c.var.url + '&page=' + c.var.page; 
+         }
+         
 } else {
     out.say('error', 'Your query failed! Please check query'); 
     out.value = null; 

@@ -1,0 +1,26 @@
+
+
+{
+    "nodeid": "export_web_omeka_additem",
+    "title": "Omeka Classic: create items",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "omeka_additem",
+    "status": "usable",
+    "description": "Creates new items via REST api",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a Omeka node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', 'Data uploaded'); "
+    },
+    
+    "views": {}
+}
+
