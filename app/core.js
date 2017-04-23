@@ -178,8 +178,9 @@ exports.setDataPath = function (params, glampipe, res) {
 };
 
 
-exports.createProject = function (title, res) {
+exports.createProject = function (req, res) {
 	
+    var title = req.body.title
 	var dirs = ["download", "export", "source", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
@@ -203,7 +204,7 @@ exports.createProject = function (title, res) {
 		for(var i = 0; i < dirs.length; i++) {
 			fs.mkdirSync(path.join(projectPath, dirs[i]));
 		} 
-		// update project count and create project
+		// update project count and create project. Project count is *permanent* counter
 		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
 			mongoquery.findOne({}, "mp_settings", function(err, meta) {
 				var collectionName = title_dir.substring(0,60).toLowerCase(); // limit 30 chars
@@ -214,8 +215,14 @@ exports.createProject = function (title, res) {
 					"prefix": "p" + meta.project_count + "_" + collectionName ,
 					"collection_count": 0,
 					"node_count":0,
-					"schemas": []
+					"schemas": [],
+                    "owner": "" 
 				};
+                
+                // mark the owner
+                if(req.user && req.user.local && req.user.local.email)
+                    project.owner = req.user.local.email;
+                
 				mongoquery.insertProject (project, function(err, data) {
 					console.log("project \"" + title + "\" created!");
 					res.json({"status": "project created", "project": data});

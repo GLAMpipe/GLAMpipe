@@ -1,6 +1,7 @@
 var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
-var User 		= require("../app/controllers/user.js");
+var project 	= require("../app/project.js");
+//var User 		= require("../app/controllers/user.js");
 const conf 		= require("../config/config.js");
 
 module.exports = function(express, glampipe, passport) {
@@ -51,8 +52,34 @@ module.exports = function(express, glampipe, passport) {
 	}
 
 	// protect API routes
-	if(config.isServerInstallation)
+	if(config.isServerInstallation) {
 		express.all('/api/v1/*', isLoggedInAPI);
+        
+        // projects
+        express.all('/api/v1/projects/:project/*', function(req, res, next) {
+            if(req.method === "GET")
+                next();
+            else {
+                project.isAuthenticated(req, function(authenticated) {
+                    if(authenticated)
+                        next();
+                    else
+                        res.json({error:"not authenticated!"});
+                })
+            }
+        })
+        
+        // node run
+        express.post('/api/v1/nodes/:id/*', function(req, res, next) {
+
+            project.isAuthenticated(req, function(authenticated) {
+                if(authenticated)
+                    next();
+                else
+                    res.json({error:"not authenticated!"});
+            })
+        })
+    }
 
 
 /***************************************************************************************************************
@@ -108,8 +135,7 @@ module.exports = function(express, glampipe, passport) {
 	// signup handler
 	express.post('/signup', passport.authenticate('local-signup', {
 		successRedirect : '/',
-		failureRedirect : '/login',
-		failureFlash : true 
+		failureRedirect : '/login'
 	
 	}));	
 	
@@ -143,7 +169,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// PROJECTS
 	express.put('/api/v1/projects', function (req, res) {
-		glampipe.core.createProject(req.body.title, res);
+		glampipe.core.createProject(req, res);
 	});
 
 	//TODO: reimplement this!
@@ -223,8 +249,13 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 
-
 	// DATA
+    
+    // protect user data
+	express.get('/api/v1/collections/mp_users/*', function (req, res) {
+		res.send("buu");
+	});
+    
 	express.get('/api/v1/collections/:collection/docs', function (req, res) {
 		glampipe.core.getCollectionTableData(req, res);
 	});

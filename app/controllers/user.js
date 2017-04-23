@@ -3,16 +3,19 @@
 let mongojs = require('mongojs');
 var bcrypt   = require('bcrypt-nodejs');
 let database = require('../../config/database');
+let config = require('../../config/config');
 let db = mongojs(database.initDBConnect());
-let collection = db.collection("users");
+let collection = db.collection("mp_users");
 
 
 class User {
 	constructor(email, pass) {
 		this.local= {
-			email: email,
-			password: pass
+			email: email
 		}
+        if(pass)
+            this.local.password = pass;
+
 		this.id = null;
 	}
 	
@@ -21,21 +24,24 @@ class User {
 	}
 
 	save(cb) {
-		var self = this;
-		if(this.validate()) {
-			console.log(this);
-			collection.update(this.local, this, {upsert:true} ,function (err, result) {
-				if (err) {
-					console.log("err :" + err);
-					cb({error: err})
-				} else {
-					self.id = result.upserted[0]._id; // set id for serializer
-					cb(null);
-				}
-			}); 
-		} else {
-			cb({error:"invalid email"})
-		}
+        if(config.canRegister) {
+            var self = this;
+            if(this.validate()) {
+                collection.update(this.local, this, {upsert:true} ,function (err, result) {
+                    if (err) {
+                        console.log("err :" + err);
+                        cb({error: err})
+                    } else {
+                        self.id = result.upserted[0]._id; // set id for serializer
+                        cb(null);
+                    }
+                }); 
+            } else {
+                cb({error:"invalid email"})
+            }
+        } else {
+            cb("Sorry, registering disabled!")
+        }
 	}
 	
 	validate() {

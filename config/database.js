@@ -8,8 +8,7 @@ module.exports.initDBConnect = function () {
 	if(process.env.MONGO_PORT) {
 		console.log(process.env.MONGO_NAME);
 		connection_string = process.env.MONGO_PORT_27017_TCP_ADDR + ':' +
-		process.env.MONGO_PORT_27017_TCP_PORT + '/' +
-		'glampipe';
+		process.env.MONGO_PORT_27017_TCP_PORT + '/' + 'glampipe';
 	} else if (process.env.DOCKER)  {
 		connection_string = "mongo:27017/glampipe"
 

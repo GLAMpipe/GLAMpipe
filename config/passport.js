@@ -79,7 +79,7 @@ module.exports = function(passport) {
         process.nextTick(function() {
             // if the user is not already logged in:
             if (!req.user) {
-                User.findOne({ 'local.email' :  email }, function(err, user) {
+                User.findOne(email, function(err, user) {
                     // if there are any errors, return the error
                     if (err)
                         return done(err);

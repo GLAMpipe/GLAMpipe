@@ -1,7 +1,7 @@
 {
-    "nodeid": "lookup_web_link_checker",
-    "type": "lookup",
-    "subtype": "web",
+    "nodeid": "process_lookup_link_checker",
+    "type": "process",
+    "subtype": "lookup",
     "subsubtype": "link_checker",
     "title": "URL checker",
     "status": "usable",

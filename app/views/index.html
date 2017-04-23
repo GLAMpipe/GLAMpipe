@@ -25,7 +25,7 @@
       <div class="pageheader">
         <div class="title pagetitle">Projects</div>
       </div>
-      <div class="fatbox">
+      <div id="project-box" class="fatbox">
         <div class="inlinetitleblock">
           <div><span class="title inlinetitle">Choose a project</span></div>
         </div>
@@ -33,10 +33,20 @@
         <div id="projectList" class="optionlist"> 
         <!-- projects are listed here -->
         </div>
-
       </div>
       
       
+      <div id="user-box" class="fatbox">
+        <div class="inlinetitleblock">
+          <div><span class="title inlinetitle">Choose a user</span></div>
+        </div>
+        <div class="infotext">Choose the user whose projects you would like see.</div>
+        <div id="userList" class="optionlist"> 
+        <!-- users are listed here -->
+        </div>
+      </div>
+
+
 
     <div class="fatbox create_project">
       <div class="inlinetitleblock">
@@ -57,19 +67,10 @@
 
     </node-pipe>
     <data-workspace>
-		<h1>Welcome to GLAMpipe!</h1>
-		<p>
-		GLAMpipe is a tool for cultural data processing.
-		</p>
-		<h2>What is GLAMpipe</h2>
-		<ul>
-		  <li>operates on collections, documents and nodes (not tables and cells)</li>
-		  <li>for tasks that require human intervention (i.e. task that can not be fully automatised)</li>
-		  <li>is able to handle multiple values in different languages</li>
-		</ul>
-		
-		<h2>What's so special in cultural data?</h2>
-		<p>In technicals sense the main difference when compared to scintific data, is that cultural data often has multiple values per field and that there are language codes.</p>
+        <div style="display: flex;align-items: center;justify-content: center;">
+            <img src="images/glampipe_mustache.png"/>
+        </div>
+        
     </data-workspace>
   </content>
   <div id="dialog-confirm" style="display:none">Are you sure?</div>

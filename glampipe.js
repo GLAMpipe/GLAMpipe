@@ -118,7 +118,7 @@ var GlamPipe = function() {
 	/**
 	 *  Initializes the application.
 	 * - check data path
-	 * - if data path ok, download nodes
+	 * - if data path ok, load nodes
 	 * - if nodes ok, initialize server
 	 */
 	self.initialize = function(cb) {

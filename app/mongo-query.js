@@ -136,8 +136,6 @@ exports.countDocs = function (collectionname, query, callback) {
 			callback(count.toString());
 		}
 	});
-
-
 }
 
 
