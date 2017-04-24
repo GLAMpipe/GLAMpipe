@@ -1,11 +1,11 @@
 {
-	"nodeid": "source_file_csv",
+	"nodeid": "source_file_pdf",
 	"type": "source",
 	"subtype": "file",
-	"subsubtype": "csv",
-	"title": "Import csv",
+	"subsubtype": "pdf",
+	"title": "Import pdf",
     "status": "usable",
-	"description": "Import csv file",
+	"description": "Import text from PDF",
 
 	"scripts": {
 		"hello": 
@@ -19,7 +19,7 @@
 		"init":"out.say('progress', context.node.title); context.vars = {count:0};",
 
 		
-		"finish":"out.say('finish', '<h2>Data imported</h2> '+context.vars.count+' items from file ' + context.node.params.file);"
+		"finish":"out.say('finish', 'Text imported from file ' + context.node.params.file);"
 		
 	},
 	

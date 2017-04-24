@@ -1,0 +1,78 @@
+
+var record = context.data;
+var new_record = {};
+out.value = new_record;
+
+if(!(context.vars.count % 1000)) 
+	out.say("progress", context.vars.count + " imported");
+	
+context.vars.count++;
+
+// create arrays for every key with clean field name
+for(var prop in record) {
+
+	if (record.hasOwnProperty(prop)) {
+
+		prop_trimmed = field.trim().toLowerCase();
+		prop_clean = cleanFieldName(prop);
+		new_record[prop_clean] = [];
+
+		// find language codes key names like "dc.title[en]"
+		var re = /\[(.|..|)\]/g;
+		var codes = re.exec(prop_trimmed);
+		
+		// add language code as a separate field
+		if(codes != null) {
+			new_record[prop_clean + "__lang"] = [];	
+		}
+
+	}
+}
+
+// push values to arrays
+for(var prop in record) {
+
+	if (record.hasOwnProperty(prop)) {
+
+		prop_trimmed = field.trim().toLowerCase();
+		prop_clean = cleanFieldName(prop);
+		new_record[prop_clean].push(record[prop]);
+												
+		// find language codes
+		var re = /\[(.|..|)\]/g;
+		var codes = re.exec(prop_trimmed);
+		
+		// push language codes
+		if(codes != null) {
+			if(codes[1] != "") {
+				new_record[prop_clean + "__lang"].push(codes[1]);
+			} else {
+				new_record[prop_clean + "__lang"].push("");
+			}
+		}
+	}
+}
+
+function cleanKeys (record) {
+	var new_rec = {}
+	for(var prop in record) {
+		if (record.hasOwnProperty(prop)) {
+			var prop_clean = cleanFieldName(prop);
+			new_rec[prop_clean] = record[prop];
+		}
+	}
+	return new_rec;
+}
+
+function cleanFieldName (field) {
+
+	if(!context.node.settings.cleankeys) {
+		return field;
+	// clean up key names (remove -. and convert spaces to underscores)
+	prop_trimmed = field.trim().toLowerCase();
+	prop_clean = prop_trimmed.replace(/[\s.]/g, '_');					
+	
+	// remove language code from field name
+	return  prop_clean.replace(/\[(.|..|)\]/g, '');
+
+}

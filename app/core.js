@@ -398,43 +398,19 @@ exports.uploadFile = function (req, res ) {
 	switch (req.file.mimetype) {
 		case "text/xml":
 			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented yet!"});
+			return res.json({"error":"XML import not implemented!"});
 		break;
 		
 		case "application/json":
 			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented yet!"});
+			return res.json({"error":"JSON import not implemented!"});
 		break;
 		
-		case "text/tab-separated-values":
-			console.log("File type: tab separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
+		case "text/tab-separated-values":	
 		case "text/comma-separated-values":
 		case "text/csv":
-			console.log("File type: comma separated values");
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-
 		case "text/plain":
-			console.log("File type: plain text");
+		case "application/pdf":
 			return res.json({
 				"status": "ok",
 				filename:req.file.filename,

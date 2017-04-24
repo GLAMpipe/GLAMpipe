@@ -9,6 +9,41 @@ const MP 		= require("../../config/const.js");
 var exports = module.exports = {};
 
 
+exports.extractText = function (node, sandbox, io) {
+	var pdfUtil = require('pdf-to-text');
+	//sandbox.pre_run.runInContext(sandbox);
+	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	
+	pdfUtil.pdfToText(file, {}, function(err, data) {
+		if (err) {
+			throw(err);
+			
+		} else {
+			// save to database
+			mongoquery.insert(node.collection, {text:data} , function(error) {
+				if(error) {
+					console.log(error);
+					runNodeScriptInContext("finish", node, sandbox, io);
+				} else {
+					runNodeScriptInContext("finish", node, sandbox, io);
+				}
+			})
+
+			// save to file
+			var file_out = path.join(node.dir, node.params.filename + ".txt");
+			var fs = require('fs');
+			fs.writeFile(file_out, data, function(err) {
+				if(err) {
+					return console.log(err);
+				}
+				console.log("The file was saved!");
+			}); 
+		}
+	});
+	
+	console.log("extracting text" + file);
+}
+
 exports.extractReferences = function (doc, sandbox, next) {
 
 	var fs = require("fs");

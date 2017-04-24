@@ -234,9 +234,21 @@ exports.runNode = function (node, io) {
 							var csv = require("../app/node_runners/source-file-csv.js");
 							var query = {}; 
 							query[MP.source] = node._id;
-							// remove previous data insertet by node and import file
+							// remove previous data inserted by node and import file
 							mongoquery.empty(node.collection, query, function() {
 								csv.importFile_stream(node, sandbox, io);
+							});
+							
+						break;
+
+						case "pdf":
+						
+							var pdf = require("../app/node_runners/file-pdf.js");
+							var query = {}; 
+							query[MP.source] = node._id;
+							// remove previous data inserted by node and import file
+							mongoquery.empty(node.collection, query, function() {
+								pdf.extractText(node, sandbox, io);
 							});
 							
 						break;
@@ -498,7 +510,7 @@ exports.runNode = function (node, io) {
 
 						case "web":
 							var web = require("../app/node_runners/web.js");
-							asyncLoop.fieldLoop(node, sandbox, web.getJSON);
+							asyncLoop.fieldLoop(node, sandbox, web.fetchJSON);
 						break;
 
 						default:

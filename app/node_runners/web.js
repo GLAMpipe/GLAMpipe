@@ -39,30 +39,17 @@ exports.postJSON = function (doc, sandbox, next) {
 	});
 }
 
-
-exports.getJSON = function (url, sandbox, next) {
-	
-	console.log("GET JSON request: " + url);
-	
-	 var options = {
-		url: url,
-		headers: {
-			"accept": "application/json"
-		},
-		jar:true
-	};
+exports.fetchJSON = function (options, sandbox, next) {
 	
 	var request = require("request");
 	//require('request').debug = true;
-
 	// make actual HTTP request
-	request.get(options, function (error, response, body) {
-		sandbox.context.data = JSON.parse(body);
+	request[sandbox.out.method](options, function (error, response, body) {
 		if (error) {
 			console.log(error);
 			next();
 		} else if (response.statusCode == 200) {
-			console.log(options.url);
+			sandbox.context.data = JSON.parse(body);
 			console.log("update response:", body);
 			next();
 		} else {
@@ -71,3 +58,4 @@ exports.getJSON = function (url, sandbox, next) {
 		}
 	});
 }
+
