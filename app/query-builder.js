@@ -39,40 +39,54 @@ exports.search = function (req, res) {
 	return params;
 }
 
-exports.filters = function (req, operators, skip, as_array) {
-	var query = {};
-	var arr = [];
-	for (var param in req.query) {
-		if(!skip.includes(param)) {
-			if(Array.isArray(req.query[param])) {
-				var q = {};
-				if(operators[param])
-					q[operators[param]] = req.query[param];
-				else
-					q = {$all:req.query[param]};  // default AND
-					
-				if(as_array) 
-					arr.push({[param]:q});
-				else
-					query[param] = q;
-					
-			} else {
-				if(as_array)
-					arr.push({[param]:req.query[param]})
-				else
-					query[param] = req.query[param];
-			}
-		}
-	}
-	
-	if(as_array) {
-		//console.log("FILTERS:\n" + util.inspect(arr, false, 4, true));
-		return arr;
-	} else {	
-		//console.log("FILTERS:\n" + util.inspect(query, false, 4, true));
-		return query;
+
+function decode (params) {
+	if(Array.isArray(params)) {
+		params.forEach(function(param, index, arr) {
+			arr[index] = decodeURIComponent(param);
+		})
+		return params;
+	} else {
+		return decodeURIComponent(params);
 	}
 }
+
+exports.filters = function (req, operators, skip, as_array) {
+		var query = {};
+		var arr = [];
+		for (var param in req.query) {
+			if(!skip.includes(param)) {
+				var p = decode(req.query[param]);
+				if(Array.isArray(p)) {
+					var q = {};
+					if(operators[param])
+						q[operators[param]] = p;
+					else
+						q = {$all:p};  // default AND
+
+					if(as_array)
+						arr.push({[param]:q});
+					else
+						query[param] = q;
+
+				} else {
+					if(as_array)
+						arr.push({[param]:p})
+					else
+						query[param] = p;
+				}
+			}
+	}
+
+		if(as_array) {
+				//console.log("FILTERS:\n" + util.inspect(arr, false, 4, true));
+				return arr;
+		} else {
+				//console.log("FILTERS:\n" + util.inspect(query, false, 4, true));
+				return query;
+		}
+}
+
 
 exports.operators = function (req) {
 	var operators = {};
