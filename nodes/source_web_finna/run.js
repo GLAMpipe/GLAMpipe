@@ -64,8 +64,17 @@ function createDocs (recs) {
              } 
       
              /* make sure that we always have 'subjects' as ARRAY */
-             if (recs[i].subjects) 
-                 out_rec.subjects = recs[i].subjects; 
+            if (recs[i].subjects && Array.isArray(recs[i].subjects)) { 
+                 var subjects = recs[i].subjects; 
+                 var arr = []; 
+                 for(var j = 0; j < subjects.length; j++) {
+                    if(Array.isArray(subjects[j]))
+                        arr.push(subjects[j][0]); 
+                    else
+                        arr.push(subjects[j]);
+                 }
+                 out_rec.subjects = arr; 
+             } 
 
              if (recs[i].title) 
                  out_rec.title = recs[i].title; 

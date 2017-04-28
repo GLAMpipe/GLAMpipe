@@ -394,40 +394,39 @@ exports.getNode = function (node_id, cb) {
 exports.uploadFile = function (req, res ) {
 	
 	console.log("req.file:", req.file);
-	
-	switch (req.file.mimetype) {
-		case "text/xml":
-			console.log("File type: XML");
-			return res.json({"error":"XML import not implemented!"});
-		break;
-		
-		case "application/json":
-			console.log("File type: JSON");
-			return res.json({"error":"JSON import not implemented!"});
-		break;
-		
-		case "text/tab-separated-values":	
-		case "text/comma-separated-values":
-		case "text/csv":
-		case "text/plain":
-		case "application/pdf":
-			return res.json({
-				"status": "ok",
-				filename:req.file.filename,
-				mimetype:req.file.mimetype,
-				title: req.body.title,
-				nodeid: req.body.nodeid,
-				project: req.body.project,
-				description: req.body.description
-			})
-		break;
-		
-		default:
-			console.log("File type: unidentified!");
-			return res.json({"error":"File type unidentified! " + req.file.mimetype});
+	if(req.file.mimetype) {
+		return res.json({
+			"status": "ok",
+			filename:req.file.filename,
+			mimetype:req.file.mimetype,
+			title: req.body.title,
+			nodeid: req.body.nodeid,
+			project: req.body.project,
+			description: req.body.description
+		})
+	} else {
+		return res.json({
+			"status": "ok",
+			filename:req.file.filename,
+			mimetype:"unknown",
+			title: req.body.title,
+			nodeid: req.body.nodeid,
+			project: req.body.project,
+			description: req.body.description
+		})
 	}
 }
 
+exports.deleteFile = function(req, res) {
+	var file_id = path.normalize(req.params.id).replace(/^(\.\.[\/\\])+/, '');
+	var file = path.join(glampipe.dataPath, 'tmp', file_id);
+	fs.unlink(file, function(err) {
+		if(err)
+			res.json({status: "error", file:req.params.id});
+		else
+			res.json({status:"ok", file:req.params.id});
+	})
+}
 
 
 /**

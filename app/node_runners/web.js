@@ -39,12 +39,13 @@ exports.postJSON = function (doc, sandbox, next) {
 	});
 }
 
+// get JSON response via GET or POST
 exports.fetchJSON = function (options, sandbox, next) {
 	
 	var request = require("request");
 	//require('request').debug = true;
 	// make actual HTTP request
-	request[sandbox.out.method](options, function (error, response, body) {
+	function responseCallback (error, response, body) {
 		if (error) {
 			console.log(error);
 			next();
@@ -56,6 +57,10 @@ exports.fetchJSON = function (options, sandbox, next) {
 			console.log("SERVER RESPONSE: " + response.statusCode)
 			next();
 		}
-	});
+	}
+	if(sandbox.out.method === "post")
+		request.post(options, responseCallback);
+	else
+		request.get(options, responseCallback); // default method is GET
 }
 

@@ -14,33 +14,46 @@ exports.extractText = function (node, sandbox, io) {
 	//sandbox.pre_run.runInContext(sandbox);
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	
-	pdfUtil.pdfToText(file, {}, function(err, data) {
-		if (err) {
-			throw(err);
-			
-		} else {
-			// save to database
-			mongoquery.insert(node.collection, {text:data} , function(error) {
-				if(error) {
-					console.log(error);
-					runNodeScriptInContext("finish", node, sandbox, io);
-				} else {
-					runNodeScriptInContext("finish", node, sandbox, io);
-				}
-			})
 
-			// save to file
-			var file_out = path.join(node.dir, node.params.filename + ".txt");
-			var fs = require('fs');
-			fs.writeFile(file_out, data, function(err) {
-				if(err) {
-					return console.log(err);
-				}
-				console.log("The file was saved!");
-			}); 
-		}
+	pdfUtil.info(file, function(err, info) {
+		if (err)
+			throw(err)
+		
+		toText(file, info);
 	});
+
 	
+	function toText (file, info) {	
+		pdfUtil.pdfToText(file, {}, function(err, data) {
+			if (err) {
+				sandbox.out.error = err;
+				//runNodeScriptInContext("finish", node, sandbox, io);
+				//sandbox.finish.runInContext(sandbox);
+			} else {
+				// save to database
+				var record = {info:info, text:data}
+				record[MP.source] = node._id;
+				mongoquery.insert(node.collection, record , function(error) {
+					if(error) {
+						console.log(error);
+						runNodeScriptInContext("finish", node, sandbox, io);
+					} else {
+						runNodeScriptInContext("finish", node, sandbox, io);
+					}
+				})
+
+				// save to file
+				var file_out = path.join(node.dir, node.params.filename + ".txt");
+				var fs = require('fs');
+				fs.writeFile(file_out, data, function(err) {
+					if(err) {
+						return console.log(err);
+					}
+					console.log("The file was saved!");
+				}); 
+			}
+		});
+	}
 	console.log("extracting text" + file);
 }
 

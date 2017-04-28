@@ -22,13 +22,15 @@ exports.language = function (doc, sandbox, next) {
 	sandbox.out.value = [];  // reset output
 	sandbox.context.data = [];
 	
+
+	
 	// force to array
-	if(doc[input] && !Array.isArray(doc[input]))
+	if(input && !Array.isArray(input))
 		input = [input];
 	
 	async.eachSeries(input, function iterator(value, nextvalue) {
 		
-		cld.detect(value, function(err, result) {
+		cld.detect(limitText(value), function(err, result) {
 			console.log("detection result", result);
 			sandbox.context.data.push(result);
 			nextvalue();
@@ -41,4 +43,12 @@ exports.language = function (doc, sandbox, next) {
 		mongoquery.update(context.node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);			
 	})
 		
+}
+
+function limitText(str) {
+	//we take 4000 characters form the middle of the text
+	if(str.length > 4000)
+		return str.slice(str.length/2-2000, str.length/2+2000);
+	else 
+		return str;
 }

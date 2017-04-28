@@ -47,7 +47,7 @@ exports.runNode = function (node, io) {
 		// hard-coded demo
 		case "meta":
 			
-			runNodeScriptInContext("init", node, sandbox, io);
+			//runNodeScriptInContext("init", node, sandbox, io);
 			if(sandbox.context.init_error) 
 				return;
 			
@@ -135,7 +135,7 @@ exports.runNode = function (node, io) {
  * *************************************************************************************************************/
 
 		case "source":
-			runNodeScriptInContext("init", node, sandbox, io);
+			//runNodeScriptInContext("init", node, sandbox, io);
 			if(sandbox.context.init_error) 
 				return;
 			
@@ -246,6 +246,7 @@ exports.runNode = function (node, io) {
 							var pdf = require("../app/node_runners/file-pdf.js");
 							var query = {}; 
 							query[MP.source] = node._id;
+							console.log(query);
 							// remove previous data inserted by node and import file
 							mongoquery.empty(node.collection, query, function() {
 								pdf.extractText(node, sandbox, io);
@@ -640,8 +641,12 @@ exports.createSandbox = function (node, io) {
 				var date = new Date();
 				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
 					// send http response if needed (i.e. node was executed by "run" instead of "start")
-					if(ch === "finish" && node.res) 
-						node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
+					if(ch === "finish" && node.res) {
+						if(this.error)
+							node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
+						else
+							node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
+					}
 				});
 			}
 		},

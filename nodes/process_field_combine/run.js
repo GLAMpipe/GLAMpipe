@@ -8,6 +8,11 @@ var field2_value = doc[settings.field2];
 
 var arr = []; 
 
+if(typeof field1_value === "undefined")
+    field1_value = "";
+if(typeof field2_value === "undefined")
+    field2_value = "";
+
 // if both are arrays
 if(Array.isArray(field1_value) && Array.isArray(field2_value)) {
 	var max = Math.max(field1_value.length, field2_value.length);

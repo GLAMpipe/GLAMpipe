@@ -332,6 +332,10 @@ module.exports = function(express, glampipe, passport) {
 	express.post('/api/v1/upload', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
 	});
+
+	express.delete('/api/v1/upload/:id', function (req, res) {
+		glampipe.core.deleteFile(req, res);
+	});
 	
     // DOWNLOAD
 	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
