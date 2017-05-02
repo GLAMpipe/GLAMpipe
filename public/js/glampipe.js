@@ -13,7 +13,8 @@ $.delete = function(url, data, callback, type){
     type: 'DELETE',
     success: callback,
     data: data,
-    contentType: type
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
   });
 }
 
@@ -30,7 +31,8 @@ $.put = function(url, data, callback, type){
     type: 'PUT',
     success: callback,
     data: data,
-    contentType: type
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
   });
 }
 
@@ -136,13 +138,15 @@ var glamPipe = function () {
 	}
 
 	this.getLoginStatus = function (div, cb) {
-		$.getJSON(self.baseAPI + "/auth", function(data) { 
-			if(data.error) {
+		
+		$.ajax(self.baseAPI + "/config", function(data) { 
+
+			if(data.isServerInstallation === false ) {
 				if(data.error === "desktop installation") {
 					$(div).empty();
 					self.desktop = true;
 				} else {
-					$(div).html("<a href='/login'>login</a>");
+					$(div).html("<a id='login-pop' href=''>login</a>");
 					self.desktop = false;
 				}
 			} else {
@@ -154,6 +158,25 @@ var glamPipe = function () {
 
 		})
 	}	
+//var d = {method:"GET", headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")}}
+		//	if(xhr.status==401)
+			//{
+			  // $('#sometag').html(data);
+		//	}
+	
+	this.login = function(user, pass) {
+		var d = {email:user, password:pass}
+		$.post(self.baseAPI + "/login", d, function(data) { 
+			//$(div).empty();
+			if(data.success) {
+				window.localStorage.setItem("token", data.token);
+				//$("#login-popup").remove();
+			} else
+				alert("Login failed!")
+
+			console.log(data)
+		})
+	}
 	
 	this.addProject = function (projectName) {
 		if ($(".create_project #title").val().trim() == "")

@@ -12,6 +12,21 @@ $( document ).ready(function() {
         }
     });
 
+	$(document).on("click", "#login-pop", function(e) {
+		$("#login-pop").parent().append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		e.preventDefault();
+	});
+
+	$(document).on("click", "#login-submit", function(e) {
+		var user = $("#username").val()
+		var pass = $("#password").val()
+		if(user == "" || pass == "")
+			alert("Give username and password")
+		else 
+			gp.login(user, pass)
+			
+		e.preventDefault();
+	});
 
     $("#user-box").on("click", "a", function (e) {
         var user = $(e.target).parents("a").data("id");

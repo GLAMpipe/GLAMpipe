@@ -419,7 +419,7 @@ exports.uploadFile = function (req, res ) {
 
 exports.deleteFile = function(req, res) {
 	var file_id = path.normalize(req.params.id).replace(/^(\.\.[\/\\])+/, '');
-	var file = path.join(glampipe.dataPath, 'tmp', file_id);
+	var file = path.join(global.config.dataPath, 'tmp', file_id);
 	fs.unlink(file, function(err) {
 		if(err)
 			res.json({status: "error", file:req.params.id});

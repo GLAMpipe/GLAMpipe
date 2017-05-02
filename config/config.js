@@ -16,8 +16,9 @@ var MP = "__mp";
 // MODE (server/desktop)
 // - false = do not use authentication
 // - true = use local authentication
-var isServerInstallation = false;
+var isServerInstallation = true;
 var canRegister = true;
+var secret = "Set something here";
 
 var url = "http://localhost";
 
@@ -42,5 +43,6 @@ exports.nodePath = nodePath;
 exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.canRegister = canRegister;
+exports.secret = secret;
 exports.IP_passes = IP_passes;
 

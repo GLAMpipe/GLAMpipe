@@ -1,3 +1,6 @@
+
+var jwt			= require('jsonwebtoken');
+var jwt2		= require('express-jwt');
 var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
 var project 	= require("../app/project.js");
@@ -11,6 +14,7 @@ module.exports = function(express, glampipe, passport) {
     var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
+	express.set('superSecret', conf.secret); // secret variable
 	
     // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
@@ -51,9 +55,28 @@ module.exports = function(express, glampipe, passport) {
 		res.json({error:"not authenticated!"});
 	}
 
+	
+	// API AUTH
+	express.post('/api/v1/login', passport.authenticate('local-login', { session: false }), function(req, res) {
+		console.log("logged in", req.user.id)
+		var token = jwt.sign(req.user, express.get('superSecret'), {
+			expiresIn: 86400 // expires in 24 hours
+		});
+
+		res.json({
+			success: true,
+			message: 'Enjoy your token!',
+			token: token
+		});
+	});
+
+
 	// protect API routes
 	if(config.isServerInstallation) {
-		express.all('/api/v1/*', isLoggedInAPI);
+		var s = express.get('superSecret');
+		express.post('/api/v1/*', jwt2({secret: s}));
+		express.put('/api/v1/*', jwt2({secret: s}));
+		express.delete('/api/v1/*', jwt2({secret: s}));
         
         // projects
         express.all('/api/v1/projects/:project/*', function(req, res, next) {
@@ -148,7 +171,7 @@ module.exports = function(express, glampipe, passport) {
 
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
-		res.json({url:conf.url});
+		res.json({url:conf.url, isServerInstallation:conf.isServerInstallation});
 	});
     
 	express.get('/api/v1/status', function (req, res) {
@@ -362,19 +385,8 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 
-	
-	// API AUTH
-	express.post('/api/v1/login', passport.authenticate('local-login', { session: true }), function(req, res) {
-		console.log("logged in", req.user.id)
-		res.json(req.user);
-	});
-
-	express.get('/api/v1/auth', function (req, res) {
-		if(global.config.isServerInstallation)
-			res.json({email:req.user.local.email});
-		else
-			res.json({error:"desktop installation"});
-		
+	express.get('/api/v1/auth', jwt2({secret:express.get("superSecret")}), function (req, res) {
+			res.json({user:req.user});
 	});
 
 
