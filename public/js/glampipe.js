@@ -765,6 +765,7 @@ var glamPipe = function () {
             contentType: false, 
             cache: false,
             processData:false,
+            headers: {"Authorization": "Bearer " + localStorage.getItem("token")},
             success: function(data)
             {
                 if (data.error) {
