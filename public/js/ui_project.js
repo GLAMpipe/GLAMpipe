@@ -6,6 +6,30 @@ $( document ).ready(function() {
 	gp.getLoginStatus("#login");
 	gp.loadProject("#projectList");
 
+
+	$(document).on("click", "#login-pop", function(e) {
+		$("#login").empty();
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		e.preventDefault();
+	});
+
+	$(document).on("click", "#login-submit", function(e) {
+		var user = $("#username").val()
+		var pass = $("#password").val()
+		if(user == "" || pass == "")
+			alert("Give username and password")
+		else 
+			gp.login(user, pass)
+			
+		e.preventDefault();
+	});
+
+	$(document).on("click", "#logout", function(e) {
+		localStorage.removeItem("token");
+		$("#login").empty().append("<a id='login-pop' href=''>login</a>");
+		e.preventDefault();
+	});
+
 	// hide node settings panel on start
 	$("data-workspace .settings").hide();
 	$("data-workspace .settingscontainer").hide();

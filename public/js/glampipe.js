@@ -18,6 +18,27 @@ $.delete = function(url, data, callback, type){
   });
 }
 
+
+post = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+  
+  return $.ajax({
+    url: url,
+    type: 'POST',
+    done: function(){alert("pois")},
+    data: data,
+    success:callback,
+    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
+  });
+}
+
 $.put = function(url, data, callback, type){
  
   if ( $.isFunction(data) ){
@@ -25,14 +46,16 @@ $.put = function(url, data, callback, type){
     callback = data,
     data = {}
   }
- 
+  
   return $.ajax({
     url: url,
     type: 'PUT',
-    success: callback,
+    done: function(){alert("pois")},
     data: data,
+    success:callback,
+    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
-    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
   });
 }
 
@@ -138,20 +161,32 @@ var glamPipe = function () {
 	}
 
 	this.getLoginStatus = function (div, cb) {
-		
-		$.ajax(self.baseAPI + "/config", function(data) { 
-
-			if(data.isServerInstallation === false ) {
-				if(data.error === "desktop installation") {
+		$.getJSON(self.baseAPI + "/config", function(data) { 
+			if(data.isServerInstallation) {
+				var d = {
+					url: self.baseAPI + "/auth", 
+					method:"GET", 
+					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
+					error: function(data, s, xhr) {
+						console.log("not logged in");
+						$(div).html("<a id='login-pop' href=''>login</a>");
+					},
+					success: function(data) {
+						console.log("Logged in");
+						//console.log(data);
+						$(div).html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+					}
+				}
+				$.ajax(d, function(data, s, xhr) {
+					
+					
+				})
+				
+				self.desktop = false;
+			} else {
 					$(div).empty();
 					self.desktop = true;
-				} else {
 					$(div).html("<a id='login-pop' href=''>login</a>");
-					self.desktop = false;
-				}
-			} else {
-				$(div).html("<a href='/logout'>" +data.email + "</a>");
-				self.desktop = false;
 			}
 			if(cb)
 				cb(self.desktop);
@@ -164,35 +199,48 @@ var glamPipe = function () {
 			  // $('#sometag').html(data);
 		//	}
 	
+	
+	// MUUTA TÄMÄ KÄYTTÄMÄÄN AJAXIA
 	this.login = function(user, pass) {
-		var d = {email:user, password:pass}
-		$.post(self.baseAPI + "/login", d, function(data) { 
-			//$(div).empty();
-			if(data.success) {
-				window.localStorage.setItem("token", data.token);
-				//$("#login-popup").remove();
-			} else
-				alert("Login failed!")
+		var d = {
+			url:self.baseAPI + "/login", 
+			type:"POST",
+			data: {
+				email:user,
+				password:pass
+			},
+			error:function() {console.log("fail")},
+			success: function(data) {
+				console.log(data);
+				if(data.success) {
+					window.localStorage.setItem("token", data.token);
+					$("#login-popup").remove();
+					$("#login").html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+				} else
+					alert("Login failed!")
+				}
+		}
+		$.ajax(d);
 
-			console.log(data)
-		})
 	}
 	
 	this.addProject = function (projectName) {
+
 		if ($(".create_project #title").val().trim() == "")
 			alert("Please give a title for the project!");
 		else {
 			var title = $(".create_project #title").val().trim();
 			var data = {"title": title};
-			$.put(self.baseAPI + "/projects", data, function(returnedData) {
-				if(!returnedData.error) {
-					console.log('created project', returnedData.project);
-					window.location.href = "/project/" + returnedData.project._id;
-				} else {
-					alert(returnedData.error);
-				}
-			});
 		}
+
+		$.put(self.baseAPI + "/projects", data, function(data) {
+				if(!data.error) {
+					console.log('created project', data.project);
+					window.location.href = "/project/" + data.project._id;
+				} else {
+					alert(data.error);
+				}
+		})
 	}
 
 	this.removeProject = function (event) {
@@ -561,8 +609,7 @@ var glamPipe = function () {
 
 
 	this.updateDocument = function (data, cb) {
-		$.post( "/edit/collection/" + self.currentCollection.source.collection, data, function( response ) {
-			
+		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id, data, function( response ) {
 			console.log(response);
 			cb();
 		})

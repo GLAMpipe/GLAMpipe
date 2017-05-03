@@ -24,7 +24,7 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
 		
-		$.post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
+		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
 				$(".settings").removeClass("busy");
@@ -39,7 +39,7 @@ var glamPipeNode = function (node, gp) {
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with settings: ", self.source.settings);
 		
-		$.post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
+		post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
 				$(".settings").removeClass("busy");

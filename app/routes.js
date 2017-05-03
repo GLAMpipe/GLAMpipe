@@ -66,7 +66,8 @@ module.exports = function(express, glampipe, passport) {
 		res.json({
 			success: true,
 			message: 'Enjoy your token!',
-			token: token
+			token: token,
+			user: req.user
 		});
 	});
 
@@ -137,22 +138,11 @@ module.exports = function(express, glampipe, passport) {
  * *************************************************************************************************************/
 
 	// login page
-	express.get('/login', function (req, res) {
+	express.get('/signup', function (req, res) {
 		if(global.config.isServerInstallation)
 			res.sendFile(path.join(__dirname, 'views', 'login.html'));
 		else
 			res.redirect('/');
-	});
-
-	// login handler
-	express.post('/login', passport.authenticate('local-login', { session: true }), function(req, res) {
-		console.log("logged in", req.user.id)
-		res.redirect("/");
-	});
-
-	express.get('/logout', function (req, res) {
-        req.logout();
-        res.redirect('/');
 	});
 
 	// signup handler
@@ -339,7 +329,7 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
 	});
 
-	express.post('/edit/collection/:collection', function (req, res) {
+	express.post('/api/v1/collections/:collection/docs/:doc', function (req, res) {
 		glampipe.core.editCollection(req, function(data) {res.send(data)});
 	});
 

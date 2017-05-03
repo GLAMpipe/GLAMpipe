@@ -1055,11 +1055,11 @@ exports.editCollection = function (req, callback) {
 
 	var collection_id = req.params.collection
 	console.log("editing", collection_id);
-	if(!req.body.doc_id)
+	if(!req.params.doc)
 		return callback({error:"doc_id is missing!"});
 		
 	try {
-		var doc_id = mongojs.ObjectId(req.body.doc_id)
+		var doc_id = mongojs.ObjectId(req.params.doc)
 	} catch (e) {
 		return callback({error:"doc_id is invalid! It must be a valid MongoDB id."});
 	}
@@ -1068,7 +1068,7 @@ exports.editCollection = function (req, callback) {
 	setter[req.body.field] = req.body.value;
 	console.log("setter:", setter);
 	
-	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$set:setter}, function(result) {
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(result) {
 		callback(result); 
 	});
 }

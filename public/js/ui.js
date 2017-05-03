@@ -13,7 +13,8 @@ $( document ).ready(function() {
     });
 
 	$(document).on("click", "#login-pop", function(e) {
-		$("#login-pop").parent().append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		$("#login").empty();
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
 		e.preventDefault();
 	});
 
@@ -25,6 +26,12 @@ $( document ).ready(function() {
 		else 
 			gp.login(user, pass)
 			
+		e.preventDefault();
+	});
+
+	$(document).on("click", "#logout", function(e) {
+		localStorage.removeItem("token");
+		$("#login").empty().append("<a id='login-pop' href=''>login</a>");
 		e.preventDefault();
 	});
 
