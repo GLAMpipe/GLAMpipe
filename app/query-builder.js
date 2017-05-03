@@ -30,7 +30,7 @@ exports.search = function (req, res) {
 		query: query,
 		limit: limit,
 		skip: skip,
-		sort: req.query.sort,
+		sort: sort,
 		reverse: reverse
 	}
 
