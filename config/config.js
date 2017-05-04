@@ -18,7 +18,7 @@ var MP = "__mp";
 // MODE (server/desktop)
 // - false = do not use authentication
 // - true = use local authentication
-var isServerInstallation = true;
+var isServerInstallation = false;
 var canRegister = true;
 var secret = "Set something here";
 

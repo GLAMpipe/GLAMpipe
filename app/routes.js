@@ -161,7 +161,12 @@ module.exports = function(express, glampipe, passport) {
 
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
-		res.json({url:conf.url, isServerInstallation:conf.isServerInstallation, version:conf.version});
+		res.json({
+			url:conf.url, 
+			isServerInstallation:conf.isServerInstallation, 
+			version:conf.version,
+			dataPath:conf.dataPath
+		});
 	});
     
 	express.get('/api/v1/status', function (req, res) {
@@ -176,7 +181,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/api/v1/datapaths', function (req, res) {
-		res.json({"datapath": global.config.dataPath});
+		res.json({"dataPath": global.config.dataPath});
 	});
 
 
