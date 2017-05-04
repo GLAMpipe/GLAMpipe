@@ -900,7 +900,7 @@ exports.getCollection = function (req, query, res) {
 		query: query,
 		limit: limit,
 		skip: skip,
-		sort: req.query.sort,
+		sort: sort,
 		reverse: reverse
 	}
 	mongoquery.findAll(params, function(data) { res.json(data) });
@@ -938,7 +938,7 @@ exports.getCollectionTableData = function (req, res) {
 		skip = 0;
 
 	var sort = req.query.sort
-	if(sort === 'undefined')  // by default sort by _id (mongoid)
+	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
 		sort = "_id";
 
 	var reverse = false
