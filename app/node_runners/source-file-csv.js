@@ -108,15 +108,19 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 	var count = 0;
 	if(node.settings.columns)
 		columns = true;
-
-	var parser = parse(
-	{
+		
+	var settings = {
 		delimiter: node.settings.separator, 
 		columns:columns, 
 		relax: true,
 		trim: true, // this could be optional
 		skip_empty_lines:true
-	})
+	} 
+	
+	if(node.settings.tabs)
+		settings.delimiter = "\t";
+
+	var parser = parse(settings)
 	
 	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
 	var options = { db: db, collection: node.collection }
