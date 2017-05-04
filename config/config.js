@@ -1,4 +1,6 @@
 
+var version = "2017.05.03"
+
 // DATAPATH
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
@@ -44,5 +46,6 @@ exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.canRegister = canRegister;
 exports.secret = secret;
+exports.version = version;
 exports.IP_passes = IP_passes;
 

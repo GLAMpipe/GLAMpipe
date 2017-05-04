@@ -161,7 +161,7 @@ module.exports = function(express, glampipe, passport) {
 
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
-		res.json({url:conf.url, isServerInstallation:conf.isServerInstallation});
+		res.json({url:conf.url, isServerInstallation:conf.isServerInstallation, version:conf.version});
 	});
     
 	express.get('/api/v1/status', function (req, res) {

@@ -16,8 +16,8 @@ if(Array.isArray(in_field_value)) {
 			formData: {
 				text: 		limitText(value),
 				project: 	context.node.settings.project,
-				maxhits: 	context.node.settings.maxhits,
-				threshold: 	context.node.settings.threshold
+				maxhits: 	parseInt(context.node.settings.maxhits),
+				threshold: 	parseInt(context.node.settings.threshold)
 				}
 		};
 		out.pre_value.push(options);
@@ -32,8 +32,8 @@ if(Array.isArray(in_field_value)) {
 		formData: {
 			text: 		limitText(in_field_value), 
 			project: 	context.node.settings.project,
-			maxhits: 	context.node.settings.maxhits,
-			threshold: 	context.node.settings.threshold
+			maxhits: 	parseInt(context.node.settings.maxhits),
+			threshold: 	parseInt(context.node.settings.threshold)
 			}
 	};	
 }

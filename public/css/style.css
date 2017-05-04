@@ -94,6 +94,10 @@ header {
 	margin-bottom:1px;
 }
 
+header span {
+	margin-left:10px;
+}
+
 content {
 }
 
@@ -128,6 +132,7 @@ node-pipe {
 
 .sitetitle {
 	font-size: 24px;
+	margin-left:0px;
 }
 
 .pagetitle {

@@ -177,10 +177,7 @@ var glamPipe = function () {
 						$(div).html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
 					}
 				}
-				$.ajax(d, function(data, s, xhr) {
-					
-					
-				})
+				$.ajax(d);
 				
 				self.desktop = false;
 			} else {
@@ -188,19 +185,14 @@ var glamPipe = function () {
 					self.desktop = true;
 					$(div).html("<a id='login-pop' href=''>login</a>");
 			}
+			$("#version").empty().append("ver." + data.version);
 			if(cb)
 				cb(self.desktop);
 
 		})
 	}	
-//var d = {method:"GET", headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")}}
-		//	if(xhr.status==401)
-			//{
-			  // $('#sometag').html(data);
-		//	}
 	
 	
-	// MUUTA TÄMÄ KÄYTTÄMÄÄN AJAXIA
 	this.login = function(user, pass) {
 		var d = {
 			url:self.baseAPI + "/login", 
