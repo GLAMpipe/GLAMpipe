@@ -20,7 +20,9 @@ exports.loop = function (node, sandbox, onDoc) {
 				sandbox.context.doc_count = 1;
 				// call document processing function
 				onDoc(doc, sandbox, function processed () {
-					console.log("sandbox.out:" + sandbox.out);
+					console.log("sandbox.out.value:" + sandbox.out.value);
+					console.log("sandbox.out.setter:");
+					console.log(JSON.stringify(sandbox.out.setter, null, 4))
 					if(sandbox.out.setter != null) {
 						var setter = sandbox.out.setter; 
 					} else {

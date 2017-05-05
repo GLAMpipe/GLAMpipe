@@ -1,13 +1,16 @@
 <div class="box-noflex">
 	
 	<select id="process_field_extract_pre">
-		<option>year (four digits)</option>
-		<option>person names</option>
+		<option value="">examples</option>
+		<option value="\d{4}">year (four digits)</option>
+		<option value='([A-ZÅÄÖ][\wåäö"-]+|\sde\b|\sla\b|\von\b)(\s[A-ZÅÄÖ"][\wåäö"-]*|\sde\b|\sla\b|\von\b)*'>person names (two words starting with capital letter)</option>
 	</select>
 	
-	<label>regular expression (add "/" YOUR REGEXP "/g" for global match</label>
-	<input class="node-settings long_input" name="regexp"/>
+	<label>regular expression</label>
+	<input id="process_field_extract_regexp" class="node-settings long_input" name="regexp"/>
 
-	<input type="checkbox" class="node-settings" name="global"/>
-	<label>global</label>
+	<div>
+		<input type="checkbox" class="node-settings" name="only_first"/>
+		<label>take only first match</label>
+	</div>
 </div>

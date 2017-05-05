@@ -594,13 +594,6 @@ function initNode (req, io, project, callback) {
 			if(req.body.settings)
 				node.settings = req.body.settings;
 
-
-			// settings html is on client side and therefore it is not aware of node content
-			// so we inject node.params to settings view so that client side script can acces parameters of node (urls and so on)
-			if( node.views.settings) {
-				node.views.settings = node.views.settings.replace("[[params]]", "var params = " + JSON.stringify(node.params) + ";\n");
-			}
-
 			node.params.collection = node.collection;
 			
 			// copy static data view to project node's view if defined

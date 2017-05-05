@@ -229,9 +229,13 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+// add empty fields to collection
 exports.addFieldToCollection = function (collectionname, field, cb) {
 	var add = {};
-	add[field] = null;
+	if(Array.isArray(field))
+		field.forEach(function(f) {add[f] = null});
+	else
+		add[field] = null;
 	var update = {$set:add}
 	exports.update(collectionname, {}, update, cb);
 	

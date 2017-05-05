@@ -26,7 +26,6 @@ exports.getKeys = function (collection_name, cb) {
 	mongoquery.findOne({collection:collection_name}, "mp_schemas", function(err, doc) {
 		if(doc) {
 			all_keys = doc.keys;
-		
 		}
 		
 		// first we take the first record and extract key names from that
@@ -40,7 +39,7 @@ exports.getKeys = function (collection_name, cb) {
 				key_list[key] = {};
 			}
 
-		cb({node_keys:node_keys,keys:key_list, sorted:all_keys.sort()});
+			cb({node_keys:node_keys,keys:key_list, sorted:all_keys.sort()});
 		
 		})		
 		

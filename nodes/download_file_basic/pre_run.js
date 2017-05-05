@@ -78,7 +78,7 @@ function generateFileName (url, index) {
 
 
 	/* remove characters that might confuse OS */ 
-	return filename.replace(/[\/]\,\./g, "_").trim(); 
+	return filename.replace(/[\.-/, \\]/g, "_").trim().toLowerCase(); 
 	 
 		
 }
