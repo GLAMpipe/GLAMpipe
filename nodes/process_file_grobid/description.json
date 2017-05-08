@@ -1,9 +1,9 @@
 {
-    "nodeid": "process_file_grobid2",
+    "nodeid": "process_file_grobid",
     "type": "process",
     "subtype": "files",
     "subsubtype": "grobid",
-    "title": "GROBID2",
+    "title": "Reference extraction (GROBID)",
     "status": "rubbish",
     "usage":"",
     "description": "Extracts references from academic articles",
