@@ -72,7 +72,8 @@ exports.uploadFile = function (doc, sandbox, next ) {
 		jar:true,
 		headers: { // TODO: these should be set by node
 			"accept": "application/xml",
-			"content-type": "application/pdf"
+			"content-type": "application/pdf",
+			"User-Agent": "GLAMpipe/0.0.1",
 		},
 		formData: formData
 	}
