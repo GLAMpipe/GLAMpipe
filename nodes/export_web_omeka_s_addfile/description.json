@@ -1,0 +1,26 @@
+{
+    "nodeid": "export_web_omeka_s_addfile",
+    "title": "Omeka-S: add file",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "upload_file",
+    "tags":["omeka-s", "bitstream"],
+    "status": "rubbish",
+    "description": "Upload files to OMEKA-S (items must exist)",
+
+    "scripts": {
+        "hello": 
+        [
+			"out.say('news', 'You just created a Omeka-S node '); ",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('finish', 'Deleted node!'); ",
+            
+        "finish":"out.say('finish', context.success_counter + ' of '  + context.doc_count + ' files added!'); "
+
+    },
+    
+    "views": {}
+
+}

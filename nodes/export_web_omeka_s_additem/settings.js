@@ -65,13 +65,13 @@ $("#export-web-omeka_fetch_collections").click(function (e) {
 			var html = display(data);
 			$("#export-web-omeka_coll_list").empty().append(html);
 		}
-	})				
+	})
 })
 
 
 
 // collection click handler
-$("#export-web-omeka_coll_list").on("click", "li.collection", function (event) {
+$("#export-web-omeka_coll_list").on("click", "li.set", function (event) {
 	event.stopPropagation();
 	$("#export-web-omeka_collection").val($(this).data("id"));
 	$("#export-web-omeka_coll_list").hide();
@@ -98,7 +98,7 @@ function fetchSchemas (cb) {
 function display (data) {
 	var html = "<ul>";
 	for(var i = 0; i < data.length; i++) {
-		html += "<li data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</li>";
+		html += "<li class='set' data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</li>";
 
 	}
 	html += "</ul>";

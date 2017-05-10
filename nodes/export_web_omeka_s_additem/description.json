@@ -1,6 +1,6 @@
 {
     "nodeid": "export_web_omeka_s_additem",
-    "title": "Omeka-s: create items",
+    "title": "Omeka-S: create items",
     "type": "export",
     "subtype": "web",
     "subsubtype": "omeka_additem",

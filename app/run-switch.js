@@ -364,7 +364,12 @@ exports.runNode = function (node, io) {
 							//mv_bot.uploadFileWithWikitext(node, sandbox, io);
 
 						break;
-						
+
+						case "upload_file":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
+						break;
+
 						default:
 							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");

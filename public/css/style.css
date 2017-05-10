@@ -764,3 +764,9 @@ label {
 .inline {
 	display:inline;
 }
+
+.info {
+	border: 1px solid orange;
+	padding:2px;
+}
+

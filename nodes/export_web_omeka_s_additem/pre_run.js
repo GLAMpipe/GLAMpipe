@@ -72,12 +72,21 @@ for (mapkey in context.node.settings) {
 
 } 
 
+// set item set
+item["o:item_set"] = [{"o:id":context.node.settings.collection}] 
 
 
 if(parseInt(context.count) % 10 == 0) 
     out.say("progress", context.node.type.toUpperCase() + ": processed " + context.count + "/" + context.doc_count);
 
 
+var options = {
+	url: out.url,
+	json:  item,
+	headers: {
+		"accept": "application/json"
+	}
+};
 
 
-out.setter = {"upload": item};
+out.pre_value = options;

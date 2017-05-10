@@ -77,7 +77,7 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 			// call document processing function
 			onDoc(doc, sandbox, function processed () {
 				
-				//console.log("search:", sandbox.out.pre_value);
+				console.log("search:", sandbox.out.pre_value);
 				// we always set value even if there is no query
 				if(!sandbox.out.pre_value) {
 					var set_value = {};

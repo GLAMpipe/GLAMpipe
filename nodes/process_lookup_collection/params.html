@@ -1,9 +1,16 @@
 
-<label>lookup collection</label> collection name where lookup data is
-<input class="dynamic_collection" name="source_collection" /> 
 
+<input class="dynamic_collection button" name="source_collection" placeholder="choose lookup collection"/> 
+
+<label>Which field to compare from lookup collection?</label> 
+<input class="dynamic_field" name="compare_field" /> 
+
+<p>(you have to choose collection again, sorry)</p>
 <label>Which field to copy from lookup collection?</label> 
 <input class="dynamic_field" name="copy_field" /> 
+
+<label>key field in this collection</label> 
+<input class="dynamic_field" name="in_field" /> 
 
 <label>Where to write the result</label>
 <input name="out_field" value="lookup"/> 

@@ -1,0 +1,102 @@
+
+
+
+<div>You can test your wikitext by copying it <a target='_blank' href='https://commons.wikimedia.org/wiki/Special:ExpandTemplates?uselang=en'>here</a>.</div>
+
+
+<h3>Categories</h3>
+<div class="box-noflex">
+	<label>Item specific categories (select field if any)</label>
+	<input class="node-settings dynamic_field" name="categories"/><br>
+	
+	<label>Categories for all items (comma separated list)</label>
+	<textarea class="node-settings big" name="category_all"></textarea>
+    
+	<label>Extra text after template</label>
+	<textarea class="node-settings big" name="extra"></textarea>
+</div>
+
+<h3>Title</h3>
+<div class="box-noflex">
+	<div class="info">This is the page title and this MUST be unique!</div>
+	<label>content (static + dynamic + static)</label>
+	<input class="node-settings middle_input" name="title_static1"/>
+    <input class="node-settings dynamic_field middle_input" name="title_dyn1"/>
+    <input class="node-settings middle_input" name="title_static2"/>
+    
+    <label>language (static or dynamic)</label>
+    <input class="node-settings short_input" name="title_lang_static"/>
+    <input class="node-settings dynamic_field middle_input" name="title_lang_dyn"/>
+</div>
+
+<h3>Description</h3>
+<div class="box-noflex">
+	<label>content (static + dynamic + static)</label>
+	<input class="node-settings middle_input" name="description_static1"/>
+    <input class="node-settings dynamic_field middle_input" name="description_dyn1"/>
+    <input class="node-settings middle_input" name="description_static2"/>
+    
+    <label>language (static or dynamic)</label>
+    <input class="node-settings short_input" name="description_lang_static"/> or
+    <input class="node-settings dynamic_field middle_input" name="description_lang_dyn"/>
+</div>
+
+
+<h3>Date</h3>
+<div class="box-noflex">
+	<label>content (static + dynamic + static)</label>
+	<input class="node-settings middle_input" name="date_static1"/>
+    <input class="node-settings dynamic_field middle_input" name="date_dyn1"/>
+    <input class="node-settings middle_input" name="date_static2"/>
+</div>
+
+
+<h3>Permission</h3>
+<div class="box-noflex">
+	<label>static content</label>
+	<textarea class="node-settings big" name="permission_static1"></textarea>
+    <label>dynamic content</label>
+    <input class="node-settings dynamic_field" name="permission_dyn1"/>
+</div>
+
+<h3>Source</h3>
+<div class="box-noflex">
+	<label>static content</label>
+	<textarea class="node-settings big" name="source_static1"></textarea>
+    <label>dynamic content</label>
+    <input class="node-settings dynamic_field" name="source_dyn1"/>
+
+</div>
+
+<h3>Institution and department</h3>
+<div class="box-noflex">
+	<label>static content</label>
+	<textarea class="node-settings big" name="institution_static1"></textarea>
+    <label>dynamic content</label>
+    <input class="node-settings dynamic_field" name="institution_dyn1"/>
+
+</div>
+
+
+<h3>Accession number, notes and inscriptions</h3>
+<div class="box-noflex">
+	<label>accession number</label>
+	<input class="node-settings middle_input" name="accnumber_static1"/>
+    <input class="node-settings dynamic_field middle_input" name="accnumber_dyn1"/>
+    <input class="node-settings middle_input" name="accnumber_static2"/>
+    
+    <label>notes</label>
+    <input class="node-settings dynamic_field" name="notes_dyn1"/>
+    
+    <label>inscriptions</label>
+    <input class="node-settings dynamic_field" name="inscriptions_dyn1"/>
+
+</div>
+
+<h3>Template specific fields</h3>
+<div class="box-noflex">
+    <div class="help">Here you can match your fields to the fields of wikitext template.</div>
+    <div id="node_set___node_id__" class="template_map"></div>
+</div>
+
+
