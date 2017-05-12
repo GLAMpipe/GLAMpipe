@@ -110,6 +110,23 @@ exports.extractReferences = function (doc, sandbox, next) {
 	}
 
 
+exports.pdf2image = function (doc, sandbox, next) {
+	
+	var PDFImage = require("pdf-image").PDFImage;
+	var options = {outputDirectory: sandbox.context.node.dir};
+	var pdfImage = new PDFImage(doc, options);
+	pdfImage.convertPage(0).then(function (imagePath) {
+		sandbox.context.data = imagePath;
+		// 0-th page (first page) of the slide.pdf is available as slide-0.png 
+		//fs.existsSync("/tmp/slide-0.png") // => true 
+		next();
+	}).catch(function(error) {
+		console.log("ERROR: "+ error.message);
+		next();
+	});
+
+}
+
 
 function runNodeScriptInContext (script, node, sandbox, io) {
 	try {

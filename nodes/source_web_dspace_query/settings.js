@@ -623,7 +623,7 @@ var QueryReport = function() {
             "query_op[]"    : [],
             "query_val[]"   : [],
             "collSel[]"     : ($("#collSel").val() == null) ? [""] : $("#collSel").val(),
-            "expand"        : "parentCollection,metadata",
+            "expand"        : "parentCollection,metadata,bitstreams",
             filters         : this.myFilters.getFilterList(),
             "show_fields[]" : this.myMetadataFields.getShowFields(),
         };

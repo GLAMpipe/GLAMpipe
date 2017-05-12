@@ -70,7 +70,7 @@ exports.uploadFile = function (doc, sandbox, next ) {
 		var stats = fs.statSync(options.file);
 	}
 	catch(err) {
-		console.log("not found")
+		console.log("WARNING: " + options.file + " not found")
 		return next("file does not exist");
 	}
 

@@ -447,15 +447,20 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						
 						case "extract_references":
-							var extractReferences = require("../app/node_runners/file-pdf.js");
-							asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+							var pdf = require("../app/node_runners/file-pdf.js");
+							asyncLoop.loop(node, sandbox, pdf.extractReferences);
 						break;
-						
+
+						case "pdf2image":
+							var pdf = require("../app/node_runners/file-pdf.js");
+							asyncLoop.fieldLoop(node, sandbox, pdf.pdf2image);
+						break;
+
 						case "calculate_checksum":
 							var checksum = require("../app/node_runners/file-checksum.js");
 							asyncLoop.fieldLoop(node, sandbox, checksum.getHash);
 						break;
-						
+
 						case "grobid":
 							var web = require("../app/node_runners/web-get-content.js");
 							asyncLoop.loop(node, sandbox, web.uploadFile);

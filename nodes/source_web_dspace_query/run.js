@@ -1,6 +1,10 @@
 
 var c = context;
 
+// we must remove rest part from dspace_url (usually "/rest")
+var splitted = context.node.params.dspace_url.split("/");
+var dspace_url_stripped = splitted.slice(0, splitted.length-1).join("/");
+
 
 if (context.response && context.response.statusCode == 200 ) {
 	// count query rounds
@@ -48,18 +52,26 @@ if (context.response && context.response.statusCode == 200 ) {
 			}
 			
 			// BITSTREAMS
+			context.data.items[i]["bitstream_original_file_url"] = [];
+			context.data.items[i]["bitstream_original_name"] = [];
+			context.data.items[i]["bitstream_original_format"] = [];
+			context.data.items[i]["bitstream_thumb_file_url"] = [];
+			context.data.items[i]["bitstream_thumb_format"] = [];
+			
 			if (context.data.items[i].bitstreams && context.data.items[i].bitstreams.constructor.name == "Array") {
-				context.data.items[i]["bitstream_original_file"] = [];
-				context.data.items[i]["bitstream_original_name"] = [];
-				context.data.items[i]["bitstream_original_format"] = [];
 				for (var j = 0; j < context.data.items[i].bitstreams.length; j++) {
 					if (context.data.items[i].bitstreams[j].bundleName == "ORIGINAL" && context.data.items[i].bitstreams[j].type == "bitstream") {
-						context.data.items[i]["bitstream_original_file"].push(context.node.params.dspace_url + context.data.items[i].bitstreams[j].retrieveLink);
+						context.data.items[i]["bitstream_original_file_url"].push(dspace_url_stripped + context.data.items[i].bitstreams[j].retrieveLink);
 						context.data.items[i]["bitstream_original_name"].push(context.data.items[i].bitstreams[j].name);
 						context.data.items[i]["bitstream_original_format"].push(context.data.items[i].bitstreams[j].format);
 					}
+					if (context.data.items[i].bitstreams[j].bundleName == "THUMBNAIL" && context.data.items[i].bitstreams[j].type == "bitstream") {
+						context.data.items[i]["bitstream_thumb_file_url"].push(dspace_url_stripped + context.data.items[i].bitstreams[j].retrieveLink);
+						context.data.items[i]["bitstream_thumb_format"].push(context.data.items[i].bitstreams[j].format);
+					}
 				}
 			}
+			
 		}
 
 		// OUTPUT

@@ -277,12 +277,12 @@ var dataTable = function (node) {
 				} else {
 					if(config) { 
 						if(config.output_keys.indexOf(visible_keys[k]) !== -1) {
-							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "output") + "</td>";
+							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "output", visible_keys[k]) + "</td>";
 						} else {
-							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "") + "</td>";
+							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "", visible_keys[k]) + "</td>";
 						}
 					} else {
-						html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "") + "</td>";
+						html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "", visible_keys[k]) + "</td>";
 					}
 				}
 			}
@@ -294,7 +294,7 @@ var dataTable = function (node) {
 
 
 
-	this.renderCell = function (data, index, className) {
+	this.renderCell = function (data, index, className, key) {
 		
 		var html = "";
 		if(data == null)
@@ -303,7 +303,7 @@ var dataTable = function (node) {
 		// render arrays recursively
 		if (Array.isArray(data)) {
 			for(var i = 0; i < data.length; i++) {
-				html += self.renderCell(data[i], i, className);
+				html += self.renderCell(data[i], i, className, key);
 				
 				//if(!self.expandCells && i > self.maxArrayLenghtDisplay) {
 					//var left = data.length - i -1;
@@ -314,10 +314,16 @@ var dataTable = function (node) {
 			}
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
-			if(index != null)
-				html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
-			else
-				html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
+			// render urls as links
+			if(key.includes("url")) {
+				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				
+			} else {
+				if(index != null)
+					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
+				else
+					html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
+			}
 		// render objects
 		} else {
 			if(index != null)

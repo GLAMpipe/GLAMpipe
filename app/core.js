@@ -181,7 +181,7 @@ exports.setDataPath = function (params, glampipe, res) {
 exports.createProject = function (req, res) {
 	
     var title = req.body.title
-	var dirs = ["download", "export", "source", "view"]; // these dirs are created for every project
+	var dirs = ["download", "export", "source", "view", "process", "meta"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
@@ -616,49 +616,27 @@ function initNode (req, io, project, callback) {
 			
 			node._id = mongojs.ObjectId();
 			
-			// create output directory for nodes that do file output
-			if(node.type == "download" || node.type == "export" || node.type == "source" || node.type == "view") {
-
-				createNodeDirs(node, project, function(err) {
-					insertNode(node, function(err) {
-						if(err) {
-							console.log(err);
-							callback({"error": err});
-						} else {
-							console.log("node created");
-							callback({
-								status:'node created', 
-								id:node._id, 
-								node:node,
-								collection:node.collection,
-								nodeid: node.nodeid
-							})
-						}
-					});					
-				})
-
-				
-			// otherwise just insert node 
-			} else {
-				insertNode(node, function (err) {
+			// create node directories
+			createNodeDirs(node, project, function(err) {
+				// create node
+				insertNode(node, function(err) {
 					if(err) {
 						console.log(err);
 						callback({"error": err});
 					} else {
-						
 						console.log("node created");
-						
 						callback({
 							status:'node created', 
 							id:node._id, 
-							node: node, 
+							node:node,
 							collection:node.collection,
 							nodeid: node.nodeid
-						});
-					
+						})
 					}
-				});
-			}
+				});					
+			})
+
+
 
 		} else {
 			console.log("ERROR: node not found");
