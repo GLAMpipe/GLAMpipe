@@ -1164,16 +1164,31 @@ exports.getNodeParams = function (req, cb) {
 	})	
 }
 
-exports.getNodeFile = function (req, cb) {
+exports.getNodeFile = function (req, res) {
 	
-	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_params", function(err, result) {
+	exports.getNodeKey("dir", req.params.nodeid, function(err, data) {
 		if(err)
-			console.log(err);
-		
-		cb({"error":"not implemented"});
+			res.json({"error": err});
+		else {
+			var file = path.join(data.value,req.params.file);
+			console.log(file)
+			res.sendFile(file);
+		}
 	})	
 }
 
+exports.getNodeKey = function (key, nodeid, cb) {
+	
+	mongoquery.findProjectNode(nodeid, function(err, project) {
+		if(err)
+			console.log(err);
+		if(project.nodes[0]) {
+			cb(null, {key:"node." + key, value:project.nodes[0][key]});
+		} else {
+			cb({"error":"not found"});
+		}
+	})	
+}
 
 
 exports.setNodeParams = function (req, cb) {

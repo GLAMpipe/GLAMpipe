@@ -141,6 +141,27 @@ exports.countDocs = function (collectionname, query, callback) {
 
 
 
+exports.findProjectNode = function (node_id, callback) {
+	
+	var collection = db.collection("mp_projects");
+	var query = {nodes:{$elemMatch:{_id:mongojs.ObjectId(node_id)}}};
+
+	collection.findOne(query, {title:1, "nodes.$":1}, function (err, result) {
+		if (err) {
+			console.log("ERROR:", err);
+			callback(err, result)
+		} else {
+			callback(err, result);
+		}
+	}); 
+
+	//exports.findOne (query, "mp_projects", function (err, node) {
+		//callback(err, node);
+	//})
+}
+
+
+
 // *********************************************************************
 // ******************************* INSERT ******************************
 // *********************************************************************

@@ -2,6 +2,7 @@
 var glamPipeNode = function (node, gp) {
 	var self = this;
 	this.gp = gp;
+	this.debug = true;
 	this.source = node;
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
 	this.settings = {};
@@ -160,6 +161,10 @@ var glamPipeNode = function (node, gp) {
 		$("data-workspace .settings").append("<div class='params box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
 		$("data-workspace .settings").append(self.source.views.settings);
 		$("data-workspace .settings .params").append(self.source.params);
+		
+		if(self.debug) {
+			$("data-workspace .settings").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
+		}
 		
 		// render parameters
 		var params_table = "<table><tbody>";

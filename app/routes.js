@@ -238,7 +238,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/api/v1/nodes/:nodeid/files/:file', function (req, res) {
-		glampipe.core.getNodeFile(req, function(data) {res.send(data)});
+		glampipe.core.getNodeFile(req, res);
 	});
 
 	express.post('/api/v1/nodes/:nodeid/params', function (req, res) {
