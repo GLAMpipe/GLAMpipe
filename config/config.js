@@ -7,14 +7,6 @@ var version = "2017.05.03"
 var dataPath = "/home/arihayri/GLAMpipe-data";
 
 
-// NODEPATH
-// - where are GLAMpipe node files?
-// default: "" (means that GP uses internal nodes)
-var nodePath = ""; 
-
-
-var MP = "__mp";
-
 // MODE (server/desktop)
 // - false = do not use authentication
 // - true = use local authentication
@@ -22,6 +14,20 @@ var isServerInstallation = false;
 var canRegister = true;
 var secret = "Set something here";
 
+// defines what nodes are available for use
+// default: "null" -> all nodes are available
+var visible_tags = null;
+
+
+
+
+
+// NODEPATH
+// - where are GLAMpipe node files?
+// default: "" (means that GP uses internal nodes)
+var nodePath = ""; 
+
+var MP = "__mp";
 var url = "http://localhost";
 
 // IP passes
@@ -47,5 +53,6 @@ exports.isServerInstallation = isServerInstallation;
 exports.canRegister = canRegister;
 exports.secret = secret;
 exports.version = version;
+exports.tags = visible_tags;
 exports.IP_passes = IP_passes;
 

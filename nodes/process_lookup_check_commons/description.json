@@ -5,6 +5,7 @@
     "subsubtype": "web",
     "title": "Check if file is in Commons",
     "status": "usable",
+    "tags":["wikimedia"],
     "usage":"",
     "description": "Checks if file is already in Wikimedia Commons (using SHA1-checksum). You must create checksums beforehand.",
     

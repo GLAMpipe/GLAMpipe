@@ -1164,6 +1164,18 @@ exports.getNodeParams = function (req, cb) {
 	})	
 }
 
+exports.getNodeFile = function (req, cb) {
+	
+	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_params", function(err, result) {
+		if(err)
+			console.log(err);
+		
+		cb({"error":"not implemented"});
+	})	
+}
+
+
+
 exports.setNodeParams = function (req, cb) {
 
 	var query = {nodeid:req.params.nodeid};

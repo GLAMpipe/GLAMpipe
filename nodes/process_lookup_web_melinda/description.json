@@ -5,6 +5,7 @@
     "subsubtype": "web",
     "title": "Melinda lookup",
     "status": "usable",
+    "tags":["library", "melinda"],
     "usage":"",
     "description": "Get metadata of based ISBN or ISSN from Union Catalogue of Finnish Libraries API",
     

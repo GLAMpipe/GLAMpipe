@@ -630,6 +630,7 @@ exports.createSandbox = function (node, io) {
 			MP: MP
 		},
 		out: {
+			self:this,
 			pre_value:"",
 			value:"",
 			file:"",
@@ -652,10 +653,20 @@ exports.createSandbox = function (node, io) {
 				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
 					// send http response if needed (i.e. node was executed by "run" instead of "start")
 					if(ch === "finish" && node.res) {
+						console.log(sandbox.out.value);
 						if(this.error)
 							node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
 						else
-							node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
+							node.res.json({
+								status:"finished", 
+								node_uuid: node._id.toString(), 
+								nodeid: node.nodeid, 
+								ts: date, 
+								result:{
+									value:sandbox.out.value,
+									setter:sandbox.out.setter
+									}
+								}) 
 					}
 				});
 			}
@@ -667,6 +678,9 @@ exports.createSandbox = function (node, io) {
 
 }
 
+function sendRunResponse(no) {
+	console.log("out" + JSON.stringify(no.sandbox));
+}
 
 // currently not used
 function CreateScriptVM(node, sandbox, scriptName) {

@@ -5,6 +5,7 @@
     "subsubtype": "select_delete",
     "title": "select&delete",
     "status": "rubbish",
+    "tags":["generic"],
     "usage":"",
     "description": "Deletes documents based on search criteria",
     

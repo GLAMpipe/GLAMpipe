@@ -5,6 +5,7 @@
     "type": "source",
     "subtype": "web",
     "status": "works",
+    "tags":["generic"],
     "description": "Fetch data from IA based on query constructed with IA's advanced query.",
 
     "scripts": {

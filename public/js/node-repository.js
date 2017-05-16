@@ -4,6 +4,7 @@ var nodeRepository = function () {
 	this.nodes = []
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
+	this.visible_tags = ["wmf"];
 	
 	this.loadNodes = function () {
 		$.getJSON(self.baseAPI + "/nodes", function(data) { 

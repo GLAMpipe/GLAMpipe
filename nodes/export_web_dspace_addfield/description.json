@@ -4,7 +4,7 @@
     "type": "export",
     "subtype": "web",
     "subsubtype": "dspace_addfield",
-    "tags":["dspace", "schema"],
+    "tags":["dspace"],
     "status": "usable",
     "description": "Adds a new field to a certain metadata schema (schema must exist)",
 

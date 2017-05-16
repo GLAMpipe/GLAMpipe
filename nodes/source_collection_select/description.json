@@ -5,6 +5,7 @@
     "subsubtype": "select",
     "title": "select",
     "status": "rubbish",
+    "tags":["generic"],
     "usage":"",
     "description": "Creates a new collection based on select criteria",
     

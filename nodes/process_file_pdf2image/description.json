@@ -5,6 +5,7 @@
     "subsubtype": "pdf2image",
     "title": "PDF to images",
     "status": "usable",
+    "tags":["pdf"],
     "usage":"",
     "description": "Convert pdf to images (or thumbnails)",
     

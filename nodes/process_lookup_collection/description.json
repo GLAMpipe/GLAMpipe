@@ -5,6 +5,7 @@
 	"subtype": "lookups",
 	"subsubtype": "collection",
     "status": "rubbish",
+    "tags":["generic"],
 	"description": "Collection lookup. Suitable for example term lookups.",
 
 	"scripts": {

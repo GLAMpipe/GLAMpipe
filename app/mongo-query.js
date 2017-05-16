@@ -324,15 +324,21 @@ exports.updateAll = function (collectionname, query, callback) {
 exports.nodes = function (callback) {
 
 	var collection = db.collection("mp_nodes");
+	var tags = {}
+	if(global.config.tags && Array.isArray(global.config.tags))
+		tags = {tags:{$in:global.config.tags}}
 
 	collection.aggregate([
 
+		// filter by tags
+		{$match:tags},
 		// group by subtype
 		{$group : {_id: {subtype:"$subtype", type:"$type"}, description : { $first: "$type_desc" },"nodes": {$push: {
 			title:"$title",
             status:"$status",
 			nodeid:"$nodeid",
 			type:"$type",
+			tags:"$tags",
 			subtype:"$subtype",
 			description: "$description",
 			views:"$views",

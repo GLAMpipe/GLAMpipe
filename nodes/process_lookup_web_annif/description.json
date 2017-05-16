@@ -5,6 +5,7 @@
     "subsubtype": "web",
     "title": "Annif lookup",
     "status": "usable",
+    "tags":["library", "finna"],
     "usage":"",
     "description": "Get subjec suggestions from Annif (FINNA-based)",
     

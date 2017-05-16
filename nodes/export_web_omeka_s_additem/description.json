@@ -5,6 +5,7 @@
     "subtype": "web",
     "subsubtype": "omeka_additem",
     "status": "usable",
+    "tags":["omeka-s"],
     "description": "Creates new items via REST api",
 
     "scripts": {

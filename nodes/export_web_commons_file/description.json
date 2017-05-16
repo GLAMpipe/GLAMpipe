@@ -5,6 +5,7 @@
     "subtype":"web",
     "subsubtype": "mediawiki_bot",
     "status": "rubbish",
+    "tags": ["wikimedia"],
     "description": "Upload files to <a href=\"https://commons.wikimedia.org/wiki/Main_Page\" target=\"_blank\">wikimedia commons</a>",
 
     "scripts": {

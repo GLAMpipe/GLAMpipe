@@ -4,6 +4,7 @@
 	"subtype": "facet",
 	"title": "Faceted view",
 	"status": "test",
+	"tags":["generic"],
 	"description": "Creates faceted view",
 
 	"scripts": {

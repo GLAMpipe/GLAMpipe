@@ -5,6 +5,7 @@
     "subsubtype": "link_checker",
     "title": "URL checker",
     "status": "usable",
+    "tags":["generic"],
     "usage":"",
     "description": "Makes HEAD requests to URLs given and saves response codes.",
     

@@ -237,6 +237,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.getNodeParams(req, function(data) {res.send(data)});
 	});
 
+	express.get('/api/v1/nodes/:nodeid/files/:file', function (req, res) {
+		glampipe.core.getNodeFile(req, function(data) {res.send(data)});
+	});
+
 	express.post('/api/v1/nodes/:nodeid/params', function (req, res) {
 		glampipe.core.setNodeParams(req, function(data) {res.send(data)});
 	});
@@ -358,6 +362,10 @@ module.exports = function(express, glampipe, passport) {
     // DOWNLOAD
 	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
 		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
+	});
+
+	express.get('/files/:projectdir/:nodedir/:file', function (req, res) {
+		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'process', req.params.nodedir, req.params.file));
 	});
 
 	// PIPES

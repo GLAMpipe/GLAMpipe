@@ -5,6 +5,7 @@
     "subtype": "web",
     "subsubtype": "dspace_additem",
     "status": "usable",
+    "tags":["dspace"],
     "description": "Create new items via REST API",
 
     "scripts": {

@@ -5,6 +5,7 @@
 	"subsubtype": "csv",
 	"title": "Online CSV: import",
     "status": "usable",
+    "tags":["generic"],
 	"description": "Import data from online CSV",
 
 	"scripts": {

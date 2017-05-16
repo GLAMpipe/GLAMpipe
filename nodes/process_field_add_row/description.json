@@ -4,6 +4,7 @@
 	"type": "process",
 	"subtype": "fields",
     "status": "usable",
+    "tags":["generic"],
 	"description": "Add row with content if certain criteria is met.",
 	"scripts": {
 	

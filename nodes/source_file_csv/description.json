@@ -5,6 +5,7 @@
 	"subsubtype": "csv",
 	"title": "Import csv",
     "status": "usable",
+    "tags":["generic"],
 	"description": "Import csv file",
 
 	"scripts": {

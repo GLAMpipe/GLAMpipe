@@ -4,6 +4,7 @@
     "subtype": "basic",
     "title": "file",
     "status": "usable",
+    "tags":["generic"],
     "description": "Download file from URL.",
 
 

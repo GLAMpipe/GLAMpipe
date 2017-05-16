@@ -30,7 +30,6 @@ post = function(url, data, callback, type){
   return $.ajax({
     url: url,
     type: 'POST',
-    done: function(){alert("pois")},
     data: data,
     success:callback,
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},
@@ -50,7 +49,6 @@ $.put = function(url, data, callback, type){
   return $.ajax({
     url: url,
     type: 'PUT',
-    done: function(){alert("pois")},
     data: data,
     success:callback,
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},

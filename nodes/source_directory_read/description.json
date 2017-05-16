@@ -4,6 +4,7 @@
 	"subtype": "directory",
 	"title": "Recursive directory scan",
 	"description": "Recursive directory scan",
+	"tags":["generic"],
 
 	"scripts": {
 		"hello": 

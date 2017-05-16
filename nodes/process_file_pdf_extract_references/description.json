@@ -4,7 +4,8 @@
     "subtype": "files",
     "subsubtype": "extract_references",
     "title": "PDF References",
-    "status": "usable",
+    "status": "rubbish",
+    "tags":["pdf"],
     "usage":"",
     "description": "Extracts references from academic article",
     

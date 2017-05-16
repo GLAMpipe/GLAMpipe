@@ -4,8 +4,8 @@
     "type": "export",
     "subtype": "web",
     "subsubtype": "upload_file",
-    "tags":["omeka-s", "bitstream"],
     "status": "rubbish",
+    "tags":["omeka-s"],
     "description": "Upload files to OMEKA-S (items must exist)",
 
     "scripts": {
