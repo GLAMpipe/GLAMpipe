@@ -1,0 +1,129 @@
+
+
+<label>Choose Eprints REST API url or write url below.</label>
+<select id="source-web-eprints_url" name="eprints_url">
+	<option value="" selected disabled>predefined servers</option>
+	<option value="http://demoprints.eprints.org/rest/">http://demoprints.eprints.org/rest/</option>
+</select>
+<button id="source-web-eprints_plus">+</button>
+
+<!-- add options starts -->
+<div id="source-web-eprints_addoption" style="display:none">
+	<input id="source-web-eprints_url_add" placeholder="http://demoprints.eprints.org/rest/" name="url_add" />
+	<button id="source-web-eprints_test" title="test Eprints rest api">test</button>
+	<button id="source-web-eprints_add" title="add url to predefined urls">add</button>
+</div>
+<!-- add options ends -->
+
+
+<div id="source-web-eprints_status" class="status"></div>
+
+
+<script>
+var nodeid = "#source-web-eprints";
+var params_url = "/api/v1/nodes/source_web_eprints/params"
+
+// *************** CODE FOR ADDING NEW URLS starts **************
+var add_div       = $(nodeid + "_addoption");
+var add_button    = $(nodeid + "_add");
+var add_input     = $(nodeid + "_url_add");
+var test_button   = $(nodeid + "_test");
+var plus_button   = $(nodeid + "_plus");
+var add_url_input = $(nodeid + "_url_add");
+var Eprints_status = $(nodeid + "_status");
+var url_select    = $(nodeid + "_url");
+
+
+function testUrl (url, success, fail) {
+
+	var status = $.getJSON("/api/v1/proxy?url=" + url );
+	
+	status.done(function(data) {
+		if(data.error) 
+			fail("Server did not answer");
+		else
+            success(data);
+
+	});
+	
+	status.fail(function() {
+		fail("Proxy not working");
+	});
+}
+
+
+function addUrl (url) {
+	var data = {}
+	data.url = add_input.val();
+	var post = $.post(url, data, function(response) {
+		add_div.hide();
+		add_input.val("");
+		fetchParams();
+		
+	})	
+}
+
+
+test_button.click(function (e) {
+	var url = add_url_input.val();
+	if(url == "") {
+		alert("Set the rest api url of Eprints");
+		return;
+	}
+	
+	function success () {Eprints_status.text("Status: okay").removeClass().addClass("good");}
+	function fail (msg) {Eprints_status.text("Not okay! Check url ("+msg+")").removeClass().addClass("bad")}
+	testUrl(url, success, fail);
+})	
+
+add_button.click(function () {
+	function success() {addUrl(params_url)};
+	function fail(msg) {alert("Eprints rest url seems to invalid, can not add!")};
+	testUrl(add_url_input.val(), success, fail);
+})	
+
+plus_button.click(function () {
+	add_div.show();
+})	
+// *************** CODE FOR ADDING NEW URLS ends **************
+
+
+
+// GET USER ADDED PARAMS
+function fetchParams () {
+	$.getJSON(params_url, function (data) {
+		if(data.error)
+			alert(data.error);
+		else {
+			if(data && Array.isArray(data)) {
+				Eprints_status.empty();
+				url_select.empty();
+				url_select.append("<option value='' selected disabled>predefined servers</option>");
+				url_select.append("<option value='http://demoprints.eprints.org/rest/'>http://demoprints.eprints.org/rest/</option>");
+				data[0].url.forEach(function(url_opt) {
+					url_select.append($("<option></option>").text(url_opt).attr("value", url_opt));
+				})
+			}
+		}
+	})
+}
+
+
+
+// CHOOSE SERVER HANDLER
+$("#source-web-eprints_url").change(function() {
+	add_div.hide();
+	function success() {
+		$("#source-web-eprints_status").empty().append("Eprints responded OK").addClass("good");
+	};
+	function fail(msg) {alert("Eprints rest API not working!")};
+	testUrl($("#source-web-eprints_url :selected").val(), success, fail);
+});
+
+
+fetchParams();
+
+</script>
+
+
+

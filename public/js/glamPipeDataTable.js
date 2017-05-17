@@ -315,7 +315,7 @@ var dataTable = function (node) {
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			// render urls as links
-			if(key.includes("url")) {
+			if(typeof data == "string" && data.match(/^http/)) {
 				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				
 			} else {

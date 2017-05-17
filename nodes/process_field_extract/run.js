@@ -26,10 +26,6 @@ function extract (val) {
 			// we take only first from match groups
 			if(m[0])
 				extracted.push(m[0]);
-			// The result can be accessed through the `m`-variable.
-			//m.forEach((match, groupIndex) => {
-				//console.log(`Found match, group ${groupIndex}: ${match}`);
-			//});
 		}
          
    }
@@ -45,22 +41,3 @@ if (val != null) {
 	else
 		out.value = arr;
 }
-
-
-
-	//var regex = new RegExp(/([A-ZÅÄÖ][\wåäö"-]+|\sde\b|\sla\b|\von\b)(\s[A-ZÅÄÖ"][\wåäö"-]*|\sde\b|\sla\b|\von\b)*/g);
-	//var str = `apupappi ja Pekka Koskela ja Urpo von Tiainen ja Matti Möttönen vuonna 1998 ja 2013`;
-	//var m;
-	
-	//while ((m = regex.exec(str)) !== null) {
-	    //// This is necessary to avoid infinite loops with zero-width matches
-	    //if (m.index === regex.lastIndex) {
-	        //regex.lastIndex++;
-	    //}
-	    
-	    //// The result can be accessed through the `m`-variable.
-	    //m.forEach((match, groupIndex) => {
-	        //console.log(`Found match, group ${groupIndex}: ${match}`);
-	    //});
-	//}
-
