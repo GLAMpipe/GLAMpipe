@@ -2,7 +2,7 @@
 var upload = {};
 
 upload.filepath = getFilePath(context.doc[context.node.params.in_field]);
-upload.url = context.node.params.grobid_url + "/processReferences";
+upload.url = context.node.params.grobid_url + "/processHeaderDocument";
 
 out.value = upload;
 

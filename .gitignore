@@ -1,5 +1,5 @@
 .*
-data/*
+glampipe-data/*
 glampipe
 node_modules
 !/.gitignore

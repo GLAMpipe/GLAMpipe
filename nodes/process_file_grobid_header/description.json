@@ -1,12 +1,12 @@
 {
-    "nodeid": "process_file_grobid",
+    "nodeid": "process_file_grobid_header",
     "type": "process",
     "subtype": "files",
     "subsubtype": "grobid",
-    "title": "GROBID: Reference extraction",
+    "title": "GROBID: Title and authors",
     "status": "rubbish",
     "usage":"",
-    "description": "Extracts references from academic articles",
+    "description": "Extracts title and authors from academic articles",
     
     "scripts": {
         "hello": "out.say('news', 'You added a reference extract node'); ",

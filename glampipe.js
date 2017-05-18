@@ -33,7 +33,7 @@ var GlamPipe = function() {
 		if(process.env.MONGO_PORT || process.env.DOCKER) {
 			console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
 			self.ipaddress = "0.0.0.0";
-			self.dataPath = "/glampipe";
+			self.dataPath = "/glampipe-data";
 		} else {
 			console.log("Running locally, using 127.0.0.1");
 			self.ipaddress = "127.0.0.1";
