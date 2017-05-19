@@ -520,6 +520,7 @@ function createMetaSubNodes (node, io, cb) {
 		console.log("CREATING SUBNODE");
 		var req = {params:{}, body:{}};
 		req.body.params = nodeitem.params;
+		req.body.params.parent = node._id;
 		req.body.collection = nodeitem.collection;
 		req.params.project = node.project;
 		req.params.nodeid = nodeitem.nodeid;

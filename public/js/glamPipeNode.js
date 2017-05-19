@@ -130,6 +130,9 @@ var glamPipeNode = function (node, gp) {
 	// render node to project view (left column)
 	this.renderNode = function () {
 		var in_field = '';
+		//if(self.source.params.parent) {
+			//return "<div class='metanode'>META: "+self.source.title+"</div>";
+		//}
 		var subsubtype = "";
 		if(self.source.subsubtype)
 			subsubtype = " > " + self.source.subsubtype;

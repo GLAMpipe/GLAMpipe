@@ -45,7 +45,7 @@ if(!context.error && context.response.statusCode == 200) {
 	out.value = outputs;
 		
 } else {
-	out.console.log(context.error.message);
+	//out.console.log(context.error.message);
 	var output = createRef();
 	output.status = "file error";
 	output.gr_status = "file error";

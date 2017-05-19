@@ -12,6 +12,7 @@ var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
+const config 	= require("../config/config.js");
 var exports 	= module.exports = {};
 
 
@@ -430,7 +431,11 @@ exports.runNode = function (node, io) {
 		case "download":
 				
 			var downloader = require("../app/node_runners/download-file.js");
-			asyncLoop.loop(node, sandbox, downloader.downloadFile);
+			if(config.isServerInstallation && !node.res) {
+				io.sockets.emit("finish", {"nodeid":node._id, "msg": "Download nodes not available on server installation"});
+			} else {
+				asyncLoop.loop(node, sandbox, downloader.downloadFile);
+			}
 
 		break;
 

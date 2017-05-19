@@ -1,5 +1,5 @@
 
-var version = "2017.05.03"
+var version = "2017.05.19"
 
 // DATAPATH
 // - where GLAMpipe can strore project data on *non-docker* installation

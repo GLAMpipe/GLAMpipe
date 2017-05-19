@@ -29,8 +29,8 @@ var GlamPipe = function() {
 		self.port      = 3000;
 		self.nodePath = global.config.nodePath;
 
-		// There should be MONGO env variables present if we were running inside docker
-		if(process.env.MONGO_PORT || process.env.DOCKER) {
+		// There should be DOCKER env variable present if we were running inside docker
+		if(process.env.DOCKER) {
 			console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
 			self.ipaddress = "0.0.0.0";
 			self.dataPath = "/glampipe-data";
@@ -124,6 +124,11 @@ var GlamPipe = function() {
 	self.initialize = function(cb) {
 		self.setupVariables();
 		self.core 	= require("./app/core.js");
+		if(self.dataPath === "") {
+			console.log(colors.red("You must set DATAPATH in config/config.js!"));
+			return cb("failure");
+		}
+			
 	   
 		self.core.initDB(function (error) {
 

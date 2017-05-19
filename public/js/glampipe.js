@@ -226,7 +226,14 @@ var glamPipe = function () {
 		$.put(self.baseAPI + "/projects", data, function(data) {
 				if(!data.error) {
 					console.log('created project', data.project);
-					window.location.href = "/project/" + data.project._id;
+					var project = data.project._id;
+					var params = {params:{title:"data"}}
+					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
+						if(!data.error)
+							window.location.href = "/project/" + project;
+						else
+							alert(data.error);
+					})
 				} else {
 					alert(data.error);
 				}
