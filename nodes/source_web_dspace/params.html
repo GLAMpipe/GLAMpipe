@@ -21,7 +21,7 @@
 
 <script>
 var nodeid = "#source-web-dspace-collection";
-var params_url = "/api/v1/nodes/source_web_dspace/params"
+var params_url = g_apipath + "/nodes/source_web_dspace/params"
 
 // *************** CODE FOR ADDING NEW URLS starts **************
 var add_div       = $(nodeid + "_addoption");
@@ -36,7 +36,7 @@ var url_select    = $(nodeid + "_url");
 
 function testUrl (url, success, fail) {
 
-	var status = $.getJSON("/api/v1/proxy?url=" + url + "/status");
+	var status = $.getJSON(g_apipath + "/proxy?url=" + url + "/status");
 	
 	status.done(function(data) {
 		if(data.error) 

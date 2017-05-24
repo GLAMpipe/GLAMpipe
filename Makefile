@@ -3,8 +3,6 @@ IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
 DATA_DIR := $(shell pwd)/glampipe-data
 
-all: build
-
 
 clean:
 	docker rm -f $(CONTAINERS)

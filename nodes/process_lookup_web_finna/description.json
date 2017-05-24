@@ -1,13 +1,13 @@
 {
-    "nodeid": "process_lookup_web_melinda",
+    "nodeid": "process_lookup_web_finna",
     "type": "process",
     "subtype": "lookups",
     "subsubtype": "web",
-    "title": "Melinda lookup",
+    "title": "Finna lookup",
     "status": "usable",
-    "tags":["library", "melinda"],
+    "tags":["library", "finna"],
     "usage":"",
-    "description": "Get metadata of based ISBN or ISSN from Union Catalogue of Finnish Libraries API",
+    "description": "Get metadata based ISBN or ISSN from Finna",
     
     "scripts": {
         "hello": "out.say('news', 'You added a commons checker node'); ",

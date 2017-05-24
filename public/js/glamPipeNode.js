@@ -11,7 +11,7 @@ var glamPipeNode = function (node, gp) {
 	
 	this.dataDisplayDiv = "data-workspace data data-display";
 	this.dataControlsDiv = "data-workspace data data-controls";
-	this.baseAPI = "/api/v1";
+	this.baseAPI = gp.baseAPI;
 	
 	this.display = new dataTable(this); // default data renderer
 		
@@ -129,6 +129,7 @@ var glamPipeNode = function (node, gp) {
 	
 	// render node to project view (left column)
 	this.renderNode = function () {
+		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
 		//if(self.source.params.parent) {
 			//return "<div class='metanode'>META: "+self.source.title+"</div>";

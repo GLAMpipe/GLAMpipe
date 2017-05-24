@@ -1,62 +1,5 @@
 
 
-$.delete = function(url, data, callback, type){
- 
-  if ( $.isFunction(data) ){
-    type = type || callback,
-        callback = data,
-        data = {}
-  }
- 
-  return $.ajax({
-    url: url,
-    type: 'DELETE',
-    success: callback,
-    data: data,
-    contentType: type,
-    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-  });
-}
-
-
-post = function(url, data, callback, type){
- 
-  if ( $.isFunction(data) ){
-    type = type || callback,
-    callback = data,
-    data = {}
-  }
-  
-  return $.ajax({
-    url: url,
-    type: 'POST',
-    data: data,
-    success:callback,
-    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
-    contentType: type,
-    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
-}
-
-$.put = function(url, data, callback, type){
- 
-  if ( $.isFunction(data) ){
-    type = type || callback,
-    callback = data,
-    data = {}
-  }
-  
-  return $.ajax({
-    url: url,
-    type: 'PUT',
-    data: data,
-    success:callback,
-    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
-    contentType: type,
-    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
-}
-
 var glamPipe = function () {
 	var self = this;
 	this.currentProject = "";
@@ -65,7 +8,7 @@ var glamPipe = function () {
 	this.currentNodes = {}; // active node per collection
 
 	this.pickedCollectionId = "";
-	this.baseAPI = "/api/v1"; 
+	this.baseAPI = "api/v1"; 
 	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
@@ -76,6 +19,11 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
+	// set api path
+	var paths = window.location.pathname.split("/");
+	if(paths.indexOf("project") !== -1)
+		this.baseAPI = "../api/v1";
+	
 	// MAIN PAGE (projects)
 	this.getProjects = function (div) {
 
@@ -275,6 +223,7 @@ var glamPipe = function () {
 	// loads node repository
 	this.loadNodes = function() {
 		this.nodeRepository = new nodeRepository();
+		this.nodeRepository.baseAPI = this.baseAPI;
 		this.nodeRepository.loadNodes();
 	}
 
@@ -612,15 +561,23 @@ var glamPipe = function () {
 		})
 	}
 
-	this.openDynamicFieldSelector = function (event) {
+	this.openDynamicFieldSelector = function (event, source) {
 		var obj = $(event.target);
 		self.currentInput = obj;   // put input to global variable so that we can update it later
 		
-		if(self.pickedCollectionId == null)
-			self.pickedCollectionId = self.currentCollection.source.collection;
+		var collection = self.pickedCollectionId;
+		console.log(source)
+		console.log(self.currentCollection.source.collection);
+		
+		if(self.pickedCollectionId == null && source) {
+			alert("You must choose collection first!")
+			return;
+		} else if(!source) {
+			collection = self.currentCollection.source.collection;
+		} 
 		
         // fetch fields
-        $.getJSON(self.baseAPI + "/collections/" + self.pickedCollectionId + "/fields", function(data) { 
+        $.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
             if(data.error)
                 alert(data.error);
 
@@ -641,7 +598,7 @@ var glamPipe = function () {
                 title: "choose field"
             });
 				
-			self.pickedCollectionId = null; // reset
+			//self.pickedCollectionId = null; // reset
         })
 	}
 
@@ -786,6 +743,65 @@ var glamPipe = function () {
 
 }
 
+
+
+
+$.delete = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+        callback = data,
+        data = {}
+  }
+ 
+  return $.ajax({
+    url: url,
+    type: 'DELETE',
+    success: callback,
+    data: data,
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+  });
+}
+
+
+post = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+  
+  return $.ajax({
+    url: url,
+    type: 'POST',
+    data: data,
+    success:callback,
+    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
+  });
+}
+
+$.put = function(url, data, callback, type){
+ 
+  if ( $.isFunction(data) ){
+    type = type || callback,
+    callback = data,
+    data = {}
+  }
+  
+  return $.ajax({
+    url: url,
+    type: 'PUT',
+    data: data,
+    success:callback,
+    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
+    contentType: type,
+    headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
+  });
+}
 
 
 function compare(a,b) {

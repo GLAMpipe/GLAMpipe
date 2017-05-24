@@ -13,7 +13,7 @@ var dataTable = function (node) {
 	this.dataDisplayDiv 	= "data-workspace data data-display";
 	this.dataControlsDiv 	= "data-workspace data data-controls";
 	this.keySelectorDiv 	= "#field-selector";
-	this.baseAPI = "/api/v1";
+	this.baseAPI = node.baseAPI;
 
 	this.editMode = false;
 	this.expandCells = false;

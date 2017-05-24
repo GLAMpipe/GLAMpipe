@@ -1,5 +1,5 @@
 FROM node:6.9.4
-RUN apt-get update && apt-get install -y vim build-essential python-pip && pip install pdfx 
+RUN apt-get update && apt-get install -y vim build-essential poppler-utils python-pip && pip install pdfx 
 
 # Install app dependencies
 COPY package.json /tmp

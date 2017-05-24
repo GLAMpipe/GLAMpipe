@@ -135,6 +135,11 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 		console.log("PARSING DONE");
 	})
 
+	parser.on('error', function(e){
+		console.log(e.message);
+		sandbox.out.say("error", e.message);
+	})
+
 	streamToMongo.on('finish', function(){
 		console.log("IMPORTING DONE! Imported " + count);
 		runNodeScriptInContext("finish", node, sandbox, io);

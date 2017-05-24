@@ -24,7 +24,7 @@
 
 <script>
 var nodeid = "#export-data-omeka";
-var params_url = "/api/v1/nodes/export_web_omeka_additem/params"
+var params_url = g_apipath + "/nodes/export_web_omeka_additem/params"
 
 // *************** CODE FOR ADDING NEW URLS starts **************
 var add_div       = $(nodeid + "_addoption");
@@ -39,7 +39,7 @@ var url_select    = $(nodeid + "_url");
 
 function testUrl (url, success, fail) {
 
-	var status = $.getJSON("/api/v1/proxy?url=" + url + "/vocabularies");
+	var status = $.getJSON(g_apipath + "/proxy?url=" + url + "/vocabularies");
 	
 	status.done(function(data) {
 		if(data.error) 
@@ -120,7 +120,7 @@ function fetchParams () {
 // CHOOSE SERVER HANDLER
 $("#export-data-omeka_url").change(function() {
 	function success() {
-		$("#export_data-omeka_status").empty().append("Omeka responded OK").addClass("good");
+		$("#export-data-omeka_status").empty().append("Omeka responded OK").addClass("good");
 		$("#export-data-omeka_hidden").show();
 	};
 	function fail(msg) {alert("Omeka rest API not working!")};

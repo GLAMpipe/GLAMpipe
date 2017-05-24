@@ -12,7 +12,7 @@
 		
 		$("#source_api_dspace_data").empty();
 		$("#source_api_dspace_data").append("<h3>Fetching...</h3>");
-		$.getJSON("/api/v1/proxy?url=" + params.dspace_url + "/hierarchy", function (data) {
+		$.getJSON(g_apipath + "/proxy?url=" + params.dspace_url + "/hierarchy", function (data) {
 			if(data.error)
 				alert(data.error);
 			else {

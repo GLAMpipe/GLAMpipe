@@ -346,6 +346,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.editCollection2(req, function(data) {res.send(data)});
 	});
 
+	express.put('/api/v1/collections/:collection/docs', function (req, res) {
+		collection.addDocument(req, function(data) {res.send(data)});
+	});
+
 	express.post('/edit/collection/addtoset/:id', function (req, res) {
 		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
 	});

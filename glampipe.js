@@ -178,7 +178,6 @@ var GlamPipe = function() {
 				var port = server.address().port;
 				console.log("\n********************* G L A M p i pe *************************");
 				console.log("* DATA PATH:",self.dataPath);
-				console.log("* NODE PATH:",self.nodePath);
 				console.log("* STATUS:    running on http://%s:%s", host, port);
 				console.log("********************* G L A M p i pe *************************");
 			});

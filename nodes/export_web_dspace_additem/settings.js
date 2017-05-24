@@ -13,7 +13,7 @@ var ignoreFields = ["id", "_id", "collection", "__mp_source"];
 $("#xml_basic_fetch").click(function(e){
 
    var obj = $(e.target);
-   var url = "/api/v1/collections/"+node.collection+"/docs?skip=0&limit=1";
+   var url = g_apipath + "/collections/"+node.collection+"/docs?skip=0&limit=1";
    
    fetchSchemas(function () {
 	   $.getJSON(url, function(data){
@@ -55,7 +55,7 @@ $("#export_data_dspace_fetch_collections").click(function (e) {
 	$("#export_data_dspace_coll_list").append("<h3>Fetching...</h3>");
 	$("#export_data_dspace_coll_list").show();
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/hierarchy", function (data) {
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/hierarchy", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -79,7 +79,7 @@ $("#export_data_dspace_coll_list").on("click", "li.collection", function (event)
 // CREATE SCHEMA LIST
 function fetchSchemas (cb) {
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/registries/schema", function (data) {
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/registries/schema", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {

@@ -14,7 +14,7 @@ function fetchSchemas (url) {
 	} else {
 		$(dataDisplay).empty();
 		$(dataDisplay).append("<h3>Fetching...</h3>");
-		$.getJSON("/api/v1/proxy?url=" + url + "/registries/schema", function (data) {
+		$.getJSON(g_apipath + "/proxy?url=" + url + "/registries/schema", function (data) {
 			if(data.error)
 				alert(data.error);
 			else {

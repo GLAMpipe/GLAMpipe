@@ -1,4 +1,6 @@
 
+const g_apipath = "../api/v1" // global api path for node parameters scripts
+
 $( document ).ready(function() {
 	
 	var gp = new glamPipe();
@@ -84,6 +86,7 @@ $( document ).ready(function() {
 
 	// open node parameters for new node
 	$(document).on('click','.listoption', function(e) {
+		gp.pickedCollectionId = null;
 		gp.nodeRepository.openNodeParameters(e);
 		e.preventDefault();
 	})
@@ -120,6 +123,11 @@ $( document ).ready(function() {
 		gp.openDynamicFieldSelector(e);
     });
 
+	// open dynamic field picker
+    $(document).on('click','.source_dynamic_field', function(e) {
+		gp.openDynamicFieldSelector(e, "source");
+    });
+
 	// pick field
     $(document).on('click','.pick_field', function(e) {
 		gp.pickField(e)
@@ -150,7 +158,8 @@ $( document ).ready(function() {
 	});
 
     // websocket stuff
-    var socket = io.connect();
+    var gp_path = getWSPath();
+    var socket = io.connect("http://localhost", {path: gp_path + '/socket.io'});
     var progressDisplay = $("#node-progress");
     var finishDisplay = $("#node-finished");
     var genericDisplay = $("#generic-messages");
@@ -205,6 +214,15 @@ $( document ).ready(function() {
     });
 
 });
+
+function getWSPath() {
+	var paths = window.location.pathname.split("/");
+	console.log(paths);
+	if(paths[1] != "project")
+		return "/" + paths[1];
+	else
+		return "";
+}
 
 function websockPopup(div, title) {
 		$(div).dialog({

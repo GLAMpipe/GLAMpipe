@@ -201,7 +201,7 @@ var Auth = function(report) {
 
         var self = this;
         $.ajax({
-            url : "/api/v1/proxy?url=" + dspace_url + "/login",
+            url : g_apipath + "/proxy?url=" + dspace_url + "/login",
             contentType : "application/x-www-form-urlencoded",
             accepts : "application/json",
             type : "POST",
@@ -221,7 +221,7 @@ var Auth = function(report) {
     this.authStat = function() {
         var self = this;
         $.ajax({
-            url : "/api/v1/proxy?url=" + dspace_url + "/status",
+            url : g_apipath + "/proxy?url=" + dspace_url + "/status",
             dataType : "json",
             error: function(xhr, status, errorThrown) {
                 alert("Error in/rest/status "+ status+ " " + errorThrown);
@@ -244,7 +244,7 @@ var Auth = function(report) {
     this.logout = function() {
         var self = this;
         $.ajax({
-            url : "/api/v1/proxy?url=" + dspace_url + "/logout",
+            url : g_apipath + "/proxy?url=" + dspace_url + "/logout",
             error: function(xhr, status, errorThrown) {
                 alert("Error in/rest/logout "+ status+ " " + errorThrown);
             },
@@ -343,8 +343,7 @@ var Filters = function() {
             }
         );
         
-        $.getJSON(
-            "/api/v1/proxy?url=" + dspace_url + "/filters",
+        $.getJSON(g_apipath + "/proxy?url=" + dspace_url + "/filters",
             function(data){
                 $.each(data, function(index, filter){
                     var checkbox = self.addFilter(filter["filter-name"], categories, filter.category, filter.title, filter.description, "filter").click(
@@ -416,7 +415,7 @@ var MetadataFields = function(report) {
     
     this.load = function(){
         $.ajax({
-            url: "/api/v1/proxy?url=" + dspace_url + "/registries/schema",
+            url: g_apipath + "/proxy?url=" + dspace_url + "/registries/schema",
             dataType: "json",
             success: function(data){
                 self.initFields(data, report);
@@ -550,7 +549,7 @@ var CommunitySelector = function(report, parent, paramCollSel) {
     report.myHtmlUtil.addOpt(collSel, "Whole Repository", "");
     
     $.ajax({
-        url: "/api/v1/proxy?url=" + dspace_url + "/hierarchy",
+        url: g_apipath + "/proxy?url=" + dspace_url + "/hierarchy",
         dataType: "json",
         headers: report.myAuth.getHeaders(),
         success: function(data){
@@ -671,7 +670,7 @@ var QueryReport = function() {
         //this.spinner.spin($("body")[0]);
         $("button").attr("disabled", true);
         $.ajax({
-            url: "/api/v1/proxy?url=" + dspace_url + "/filtered-items", 
+            url: g_apipath + "/proxy?url=" + dspace_url + "/filtered-items", 
             data: this.getCurrentParameters(), 
             dataType: "json",
             headers: self.myAuth.getHeaders(),

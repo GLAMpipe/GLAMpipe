@@ -384,45 +384,6 @@ exports.runNode = function (node, io) {
 
 		break;
 
-/***************************************************************************************************************
- *                                       LOOKUP                                                                *
- * *************************************************************************************************************/
-
-		case "lookup":
-
-			var runFunc = null;
-			
-			switch (node.subtype) {
-				
-				case "web":
-				
-					switch (node.subsubtype) {
-				
-						case "link_checker":
-							var checker = require("../app/node_runners/link-checker.js");
-							asyncLoop.loop(node, sandbox, checker.checkLinks);
-						break;
-					}
-
-				break;
-				
-				case "file":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//fileStats (sandbox, node, onNodeScript, onError);
-					//}
-				break;
-				
-				case "collection":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
-					//}
-
-				break;
-			}
-			
-
 
 /***************************************************************************************************************
  *                                       DOWNLOAD                                                              *
@@ -518,10 +479,16 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						
 						case "collection":
-							asyncLoop.mongoLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-								sandbox.run.runInContext(sandbox);
-								next();
-							});
+							// read map data
+							mongoquery.find({}, sandbox.context.node.params.source_collection, function(err, result) {
+								sandbox.context.data = result;
+								console.log(result);
+								asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+									sandbox.run.runInContext(sandbox);
+									next();
+								});
+							})
+
 						break;	
 
 						case "web":
