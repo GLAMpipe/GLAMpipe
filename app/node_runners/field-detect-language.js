@@ -30,7 +30,7 @@ exports.language = function (doc, sandbox, next) {
 	
 	async.eachSeries(input, function iterator(value, nextvalue) {
 		
-		cld.detect(limitText(value), function(err, result) {
+		cld.detect(value, function(err, result) {
 			console.log("detection result", result);
 			sandbox.context.data.push(result);
 			nextvalue();

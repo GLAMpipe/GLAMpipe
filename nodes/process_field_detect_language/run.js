@@ -14,6 +14,7 @@ if(context.data != null && Array.isArray(context.data)) {
 		// count succesfull detects
 		if(context.data[i] != null && context.data[i].reliable) {
 			context.node.success_counter++;
+			// we take the language with highest percentage (first in results)
 			detects.push(context.data[i].languages[0].code);
 			
 		} else {
