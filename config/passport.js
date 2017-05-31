@@ -37,8 +37,6 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     },
     function(req, email, password, done) {
-        if (email)
-            email = email.toLowerCase(); 
 
         // asynchronous
         process.nextTick(function() {
@@ -72,45 +70,40 @@ module.exports = function(passport) {
         passReqToCallback : true // allows us to pass in the req from our route (lets us check if a user is logged in or not)
     },
     function(req, email, password, done) {
-        if (email)
-            email = email.toLowerCase(); // Use lower-case e-mails to avoid case-sensitive e-mail matching
+
+        var newUser = new User(email);
+        if(!newUser.validate(email))
+            return done("Invalid characters in username!", false, {message:"Invalid characters"});
+        console.log(email);
 
         // asynchronous
         process.nextTick(function() {
-            // if the user is not already logged in:
-            if (!req.user) {
-                User.findOne(email, function(err, user) {
-                    // if there are any errors, return the error
-                    if (err)
-                        return done(err);
 
-                    // check to see if theres already a user with that email
-                    if (user) {
-						console.log("That email is already taken!");
-                        return done(null, false, {message: "That email is already taken!"});
-                    } else {
+            User.findOne(email, function(err, user) {
+                // if there are any errors, return the error
+                if (err)
+                    return done(err);
 
-                        // create the user
-                        var newUser            = new User(email);
-						newUser.setPassword(password);
-                        newUser.save(function(err) {
-                            if (err)
-                                return done(err, false, {message:"Error in registration"});
+                // check to see if theres already a user with that email
+                if (user) {
+                    console.log("That username is already taken!");
+                    return done(null, false, {message: "That username is already taken!"});
+                } else {
 
-							console.log("signin up");
-							console.log(newUser);
-                            return done(null, newUser);
-                        });
-                    }
+                    // create the user
+                    
+                    newUser.setPassword(password);
+                    newUser.save(function(err) {
+                        if (err)
+                            return done(err, false, {message:"Error in registration"});
 
-                });
-
-            } else {
-                return done(null, req.user);
-            }
-
+                        console.log("signin up");
+                        console.log(newUser);
+                        return done(null, newUser);
+                    });
+                }
+            });
         });
-
     }));
 
 };

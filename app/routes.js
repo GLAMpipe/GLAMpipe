@@ -60,7 +60,7 @@ module.exports = function(express, glampipe, passport) {
 	express.post('/api/v1/login', passport.authenticate('local-login', { session: false }), function(req, res) {
 		console.log("logged in", req.user.id)
 		var token = jwt.sign(req.user, express.get('superSecret'), {
-			expiresIn: 86400 // expires in 24 hours
+			expiresIn: "1d" // expires in 24 hours
 		});
 
 		res.json({
@@ -75,7 +75,7 @@ module.exports = function(express, glampipe, passport) {
 	// protect API routes
 	if(config.isServerInstallation) {
 		var s = express.get('superSecret');
-		express.post('/api/v1/*', jwt2({secret: s}));
+		//express.post('/api/v1/*', jwt2({secret: s}));
 		express.put('/api/v1/*', jwt2({secret: s}));
 		express.delete('/api/v1/*', jwt2({secret: s}));
         
@@ -140,16 +140,23 @@ module.exports = function(express, glampipe, passport) {
 	// login page
 	express.get('/signup', function (req, res) {
 		if(global.config.isServerInstallation)
-			res.sendFile(path.join(__dirname, 'views', 'login.html'));
+			res.sendFile(path.join(__dirname, 'views', 'signup.html'));
 		else
 			res.redirect('/');
 	});
 
+	express.get('/signup_error', function (req, res) {
+		if(global.config.isServerInstallation)
+			res.sendFile(path.join(__dirname, 'views', 'signup_error.html'));
+		else
+			res.redirect('/');
+	});
+
+
 	// signup handler
 	express.post('/signup', passport.authenticate('local-signup', {
 		successRedirect : '/',
-		failureRedirect : '/login'
-	
+		failureRedirect : '/signup_error'
 	}));	
 	
 	
