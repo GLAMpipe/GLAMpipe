@@ -73,46 +73,36 @@ var glamPipeNode = function (node, gp) {
 	
 
 	this.getOutputFields = function () {
-		
-		if(self.source.out_field)
-			return [self.source.out_field];
-			
-		if(self.source.params.out_field)
-			return [self.source.params.out_field];
-			
-		if(self.source.params.suffix)
-			if(self.source.params.in_field)
-				return [self.source.params.in_field + self.source.params.suffix];
-				
-		return [];
-				
-	}
-
-
-	this.getInputFields = function () {
-		
-		// field1, field2, etc. are input key names
-		// other fields hold string constants
-
-		// one input field
-		if(self.source.in_field)
-			return [self.source.in_field];
-			
-		if(self.source.params.in_field)
-			return [self.source.params.in_field];
 
 		var keys = [];
 		// inputs can be in params or settings
 		for(var key in self.source.params) {
-			if(/^field/.test(key))
+			if(/^out_/.test(key))
 				keys.push(self.source.params[key]);
 		}
 		for(var key in self.source.settings) {
-			if(/^field/.test(key))
+			if(/^out_/.test(key))
 				keys.push(self.source.settings[key]);
 		}
 		return keys;
 	}
+
+
+	this.getInputFields = function () {
+
+		var keys = [];
+		// inputs can be in params or settings
+		for(var key in self.source.params) {
+			if(/^in_/.test(key))
+				keys.push(self.source.params[key]);
+		}
+		for(var key in self.source.settings) {
+			if(/^in_/.test(key))
+				keys.push(self.source.settings[key]);
+		}
+		return keys;
+	}
+
 
 	// render data with node spesific settings and display node settings
 	this.open = function (config) {

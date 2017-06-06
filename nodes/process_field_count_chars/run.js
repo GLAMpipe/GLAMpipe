@@ -7,8 +7,9 @@ function split (val) {
 		var result = [];
 		var result_strings = [];
 		for (var i = 0; i < val.length; i++) { 
-			result.push(val[i].trim().length); 
-			result_strings.push(val[i].trim().length.toString()); 
+			var l = getLength(val[i])
+			result.push(l); 
+			result_strings.push(l.toString()); 
 		}
 		
 		if(context.node.settings.combine) {
@@ -17,9 +18,21 @@ function split (val) {
 			return result_strings;
 		}
 	   
-	} else {  
-		return val.trim().length.toString();
+	} else if(val) {
+		return getLength(val).toString();
+	} else {
+		return "0";
 	}
+
+}
+
+function getLength(val) {
+	if(typeof val === "string") {  
+		return val.trim().length;
+	} else if(typeof val === "number") {  
+		return val.toString().trim().length;
+	}
+	return "0";
 }
 
 function add(a, b) {

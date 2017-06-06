@@ -22,7 +22,13 @@ exports.getHash = function (file, sandbox, cb) {
 
 	fd.on("error", function() {
 		console.log("Can not read file");
-		sandbox.context.data = "ERROR";
+		sandbox.context.error = "Can not read file";
+		cb();
+	})
+
+	hash.on("error", function() {
+		console.log("Can not read file");
+		sandbox.context.error = "Can not read file";
 		cb();
 	})
 

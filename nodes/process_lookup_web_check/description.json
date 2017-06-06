@@ -1,9 +1,9 @@
 {
-    "nodeid": "process_lookup_link_checker",
+    "nodeid": "process_lookup_web_check",
     "type": "process",
     "subtype": "lookups",
-    "subsubtype": "link_checker",
-    "title": "URL checker",
+    "subsubtype": "web_check",
+    "title": "Link checker",
     "status": "usable",
     "tags":["generic"],
     "usage":"",
@@ -12,9 +12,7 @@
     "scripts": {
         "hello": 
         [ 
-			"out.say('news', 'You added a link checker node'); ",
-			"/* set output field */",
-			"context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+			"out.say('news', 'You added a link checker node'); "
 		],
         "bye": "out.say('finish', 'Bye!'); ",
         

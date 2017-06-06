@@ -1,0 +1,15 @@
+<label>base URL </label>
+<input name="base_url" placeholder="http://"/>
+
+<label>URL field </label>
+<input id="lookup_url_response_input" class="dynamic_field" name="in_field"/>
+
+<label>Where to write references? </label>
+<input id="lookup_url_response_output" name="out_field" />
+
+<script>
+  $("#lookup_url_response_input").change(function() {
+     $("#lookup_url_response_output").val($("#lookup_url_response_input").val() + "_response");
+  });
+
+</script>

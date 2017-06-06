@@ -5,7 +5,7 @@
 
 var c = context; 
 var input = context.doc[context.in_field];
-out.urls = [];
+out.pre_value = [];
 
 if(Array.isArray(input)) {
 	for (var i = 0; i < input.length; i++) {
@@ -13,13 +13,13 @@ if(Array.isArray(input)) {
 		download.filename = generateFileName(input[i], i);	
 		out.console.log(download.filename);	
 		download.url = context.base_url + input[i];
-		out.urls.push(download); 
+		out.pre_value.push(download); 
 	}
 } else {
 	var download = {};
 	download.filename = generateFileName(input);
 	download.url = context.base_url + input;
-	out.urls.push(download);
+	out.pre_value.push(download);
 }
 
 
@@ -61,7 +61,7 @@ function generateFileName (url, index) {
 		filename += "_" + index;
 
 	/* static file extension */ 
-	if (c.node.settings.file__ext.trim() != "") {
+	if (c.node.settings.file__ext && c.node.settings.file__ext.trim() != "") {
 		var ext = c.node.settings.file__ext.replace(".", ""); 
 		filename += "." + ext; 
 	}

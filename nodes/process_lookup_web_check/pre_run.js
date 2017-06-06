@@ -3,12 +3,20 @@ var base = context.node.params.base_url;
 
 // we must output array of URLs
 if(Array.isArray(context.doc[context.node.params.in_field])) {
-	out.urls = [];
+	out.pre_value = [];
 	var urls = context.doc[context.node.params.in_field];
 	urls.forEach(function(url) {
-		out.urls.push(base + url);
+		var options = {
+			url:base + url,
+			method: 'HEAD'
+		}
+		out.pre_value.push(options);
 	})
 } else {
-	out.urls = [base + context.doc[context.node.params.in_field]];
+	var options = {
+		url:base + context.doc[context.node.params.in_field],
+		method: 'HEAD'
+	}
+	out.pre_value = [options];
 }
 

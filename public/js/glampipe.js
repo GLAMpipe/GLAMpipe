@@ -450,13 +450,6 @@ var glamPipe = function () {
 			html += "  </div><div class='holder params'></div>"
 			
 			html += self.renderNodes(collection, ["process"]);
-
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Downloads</span> <a class='add-node' data-type='download' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-
-			html += self.renderNodes(collection, ["download"]);
 			
 			html += "  <div class='sectiontitleblock'>"
 			html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"

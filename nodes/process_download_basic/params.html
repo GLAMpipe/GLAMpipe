@@ -1,0 +1,16 @@
+<div>Download from where?</div>
+<label>Start of the url (optional)</label>
+<input class="node-settings" name="base_url"/>
+
+<label>URL field in documents</label> 
+<input id="download_file_basic_input" name="in_field" class="dynamic_field"/>
+
+<label>file names and path are written to</label>
+<input id="download_file_basic_output" name="out_field" value="_download"></input>
+
+<script>
+  $("#download_file_basic_input").change(function() {
+     $("#download_file_basic_output").val($("#download_file_basic_input").val() + "_download");
+  });
+
+</script>

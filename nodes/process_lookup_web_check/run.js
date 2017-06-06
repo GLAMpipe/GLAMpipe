@@ -1,0 +1,21 @@
+
+
+out.value = "";
+
+function process (element, index) {
+	
+	if(element.error) {
+		out.value = out.error_marker + ":" + element.error.message;
+	} else if (element.response && element.response.statusCode) {
+		out.value = element.response.statusCode.toString();
+		context.vars.success_counter++;		
+	} else {
+		out.value = out.error_marker;
+
+	}
+}
+
+
+process(context.data);
+
+

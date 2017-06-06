@@ -16,7 +16,7 @@ context.node.metaparams = [
 		nodeid: "process_field_count_chars",
 		params: {
 			in_field:"meta1_split",
-			out_field:"meta1_count"
+			out_field:context.node.params.out_field
 		},
 		settings: {
 			

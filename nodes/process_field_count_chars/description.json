@@ -9,9 +9,7 @@
     
         "hello": 
         [
-            "out.say('news', 'You added a coount node'); ",
-            "/* set output field */",
-            "context.node.out_field = context.node.params.in_field + '_' + context.node.params.suffix; "
+            "out.say('news', 'You added a count node'); "
         ],
         
         "bye": "out.say('news', 'Deleted node. Bye!'); ",

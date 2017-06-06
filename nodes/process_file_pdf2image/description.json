@@ -3,11 +3,11 @@
     "type": "process",
     "subtype": "files",
     "subsubtype": "pdf2image",
-    "title": "PDF to images",
+    "title": "PDF cover image",
     "status": "usable",
     "tags":["pdf"],
     "usage":"",
-    "description": "Convert pdf to images (or thumbnails)",
+    "description": "Create PDF cover image (page 0)",
     
     "scripts": {
         "hello": "out.say('news', 'You added a checksum node'); ",

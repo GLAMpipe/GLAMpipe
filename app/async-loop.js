@@ -10,7 +10,7 @@ var exports = module.exports = {};
 
 exports.loop = function (node, sandbox, onDoc) {
 	
-	// ONE DOC
+	// ONE DOC (single run)
 	if(node.req && node.req.params.doc) {
 		console.log("NODE: single doc")
 			
@@ -245,18 +245,21 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 			sandbox.out.value = null;
 			sandbox.context.count++;
 			sandbox.pre_run.runInContext(sandbox);
-			console.log("sandbox.out.pre_value: " + sandbox.out.pre_value);
 			
+			//console.log("sandbox.out.pre_value: " + sandbox.out.pre_value);
+			//console.log(typeof sandbox.out.pre_value)
+			//console.log(sandbox.out.pre_value)
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
 				var result = [];
 				
 				// loop over field array
 				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
+					sandbox.context.data = null;
 
 					// call document processing function
 					onDoc(row, sandbox, function processed () {
-						console.log(row);
+						//console.log(row);
 						sandbox.run.runInContext(sandbox); // sets "context.out.value"
 						result.push(sandbox.out.value);
 						nextFieldRow();

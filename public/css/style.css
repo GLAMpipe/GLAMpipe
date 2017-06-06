@@ -725,7 +725,11 @@ label {
 }
 
 .output {
-	border-left: 5px solid #94c080;
+	background-color:#e7f2e2;;
+}
+
+.input {
+	background-color:#f5f0e2;;
 }
 
 .object-cell {
@@ -781,3 +785,7 @@ label {
 	padding:2px;
 }
 
+.error {
+	border: 1px solid red;
+	padding:2px;
+}

@@ -1,18 +1,18 @@
 {
-    "nodeid": "download_file_basic",
-    "type": "download",
-    "subtype": "basic",
+    "nodeid": "process_download_basic",
+    "type": "process",
+    "subtype": "downloads",
+    "subsubtype": "basic",
     "title": "file",
     "status": "usable",
     "tags":["generic"],
-    "description": "Download file from URL.",
+    "description": "Download file from URL(s).",
 
 
     "scripts": {
 		"hello": 
 		[
-			"out.say('news', 'You added a download node'); ",
-			"context.node.out_field = context.node.params.in_field + context.node.params.out_suffix; "
+			"out.say('news', 'You added a download node'); "
 		],
         
         "bye": "out.say('news', 'Deleted donwload node. Downloaded files will remain. Bye!'); ",

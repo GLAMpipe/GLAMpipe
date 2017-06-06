@@ -1,4 +1,5 @@
 var request = require("request");
+var path = require("path");
 
 var exports = module.exports = {};
 
@@ -53,6 +54,24 @@ exports.fetchJSON = function (options, sandbox, next) {
 		request.get(options, responseCallback); // default method is GET
 }
 
+
+
+exports.headRequest = function(options, sandbox, next) {
+
+	var request = require("request");
+	console.log("REQUEST:", options.url);
+	if(!options.url)
+		next("missing url")
+
+	request(options, function (error, response, body) {
+		sandbox.context.data = {"error": error, "response": response};
+		next();
+	});
+
+}
+
+
+
 // this is meant to be called from asyncLoop.fieldLoop
 exports.uploadFile = function (doc, sandbox, next ) {
 
@@ -100,3 +119,135 @@ exports.uploadFile = function (doc, sandbox, next ) {
 
 }
 
+
+exports.downloadFile = function (download, sandbox, next ) {
+	
+	var fs = require("fs");
+	var request = require("request")
+
+	console.log("downloading:", download);
+	var node = sandbox.context.node;
+	sandbox.context.data = download;
+	
+	// dry run
+	if(node.settings.dry_run) {
+		checkUrl(download);
+		next();
+	
+	// actual run
+	} else {
+		fileExists(node, download, function(error, filePath) {
+			
+			if(error == null) {
+				exports.downloadAndSave(node, download, next);
+			} else {
+				// file exist -> write file path to
+				download.error = error;
+				download.filepath = filePath;
+				sandbox.context.data = download;
+				next();
+			}
+		});			
+	}
+
+}
+
+
+exports.downloadAndSave = function (node, download, next) {
+	
+	if(isInvalidURL(download.url)) {
+		download.error = "Invalid URL!"
+		return next();
+	}
+
+	var request = require("request");
+	
+	var filePath = path.join(node.dir, download.filename); 
+	var file = fs.createWriteStream(filePath);
+	
+	var options = {
+		url:download.url,
+		followRedirect:false
+	}
+	
+	// use basic authentication if node did set "auth"
+	if(download.auth)
+		options.auth = download.auth;
+	
+	var sendReq = request.get(options);
+
+	// verify response code
+	sendReq.on('response', function(response) {
+		
+		download.response = response;
+		
+		if(response.statusCode === 200) {
+			
+			sendReq.pipe(file);
+
+			file.on('finish', function() {
+				file.close(function () {
+					next();
+				}); 
+			});
+
+			file.on('error', function(err) { 
+				fs.unlink(filePath); // Delete the file async. 
+				console.log(err);
+				download.error = err;
+				return next();
+			});
+			
+		} else {
+			fs.unlink(filePath);
+			download.error = "file not found on server!";
+			console.log("file not found on server!");
+			return next();
+		}
+
+	});
+
+	// check for request errors
+	sendReq.on('error', function (err) {
+		fs.unlink(filePath);
+		console.log(err);
+		download.error = err;
+		return next();
+
+	});
+	
+}
+
+
+function fileExists (node, download, cb) {
+
+	if(download.filename == "") {
+		return cb("no file name");
+	}
+
+	var filePath = path.join(node.dir, download.filename);
+
+	fs.stat(filePath, function(err, stat) {
+		if(err == null) {
+			console.log("FILE EXISTS:", filePath);
+			cb("file exists", filePath);
+		} else if(err.code == 'ENOENT') {
+			cb(null, filePath)
+		} else {
+			console.log('Error with file stats: ', err.code);
+			cb(err.code);
+		}
+	});
+}
+
+
+function isInvalidURL(url) {
+	
+	if(url == null || url == "") {
+		return "URL missing";
+	} else if(url.search("http") != 0) {
+		return "URL not starting with 'http'";
+	} else
+		return false;
+	
+}

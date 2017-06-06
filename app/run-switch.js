@@ -87,7 +87,7 @@ exports.runNode = function (node, io) {
 			// run subnodes
 			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
 				console.log("THIS IS SUBNODE");
-				var baseurl = "http://localhost:3000";
+				var baseurl = "http://localhost:3000"; // localhost does not require authentication
 				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
 				console.log(url);	
 				console.log("subnode settings: " + nodes[count].settings);
@@ -362,8 +362,6 @@ exports.runNode = function (node, io) {
 									asyncLoop.loop(node, sandbox, mv_bot.uploadFile);
 								}
 							});
-							//mv_bot.uploadFileWithWikitext(node, sandbox, io);
-
 						break;
 
 						case "upload_file":
@@ -380,24 +378,6 @@ exports.runNode = function (node, io) {
 				break;
 			}
 
-
-
-		break;
-
-
-/***************************************************************************************************************
- *                                       DOWNLOAD                                                              *
- * *************************************************************************************************************/
-
-		case "download":
-				
-			var downloader = require("../app/node_runners/download-file.js");
-			if(config.isServerInstallation && !node.res) {
-				io.sockets.emit("finish", {"nodeid":node._id, "msg": "Download nodes not available on server installation"});
-			} else {
-				asyncLoop.loop(node, sandbox, downloader.downloadFile);
-			}
-
 		break;
 
 
@@ -411,11 +391,6 @@ exports.runNode = function (node, io) {
 				case "files":
 				
 					switch (node.subsubtype) {
-						
-						case "extract_references":
-							var pdf = require("../app/node_runners/file-pdf.js");
-							asyncLoop.loop(node, sandbox, pdf.extractReferences);
-						break;
 
 						case "pdf2image":
 							var pdf = require("../app/node_runners/file-pdf.js");
@@ -442,11 +417,6 @@ exports.runNode = function (node, io) {
 				case "fields":
 				
 					switch (node.subsubtype) {
-						
-						case "link_checker":
-							var checker = require("../app/node_runners/link-checker.js");
-							asyncLoop.loop(node, sandbox, checker.checkLinks);
-						break;
 
 						case "detect_language":
 							var detect = require("../app/node_runners/field-detect-language.js");
@@ -496,6 +466,11 @@ exports.runNode = function (node, io) {
 							asyncLoop.fieldLoop(node, sandbox, web.fetchJSON);
 						break;
 
+						case "web_check":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.fieldLoop(node, sandbox, web.headRequest);
+						break;
+
 						default:
 							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
@@ -503,6 +478,20 @@ exports.runNode = function (node, io) {
 							});			
 
 					}
+					
+				case "downloads":
+				
+					switch (node.subsubtype) {
+						case "basic":
+							var web = require("../app/node_runners/web.js");
+							if(config.isServerInstallation && !node.res) {
+								io.sockets.emit("finish", {"nodeid":node._id, "msg": "Download nodes not available on server installation"});
+							} else {
+								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
+							}
+						break;
+					}
+					
 					break;
 			}				
 
@@ -511,50 +500,6 @@ exports.runNode = function (node, io) {
 
 
 
-/***************************************************************************************************************
- *                                       UPLOAD                                                                *
- * *************************************************************************************************************/
-
-		case "upload":
-			switch (node.subtype) {
-				case "data":
-					switch (node.subsubtype) {
-						case "dspace":
-						
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node,sandbox, io, function(error) {
-								if(error)
-									console.log("ERROR: login failed");
-								else {
-									console.log("LOGIN GOOD");
-									dspace.updateData(node,sandbox, io);
-								}
-							});
-						break;
-							
-						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
-							console.log("There is no run-switch for this node yet!");
-					}
-
-					break;
-				
-				case "file":
-					switch (node.subsubtype) {
-						case "mediawiki_bot":
-						
-							var mv_bot = require("../app/node_runners/mediawiki_bot.js");
-
-						break;
-						
-						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
-							console.log("There is no run-switch for this node yet!");
-					}
-					
-				break;
-		}
-		break;
 
 
 /***************************************************************************************************************
@@ -603,6 +548,7 @@ exports.createSandbox = function (node, io) {
 		},
 		out: {
 			self:this,
+			error_marker: "AAAA_error:",
 			pre_value:"",
 			value:"",
 			file:"",

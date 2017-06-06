@@ -1,0 +1,27 @@
+{
+    "nodeid": "meta_omeka_item",
+    "title": "Upload file to Omeka-s",
+    "type": "meta",
+    "subtype": "test",
+    "status": "usable",
+    "description": "Create Omeka-s item with file.",
+    "scripts": {
+    
+        "hello": 
+        [
+            "out.say('news', 'You added a metanode'); "
+        ],
+        
+        "bye": "out.say('news', 'Deleted node. Bye!'); ",
+        
+        "init":
+        [
+            "out.say('progress', 'Metanode started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Metanode done!');"
+    },
+    
+    "views": {}
+}

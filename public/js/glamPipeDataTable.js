@@ -61,26 +61,18 @@ var dataTable = function (node) {
 
 	// asks data from node and then renders table
 	this.render = function () {
-	
-		if(self.node.getConfig()) {
+
+		self.node.loadCollectionKeys(function() { 
+			self.keys.all_keys = self.node.data.keys;
+			
 			self.node.loadCollectionData(self.params, function() {
 				self.renderTablePage();
 				self.renderControls();
 				self.renderCollectionCount();
 				self.setEventListeners();
-			});		
-		} else {
-			self.node.loadCollectionKeys(function() { 
-				self.keys.all_keys = self.node.data.keys;
-				
-				self.node.loadCollectionData(self.params, function() {
-					self.renderTablePage();
-					self.renderControls();
-					self.renderCollectionCount();
-					self.setEventListeners();
-				});	
-			});
-		}
+			});	
+		});
+		
 	}
 
 	
@@ -186,10 +178,23 @@ var dataTable = function (node) {
 
 		// if node has input/output field, then use them as visible fields
 		if(config) {
-			console.log("has config");
 			var keys = config.input_keys.concat(config.output_keys);
 			keys.unshift("row");
-			return keys;
+			
+			if(self.keys.visible_keys == null) {
+				self.keys.visible_keys = keys;
+				return keys;
+			} else {
+				// if visible fields are set by the user, make sure that in/out keys 
+				// are included as first items in array
+
+				var c = self.keys.visible_keys.filter(function(item) {
+					return keys.indexOf(item) === -1;
+				});
+				
+				self.keys.visible_keys = keys.concat(c);
+				return self.keys.visible_keys;
+			}
 		}
 
 		// otherwise let the user decide what to see
@@ -207,6 +212,7 @@ var dataTable = function (node) {
 			}
 		}
 		
+		// add "row"
 		if(self.keys.visible_keys.indexOf("row") === -1) {
 			self.keys.visible_keys.splice(0, 0, "row");
 			return self.keys.visible_keys;
@@ -231,7 +237,7 @@ var dataTable = function (node) {
 		
 		html += "</tr></thead><tbody>"
 		
-		html += self.renderDataTable();
+		html += self.renderDataTable(config);
 		
 		html += "</tbody></table>" ;
 
@@ -245,48 +251,51 @@ var dataTable = function (node) {
 		
 
 	}
+
 	
 	this.getRowIndex = function (index) {
 		return self.params.skip_value + index + 1;
 	}
 
-	this.renderDataTable = function () {
+
+
+	this.renderDataTable = function (config) {
 
 		if(self.node.data.docs.length == 0)
 			return "<h2>This collection is empty</h2><p>Add source node to get something to look at :)</p>";
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
-		console.log(visible_keys)
-
-		// we render output fields with class "output"
 
 		var html = "";
 		
 		for(var j = 0; j < self.node.data.docs.length; j++) {
-			//console.log(self.node.data.docs[j]);
 			html += "<tr>";
-	
 			for(var k = 0; k < visible_keys.length; k++) {
-				if(visible_keys[k] == "row") { // "row" is not an actual key, just an internal row counter
-					if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-						html += "<td><div data-id='"+self.node.data.docs[j]._id+"' class='button run_single'>run <span>"+ self.getRowIndex(j) +"</span></div></td>";
-					else
-						html += "<td>" + self.getRowIndex(j) + "</td>";
-					
-				} else {
-					if(config) { 
-						if(config.output_keys.indexOf(visible_keys[k]) !== -1) {
-							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "output", visible_keys[k]) + "</td>";
-						} else {
-							html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "", visible_keys[k]) + "</td>";
-						}
-					} else {
-						html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCell(self.node.data.docs[j][visible_keys[k]], null, "", visible_keys[k]) + "</td>";
-					}
-				}
+				html += self.renderCell(visible_keys[k], k, self.node.data.docs[j], config)
 			}
-			html += "</tr>";
+			html += "</tr>"
+		}
+		return html;
+	}
+
+
+
+	this.renderCell = function(key_name, key_index, data, config) {
+		var html = "";
+		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
+			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
+				html += "<td><div data-id='" + data._id + "' class='button run_single'>run <span>"+ self.getRowIndex(key_index) +"</span></div></td>";
+			else
+				html += "<td>" + self.getRowIndex(key_index) + "</td>";
+			
+		} else {
+			if(config && config.input_keys.indexOf(key_name) !== -1)
+				html += "<td class='input'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, "", key_name)  + "</td>";
+			else if(config && config.output_keys.indexOf(key_name) !== -1)
+				html += "<td class='output'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, "", key_name)  + "</td>";
+			else 
+				html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCellContent(data[key_name], null, "", key_name) + "</td>";
 			
 		}
 		return html;
@@ -294,7 +303,7 @@ var dataTable = function (node) {
 
 
 
-	this.renderCell = function (data, index, className, key) {
+	this.renderCellContent = function (data, index, className, key) {
 		
 		var html = "";
 		if(data == null)
@@ -303,27 +312,25 @@ var dataTable = function (node) {
 		// render arrays recursively
 		if (Array.isArray(data)) {
 			for(var i = 0; i < data.length; i++) {
-				html += self.renderCell(data[i], i, className, key);
-				
-				//if(!self.expandCells && i > self.maxArrayLenghtDisplay) {
-					//var left = data.length - i -1;
-					//html += "<div class='more'>" + left + " more ...</div>"
-					//break;
-				//}
-					
+				html += self.renderCellContent(data[i], i, className, key);
 			}
+
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
+
 			// render urls as links
 			if(typeof data == "string" && data.match(/^http/)) {
 				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				
 			} else {
-				if(index != null)
+				if(data.match("^AAAA_error"))
+					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
+				else if(index != null)
 					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
 				else
 					html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
 			}
+
 		// render objects
 		} else {
 			if(index != null)
@@ -334,7 +341,8 @@ var dataTable = function (node) {
 		return html;
 	}
 
-	
+
+
 	this.getDocByTableClick = function (event) {
 		var obj = $(event.target);
 		var row = obj.parent().parent().parent().children().index(obj.parent().parent());
