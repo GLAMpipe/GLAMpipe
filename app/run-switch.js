@@ -45,6 +45,28 @@ exports.runNode = function (node, io) {
  *                                       METANODE                                                                *
  * *************************************************************************************************************/
 
+
+
+//var request = Promise.promisifyAll(require("request"), {multiArgs: true});
+ 
+//var urlList = ["https://commons.wikimedia.org/wiki/Commons_talk:Structured_data#It.27s_alive.21", "https://commons.wikimedia.org/wiki/User:Basvb/Ideas/Single_Image_Batch_Upload", "hthtps://yle.fi/uutiset"];
+//Promise.mapSeries(urlList, function(url) {
+    //return request.getAsync(url).then(function(response,body) {
+        //console.log(url)
+        //return url;
+    //});
+//}).then(function(results) {
+     //// results is an array of all the parsed bodies in order
+     //console.log("then")
+     //console.log(results)
+//}).catch(function(err) {
+     //// handle error here
+     //console.log(err.message)
+     //sandbox.run.runInContext(sandbox);
+//});
+
+
+
 		// hard-coded demo
 		case "meta":
 			
@@ -83,11 +105,11 @@ exports.runNode = function (node, io) {
 			// ***************************************
 
 			var count = 0;
+            var baseurl = "http://localhost:3000"; // localhost does not require authentication
 
 			// run subnodes
 			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
 				console.log("THIS IS SUBNODE");
-				var baseurl = "http://localhost:3000"; // localhost does not require authentication
 				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
 				console.log(url);	
 				console.log("subnode settings: " + nodes[count].settings);

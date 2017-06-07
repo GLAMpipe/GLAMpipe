@@ -725,10 +725,14 @@ exports.deleteNode = function (req, res, io) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", req.params.node);
 			var node = project.nodes[index];
+            if(!node) {
+                console.log("ERROR: node not found");
+                return res.json({"error": "node not found (should not happen)"});
+            }
 			// check that there is no nodes that depends on this node
-			if(inputNode(node, project.nodes)) {
-				return res.json({"error": "Can not remove node with child nodes!"});
-			}
+			//if(inputNode(node, project.nodes)) {
+				//return res.json({"error": "Can not remove node with child nodes!"});
+			//}
 
 			// allow node to say bye
 			//runNodeScript("bye", node, null, io);
@@ -786,7 +790,44 @@ exports.deleteNode = function (req, res, io) {
 						callback(); // we did nothing
 					}
 				},
-				
+
+				// if node is a metanode, then remove its subnodes
+				function (callback) {
+					if(node.type === "meta" && node.metanodes) {
+						var baseurl = "http://localhost:3000"; // localhost does not require authentication
+                        require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
+                            var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + metanode;
+                            console.log("REMOVING: node " + metanode);	
+                            
+                             var options = {
+                                url: url,
+                                headers: {
+                                    "accecpt": "application/json"
+                                }
+                            };
+                            
+                            var request = require("request");
+                            //require('request').debug = true;
+
+                            // make actual HTTP request
+                            request.delete(options, function (error, response, body) {
+                                if (error) {
+                                    console.log(error);
+                                    next();
+                                } else {
+                                    next();
+                                }
+                            });
+                        }, function done () {
+                            console.log("METANODE: deleted all subnodes!");
+                            callback();
+                        })
+
+					} else {
+						callback(); // we did nothing
+					}
+				},
+
 				// if node is an interactive, then remove its init_fields
 				function (callback) {
 					if((node.type == "view") && node.init_fields != null) {
