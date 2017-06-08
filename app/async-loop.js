@@ -1,8 +1,8 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
-var path        = require('path');
-var mongoquery 	= require("../app/mongo-query.js");
-var collection = require("../app/collection.js");
+var path		= require('path');
+var mongoquery	= require("../app/mongo-query.js");
+var collection	= require("../app/collection.js");
 const MP 		= require("../config/const.js");
 
 

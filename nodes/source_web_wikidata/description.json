@@ -1,0 +1,17 @@
+{
+    "nodeid": "source_web_wikidata",
+    "title": "WIKIDATA: sparql import",
+    "type": "source",
+    "subtype": "web",
+    "status": "test",
+    "tags":["generic", "wikimedia"],
+    "description": "Fetch data from wikidata with SPARQL query. ",
+
+    "scripts": {
+        "finish":"out.say('finish', 'Wikidata fetch completed! (' + context.var.total_count +')' ); "
+    },
+    
+    "views": {
+        "params":"no params"
+    }
+}

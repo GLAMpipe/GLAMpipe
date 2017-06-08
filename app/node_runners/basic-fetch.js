@@ -8,6 +8,8 @@ var schema 		= require("../../app/schema.js");
 const MP 		= require("../../config/const.js");
 
 
+// TODO: merge this to web.js
+
 var exports = module.exports = {};
 
 exports.fetchData = function (node, sandbox, io, cb) {
