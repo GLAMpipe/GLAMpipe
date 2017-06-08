@@ -149,6 +149,41 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 	});
 }
 
+// import loop requests data based on array
+exports.importLoop = function (node, sandbox, onDoc) {
+
+	var async = require("async");
+
+	// empty node collection
+	mongoquery.empty(node.collection, {}, function() {
+		
+		//sandbox.context.doc_count = docs.length;
+		
+		// run node once per record
+		async.eachSeries(sandbox.context.pre_value, function iterator (url, next) {
+			//sandbox.context.doc = doc;
+			sandbox.context.count++;
+			var options = {url:url}
+			
+			// call document processing function
+			onDoc(options, sandbox, function processed (error) {
+				console.log(options);
+				sandbox.run.runInContext(sandbox);
+				sandbox.out.value[MP.source] = node._id;
+				if(!error && sandbox.out.value)
+					mongoquery.insert(node.collection, sandbox.out.value, next);
+				else {
+					next();
+				}
+			});
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	})
+
+}
+
 
 // delete loop deletes documents
 exports.deleteLoop = function(node, sandbox, onDoc) {

@@ -1,13 +1,13 @@
-var mongojs 	= require('mongojs');
-var async 		= require("async");
-var colors 		= require('ansicolors');
+var mongojs	= require('mongojs');
+var async		= require("async");
+var colors		= require('ansicolors');
 var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
 var validator 	= require('validator');
-var parser 		= require('xml2json');
+var parser		= require('xml2json');
 
-var mongoquery 	= require("../app/mongo-query.js");
+var mongoquery	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
@@ -51,18 +51,18 @@ exports.runNode = function (node, io) {
  
 //var urlList = ["https://commons.wikimedia.org/wiki/Commons_talk:Structured_data#It.27s_alive.21", "https://commons.wikimedia.org/wiki/User:Basvb/Ideas/Single_Image_Batch_Upload", "hthtps://yle.fi/uutiset"];
 //Promise.mapSeries(urlList, function(url) {
-    //return request.getAsync(url).then(function(response,body) {
-        //console.log(url)
-        //return url;
-    //});
+	//return request.getAsync(url).then(function(response,body) {
+		//console.log(url)
+		//return url;
+	//});
 //}).then(function(results) {
-     //// results is an array of all the parsed bodies in order
-     //console.log("then")
-     //console.log(results)
+	 //// results is an array of all the parsed bodies in order
+	 //console.log("then")
+	 //console.log(results)
 //}).catch(function(err) {
-     //// handle error here
-     //console.log(err.message)
-     //sandbox.run.runInContext(sandbox);
+	 //// handle error here
+	 //console.log(err.message)
+	 //sandbox.run.runInContext(sandbox);
 //});
 
 
@@ -105,7 +105,7 @@ exports.runNode = function (node, io) {
 			// ***************************************
 
 			var count = 0;
-            var baseurl = "http://localhost:3000"; // localhost does not require authentication
+			var baseurl = "http://localhost:3000"; // localhost does not require authentication
 
 			// run subnodes
 			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
@@ -172,7 +172,18 @@ exports.runNode = function (node, io) {
 						case "two_rounds" :
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
 						break;
-						
+
+						case "eprints" :
+							// we first get all item ids (is there a better way?)
+							var w = require("../app/node_runners/web.js");
+							var url = "http://demoprints.eprints.org/rest/eprint/";
+							var options = {url: url}
+							w.fetchContent(options, sandbox, function() {
+								sandbox.pre_run.runInContext(sandbox);
+								asyncLoop.importLoop(node, sandbox, w.fetchContent);
+							})
+						break;
+
 						case "csv":
 							var downloader = require("../app/node_runners/download-file.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
@@ -181,7 +192,6 @@ exports.runNode = function (node, io) {
 							downloader.downloadAndSave (node, download, function() {
 								csv.importUpdates(node, sandbox, download, io);
 							});
-							
 						break;
 						
 						default:

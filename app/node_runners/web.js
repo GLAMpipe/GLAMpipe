@@ -55,6 +55,28 @@ exports.fetchJSON = function (options, sandbox, next) {
 }
 
 
+exports.fetchContent = function (options, sandbox, next) {
+	
+	// make actual HTTP request
+	function responseCallback (error, response, body) {
+		if (error) {
+			console.log(error);
+			next();
+		} else if (response.statusCode == 200) {
+			sandbox.context.data = body;
+			sandbox.context.response = response;
+			//console.log("update response:", body);
+			next();
+		} else {
+			console.log("SERVER RESPONSE: " + response.statusCode)
+			next();
+		}
+	}
+
+    request.get(options, responseCallback); // default method is GET
+}
+
+
 
 exports.headRequest = function(options, sandbox, next) {
 
