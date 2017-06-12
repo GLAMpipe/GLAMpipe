@@ -41,7 +41,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 			next();
 		} else if (response.statusCode == 200) {
 			sandbox.context.data = JSON.parse(body);
-			console.log("update response:", body);
+			//console.log("update response:", body);
 			next();
 		} else {
 			console.log("SERVER RESPONSE: " + response.statusCode)

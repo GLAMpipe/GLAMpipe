@@ -307,7 +307,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				});
 				
 			} else {
-				console.log("not array");
+				console.log(sandbox.out.pre_value)
 				// call document processing function
 				onDoc(sandbox.out.pre_value, sandbox, function processed () {
 					sandbox.run.runInContext(sandbox); // sets "context.out.value"

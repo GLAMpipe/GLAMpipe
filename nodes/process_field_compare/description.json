@@ -1,0 +1,20 @@
+{
+    "nodeid": "process_field_compare",
+    "title": "Compare fields",
+    "type": "process",
+    "subtype": "fields",
+    "status": "usable",
+    "description": "Compare two fields and set new field.",
+    "scripts": {
+    
+        "finish": "out.say('finish', 'Compare done!');"
+    },
+    
+    "views": {
+        "params":
+        [
+            "<label>in field:</label> <input class='dynamic_field' name='in_field'/>",
+            "<label>output field suffix:</label> <input name='out_field'/ value='compared'>"
+        ]
+    }
+}

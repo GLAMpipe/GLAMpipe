@@ -1,10 +1,10 @@
 
-
+var version = "2017.06.07"
 
 // DATAPATH
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
-var dataPath = "/home/arihayri/GLAMpipe-data";
+var dataPath = "";
 
 
 // MODE (server/desktop)
@@ -52,6 +52,7 @@ exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.canRegister = canRegister;
 exports.secret = secret;
+exports.version = version;
 exports.tags = visible_tags;
 exports.IP_passes = IP_passes;
 

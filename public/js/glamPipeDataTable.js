@@ -317,13 +317,13 @@ var dataTable = function (node) {
 
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
-
+			console.log(typeof data)
 			// render urls as links
 			if(typeof data == "string" && data.match(/^http/)) {
 				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				
 			} else {
-				if(data.match("^AAAA_error"))
+				if(typeof data == "string" && data.match("^AAAA_error"))
 					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
 				else if(index != null)
 					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";

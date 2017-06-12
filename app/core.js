@@ -48,14 +48,14 @@ exports.initDB = function (callback) {
 	});
 }
 
-exports.createProjectsDir = function (dataPath, callback) {
+exports.createDirIfNotExist = function (dataPath, callback) {
 	fs = require('fs');
 	
 	// create "projects" directory
-	fs.mkdir(path.join(dataPath, "projects"), function(err) {
+	fs.mkdir(dataPath, function(err) {
 		if(err) {
 			if (err.code === "ENOENT") {
-				return callback(err, "dataPath directory does not exist!");
+				return callback(err, "directory does not exist!\n" + dataPath);
 				
 			} else if(err.code === "EEXIST") {
 				return callback();
@@ -64,7 +64,7 @@ exports.createProjectsDir = function (dataPath, callback) {
 				return callback(err, err.message);
 				
 		}
-		console.log("INIT: project directory created");
+		console.log("INIT: " + dataPath + " directory created");
 		callback();
 	});
 			

@@ -9,9 +9,10 @@ var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
 global.config 		= require("./config/config.js");
+const version 		= require("./config/version.js");
 const env			= process.env;
 
-
+global.config.version = version.version;
 
 var GlamPipe = function() {
 
@@ -27,6 +28,11 @@ var GlamPipe = function() {
 	self.setupVariables = function() {
 
 		self.port      = 3000;
+		self.dataPath = global.config.dataPath;
+		
+		if(self.dataPath == "")
+			self.dataPath = path.join(__dirname, "glampipe-data");
+			
 		self.nodePath = global.config.nodePath;
 
 		// There should be DOCKER env variable present if we were running inside docker
@@ -37,7 +43,6 @@ var GlamPipe = function() {
 		} else {
 			console.log("Running locally, using 127.0.0.1");
 			self.ipaddress = "127.0.0.1";
-			self.dataPath = global.config.dataPath;
 		}
 	};
 
@@ -121,37 +126,45 @@ var GlamPipe = function() {
 	 * - if data path ok, load nodes
 	 * - if nodes ok, initialize server
 	 */
+	 
+	// TODO: promisify!
 	self.initialize = function(cb) {
 		self.setupVariables();
 		self.core 	= require("./app/core.js");
-		if(self.dataPath === "") {
-			console.log(colors.red("You must set DATAPATH in config/config.js!"));
-			return cb("failure");
-		}
-			
-	   
-		self.core.initDB(function (error) {
+		
+		self.core.createDirIfNotExist(self.dataPath, function(error, msg) {
+			if(error) {
+				console.log(colors.red("DATAPATH problem: " + self.dataPath));
+				console.log(msg);
+				cb(error);
+			} else {
+			   
+				self.core.initDB(function (error) {
 
-			self.core.initNodes (self.nodePath, null, function() {
+					self.core.initNodes (self.nodePath, null, function() {
 
-				self.core.createProjectsDir(self.dataPath, function(error, msg) {
-			
-					if(error) {
-						console.log(colors.red("DATAPATH problem: " + self.dataPath));
-						console.log(msg);
-						cb(error);
-					} else {
-						global.config.dataPath = self.dataPath;
-						global.config.projectsPath = path.join(self.dataPath, "projects");
+						self.core.createDirIfNotExist(path.join(self.dataPath, "projects"), function(error, msg) {
+					
+							if(error) {
+								console.log(colors.red("DATAPATH problem: " + self.dataPath));
+								console.log(msg);
+								cb(error);
+							} else {
+								global.config.dataPath = self.dataPath;
+								global.config.projectsPath = path.join(self.dataPath, "projects");
 
-						// Create the express server and routes.
-						self.initializeServer();
-						console.log(colors.green("INIT done"));
-						cb(); 
-					}
+								// Create the express server and routes.
+								self.initializeServer();
+								console.log(colors.green("INIT done"));
+								cb(); 
+							}
+						});
+					});
 				});
-			});
-		});
+			}
+		})
+
+
 	};
 
 
