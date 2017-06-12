@@ -2,7 +2,7 @@
 
 context.vars = {};
 context.vars.total_count = 0;
-var url = "http://demoprints.eprints.org/rest/eprint/";
+var url = context.node.params.eprints_url + "/eprint/";
 
 context.pre_value = [];
 var re = /(?:')([0-9]{1,4}\.xml)/g;
