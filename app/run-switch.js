@@ -176,7 +176,8 @@ exports.runNode = function (node, io) {
 						case "eprints" :
 							// we first get all item ids (is there a better way?)
 							var w = require("../app/node_runners/web.js");
-							var url = "http://demoprints.eprints.org/rest/eprint/";
+							var url = node.params.eprints_url + "/eprint/";
+							url = url.replace("//", "/");
 							var options = {url: url}
 							w.fetchContent(options, sandbox, function() {
 								sandbox.pre_run.runInContext(sandbox);
