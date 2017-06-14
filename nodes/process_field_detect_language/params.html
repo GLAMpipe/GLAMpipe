@@ -1,0 +1,12 @@
+
+<label>Field to be detected</label>
+<input id="detect_field_language_in" name="in_field" class="dynamic_field"/>
+
+<label>out field suffix</label>
+<input id="detect_field_language_out" name="out_field" value="_detected_lang"> 
+
+<script>
+	$("#detect_field_language_in").change(function() {
+		$("#detect_field_language_out").val($(this).val() + "_detected_lang");
+	})
+</script>

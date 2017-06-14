@@ -9,13 +9,6 @@
 
 
     "scripts": {
-		"hello": 
-		[
-			"out.say('news', 'You added a language detection node'); ",
-			"context.node.out_field = context.node.params.in_field  + context.node.params.suffix; "
-		],
-        
-        "bye": "out.say('news', 'Deleted node. Bye!'); ",
         
         "init":
         [
@@ -34,15 +27,7 @@
     },
     
     "views": {
-    
-        "params":
-        [
-			"<label>Field to be detected</label>",
-			"<input id='detect_field_language_in' name='in_field' class='dynamic_field'/>",
-			"<label>out field suffix</label>",
-			"<input id='detect_field_language_out' name='suffix'/ value='_detected_lang'>"   
-        ],
-                    
+           
         "settings": ["no settings"]
     }
 }

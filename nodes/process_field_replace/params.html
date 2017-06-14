@@ -1,0 +1,16 @@
+
+<label>Note title</label> 
+<input name="title"/>
+
+<label>in field:</label> 
+<input id="process_field_replace_in" class="dynamic_field" name="in_field"/>
+
+<label>output field suffix:</label> 
+<input id="process_field_replace_out" name="out_field" value="_replaced">
+
+
+<script>
+	$("#process_field_replace_in").change(function() {
+		$("#process_field_replace_out").val($(this).val() + "_replaced");
+	})
+</script>

@@ -1,12 +1,11 @@
 <label>in field:</label> 
 <input id="process_field_count_chars_in" class="dynamic_field" name="in_field"/>
 
-<label>output field suffix:</label> 
-<input id="process_field_count_chars_out" name="out_field" placeholder="char_count"/>
+<label>output field:</label> 
+<input id="process_field_count_chars_out" name="out_field" value="_char_count"/>
 
 <script>
 	$("#process_field_count_chars_in").change(function() {
 		$("#process_field_count_chars_out").val($(this).val() + "_char_count");
 	})
-
 </script>

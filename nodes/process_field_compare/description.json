@@ -11,10 +11,6 @@
     },
     
     "views": {
-        "params":
-        [
-            "<label>in field:</label> <input class='dynamic_field' name='in_field'/>",
-            "<label>output field suffix:</label> <input name='out_field'/ value='compared'>"
-        ]
+
     }
 }

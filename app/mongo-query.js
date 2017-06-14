@@ -388,60 +388,52 @@ exports.group = function (node, array, callback) {
 	project[node.params.in_field] = 1;
 	project["_id"] = 1;
 	var project2 = { count:1, ids: 1, _id: 0 };
+	var project2 = { count:1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
+	
+	if(array)
+		var unwind = {$unwind: field_name};
+	else
+		var unwind = {};
 
-	// we fist try group with array
-	if(array) {
-		collection.aggregate([
-			{$project: project},
-			{$unwind: field_name},
-			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-			{$project: { _id: 0, "name": "$_id", ids: 1, count:1 } },
-			{$sort: { count: 1 }}
-			// use $out for mongo 2.6 and newer
-			],
-			function (err, data) {
-				if(err) {
-					
-					// did not work, try with non-array
-					console.log("trying witn non-array");
-					collection.aggregate([
-						// {"$match": {"author":{"$ne": ""}} },
-						{$project: project},
-						{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-						{$project: project2 },
-						{$sort: { count: -1 }}
-						// use $out for mongo 2.6 and newer
-						],
-						function (err, data) {
-							if(err)
-								console.log(err);
-							callback(data);
-						}
-					)
-				} else {
-					callback(data);
-				}
-			}
-		)
-	} else {
-		collection.aggregate([
-			// {"$match": {"author":{"$ne": ""}} },
-			{$project: project},
-			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-			{$project: project2 },
-			{$sort: { count: -1 }}
-			// use $out for mongo 2.6 and newer
-			],
-			function (err, data) {
-				if(err)
-					console.log(err);
+
+	collection.aggregate([
+		{$project: project},
+		{$unwind: field_name},
+		{$group : {_id: field_name, count: {$sum:1}}}, 
+		{$project: { _id: 0, "name": "$_id", count:1 } },
+		{$sort: { count: 1 }}
+		// use $out for mongo 2.6 and newer
+		],
+		function (err, data) {
+
+			if(err) {
+				console.log(err.message);
+				// did not work, try with non-array
+				console.log("trying witn non-array");
+				collection.aggregate([
+					// {"$match": {"author":{"$ne": ""}} },
+					{$project: project},
+					{$group : {_id: field_name, count: {$sum:1}}}, 
+					{$project: project2 },
+					{$sort: { count: -1 }}
+					// use $out for mongo 2.6 and newer
+					],
+					function (err, data) {
+						if(err)
+							console.log(err);
+						callback(data);
+					}
+				)
+			} else {
 				callback(data);
 			}
-		)
-	}
+		}
+	)
+
 
 }
+
 
 // facet counts (double grouped also)
 exports.facet = function (req, callback) {
