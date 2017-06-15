@@ -16,7 +16,7 @@ if(context.error) {
 	out.console.log(mode);
 	switch(mode) {
 		case "revision":
-			out.value = getLastRevision();
+			out.setter = getRevision();
 		break;
 	}
 	context.vars.success_counter++;
@@ -26,10 +26,14 @@ if(parseInt(context.count) % 10 == 0)
 	out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
 
-function getLastRevision() {
+function getRevision() {
 	if(data && data.entities && Object.keys(data.entities).length == 1) {
 		var item = data.entities[Object.keys(data.entities)[0]];
-		return item.lastrevid.toString();
+		var setter = {};
+		setter[context.node.params.out_field] = item.lastrevid.toString();
+		setter[context.node.params.out_modified] = item.modified;
+		return setter;
 	}
+	return {};
 
 }

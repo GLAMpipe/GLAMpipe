@@ -287,6 +287,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
 				var result = [];
+				var setters = [];
 				
 				// loop over field array
 				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
@@ -295,14 +296,23 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 					// call document processing function
 					onDoc(row, sandbox, function processed () {
 						//console.log(row);
+						sandbox.out.setter = null;
 						sandbox.run.runInContext(sandbox); // sets "context.out.value"
-						result.push(sandbox.out.value);
+						if(sandbox.out.setter)
+							setters.push(sandbox.out.setter)
+						else
+							result.push(sandbox.out.value);
+							
 						nextFieldRow();
 					});
 
 				}, function done () {
-					var setter = {};
-					setter[node.out_field] = result;
+					var setter = combineSetters(setters);
+					if(!setter) {
+						var setter = {};
+						setter[node.out_field] = result;
+					}
+
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
 				});
 				
@@ -310,9 +320,12 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				console.log(sandbox.out.pre_value)
 				// call document processing function
 				onDoc(sandbox.out.pre_value, sandbox, function processed () {
+					sandbox.out.setter = null;
 					sandbox.run.runInContext(sandbox); // sets "context.out.value"
-					var setter = {};
-					setter[node.out_field] = sandbox.out.value;
+					var setter = sandbox.out.setter;
+					if(!setter) {
+						setter[node.out_field] = sandbox.out.value;
+					}
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
 				});
 			}
@@ -323,3 +336,23 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 	});
 }
 
+// create one setter object for Mongo based on individual setter objects
+// NOTE: this assumes that setter objects have identical keys
+function combineSetters(setters) {
+	if(Array.isArray(setters) && setters.length) {
+		var keys = Object.keys(setters[0]);
+		var c_setter = {};
+		keys.forEach(function(key) {
+			c_setter[key] = [];
+		})
+		setters.forEach(function(setter) {
+			var setter_keys = Object.keys(setter);
+			setter_keys.forEach(function(s_key) {
+				c_setter[s_key].push(setter[s_key]);
+			})
+		})
+		console.log(c_setter);
+		return c_setter;
+	} else
+		return null;
+}

@@ -607,13 +607,19 @@ function initNode (req, io, project, callback) {
 			// "out_field" overrides "_suffix" set by hello script
 			if(node.params.out_field)
 				node.out_field = node.params.out_field;
-				
-			// add output field to all records
-			if(node.out_field && node.out_field !== "") {
-				mongoquery.addFieldToCollection(node.collection, node.out_field, function(){
+			
+			// add all output keys (starting with "out_") to all records
+			var add_keys = [];
+			for(var key in node.params) {
+				if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
+					add_keys.push(node.params[key]);
+			}
+			add_keys.forEach(function(keytoadd) {
+				mongoquery.addFieldToCollection(node.collection, keytoadd, function(){
 					console.log(node.out_field + " added to collection");
 				});
-			}
+			})
+
 			
 			node._id = mongojs.ObjectId();
 			
