@@ -159,7 +159,7 @@ $( document ).ready(function() {
 
     // websocket stuff
     var gp_path = getWSPath();
-    var socket = io.connect("http://localhost", {path: gp_path + '/socket.io'});
+    var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
     var progressDisplay = $("#node-progress");
     var finishDisplay = $("#node-finished");
     var genericDisplay = $("#generic-messages");

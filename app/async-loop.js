@@ -257,7 +257,14 @@ function loop (node, sandbox, onDoc) {
 }
 
 
-// loop updates existing documents and call node asynchronously *on every row* of array
+// loop for running complex (asynchronous) nodes 
+// - pre_run.js is called *once* per document -> outputs an array (sandbox.pre_value)
+// - for(sandbox.pre_value)
+//       call "onDoc" 
+//           - output: sandbox.context.data
+//       call node's run.js 
+//           - processes: sandbox.context.data
+//           - output: out.setter (multiple fields) or out.value (single field)
 exports.fieldLoop = function (node, sandbox, onDoc) {
 
 	var query = {};
@@ -281,9 +288,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 			sandbox.context.count++;
 			sandbox.pre_run.runInContext(sandbox);
 			
-			//console.log("sandbox.out.pre_value: " + sandbox.out.pre_value);
-			//console.log(typeof sandbox.out.pre_value)
-			//console.log(sandbox.out.pre_value)
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
 				var result = [];
@@ -324,6 +328,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 					sandbox.run.runInContext(sandbox); // sets "context.out.value"
 					var setter = sandbox.out.setter;
 					if(!setter) {
+						setter = {};
 						setter[node.out_field] = sandbox.out.value;
 					}
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
