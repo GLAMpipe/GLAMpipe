@@ -1,0 +1,27 @@
+{
+    "nodeid": "meta_commons_online_upload",
+    "title": "Upload online files to wikimedia commons",
+    "type": "meta",
+    "subtype": "test",
+    "status": "usable",
+    "description": "Upload online files to wikimedia commons",
+    "scripts": {
+    
+        "hello": 
+        [
+            "out.say('news', 'You added a metanode'); "
+        ],
+        
+        "bye": "out.say('news', 'Deleted node. Bye!'); ",
+        
+        "init":
+        [
+            "out.say('progress', 'Metanode started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Metanode done!');"
+    },
+    
+    "views": {}
+}
