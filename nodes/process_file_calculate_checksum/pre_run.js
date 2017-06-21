@@ -1,6 +1,10 @@
 
 var filenames = context.doc[context.node.params.in_field];
 
+// make sure that file path is not "undefined"
+if(!context.node.params.filepath)
+	context.node.params.filepath = "";
+
 if(Array.isArray(filenames)) {
 	var paths = [];
 	filenames.forEach(function(filename) {

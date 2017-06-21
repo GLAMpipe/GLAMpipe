@@ -510,7 +510,7 @@ function createMetaSubNodes (node, io, cb) {
 		//}
 	//]
 	
-	var nodes = node.metaparams;
+	var nodes = node.pipe;
 	
 	var nodelist = [];
 	//nodes.reverse();
@@ -539,8 +539,8 @@ function createMetaSubNodes (node, io, cb) {
 		});		
 	}, function done () {
 		console.log("DONE ASYNC CREATING OF SUBNODES")
-		// write node ids to metanode
-		mongoquery.editProjectNode(node._id, {"metanodes":nodelist}, function() {
+		// write subnode ids to metanode
+		mongoquery.editProjectNode(node._id, {"subnodes":nodelist}, function() {
 			cb();
 		})
 		
@@ -601,7 +601,8 @@ function initNode (req, io, project, callback) {
 				node.views.data = node.views.data_static;
 			
 			runNodeScript("hello", node, req, io);
-			runNodeScript("metanodes", node, req, io);
+			runNodeScript("metanodes", node, req, io);  // sets "node.pipe"
+			console.log(node.pipe)
 
 			// "out_field" overrides "_suffix" set by hello script
 			if(node.params.out_field)
@@ -798,11 +799,11 @@ exports.deleteNode = function (req, res, io) {
 
 				// if node is a metanode, then remove its subnodes
 				function (callback) {
-					if(node.type === "meta" && node.metanodes) {
+					if(node.type === "meta" && node.subnodes) {
 						var baseurl = "http://localhost:3000"; // localhost does not require authentication
-                        require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
-                            var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + metanode;
-                            console.log("REMOVING: node " + metanode);	
+                        require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
+                            var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + subnode;
+                            console.log("REMOVING: node " + subnode);	
                             
                              var options = {
                                 url: url,

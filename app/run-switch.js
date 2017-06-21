@@ -100,21 +100,26 @@ exports.runNode = function (node, io) {
 				//}
 			//]
 			
-			var nodes = node.metaparams;
-			nodes[0].settings = node.settings;
+			var pipe = node.pipe;
+			//console.log(sandbox.context.node.pipe)
+			
+			// apply metanode's settings to settings of the first subnode
+			for(var key in node.settings)
+				node.pipe[0].settings[key] = node.settings[key];
 			// ***************************************
 
 			var count = 0;
 			var baseurl = "http://localhost:3000"; // localhost does not require authentication
 
 			// run subnodes
-			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
+			require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
 				console.log("THIS IS SUBNODE");
-				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
+				var url = baseurl + "/api/v1/nodes/" + subnode + "/run";
 				console.log(url);	
-				console.log("subnode settings: " + nodes[count].settings);
+				console.log("subnode settings:");
+				console.log(node.pipe[count].settings);
 				
-				var settings = nodes[count].settings;
+				var settings = node.pipe[count].settings;
 				count++;
 				
 				// POST
@@ -128,9 +133,9 @@ exports.runNode = function (node, io) {
 				};
 				
 				var request = require("request");
-				//require('request').debug = true;
+				require('request').debug = true;
 
-				// make actual HTTP request
+				//make actual HTTP request
 				request.post(options, function (error, response, body) {
 					sandbox.context.data = body;
 					if (error) {
@@ -143,6 +148,8 @@ exports.runNode = function (node, io) {
 						next();
 					}
 				});
+				
+				//next();
 	
 							
 			}, function done () {

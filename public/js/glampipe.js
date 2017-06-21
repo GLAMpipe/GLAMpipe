@@ -445,7 +445,7 @@ var glamPipe = function () {
 			html += self.renderNodes(collection,["source", "lookup"]);
 			  
 			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Processing</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 			html += "  </div><div class='holder params'></div>"
 			
@@ -466,7 +466,7 @@ var glamPipe = function () {
 			html += self.renderNodes(collection, ["view"]);
 
 			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Meta nodes</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
+			html += "	<div><span class='title sectiontitle'>Pipes</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
 			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 			html += "  </div><div class='holder params'></div>"
 
