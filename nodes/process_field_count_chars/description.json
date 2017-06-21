@@ -2,7 +2,7 @@
     "nodeid": "process_field_count_chars",
     "title": "Count characters",
     "type": "process",
-    "subtype": "fields",
+    "subtype": "strings",
     "status": "usable",
     "description": "Count characters of certain field.",
     "scripts": {

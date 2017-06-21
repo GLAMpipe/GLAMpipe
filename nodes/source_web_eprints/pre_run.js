@@ -3,6 +3,7 @@
 context.vars = {};
 context.vars.total_count = 0;
 var url = context.node.params.eprints_url + "/eprint/";
+url = url.replace("//eprint", "/eprint");
 
 context.pre_value = [];
 var re = /(?:')([0-9]{1,4}\.xml)/g;

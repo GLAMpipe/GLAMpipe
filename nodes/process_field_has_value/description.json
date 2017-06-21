@@ -2,7 +2,7 @@
 	"nodeid": "process_field_has_value",
 	"title": "Has field value or not",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
 	"subsubtype": "string manipulation",
     "status": "usable",
 	"description": "This can be used for boolean type marking of field value. Handy for for faceted view.",

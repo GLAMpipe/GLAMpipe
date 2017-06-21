@@ -2,7 +2,7 @@
 	"nodeid": "process_field_hello_world",
 	"title": "Hello world",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
 	"description": "My first node",
 	"status": "works",
 	"scripts": {

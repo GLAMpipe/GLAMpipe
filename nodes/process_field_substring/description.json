@@ -2,7 +2,7 @@
 	"nodeid": "process_field_substring",
 	"title": "Substring",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
 	"subsubtype": "string manipulation",
     "status": "usable",
 	"description": "Extract string from certain character(s) to certain character(s).",

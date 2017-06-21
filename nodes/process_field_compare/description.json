@@ -2,7 +2,7 @@
     "nodeid": "process_field_compare",
     "title": "Compare fields",
     "type": "process",
-    "subtype": "fields",
+    "subtype": "strings",
     "status": "usable",
     "description": "Compare two fields and set new field.",
     "scripts": {

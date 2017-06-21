@@ -2,7 +2,7 @@
 	"nodeid": "process_field_combine",
 	"title": "Combine fields",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
     "status": "usable",
 	"description": "Combine string fields with arbitrary strings",
 	"scripts": {

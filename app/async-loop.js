@@ -30,7 +30,7 @@ exports.loop = function (node, sandbox, onDoc) {
 						setter[node.out_field] = sandbox.out.value;
 					}
 					
-					if(sandbox.context.skip)
+					if(sandbox.context.skip || node.type === "meta") // metanodes do not save output
 						sandbox.finish.runInContext(sandbox);
 					else {
 						mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
@@ -244,7 +244,7 @@ function loop (node, sandbox, onDoc) {
 					setter[node.out_field] = sandbox.out.value;
 				}
 				//console.log("setter:", setter);
-				if(sandbox.context.skip)
+				if(sandbox.context.skip || node.type === "meta") // metanodes do not save output
 					next();
 				else
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);

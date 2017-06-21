@@ -10,14 +10,6 @@ const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
 
-var positionOffset = 60;
-
-
-exports.createPipe = function (req) {
-	console.log(req.body);
-	return 'Pipe created';
-}
-
 
 /**
  * Create glampipe collection on start up

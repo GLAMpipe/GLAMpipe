@@ -2,7 +2,7 @@
     "nodeid": "process_field_detect_language",
     "type": "process",
     "title": "detect language",
-    "subtype": "fields",
+    "subtype": "strings",
     "subsubtype": "detect_language",
     "status": "usable",
     "description": "Detects language of the field (node-cld). Please note that detection is not reliable for short texts.",

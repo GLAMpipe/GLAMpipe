@@ -2,7 +2,7 @@
     "nodeid": "process_field_split",
     "title": "Split",
     "type": "process",
-    "subtype": "fields",
+    "subtype": "strings",
     "status": "usable",
     "description": "Split field to an array.",
     "scripts": {

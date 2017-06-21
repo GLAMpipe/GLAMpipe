@@ -2,7 +2,7 @@
 	"nodeid": "process_field_combine_to_array",
 	"title": "Combine to array",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
 	"subsubtype": "string manipulation",
     "status": "usable",
 	"description": "Combine values from fields to array.",

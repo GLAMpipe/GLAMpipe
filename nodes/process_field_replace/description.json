@@ -2,7 +2,7 @@
 	"nodeid": "process_field_replace",
 	"title": "Search and Replace",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
     "status": "usable",
 	"description": "Search and replace a string. You can use regular expressions.",
 	"scripts": {

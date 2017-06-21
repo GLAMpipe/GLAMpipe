@@ -1,5 +1,5 @@
 var request = require("request");
-var path = require("path");
+var path    = require("path");
 
 var exports = module.exports = {};
 
@@ -62,15 +62,12 @@ exports.fetchContent = function (options, sandbox, next) {
 		if (error) {
 			console.log(error);
 			next();
-		} else if (response.statusCode == 200) {
+		} else {
 			sandbox.context.data = body;
 			sandbox.context.response = response;
 			//console.log("update response:", body);
 			next();
-		} else {
-			console.log("SERVER RESPONSE: " + response.statusCode)
-			next();
-		}
+		} 
 	}
 
     request.get(options, responseCallback); // default method is GET

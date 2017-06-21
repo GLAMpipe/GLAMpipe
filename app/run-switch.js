@@ -74,87 +74,16 @@ exports.runNode = function (node, io) {
 			if(sandbox.context.init_error) 
 				return;
 			
-			// THIS COMES FROM NODE ****************
-			//var nodes = [
-				//{
-					//collection: node.collection,
-					//nodeid: "process_field_split",
-					//params: {
-						//in_field: node.params.in_field,
-						//out_field:"meta1_split"
-					//},
-					//settings: {
-						//separator: node.settings.separator
-					//}
-				//},
-				//{
-					//collection: node.collection,
-					//nodeid: "process_field_count_chars",
-					//params: {
-						//in_field:"meta1_split",
-						//out_field:"meta1_count"
-					//},
-					//settings: {
-						
-					//}
-				//}
-			//]
-			
 			var pipe = node.pipe;
-			//console.log(sandbox.context.node.pipe)
 			
 			// apply metanode's settings to settings of the first subnode
 			for(var key in node.settings)
 				node.pipe[0].settings[key] = node.settings[key];
 			// ***************************************
-
-			var count = 0;
-			var baseurl = "http://localhost:3000"; // localhost does not require authentication
-
-			// run subnodes
-			require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
-				console.log("THIS IS SUBNODE");
-				var url = baseurl + "/api/v1/nodes/" + subnode + "/run";
-				console.log(url);	
-				console.log("subnode settings:");
-				console.log(node.pipe[count].settings);
-				
-				var settings = node.pipe[count].settings;
-				count++;
-				
-				// POST
-				 var options = {
-					url: url,
-					json: settings,
-					headers: {
-						"accecpt": "application/json"
-					},
-					jar:true
-				};
-				
-				var request = require("request");
-				require('request').debug = true;
-
-				//make actual HTTP request
-				request.post(options, function (error, response, body) {
-					sandbox.context.data = body;
-					if (error) {
-						console.log(error);
-						next();
-					} else {
-						console.log(options.url);
-						console.log("update response:", body);
-						//sandbox.run.runInContext(sandbox);
-						next();
-					}
-				});
-				
-				//next();
-	
-							
-			}, function done () {
-				console.log("METANODE: done all nodes!");
-			})
+			
+			//node.req = {params:{doc:"594ac327b6ce710e8ccefe37"}};
+			metanode = require("../app/node_runners/metanode.js")
+			asyncLoop.loop(node, sandbox, metanode.run);
 				
 			break;
 
@@ -184,7 +113,7 @@ exports.runNode = function (node, io) {
 							// we first get all item ids (is there a better way?)
 							var w = require("../app/node_runners/web.js");
 							var url = node.params.eprints_url + "/eprint/";
-							url = url.replace("//", "/");
+                            url = url.replace("//eprint", "/eprint");
 							var options = {url: url}
 							w.fetchContent(options, sandbox, function() {
 								sandbox.pre_run.runInContext(sandbox);
@@ -454,7 +383,7 @@ exports.runNode = function (node, io) {
 					break;	
 
 
-				case "fields":
+				case "strings":
 				
 					switch (node.subsubtype) {
 

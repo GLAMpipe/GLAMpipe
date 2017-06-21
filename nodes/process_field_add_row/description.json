@@ -2,7 +2,7 @@
 	"nodeid": "process_field_add_row",
 	"title": "add row",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
     "status": "usable",
     "tags":["generic"],
 	"description": "Add row with content if certain criteria is met.",

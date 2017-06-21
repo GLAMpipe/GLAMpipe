@@ -2,7 +2,7 @@
 	"nodeid": "process_field_create_commons_metadata",
 	"title": "Create commons metadata",
 	"type": "process",
-	"subtype": "fields",
+	"subtype": "strings",
 	"status": "works",
 	"description": "Produce commons metadata",
 	"scripts": {
