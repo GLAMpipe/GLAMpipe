@@ -1,7 +1,7 @@
 
 
 <label>Choose DSpace REST API url or write url below.</label>
-<select id="export-data-dspace-addfile_url" name="dspace_url">
+<select id="export-data-dspace-addfile_url" name="url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
@@ -20,7 +20,8 @@
 
 <div id="export-data-dspace-addfile_hidden" style="display:none">
 	<label>Where to write result</label>
-	<input name="out_field" value="upload_response" required />
+	<input name="out_field" value="dspace_upload_response" required />
+	<input name="out_link" value="dspace_upload_link" required />
 </div>
 
 <script>

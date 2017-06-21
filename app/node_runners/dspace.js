@@ -64,7 +64,7 @@ exports.uploadItem = function (doc, sandbox, next) {
 
 	 var options = {
 		url: sandbox.out.url,
-		json: sandbox.out.setter.upload,
+		json: sandbox.out.pre_value,
 		headers: {
 			"accecpt": "application/json"
 		},
@@ -185,7 +185,8 @@ exports.addFile = function (doc, sandbox, nextDoc) {
 	var options = {
 		jar:true,		// cookie jar on so that authentication works
 		headers: {
-			"accept": "application/json"
+			"accept": "application/json",
+			"content-type": "multipart/form-data"
 		}
 	}
 
@@ -193,11 +194,13 @@ exports.addFile = function (doc, sandbox, nextDoc) {
 	async.eachSeries(sandbox.out.value, function (upload, nextEle) {
 		sandbox.context.response = null;
 		options.url = upload.url + "?name=" + upload.title; // file name provided here!!
-		console.log(upload);
+		console.log(options.url);
 
 
 		var req = 	request.post(options, function optionalCallback(err, response, body) {
 			sandbox.context.response = response;
+			sandbox.context.data = JSON.parse(body);
+			console.log(sandbox.context.data);
 			sandbox.run.runInContext(sandbox);
 
 			if (err) {

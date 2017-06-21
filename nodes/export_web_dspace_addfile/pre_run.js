@@ -2,10 +2,11 @@
 /*
 pre_run.js must provide an array of upload objects (item specific URL, file title and full file path)
 example: 
-{ 
-	url: https://demo.dspace.org/rest/items/b100008c-0895-4a3f-b85f-312fd43f2393/bitstreams,
+* 
+var test = { 
+	url: "http://siljo.lib.jyu.fi:8080/rest/items/21c28eb0-43d4-4cbc-960c-71491d37915c/bitstreams",
 	title:"mytest.png",
-	filepath:"/home/me/images/mytest.png"
+	filepath:"/home/arihayri/GLAMpipe-data/tmp/504086e41f54c8dd097e02895dffe951"
 }
 */
 
@@ -16,6 +17,9 @@ var uuid = context.doc[context.node.settings.uuid];
 var filepath = context.node.settings.file_path;
 
 var output = [];
+
+if(!filepath)
+	filepath = "";
 
 // input can be array or string
 // we must pair filepaths and file titles
@@ -41,9 +45,10 @@ if(Array.isArray(file) && Array.isArray(title)) {
 	output.push(upload);
 }
 
-var url = context.node.params.dspace_url + "/items/" + uuid + "/bitstreams";
+var url = context.node.params.url + "/items/" + uuid + "/bitstreams";
 output.forEach(function(upload) {
 	upload.url = url;
 })
 
+//out.console.log(output)
 out.value = output;

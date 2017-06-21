@@ -228,9 +228,9 @@ exports.update = function (collectionname, query, doc, callback) {
 	collection.update(query, doc , {multi:true}, function (err, result) {
 		if (err) {
 			console.log(err);
-			callback(err);
+			callback(err, result);
 		} else {
-			callback();
+			callback(null, result);
 		}
 	}); 
 }

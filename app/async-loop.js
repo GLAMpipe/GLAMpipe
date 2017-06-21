@@ -46,12 +46,12 @@ exports.loop = function (node, sandbox, onDoc) {
 		loop (node, sandbox, onDoc);
 	}
 	
-	mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
-		if(error)
-			console.log(error);
-		else
-			console.log("SCHEMA saved");
-	})
+	//mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
+		//if(error)
+			//console.log(error);
+		//else
+			//console.log("SCHEMA saved");
+	//})
 }
 
 

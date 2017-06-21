@@ -1,8 +1,8 @@
 
 var config = { 
 	"protocol": "http", 
-	"url": context.node.params.dspace_url + "/login", 
-	"status_url" : context.node.params.dspace_url + "/status",
+	"url": context.node.params.url + "/login", 
+	"status_url" : context.node.params.url + "/status",
 	"debug": true, 
 	"dryRun": false, 
 	"login": {"email": context.node.settings.username, "password": context.node.settings.password},

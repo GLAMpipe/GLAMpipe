@@ -43,33 +43,45 @@ function pushField (item, value, key_mapped, key_plain, language) {
 	}
 }
 
+// ready-made rest data
+if(context.node.settings.rest_data) {
+	var items = context.doc[context.node.settings.rest_data];
+	items.forEach(function(item2) {
+		item2.language = "";
+	})
+	out.pre_value = {"metadata":items};
+	out.console.log("pre_value")
+	out.console.log(out.pre_value)
 
+// mapped data
+} else {
+	for (mapkey in context.node.settings) {
 
-for (mapkey in context.node.settings) {
+		var language = "";
+		// loop over keys that are mapped
+		if(mapkey.indexOf("_mapkey_") != -1) {
+			var key_plain = mapkey.replace("_mapkey_", "");
+			var key_mapped = context.node.settings[mapkey];
+			var value = context.doc[key_plain];
 
-	var language = "";
-	// loop over keys that are mapped
-	if(mapkey.indexOf("_mapkey_") != -1) {
-		var key_plain = mapkey.replace("_mapkey_", "");
-		var key_mapped = context.node.settings[mapkey];
-		var value = context.doc[key_plain];
-
-		// loop over value arrays
-	   if (value != null && value.constructor.name === "Array") {
-		   for (var i = 0; i < value.length; i++ ) { 
-			   	if(context.doc[key_plain + "__lang"])
-					language = context.doc[key_plain + "__lang"][i];
-				pushField(item, value[i], key_mapped, key_plain, language);	
+			// loop over value arrays
+		   if (value != null && value.constructor.name === "Array") {
+			   for (var i = 0; i < value.length; i++ ) { 
+					if(context.doc[key_plain + "__lang"])
+						language = context.doc[key_plain + "__lang"][i];
+					pushField(item, value[i], key_mapped, key_plain, language);	
+			   }
+			   
+		   } else { 
+				if(context.doc[key_plain + "__lang"])
+					language = context.doc[key_plain + "__lang"];
+				pushField(item, value, key_mapped, key_plain, language);	
 		   }
-		   
-	   } else { 
-			if(context.doc[key_plain + "__lang"])
-				language = context.doc[key_plain + "__lang"];
-			pushField(item, value, key_mapped, key_plain, language);	
 	   }
-   }
 
-} 
+	} 
+	out.pre_value = item;
+}
 
 
 
@@ -79,4 +91,4 @@ if(parseInt(context.count) % 10 == 0)
 
 
 
-out.setter = {"upload": item};
+

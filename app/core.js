@@ -557,12 +557,11 @@ function createMetaSubNodes (node, io, cb) {
  
 function initNode (req, io, project, callback) {
 
-	console.log("New node id:", mongojs.ObjectId());
-	console.log("nodeparams:", req.params);
+	console.log("NODE CREATION: New node id:", mongojs.ObjectId());
+	console.log("NODE CREATION: nodeparams:", req.params);
 	
 	// callback for inserting node to db
 	var insertNode = function (node, cb) {
-		console.log("inserting");
 		
 		mongoquery.update("mp_projects",
 			{_id:mongojs.ObjectId(node.project)},
@@ -616,7 +615,7 @@ function initNode (req, io, project, callback) {
 			}
 			add_keys.forEach(function(keytoadd) {
 				mongoquery.addFieldToCollection(node.collection, keytoadd, function(){
-					console.log(node.out_field + " added to collection");
+					console.log("NODE CREATION: '" + keytoadd + "' added to collection");
 				});
 			})
 
@@ -631,7 +630,7 @@ function initNode (req, io, project, callback) {
 						console.log(err);
 						callback({"error": err});
 					} else {
-						console.log("node created");
+						console.log("NODE CREATION: node created!");
 						callback({
 							status:'node created', 
 							id:node._id, 
@@ -665,7 +664,7 @@ function createNodeDirs (node, project, cb) {
 			//return res.json({"error":"Could not create node's output directory!"});
 				
 		} else {
-			console.log("INIT: output directory created");
+			console.log("NODE CREATION: output directory created");
 			node.dir = dir;
 			cb(null);
 		}
@@ -702,7 +701,7 @@ function initCollectionNode (req, res, io) {
 						console.log(error);
 						res.json({"error": error});
 					} else {
-						console.log("node created");
+						console.log("NODE CREATION: node created");
 						res.json({
 							"status": "node created", 
 							"collection":node.collection, 
@@ -713,7 +712,7 @@ function initCollectionNode (req, res, io) {
 
 			})
 		} else {
-			console.log("node " + req.nodeid + " not found!");
+			console.log("ERROR: node " + req.nodeid + " not found!");
 			res.json({"error": "node " + req.nodeid + " not found"})
 		}
 	});
@@ -1085,9 +1084,14 @@ exports.editCollection = function (req, callback) {
 	
 	var setter = {};
 	setter[req.body.field] = req.body.value;
+	setter = req.body;
 	console.log("setter:", setter);
 	
-	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(result) {
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
+		if(err)
+			console.log(err);
+		console.log("edit collection");
+		console.log(result);
 		callback(result); 
 	});
 }

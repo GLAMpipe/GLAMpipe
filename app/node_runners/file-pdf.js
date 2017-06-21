@@ -31,7 +31,7 @@ exports.extractText = function (node, sandbox, io) {
 				//sandbox.finish.runInContext(sandbox);
 			} else {
 				// save to database
-				var record = {info:info, text:data, file:file}
+				var record = {info:info, text:data, file:file, original_filename:node.params.file}
 				record[MP.source] = node._id;
 				mongoquery.insert(node.collection, record , function(error) {
 					if(error) {
