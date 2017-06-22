@@ -2,7 +2,7 @@
     "nodeid": "meta_test",
     "title": "Split and Count characters",
     "type": "meta",
-    "subtype": "test",
+    "subtype": "strings",
     "status": "usable",
     "description": "Testing meta node.",
     "scripts": {

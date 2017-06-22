@@ -46,6 +46,21 @@ exports.runNode = function (node, io) {
  * *************************************************************************************************************/
 
 
+		case "meta":
+			
+			//runNodeScriptInContext("init", node, sandbox, io);
+			if(sandbox.context.init_error) 
+				return;
+			
+			// apply metanode's settings to settings of the first subnode
+			for(var key in node.settings)
+				node.pipe[0].settings[key] = node.settings[key];
+			
+			metanode = require("../app/node_runners/metanode.js")
+			asyncLoop.loop(node, sandbox, metanode.run);
+				
+			break;
+
 
 //var request = Promise.promisifyAll(require("request"), {multiArgs: true});
  
@@ -67,25 +82,6 @@ exports.runNode = function (node, io) {
 
 
 
-		// hard-coded demo
-		case "meta":
-			
-			//runNodeScriptInContext("init", node, sandbox, io);
-			if(sandbox.context.init_error) 
-				return;
-			
-			var pipe = node.pipe;
-			
-			// apply metanode's settings to settings of the first subnode
-			for(var key in node.settings)
-				node.pipe[0].settings[key] = node.settings[key];
-			// ***************************************
-			
-			//node.req = {params:{doc:"594ac327b6ce710e8ccefe37"}};
-			metanode = require("../app/node_runners/metanode.js")
-			asyncLoop.loop(node, sandbox, metanode.run);
-				
-			break;
 
 
 

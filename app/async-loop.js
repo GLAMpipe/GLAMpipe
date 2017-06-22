@@ -298,8 +298,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 					sandbox.context.data = null;
 
 					// call document processing function
-					onDoc(row, sandbox, function processed () {
-						//console.log(row);
+					onDoc(row, sandbox, function processed (error) {
+						console.log(error);
 						sandbox.out.setter = null;
 						sandbox.run.runInContext(sandbox); // sets "context.out.value"
 						if(sandbox.out.setter)

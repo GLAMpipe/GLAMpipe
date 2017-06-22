@@ -1,4 +1,5 @@
 
+// this outputs options objects for request module
 
 var servers = [
 	"https://commons.wikimedia.org",
@@ -18,14 +19,22 @@ var values = context.doc[context.node.params.in_field];
 if(Array.isArray(values)) {
 	var outputs = [];
 	values.forEach(function(value) {
-		outputs.push(server + api + value);
+		var options = {
+			url: server + api + value,
+			method: 'GET'
+		}
+		outputs.push(options);
 	})
 	
 	out.pre_value = outputs;
 	
 } else {
+	var options = {
+		url: server + api + context.doc[context.node.params.in_field],
+		method: 'GET'
+	}
 	
-	out.pre_value = server + api + context.doc[context.node.params.in_field];
+	out.pre_value = options;
 }
 
 

@@ -1,14 +1,17 @@
 
 
-context.node.metaparams = [
+context.node.pipe = [
 	{
 		collection: context.node.collection,
 		nodeid: "process_field_split",
 		params: {
 			in_field: context.node.params.in_field,
 			out_field:"meta1_split"
+		},
+		settings: {
+			// settings comes from metanode
 		}
-		// settings comes from metanode
+		
 	},
 	
 	{

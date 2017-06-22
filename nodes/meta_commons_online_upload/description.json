@@ -1,8 +1,8 @@
 {
     "nodeid": "meta_commons_online_upload",
-    "title": "Upload online files to wikimedia commons",
+    "title": "Check if file is in Wikimedia commons",
     "type": "meta",
-    "subtype": "test",
+    "subtype": "web",
     "status": "usable",
     "description": "Upload online files to wikimedia commons",
     "scripts": {

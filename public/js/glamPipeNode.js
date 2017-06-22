@@ -121,9 +121,14 @@ var glamPipeNode = function (node, gp) {
 	this.renderNode = function () {
 		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
-		//if(self.source.params.parent) {
-			//return "<div class='metanode'>META: "+self.source.title+"</div>";
-		//}
+		if(self.source.params.parent) {
+			var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
+			html +=   "  <div class='boxleft'>"
+			html += "<div class='metanode'>TASK "+self.source.title+"</div>";
+			html += "</div></div>"
+			return html;
+		}
+		
 		var subsubtype = "";
 		if(self.source.subsubtype)
 			subsubtype = " > " + self.source.subsubtype;

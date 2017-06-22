@@ -13,6 +13,8 @@ exports.postJSON = function (doc, sandbox, next) {
 	var options = sandbox.out.pre_value; 
 	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
+	if(!options.url)
+		return next("missing url! skipping...")
 	
 	//require('request').debug = true;
 
@@ -33,7 +35,11 @@ exports.postJSON = function (doc, sandbox, next) {
 
 // get JSON response via GET or POST
 exports.fetchJSON = function (options, sandbox, next) {
-	
+
+	if(!options.url) {
+		return next("missing url! skipping...");
+	}
+
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		if (error) {
@@ -57,6 +63,9 @@ exports.fetchJSON = function (options, sandbox, next) {
 
 exports.fetchContent = function (options, sandbox, next) {
 	
+	if(!options.url)
+		return next("missing url! skipping...")
+		
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		if (error) {
@@ -80,7 +89,7 @@ exports.headRequest = function(options, sandbox, next) {
 	var request = require("request");
 	console.log("REQUEST:", options.url);
 	if(!options.url)
-		next("missing url")
+		return next("missing url! skipping...")
 
 	request(options, function (error, response, body) {
 		sandbox.context.data = {"error": error, "response": response};

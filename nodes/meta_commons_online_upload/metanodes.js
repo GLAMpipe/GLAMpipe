@@ -19,16 +19,30 @@ context.node.pipe = [
 		}
 	},
 	
-	// upload downloaded file to OMEKA-s
+	// calculate checksum for file
 	{
 		collection: context.node.collection,
 		nodeid: "process_file_calculate_checksum",
 		params: {
 			in_field: context.node.params.in_file_url + "_download",
-			out_field: context.node.params.out_field
+			out_field: context.node.params.in_file_url + "_checksum"
 		},
 		settings: {
 			
 		}
-	}
+	},
+	
+	// check if file is in commons
+	{
+		collection: context.node.collection,
+		nodeid: "process_lookup_web_check_commons",
+		params: {
+			in_field: context.node.params.in_file_url + "_checksum",
+			out_field: context.node.params.out_field,
+			server: "beta"
+		},
+		settings: {
+			
+		}
+	},
 ]

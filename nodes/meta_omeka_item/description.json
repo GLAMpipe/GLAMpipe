@@ -2,7 +2,7 @@
     "nodeid": "meta_omeka_item",
     "title": "Upload file to Omeka-s",
     "type": "meta",
-    "subtype": "test",
+    "subtype": "web",
     "status": "usable",
     "description": "Create Omeka-s item with file.",
     "scripts": {

@@ -3,7 +3,7 @@
     "type": "process",
     "subtype": "downloads",
     "subsubtype": "basic",
-    "title": "file",
+    "title": "Download file",
     "status": "usable",
     "tags":["generic"],
     "description": "Download file from URL(s).",
