@@ -34,7 +34,7 @@ exports.search = function (req, res) {
 		reverse: reverse
 	}
 
-	console.log("SEARCH:\n" + util.inspect(params, false, 4, true));
+	//console.log("SEARCH:\n" + util.inspect(params, false, 4, true));
 	
 	return params;
 }

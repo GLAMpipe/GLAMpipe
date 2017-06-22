@@ -1,10 +1,10 @@
 
-// output as json
-var data = context.data;
+// handle error
+if (context.error)
+	out.value = out.error_marker + context.error;
 
-if (data.error)
-	out.value = out.error_marker;
-else if(data && data != "") {
+// output data if not error
+else if(context.data && context.data != "") {
 	context.vars.success_counter++;
 	out.value = context.data;
 } 

@@ -323,7 +323,7 @@ exports.getNodeFromFile = function (node_id, res) {
  */ 
 exports.runNode = function (req, io, res) {
 
-	console.log('Running node:', req.params.id);
+	//console.log('NODE RUN: node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
 
 	exports.getNode(req.params.id, function(err, node) {
@@ -342,13 +342,15 @@ exports.runNode = function (req, io, res) {
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
 
-			console.log("\n>>>>>>>>>>>>>>>>>>>>>> NODE >>>>>>>>>>>>>>>>>>>>>>>>");
+			console.log("\n>>>>>>>>>>>>>> RUNNING NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);
 			console.log("type: ", node.type);
-			console.log("params:");
+			console.log("node params:");
 			console.log(node.params);
-			console.log("settings:");
+			console.log("node settings:");
 			console.log(node.settings);
+			console.log("request params:");
+			console.log(req.params);
 			console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 			
 			if(res)
@@ -1020,7 +1022,7 @@ exports.getCollectionCount = function (req, cb) {
 	
 	var query = createSearchQuery(req);
 	var params = buildquery.search(req);
-	console.log(query)
+	//console.log(query)
 	mongoquery.countDocs(req.params.collection, params.query, function (result) {
 		cb({count:result});
 	});

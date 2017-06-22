@@ -40,6 +40,8 @@ exports.fetchJSON = function (options, sandbox, next) {
 		return next("missing url! skipping...");
 	}
 
+	console.log("REQUEST:", options.url);
+
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		if (error) {
@@ -92,8 +94,8 @@ exports.headRequest = function(options, sandbox, next) {
 		return next("missing url! skipping...")
 
 	request(options, function (error, response, body) {
-		sandbox.context.data = {"error": error, "response": response};
-		next();
+		//sandbox.context.data = ;
+		next({"error": error, "response": response});
 	});
 
 }
@@ -153,7 +155,9 @@ exports.downloadFile = function (download, sandbox, next ) {
 	var fs = require("fs");
 	var request = require("request")
 
-	console.log("downloading:", download);
+	console.log("REQUEST:", download.url);
+	console.log("FILENAME:", download.filename);
+	
 	var node = sandbox.context.node;
 	sandbox.context.data = download;
 	

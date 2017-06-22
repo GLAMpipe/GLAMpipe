@@ -26,7 +26,7 @@
             "out.say('progress', 'Starting to download!'); "
         ],
                 
-        "finish":"out.say('finish', '<h2>Downloaded '+context.node.download_counter+' files!</h2>');"
+        "finish":"out.say('finish', 'Downloaded '+context.node.download_counter+' files!');"
     },
     
     "views": {}

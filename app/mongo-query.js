@@ -132,7 +132,6 @@ exports.countDocs = function (collectionname, query, callback) {
 			console.log(err);
 			callback("error in count");
 		} else {
-			console.log("COUNT:", count)
 			callback(count.toString());
 		}
 	});
@@ -633,10 +632,10 @@ function createParamsObject(arrayName, params) {
 		  result[arrayName + ".$." + p] =  params[p];
 		} 
 	}
-    console.log("******************************");
-    console.log(params);
-    console.log(result);
-    console.log("******************************");
+    //console.log("******************************");
+    //console.log(params);
+    //console.log(result);
+    //console.log("******************************");
 	return result;
 }
 

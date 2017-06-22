@@ -12,7 +12,7 @@ exports.loop = function (node, sandbox, onDoc) {
 	
 	// ONE DOC (single run)
 	if(node.req && node.req.params.doc) {
-		console.log("NODE: single doc")
+		console.log("LOOP: single doc")
 			
 		mongoquery.findOneById (node.req.params.doc, node.collection, function (doc) {
 			if(doc) {
@@ -20,9 +20,9 @@ exports.loop = function (node, sandbox, onDoc) {
 				sandbox.context.doc_count = 1;
 				// call document processing function
 				onDoc(doc, sandbox, function processed () {
-					console.log("sandbox.out.value:" + sandbox.out.value);
-					console.log("sandbox.out.setter:");
-					console.log(JSON.stringify(sandbox.out.setter, null, 4))
+					//console.log("sandbox.out.value:" + sandbox.out.value);
+					//console.log("sandbox.out.setter:");
+					//console.log(JSON.stringify(sandbox.out.setter, null, 4))
 					if(sandbox.out.setter != null) {
 						var setter = sandbox.out.setter; 
 					} else {
@@ -43,6 +43,7 @@ exports.loop = function (node, sandbox, onDoc) {
 
 	// LOOP ALL DOCS
 	} else {
+		console.log("LOOP: all")
 		loop (node, sandbox, onDoc);
 	}
 	
@@ -270,7 +271,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {
-		console.log("NODE: single doc")
+		console.log("LOOP: single doc")
 		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
 	}
 
@@ -278,7 +279,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 	mongoquery.find2(query, node.collection, function (err, docs) {
 		
 		sandbox.context.doc_count = docs.length;
-		console.log(onDoc);
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
@@ -296,10 +296,12 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				// loop over field array
 				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
 					sandbox.context.data = null;
-
+					
 					// call document processing function
-					onDoc(row, sandbox, function processed (error) {
-						console.log(error);
+					onDoc(row, sandbox, function processed () {
+						if(sandbox.error)
+							console.log(sandbox.error);
+							
 						sandbox.out.setter = null;
 						sandbox.run.runInContext(sandbox); // sets "context.out.value"
 						if(sandbox.out.setter)
@@ -321,11 +323,13 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				});
 				
 			} else {
-				console.log(sandbox.out.pre_value)
 				// call document processing function
-				onDoc(sandbox.out.pre_value, sandbox, function processed () {
+				onDoc(sandbox.out.pre_value, sandbox, function processed (error) {
+					if(error)
+						console.log(error);
+						
 					sandbox.out.setter = null;
-					sandbox.run.runInContext(sandbox); // sets "context.out.value"
+					sandbox.run.runInContext(sandbox); 
 					var setter = sandbox.out.setter;
 					if(!setter) {
 						setter = {};
