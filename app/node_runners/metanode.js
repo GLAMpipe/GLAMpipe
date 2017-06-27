@@ -12,6 +12,11 @@ exports.run = function(doc, sandbox, next) {
 	var baseurl = "http://localhost:3000"; // localhost does not require authentication
 	console.log(sandbox.context.node.subnodes)
 	
+	// pre_run may skip whole node sequence
+	sandbox.pre_run.runInContext(sandbox);
+	if(sandbox.context.skip)
+		return next();
+	
 	// run subnodes
 	require("async").eachSeries(sandbox.context.node.subnodes, function iterator (subnode, next_sub) {
 		console.log("THIS IS SUBNODE");

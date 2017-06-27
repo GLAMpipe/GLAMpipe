@@ -12,6 +12,8 @@ var config = {
 }; 
 out.botconfig = config;
             
+if(context.node.settings.username == "" || context.node.settings.password == "")
+	context.abort = true;
 
 out.say("progress", "Trying to login to commons..."); 
 out.url = apis[parseInt(context.node.settings.api)] +"/w/api.php?action=query&meta=tokens&type=login"; 

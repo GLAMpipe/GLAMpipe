@@ -272,7 +272,7 @@ var dataTable = function (node) {
 		for(var j = 0; j < self.node.data.docs.length; j++) {
 			html += "<tr>";
 			for(var k = 0; k < visible_keys.length; k++) {
-				html += self.renderCell(visible_keys[k], k, self.node.data.docs[j], config)
+				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
 			}
 			html += "</tr>"
 		}
@@ -495,8 +495,10 @@ var dataTable = function (node) {
 		//var doc = self.getDocByTableClick(event);
         if(typeof doc_id === "undefined")
             alert("No doc id found");
-        else
-            self.node.runSingle(doc_id);	
+        else {
+			$(event.target).text("running...");
+            self.node.runSingle(doc_id);
+		}
 	}
 
 

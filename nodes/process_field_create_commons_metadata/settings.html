@@ -4,6 +4,20 @@
 <div>You can test your wikitext by copying it <a target='_blank' href='https://commons.wikimedia.org/wiki/Special:ExpandTemplates?uselang=en'>here</a>.</div>
 
 
+<h3>Page title</h3>
+<div class="box-noflex">
+	<div class="info">Page title must be UNIQUE (part of URL of the page)</div>
+	<label>content (static + dynamic + static)</label>
+	<input class="node-settings middle_input" name="page_static1"/>
+    <input class="node-settings dynamic_field middle_input" name="page_dyn1"/>
+    <input class="node-settings middle_input" name="page_static2"/>
+    <input class="node-settings dynamic_field middle_input" name="page_dyn2"/>
+    <input class="node-settings middle_input" name="page_static3"/>
+    
+    <label>file type (dynamic. You can put static extension to last field above)</label>
+    <input class="node-settings dynamic_field middle_input" name="file_extension"/>
+</div>
+
 <h3>Categories</h3>
 <div class="box-noflex">
 	<label>Item specific categories (select field if any)</label>
@@ -16,9 +30,12 @@
 	<textarea class="node-settings big" name="extra"></textarea>
 </div>
 
-<h3>Title</h3>
+
+
+
+<h3>Image title</h3>
 <div class="box-noflex">
-	<div class="info">This is the page title and this MUST be unique!</div>
+	<div class="info">A translatable title of the image</div>
 	<label>content (static + dynamic + static)</label>
 	<input class="node-settings middle_input" name="title_static1"/>
     <input class="node-settings dynamic_field middle_input" name="title_dyn1"/>

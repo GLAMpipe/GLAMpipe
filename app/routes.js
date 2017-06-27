@@ -7,6 +7,8 @@ var project 	= require("../app/project.js");
 //var User 		= require("../app/controllers/user.js");
 const conf 		= require("../config/config.js");
 
+global.register = {};
+
 module.exports = function(express, glampipe, passport) {
     
 	var multer 		= require("multer");
@@ -263,6 +265,20 @@ module.exports = function(express, glampipe, passport) {
 	//express.post('/set/node/:id/visible-fields', function (req, res) {
 		//glampipe.core.setVisibleFields(req.params.id, res);
 	//});
+	
+	express.post('/api/v1/nodes/*', function (req, res, next) {
+		if(global.register[req.originalUrl]) {
+			console.log("REGISTER: request is running already!")
+			res.send({error:"request is running already!"})
+		} else {
+			global.register[req.originalUrl] = {req:req.originalUrl, log:[]};
+			next()
+		}
+	});
+
+	express.get('/api/v1/register', function (req, res, next) {
+		res.send(register);
+	});
 
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
 		glampipe.core.runNode(req, glampipe.io);

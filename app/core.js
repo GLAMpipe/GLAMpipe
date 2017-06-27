@@ -325,7 +325,6 @@ exports.runNode = function (req, io, res) {
 
 	//console.log('NODE RUN: node:', req.params.id);
 	io.sockets.emit("news", "NODE: running node " + req.params.id);
-
 	exports.getNode(req.params.id, function(err, node) {
 		if(err) {
 			console.log("node not found");
@@ -1078,7 +1077,7 @@ exports.editCollection = function (req, callback) {
 	}
 	
 	var setter = {};
-	setter[req.body.field] = req.body.value;
+	//setter[req.body.field] = req.body.value;
 	setter = req.body;
 	console.log("setter:", setter);
 	

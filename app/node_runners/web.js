@@ -94,7 +94,7 @@ exports.headRequest = function(options, sandbox, next) {
 		return next("missing url! skipping...")
 
 	request(options, function (error, response, body) {
-		//sandbox.context.data = ;
+		sandbox.context.data = {"error": error, "response": response};
 		next({"error": error, "response": response});
 	});
 

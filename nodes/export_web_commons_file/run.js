@@ -1,7 +1,16 @@
+var apis = ["commons.wikimedia.beta.wmflabs.org", "commons.wikimedia.org"]; 
+
 if(context.error) { 
     out.say("error", context.error); 
     out.value = context.error; 
-} else { 
+    
+// if page exists, then write the url to output
+} else if(context.data && context.data.pageexists) {
+	var server = "https://" + apis[parseInt(context.node.settings.api)];  
+	out.value = server + "/wiki/File:" + context.data.pageexists;
+	
+// else write new url to output
+} else if(context.data && context.data.imageinfo) { 
     out.value = context.data.imageinfo.descriptionurl; 
 }
             

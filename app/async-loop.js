@@ -303,7 +303,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							console.log(sandbox.error);
 							
 						sandbox.out.setter = null;
-						sandbox.run.runInContext(sandbox); // sets "context.out.value"
+						sandbox.run.runInContext(sandbox); 
 						if(sandbox.out.setter)
 							setters.push(sandbox.out.setter)
 						else
@@ -324,9 +324,9 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				
 			} else {
 				// call document processing function
-				onDoc(sandbox.out.pre_value, sandbox, function processed (error) {
-					if(error)
-						console.log(error);
+				onDoc(sandbox.out.pre_value, sandbox, function processed () {
+					if(sandbox.error)
+						console.log(sandbox.error);
 						
 					sandbox.out.setter = null;
 					sandbox.run.runInContext(sandbox); 

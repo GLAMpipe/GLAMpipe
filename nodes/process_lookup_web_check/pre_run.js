@@ -1,5 +1,5 @@
 
-var base = context.node.params.base_url;
+var base = context.node.settings.base_url;
 
 // we must output array of URLs
 if(Array.isArray(context.doc[context.node.params.in_field])) {

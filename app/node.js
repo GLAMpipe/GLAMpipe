@@ -1,19 +1,79 @@
-var mongojs		= require('mongojs');
-var async		= require("async");
-var colors		= require('ansicolors');
+
+var mongojs 	= require('mongojs');
+var async 		= require("async");
+var colors 		= require('ansicolors');
 var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
-var validator 	= require('validator');
-var parser		= require('xml2json');
-
-var mongoquery	= require("../app/mongo-query.js");
-var nodeview 	= require("../app/nodeview.js");
-var sourceAPI	= require("../app/node_runners/basic-fetch.js");
-var asyncLoop	= require("../app/async-loop.js");
+var mongoquery 	= require("../app/mongo-query.js");
+var buildquery 	= require("../app/query-builder.js");
 const MP 		= require("../config/const.js");
-const config 	= require("../config/config.js");
 var exports 	= module.exports = {};
+
+var exports = module.exports = {};
+
+exports.run = function() {
+
+	//console.log('NODE RUN: node:', req.params.id);
+	io.sockets.emit("news", "NODE: running node " + req.params.id);
+
+	exports.getNode(req.params.id, function(err, node) {
+		if(err) {
+			console.log("node not found");
+			io.sockets.emit("error", "node not found");
+			return;
+		}
+		
+		node.settings = req.body;
+		node.req = req;	
+		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
+		// from it without affecting settings that are used by node
+        var copy = Object.assign({}, node.settings) 
+		
+		// save node settings TODO: set callback
+		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
+
+			console.log("\n>>>>>>>>>>>>>> RUNNING NODE >>>>>>>>>>>>>>>>>>>>>>>>");
+			console.log("title: " + node.title);
+			console.log("type: ", node.type);
+			console.log("node params:");
+			console.log(node.params);
+			console.log("node settings:");
+			console.log(node.settings);
+			console.log("request params:");
+			console.log(req.params);
+			console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
+			
+			if(res)
+				node.res = res;
+			
+			try {
+				require("../app/run-switch.js").runNode(node, io);
+			} catch (e) {
+				console.log("ERROR:" + e.message);
+				io.sockets.emit("error", e.message);
+			}
+		})
+
+	})
+
+}
+
+exports.getNode = function (node_id, cb) {
+
+	mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
+		if(!project) {
+			return cb("not found", null);
+		}
+		var index = indexByKeyValue(project.nodes, "_id", node_id);
+		var node = project.nodes[index];
+		node.project = project._id;
+		node.project_title = project.title;
+		node.project_dir = project.dir;
+		cb(null, node);	
+	})
+	
+}
 
 
 
@@ -118,11 +178,11 @@ exports.runNode = function (node, io) {
 						break;
 
 						case "csv":
-							var web = require("../app/node_runners/web.js");
+							var downloader = require("../app/node_runners/download-file.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
-							web.downloadAndSave (node, download, function() {
+							downloader.downloadAndSave (node, download, function() {
 								csv.importUpdates(node, sandbox, download, io);
 							});
 						break;
@@ -324,7 +384,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("finish","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.fieldLoop(node, sandbox, mv_bot.uploadFile);
+									asyncLoop.loop(node, sandbox, mv_bot.uploadFile);
 								}
 							});
 						break;
@@ -363,13 +423,8 @@ exports.runNode = function (node, io) {
 						break;
 
 						case "calculate_checksum":
-							var file = require("../app/node_runners/file.js");
-							asyncLoop.fieldLoop(node, sandbox, file.getHash);
-						break;
-
-						case "type":
-							var file = require("../app/node_runners/file.js");
-							asyncLoop.fieldLoop(node, sandbox, file.getType);
+							var checksum = require("../app/node_runners/file-checksum.js");
+							asyncLoop.fieldLoop(node, sandbox, checksum.getHash);
 						break;
 
 						case "grobid":
@@ -493,201 +548,4 @@ exports.runNode = function (node, io) {
 			return;
 	}	
 
-}
-
-
-
-exports.createSandbox = function (node, io) {
-
-	// context for node scripts
-	var sandbox = {
-		context: {
-			doc: null,
-			data: null,
-			vars: {},
-			myvar: {},
-			node: node,
-			doc_count:0,
-			count:0,
-			path: path,
-			get: getProp,
-			flat: flatten,
-			validator: validator,
-			parser: parser,
-			MP: MP
-		},
-		out: {
-			self:this,
-			error_marker: "AAAA_error:",
-			pre_value:"",
-			value:"",
-			file:"",
-			setter:null,
-			updatequery: null,
-			error: null,
-			console:console,
-			schema: [],
-			key_type: [],
-			add_display_key: function (key, type) {
-				if(this.schema.indexOf(key) < 0) {
-					this.schema.push(key);
-					this.key_type.push(type);
-				}
-			},
-			say: function(ch, msg) {
-				console.log(ch.toUpperCase() + ":", msg);
-				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
-
-				var date = new Date();
-				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
-				global.register[node.req.originalUrl].log.push(log);
-				//mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					// send http response if needed (i.e. node was executed by "run" instead of "start")
-					if(ch === "finish" && node.res) {
-						console.log(sandbox.out.value);
-						if(this.error)
-							node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
-						else
-							node.res.json({
-								status:"finished", 
-								node_uuid: node._id.toString(), 
-								nodeid: node.nodeid, 
-								ts: date, 
-								result:{
-									value:sandbox.out.value,
-									setter:sandbox.out.setter
-									}
-								}) 
-					}
-				//});
-				// remove node from register if finished or if error
-				if(ch === "finish" || ch === "error") {
-					console.log("REGISTER: deleting " + node.req.originalUrl)
-					delete global.register[node.req.originalUrl];
-				}
-			}
-		},
-		say: io.sockets.emit
-	};
-	
-	return vm.createContext(sandbox);
-
-}
-
-function sendRunResponse(no) {
-	console.log("out" + JSON.stringify(no.sandbox));
-}
-
-// currently not used
-function CreateScriptVM(node, sandbox, scriptName) {
-		
-	// create scripts (this will catch syntax errors)
-	try {
-		var run = new vm.createScript(node.scripts[scriptName]);
-	} catch (e) {
-		console.log("ERROR:", e.stack);
-		console.log(node.scripts[scriptName]);
-		sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
-		sandbox.out.say("error", "Slap the node writer!");
-	}
-	return run;
-	
-
-}
-
-// try to give some sensible value
-function getProp(doc, keyname, index) { 
-
-	var obj = doc[keyname];
-	if(obj == null)
-		return "";
-
-	// if string, then return that
-	if (typeof obj === "string")
-		return obj;
-
-	
-	// if array, then give value by optional index
-	if (Array.isArray(obj)) {
-		if(index) {
-			if(obj[index])
-				return obj[index];
-			else
-				return ""; // if index is not found, return empty string
-		} else {
-			// if index is not given, then give the first one
-			return obj[0];
-		}
-		
-	// this is object, find dotted value (like dc.type.uri)	
-	} else {
-	
-		var arr = keyname.split('.'); 
-		while(arr.length && (obj = obj[arr.shift()])); 
-		if(typeof obj === 'undefined') return ''; 
-		return obj; 
-	}
-}
-
-
-/**
- * Make HTTP request in the record context
- */ 
-function callAPISerial (sandbox, node, onScript, onError) {
-
-	var request = require("request");
-
-	 var options = {
-		url: sandbox.out.url,
-		method: 'GET',
-		json: true
-	};
-
-	// make actual HTTP request
-	request(options, function (error, response, body) {
-			sandbox.context.error = error;
-			sandbox.context.response = response;
-			sandbox.context.data = body;
-			onScript(sandbox)
-	});
-
-}
-
-
-/**
- * Execute node's script without given context
- * - used in node creation
- * - node can say "hello" to user via out.say
- */
-function runNodeScript (script, node, nodeParams, io) {
-	var sandbox = {
-		context: { node: node, noderequest: nodeParams},
-		out: { say: function (ch, msg) {
-				io.sockets.emit(ch, msg);
-			}
-		}
-	}
-	runNodeScriptInContext(script, node, sandbox, io);
-}
-
-
-function NodeScriptError (message) {
-	this.message = message;
-	this.name = "NodeScriptError";
-}
-
-function runNodeScriptInContext (script, node, sandbox, io) {
-	try {
-		vm.runInNewContext(node.scripts[script], sandbox);
-	} catch (e) {
-		if (e instanceof SyntaxError) {
-			console.log("Syntax error in node.scripts."+script+"!", e);
-			io.sockets.emit("error", "Syntax error in node.scripts."+script+"!</br>" + e);
-			throw new NodeScriptError("syntax error:" + e.message);
-		} else {
-			console.log("Error in node.scripts."+script+"!",e);
-			io.sockets.emit("error", "Error in node.scripts."+script+"!</br>" + e);
-			throw new NodeScriptError(e.message);
-		}
-	}
 }
