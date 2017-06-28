@@ -153,10 +153,7 @@ exports.uploadFile = function (doc, sandbox, next ) {
 exports.downloadFile = function (download, sandbox, next ) {
 	
 	var fs = require("fs");
-	var request = require("request")
-
-	console.log("REQUEST:", download.url);
-	console.log("FILENAME:", download.filename);
+	var request = require("request");
 	
 	var node = sandbox.context.node;
 	sandbox.context.data = download;
@@ -171,7 +168,10 @@ exports.downloadFile = function (download, sandbox, next ) {
 		fileExists(node, download, function(error, filePath) {
 			
 			if(error == null) {
-				exports.downloadAndSave(node, download, next);
+				console.log("FILENAME:", download.filename);
+				console.log("REQUEST:", download.url);
+				exports.downloadAndSave(node, download, sandbox.context.node.settings.extension, next);
+
 			} else {
 				// file exist -> write file path to
 				download.error = error;
@@ -185,8 +185,11 @@ exports.downloadFile = function (download, sandbox, next ) {
 }
 
 
-exports.downloadAndSave = function (node, download, next) {
-	
+exports.downloadAndSave = function (node, download, addext, next) {
+
+	const readChunk = require('read-chunk');
+	const fileType = require('file-type');
+
 	if(isInvalidURL(download.url)) {
 		download.error = "Invalid URL!"
 		return next();
@@ -219,7 +222,19 @@ exports.downloadAndSave = function (node, download, next) {
 
 			file.on('finish', function() {
 				file.close(function () {
-					next();
+					const buffer = readChunk.sync(filePath, 0, 4100);
+					download.filetype = fileType(buffer);
+					
+					// add extension to file name if user requested it
+					if(addext && download.filetype.ext) {
+						download.filename = download.filename + "." + download.filetype.ext;
+						fs.rename(filePath, filePath + "." + download.filetype.ext, function(err) {
+							if ( err ) console.log('ERROR: ' + err);
+							next();
+						});
+					} else {
+						next();
+					}
 				}); 
 			});
 
@@ -241,6 +256,7 @@ exports.downloadAndSave = function (node, download, next) {
 
 	// check for request errors
 	sendReq.on('error', function (err) {
+		console.log("CONNECTION ERROR");
 		fs.unlink(filePath);
 		console.log(err);
 		download.error = err;
@@ -257,7 +273,11 @@ function fileExists (node, download, cb) {
 		return cb("no file name");
 	}
 
-	var filePath = path.join(node.dir, download.filename);
+	// if node has downloaded file earlier, then check if that file exists
+	if(download.previous)
+		var filePath = download.previous;
+	else
+		var filePath = path.join(node.dir, download.filename);
 
 	fs.stat(filePath, function(err, stat) {
 		if(err == null) {

@@ -274,7 +274,7 @@ exports.remove = function (doc_id, collectionname, callback) {
 			console.log(err);
 			callback({'error':err})
 		} else {
-			console.log('Removed');
+			console.log('DB: removed ' + doc_id);
 			callback(null, {status:'ok'});
 		}
 	}); 
@@ -613,6 +613,7 @@ exports.getProjectNode = function (id, callback) {
 exports.dropCollection = function (collectionName, callback) {
 	var collection = db.collection(collectionName);
 	collection.drop(function (err) {
+		console.log("DB: dropped collection " + collectionName )
 		callback(err);
 	});
 }

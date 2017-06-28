@@ -266,7 +266,8 @@ module.exports = function(express, glampipe, passport) {
 		//glampipe.core.setVisibleFields(req.params.id, res);
 	//});
 	
-	express.post('/api/v1/nodes/*', function (req, res, next) {
+	// check if node is running before runnin
+	express.post('/api/v1/nodes/:id/run|start', function (req, res, next) {
 		if(global.register[req.originalUrl]) {
 			console.log("REGISTER: request is running already!")
 			res.send({error:"request is running already!"})
@@ -293,6 +294,10 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.runNode(req, glampipe.io, res);
 	});
 
+	express.post('/api/v1/nodes/:id/stop', function (req, res) {
+		delete global.register["/api/v1/nodes/"+req.params.id+"/start"];
+		res.send({removed: req.originalUrl});
+	});
 
 	// DATA
     

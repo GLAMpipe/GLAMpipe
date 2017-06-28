@@ -20,8 +20,6 @@ exports.loop = function (node, sandbox, onDoc) {
 				sandbox.context.doc_count = 1;
 				// call document processing function
 				onDoc(doc, sandbox, function processed () {
-					//console.log("sandbox.out.value:" + sandbox.out.value);
-					//console.log("sandbox.out.setter:");
 					//console.log(JSON.stringify(sandbox.out.setter, null, 4))
 					if(sandbox.out.setter != null) {
 						var setter = sandbox.out.setter; 
@@ -69,6 +67,12 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
+			
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
 
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
@@ -129,6 +133,12 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 			
 			// run node once per record
 			require("async").eachSeries(docs, function iterator (doc, next) {
+				
+				// check if user asked for termination of the node run
+				if(!global.register[node.req.originalUrl]) {
+					sandbox.finish.runInContext(sandbox);
+					return;
+				}
 				sandbox.context.doc = doc;
 				sandbox.context.count++;
 				
@@ -162,6 +172,12 @@ exports.importLoop = function (node, sandbox, onDoc) {
 		
 		// run node once per record
 		async.eachSeries(sandbox.context.pre_value, function iterator (url, next) {
+			
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
 			//sandbox.context.doc = doc;
 			sandbox.context.count++;
 			var options = {url:url}
@@ -233,6 +249,12 @@ function loop (node, sandbox, onDoc) {
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
 
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
 			
@@ -282,6 +304,12 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
+
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
 
 			sandbox.context.doc = doc;
 			sandbox.out.value = null;
@@ -360,7 +388,7 @@ function combineSetters(setters) {
 				c_setter[s_key].push(setter[s_key]);
 			})
 		})
-		console.log(c_setter);
+		//console.log(c_setter);
 		return c_setter;
 	} else
 		return null;

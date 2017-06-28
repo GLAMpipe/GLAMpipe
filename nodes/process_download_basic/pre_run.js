@@ -5,6 +5,7 @@
 
 var c = context; 
 var input = context.doc[context.in_field];
+
 out.pre_value = [];
 
 if(Array.isArray(input)) {
@@ -13,15 +14,33 @@ if(Array.isArray(input)) {
 		download.filename = generateFileName(input[i], i);	
 		out.console.log(download.filename);	
 		download.url = context.base_url + input[i];
+		previousFile(download, index);
 		out.pre_value.push(download); 
 	}
 } else {
 	var download = {};
-	download.filename = generateFileName(input);
+	download.filename = generateFileName(input, null);
 	download.url = context.base_url + input;
+	previousFile(download, null);
 	out.pre_value.push(download);
 }
 
+
+function previousFile(download, index) {
+	var output = context.doc[context.node.params.out_field];
+	// if "out_field" has value, then we use that instead of generated filename
+	// reason for this is that when we use dynamic file extension as part of the file,
+	// we cannot generate proper filename before we have actually downloaded the file
+	if(index != null && Array.isArray(output)) {
+		if(output[index] && output[index] != "")
+			download.previous = output[index];
+	} else {
+		if(Array.isArray(output) && output[0] != "") {
+			download.previous = output[0];
+		}
+	}
+	
+}
 
 
 function generateFileName (url, index) {
@@ -61,14 +80,8 @@ function generateFileName (url, index) {
 	}
 
 	// if input is array with more than one items, then we must add index to filename
-	if(index)
+	if(index != null)
 		filename += "_" + index;
-
-	/* static file extension */ 
-	if (c.node.settings.file__ext && c.node.settings.file__ext.trim() != "") {
-		var ext = c.node.settings.file__ext.replace(".", ""); 
-		filename += "." + ext; 
-	}
 
 	// some sensible max length 
 	if(filename.length > 250) {
@@ -78,11 +91,17 @@ function generateFileName (url, index) {
 	/* fallback */ 
 	if (filename == "" || filename == null || typeof filename !== "string") 
 		filename = c.count.toString(); 
-	
 
 
 	/* remove characters that might confuse OS */ 
-	return filename.replace(/[\.-/, \\]/g, "_").trim().toLowerCase(); 
-	 
+	filename = filename.replace(/[\.-/, \\]/g, "_").trim().toLowerCase(); 
+
+	/* static file extension */ 
+	if (c.node.settings.file__ext && c.node.settings.file__ext.trim() != "") {
+		var ext = c.node.settings.file__ext.replace(".", ""); 
+		filename += "." + ext; 
+	}
+	
+	return filename;
 		
 }

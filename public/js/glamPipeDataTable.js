@@ -285,7 +285,7 @@ var dataTable = function (node) {
 		var html = "";
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>run <span>"+ self.getRowIndex(key_index) +"</span></div></td>";
+				html += "<td><div data-id='" + data._id + "' class='button run_single'>run "+ self.getRowIndex(key_index) +"</div></td>";
 			else
 				html += "<td>" + self.getRowIndex(key_index) + "</td>";
 			
@@ -317,7 +317,6 @@ var dataTable = function (node) {
 
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
-			console.log(typeof data)
 			// render urls as links
 			if(typeof data == "string" && data.match(/^http/)) {
 				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
@@ -517,29 +516,29 @@ var dataTable = function (node) {
 
 	this.saveCellEdit = function (event) {
 		var doc_id = $(event.target).data("doc_id");
-		console.log("start listing values");
-		var data = {field:""};
+		var data = {};
 		
 		// get field name
 		var name = $("#cell-display input, #cell-display textarea").first().attr("name");
 		// if input name has form "set[something1]", then we want to gather all of them to array
 		var nameSplitted = name.split("[");
+		var field = nameSplitted[0];
 		if(nameSplitted.length > 1) 
-				data.value = [];
+				data[field] = [];
 		
 		$("#cell-display input, #cell-display textarea").each(function(i) {
             
             // if input name has form "set[something1]", then we want to gather all of them to array
             if(nameSplitted.length > 1) {
-                data.value.push($(this).val());
+                data[field].push($(this).val());
             } else {
-                data.value = $(this).val();
+                data[field] = $(this).val();
             }
 		})
-		data.field = nameSplitted[0];
 		data.doc_id = doc_id;
 		console.log(data);
-		if(data.field == "_id")
+		
+		if(field == "_id")
 			alert("Can not edit the internal ID of the document!")
 		else
 			self.node.gp.updateDocument(data, function () {

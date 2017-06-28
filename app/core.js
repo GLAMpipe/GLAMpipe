@@ -172,8 +172,8 @@ exports.setDataPath = function (params, glampipe, res) {
 
 exports.createProject = function (req, res) {
 	
-    var title = req.body.title
-	var dirs = ["download", "export", "source", "view", "process", "meta"]; // these dirs are created for every project
+	var title = req.body.title
+	var dirs = ["export", "source", "view", "process", "meta"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
@@ -208,13 +208,13 @@ exports.createProject = function (req, res) {
 					"collection_count": 0,
 					"node_count":0,
 					"schemas": [],
-                    "owner": "" 
+					"owner": "" 
 				};
-                
-                // mark the owner
-                if(req.user && req.user.local && req.user.local.email)
-                    project.owner = req.user.local.email;
-                
+				
+				// mark the owner
+				if(req.user && req.user.local && req.user.local.email)
+					project.owner = req.user.local.email;
+				
 				mongoquery.insertProject (project, function(err, data) {
 					console.log("project \"" + title + "\" created!");
 					res.json({"status": "project created", "project": data});
@@ -239,18 +239,36 @@ exports.runProject = function (req, gp, res) {
 
 exports.deleteProject = function (doc_id, res) {
 	
-	mongoquery.findOneById(doc_id, "mp_projects", function(data) {
-		console.log("PROJECT: deleting project", data.title);
+	mongoquery.findOneById(doc_id, "mp_projects", function(project) {
+		if(!project)
+			return res.json({});
+			
+		console.log("PROJECT: deleting project", project.title);
 		// if project has collections then remove those first
-		
-		// then remove project document itself
-		mongoquery.remove(doc_id, "mp_projects", function(err, data) {
-			res.json(data);
-		});
-		
-	});
-	
+		require("async").eachSeries(project.collections, function iterator (collection, next) {
+			console.log("PROJECT: deleting collection " + collection)
+			mongoquery.dropCollection(collection, next);
+			
+			// then remove project document itself
+		}, function done () {
+			mongoquery.remove(doc_id, "mp_projects", function(err, data) {
+				// remove project directory
+				var rimraf = require("rimraf");	
+				var project_path = path.join(global.config.projectsPath, project.dir);
+				if(project_path && project_path.includes(config.dataPath)) {
+					console.log("PROJECT: removing " + project_path);
+					rimraf(project.dir, function() {
+						console.log("PROJECT: " + project.title + " deleted!");
+						res.json(data);						
+					});
+				} else {
+					console.log("PROJECT: " + project.title + " deleted!");
+					res.json(data);
+				}
 
+			});
+		});
+	});
 }
 
 exports.getProjectTitles = function  (res) {
@@ -336,7 +354,7 @@ exports.runNode = function (req, io, res) {
 		node.req = req;	
 		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
 		// from it without affecting settings that are used by node
-        var copy = Object.assign({}, node.settings) 
+		var copy = Object.assign({}, node.settings) 
 		
 		// save node settings TODO: set callback
 		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
@@ -649,7 +667,7 @@ function initNode (req, io, project, callback) {
 function createNodeDirs (node, project, cb) {
 	
 	var fs = require("fs");
-	var dir = path.join(global.config.projectsPath, project.dir, node.type, project.node_count + "_" + node.nodeid + node.dirsuffix);
+	var dir = path.join(global.config.projectsPath, project.dir, node.type,  node.nodeid + "_" + project.node_count );
 	fs.mkdir(dir, function(err) {
 		if(err) {
 			console.log("ERROR:", err);
@@ -724,17 +742,10 @@ exports.deleteNode = function (req, res, io) {
 		if(project) {
 			var index = indexByKeyValue(project.nodes, "_id", req.params.node);
 			var node = project.nodes[index];
-            if(!node) {
-                console.log("ERROR: node not found");
-                return res.json({"error": "node not found (should not happen)"});
-            }
-			// check that there is no nodes that depends on this node
-			//if(inputNode(node, project.nodes)) {
-				//return res.json({"error": "Can not remove node with child nodes!"});
-			//}
-
-			// allow node to say bye
-			//runNodeScript("bye", node, null, io);
+			if(!node) {
+				console.log("ERROR: node not found");
+				return res.json({"error": "node not found (should not happen)"});
+			}
 
 			// check if we need to remove anything else
 			async.series([
@@ -773,20 +784,29 @@ exports.deleteNode = function (req, res, io) {
 
 				// if node is a transform node, then remove its output field
 				function (callback) {
-					if(node.out_field && node.out_field !== "") {
-						var field = {};
-						var query = {};
-						field[node.out_field] = 1;
-						query["$unset"] = field;
-						mongoquery.updateAll(node.collection, query, function (error) {
-							if(error)
-								console.log(error);
-							else
-								console.log("data removed", node.collection);
-							callback(error);
-							});
+					if(node.type != "source") {
+						// delete all output keys (starting with "out_") from all records
+						var del_keys = {};
+						for(var key in node.params) {
+							if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
+								del_keys[node.params[key]] = "";
+						}
+
+						if(del_keys) {
+							var query = {};
+							query["$unset"] = del_keys;
+							mongoquery.updateAll(node.collection, query, function (error) {
+								if(error)
+									console.log(error);
+								else
+									console.log("DB: keys removed", node.collection);
+								callback(error);
+								});
+						} else {
+							callback(); // we did nothing
+						}
 					} else {
-						callback(); // we did nothing
+						callback(); //we did nothing
 					}
 				},
 
@@ -794,33 +814,33 @@ exports.deleteNode = function (req, res, io) {
 				function (callback) {
 					if(node.type === "meta" && node.subnodes) {
 						var baseurl = "http://localhost:3000"; // localhost does not require authentication
-                        require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
-                            var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + subnode;
-                            console.log("REMOVING: node " + subnode);	
-                            
-                             var options = {
-                                url: url,
-                                headers: {
-                                    "accecpt": "application/json"
-                                }
-                            };
-                            
-                            var request = require("request");
-                            //require('request').debug = true;
+						require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
+							var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + subnode;
+							console.log("REMOVING: node " + subnode);	
+							
+							 var options = {
+								url: url,
+								headers: {
+									"accecpt": "application/json"
+								}
+							};
+							
+							var request = require("request");
+							//require('request').debug = true;
 
-                            // make actual HTTP request
-                            request.delete(options, function (error, response, body) {
-                                if (error) {
-                                    console.log(error);
-                                    next();
-                                } else {
-                                    next();
-                                }
-                            });
-                        }, function done () {
-                            console.log("METANODE: deleted all subnodes!");
-                            callback();
-                        })
+							// make actual HTTP request
+							request.delete(options, function (error, response, body) {
+								if (error) {
+									console.log(error);
+									next();
+								} else {
+									next();
+								}
+							});
+						}, function done () {
+							console.log("METANODE: deleted all subnodes!");
+							callback();
+						})
 
 					} else {
 						callback(); // we did nothing
@@ -849,6 +869,18 @@ exports.deleteNode = function (req, res, io) {
 						callback(); // we did nothing
 					}
 				},
+				
+				// remove node directory
+				function(callback) {
+					var rimraf = require("rimraf");	
+					if(node.dir && node.dir.includes(config.dataPath)) {
+						console.log("NODE: removing " + node.dir);
+						rimraf(node.dir, callback);
+					} else {
+						callback();
+					}
+					
+				}
 
 
 			], function (err, results) {
@@ -1396,7 +1428,7 @@ function readFiles(dirname, onNodeContent, onError, onDone) {
 					readNodeDirectory(path.join(dirname, nodedir), next, function (node) {
 						onNodeContent(nodedir, node, next);
 					}) 
-                // skip files
+				// skip files
 				} else next();
 			})
 		// we have read all node directories
@@ -1419,9 +1451,9 @@ function readNodeDirectory (nodeDir, skip, cb) {
 			return;
 		} else {
 			var node = JSON.parse(content);
-            // make sure that we have "scripts" and "views"
-            if(!node.scripts) node.scripts = {};
-            if(!node.views) node.views = {};
+			// make sure that we have "scripts" and "views"
+			if(!node.scripts) node.scripts = {};
+			if(!node.views) node.views = {};
 
 			// join "pretty" settings
 			if(node.views.settings instanceof Array)
@@ -1447,9 +1479,9 @@ function readNodeDirectory (nodeDir, skip, cb) {
 					skip(err);
 					return;
 				}
-                if(nodeFiles.length == 1) {
-                    cb(node); return;
-                }
+				if(nodeFiles.length == 1) {
+					cb(node); return;
+				}
 				// read each file and add content to node
 				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
 					if(fs.statSync(path.join(nodeDir, nodeFile)).isDirectory()) {

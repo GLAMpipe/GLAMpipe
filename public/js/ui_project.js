@@ -99,7 +99,14 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
-		gp.runNode(e);
+		var button = $(e.target);
+		if(button.text() == "run") {
+			button.text("stop");
+			gp.runNode(e);
+		} else if(button.text() == "stop") {
+			button.text("stopping node...");
+			gp.stopNode(e);
+		} 
 		e.preventDefault();
 	})
 
@@ -203,12 +210,13 @@ $( document ).ready(function() {
 
     socket.on('finish', function (data) {
 
-		
         progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
        // websockPopup(finishDisplay, "Node done!");
         $(".settings").removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();
+        // change run button text
+        $("#" + data.node_uuid).text("run");
         gp.nodeRunFinished(data); 
 
     });

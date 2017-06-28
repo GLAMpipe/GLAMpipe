@@ -321,7 +321,7 @@ exports.runNode = function (node, io) {
 							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
 							mv_bot.login(node, sandbox, io, function(error) {
 								if(error)
-									sandbox.out.say("finish","login failed");
+									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
 									asyncLoop.fieldLoop(node, sandbox, mv_bot.uploadFile);
@@ -540,30 +540,34 @@ exports.createSandbox = function (node, io) {
 
 				var date = new Date();
 				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
-				global.register[node.req.originalUrl].log.push(log);
-				//mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					// send http response if needed (i.e. node was executed by "run" instead of "start")
-					if(ch === "finish" && node.res) {
-						console.log(sandbox.out.value);
-						if(this.error)
-							node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
-						else
-							node.res.json({
-								status:"finished", 
-								node_uuid: node._id.toString(), 
-								nodeid: node.nodeid, 
-								ts: date, 
-								result:{
-									value:sandbox.out.value,
-									setter:sandbox.out.setter
-									}
-								}) 
-					}
-				//});
-				// remove node from register if finished or if error
+				if(global.register[node.req.originalUrl])
+					global.register[node.req.originalUrl].log.push(log);
+				
+				// send http response if needed (i.e. node was executed by "run" instead of "start")
+				if(ch === "finish" && node.res) {
+					console.log(sandbox.out.value);
+					if(this.error)
+						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg}) // toimii
+					else
+						node.res.json({
+							status:"finished", 
+							node_uuid: node._id.toString(), 
+							nodeid: node.nodeid, 
+							ts: date, 
+							result:{
+								value:sandbox.out.value,
+								setter:sandbox.out.setter
+								}
+							}) 
+				} else if(ch === "error" && node.res) {
+					node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg: msg}) 
+				}
+				
+				// remove node from register if finished or if error (aborting)
 				if(ch === "finish" || ch === "error") {
 					console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
+
 				}
 			}
 		},

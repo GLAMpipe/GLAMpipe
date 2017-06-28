@@ -3,15 +3,18 @@
 
 var data = context.data;
 out.value = "";
+out.setter = {};
+out.setter[context.node.params.out_field] = "";
+
 
 
 
 // dry run
 if(context.node.settings.dry_run) {
 	if(data.error)
-		out.value = "dry run: " + data.error;
+		out.setter[context.node.params.out_field] = "dry run: " + data.error;
 	else
-		out.value = "dry run: " + context.path.join(context.node.dir, data.filename);
+		out.setter[context.node.params.out_field] = "dry run: " + context.path.join(context.node.dir, data.filename);
 	
 } else if(data.response) {
 	
@@ -22,13 +25,16 @@ if(context.node.settings.dry_run) {
 		var len = parseInt(data.response.headers['content-length'], 10); 
 		var total = len / 1048576; 
 		out.say('progress', 'Downloaded ' + total.toFixed(2) + ' Mt'); 
+			
+		out.setter[context.node.params.out_field] = context.path.join(context.node.dir, data.filename); 
+		out.setter[context.node.params.out_ext] = data.filetype.ext; 
+		out.setter[context.node.params.out_mime] = data.filetype.mime; 
 		
-		out.value = context.path.join(context.node.dir, data.filename); 
 		context.node.download_counter++;	
 		
 	} else {
 		//out.say('error', 'Downloaded failed:' + data.url); 
-		out.value = out.error_marker + data.response.statusCode + "]:" + data.url; 
+		out.setter[context.node.params.out_field] = out.error_marker + data.response.statusCode + "]:" + data.url; 
 	}
 
 	
@@ -36,11 +42,9 @@ if(context.node.settings.dry_run) {
 	//out.say('progress', 'download failed: '  + data.error); 
 	// if file exists, then we just output the filepath
 	if(data.error === "file exists") 
-		out.value = data.filepath;
+		out.setter[context.node.params.out_field] = data.filepath;
 	else
-		out.value = out.error_marker + data.error;
+		out.setter[context.node.params.out_field]  = out.error_marker + data.error;
 	
-} else {
-	out.value = undefined;
-}
+} 
 

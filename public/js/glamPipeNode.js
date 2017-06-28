@@ -31,6 +31,8 @@ var glamPipeNode = function (node, gp) {
 				$(".settings").removeClass("busy");
 				alert(data.error);
 			}
+		}).fail(function() {
+			alert("GLAMpipe server did not respond!")
 		});
 	}
 
@@ -46,9 +48,24 @@ var glamPipeNode = function (node, gp) {
 				$(".settings").removeClass("busy");
 				alert(data.error);
 			}
+		}).fail(function() {
+			alert("GLAMpipe server did not respond!")
 		});
 	}
 	
+	this.stop = function () {
+		
+		post(self.baseAPI + "/nodes/" + self.source._id + "/stop", {} , function(data) {
+			console.log(data);
+			if(data.error) {
+				$(".settings").removeClass("busy");
+				alert(data.error);
+			}
+		}).fail(function() {
+			alert("GLAMpipe server did not respond!")
+		});
+	}
+
 	
 	this.runFinished = function () {
 		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
@@ -119,6 +136,19 @@ var glamPipeNode = function (node, gp) {
 	
 	// render node to project view (left column)
 	this.renderNode = function () {
+		// huttua
+		var node_out_keys = [];
+		for(var key in self.source.params) {
+			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
+				node_out_keys.push(self.source.params[key]);
+		}
+		for(var i = 0; i < node_out_keys.length; i++) {
+			
+			if(!self.gp.currentCollection.fields.node_keys.includes(node_out_keys[i]))
+				sself.orphan = true;
+		}
+		// huttua ends
+		
 		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
 		if(self.source.params.parent) {

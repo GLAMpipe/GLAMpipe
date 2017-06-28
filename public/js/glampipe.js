@@ -257,7 +257,11 @@ var glamPipe = function () {
 				self.setCollectionCounter();
 				
 				// render current collection set and its nodes
-				self.renderCollectionSet();
+				 $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+					self.currentCollection.fields = data; 
+					self.renderCollectionSet();
+				})
+				
 			}
 		})
 	}
@@ -300,6 +304,15 @@ var glamPipe = function () {
 			$("#node-messages").empty();
 			$(".settings").addClass("busy");
 			node.run();
+		} else
+			alert("node id not found");
+	}
+
+	this.stopNode = function (e) {
+		var node = self.getNode(e);
+		if(node) {
+			$(".settings").removeClass("busy");
+			node.stop();
 		} else
 			alert("node id not found");
 	}
@@ -429,7 +442,6 @@ var glamPipe = function () {
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
 		
-		
 		var html = "";
 		html += "<collectionset>"
 		
@@ -442,7 +454,7 @@ var glamPipe = function () {
 			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 			html += "  </div><div class='holder params'></div>"
 			 
-			html += self.renderNodes(collection,["source", "lookup"]);
+			html += self.renderNodes(collection,["source"]);
 			  
 			html += "  <div class='sectiontitleblock'>"
 			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
