@@ -10,8 +10,8 @@ var dataTable = function (node) {
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
 	this.maxInputLength = 30; // limit whether input rendered as input or textarea on cell edit
 	
-	this.dataDisplayDiv 	= "data-workspace data data-display";
-	this.dataControlsDiv 	= "data-workspace data data-controls";
+	this.dataDisplayDiv 	= "data-workspace datablock";
+	this.dataControlsDiv 	= "data-workspace dataheader data-controls";
 	this.keySelectorDiv 	= "#field-selector";
 	this.baseAPI = node.baseAPI;
 
@@ -146,7 +146,7 @@ var dataTable = function (node) {
 		// edit, search, visible fields buttons 
 		html += "<div class='boxright' style='float:right'> ";
 		html += "    <div id='data-expand' class='wikiglyph wikiglyph-edit icon' aria-hidden='true' title='edit'></div>";
-		html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
+		//html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
 		html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true' title='search (not implemented)'></div>";
 		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true' title='visible fields'></div>";
 		html += "  </div>";

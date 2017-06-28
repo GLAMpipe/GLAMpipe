@@ -68,8 +68,8 @@ var glamPipeNode = function (node, gp) {
 
 	
 	this.runFinished = function () {
-		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
-		$(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+		$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
+		$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
 		
 		var input = self.getInputFields();
@@ -124,12 +124,12 @@ var glamPipeNode = function (node, gp) {
 	// render data with node spesific settings and display node settings
 	this.open = function (config) {
 		if(self.source.type == "collection") {
-			$("data-workspace .settingscontainer").hide();
+			$("data-workspace settingscontainer").hide();
 			self.display.render();
 		} else {
 			self.renderSettings();
 			self.display.render();
-			$("data-workspace .settingscontainer").show();
+			$("data-workspace settingscontainer").show();
 		}
 			
 	}
@@ -164,7 +164,7 @@ var glamPipeNode = function (node, gp) {
 			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
-		var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
+		var html = "<div class='box node' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>"
 		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
@@ -187,7 +187,7 @@ var glamPipeNode = function (node, gp) {
 		
 		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 		$("data-workspace .settings").empty();
-		$("data-workspace .settings").append("<div class='params box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+		$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button>");
 		$("data-workspace .settings").append(self.source.views.settings);
 		$("data-workspace .settings .params").append(self.source.params);
 		

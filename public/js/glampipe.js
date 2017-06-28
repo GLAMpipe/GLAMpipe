@@ -14,7 +14,7 @@ var glamPipe = function () {
 	this.projectPipeDiv = "#project-pipe";
 	this.collectionSwitchDiv = "#collection-node-switch";
 	this.pageTitleDiv = "#page-title";
-	this.nodeHolderDiv = "node-pipe .nodeset";
+	this.nodeHolderDiv = "pipe .nodeset";
 	
 	this.collections = [];
 	this.nodes = [];
@@ -354,6 +354,7 @@ var glamPipe = function () {
 
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
+		console.log(obj.text())
 		var types = [];
 		
 		if (obj.data("type") == "collection")
@@ -363,7 +364,7 @@ var glamPipe = function () {
 			types = ["source"]
 			
 		if (obj.data("type") == "export")
-			types = ["export", "upload"]
+			types = ["export"]
 
 		if (obj.data("type") == "process")
 			types = ["process"]
@@ -427,7 +428,7 @@ var glamPipe = function () {
 					self.currentNodes[self.currentCollection.source.collection] = node;
 					self.renderCollectionSet();
 					node.open();
-					$("data-workspace .settingscontainer .settings").show();
+					$("data-workspace settingscontainer .settings").show();
 				});
 			}
         }
@@ -447,17 +448,33 @@ var glamPipe = function () {
 		
 		if(self.currentCollection) {
 			var collection = self.currentCollection;
-			html += collection.renderNode();
-		
+			//html += collection.renderNode();
+
+  //<div class="sectiontitleblock">
+      
+      //<div><span class="title sectiontitle">Data source</span> <a href="#">Add data source</a></div>
+      //<div class="wikiglyph wikiglyph-user-talk sectionicon icon" aria-hidden="true"></div>
+    //</div>
+
+    //<div class="box">
+      //<div class="boxleft">
+        //<div class="boxtag">Source</div>
+        //<div class="title boxtitle">MySource</div>
+        //<div class="boxtext">See if these could be a good source</div>
+      //</div>
+      //<div class="wikiglyph wikiglyph-cross boxicon icon" aria-hidden="true"></div>
+    //</div>
+
+
 			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+			html += "	<div><span class='title sectiontitle'>Data source</span> <a class='add-node' data-type='source' href='#'>Add data source</a></div>"
+			html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 			html += "  </div><div class='holder params'></div>"
 			 
 			html += self.renderNodes(collection,["source"]);
 			  
 			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add operation</a></div>"
 			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 			html += "  </div><div class='holder params'></div>"
 			

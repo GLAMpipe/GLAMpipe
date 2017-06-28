@@ -124,7 +124,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// project page
 	express.get('/project/:id', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'project.html'));
+		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
 	});
 
 	// facet view

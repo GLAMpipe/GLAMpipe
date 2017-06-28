@@ -34,7 +34,8 @@ $( document ).ready(function() {
 
 	// hide node settings panel on start
 	$("data-workspace .settings").hide();
-	$("data-workspace .settingscontainer").hide();
+	$("data-workspace settingscontainer").hide();
+	$("data-workspace submitblock").hide();
 
 	// COLLECTION CHOOSER
 	$("#collection-chooser").on("click", function (e) {
@@ -57,13 +58,13 @@ $( document ).ready(function() {
 
 
 	// hide/show node settings TODO: move to node
-	$(".settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
+	$("settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
 		$("data-workspace .settings").hide();
 	});
 
-	$(".settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
+	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
 		$(this).removeClass("wikiglyph-caret-down");
 		$(this).addClass("wikiglyph-caret-up");
 		$("data-workspace .settings").show();
