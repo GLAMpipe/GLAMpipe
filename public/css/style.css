@@ -789,3 +789,7 @@ label {
 	border: 1px solid red;
 	padding:2px;
 }
+
+.orphan {
+	border-left:solid red 10px;
+}

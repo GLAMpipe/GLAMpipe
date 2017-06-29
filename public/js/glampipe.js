@@ -257,10 +257,10 @@ var glamPipe = function () {
 				self.setCollectionCounter();
 				
 				// render current collection set and its nodes
-				 $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-					self.currentCollection.fields = data; 
+				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+					//self.currentCollection.fields = data; 
 					self.renderCollectionSet();
-				})
+				//})
 				
 			}
 		})
@@ -442,54 +442,58 @@ var glamPipe = function () {
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
 		
-		var html = "";
-		html += "<collectionset>"
 		
-		if(self.currentCollection) {
-			var collection = self.currentCollection;
-			html += collection.renderNode();
-		
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-			 
-			html += self.renderNodes(collection,["source"]);
-			  
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
+		 $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+			self.currentCollection.fields = data; 
+			var html = "";
+			html += "<collectionset>"
 			
-			html += self.renderNodes(collection, ["process"]);
+			if(self.currentCollection) {
+				var collection = self.currentCollection;
+				html += collection.renderNode();
 			
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
+				 
+				html += self.renderNodes(collection,["source"]);
+				  
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
+				
+				html += self.renderNodes(collection, ["process"]);
+				
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
 
-			html += self.renderNodes(collection, ["export"]);
+				html += self.renderNodes(collection, ["export"]);
 
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
 
-			html += self.renderNodes(collection, ["view"]);
+				html += self.renderNodes(collection, ["view"]);
 
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
 
-			html += self.renderNodes(collection, ["meta"]);
-		}
-		html += "</collectionset>"
-		
-		
-		$(self.nodeHolderDiv).empty();
-		$(self.nodeHolderDiv).append(html);
-		
+				html += self.renderNodes(collection, ["meta"]);
+			}
+			html += "</collectionset>"
+			
+			
+			$(self.nodeHolderDiv).empty();
+			$(self.nodeHolderDiv).append(html);
+				
+		})
 	}
 	
 	

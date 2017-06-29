@@ -614,6 +614,7 @@ function initNode (req, io, project, callback) {
 			runNodeScript("hello", node, req, io);
 			runNodeScript("metanodes", node, req, io);  // sets "node.pipe"
 			console.log(node.pipe)
+			node._id = mongojs.ObjectId();
 
 			// "out_field" overrides "_suffix" set by hello script
 			if(node.params.out_field)
@@ -625,34 +626,34 @@ function initNode (req, io, project, callback) {
 				if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
 					add_keys.push(node.params[key]);
 			}
-			add_keys.forEach(function(keytoadd) {
-				mongoquery.addFieldToCollection(node.collection, keytoadd, function(){
-					console.log("NODE CREATION: '" + keytoadd + "' added to collection");
-				});
-			})
+			//add_keys.forEach(function(keytoadd) {
+			mongoquery.addFieldToCollection(node.collection, add_keys, function(){
+				console.log("NODE CREATION: '" + add_keys + "' added to collection");
+			
+				// create node directories
+				createNodeDirs(node, project, function(err) {
+					// create node
+					insertNode(node, function(err) {
+						if(err) {
+							console.log(err);
+							callback({"error": err});
+						} else {
+							console.log("NODE CREATION: node created!");
+							callback({
+								status:'node created', 
+								id:node._id, 
+								node:node,
+								collection:node.collection,
+								nodeid: node.nodeid
+							})
+						}
+					});					
+				})
+
+			});
+			//})
 
 			
-			node._id = mongojs.ObjectId();
-			
-			// create node directories
-			createNodeDirs(node, project, function(err) {
-				// create node
-				insertNode(node, function(err) {
-					if(err) {
-						console.log(err);
-						callback({"error": err});
-					} else {
-						console.log("NODE CREATION: node created!");
-						callback({
-							status:'node created', 
-							id:node._id, 
-							node:node,
-							collection:node.collection,
-							nodeid: node.nodeid
-						})
-					}
-				});					
-			})
 
 
 
