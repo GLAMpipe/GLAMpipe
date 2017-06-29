@@ -29,9 +29,7 @@ context.node.pipe = [
 			in_field: context.node.params.in_file_url + "_download",
 			out_field: context.node.params.in_file_url + "_checksum"
 		},
-		settings: {
-			
-		}
+		settings: {}
 	},
 	
 	// check if file is in commons
@@ -43,9 +41,7 @@ context.node.pipe = [
 			out_field: context.node.params.out_field,
 			server: "beta"
 		},
-		settings: {
-			
-		}
+		settings: {}
 	},
 	
 	// upload to commons
@@ -57,12 +53,15 @@ context.node.pipe = [
 			in_wikitext: context.node.params.in_wikitext,
 			in_location: context.node.params.in_file_url + "_download",
 			in_checksum_result: context.node.params.in_file_url + "_checksum",
-			out_field: context.node.params.out_field,
-			server: "beta"
+			out_field: context.node.params.out_field
 		},
-		settings: {
-			username:"user",
-			password: "passu"
+		// this passes settings from metanode to subnode
+		settingsFunc: function() {
+			this.settings = {
+				server:"0",
+				username: context.node.settings.username,
+				password: context.node.settings.password
+			}
 		}
-	},
+	}
 ]

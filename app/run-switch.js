@@ -51,10 +51,25 @@ exports.runNode = function (node, io) {
 			//runNodeScriptInContext("init", node, sandbox, io);
 			if(sandbox.context.init_error) 
 				return;
-			
+
+runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+
 			// apply metanode's settings to settings of the first subnode
 			for(var key in node.settings)
 				node.pipe[0].settings[key] = node.settings[key];
+			
+			// dynamic settings
+			node.pipe.forEach(function(pipe, index) {
+				console.log(pipe.nodeid)
+				//console.log(pipe.params)
+				//console.log(pipe.settings)
+				//console.log(pipe.settingsFunc())
+				if(pipe.settingsFunc) {
+					console.log("settingsFunc");
+					console.log(pipe.settingsFunc());
+					//pipe.settings = pipe.settingsFunc();
+				}
+			})
 			
 			metanode = require("../app/node_runners/metanode.js")
 			asyncLoop.loop(node, sandbox, metanode.run);

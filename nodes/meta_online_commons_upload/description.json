@@ -1,5 +1,5 @@
 {
-    "nodeid": "meta_online_commons_upload",
+    "nodeid": "process_meta_online_commons_upload",
     "title": "Download file and upload to commons",
     "type": "meta",
     "subtype": "web",

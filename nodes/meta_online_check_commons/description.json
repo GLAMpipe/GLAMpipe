@@ -1,5 +1,5 @@
 {
-    "nodeid": "meta_online_check_commons",
+    "nodeid": "process_meta_online_check_commons",
     "title": "Check if file is in Wikimedia commons",
     "type": "meta",
     "subtype": "web",
