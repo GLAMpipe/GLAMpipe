@@ -139,17 +139,19 @@ var glamPipeNode = function (node, gp) {
 	this.renderNode = function () {
 		// huttua
 		self.orphan_fields = [];
-		var node_out_keys = [];
+		var node_in_keys = [];
+		self.orphan = "";
+		console.log(self.source.params)
 		for(var key in self.source.params) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
-				node_out_keys.push(self.source.params[key]);
+				node_in_keys.push(self.source.params[key]);
 		}
-		self.orphan = "";
-		for(var i = 0; i < node_out_keys.length; i++) {
+		console.log(node_in_keys);
+		for(var i = 0; i < node_in_keys.length; i++) {
 			
-			if(!self.gp.currentCollection.fields.node_keys.includes(node_out_keys[i])) {
+			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
 				self.orphan = "orphan";
-				self.orphan_fields.push(node_out_keys[i]);
+				self.orphan_fields.push(node_in_keys[i]);
 			}
 		}
 		// huttua ends

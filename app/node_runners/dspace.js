@@ -59,7 +59,10 @@ exports.uploadItem = function (doc, sandbox, next) {
 	
 	// let node create an upload item
 	sandbox.pre_run.runInContext(sandbox);
+	if(sandbox.context.skip)
+		return next();
 		
+	//console.log(sandbox.out.pre_value);
 	//console.log(JSON.stringify(sandbox.out.setter.upload));
 
 	 var options = {
@@ -76,9 +79,12 @@ exports.uploadItem = function (doc, sandbox, next) {
 
 	// make actual HTTP request
 	request.post(options, function (error, response, body) {
+		sandbox.context.response = response;
 		sandbox.context.data = body;
 		if (error) {
 			console.log(error);
+			sandbox.context.error = error;
+			sandbox.run.runInContext(sandbox);
 			next();
 		} else {
 			console.log(options.url);
@@ -104,7 +110,6 @@ exports.updateData = function (doc, sandbox, next) {
 		sandbox.out.say("error", sandbox.out.error);
 		return;
 	}
-	console.log("URL:" + sandbox.out.url);
 	if(sandbox.out.value === null || sandbox.out.url === null) {
 		next();
 		console.log("HITTING NEXT BECAUSE OF NULL*******************");
@@ -119,8 +124,9 @@ exports.updateData = function (doc, sandbox, next) {
 			jar:true
 		};
 		
-		console.log("options:" + options);
+		//console.log("options:" + options);
 		console.log(options);
+		console.log("REQUEST:" + sandbox.out.url);
 		
 		var request = require("request");
 		//require('request').debug = true;
@@ -176,8 +182,8 @@ exports.addMetadataField = function (doc, sandbox, next) {
 
 exports.addFile = function (doc, sandbox, nextDoc) {
 
-	// let node create an array of upload items (url, file title, file path)
-	sandbox.pre_run.runInContext(sandbox);
+	if(sandbox.context.skip)
+		return nextDoc();
 
 	var fs = require('fs');
 	var request = require("request");
@@ -198,15 +204,14 @@ exports.addFile = function (doc, sandbox, nextDoc) {
 
 
 		var req = 	request.post(options, function optionalCallback(err, response, body) {
+
 			sandbox.context.response = response;
-			sandbox.context.data = JSON.parse(body);
-			console.log(sandbox.context.data);
-			sandbox.run.runInContext(sandbox);
 
 			if (err) {
 				return console.error('upload failed:', err);
 			} else if (response.statusCode === 200) {
 				console.log('Upload successful!  Server responded with:', response.statusCode);
+				sandbox.context.data = JSON.parse(body);
 				nextEle();
 			} else {
 				console.log('Upload failed!  Server responded with:', response.statusCode);

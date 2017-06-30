@@ -19,13 +19,13 @@ for (mapkey in context.node.settings) {
 // ERROR CHECKS
 // is collection set
 if(collection == "") {
-	out.say("error", "You must choose a collection");
+	//out.say("error", "You must choose a collection");
 	out.init_error = "You must choose a collection";
 }
 
 // is "dc.title" mapped (and data is not allready in rest api format) 
 if(!title_mapped && !context.node.settings.rest_data) {
-	out.say("error", "You must map at least dc.title");
+	//out.say("error", "You must map at least dc.title");
 	out.init_error = "You must map at least dc.title";
 }
 

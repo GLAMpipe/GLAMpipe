@@ -17,7 +17,7 @@
 		
         "bye": "out.say('finish', 'Deleted node!'); ",
             
-        "finish":"out.say('finish', 'Data uploaded'); "
+        "finish":"out.say('finish', context.success_count + ' items uploaded'); "
     },
     
     "views": {}

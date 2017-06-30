@@ -171,26 +171,6 @@ $( document ).ready(function() {
     var finishDisplay = $("#node-finished");
     var genericDisplay = $("#generic-messages");
 
-    socket.on('hello', function (data) {
-        progressDisplay.empty();
-        finishDisplay.empty();
-        if(data.nodeid) {
-            progressDisplay.append("<div class=\"error\">" + data.msg + "</div>");
-        } else {
-            genericDisplay.append(data + "</br>");
-            //tailScroll(cons) ;
-        }
-    });
-
-    
-    socket.on('news', function (data) {
-        if(data.nodeid) {
-            progressDisplay.prepend("<div class=\"error\">" + data.msg + "</div>");
-        } else {
-            genericDisplay.prepend(data + "</br>");
-        }
-    });
-
     socket.on('progress', function (data) {
 		progressDisplay.show();
 		progressDisplay.empty();
@@ -198,13 +178,16 @@ $( document ).ready(function() {
     });
 
     socket.on('error', function (data) {
-        if(data.nodeid) {
+        if(data.node_uuid) {
             progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
             $(".settings").removeClass("busy");
             progressDisplay.addClass("done");
         } else {
             genericDisplay.append("<div class=\"bad\">" + data + "</div>");
         }
+        // revert "run" button text
+        $("button[data-id='"+data.node_uuid+"']").text("run");
+        $("div[data-id='"+data.doc+"']").text("run only this");
         websockPopup(progressDisplay, "Node run error");
     });
 
@@ -215,8 +198,6 @@ $( document ).ready(function() {
         $(".settings").removeClass("busy");
         progressDisplay.addClass("done");
         progressDisplay.hide();
-        // change run button text
-        $("#" + data.node_uuid).text("run");
         gp.nodeRunFinished(data); 
 
     });

@@ -129,7 +129,7 @@ var glamPipe = function () {
 			} else {
 					$(div).empty();
 					self.desktop = true;
-					$(div).html("<a id='login-pop' href=''>login</a>");
+					$(div).html("");
 			}
 			$("#version").empty().append("ver." + data.version);
 			if(cb)
@@ -319,7 +319,7 @@ var glamPipe = function () {
 
 	// called by "finished" websocket message
 	this.nodeRunFinished = function (data) {
-		var node = self.getRegularNode(data.nodeid);
+		var node = self.getRegularNode(data.node_uuid);
 		node.runFinished();
 		// self.openCurrentNode(); // we should open finished node
 	}

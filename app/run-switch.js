@@ -31,9 +31,7 @@ exports.runNode = function (node, io) {
 	
 	// we quit in init_error
 	if(sandbox.out.init_error) {
-		console.log("*********** NODE INIT ERROR ***********************");
-		console.log("msg: " + sandbox.out.init_error);
-		io.sockets.emit("error", {"nodeid":node._id, "msg": sandbox.out.init_error});
+		sandbox.out.say("error", sandbox.out.init_error);
 		return;
 	}
 
@@ -52,7 +50,7 @@ exports.runNode = function (node, io) {
 			if(sandbox.context.init_error) 
 				return;
 
-runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+			runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 
 			// apply metanode's settings to settings of the first subnode
 			for(var key in node.settings)
@@ -178,8 +176,8 @@ runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 										//var array = record[node.params.in_field].constructor.name == "Array";
 										mongoquery.group(node, true, groupCB);
 									} else {
-										io.sockets.emit("error", {"nodeid":node._id, "msg":"Record or field not found!"});
-										io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+										io.sockets.emit("error", {"node_uuid":node._id, "msg":"Record or field not found!"});
+										io.sockets.emit("progress", {"node_uuid":node._id, "msg":"Destroy node and create new one with correct field name."});
 									}
 								}) 
 							});
@@ -198,7 +196,7 @@ runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 						break;	
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 								
 					}
@@ -350,7 +348,7 @@ runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 						break;
 
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					
 					}
@@ -393,7 +391,7 @@ runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 						break;
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					}
 					break;	
@@ -470,7 +468,7 @@ runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 						case "basic":
 							var web = require("../app/node_runners/web.js");
 							if(config.isServerInstallation && !node.res) {
-								io.sockets.emit("finish", {"nodeid":node._id, "msg": "Download nodes not available on server installation"});
+								io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Download nodes not available on server installation"});
 							} else {
 								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
 							}
@@ -522,8 +520,9 @@ exports.createSandbox = function (node, io) {
 			vars: {},
 			myvar: {},
 			node: node,
-			doc_count:0,
-			count:0,
+			doc_count: 0,
+			count: 0,
+			success_count: 0,
 			path: path,
 			get: getProp,
 			flat: flatten,
@@ -551,31 +550,47 @@ exports.createSandbox = function (node, io) {
 			},
 			say: function(ch, msg) {
 				console.log(ch.toUpperCase() + ":", msg);
-				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
+				io.sockets.emit(ch, {
+					"node_uuid":node._id, 
+					"msg":msg,
+					doc:node.req.params.doc
+				});
 
 				var date = new Date();
 				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
-				if(global.register[node.req.originalUrl])
-					global.register[node.req.originalUrl].log.push(log);
+				
+				// remove from register
+				if(ch === "finish" && ch === "error") {
+					if(global.register[node.req.originalUrl])
+						global.register[node.req.originalUrl].log.push(log);
+				}
 				
 				// send http response if needed (i.e. node was executed by "run" instead of "start")
 				if(ch === "finish" && node.res) {
 					console.log(sandbox.out.value);
 					if(this.error)
-						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg}) // toimii
+						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg, error:this.error}) // toimii
 					else
 						node.res.json({
 							status:"finished", 
 							node_uuid: node._id.toString(), 
 							nodeid: node.nodeid, 
 							ts: date, 
+							doc:node.req.params.doc,
 							result:{
 								value:sandbox.out.value,
 								setter:sandbox.out.setter
 								}
 							}) 
 				} else if(ch === "error" && node.res) {
-					node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg: msg}) 
+					node.res.json({
+						status:"error", 
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						msg: msg,
+						doc:node.req.params.doc
+					}) 
 				}
 				
 				// remove node from register if finished or if error (aborting)
