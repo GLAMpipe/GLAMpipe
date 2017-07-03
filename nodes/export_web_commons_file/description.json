@@ -1,5 +1,5 @@
 {
-    "nodeid": "process_export_web_commons_file",
+    "nodeid": "export_web_commons_file",
     "title": "WM Commons: upload files",
     "type": "export",
     "subtype":"web",
