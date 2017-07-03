@@ -13,7 +13,11 @@ var test = {
 var file = context.doc[context.node.params.in_file];
 var title = context.doc[context.node.params.in_file_title];
 var uuid = context.doc[context.node.params.in_uuid];
+var out_link = context.doc[context.node.params.out_link];
 var filepath = context.node.params.file_path;
+
+
+
 
 if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 
@@ -26,34 +30,43 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 	// we must pair filepaths and file titles
 	if(Array.isArray(file) && Array.isArray(title)) {
 		file.forEach(function(f, i) {
-			var upload = {};
-			upload.filepath = filepath + f; // full file path
-			if(title[i] && title[i] !== "")
-				upload.title = title[i];
-			else
-				out.error = "Number of files and file names do not match!";
-				
-			output.push(upload);
+			var upload = createUpload(filepath, f, title[i]);
+			if(upload)
+				output.push(upload);
 		})
 	} else {
-		var upload = {};
-		upload.filepath = filepath + file; // full file path
-		if(title && title !== "")
-			upload.title = title;
-		else
-			out.error = "No file title found!";
-			
-		output.push(upload);
+		var upload = createUpload(filepath, file, title);
+		if(upload)
+			output.push(upload);
 	}
 
 	var url = context.node.params.url + "/items/" + uuid + "/bitstreams";
 	output.forEach(function(upload) {
-		upload.url = url;
+		upload.options = {
+			url: url + "?name=" + upload.title,
+			jar:true,		// cookie jar on so that authentication works
+			headers: {
+				"accept": "application/json",
+				"content-type": "multipart/form-data"
+			}
+		}
 	})
 
 	//out.console.log(output)
-	out.value = output;
+	out.pre_value = output;
 
 } else {
 	context.skip = true;
+}
+
+
+function createUpload(filepath, file, title) {
+	var upload = {};
+	if(!file || !title)
+		return null;
+		
+	upload.file = filepath + file; // full file path
+	upload.title = title;
+		
+	return upload;
 }

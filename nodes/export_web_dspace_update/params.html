@@ -23,7 +23,7 @@
 	</select>
 
 	<label>write response here</label>
-	<input type="text" name="out_field" value="update_response"/>
+	<input id="export-data-dspace-update_out" type="text" name="out_field" value="update"/>
 </div>
 
 
@@ -102,6 +102,10 @@ plus_button.click(function () {
 // *************** CODE FOR ADDING NEW URLS ends **************
 
 
+$("#export-data-dspace-update_field_sel").change(function() {
+	var value = $(this).val().replace(/\./g, "_");
+	$("#export-data-dspace-update_out").val(value + "_update");
+});
 
 // GET USER ADDED PARAMS
 function fetchParams () {

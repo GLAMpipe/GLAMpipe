@@ -9,7 +9,7 @@ const MP 		= require("../config/const.js");
 var exports = module.exports = {};
 
 // loop for synchronous nodes and export nodes (export is done once per document)
-exports.loop = function (node, sandbox, onDoc) {
+exports.documentLoop = function (node, sandbox, onDoc) {
 	
 
 	var query = {};
@@ -48,12 +48,15 @@ exports.loop = function (node, sandbox, onDoc) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
-
+			
 			// call document processing function
 			onDoc(doc, sandbox, function processed () {
 				
+				console.log("SETTER")
+				console.log(sandbox.out.setter)
+				
 				if(Array.isArray(sandbox.out.setter))
-					sandbox.out.setter = sandbox.out.setter[0];  // FIX THIS!!!!
+					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
 				
 				if(sandbox.out.setter != null) {
 					var setter = sandbox.out.setter; 
@@ -68,6 +71,7 @@ exports.loop = function (node, sandbox, onDoc) {
 				} else
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
 			});
+			
 
 		}, function done () {
 			sandbox.finish.runInContext(sandbox);

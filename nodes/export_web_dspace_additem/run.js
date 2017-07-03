@@ -3,7 +3,7 @@
 
 if(context.error) {
 	out.setter[context.node.params.out_link] = out.error_marker + context.error;
-} else if(context.data && context.response && context.response.statusCode == 200) {
+} else if(!context.skip && context.data && context.response && context.response.statusCode == 200) {
 	context.success_count++;
 	var data = context.data;
 	var splitted = context.node.params.url.split("/");

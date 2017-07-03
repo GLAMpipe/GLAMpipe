@@ -1,6 +1,18 @@
 
+
+
 var item = {"metadata": []};
 var out_link = context.doc[context.node.params.out_link];
+
+
+var options = {
+	url: out.url,  // from init.js
+	json: item,
+	headers: {
+		"accecpt": "application/json"
+	},
+	jar:true
+};
 
 // if there is an url in out_link, then we do not run again
 if(out_link && typeof out_link == "string" && out_link.match(/^http/))
@@ -46,7 +58,7 @@ if(context.node.settings.rest_data) {
 	   }
 
 	} 
-	out.pre_value = item;
+	out.pre_value = options;
 }
 
 

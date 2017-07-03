@@ -319,7 +319,10 @@ var dataTable = function (node) {
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			// render urls as links
 			if(typeof data == "string" && data.match(/^http/)) {
-				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				if(index === 0 || index)
+					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				else
+					html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				
 			} else {
 				if(typeof data == "string" && data.match("^AAAA_error"))

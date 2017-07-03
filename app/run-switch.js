@@ -22,7 +22,7 @@ exports.runNode = function (node, io) {
 	// create context for GP node
 	var sandbox = exports.createSandbox(node ,io);
 	// init node scripts
-	var init 	= CreateScriptVM(node, sandbox, "init");
+	var init 		= CreateScriptVM(node, sandbox, "init");
 	sandbox.pre_run = CreateScriptVM(node, sandbox, "pre_run");
 	sandbox.run 	= CreateScriptVM(node, sandbox, "run");
 	sandbox.finish 	= CreateScriptVM(node, sandbox, "finish");
@@ -70,7 +70,7 @@ exports.runNode = function (node, io) {
 			})
 			
 			metanode = require("../app/node_runners/metanode.js")
-			asyncLoop.loop(node, sandbox, metanode.run);
+			asyncLoop.documentLoop(node, sandbox, metanode.run);
 				
 			break;
 
@@ -273,21 +273,22 @@ exports.runNode = function (node, io) {
 				
 				case "web":
 				
+					var web = require("../app/node_runners/web.js");
+					sandbox.login = CreateScriptVM(node, sandbox, "login");
+				
 					switch (node.subsubtype) {
 		
 						case "omeka_additem":
-							var web = require("../app/node_runners/web.js");
-							asyncLoop.loop(node, sandbox, web.postJSON);
+							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
 										
 						case "dspace_additem":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.uploadItem);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 							
@@ -300,7 +301,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.updateData);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
@@ -312,7 +313,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addMetadataField);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
@@ -325,7 +326,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addFile);
+									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
 								}
 							});
 						break;
@@ -343,7 +344,6 @@ exports.runNode = function (node, io) {
 						break;
 
 						case "upload_file":
-							var web = require("../app/node_runners/web.js");
 							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
 						break;
 
@@ -387,7 +387,7 @@ exports.runNode = function (node, io) {
 
 						case "grobid":
 							var web = require("../app/node_runners/web-get-content.js");
-							asyncLoop.loop(node, sandbox, web.uploadFile);
+							asyncLoop.documentLoop(node, sandbox, web.uploadFile);
 						break;
 						
 						default:
@@ -403,11 +403,11 @@ exports.runNode = function (node, io) {
 
 						case "detect_language":
 							var detect = require("../app/node_runners/field-detect-language.js");
-							asyncLoop.loop(node, sandbox, detect.language);
+							asyncLoop.documentLoop(node, sandbox, detect.language);
 						break;
 					
 						default: // syncronous nodes
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
@@ -436,7 +436,7 @@ exports.runNode = function (node, io) {
 							mongoquery.find({}, sandbox.context.node.params.source_collection, function(err, result) {
 								sandbox.context.data = result;
 								console.log(result);
-								asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 									sandbox.run.runInContext(sandbox);
 									next();
 								});
@@ -455,7 +455,7 @@ exports.runNode = function (node, io) {
 						break;
 
 						default:
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});			

@@ -3,12 +3,13 @@
 
 var uuid_value 		= context.doc[context.node.settings.uuid_field];
 var update_value 	= context.doc[context.node.settings.update_field];
-var original_value  = context.doc[context.node.settings.original_value];
 var language_value 	= context.doc[context.node.settings.language_field];
+var original_value  = context.doc[context.node.settings.original_value];
 var original_field 	= context.node.params.original_field; // field to be updated
 
 
-out.value 		= [];
+var update = [];
+var url =  context.node.params.dspace_url + "/items/" + uuid_value + "/metadata";
 
 
 if(!uuid_value || !context.validator.isUUID(uuid_value+""))
@@ -23,23 +24,30 @@ if (context.node.settings.original_value && Array.isArray(update_value)) {
 	});
 
 	if(is_same) {
-		out.value = null;
+		update = null;
 		out.url = null;
 	} else {
 		out.console.log("setting values")
-		createNewVal(out.value);
-		out.console.log(out.value)
-		out.url =  context.node.params.dspace_url + "/items/" + uuid_value + "/metadata";
+		createNewVal(update);
+		
 	}
 	
 } else {
 // create new metadata object
-	createNewVal(out.value);
+	createNewVal(update);
 
-	out.url =  context.node.params.dspace_url + "/items/" + uuid_value + "/metadata";
 }
 
 
+
+if(update) {
+	out.pre_value = {
+		url: url,
+		json: update,
+		method: "put",
+		jar:true
+	};
+}
 
 // FUNCTIONS
 
