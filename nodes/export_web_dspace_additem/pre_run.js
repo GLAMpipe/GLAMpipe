@@ -25,9 +25,10 @@ if(context.node.settings.rest_data) {
 		item2.language = "";
 	})
 	
-	//out.pre_value = {"metadata":items};
+	options.json = {"metadata":items};
+	out.pre_value = options;
 	//out.console.log("pre_value")
-	//out.console.log(out.pre_value)
+	out.console.log(out.pre_value)
 
 // mapped data
 } else {

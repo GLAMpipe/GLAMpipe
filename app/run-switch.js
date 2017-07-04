@@ -281,7 +281,7 @@ exports.runNode = function (node, io) {
 						case "omeka_additem":
 							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
-										
+
 						case "dspace_additem":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
@@ -291,12 +291,10 @@ exports.runNode = function (node, io) {
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
-							
 						break;
-						
+
 						case "dspace_update":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
@@ -307,8 +305,7 @@ exports.runNode = function (node, io) {
 						break;
 
 						case "dspace_addfield":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
@@ -318,10 +315,8 @@ exports.runNode = function (node, io) {
 							});
 						break;
 
-
 						case "dspace_addfile":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
