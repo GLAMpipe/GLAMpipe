@@ -45,21 +45,27 @@ exports.fetchJSON = function (options, sandbox, next) {
 	if(!options.url || sandbox.context.skip) {
 		return next("skipping...");
 	}
-
+	
+	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
+		console.log("RESPONSE: " + response.statusCode)
 		if (error) {
 			console.log(error);
 			next();
 		} else if (response.statusCode == 200) {
-			sandbox.context.data = JSON.parse(body);
-			//console.log("update response:", body);
+			try {
+				sandbox.context.data = JSON.parse(body);
+				//console.log("BODY:", body);
+			} catch(e) {
+				console.log("JSON PARSE:" + e.message);
+				sandbox.context.error = "error JSON parse error";
+			}
 			next();
 		} else {
-			console.log("SERVER RESPONSE: " + response.statusCode)
 			next();
 		}
 	}

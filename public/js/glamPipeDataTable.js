@@ -264,17 +264,25 @@ var dataTable = function (node) {
 		if(self.node.data.docs.length == 0)
 			return "<h2>This collection is empty</h2><p>Add source node to get something to look at :)</p>";
 
+		// check if node wants to render data itself
+		if(self.node.source.scripts.view) {
+			var render = new Function('node', self.node.source.scripts.view);
+		}
+
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
 
 		var html = "";
-		
-		for(var j = 0; j < self.node.data.docs.length; j++) {
-			html += "<tr>";
-			for(var k = 0; k < visible_keys.length; k++) {
-				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
+		if(render) {
+			html = render(self.node);
+		} else {
+			for(var j = 0; j < self.node.data.docs.length; j++) {
+				html += "<tr>";
+				for(var k = 0; k < visible_keys.length; k++) {
+					html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
+				}
+				html += "</tr>"
 			}
-			html += "</tr>"
 		}
 		return html;
 	}

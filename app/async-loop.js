@@ -151,7 +151,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							sandbox.finish.runInContext(sandbox);
 							return;
 						}
-						
+						//console.log(sandbox.out.setter)
 						if(sandbox.out.setter)
 							setters.push(sandbox.out.setter)
 						else
@@ -395,8 +395,12 @@ function combineSetters(setters) {
 		keys.forEach(function(key) {
 			c_setter[key] = [];
 		})
+		
 		setters.forEach(function(setter) {
 			var setter_keys = Object.keys(setter);
+			//console.log(setter)
+			console.log("setter_keys");
+			console.log(setter_keys);
 			setter_keys.forEach(function(s_key) {
 				c_setter[s_key].push(setter[s_key]);
 			})
