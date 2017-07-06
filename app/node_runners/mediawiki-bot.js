@@ -51,8 +51,7 @@ exports.uploadFile = function (options, sandbox, next) {
 			} else {
 				fs.readFile(options.filename, function (err,data) {
 					if (err) {
-						io.sockets.emit("error", err);
-						sandbox.context.error = err;
+						sandbox.out.say("error", err);
 						return next();	// skip if file not found
 					} 
 					
@@ -60,7 +59,9 @@ exports.uploadFile = function (options, sandbox, next) {
 					sandbox.client.upload(options.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
 						sandbox.context.data = data;
 						if(err) {
-							io.sockets.emit("error", err);
+							//sandbox.out.say("error", err);
+							sandbox.context.error = err;
+							next();
 						} else {
 							// upload wikitext
 							sandbox.client.edit(data.imageinfo.canonicaltitle, options.wikitext, 'initial metadata', function(err) {

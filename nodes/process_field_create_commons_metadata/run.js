@@ -67,15 +67,8 @@ if(parseInt(context.count) % 100 == 0)
     out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
 
-// create page title
-var title = makeValues("page", true);
-if(context.node.settings.file_extension)
-	title = title + "." + context.doc[context.node.settings.file_extension];
-	
-title = title.replace(/\.+/g, "."); // remove possible double dots (like "name..jpg")
 var output = {};
 output[context.node.params.out_field] = wikitext;
-output[context.node.params.out_title] = title;
 
 // out put wikitext
 out.setter = output; 

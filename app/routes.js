@@ -76,6 +76,8 @@ module.exports = function(express, glampipe, passport) {
 
 	// protect API routes
 	if(config.isServerInstallation) {
+		console.log("AUTHENTICATION")
+		//console.log(req.ip)
 		var s = express.get('superSecret');
 		express.post('/api/v1/*', jwt2({secret: s}));
 		express.put('/api/v1/*', jwt2({secret: s}));
@@ -97,13 +99,17 @@ module.exports = function(express, glampipe, passport) {
         
         // node run
         express.post('/api/v1/nodes/:id/*', function(req, res, next) {
-
-            project.isAuthenticated(req, function(authenticated) {
-                if(authenticated)
-                    next();
-                else
-                    res.json({error:"Node run not authenticated!"});
-            })
+			console.log(req.ip)
+			if(req.ip == "127.0.0.1")
+				next();
+			else {
+				project.isAuthenticated(req, function(authenticated) {
+					if(authenticated)
+						next();
+					else
+						res.json({error:"Node run not authenticated!"});
+				})
+			}
         })
     }
 

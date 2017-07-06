@@ -554,15 +554,19 @@ exports.createSandbox = function (node, io) {
 				var date = new Date();
 				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
 				
-				// remove from register
-				if(ch === "finish" && ch === "error") {
-					if(global.register[node.req.originalUrl])
-						global.register[node.req.originalUrl].log.push(log);
+				// writle log to register
+				if(global.register[node.req.originalUrl])
+					global.register[node.req.originalUrl].log.push(log);
+
+				// remove node from register if finished or if error (aborting)
+				if(ch === "finish" || ch === "error") {
+					console.log("REGISTER: deleting " + node.req.originalUrl)
+					delete global.register[node.req.originalUrl];
 				}
 				
 				// send http response if needed (i.e. node was executed by "run" instead of "start")
 				if(ch === "finish" && node.res) {
-					console.log(sandbox.out.value);
+					//console.log(sandbox.out.value);
 					if(this.error)
 						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg, error:this.error}) // toimii
 					else
@@ -588,12 +592,7 @@ exports.createSandbox = function (node, io) {
 					}) 
 				}
 				
-				// remove node from register if finished or if error (aborting)
-				if(ch === "finish" || ch === "error") {
-					console.log("REGISTER: deleting " + node.req.originalUrl)
-					delete global.register[node.req.originalUrl];
 
-				}
 			}
 		},
 		say: io.sockets.emit
