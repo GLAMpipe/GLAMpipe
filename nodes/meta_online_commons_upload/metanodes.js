@@ -17,7 +17,8 @@ context.node.pipe = [
 		
 		// run settings 
 		settings: {
-			filename_type: "id"
+			filename_type: "id",
+			extension: "yes"
 		}
 	},
 	

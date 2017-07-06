@@ -819,12 +819,14 @@ exports.deleteNode = function (req, res, io) {
 							var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + subnode;
 							console.log("REMOVING: node " + subnode);	
 							
-							 var options = {
+							var options = {
 								url: url,
 								headers: {
 									"accecpt": "application/json"
 								}
 							};
+							if(req.headers.authorization)
+								options.headers.authorization = req.headers.authorization;
 							
 							var request = require("request");
 							//require('request').debug = true;
