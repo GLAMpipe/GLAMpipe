@@ -44,7 +44,7 @@ var glamPipe = function () {
 	}
 
 	this.getProjectsByUser = function (div, user) {
-		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th></tr>";
+		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			var projects = data.data;
@@ -82,6 +82,7 @@ var glamPipe = function () {
 					})
 				}
 				html += "</td>";
+				html += "<td><div data-id='" + projects[i]._id + "' class='wikiglyph-cross button icon boxicon'>delete</div></td>";
 				
 				
 			}
@@ -115,7 +116,7 @@ var glamPipe = function () {
 					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
 					error: function(data, s, xhr) {
 						console.log("not logged in");
-						$(div).html("<a id='login-pop' href=''>login</a>");
+						$(div).html("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
 					},
 					success: function(data) {
 						console.log("Logged in");
@@ -321,7 +322,6 @@ var glamPipe = function () {
 	this.nodeRunFinished = function (data) {
 		var node = self.getRegularNode(data.node_uuid);
 		node.runFinished();
-		// self.openCurrentNode(); // we should open finished node
 	}
 
 	this.getNode = function (clickEvent) {
@@ -770,7 +770,7 @@ $.delete = function(url, data, callback, type){
     data: data,
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 
@@ -790,7 +790,7 @@ post = function(url, data, callback, type){
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 $.put = function(url, data, callback, type){
@@ -809,7 +809,7 @@ $.put = function(url, data, callback, type){
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 

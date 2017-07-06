@@ -73,10 +73,13 @@ var glamPipeNode = function (node, gp) {
 		$(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
 		
-		var input = self.getInputFields();
-		var output = self.getOutputFields();
-		
-		self.open({input_keys:input, output_keys:output});
+		// we open node only if it is not a subnode of metanode
+		if(!self.source.params.parent) {
+			var input = self.getInputFields();
+			var output = self.getOutputFields();
+			
+			self.open({input_keys:input, output_keys:output});
+	}
 	}
 
 	// getter for input/output fields of the node (used as config for data rendering)

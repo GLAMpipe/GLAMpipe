@@ -14,7 +14,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
-		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button class='button' id='login-submit'>login</button></div>");
 		e.preventDefault();
 	});
 
@@ -47,7 +47,7 @@ $( document ).ready(function() {
 	});
 
 	// remove project
-	$("#projectList").on('click', ".wikiglyph-cross", function(e) {
+	$(document).on('click', ".wikiglyph-cross", function(e) {
 		gp.removeProject(e);
 		e.stopPropagation();
 		e.preventDefault();

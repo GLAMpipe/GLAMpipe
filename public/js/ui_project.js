@@ -188,7 +188,7 @@ $( document ).ready(function() {
         // revert "run" button text
         $("button[data-id='"+data.node_uuid+"']").text("run");
         $("div[data-id='"+data.doc+"']").text("run only this");
-        websockPopup(progressDisplay, "Node run error");
+        //websockPopup(progressDisplay, "Node run error");
     });
 
     socket.on('finish', function (data) {

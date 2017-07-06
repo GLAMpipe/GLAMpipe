@@ -53,13 +53,14 @@ context.node.pipe = [
 			in_title: context.node.params.in_title,
 			in_wikitext: context.node.params.in_wikitext,
 			in_location: context.node.params.in_file_url + "_download",
+			in_location_ext: context.node.params.in_file_url + "_ext",
 			in_checksum_result: context.node.params.in_file_url + "_checksum",
 			out_field: context.node.params.out_field
 		},
 		// this passes settings from metanode to subnode
 		settingsFunc: function() {
 			this.settings = {
-				server:"0",
+				server: context.node.settings.server,
 				username: context.node.settings.username,
 				password: context.node.settings.password
 			}

@@ -17,10 +17,8 @@
         "init":
         [
             "out.say('progress', 'Metanode started...'); "
-        ],
+        ]
         
-        
-        "finish": "out.say('finish', 'Metanode done!');"
     },
     
     "views": {}

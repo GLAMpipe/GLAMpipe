@@ -53,8 +53,8 @@ exports.runNode = function (node, io) {
 			runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
 
 			// apply metanode's settings to settings of the first subnode
-			for(var key in node.settings)
-				node.pipe[0].settings[key] = node.settings[key];
+			//for(var key in node.settings)
+				//node.pipe[0].settings[key] = node.settings[key];
 			
 			// dynamic settings
 			node.pipe.forEach(function(pipe, index) {
@@ -65,6 +65,7 @@ exports.runNode = function (node, io) {
 				if(pipe.settingsFunc) {
 					console.log("settingsFunc");
 					console.log(pipe.settingsFunc());
+					console.log(pipe.settings)
 					//pipe.settings = pipe.settingsFunc();
 				}
 			})
@@ -543,11 +544,12 @@ exports.createSandbox = function (node, io) {
 					this.key_type.push(type);
 				}
 			},
-			say: function(ch, msg) {
+			say: function(ch, msg, options) {
 				console.log(ch.toUpperCase() + ":", msg);
 				io.sockets.emit(ch, {
 					"node_uuid":node._id, 
 					"msg":msg,
+					"options": options,
 					doc:node.req.params.doc
 				});
 
@@ -566,30 +568,29 @@ exports.createSandbox = function (node, io) {
 				
 				// send http response if needed (i.e. node was executed by "run" instead of "start")
 				if(ch === "finish" && node.res) {
-					//console.log(sandbox.out.value);
-					if(this.error)
-						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg, error:this.error}) // toimii
-					else
-						node.res.json({
-							status:"finished", 
-							node_uuid: node._id.toString(), 
-							nodeid: node.nodeid, 
-							ts: date, 
-							doc:node.req.params.doc,
-							result:{
-								value:sandbox.out.value,
-								setter:sandbox.out.setter
-								}
-							}) 
+					node.res.json({
+						status:"finished", 
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						doc:node.req.params.doc,
+						result:{
+							value:sandbox.out.value,
+							setter:sandbox.out.setter
+							}
+						}) 
+					node.res = null;
 				} else if(ch === "error" && node.res) {
 					node.res.json({
 						status:"error", 
+						error: msg,
 						node_uuid: node._id.toString(), 
 						nodeid: node.nodeid, 
 						ts: date, 
 						msg: msg,
 						doc:node.req.params.doc
 					}) 
+					node.res = null;
 				}
 				
 

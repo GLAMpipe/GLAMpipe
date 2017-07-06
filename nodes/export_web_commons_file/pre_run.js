@@ -1,6 +1,10 @@
 var title = context.doc[context.node.params.in_field]; 
 var source = context.doc[context.node.params.in_location]; 
 
+var ext = "";
+if(context.node.params.in_location_ext)
+	ext = context.doc[context.node.params.in_location_ext];
+
 var upload = {};
 
 // checksum test
@@ -21,9 +25,10 @@ if(Array.isArray(context.doc[context.node.params.in_location]))
 else
 	upload.filename = context.doc[context.node.params.in_location]
 
-	
-if(title) {
-   // title = title.replace(".jpg","");
+// add file extension
+if(ext) {
+	title = title + "." + ext;
+	title = title.replace(/\.+/g, "."); // remove possible double dots (like "name..jpg")
   //  title = title.replace(".tif","");
 }
 

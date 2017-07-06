@@ -24,9 +24,9 @@ exports.run = function(doc, sandbox, next) {
 	// run subnodes
 	require("async").eachSeries(sandbox.context.node.subnodes, function iterator (subnode, next_sub) {
 		if(pass) {
-			console.log("THIS IS SUBNODE");
+			//console.log("THIS IS SUBNODE");
 			var url = baseurl + "/api/v1/nodes/" + subnode + "/run/" + doc._id.toString();
-			console.log(url);	
+			//console.log(url);	
 			console.log("subnode settings:");
 			console.log(sandbox.context.node.pipe[count].settings);
 			
@@ -55,9 +55,11 @@ exports.run = function(doc, sandbox, next) {
 					next_sub();
 				} else {
 					// if we got error as a response, then we skip rest of the nodes
-					if(body.error || (body.status && body.status == "error"))
+					if(body.error) {
 						pass = false;
-					console.log(options.url);
+						sandbox.context.error = body.error; 
+					}
+					//console.log(options.url);
 					console.log("update response:", body);
 					//sandbox.run.runInContext(sandbox);
 					next_sub();
@@ -68,11 +70,9 @@ exports.run = function(doc, sandbox, next) {
 			console.log("SKIPPING:" + subnode)
 			next_sub();
 		}
-		
-		//next();
 
-					
 	}, function done () {
+		sandbox.run.runInContext(sandbox);
 		console.log("METANODE: done all nodes!");
 		next();
 	})
