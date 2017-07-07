@@ -86,6 +86,7 @@ exports.fetchContent = function (options, sandbox, next) {
 		sandbox.context.response = response;
 		if (error) {
 			console.log(error);
+			sandbox.context.error = error;
 			next();
 		} else {
 			sandbox.context.data = body;
@@ -343,9 +344,10 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		
 		if(error)
 			cb("Login error")
-		else if(response.statusCode === 200)
+		else if(response.statusCode === 200) {
+			sandbox.out.say("progress", "Login succesful"); 
 			cb(null);
-		else
+		} else
 			cb("Authentication failed");
 
 	});

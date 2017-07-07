@@ -44,7 +44,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				sandbox.pre_run.runInContext(sandbox);
 			} catch(e) {
 				console.log(e);
-				sandbox.out.error = "errorin in pre_run.js:" + e.message;
+				sandbox.out.error = "error in pre_run.js:" + e.message;
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
@@ -327,6 +327,8 @@ exports.importLoop = function (node, sandbox, onDoc) {
 				return;
 			}
 			//sandbox.context.doc = doc;
+			sandbox.context.error = null;
+			sandbox.context.skip = null;
 			sandbox.context.count++;
 			var options = {url:url}
 			
@@ -334,11 +336,11 @@ exports.importLoop = function (node, sandbox, onDoc) {
 			onDoc(options, sandbox, function processed (error) {
 				console.log(options);
 				sandbox.run.runInContext(sandbox);
-				sandbox.out.value[MP.source] = node._id;
-				if(!error && sandbox.out.value)
-					mongoquery.insert(node.collection, sandbox.out.value, next);
-				else {
+				if(error || sandbox.context.skip || !sandbox.out.value)
 					next();
+				else {
+					sandbox.out.value[MP.source] = node._id;
+					mongoquery.insert(node.collection, sandbox.out.value, next);
 				}
 			});
 

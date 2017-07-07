@@ -1,6 +1,6 @@
 
 
-<label>Choose Eprints REST API url or write url below.</label>
+<label>Choose Eprints REST API url or add new url.</label>
 <select id="source-web-eprints_url" name="eprints_url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="http://demoprints.eprints.org/rest/">http://demoprints.eprints.org/rest/</option>
@@ -42,7 +42,7 @@ function testUrl (url, success, fail) {
 		if(data.error) 
 			fail("Server did not answer");
 		else
-            success(data);
+            success(url);
 
 	});
 	
@@ -53,14 +53,21 @@ function testUrl (url, success, fail) {
 
 
 function addUrl (url) {
-	var data = {}
-	data.url = add_input.val();
-	var post = $.post(url, data, function(response) {
+	console.log("addurl")
+	var options = {
+		url: params_url,
+		method: "POST",
+		data: {},
+		headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+	};
+	console.log(options);
+	options.data.url = add_input.val();
+	var post = $.ajax(options);
+	post.done(function( msg ) {
 		add_div.hide();
 		add_input.val("");
 		fetchParams();
-		
-	})	
+	});
 }
 
 
@@ -79,6 +86,7 @@ test_button.click(function (e) {
 add_button.click(function () {
 	function success() {addUrl(params_url)};
 	function fail(msg) {alert("Eprints rest url seems to invalid, can not add!")};
+	//addUrl(add_url_input.val())
 	testUrl(add_url_input.val(), success, fail);
 })	
 

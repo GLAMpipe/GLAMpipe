@@ -1,6 +1,6 @@
 
 <label>Choose DSpace REST API url or write url below.</label>
-<select id="export-data-dspace-update_url" name="dspace_url">
+<select id="export-data-dspace-update_url" name="url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
@@ -18,9 +18,22 @@
 <div id="export-data-dspace-update_status" class="status"></div>
 
 <div id="export-data-dspace-update_hidden" style="display:none">
-	<select id="export-data-dspace-update_field_sel" name="original_field">
+	<select id="export-data-dspace-update_field_sel" name="dspace_field">
 		<option value="" selected disabled>Choose</option>
 	</select>
+
+
+	<label>UUID of the item</label>
+	<input class="dynamic_field" name="in_uuid_field" value="uuid" required />
+
+	<label>new value field</label>
+	<input class="dynamic_field" name="in_update_field" required />
+
+	<label>current value field (optional, updates only if new value differs from this)</label>
+	<input class="dynamic_field" name="in_original_value"/>
+
+	<label>language field (optional)</label>
+	<input class="dynamic_field" name="language_field"/>
 
 	<label>write response here</label>
 	<input id="export-data-dspace-update_out" type="text" name="out_field" value="update"/>
@@ -67,14 +80,21 @@ function testUrl (url, success, fail) {
 
 
 function addUrl (url) {
-	var data = {}
-	data.url = add_input.val();
-	var post = $.post(url, data, function(response) {
+	console.log("addurl")
+	var options = {
+		url: params_url,
+		method: "POST",
+		data: {},
+		headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+	};
+	console.log(options);
+	options.data.url = add_input.val();
+	var post = $.ajax(options);
+	post.done(function( msg ) {
 		add_div.hide();
 		add_input.val("");
 		fetchParams();
-		
-	})	
+	});
 }
 
 
