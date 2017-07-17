@@ -105,4 +105,26 @@ exports.operators = function (req) {
 	return operators;
 }
 
-
+exports.createSearchQuery = function(req) {
+	
+	var query = {};
+	if(req.query.query_fields) {
+		// create an AND query if there are several query fields
+		if(req.query.query_fields.length > 1) {
+			var ands = [];
+			for(var i = 0; i < req.query.query_fields.length; i++) {
+				var search = {};
+				search[req.query.query_fields[i]] = {$regex:req.query.query_values[i], $options: 'i'};
+				ands.push(search);
+			}
+			query.$and = ands;
+		// otherwise create query for one field
+		} else {
+			if(req.query.query_values[0] === "")
+				query[req.query.query_fields[0]] =  "";
+			else
+				query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+		}
+	}
+	return query;
+}
