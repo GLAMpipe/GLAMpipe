@@ -1,14 +1,22 @@
 
-// "node" is passed as a parameter to this scripts
-// "node.source.settings" includes node settings and "node.source.params" node's parameters
-// "node.data.docs" contains current (paged) set of documents
+/*
+* EXAMPLE OF VIEW SCRIPT
+* - view script replaces default data table renderer
+* - "node" is passed as a parameter to this script
+* - "node.source.settings" includes node settings and "node.source.params" node's parameters
+* - "node.data.docs" contains current (paged) set of documents
+*/
 
+
+// GLOBAL VARIABLES
+console.log("view.js called");
 var wikidata_url = "https://www.wikidata.org/wiki/";
-
+var api_url = g_apipath + "/collections/" + node.source.collection + "/docs/";
 html = "";
 
 
-    
+// HTML RENDERING
+
 for(var i = 0; i < node.data.docs.length; i++) {
     var doc = node.data.docs[i];
     var title = doc[node.source.params.in_field];
@@ -16,19 +24,29 @@ for(var i = 0; i < node.data.docs.length; i++) {
     if(Array.isArray(result))
 		result = result[0];  // we assume that we have only one search term
 
-	html += "<table class='match-set'><tr><td>"
+	html += "<table class='match'><tr id='" + doc._id + "'><td>"
     html += "<div class='fatbox'>";
     html += "  <div class='inlinetitleblock'><span class='title'>" + title + "</span></div>";
-    //html += "  <textarea class='big'>"+ doc[node.source.params.out_field] +"</textarea>";
-   // html += "  <a target='_blank' href='" + preview_url + wikitext_url + "'><div class='button'>Preview wikitext</div></a>";
-    html += "</div></td><td>";
-    html += renderWDResult(result) ;
+    html += "</div><div class='match'>SELECTED MATCH:" + doc[node.source.params.out_match] + "</div></td><td>";
+    html += renderWDResult(result, doc) ;
     html += "<td></tr></table>";
 }
 
 
 
-function renderWDResult(result) {
+// EVENT HANDLERS 
+
+// off() is important since view.js gets called every time user clicks node
+$("data-display").off().on("click", "a", function(e) {
+	setMatch($(this).data("match"), $(this).data("doc"));
+	e.preventDefault();
+})
+
+
+
+// FUNCTIONS
+
+function renderWDResult(result, doc) {
 
 	if(result) {
 		var html = "<table class='match-set'>";
@@ -43,9 +61,10 @@ function renderWDResult(result) {
 				html += "<tr>";
 				
 			html += "<td>"+result[i].name+"</td>";
-			html += "<td>"+type+"</td>";
+			html += "<td> ["+type+"] </td>";
 			html += "<td>"+result[i].score+"</td>";
-			html += "<td><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a></td>";
+			html += "<td><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a> ";
+			html += "<a class='select-match' target='_blank' data-match='"+result[i].id+"' data-doc='"+doc._id+"' href='#'>select match</a></td>";
 			html += "</tr>";
 		}
 		return html + "</table>";
@@ -53,10 +72,36 @@ function renderWDResult(result) {
 	return "no matches";
 }
 
-$(".match-set").on("click", "a", function(e) {
-	alert("pop");
-	e.preventDefault();
-})
 
+function setMatch(match, doc) {
+	var data = {};
+	// field name can be found on node params
+	data[node.source.params.out_match] = match;
+	
+	//data.field = node.source.params.out_match;
+	//data.value = match;
+	var url = api_url + doc;
+	
+	var options = {
+		url: url,
+		method: "POST",
+		data: data
+	}
+	apiCall(options, doc);
+
+}
+
+function apiCall (options, doc) {
+	// add auth
+	options.headers = {"Authorization": "Bearer " + localStorage.getItem("token")}
+	var post = $.ajax(options);
+	post.done(function( msg ) {
+		if(msg.error)
+			alert(msg.error);
+		else
+			$("#" + doc + " .match").empty().append(options.data[node.source.params.out_match]);
+		
+	});
+}
 
 return html ;

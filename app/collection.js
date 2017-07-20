@@ -92,11 +92,11 @@ exports.getTableData = function (req, res) {
 
 
 
-
-exports.editCollection = function (req, callback) {
+// post with setter
+exports.edit = function (req, callback) {
 
 	var collection_id = req.params.collection
-	console.log("editing", collection_id);
+	console.log("COLLECTION: editing", collection_id,":",req.params.doc);
 	if(!req.params.doc)
 		return callback({error:"doc_id is missing!"});
 		
@@ -114,17 +114,16 @@ exports.editCollection = function (req, callback) {
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
 		if(err)
 			console.log(err);
-		console.log("edit collection");
 		console.log(result);
 		callback(result); 
 	});
 }
 
-
+// put with field-value pair
 exports.edit2 = function (req, callback) {
 
 	var collection_id = req.params.collection
-	console.log("editing", collection_id);
+	console.log("COLLECTION: editing", collection_id,":",req.params.doc);
 	if(!req.params.doc)
 		return callback({error:"doc_id is missing!"});
 		
@@ -135,10 +134,16 @@ exports.edit2 = function (req, callback) {
 	}
 	
 	var setter = {};
+    if(!req.body.field)
+        return callback({error:"No update field defined!"});
+        
 	setter[req.body.field] = req.body.value;
 	console.log("setter:", setter);
 	
-	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$set:setter}, function(result) {
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
+		if(err)
+			console.log(err);
+        console.log(result);
 		callback(result); 
 	});
 }
