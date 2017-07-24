@@ -22,7 +22,7 @@ exports.runNode = function (node, io) {
 	// create context for GP node
 	var sandbox = exports.createSandbox(node ,io);
 	// init node scripts
-	var init 	= CreateScriptVM(node, sandbox, "init");
+	var init 		= CreateScriptVM(node, sandbox, "init");
 	sandbox.pre_run = CreateScriptVM(node, sandbox, "pre_run");
 	sandbox.run 	= CreateScriptVM(node, sandbox, "run");
 	sandbox.finish 	= CreateScriptVM(node, sandbox, "finish");
@@ -31,9 +31,7 @@ exports.runNode = function (node, io) {
 	
 	// we quit in init_error
 	if(sandbox.out.init_error) {
-		console.log("*********** NODE INIT ERROR ***********************");
-		console.log("msg: " + sandbox.out.init_error);
-		io.sockets.emit("error", {"nodeid":node._id, "msg": sandbox.out.init_error});
+		sandbox.out.say("error", sandbox.out.init_error);
 		return;
 	}
 
@@ -51,13 +49,29 @@ exports.runNode = function (node, io) {
 			//runNodeScriptInContext("init", node, sandbox, io);
 			if(sandbox.context.init_error) 
 				return;
-			
+
+			runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+
 			// apply metanode's settings to settings of the first subnode
-			for(var key in node.settings)
-				node.pipe[0].settings[key] = node.settings[key];
+			//for(var key in node.settings)
+				//node.pipe[0].settings[key] = node.settings[key];
+			
+			// dynamic settings
+			node.pipe.forEach(function(pipe, index) {
+				console.log(pipe.nodeid)
+				//console.log(pipe.params)
+				//console.log(pipe.settings)
+				//console.log(pipe.settingsFunc())
+				if(pipe.settingsFunc) {
+					console.log("settingsFunc");
+					console.log(pipe.settingsFunc());
+					console.log(pipe.settings)
+					//pipe.settings = pipe.settingsFunc();
+				}
+			})
 			
 			metanode = require("../app/node_runners/metanode.js")
-			asyncLoop.loop(node, sandbox, metanode.run);
+			asyncLoop.documentLoop(node, sandbox, metanode.run);
 				
 			break;
 
@@ -163,8 +177,8 @@ exports.runNode = function (node, io) {
 										//var array = record[node.params.in_field].constructor.name == "Array";
 										mongoquery.group(node, true, groupCB);
 									} else {
-										io.sockets.emit("error", {"nodeid":node._id, "msg":"Record or field not found!"});
-										io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+										io.sockets.emit("error", {"node_uuid":node._id, "msg":"Record or field not found!"});
+										io.sockets.emit("progress", {"node_uuid":node._id, "msg":"Destroy node and create new one with correct field name."});
 									}
 								}) 
 							});
@@ -183,7 +197,7 @@ exports.runNode = function (node, io) {
 						break;	
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 								
 					}
@@ -260,59 +274,55 @@ exports.runNode = function (node, io) {
 				
 				case "web":
 				
+					var web = require("../app/node_runners/web.js");
+					sandbox.login = CreateScriptVM(node, sandbox, "login");
+				
 					switch (node.subsubtype) {
 		
 						case "omeka_additem":
-							var web = require("../app/node_runners/web.js");
-							asyncLoop.loop(node, sandbox, web.postJSON);
+							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
-										
+
 						case "dspace_additem":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.uploadItem);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
-							
 						break;
-						
+
 						case "dspace_update":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.updateData);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
 
 						case "dspace_addfield":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addMetadataField);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
 
-
 						case "dspace_addfile":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addFile);
+									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
 								}
 							});
 						break;
@@ -330,12 +340,11 @@ exports.runNode = function (node, io) {
 						break;
 
 						case "upload_file":
-							var web = require("../app/node_runners/web.js");
 							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
 						break;
 
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					
 					}
@@ -374,11 +383,11 @@ exports.runNode = function (node, io) {
 
 						case "grobid":
 							var web = require("../app/node_runners/web-get-content.js");
-							asyncLoop.loop(node, sandbox, web.uploadFile);
+							asyncLoop.documentLoop(node, sandbox, web.uploadFile);
 						break;
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					}
 					break;	
@@ -390,11 +399,11 @@ exports.runNode = function (node, io) {
 
 						case "detect_language":
 							var detect = require("../app/node_runners/field-detect-language.js");
-							asyncLoop.loop(node, sandbox, detect.language);
+							asyncLoop.documentLoop(node, sandbox, detect.language);
 						break;
 					
 						default: // syncronous nodes
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
@@ -423,7 +432,7 @@ exports.runNode = function (node, io) {
 							mongoquery.find({}, sandbox.context.node.params.source_collection, function(err, result) {
 								sandbox.context.data = result;
 								console.log(result);
-								asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 									sandbox.run.runInContext(sandbox);
 									next();
 								});
@@ -442,7 +451,7 @@ exports.runNode = function (node, io) {
 						break;
 
 						default:
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});			
@@ -455,7 +464,7 @@ exports.runNode = function (node, io) {
 						case "basic":
 							var web = require("../app/node_runners/web.js");
 							if(config.isServerInstallation && !node.res) {
-								io.sockets.emit("finish", {"nodeid":node._id, "msg": "Download nodes not available on server installation"});
+								io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Download nodes not available on server installation"});
 							} else {
 								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
 							}
@@ -507,8 +516,9 @@ exports.createSandbox = function (node, io) {
 			vars: {},
 			myvar: {},
 			node: node,
-			doc_count:0,
-			count:0,
+			doc_count: 0,
+			count: 0,
+			success_count: 0,
 			path: path,
 			get: getProp,
 			flat: flatten,
@@ -534,41 +544,56 @@ exports.createSandbox = function (node, io) {
 					this.key_type.push(type);
 				}
 			},
-			say: function(ch, msg) {
+			say: function(ch, msg, options) {
 				console.log(ch.toUpperCase() + ":", msg);
-				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
+				io.sockets.emit(ch, {
+					"node_uuid":node._id, 
+					"msg":msg,
+					"options": options,
+					doc:node.req.params.doc
+				});
 
 				var date = new Date();
 				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
+				
+				// writle log to register
 				if(global.register[node.req.originalUrl])
 					global.register[node.req.originalUrl].log.push(log);
-				
-				// send http response if needed (i.e. node was executed by "run" instead of "start")
-				if(ch === "finish" && node.res) {
-					console.log(sandbox.out.value);
-					if(this.error)
-						node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg:msg}) // toimii
-					else
-						node.res.json({
-							status:"finished", 
-							node_uuid: node._id.toString(), 
-							nodeid: node.nodeid, 
-							ts: date, 
-							result:{
-								value:sandbox.out.value,
-								setter:sandbox.out.setter
-								}
-							}) 
-				} else if(ch === "error" && node.res) {
-					node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date, msg: msg}) 
-				}
-				
+
 				// remove node from register if finished or if error (aborting)
 				if(ch === "finish" || ch === "error") {
 					console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
-
 				}
+				
+				// send http response if needed (i.e. node was executed by "run" instead of "start")
+				if(ch === "finish" && node.res) {
+					node.res.json({
+						status:"finished", 
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						doc:node.req.params.doc,
+						result:{
+							value:sandbox.out.value,
+							setter:sandbox.out.setter
+							}
+						}) 
+					node.res = null;
+				} else if(ch === "error" && node.res) {
+					node.res.json({
+						status:"error", 
+						error: msg,
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						msg: msg,
+						doc:node.req.params.doc
+					}) 
+					node.res = null;
+				}
+				
+
 			}
 		},
 		say: io.sockets.emit

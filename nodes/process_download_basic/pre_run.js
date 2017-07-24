@@ -14,7 +14,7 @@ if(Array.isArray(input)) {
 		download.filename = generateFileName(input[i], i);	
 		out.console.log(download.filename);	
 		download.url = context.base_url + input[i];
-		previousFile(download, index);
+		previousFile(download, i);
 		out.pre_value.push(download); 
 	}
 } else {

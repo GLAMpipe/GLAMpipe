@@ -10,7 +10,9 @@ context.node.pipe = [
 		params: {
 			in_field: context.node.params.in_file_url,
 			base_url: context.node.params.base_url,
-			out_field: context.node.params.in_file_url + "_download"
+			out_field: context.node.params.in_file_url + "_download",
+			out_ext: context.node.params.in_file_url + "_ext",
+			out_mime: context.node.params.in_file_url + "_mime"
 		}, 
 		
 		// run settings 

@@ -1,10 +1,13 @@
 
 var response = context.response;
+out.setter = {}
 
 if(response.statusCode == 200) {
 	context.success_counter++;
-	//out.setter = {"item_upload_handle": response.handle, "item_upload_uuid": response.uuid};
+	
 }
-out.value = response.statusCode;
+
+if(response)
+	out.setter[context.node.params.out_field] = response.statusCode;
 
 

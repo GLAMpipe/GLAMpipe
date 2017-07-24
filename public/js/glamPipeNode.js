@@ -4,6 +4,7 @@ var glamPipeNode = function (node, gp) {
 	this.gp = gp;
 	this.debug = true;
 	this.source = node;
+	this.orphan = "";
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
 	this.settings = {};
 	this.maxArrayLenghtDisplay = 5;
@@ -72,10 +73,13 @@ var glamPipeNode = function (node, gp) {
 		$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
 		
-		var input = self.getInputFields();
-		var output = self.getOutputFields();
-		
-		self.open({input_keys:input, output_keys:output});
+		// we open node only if it is not a subnode of metanode
+		if(!self.source.params.parent) {
+			var input = self.getInputFields();
+			var output = self.getOutputFields();
+			
+			self.open({input_keys:input, output_keys:output});
+	}
 	}
 
 	// getter for input/output fields of the node (used as config for data rendering)
@@ -137,22 +141,30 @@ var glamPipeNode = function (node, gp) {
 	// render node to project view (left column)
 	this.renderNode = function () {
 		// huttua
-		var node_out_keys = [];
+		self.orphan_fields = [];
+		var node_in_keys = [];
+		self.orphan = "";
+		console.log(self.source.params)
 		for(var key in self.source.params) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
-				node_out_keys.push(self.source.params[key]);
+				node_in_keys.push(self.source.params[key]);
 		}
-		for(var i = 0; i < node_out_keys.length; i++) {
+		console.log(node_in_keys);
+		for(var i = 0; i < node_in_keys.length; i++) {
 			
-			if(!self.gp.currentCollection.fields.node_keys.includes(node_out_keys[i]))
-				sself.orphan = true;
+			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
+				self.orphan = "orphan";
+				self.orphan_fields.push(node_in_keys[i]);
+			}
 		}
 		// huttua ends
 		
 		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
+		
+		// check if subnode of metanode
 		if(self.source.params.parent) {
-			var html = "<div class='box node " + self.source.type + "' data-id='" + self.source._id + "'>"
+			var html = "<div class='box node " + self.source.type + " " + self.orphan + "' data-id='" + self.source._id + "'>"
 			html +=   "  <div class='boxleft'>"
 			html += "<div class='metanode'>TASK "+self.source.title+"</div>";
 			html += "</div></div>"
@@ -165,7 +177,10 @@ var glamPipeNode = function (node, gp) {
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
 		var html = "<div class='box node' data-id='" + self.source._id + "'>"
+		// var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>"
+		if(self.orphan_fields.length)
+			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";
 		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
 		if(self.source.params.title && self.source.params.title != "") 
@@ -183,33 +198,42 @@ var glamPipeNode = function (node, gp) {
 
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
-		
-		
-		$("data-workspace .settingstitle").text("Settings for " + self.source.title);
-		$("data-workspace .settings").empty();
-		$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button>");
-		$("data-workspace .settings").append(self.source.views.settings);
-		$("data-workspace .settings .params").append(self.source.params);
-		
-		if(self.debug) {
-			$("data-workspace .settings").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
+
+		if(self.orphan) {
+			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
+			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
+			$("data-workspace .settings").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
+			
+			
+		} else {
+
+			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
+			$("data-workspace .settings").empty();
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button>");
+			$("data-workspace .settings").append(self.source.views.settings);
+			$("data-workspace .settings .params").append(self.source.params);
+			
+
+			
+			// render parameters
+			var params_table = "<table><tbody>";
+			for(key in self.source.params) {
+				params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
+			}
+			params_table += "</tbody></table>";
+			$("data-workspace submitblock").append(params_table);
+
+			if(self.debug) {
+				$("data-workspace submitblock").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
+			}
+
+            // execute node's settings.js if exists
+			if(self.source.scripts.settings) {
+				var settingsScript = new Function('node', self.source.scripts.settings);
+				settingsScript(self.source);
+			}
+			self.setSettingValues();
 		}
-		
-		// render parameters
-		var params_table = "<table><tbody>";
-		for(key in self.source.params) {
-			params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
-		}
-		params_table += "</tbody></table>";
-		$("data-workspace .settings .params").append(params_table);
-		
-		if(self.source.scripts.settings) {
-			var settingsScript = new Function('node', self.source.scripts.settings);
-			settingsScript(self.source);
-		}
-		
-		self.setSettingValues();
-		
 	}
 
 

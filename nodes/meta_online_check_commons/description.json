@@ -1,10 +1,10 @@
 {
-    "nodeid": "meta_commons_online_upload",
+    "nodeid": "process_meta_online_check_commons",
     "title": "Check if file is in Wikimedia commons",
     "type": "meta",
     "subtype": "web",
     "status": "usable",
-    "description": "Upload online files to wikimedia commons",
+    "description": "Downloads a file, calculates a checksum and checks if it's in commons. ",
     "scripts": {
     
         "hello": 

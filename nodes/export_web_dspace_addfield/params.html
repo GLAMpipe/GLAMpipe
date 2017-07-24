@@ -59,16 +59,22 @@ function testUrl (url, success, fail) {
 	});
 }
 
-
 function addUrl (url) {
-	var data = {}
-	data.url = add_input.val();
-	var post = $.post(url, data, function(response) {
+	console.log("addurl")
+	var options = {
+		url: params_url,
+		method: "POST",
+		data: {},
+		headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
+	};
+	console.log(options);
+	options.data.url = add_input.val();
+	var post = $.ajax(options);
+	post.done(function( msg ) {
 		add_div.hide();
 		add_input.val("");
 		fetchParams();
-		
-	})	
+	});
 }
 
 

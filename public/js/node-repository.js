@@ -25,7 +25,7 @@ var nodeRepository = function () {
 		var html = "";
 		html += "<div class='fatbox'>";
 		html += "  <div class='inlinetitleblock'>";
-		html += "    <div><span class='title inlinetitle'>Choose node type</span></div>"
+		html += "    <div><span class='title inlinetitle'>Choose type</span></div>"
 		html += "  </div>"
 
 		// render node types

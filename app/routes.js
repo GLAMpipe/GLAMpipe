@@ -3,6 +3,7 @@ var jwt			= require('jsonwebtoken');
 var jwt2		= require('express-jwt');
 var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
+var node	 	= require("../app/node.js");
 var project 	= require("../app/project.js");
 //var User 		= require("../app/controllers/user.js");
 const conf 		= require("../config/config.js");
@@ -76,6 +77,8 @@ module.exports = function(express, glampipe, passport) {
 
 	// protect API routes
 	if(config.isServerInstallation) {
+		console.log("AUTHENTICATION")
+		//console.log(req.ip)
 		var s = express.get('superSecret');
 		express.post('/api/v1/*', jwt2({secret: s}));
 		express.put('/api/v1/*', jwt2({secret: s}));
@@ -97,13 +100,17 @@ module.exports = function(express, glampipe, passport) {
         
         // node run
         express.post('/api/v1/nodes/:id/*', function(req, res, next) {
-
-            project.isAuthenticated(req, function(authenticated) {
-                if(authenticated)
-                    next();
-                else
-                    res.json({error:"Node run not authenticated!"});
-            })
+			console.log(req.ip)
+			if(req.ip == "127.0.0.1")
+				next();
+			else {
+				project.isAuthenticated(req, function(authenticated) {
+					if(authenticated)
+						next();
+					else
+						res.json({error:"Node run not authenticated!"});
+				})
+			}
         })
     }
 
@@ -196,7 +203,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// PROJECTS
 	express.put('/api/v1/projects', function (req, res) {
-		glampipe.core.createProject(req, res);
+		project.createProject(req, res);
 	});
 
 	//TODO: reimplement this!
@@ -205,33 +212,33 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	express.get('/api/v1/projects/titles', function (req, res) {
-		glampipe.core.getProjectTitles(res);
+		project.getProjectTitles(res);
 	});
 
 	express.get('/api/v1/projects', function (req, res) {
-		glampipe.core.getProjects(res);
+		project.getProjects(res);
 	});
 
 	express.get('/api/v1/projects/:id', function (req, res) {
-		glampipe.core.getProject(req.params.id, res);
+		project.getProject(req.params.id, res);
 	});
 
 	express.delete('/api/v1/projects/:id', function (req, res) {
-		glampipe.core.deleteProject(req.params.id, res);
+		project.deleteProject(req.params.id, res);
 	});
 
 
 	// NODES
 	express.get('/api/v1/projects/:project/nodes', function (req, res) {
-		glampipe.core.getProjectNodes(req.params.project, res);
+		node.getProjectNodes(req.params.project, res);
 	});
 
 	express.get('/api/v1/nodes', function (req, res) {
-		glampipe.core.getNodes(res);
+		node.getNodes(res);
 	});
 
 	express.get('/api/v1/nodes/:nodeid', function (req, res) {
-		glampipe.core.getNodeFromDir(req.params.id, res);
+		node.getNodeFromDir(req.params.id, res);
 	});
 
 	//express.get('/node/view/:id', function (req, res) {
@@ -239,27 +246,27 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	express.get('/api/v1/nodes/:id/log', function (req, res) {
-		glampipe.core.getNodeLog(req, function(data) {res.send(data)});
+		node.getNodeLog(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/nodes/:nodeid/params', function (req, res) {
-		glampipe.core.getNodeParams(req, function(data) {res.send(data)});
+		node.getNodeParams(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/nodes/:nodeid/files/:file', function (req, res) {
-		glampipe.core.getNodeFile(req, res);
+		node.getNodeFile(req, res);
 	});
 
 	express.post('/api/v1/nodes/:nodeid/params', function (req, res) {
-		glampipe.core.setNodeParams(req, function(data) {res.send(data)});
+		node.setNodeParams(req, function(data) {res.send(data)});
 	});
 
 	express.put('/api/v1/projects/:project/nodes/:nodeid', function (req, res) {
-		glampipe.core.createNode(req, res, glampipe.io);
+		node.createNode(req, res, glampipe.io);
 	});
 
 	express.delete('/api/v1/projects/:project/nodes/:node', function (req, res) {
-		glampipe.core.deleteNode(req, res, glampipe.io);
+		node.deleteNode(req, res, glampipe.io);
 	});
 
 	//express.post('/set/node/:id/visible-fields', function (req, res) {
@@ -281,17 +288,20 @@ module.exports = function(express, glampipe, passport) {
 		res.send(register);
 	});
 
+	// start node and send response immediately
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
-		glampipe.core.runNode(req, glampipe.io);
+		node.run(req, glampipe.io);
 		res.json({status:"started", ts:  new Date()});
 	});
 
+	// run node for one document and wait response
 	express.post('/api/v1/nodes/:id/run/:doc', function (req, res) {
-		glampipe.core.runNode(req, glampipe.io, res);
+		node.runNode(req, glampipe.io, res);
 	});
 
+	// run node for all nodes and wait response
 	express.post('/api/v1/nodes/:id/run', function (req, res) {
-		glampipe.core.runNode(req, glampipe.io, res);
+		node.runNode(req, glampipe.io, res);
 	});
 
 	express.post('/api/v1/nodes/:id/stop', function (req, res) {
@@ -307,19 +317,19 @@ module.exports = function(express, glampipe, passport) {
 	});
     
 	express.get('/api/v1/collections/:collection/docs', function (req, res) {
-		glampipe.core.getCollectionTableData(req, res);
+		collection.getTableData(req, res);
 	});
 
 	express.get('/api/v1/collections/:collection/docs/:doc', function (req, res) {
-		glampipe.core.getDocumentById(req, res);
+		collection.getDocumentById(req, res);
 	});
 
 	express.get('/api/v1/collections/:collection/search', function (req, res) {
-		glampipe.core.collectionSearch(req, res);
+		collection.search(req, res);
 	});
 
 	express.get('/api/v1/collections/:collection/search/byfield', function (req, res) {
-		glampipe.core.getCollectionByField(req, res);
+		collection.getByField(req, res);
 	});
 
 	//express.get('/view/collection/:id', function (req, res) {
@@ -347,11 +357,11 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	express.get('/api/v1/collections/:collection/count/regexp', function (req, res) {
-		glampipe.core.getCollectionCountRegExp(req, function(data) {res.send(data)});
+		collection.getCountRegExp(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/collections/:collection/count', function (req, res) {
-		glampipe.core.getCollectionCount(req, function(data) {res.send(data)});
+		collection.getCount(req, function(data) {res.send(data)});
 	});
 
 	//express.get('/get/collection/:id/facet/test', function (req, res) {
@@ -359,19 +369,19 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	express.get('/api/v1/collections/:collection/facet/:field', function (req, res) {
-		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
+		collection.getFacet(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/collections/:collection/facet/:field/groupby/:groupby', function (req, res) {
-		glampipe.core.getCollectionFacet(req, function(data) {res.send(data)});
+		collection.getFacet(req, function(data) {res.send(data)});
 	});
 
 	express.post('/api/v1/collections/:collection/docs/:doc', function (req, res) {
-		glampipe.core.editCollection(req, function(data) {res.send(data)});
+		collection.edit(req, function(data) {res.send(data)});
 	});
 
 	express.put('/api/v1/collections/:collection/docs/:doc', function (req, res) {
-		glampipe.core.editCollection2(req, function(data) {res.send(data)});
+		collection.edit2(req, function(data) {res.send(data)});
 	});
 
 	express.put('/api/v1/collections/:collection/docs', function (req, res) {
@@ -379,7 +389,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.post('/edit/collection/addtoset/:id', function (req, res) {
-		glampipe.core.editCollectionAddToSet(req.params.id, req, function(data) {res.send(data)});
+		collection.addToSet(req.params.id, req, function(data) {res.send(data)});
 	});
 
 	// UPLOAD

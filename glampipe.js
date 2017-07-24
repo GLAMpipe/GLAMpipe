@@ -131,6 +131,7 @@ var GlamPipe = function() {
 	self.initialize = function(cb) {
 		self.setupVariables();
 		self.core 	= require("./app/core.js");
+		var node 	= require("./app/node.js");
 		
 		self.core.createDirIfNotExist(self.dataPath, function(error, msg) {
 			if(error) {
@@ -141,7 +142,7 @@ var GlamPipe = function() {
 			   
 				self.core.initDB(function (error) {
 
-					self.core.initNodes (self.nodePath, null, function() {
+					node.initNodes (self.nodePath, null, function() {
 
 						self.core.createDirIfNotExist(path.join(self.dataPath, "projects"), function(error, msg) {
 					

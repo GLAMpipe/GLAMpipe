@@ -13,46 +13,59 @@ exports.postJSON = function (doc, sandbox, next) {
 	var options = sandbox.out.pre_value; 
 	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
-	if(!options.url)
-		return next("missing url! skipping...")
+	if(!options.url || sandbox.context.skip)
+		return next("skipping...")
 	
 	//require('request').debug = true;
-
-	// make actual HTTP request
-	request.post(options, function (error, response, body) {
+	function responseCallback(error, response, body) {
 		sandbox.context.data = body;
+		sandbox.context.response = response;
 		if (error) {
 			console.log(error);
 			next();
 		} else {
 			console.log(options.url);
-			console.log("update response:", body);
+			console.log("update response code:", response.statusCode);
+			console.log("update body:", body);
 			sandbox.run.runInContext(sandbox);
 			next();
 		}
-	});
+	}
+
+	// make actual HTTP request
+	if(options.method === "put")
+		request.put(options, responseCallback);
+	else
+		request.post(options, responseCallback);
 }
 
 // get JSON response via GET or POST
 exports.fetchJSON = function (options, sandbox, next) {
 
-	if(!options.url) {
-		return next("missing url! skipping...");
+	if(!options.url || sandbox.context.skip) {
+		return next("skipping...");
 	}
-
+	
+	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
+		sandbox.context.response = response;
+		console.log("RESPONSE: " + response.statusCode)
 		if (error) {
 			console.log(error);
 			next();
 		} else if (response.statusCode == 200) {
-			sandbox.context.data = JSON.parse(body);
-			//console.log("update response:", body);
+			try {
+				sandbox.context.data = JSON.parse(body);
+				//console.log("BODY:", body);
+			} catch(e) {
+				console.log("JSON PARSE:" + e.message);
+				sandbox.context.error = "error JSON parse error";
+			}
 			next();
 		} else {
-			console.log("SERVER RESPONSE: " + response.statusCode)
 			next();
 		}
 	}
@@ -70,12 +83,13 @@ exports.fetchContent = function (options, sandbox, next) {
 		
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
+		sandbox.context.response = response;
 		if (error) {
 			console.log(error);
+			sandbox.context.error = error;
 			next();
 		} else {
 			sandbox.context.data = body;
-			sandbox.context.response = response;
 			//console.log("update response:", body);
 			next();
 		} 
@@ -88,7 +102,6 @@ exports.fetchContent = function (options, sandbox, next) {
 
 exports.headRequest = function(options, sandbox, next) {
 
-	var request = require("request");
 	console.log("REQUEST:", options.url);
 	if(!options.url)
 		return next("missing url! skipping...")
@@ -103,35 +116,35 @@ exports.headRequest = function(options, sandbox, next) {
 
 
 // this is meant to be called from asyncLoop.fieldLoop
-exports.uploadFile = function (doc, sandbox, next ) {
+exports.uploadFile = function (upload, sandbox, next ) {
 
 	//sandbox.context.doc = doc;
 	console.log("upload file");
 
-	if(!sandbox.out.pre_value)
+	if(!upload)
 		return next("no upload object from node!");
 
-	var options = doc;
-	console.log(JSON.stringify(options, null, 4));
+	console.log(JSON.stringify(upload, null, 4));
 
 	// skip if file does not exist
 	try {
-		var stats = fs.statSync(options.file);
+		var stats = fs.statSync(upload.file);
 	}
 	catch(err) {
-		console.log("WARNING: " + options.file + " not found")
+		console.log("WARNING: " + upload.file + " not found")
 		return next("file does not exist");
 	}
 
 	// create form data and set file reading stream
 	var formData = {
-		data:JSON.stringify(options.data)
+		data:JSON.stringify(upload.data)
 	};
-	formData[options.upload_field] = fs.createReadStream(options.file)
+	formData[upload.upload_field] = fs.createReadStream(upload.file)
 	//console.log(JSON.stringify(formData, null, 4));
 	
 	// make POST request 
-	request.post({url:options.url, formData: formData}, function(err, response, body) {
+	request.post({url:upload.url, formData: formData}, function(err, response, body) {
+		sandbox.context.response = response;
 		if (err) {
 			console.error('upload failed:', err);
 			console.log(body);
@@ -140,7 +153,6 @@ exports.uploadFile = function (doc, sandbox, next ) {
 			next();
 		} else {
 			console.log('Upload successful!  Server responded with:', body);
-			sandbox.context.response = response;
 			sandbox.context.data = body;
 			sandbox.run.runInContext(sandbox);
 			next();
@@ -149,11 +161,56 @@ exports.uploadFile = function (doc, sandbox, next ) {
 
 }
 
+// this is meant to be called from asyncLoop.fieldLoop
+exports.uploadFile2 = function (upload, sandbox, next ) {
+
+	sandbox.context.response = null;
+
+	var req = 	request.post(upload.options, function optionalCallback(err, response, body) {
+
+		sandbox.context.response = response;
+
+		if (err) {
+			return console.error('upload failed:', err);
+		} else if (response.statusCode === 200) {
+			console.log('Upload successful!  Server responded with:', response.statusCode);
+			sandbox.context.data = JSON.parse(body);
+			next();
+		} else {
+			console.log('Upload failed!  Server responded with:', response.statusCode);
+			console.log('body:', body);
+			next();
+		}
+	});
+	
+
+	file_stream = fs.createReadStream(upload.file);
+	file_stream.on('data', function(chunk) {
+		console.log("reading..." + chunk.length);
+		//size += chunk.length;
+	});
+
+	// if there is no file, write error to document
+	file_stream.on('error', function() {
+		console.log("file is NOT THERE");	
+		sandbox.context.error = {type:"error", msg:"FILE not found", file:upload};
+		return next();	
+	});
+	
+	file_stream.on('end', function() {
+		console.log("file is read");	
+		//console.log(size);	
+		//console.log((size/1000).toFixed(2));	
+	});
+	
+	file_stream.pipe(req);
+
+}
+
 
 exports.downloadFile = function (download, sandbox, next ) {
 	
 	var fs = require("fs");
-	var request = require("request");
 	
 	var node = sandbox.context.node;
 	sandbox.context.data = download;
@@ -195,8 +252,6 @@ exports.downloadAndSave = function (node, download, addext, next) {
 		return next();
 	}
 
-	var request = require("request");
-	
 	var filePath = path.join(node.dir, download.filename); 
 	var file = fs.createWriteStream(filePath);
 	
@@ -265,6 +320,40 @@ exports.downloadAndSave = function (node, download, addext, next) {
 	});
 	
 }
+
+
+/**
+ * Handle cookie login
+ */
+exports.cookieLogin = function (node, sandbox, cb) {
+
+	// ask login details from node
+	try {
+		sandbox.login.runInContext(sandbox);
+	} catch(e) {
+		console.log(e);
+		sandbox.out.error = "errorin in login.js:" + e.message;
+		cb(e.message);
+		return;
+	}
+	console.log("login url:" , sandbox.out.login.url);
+
+	
+	// send login information
+	request.post(sandbox.out.login, function(error, response, body) {
+		
+		if(error)
+			cb("Login error")
+		else if(response.statusCode === 200) {
+			sandbox.out.say("progress", "Login succesful"); 
+			cb(null);
+		} else
+			cb("Authentication failed");
+
+	});
+
+}
+
 
 
 function fileExists (node, download, cb) {

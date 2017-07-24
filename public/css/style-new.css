@@ -447,10 +447,6 @@ submitblock {
 }
 
 .settings {
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
-	flex: 1 1 33%;
 	margin-right:20px;
 }
 
@@ -677,6 +673,7 @@ select {
 label {
 	font-weight:500;
 	margin-top:0.8em;
+	display:block;
 }
 
 b {

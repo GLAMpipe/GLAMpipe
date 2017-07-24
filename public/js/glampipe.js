@@ -44,7 +44,7 @@ var glamPipe = function () {
 	}
 
 	this.getProjectsByUser = function (div, user) {
-		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th></tr>";
+		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			var projects = data.data;
@@ -82,6 +82,7 @@ var glamPipe = function () {
 					})
 				}
 				html += "</td>";
+				html += "<td><div data-id='" + projects[i]._id + "' class='wikiglyph-cross button icon boxicon'>delete</div></td>";
 				
 				
 			}
@@ -115,7 +116,7 @@ var glamPipe = function () {
 					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
 					error: function(data, s, xhr) {
 						console.log("not logged in");
-						$(div).html("<a id='login-pop' href=''>login</a>");
+						$(div).html("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
 					},
 					success: function(data) {
 						console.log("Logged in");
@@ -129,7 +130,7 @@ var glamPipe = function () {
 			} else {
 					$(div).empty();
 					self.desktop = true;
-					$(div).html("<a id='login-pop' href=''>login</a>");
+					$(div).html("");
 			}
 			$("#version").empty().append("ver." + data.version);
 			if(cb)
@@ -175,7 +176,7 @@ var glamPipe = function () {
 				if(!data.error) {
 					console.log('created project', data.project);
 					var project = data.project._id;
-					var params = {params:{title:"data"}}
+					var params = {params:{title:"My collection"}}
 					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
 						if(!data.error)
 							window.location.href = "/project/" + project;
@@ -246,6 +247,7 @@ var glamPipe = function () {
 					}
 				}
 				self.setPageTitle(project.title);
+				self.project = project;
 				
 				// set first collection as current collection
 				if(self.collections.length) {
@@ -255,12 +257,13 @@ var glamPipe = function () {
 				}
 				
 				self.setCollectionCounter();
+				self.renderBreadCrumb();
 				
 				// render current collection set and its nodes
-				 $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-					self.currentCollection.fields = data; 
+				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+					//self.currentCollection.fields = data; 
 					self.renderCollectionSet();
-				})
+				//})
 				
 			}
 		})
@@ -319,9 +322,8 @@ var glamPipe = function () {
 
 	// called by "finished" websocket message
 	this.nodeRunFinished = function (data) {
-		var node = self.getRegularNode(data.nodeid);
+		var node = self.getRegularNode(data.node_uuid);
 		node.runFinished();
-		// self.openCurrentNode(); // we should open finished node
 	}
 
 	this.getNode = function (clickEvent) {
@@ -438,75 +440,70 @@ var glamPipe = function () {
 		$("#data-header").empty().append(self.currentCollection.source.title);
 	}
 
-
+	this.renderBreadCrumb = function () {
+		$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+	}
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
 		
-		var html = "";
-		html += "<collectionset>"
-		
-		if(self.currentCollection) {
-			var collection = self.currentCollection;
-			//html += collection.renderNode();
+		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+			self.currentCollection.fields = data; 
 
-  //<div class="sectiontitleblock">
-      
-      //<div><span class="title sectiontitle">Data source</span> <a href="#">Add data source</a></div>
-      //<div class="wikiglyph wikiglyph-user-talk sectionicon icon" aria-hidden="true"></div>
-    //</div>
+			if(self.currentCollection) {
+				var collection = self.currentCollection;
+				
+				// render collection
+				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span> <a href='#'>Create data collection</a></div>";
+				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
+				$("pipe .collection").empty().append(col_html);
 
-    //<div class="box">
-      //<div class="boxleft">
-        //<div class="boxtag">Source</div>
-        //<div class="title boxtitle">MySource</div>
-        //<div class="boxtext">See if these could be a good source</div>
-      //</div>
-      //<div class="wikiglyph wikiglyph-cross boxicon icon" aria-hidden="true"></div>
-    //</div>
+				var html = "";
+				html += "<collectionset>"
 
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Data sources</span> <a class='add-node' data-type='source' href='#'>Add data source</a></div>"
+				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
+				 
+				html += self.renderNodes(collection,["source"]);
+				  
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add operation</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
 
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Data source</span> <a class='add-node' data-type='source' href='#'>Add data source</a></div>"
-			html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-			 
-			html += self.renderNodes(collection,["source"]);
-			  
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add operation</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
+				html += self.renderNodes(collection, ["process"]);
+				
+				//html += "  <div class='sectiontitleblock'>"
+				//html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+				//html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				//html += "  </div><div class='holder params'></div>"
+
+				//html += self.renderNodes(collection, ["export"]);
+
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
+
+				html += self.renderNodes(collection, ["view"]);
+
+				//html += "  <div class='sectiontitleblock'>"
+				//html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
+				//html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				//html += "  </div><div class='holder params'></div>"
+
+				//html += self.renderNodes(collection, ["meta"]);
+			}
+			html += "</collectionset>"
 			
-			html += self.renderNodes(collection, ["process"]);
 			
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-
-			html += self.renderNodes(collection, ["export"]);
-
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-
-			html += self.renderNodes(collection, ["view"]);
-
-			html += "  <div class='sectiontitleblock'>"
-			html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
-			html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-			html += "  </div><div class='holder params'></div>"
-
-			html += self.renderNodes(collection, ["meta"]);
-		}
-		html += "</collectionset>"
-		
-		
-		$(self.nodeHolderDiv).empty();
-		$(self.nodeHolderDiv).append(html);
-		
+			$(self.nodeHolderDiv).empty();
+			$(self.nodeHolderDiv).append(html);
+				
+			
+		})
 	}
 	
 	
@@ -783,7 +780,7 @@ $.delete = function(url, data, callback, type){
     data: data,
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 
@@ -803,7 +800,7 @@ post = function(url, data, callback, type){
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 $.put = function(url, data, callback, type){
@@ -822,7 +819,7 @@ $.put = function(url, data, callback, type){
     error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  });
+  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
 }
 
 

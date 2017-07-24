@@ -769,7 +769,8 @@ label {
 }
 
 #login {
-	float:right;
+	margin-left:auto;
+	margin-right:20px;
 }
 
 .checkbox_holder label {
@@ -788,4 +789,8 @@ label {
 .error {
 	border: 1px solid red;
 	padding:2px;
+}
+
+.orphan {
+	border-left:solid red 10px;
 }

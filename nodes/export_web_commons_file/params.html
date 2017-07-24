@@ -2,6 +2,9 @@
 <label>file location (local file)</label>
 <input class="dynamic_field" type="text" name="in_location" required />
 
+<label>file extension to be added to commons tile (leave blank title has a proper extension)</label>
+<input class="dynamic_field" type="text" name="in_location_ext" required />
+
 <label>page name</label>
 <input class="dynamic_field" name="in_title"/>
 
@@ -15,3 +18,11 @@
 <input type="text" name="out_field" value="commons_url"/>
 
 
+<script>
+  $("#download_file_basic_input").change(function() {
+     $("#download_file_basic_output").val($("#download_file_basic_input").val() + "_download");
+     $("#download_file_basic_ext").val($("#download_file_basic_input").val() + "_ext");
+     $("#download_file_basic_mime").val($("#download_file_basic_input").val() + "_mime");
+  });
+
+</script>

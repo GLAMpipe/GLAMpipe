@@ -1,5 +1,4 @@
 
-var version = "2017.06.07"
 
 // DATAPATH
 // - where GLAMpipe can strore project data on *non-docker* installation
@@ -14,12 +13,32 @@ var isServerInstallation = false;
 var canRegister = true;
 var secret = "Set something here";
 
+// VISIBLE nodes
 // defines what nodes are available for use
 // default: "null" -> all nodes are available
 var visible_tags = null;
 
 
+// PROXY passes
+// - urls that are allowed for UI to make requests via GLAMpipe's own proxy
+var PROXY_passes = [
+	"http://localhost/",
+	"https://demo.dspace.org/",
+]
 
+
+
+
+// IP passes (NOT USED)
+// - one can define IPs that are allowed to execute certain API paths
+var IP_passes = [
+	{
+		path: "/api/v1/collections/p15_admin-embargopyynnt_c0_requests/", 
+		method: "PUT", 
+		ip:"127.0.0.1",
+		label: "embargo-pyynnöt"
+	}
+]
 
 
 // NODEPATH
@@ -29,17 +48,6 @@ var nodePath = "";
 
 var MP = "__mp";
 var url = "http://localhost";
-
-// IP passes
-// one can define IPs that are allowed to execute certain API paths
-var IP_passes = [
-	{
-		path: "/api/v1/collections/p15_admin-embargopyynnt_c0_requests/", 
-		method: "PUT", 
-		ip:"127.0.0.1",
-		label: "embargo-pyynnöt"
-	}
-]
 
 var exports = module.exports = {};
 
@@ -52,7 +60,7 @@ exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.canRegister = canRegister;
 exports.secret = secret;
-exports.version = version;
 exports.tags = visible_tags;
 exports.IP_passes = IP_passes;
+exports.PROXY_passes = PROXY_passes;
 

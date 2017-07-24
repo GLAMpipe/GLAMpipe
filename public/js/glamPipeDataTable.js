@@ -262,19 +262,27 @@ var dataTable = function (node) {
 	this.renderDataTable = function (config) {
 
 		if(self.node.data.docs.length == 0)
-			return "<h2>This collection is empty</h2><p>Add source node to get something to look at :)</p>";
+			return "<h2>This collection is empty</h2><p>Add data source to get something to look at :)</p>";
+
+		// check if node wants to render data itself
+		if(self.node.source.scripts.view) {
+			var render = new Function('node', self.node.source.scripts.view);
+		}
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
 
 		var html = "";
-		
-		for(var j = 0; j < self.node.data.docs.length; j++) {
-			html += "<tr>";
-			for(var k = 0; k < visible_keys.length; k++) {
-				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
+		if(render) {
+			html = render(self.node);
+		} else {
+			for(var j = 0; j < self.node.data.docs.length; j++) {
+				html += "<tr>";
+				for(var k = 0; k < visible_keys.length; k++) {
+					html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
+				}
+				html += "</tr>"
 			}
-			html += "</tr>"
 		}
 		return html;
 	}
@@ -285,7 +293,7 @@ var dataTable = function (node) {
 		var html = "";
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>run "+ self.getRowIndex(key_index) +"</div></td>";
+				html += "<td><div data-id='" + data._id + "' class='button run_single'>run only this</div></td>";
 			else
 				html += "<td>" + self.getRowIndex(key_index) + "</td>";
 			
@@ -319,7 +327,10 @@ var dataTable = function (node) {
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			// render urls as links
 			if(typeof data == "string" && data.match(/^http/)) {
-				html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				if(index === 0 || index)
+					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				else
+					html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				
 			} else {
 				if(typeof data == "string" && data.match("^AAAA_error"))

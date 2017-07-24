@@ -1,7 +1,7 @@
 // this create urls for fetching xml files
 
 context.vars = {};
-context.vars.total_count = 0;
+context.vars.success_count = 0;
 var url = context.node.params.eprints_url + "/eprint/";
 url = url.replace("//eprint", "/eprint");
 
