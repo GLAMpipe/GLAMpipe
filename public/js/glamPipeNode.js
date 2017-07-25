@@ -176,8 +176,9 @@ var glamPipeNode = function (node, gp) {
 			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
-		var html = "<div class='box node' data-id='" + self.source._id + "'>"
-		// var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
+            
+		//var html = "<div class='box node' data-id='" + self.source._id + "'>"
+        var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>"
 		if(self.orphan_fields.length)
 			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";

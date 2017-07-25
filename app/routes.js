@@ -296,7 +296,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// run node for one document and wait response
 	express.post('/api/v1/nodes/:id/run/:doc', function (req, res) {
-		node.runNode(req, glampipe.io, res);
+		node.run(req, glampipe.io, res);
 	});
 
 	// run node for all nodes and wait response

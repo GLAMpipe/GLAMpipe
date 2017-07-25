@@ -673,7 +673,7 @@ select {
 label {
 	font-weight:500;
 	margin-top:0.8em;
-	display:block;
+	display:inline;
 }
 
 b {
@@ -701,6 +701,65 @@ b {
 
 
 /*  added by AH */
+
+.good {
+ background-color:#BFCCCA;
+}
+
+.bad {
+ color:red;
+}
+
+.checkbox_holder label {
+	display:inline;
+}
+
+.inline {
+	display:inline;
+}
+
+.info {
+	border: 1px solid orange;
+	padding:2px;
+}
+
+.error {
+	border: 1px solid red;
+	padding:2px;
+}
+
+.orphan {
+	border-left:solid red 10px;
+}
+
+table.documents thead td div {
+	font-weight:bold;
+    margin-left: 2em;
+}
+
+table.documents td {
+
+}
+
+table.documents tbody td div {
+	max-height:10em;
+	max-width:350px;
+	overflow: auto;
+	margin-left: 2em;
+	overflow-wrap: break-word;
+	margin-bottom:1em;
+}
+
+table.documents tbody td div.edit {
+    display:none;
+    float:left;
+}
+
+table.documents tbody td div.edit:hover {
+    cursor:pointer;
+    opacity:1;
+}
+
 
 table.documents tbody td div.edit {
     display:none;

@@ -62,14 +62,14 @@ $( document ).ready(function() {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
 		$("data-workspace .settings").hide();
-        $("data-workspace submitblock").hide();
+		$("data-workspace submitblock").hide();
 	});
 
 	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
 		$(this).removeClass("wikiglyph-caret-down");
 		$(this).addClass("wikiglyph-caret-up");
 		$("data-workspace .settings").show();
-        $("data-workspace submitblock").show();
+		$("data-workspace submitblock").show();
 	});
 
 
@@ -123,41 +123,40 @@ $( document ).ready(function() {
 
 	// remove node
 	$(document).on('click','.node .wikiglyph-cross', function(e) {
-        alert("df")
 		gp.removeNode(e);
 		e.stopPropagation();
 		e.preventDefault();
 	})
 
 	// open dynamic field picker
-    $(document).on('click','.dynamic_field', function(e) {
+	$(document).on('click','.dynamic_field', function(e) {
 		gp.openDynamicFieldSelector(e);
-    });
+	});
 
 	// open dynamic field picker
-    $(document).on('click','.source_dynamic_field', function(e) {
+	$(document).on('click','.source_dynamic_field', function(e) {
 		gp.openDynamicFieldSelector(e, "source");
-    });
+	});
 
 	// pick field
-    $(document).on('click','.pick_field', function(e) {
+	$(document).on('click','.pick_field', function(e) {
 		gp.pickField(e)
-    });
+	});
 
 	// open dynamic collection picker
-    $(document).on('click','.dynamic_collection', function(e) {
+	$(document).on('click','.dynamic_collection', function(e) {
 		gp.openDynamicCollectionSelector(e);
-    })
+	})
 
 	// pick collection
-    $(document).on('click','.pick_collection', function(e) {
+	$(document).on('click','.pick_collection', function(e) {
 		gp.pickCollection(e)
-    });
+	});
 
-    // handler for file upload node creation
-    $(document).on('submit', "#uploadfile", function(e) {
+	// handler for file upload node creation
+	$(document).on('submit', "#uploadfile", function(e) {
 
-    });
+	});
 
 	// esc closes some dialogs
 	$(document).keyup(function(e) {
@@ -168,43 +167,43 @@ $( document ).ready(function() {
 		}
 	});
 
-    // websocket stuff
-    var gp_path = getWSPath();
-    var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
-    var progressDisplay = $("#node-progress");
-    var finishDisplay = $("#node-finished");
-    var genericDisplay = $("#generic-messages");
+	// websocket stuff
+	var gp_path = getWSPath();
+	var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
+	var progressDisplay = $("#node-progress");
+	var finishDisplay = $("#node-finished");
+	var genericDisplay = $("#generic-messages");
 
-    socket.on('progress', function (data) {
+	socket.on('progress', function (data) {
 		progressDisplay.show();
 		progressDisplay.empty();
-        progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
-    });
+		progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+	});
 
-    socket.on('error', function (data) {
-        if(data.node_uuid) {
-            progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-            $(".settings").removeClass("busy");
-            progressDisplay.addClass("done");
-        } else {
-            genericDisplay.append("<div class=\"bad\">" + data + "</div>");
-        }
-        // revert "run" button text
-        $("button[data-id='"+data.node_uuid+"']").text("run");
-        $("div[data-id='"+data.doc+"']").text("run only this");
-        //websockPopup(progressDisplay, "Node run error");
-    });
+	socket.on('error', function (data) {
+		if(data.node_uuid) {
+			progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
+			$(".settings").removeClass("busy");
+			progressDisplay.addClass("done");
+		} else {
+			genericDisplay.append("<div class=\"bad\">" + data + "</div>");
+		}
+		// revert "run" button text
+		$("button[data-id='"+data.node_uuid+"']").text("run");
+		$("div[data-id='"+data.doc+"']").text("run only this");
+		//websockPopup(progressDisplay, "Node run error");
+	});
 
-    socket.on('finish', function (data) {
+	socket.on('finish', function (data) {
 
-        progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
-       // websockPopup(finishDisplay, "Node done!");
-        $(".settings").removeClass("busy");
-        progressDisplay.addClass("done");
-        progressDisplay.hide();
-        gp.nodeRunFinished(data); 
+		progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+	   // websockPopup(finishDisplay, "Node done!");
+		$(".settings").removeClass("busy");
+		progressDisplay.addClass("done");
+		progressDisplay.hide();
+		gp.nodeRunFinished(data); 
 
-    });
+	});
 
 });
 
