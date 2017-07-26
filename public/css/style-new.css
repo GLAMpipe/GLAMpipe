@@ -124,6 +124,10 @@ header {
 	margin-bottom:1px;
 }
 
+header #version {
+	margin-left:10px;
+}
+
 content {
 }
 
@@ -676,6 +680,12 @@ label {
 	display:inline;
 }
 
+.params label {
+	font-weight:500;
+	margin-top:0.8em;
+	display:block;
+}
+
 b {
 	font-weight:400;
 }
@@ -708,6 +718,47 @@ b {
 
 .bad {
  color:red;
+}
+
+.object-cell {
+	background-color:#E7EAEA;
+	padding:2px;
+	margin: 2px;
+}
+
+.object-cell:hover {
+	background-color:#94c080;
+	cursor:pointer;
+}
+
+.bold {
+	font-weight:bold;
+}
+
+.italic {
+	font-style:italic;
+}
+
+#filters > div > div {
+	display:inline;
+}
+
+#filters > div {
+	border: 1px solid orange;
+	padding:2px;
+}
+
+#filters .wikiglyph-cross {
+	margin-left: 1em;
+}
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+#login {
+	margin-left:auto;
+	margin-right:20px;
 }
 
 .checkbox_holder label {
@@ -771,6 +822,10 @@ table.documents tbody td div.edit:hover {
     opacity:1;
 }
 
+th, td {
+    border-bottom: 1px solid #ddd;
+}
+
 .box-noflex {
     display:block;
 	color:#444;
@@ -783,4 +838,12 @@ table.documents tbody td div.edit:hover {
 	margin-bottom:10px;
 	-webkit-transition-duration: 0.1s; /* Safari */
     transition-duration: 0.1s;
+}
+
+.output {
+	background-color:#e7f2e2;
+}
+
+.input {
+
 }

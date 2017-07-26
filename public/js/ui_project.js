@@ -90,7 +90,8 @@ $( document ).ready(function() {
 	// open node parameters for new node
 	$(document).on('click','.listoption', function(e) {
 		gp.pickedCollectionId = null;
-		gp.nodeRepository.openNodeParameters(e);
+		console.log(gp.currentCollection.source.params.collection);
+		gp.nodeRepository.openNodeParameters(e, gp.currentCollection.source.params.collection);
 		e.preventDefault();
 	})
 
@@ -129,9 +130,9 @@ $( document ).ready(function() {
 	})
 
 	// open dynamic field picker
-	$(document).on('click','.dynamic_field', function(e) {
-		gp.openDynamicFieldSelector(e);
-	});
+	//$(document).on('click','.dynamic_field', function(e) {
+		//gp.openDynamicFieldSelector(e);
+	//});
 
 	// open dynamic field picker
 	$(document).on('click','.source_dynamic_field', function(e) {
@@ -209,7 +210,6 @@ $( document ).ready(function() {
 
 function getWSPath() {
 	var paths = window.location.pathname.split("/");
-	console.log(paths);
 	if(paths[1] != "project")
 		return "/" + paths[1];
 	else

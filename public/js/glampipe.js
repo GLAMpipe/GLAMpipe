@@ -132,7 +132,7 @@ var glamPipe = function () {
 					self.desktop = true;
 					$(div).html("");
 			}
-			$("#version").empty().append("ver." + data.version);
+			$("#version").empty().append("ver. " + data.version);
 			if(cb)
 				cb(self.desktop);
 
@@ -431,6 +431,7 @@ var glamPipe = function () {
 					self.renderCollectionSet();
 					node.open();
 					$("data-workspace settingscontainer .settings").show();
+					$("data-workspace settingscontainer submitblock").show();
 				});
 			}
         }
@@ -608,8 +609,18 @@ var glamPipe = function () {
 
                 }
             html += "</ul>"
-                
             
+            // add select
+            html = "<select>";
+                
+                for (var i = 0; i < data.sorted.length; i++) {
+                    var key = data.keys[data.sorted[i]];
+                    html += "<option class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</option>";
+
+                }
+            html += "</select>";  
+            
+                      
             // open dialog
             $("#dynamic-fields").empty();
             $("#dynamic-fields").append(html);

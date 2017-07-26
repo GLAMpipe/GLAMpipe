@@ -23,6 +23,9 @@
 	<body class="vbox">
 		<header>
 			<a href="/"><span class="title sitetitle">GLAMpipe</span></a>
+			<span id="version">version</span>
+			<div id="login"></div>
+			<div id="node-status"></div> <!-- out.say('progress') in node script prints here.-->
 		</header>
 		<content class="main hbox space-between">
 			
@@ -35,7 +38,7 @@
 						<div class="wikiglyph wikiglyph-stripe-menu icon" aria-hidden="true"></div>
 						</a>
 						<div class="wikiglyph wikiglyph-caret-left icon" aria-hidden="true"></div>
-						<div>1 / 3</div>
+						<div>1 / 1</div>
 						<div class="wikiglyph wikiglyph-caret-right icon" aria-hidden="true"></div>
 					</div>
 				</div>
@@ -58,6 +61,7 @@
 					</settingsblock>
 					<submitblock>
 					</submitblock>
+					<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
 				</settingscontainer>
 			  
 				<datacontainer>

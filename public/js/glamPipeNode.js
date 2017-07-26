@@ -69,8 +69,8 @@ var glamPipeNode = function (node, gp) {
 
 	
 	this.runFinished = function () {
-		$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
-		$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+		//$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
+		//$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
 		
 		// we open node only if it is not a subnode of metanode
@@ -144,12 +144,12 @@ var glamPipeNode = function (node, gp) {
 		self.orphan_fields = [];
 		var node_in_keys = [];
 		self.orphan = "";
-		console.log(self.source.params)
+		//console.log(self.source.params)
 		for(var key in self.source.params) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
 				node_in_keys.push(self.source.params[key]);
 		}
-		console.log(node_in_keys);
+        
 		for(var i = 0; i < node_in_keys.length; i++) {
 			
 			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
@@ -179,9 +179,11 @@ var glamPipeNode = function (node, gp) {
             
 		//var html = "<div class='box node' data-id='" + self.source._id + "'>"
         var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
-		html +=   "  <div class='boxleft'>"
+		html +=   "  <div class='boxleft'>";
+        
 		if(self.orphan_fields.length)
 			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";
+            
 		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
 		if(self.source.params.title && self.source.params.title != "") 
