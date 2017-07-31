@@ -38,13 +38,9 @@ $( document ).ready(function() {
 	$("data-workspace submitblock").hide();
 
 	// COLLECTION CHOOSER
-	$("#collection-chooser").on("click", function (e) {
-		gp.showCollections(e);
-		e.preventDefault();
-	});
-
-	$(".col_choose").on("click", function (e) {
-		alert("jop");
+	$("#collection-list").on("click", function (e) {
+		gp.showCollections();
+		$(gp.collectionListDiv).toggle()
 		e.preventDefault();
 	});
 
@@ -77,6 +73,11 @@ $( document ).ready(function() {
 	// dynamic bindings
 	$(document).on('click','.add-node', function(e) {
 		gp.showNodeList(e);
+		e.preventDefault();
+	})
+
+	$(document).on('click','.collection-item', function(e) {
+		alert("parm");
 		e.preventDefault();
 	})
 

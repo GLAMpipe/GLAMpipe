@@ -677,7 +677,7 @@ select {
 label {
 	font-weight:500;
 	margin-top:0.8em;
-	display:inline;
+	display:block;
 }
 
 .params label {
@@ -832,8 +832,7 @@ th, td {
 	background-color: #FFF;
 	border-radius: 5px;
 	/*height: 50px; */
-	width: 60%;
-	overflow: hidden;
+
 	padding: 10px 5px 10px 10px;
 	margin-bottom:10px;
 	-webkit-transition-duration: 0.1s; /* Safari */
@@ -846,4 +845,16 @@ th, td {
 
 .input {
 
+}
+
+#collection-list-container { 
+	position:absolute;
+	margin-top:40px;
+	padding:10px;
+	display:none;
+	background-color:white;
+}
+
+.collection-item:hover {
+	background-color:#eaeaea;
 }

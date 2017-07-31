@@ -149,7 +149,7 @@ var glamPipeNode = function (node, gp) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
 				node_in_keys.push(self.source.params[key]);
 		}
-        
+		
 		for(var i = 0; i < node_in_keys.length; i++) {
 			
 			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
@@ -176,15 +176,15 @@ var glamPipeNode = function (node, gp) {
 			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
-            
+			
 		//var html = "<div class='box node' data-id='" + self.source._id + "'>"
-        var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
+		var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>";
-        
+		
 		if(self.orphan_fields.length)
 			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";
-            
-		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
+			
+		//html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
 		if(self.source.params.title && self.source.params.title != "") 
 			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
@@ -230,12 +230,31 @@ var glamPipeNode = function (node, gp) {
 				$("data-workspace submitblock").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
 			}
 
-            // execute node's settings.js if exists
-			if(self.source.scripts.settings) {
-				var settingsScript = new Function('node', self.source.scripts.settings);
-				settingsScript(self.source);
-			}
-			self.setSettingValues();
+			var collection = gp.currentCollection.source.params.collection;
+
+			// fetch fields
+			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
+				if(data.error)
+					alert(data.error);
+				var options = [];
+				for(var i = 0; i < data.sorted.length; i++) {
+					options.push("<option>" + data.sorted[i] + "</option>");
+				}
+				
+				// populate field selects
+				$(".settings select.dynamic_field").each(function(i) {
+					$(this).append(options.join(""));
+				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
+				})	
+
+				// execute node's settings.js if exists
+				if(self.source.scripts.settings) {
+					var settingsScript = new Function('node', self.source.scripts.settings);
+					settingsScript(self.source);
+				}
+
+				self.setSettingValues();
+			})
 		}
 	}
 

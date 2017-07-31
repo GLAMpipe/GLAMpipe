@@ -34,16 +34,16 @@ function compare (value_1, value_2) {
 	// both are arrays
 	if(Array.isArray(value_1) && Array.isArray(value_2)) {
 		for (var i = 0; i < value_1.length; i++) { 
-			// try to find pair form other value
+			// try to find pair for other value
 			if(value_2[i]) {
-				result.push(match(value_1[i],value_2[i]))
+				result.push(match(value_1[i],value_2[i], i))
 			}
 		}
 	   
 	// value_1 is array
 	} else if(Array.isArray(value_1) && typeof value_2 === "string") {  
 		for (var i = 0; i < value_1.length; i++) { 
-			result.push(match(value_1[i], value_2))
+			result.push(match(value_1[i], value_2, i))
 		}
 		
 	// both are strings
@@ -54,18 +54,26 @@ function compare (value_1, value_2) {
 	return result;
 }
 
-function match(val1, val2) {
+function match(val1, val2, index) {
 	if(val1 == val2) {
 		if(static_yes)
 			return static_yes;
-		if(dynamic_yes)
+		if(dynamic_yes && Array.isArray(dynamic_yes)) {
+			if(typeof index !== "undefined" && dynamic_yes[index])
+				return dynamic_yes[index];
+		} else {
 			return dynamic_yes;
+		}
 
 	} else {
 		if(static_no)
 			return static_no;
-		if(dynamic_no)
+		if(dynamic_no && Array.isArray(dynamic_no)) {
+			if(typeof index !== "undefined" && dynamic_no[index])
+				return dynamic_no[index];
+		} else {
 			return dynamic_no;
+		}
 	}	
 	return "";
 }

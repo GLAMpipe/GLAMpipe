@@ -12,7 +12,8 @@ var glamPipe = function () {
 	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
-	this.collectionSwitchDiv = "#collection-node-switch";
+	this.collectionSwitchDiv = "#collection-switch";
+	this.collectionListDiv = "#collection-list-container";
 	this.pageTitleDiv = "#page-title";
 	this.nodeHolderDiv = "pipe .nodeset";
 	
@@ -455,7 +456,7 @@ var glamPipe = function () {
 				var collection = self.currentCollection;
 				
 				// render collection
-				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span> <a href='#'>Create data collection</a></div>";
+				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span></div>";
 				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
 				$("pipe .collection").empty().append(col_html);
 
@@ -476,12 +477,12 @@ var glamPipe = function () {
 
 				html += self.renderNodes(collection, ["process"]);
 				
-				//html += "  <div class='sectiontitleblock'>"
-				//html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-				//html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-				//html += "  </div><div class='holder params'></div>"
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "  </div><div class='holder params'></div>"
 
-				//html += self.renderNodes(collection, ["export"]);
+				html += self.renderNodes(collection, ["export"]);
 
 				html += "  <div class='sectiontitleblock'>"
 				html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
@@ -528,9 +529,10 @@ var glamPipe = function () {
 		console.log(self.collections);
 		
 		//var obj = $(e.target).parent();
-		//for (var i = 0; i < self.collections.length; i++) {
-			//obj.append("<div class='col_choose'>collection:" + self.collections[i].source.title + "</div");
-		//}
+		for (var i = 0; i < self.collections.length; i++) {
+			$(self.collectionListDiv).empty().append("<div class='collection-item'>" + self.collections[i].source.title + "</div");
+		}
+		$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
 	}
 
 	

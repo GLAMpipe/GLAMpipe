@@ -301,7 +301,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// run node for all nodes and wait response
 	express.post('/api/v1/nodes/:id/run', function (req, res) {
-		node.runNode(req, glampipe.io, res);
+		node.run(req, glampipe.io, res);
 	});
 
 	express.post('/api/v1/nodes/:id/stop', function (req, res) {

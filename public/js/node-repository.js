@@ -136,7 +136,7 @@ var nodeRepository = function () {
                 options.push("<option>" + data.sorted[i] + "</option>");
             }
             
-            // change dynamic input to selects
+            // populate field selects
             $(".params select.dynamic_field").each(function(i) {
                 $(this).append(options.join(""));
             //    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
