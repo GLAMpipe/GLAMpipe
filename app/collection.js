@@ -161,6 +161,26 @@ exports.addToSet = function (collection_id, req, callback) {
 }
 
 
+exports.addDocument = function (req, callback) {
+
+	console.log(req.body);
+	var doc = {};
+	try {
+		doc = req.body
+	} catch(e) {
+		console.log("ERROR: json parse failed!")
+	}
+		
+	mongoquery.insert(req.params.collection, doc, function(error, result) {
+		if(error) {
+			console.log("ERROR: could not insert document!");
+			callback(error);
+		}
+		else 
+			callback();
+	});
+}
+
 
 /**
  * Get paged collection data

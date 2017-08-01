@@ -249,6 +249,24 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+exports.updateById = function (collectionname, doc_id, doc, callback) {
+
+	var collection = db.collection(collectionname);
+	var query = {_id: mongojs.ObjectId(doc_id)};
+	console.log(query)
+	//doc = {"$set":{"dc_contributor_author":"koira"}}
+	console.log(doc);
+	collection.update(query, doc , {multi:true}, function (err, result) {
+		if (err) {
+			console.log(err);
+			callback(err);
+		} else {
+			console.log(result);
+			callback();
+		}
+	}); 
+}
+
 // add empty fields to collection
 exports.addFieldToCollection = function (collectionname, field, cb) {
 	var add = {};

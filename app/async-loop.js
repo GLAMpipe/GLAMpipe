@@ -39,6 +39,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 			sandbox.context.skip = null;
 			sandbox.out.value = null;
 			sandbox.out.setter = null;
+			sandbox.out.error = null;
 
 			try {
 				sandbox.pre_run.runInContext(sandbox);
@@ -115,6 +116,10 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
+			sandbox.context.skip = null;
+			sandbox.out.value = null;
+			sandbox.out.setter = null;
+			sandbox.out.error = null;
 			
 			try {
 				sandbox.pre_run.runInContext(sandbox);
@@ -124,6 +129,9 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
+			
+			console.log("sandbox.out.pre_value")
+			console.log(sandbox.out.pre_value)
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
@@ -141,6 +149,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							
 						sandbox.out.setter = null;
 						sandbox.out.value = null;
+						sandbox.out.error = null;
 						sandbox.context.skip = null;
 						
 						try {

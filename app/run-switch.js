@@ -371,6 +371,11 @@ exports.runNode = function (node, io) {
 							asyncLoop.fieldLoop(node, sandbox, pdf.pdf2image);
 						break;
 
+						case "pdf2text":
+							var pdf = require("../app/node_runners/file-pdf.js");
+							asyncLoop.fieldLoop(node, sandbox, pdf.pdf2text);
+						break;
+
 						case "calculate_checksum":
 							var file = require("../app/node_runners/file.js");
 							asyncLoop.fieldLoop(node, sandbox, file.getHash);
@@ -463,8 +468,9 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						case "basic":
 							var web = require("../app/node_runners/web.js");
-							if(config.isServerInstallation && !node.res) {
-								io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Download nodes not available on server installation"});
+							if(config.disableBatchDownloads && !node.res) {
+								sandbox.out.say("finish", "Batch downloads not available on this installation");
+								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
 							} else {
 								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
 							}

@@ -1,3 +1,5 @@
+
+
 var filenames = context.doc[context.node.params.in_field];
 out.pre_value = null;
 
@@ -25,3 +27,5 @@ function getPath(path, filename) {
         return filename;
         
 }
+
+

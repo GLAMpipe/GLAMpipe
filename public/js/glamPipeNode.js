@@ -224,10 +224,10 @@ var glamPipeNode = function (node, gp) {
 				params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
 			}
 			params_table += "</tbody></table>";
-			$("data-workspace submitblock").append(params_table);
+			//$("data-workspace submitblock").append(params_table);
 
 			if(self.debug) {
-				$("data-workspace submitblock").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
+				$("data-workspace submitblock").append("<div class='debug box right'>"+params_table+"<table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
 			}
 
 			var collection = gp.currentCollection.source.params.collection;
