@@ -160,6 +160,11 @@ $( document ).ready(function() {
 
 	});
 
+	// show debug info of the node
+	$(document).on("click", ".debug-link", function(e) {
+		websockPopup(gp.debugInfo(e), "node parameters and id");
+	});
+
 	// esc closes some dialogs
 	$(document).keyup(function(e) {
 		 if (e.keyCode == 27) { 

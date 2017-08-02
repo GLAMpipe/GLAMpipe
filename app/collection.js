@@ -97,6 +97,7 @@ exports.edit = function (req, callback) {
 
 	var collection_id = req.params.collection
 	console.log("COLLECTION: editing", collection_id,":",req.params.doc);
+	console.log(req.body)
 	if(!req.params.doc)
 		return callback({error:"doc_id is missing!"});
 		
@@ -123,7 +124,7 @@ exports.edit = function (req, callback) {
 exports.edit2 = function (req, callback) {
 
 	var collection_id = req.params.collection
-	console.log("COLLECTION: editing", collection_id,":",req.params.doc);
+	console.log("COLLECTION: field-value editing", collection_id,":",req.params.doc);
 	if(!req.params.doc)
 		return callback({error:"doc_id is missing!"});
 		
@@ -163,21 +164,28 @@ exports.addToSet = function (collection_id, req, callback) {
 
 exports.addDocument = function (req, callback) {
 
-	console.log(req.body);
-	var doc = {};
-	try {
-		doc = req.body
-	} catch(e) {
-		console.log("ERROR: json parse failed!")
-	}
-		
-	mongoquery.insert(req.params.collection, doc, function(error, result) {
+	mongoquery.insert(req.params.collection, req.body, function(error, result) {
 		if(error) {
 			console.log("ERROR: could not insert document!");
 			callback(error);
 		}
 		else 
-			callback();
+			callback(result);
+	});
+}
+
+
+exports.deleteDocument = function (req, callback) {
+
+
+		
+	mongoquery.remove(req.params.doc, req.params.collection, function(error, result) {
+		if(error) {
+			console.log("ERROR: could not remove document! " + req.params.doc);
+			callback(error);
+		}
+		else 
+			callback(result);
 	});
 }
 

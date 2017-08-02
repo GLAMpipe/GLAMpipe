@@ -321,6 +321,14 @@ var glamPipe = function () {
 			alert("node id not found");
 	}
 
+	this.debugInfo = function (e) {
+		var node = self.getNode(e);
+		if(node) {
+			return node.renderDebug();
+		} else
+			alert("node id not found");
+	}
+
 	// called by "finished" websocket message
 	this.nodeRunFinished = function (data) {
 		var node = self.getRegularNode(data.node_uuid);
@@ -581,6 +589,34 @@ var glamPipe = function () {
 			console.log(response);
 			cb();
 		})
+	}
+
+	this.deleteDocument = function(event) {
+		var doc_id = $(event.target).data("id");
+		console.log(self.currentCollection.source);
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          title:"Deleting document " + doc_id,
+          modal: true,
+          buttons: {
+            "Delete document": function() {
+                $( this ).dialog( "close" );
+                var params = {};
+                $.delete(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + doc_id, params, function(retData) {
+                    console.log('document deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+						$(event.target).parents("tr").remove();                        
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
 	}
 
 	this.openDynamicFieldSelector = function (event, source) {

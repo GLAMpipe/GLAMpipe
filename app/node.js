@@ -108,8 +108,9 @@ exports.createCollectionNode = function (req, res, io) {
 			
 		// cleanup name
 		var collectionName = "";
-		if(req.body.params.title)
-			collectionName = req.body.params.title.replace(/[^a-z0-9- ]/g,"").toLowerCase();
+		if(req.body.params.title) {
+			collectionName = req.body.params.title.toLowerCase().replace(/[^a-z0-9-]/g,"");
+		}
 		
 		//						  project count
 		var collection = data.prefix + "_c" + data.collection_count + "_" + collectionName;

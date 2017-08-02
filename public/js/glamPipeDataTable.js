@@ -295,7 +295,7 @@ var dataTable = function (node) {
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
 				html += "<td><div data-id='" + data._id + "' class='button run_single'>run only this</div></td>";
 			else
-				html += "<td>" + self.getRowIndex(key_index) + "</td>";
+				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
 			if(config && config.input_keys.indexOf(key_name) !== -1)
@@ -702,6 +702,7 @@ var dataTable = function (node) {
 		// edit mode
 		$("data-workspace").on('click','data-controls .wikiglyph-edit', function(e) {
 			$("data-workspace table tbody td div.edit").toggle();
+			$("data-workspace table tbody td div.delete").toggle();
 			self.editMode = !self.editMode;
 		})
 
@@ -777,6 +778,11 @@ var dataTable = function (node) {
 		// edit cell content
 		$("data-workspace").on('click','table tbody td div.edit', function(e) {
 			self.editCell(e);
+		});
+
+		// edit cell content
+		$("data-workspace").on('click','table tbody td div.delete', function(e) {
+			self.node.gp.deleteDocument(e);
 		});
 
 		// run node with single document

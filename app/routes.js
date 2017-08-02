@@ -77,7 +77,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// protect API routes
 	if(config.isServerInstallation) {
-		console.log("AUTHENTICATION")
+		//console.log("AUTHENTICATION")
 		//console.log(req.ip)
 		var s = express.get('superSecret');
 		express.post('/api/v1/*', jwt2({secret: s}));
@@ -273,14 +273,18 @@ module.exports = function(express, glampipe, passport) {
 		//glampipe.core.setVisibleFields(req.params.id, res);
 	//});
 	
-	// check if node is running before runnin
+	// check if node is running before running
 	express.post('/api/v1/nodes/:id/run|start', function (req, res, next) {
-		if(global.register[req.originalUrl]) {
-			console.log("REGISTER: request is running already!")
-			res.send({error:"request is running already!"})
-		} else {
-			global.register[req.originalUrl] = {req:req.originalUrl, log:[]};
-			next()
+		if(req.query.force) // we can skip register when running nodes from api (?force=true)
+			next();
+		else { 
+			if(global.register[req.originalUrl]) {
+				console.log("REGISTER: request is running already!")
+				res.send({error:"request is running already!"})
+			} else {
+				global.register[req.originalUrl] = {req:req.originalUrl, log:[]};
+				next()
+			}
 		}
 	});
 
@@ -390,6 +394,10 @@ module.exports = function(express, glampipe, passport) {
 
 	express.post('/edit/collection/addtoset/:id', function (req, res) {
 		collection.addToSet(req.params.id, req, function(data) {res.send(data)});
+	});
+
+	express.delete('/api/v1/collections/:collection/docs/:doc', function (req, res) {
+		collection.deleteDocument(req, function(data) {res.send(data)});
 	});
 
 	// UPLOAD

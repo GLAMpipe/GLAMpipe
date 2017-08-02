@@ -96,7 +96,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {
-		console.log("FIELD LOOP: single doc")
+		console.log("FIELD LOOP: single doc:" + node.req.params.doc)
 		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
 	}
 
@@ -109,7 +109,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
 
 			// check if user asked for termination of the node run
-			if(!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force &&!global.register[node.req.originalUrl]) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}

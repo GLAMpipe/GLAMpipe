@@ -212,23 +212,10 @@ var glamPipeNode = function (node, gp) {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("data-workspace .settings").empty();
-			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button>");
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
 			
-
-			
-			// render parameters
-			var params_table = "<table><tbody>";
-			for(key in self.source.params) {
-				params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
-			}
-			params_table += "</tbody></table>";
-			//$("data-workspace submitblock").append(params_table);
-
-			if(self.debug) {
-				$("data-workspace submitblock").append("<div class='debug box right'>"+params_table+"<table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
-			}
 
 			var collection = gp.currentCollection.source.params.collection;
 
@@ -258,6 +245,20 @@ var glamPipeNode = function (node, gp) {
 		}
 	}
 
+
+	this.renderDebug = function() {
+			
+		// render parameters
+		var params_table = "<table><tbody>";
+		for(key in self.source.params) {
+			params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
+		}
+		params_table += "<tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr>";
+		params_table += "<tr><td>_id:</td><td>" + self.source._id + "</td></tr>";
+		params_table += "</tbody></table>";
+		return "<div class='debug right'>"+params_table+"</div>";
+	
+	}
 
 	this.setSettingValues = function () {
 		var data = self.source;
