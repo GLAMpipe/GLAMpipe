@@ -77,7 +77,9 @@ $( document ).ready(function() {
 	})
 
 	$(document).on('click','.collection-item', function(e) {
-		alert("parm");
+		var index = $(e.target).data("index");
+		gp.chooseCollection(index);
+		$(gp.collectionListDiv).toggle()
 		e.preventDefault();
 	})
 
@@ -93,6 +95,13 @@ $( document ).ready(function() {
 		gp.pickedCollectionId = null;
 		console.log(gp.currentCollection.source.params.collection);
 		gp.nodeRepository.openNodeParameters(e, gp.currentCollection.source.params.collection);
+		e.preventDefault();
+	})
+
+	// create collection
+	$(document).on('click','.add-collection', function(e) {
+		$(gp.collectionListDiv).toggle()
+		gp.createCollection(e);
 		e.preventDefault();
 	})
 

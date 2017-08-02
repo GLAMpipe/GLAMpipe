@@ -194,6 +194,7 @@ var glamPipe = function () {
 		console.log("starting to remove node:", $(event.target).data("id"));
         var project_id =  $(event.target).data("id");
 
+		$( "#dialog-confirm" ).empty().append("<div>Do want to remove the project? All data and files are lost.</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,
@@ -413,38 +414,58 @@ var glamPipe = function () {
             data.params[$(this).attr("name")] = $(this).val(); 
         });
         
-        if(node.type == "collection") {
-            $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid + "?type=collection", data, function(returnedData) {
-                console.log('created node');
-                $(".holder.params").empty();
-                // point currentCollectionSet to last collection
-                self.currentCollectionSet = self.collections.length;
-                self.loadProject();
-            });
-        } else {
-			// set parent collection
-			if(self.currentCollection == null) 
-				alert("parent collection is missing");
-			else {data.collection = self.currentCollection.source.collection;
-				console.log("currentCollection on node create:", self.currentCollection.source.collection);
-				
-				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
-					console.log("node create:", returnedData);
-					if(returnedData.error) {
-						alert(returnedData.error);
-						return;
-					}
-					var node = new glamPipeNode(returnedData.node, self);
-					self.addProjectNode(node);
-					self.currentNodes[self.currentCollection.source.collection] = node;
-					self.renderCollectionSet();
-					node.open();
-					$("data-workspace settingscontainer .settings").show();
-					$("data-workspace settingscontainer submitblock").show();
-				});
-			}
-        }
+		// set parent collection
+		if(self.currentCollection == null) 
+			alert("parent collection is missing");
+		else {data.collection = self.currentCollection.source.collection;
+			console.log("currentCollection on node create:", self.currentCollection.source.collection);
+			
+			$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+				console.log("node create:", returnedData);
+				if(returnedData.error) {
+					alert(returnedData.error);
+					return;
+				}
+				var node = new glamPipeNode(returnedData.node, self);
+				self.addProjectNode(node);
+				self.currentNodes[self.currentCollection.source.collection] = node;
+				self.renderCollectionSet();
+				node.open();
+				$("data-workspace settingscontainer .settings").show();
+				$("data-workspace settingscontainer submitblock").show();
+			});
+		}
 	}
+
+	this.createCollection = function (e) {
+		$( "#dialog-confirm").empty().append("<label>collection name</label><input value='new collection'/>");
+        $( "#dialog-confirm").dialog({
+          resizable: false,
+          height:160,
+          title:"Add collection ",
+          modal: true,
+          buttons: {
+            "Add": function() {
+                $( this ).dialog( "close" );
+				var title = $( "#dialog-confirm input").val();
+				var data = {"params":{"title":title}};
+				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/collection_basic?type=collection", data, function(returnedData) {
+					console.log('created node');
+					$(".holder.params").empty();
+					// point currentCollectionSet to last collection
+					self.currentCollectionSet = self.collections.length;
+					self.loadProject();
+				}); 
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+       
+
+	}
+ 
 
 	this.renderDataHeader = function () {
 		$("#data-header").empty().append(self.currentCollection.source.title);
@@ -534,11 +555,14 @@ var glamPipe = function () {
 
 	// COLLECTION CHOOSER
 	this.showCollections = function (e) {
-		console.log(self.collections);
-		
-		//var obj = $(e.target).parent();
+		//console.log(self.collections);
+		$(self.collectionListDiv).empty()
+		console.log(self.collections.length);
 		for (var i = 0; i < self.collections.length; i++) {
-			$(self.collectionListDiv).empty().append("<div class='collection-item'>" + self.collections[i].source.title + "</div");
+			var title = "no title";
+			if(self.collections[i].source.title !== "")
+				title = self.collections[i].source.title;
+			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
 		}
 		$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
 	}
@@ -556,6 +580,7 @@ var glamPipe = function () {
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet]; 
 			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.renderBreadCrumb();
 			self.renderCollectionSet();
 			if(self.currentNodes[self.currentCollection.source.collection])
 				self.currentNodes[self.currentCollection.source.collection].open(); 
@@ -573,6 +598,7 @@ var glamPipe = function () {
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
 			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.renderBreadCrumb();
 			self.renderCollectionSet();
 			if(self.currentNodes[self.currentCollection.source.collection])
 				self.currentNodes[self.currentCollection.source.collection].open(); 
@@ -583,6 +609,20 @@ var glamPipe = function () {
 		}
 	}
 
+	this.chooseCollection = function(index) {
+		self.currentCollectionSet = parseInt(index)
+		self.setCollectionCounter();
+		self.currentCollection = self.collections[self.currentCollectionSet];
+		self.pickedCollectionId = self.currentCollection.source.collection;
+		self.renderBreadCrumb();
+		self.renderCollectionSet();
+		if(self.currentNodes[self.currentCollection.source.collection])
+			self.currentNodes[self.currentCollection.source.collection].open(); 
+		else
+			self.currentCollection.open();
+							
+		console.log("currentCollection = ", self.currentCollection.source.collection);
+	}
 
 	this.updateDocument = function (data, cb) {
 		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id, data, function( response ) {
@@ -594,6 +634,7 @@ var glamPipe = function () {
 	this.deleteDocument = function(event) {
 		var doc_id = $(event.target).data("id");
 		console.log(self.currentCollection.source);
+		$( "#dialog-confirm" ).empty().append("<div>Are you sure?</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,
@@ -738,6 +779,7 @@ var glamPipe = function () {
 	this.removeNode = function (event) {
         var obj = $(event.target);
         var node_id = obj.closest(".node").data("id");
+        $( "#dialog-confirm" ).empty().append("<div>Do you want to remove node?</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,
