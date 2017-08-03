@@ -5,8 +5,6 @@ var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
 var node	 	= require("../app/node.js");
 var project 	= require("../app/project.js");
-//var User 		= require("../app/controllers/user.js");
-const conf 		= require("../config/config.js");
 
 global.register = {};
 
@@ -17,7 +15,7 @@ module.exports = function(express, glampipe, passport) {
     var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
-	express.set('superSecret', conf.secret); // secret variable
+	express.set('superSecret', global.config.secret); // secret variable
 	
     // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
@@ -37,7 +35,7 @@ module.exports = function(express, glampipe, passport) {
 			ip = req.headers['x-real-ip']
 
 		var pass = false;
-		conf.IP_passes.some(function(IP_pass) {
+		global.config.IP_passes.some(function(IP_pass) {
 			if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && ip === IP_pass.ip) {
 				pass = true;
 				console.log("INFO: allowed by IP_pass: " + IP_pass.label)
@@ -76,8 +74,8 @@ module.exports = function(express, glampipe, passport) {
 
 
 	// protect API routes
-	if(config.isServerInstallation) {
-		console.log("AUTHENTICATION")
+	if(global.config.isServerInstallation) {
+		//console.log("AUTHENTICATION")
 		//console.log(req.ip)
 		var s = express.get('superSecret');
 		express.post('/api/v1/*', jwt2({secret: s}));
@@ -131,7 +129,7 @@ module.exports = function(express, glampipe, passport) {
 
 	// project page
 	express.get('/project/:id', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'project.html'));
+		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
 	});
 
 	// facet view
@@ -178,10 +176,10 @@ module.exports = function(express, glampipe, passport) {
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
-			url:conf.url, 
-			isServerInstallation:conf.isServerInstallation, 
-			version:conf.version,
-			dataPath:conf.dataPath
+			url:global.config.url, 
+			isServerInstallation:global.config.isServerInstallation, 
+			version:global.config.version,
+			dataPath:global.config.dataPath
 		});
 	});
     
@@ -273,14 +271,18 @@ module.exports = function(express, glampipe, passport) {
 		//glampipe.core.setVisibleFields(req.params.id, res);
 	//});
 	
-	// check if node is running before runnin
+	// check if node is running before running
 	express.post('/api/v1/nodes/:id/run|start', function (req, res, next) {
-		if(global.register[req.originalUrl]) {
-			console.log("REGISTER: request is running already!")
-			res.send({error:"request is running already!"})
-		} else {
-			global.register[req.originalUrl] = {req:req.originalUrl, log:[]};
-			next()
+		if(req.query.force) // we can skip register when running nodes from api (?force=true)
+			next();
+		else { 
+			if(global.register[req.originalUrl]) {
+				console.log("REGISTER: request is running already!")
+				res.send({error:"request is running already!"})
+			} else {
+				global.register[req.originalUrl] = {req:req.originalUrl, log:[]};
+				next()
+			}
 		}
 	});
 
@@ -296,12 +298,12 @@ module.exports = function(express, glampipe, passport) {
 
 	// run node for one document and wait response
 	express.post('/api/v1/nodes/:id/run/:doc', function (req, res) {
-		node.runNode(req, glampipe.io, res);
+		node.run(req, glampipe.io, res);
 	});
 
 	// run node for all nodes and wait response
 	express.post('/api/v1/nodes/:id/run', function (req, res) {
-		node.runNode(req, glampipe.io, res);
+		node.run(req, glampipe.io, res);
 	});
 
 	express.post('/api/v1/nodes/:id/stop', function (req, res) {
@@ -390,6 +392,10 @@ module.exports = function(express, glampipe, passport) {
 
 	express.post('/edit/collection/addtoset/:id', function (req, res) {
 		collection.addToSet(req.params.id, req, function(data) {res.send(data)});
+	});
+
+	express.delete('/api/v1/collections/:collection/docs/:doc', function (req, res) {
+		collection.deleteDocument(req, function(data) {res.send(data)});
 	});
 
 	// UPLOAD

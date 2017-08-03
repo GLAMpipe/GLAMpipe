@@ -28,22 +28,19 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#logout", function(e) {
 		localStorage.removeItem("token");
-		$("#login").empty().append("<a id='login-pop' href=''>login</a>");
+		$("#login").empty().append("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
 		e.preventDefault();
 	});
 
 	// hide node settings panel on start
 	$("data-workspace .settings").hide();
-	$("data-workspace .settingscontainer").hide();
+	$("data-workspace settingscontainer").hide();
+	$("data-workspace submitblock").hide();
 
 	// COLLECTION CHOOSER
-	$("#collection-chooser").on("click", function (e) {
-		gp.showCollections(e);
-		e.preventDefault();
-	});
-
-	$(".col_choose").on("click", function (e) {
-		alert("jop");
+	$("#collection-list").on("click", function (e) {
+		gp.showCollections();
+		$(gp.collectionListDiv).toggle()
 		e.preventDefault();
 	});
 
@@ -57,16 +54,18 @@ $( document ).ready(function() {
 
 
 	// hide/show node settings TODO: move to node
-	$(".settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
+	$("settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
 		$("data-workspace .settings").hide();
+		$("data-workspace submitblock").hide();
 	});
 
-	$(".settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
+	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
 		$(this).removeClass("wikiglyph-caret-down");
 		$(this).addClass("wikiglyph-caret-up");
 		$("data-workspace .settings").show();
+		$("data-workspace submitblock").show();
 	});
 
 
@@ -74,6 +73,13 @@ $( document ).ready(function() {
 	// dynamic bindings
 	$(document).on('click','.add-node', function(e) {
 		gp.showNodeList(e);
+		e.preventDefault();
+	})
+
+	$(document).on('click','.collection-item', function(e) {
+		var index = $(e.target).data("index");
+		gp.chooseCollection(index);
+		$(gp.collectionListDiv).toggle()
 		e.preventDefault();
 	})
 
@@ -87,7 +93,15 @@ $( document ).ready(function() {
 	// open node parameters for new node
 	$(document).on('click','.listoption', function(e) {
 		gp.pickedCollectionId = null;
-		gp.nodeRepository.openNodeParameters(e);
+		console.log(gp.currentCollection.source.params.collection);
+		gp.nodeRepository.openNodeParameters(e, gp.currentCollection.source.params.collection);
+		e.preventDefault();
+	})
+
+	// create collection
+	$(document).on('click','.add-collection', function(e) {
+		$(gp.collectionListDiv).toggle()
+		gp.createCollection(e);
 		e.preventDefault();
 	})
 
@@ -99,8 +113,10 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
+		var run_button_texts = ["run for all documents", "import data", "export data"];
 		var button = $(e.target);
-		if(button.text() == "run") {
+		if(run_button_texts.includes(button.text())) {
+			button.attr("text", button.text());
 			button.text("stop");
 			gp.runNode(e);
 		} else if(button.text() == "stop") {
@@ -119,41 +135,46 @@ $( document ).ready(function() {
 	})
 
 	// remove node
-	$(document).on('click','.node  .wikiglyph-cross', function(e) {
+	$(document).on('click','.node .wikiglyph-cross', function(e) {
 		gp.removeNode(e);
 		e.stopPropagation();
 		e.preventDefault();
 	})
 
 	// open dynamic field picker
-    $(document).on('click','.dynamic_field', function(e) {
-		gp.openDynamicFieldSelector(e);
-    });
+	//$(document).on('click','.dynamic_field', function(e) {
+		//gp.openDynamicFieldSelector(e);
+	//});
 
 	// open dynamic field picker
-    $(document).on('click','.source_dynamic_field', function(e) {
+	$(document).on('click','.source_dynamic_field', function(e) {
 		gp.openDynamicFieldSelector(e, "source");
-    });
+	});
 
 	// pick field
-    $(document).on('click','.pick_field', function(e) {
+	$(document).on('click','.pick_field', function(e) {
 		gp.pickField(e)
-    });
+	});
 
 	// open dynamic collection picker
-    $(document).on('click','.dynamic_collection', function(e) {
+	$(document).on('click','.dynamic_collection', function(e) {
 		gp.openDynamicCollectionSelector(e);
-    })
+	})
 
 	// pick collection
-    $(document).on('click','.pick_collection', function(e) {
+	$(document).on('click','.pick_collection', function(e) {
 		gp.pickCollection(e)
-    });
+	});
 
-    // handler for file upload node creation
-    $(document).on('submit', "#uploadfile", function(e) {
+	// handler for file upload node creation
+	$(document).on('submit', "#uploadfile", function(e) {
 
-    });
+	});
+
+	// show debug info of the node
+	$(document).on("click", ".debug-link", function(e) {
+		websockPopup(gp.debugInfo(e), "node parameters and id");
+	});
 
 	// esc closes some dialogs
 	$(document).keyup(function(e) {
@@ -164,49 +185,49 @@ $( document ).ready(function() {
 		}
 	});
 
-    // websocket stuff
-    var gp_path = getWSPath();
-    var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
-    var progressDisplay = $("#node-progress");
-    var finishDisplay = $("#node-finished");
-    var genericDisplay = $("#generic-messages");
+	// websocket stuff
+	var gp_path = getWSPath();
+	var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
+	var progressDisplay = $("#node-progress");
+	var finishDisplay = $("#node-finished");
+	var genericDisplay = $("#generic-messages");
 
-    socket.on('progress', function (data) {
+	socket.on('progress', function (data) {
 		progressDisplay.show();
 		progressDisplay.empty();
-        progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
-    });
+		progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+	});
 
-    socket.on('error', function (data) {
-        if(data.node_uuid) {
-            progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-            $(".settings").removeClass("busy");
-            progressDisplay.addClass("done");
-        } else {
-            genericDisplay.append("<div class=\"bad\">" + data + "</div>");
-        }
-        // revert "run" button text
-        $("button[data-id='"+data.node_uuid+"']").text("run");
-        $("div[data-id='"+data.doc+"']").text("run only this");
-        //websockPopup(progressDisplay, "Node run error");
-    });
+	socket.on('error', function (data) {
+		if(data.node_uuid) {
+			progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
+			$(".settings").removeClass("busy");
+			progressDisplay.addClass("done");
+		} else {
+			genericDisplay.append("<div class=\"bad\">" + data + "</div>");
+		}
+		// revert "run" button text
+		var button = $("button[data-id='"+data.node_uuid+"']");
+		button.text(button.attr("text"));
+		$("div[data-id='"+data.doc+"']").text("run only this");
+		//websockPopup(progressDisplay, "Node run error");
+	});
 
-    socket.on('finish', function (data) {
+	socket.on('finish', function (data) {
 
-        progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
-       // websockPopup(finishDisplay, "Node done!");
-        $(".settings").removeClass("busy");
-        progressDisplay.addClass("done");
-        progressDisplay.hide();
-        gp.nodeRunFinished(data); 
+		progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+	   // websockPopup(finishDisplay, "Node done!");
+		$(".settings").removeClass("busy");
+		progressDisplay.addClass("done");
+		progressDisplay.hide();
+		gp.nodeRunFinished(data); 
 
-    });
+	});
 
 });
 
 function getWSPath() {
 	var paths = window.location.pathname.split("/");
-	console.log(paths);
 	if(paths[1] != "project")
 		return "/" + paths[1];
 	else

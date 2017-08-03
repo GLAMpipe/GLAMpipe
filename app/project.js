@@ -80,9 +80,9 @@ exports.deleteProject = function (doc_id, res) {
 				// remove project directory
 				var rimraf = require("rimraf");	
 				var project_path = path.join(global.config.projectsPath, project.dir);
-				if(project_path && project_path.includes(config.dataPath)) {
+				if(project_path && project_path.includes(global.config.dataPath)) {
 					console.log("PROJECT: removing " + project_path);
-					rimraf(project.dir, function() {
+					rimraf(project.dir, function(err) {
 						console.log("PROJECT: " + project.title + " deleted!");
 						res.json(data);						
 					});

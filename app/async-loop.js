@@ -39,6 +39,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 			sandbox.context.skip = null;
 			sandbox.out.value = null;
 			sandbox.out.setter = null;
+			sandbox.out.error = null;
 
 			try {
 				sandbox.pre_run.runInContext(sandbox);
@@ -95,7 +96,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {
-		console.log("FIELD LOOP: single doc")
+		console.log("FIELD LOOP: single doc:" + node.req.params.doc)
 		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
 	}
 
@@ -108,13 +109,17 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
 
 			// check if user asked for termination of the node run
-			if(!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force &&!global.register[node.req.originalUrl]) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
 
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
+			sandbox.context.skip = null;
+			sandbox.out.value = null;
+			sandbox.out.setter = null;
+			sandbox.out.error = null;
 			
 			try {
 				sandbox.pre_run.runInContext(sandbox);
@@ -124,6 +129,9 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
+			
+			console.log("sandbox.out.pre_value")
+			console.log(sandbox.out.pre_value)
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
@@ -141,6 +149,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							
 						sandbox.out.setter = null;
 						sandbox.out.value = null;
+						sandbox.out.error = null;
 						sandbox.context.skip = null;
 						
 						try {

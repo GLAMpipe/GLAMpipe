@@ -10,6 +10,7 @@ var dataPath = "";
 // - false = do not use authentication
 // - true = use local authentication
 var isServerInstallation = false;
+var disableBatchDownloads = true;
 var canRegister = true;
 var secret = "Set something here";
 
@@ -20,10 +21,11 @@ var visible_tags = null;
 
 
 // PROXY passes
-// - urls that are allowed for UI to make requests via GLAMpipe's own proxy
+// - urls that are allowed for UI to make requests via GLAMpipe's own proxy (bypassing CORS restrictions)
 var PROXY_passes = [
 	"http://localhost/",
 	"https://demo.dspace.org/",
+	"http://demoprints.eprints.org/"
 ]
 
 
@@ -58,6 +60,7 @@ exports.dataPath = dataPath;
 exports.nodePath = nodePath;
 exports.url = url;
 exports.isServerInstallation = isServerInstallation;
+exports.disableBatchDownloads = disableBatchDownloads;
 exports.canRegister = canRegister;
 exports.secret = secret;
 exports.tags = visible_tags;

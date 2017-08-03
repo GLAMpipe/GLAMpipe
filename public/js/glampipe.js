@@ -12,9 +12,10 @@ var glamPipe = function () {
 	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
-	this.collectionSwitchDiv = "#collection-node-switch";
+	this.collectionSwitchDiv = "#collection-switch";
+	this.collectionListDiv = "#collection-list-container";
 	this.pageTitleDiv = "#page-title";
-	this.nodeHolderDiv = "node-pipe .nodeset";
+	this.nodeHolderDiv = "pipe .nodeset";
 	
 	this.collections = [];
 	this.nodes = [];
@@ -25,14 +26,14 @@ var glamPipe = function () {
 		this.baseAPI = "../api/v1";
 	
 	// MAIN PAGE (projects)
-	this.getProjects = function (div) {
+	this.getProjectTitles = function (div) {
 
 		$.getJSON(self.baseAPI + "/projects/titles", function(data) { 
 			$(div).empty();
 			data.sort(compare);
 			
 			for(var i = 0; i< data.length; i++) {
-				var listOption = "<div data-id=" + data[i]._id + " class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
+				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
 				listOption += "<a href='project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
@@ -40,6 +41,21 @@ var glamPipe = function () {
 				listOption += "</div></a>\n";
 				$(div).append(listOption);
 			}
+		})
+	}
+
+	this.getProjects= function (div) {
+
+		$.getJSON(self.baseAPI + "/projects", function(data) { 
+			$(div).empty();
+			//data.sort(compare);
+			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
+
+			for(var i = 0; i< data.length; i++) {
+				html += self.genProjectRow(data[i]);
+				
+			}
+			$(div).append("</tr>" + html + "</table>");
 		})
 	}
 
@@ -82,12 +98,51 @@ var glamPipe = function () {
 					})
 				}
 				html += "</td>";
-				html += "<td><div data-id='" + projects[i]._id + "' class='wikiglyph-cross button icon boxicon'>delete</div></td>";
+				html += "<td><div data-id='" + projects[i]._id + "' class='del button icon boxicon'>delete</div></td>";
 				
 				
 			}
 			$(div).append("</tr>" + html + "</table>");
 		})
+	}
+
+	this.genProjectRow = function(project) {
+			var html = "<tr><td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
+
+			html += "<td>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type === "source")
+						html += "<div>" + node.title + "</div>";
+				})
+			}
+			html += "</td>";
+			
+			html += "<td><div>" + project.collection_count + "</div></td>";
+			
+			html += "<td><div>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type !== "collection")
+						html += "<li>" + node.nodeid + "</li>";
+				})
+			}
+			html += "</div></td>";
+			
+			html += "<td>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type === "export")
+						html += "<div>" + node.title + "</div>";
+				})
+			}
+			html += "</td>";
+			html += "<td><div data-id='" + project._id + "' class='del button icon boxicon'>delete</div></td>";
+			return html;
+			
 	}
 
 	this.getUsers = function (div) {
@@ -110,6 +165,7 @@ var glamPipe = function () {
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
 			if(data.isServerInstallation) {
+				self.desktop = false;
 				var d = {
 					url: self.baseAPI + "/auth", 
 					method:"GET", 
@@ -117,24 +173,32 @@ var glamPipe = function () {
 					error: function(data, s, xhr) {
 						console.log("not logged in");
 						$(div).html("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
+						if(cb)
+							cb(self.desktop);
 					},
 					success: function(data) {
 						console.log("Logged in");
+						self.user = data.user.local.email;
 						//console.log(data);
 						$(div).html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+			
+						if(cb)
+							cb(self.desktop);
 					}
 				}
 				$.ajax(d);
 				
-				self.desktop = false;
+				
 			} else {
 					$(div).empty();
 					self.desktop = true;
 					$(div).html("");
+					$("#version").empty().append("ver. " + data.version);
+								
+					if(cb)
+						cb(self.desktop);
 			}
-			$("#version").empty().append("ver." + data.version);
-			if(cb)
-				cb(self.desktop);
+
 
 		})
 	}	
@@ -148,10 +212,11 @@ var glamPipe = function () {
 				email:user,
 				password:pass
 			},
-			error:function() {console.log("fail")},
+			error:function() {console.log("fail"), alert("login failed!")},
 			success: function(data) {
 				console.log(data);
 				if(data.success) {
+					self.user = data.user.local.email;
 					window.localStorage.setItem("token", data.token);
 					$("#login-popup").remove();
 					$("#login").html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
@@ -176,7 +241,7 @@ var glamPipe = function () {
 				if(!data.error) {
 					console.log('created project', data.project);
 					var project = data.project._id;
-					var params = {params:{title:"data"}}
+					var params = {params:{title:"My collection"}}
 					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
 						if(!data.error)
 							window.location.href = "/project/" + project;
@@ -193,6 +258,7 @@ var glamPipe = function () {
 		console.log("starting to remove node:", $(event.target).data("id"));
         var project_id =  $(event.target).data("id");
 
+		$( "#dialog-confirm" ).empty().append("<div>Do want to remove the project? All data and files are lost.</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,
@@ -247,6 +313,7 @@ var glamPipe = function () {
 					}
 				}
 				self.setPageTitle(project.title);
+				self.project = project;
 				
 				// set first collection as current collection
 				if(self.collections.length) {
@@ -256,6 +323,7 @@ var glamPipe = function () {
 				}
 				
 				self.setCollectionCounter();
+				self.renderBreadCrumb();
 				
 				// render current collection set and its nodes
 				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
@@ -318,6 +386,14 @@ var glamPipe = function () {
 			alert("node id not found");
 	}
 
+	this.debugInfo = function (e) {
+		var node = self.getNode(e);
+		if(node) {
+			return node.renderDebug();
+		} else
+			alert("node id not found");
+	}
+
 	// called by "finished" websocket message
 	this.nodeRunFinished = function (data) {
 		var node = self.getRegularNode(data.node_uuid);
@@ -354,6 +430,8 @@ var glamPipe = function () {
 
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
+		console.log(obj.text())
+		//obj.text("cancel");
 		var types = [];
 		
 		if (obj.data("type") == "collection")
@@ -363,7 +441,7 @@ var glamPipe = function () {
 			types = ["source"]
 			
 		if (obj.data("type") == "export")
-			types = ["export", "upload"]
+			types = ["export"]
 
 		if (obj.data("type") == "process")
 			types = ["process"]
@@ -401,60 +479,87 @@ var glamPipe = function () {
             data.params[$(this).attr("name")] = $(this).val(); 
         });
         
-        if(node.type == "collection") {
-            $.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid + "?type=collection", data, function(returnedData) {
-                console.log('created node');
-                $(".holder.params").empty();
-                // point currentCollectionSet to last collection
-                self.currentCollectionSet = self.collections.length;
-                self.loadProject();
-            });
-        } else {
-			// set parent collection
-			if(self.currentCollection == null) 
-				alert("parent collection is missing");
-			else {data.collection = self.currentCollection.source.collection;
-				console.log("currentCollection on node create:", self.currentCollection.source.collection);
-				
-				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
-					console.log("node create:", returnedData);
-					if(returnedData.error) {
-						alert(returnedData.error);
-						return;
-					}
-					var node = new glamPipeNode(returnedData.node, self);
-					self.addProjectNode(node);
-					self.currentNodes[self.currentCollection.source.collection] = node;
-					self.renderCollectionSet();
-					node.open();
-					$("data-workspace .settingscontainer .settings").show();
-				});
-			}
-        }
+		// set parent collection
+		if(self.currentCollection == null) 
+			alert("parent collection is missing");
+		else {data.collection = self.currentCollection.source.collection;
+			console.log("currentCollection on node create:", self.currentCollection.source.collection);
+			
+			$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+				console.log("node create:", returnedData);
+				if(returnedData.error) {
+					alert(returnedData.error);
+					return;
+				}
+				var node = new glamPipeNode(returnedData.node, self);
+				self.addProjectNode(node);
+				self.currentNodes[self.currentCollection.source.collection] = node;
+				self.renderCollectionSet();
+				node.open();
+				$("data-workspace settingscontainer .settings").show();
+				$("data-workspace settingscontainer submitblock").show();
+			});
+		}
 	}
+
+	this.createCollection = function (e) {
+		$( "#dialog-confirm").empty().append("<label>collection name</label><input value='new collection'/>");
+        $( "#dialog-confirm").dialog({
+          resizable: false,
+          height:160,
+          title:"Add collection ",
+          modal: true,
+          buttons: {
+            "Add": function() {
+                $( this ).dialog( "close" );
+				var title = $( "#dialog-confirm input").val();
+				var data = {"params":{"title":title}};
+				$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/collection_basic?type=collection", data, function(returnedData) {
+					console.log('created node');
+					$(".holder.params").empty();
+					// point currentCollectionSet to last collection
+					self.currentCollectionSet = self.collections.length;
+					self.loadProject();
+				}); 
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+       
+
+	}
+ 
 
 	this.renderDataHeader = function () {
 		$("#data-header").empty().append(self.currentCollection.source.title);
 	}
 
-
+	this.renderBreadCrumb = function () {
+		$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+	}
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
 		
-		
-		 $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
+		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
 			self.currentCollection.fields = data; 
-			var html = "";
-			html += "<collectionset>"
-			
+
 			if(self.currentCollection) {
 				var collection = self.currentCollection;
-				html += collection.renderNode();
-			
+				
+				// render collection
+				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span></div>";
+				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
+				$("pipe .collection").empty().append(col_html);
+
+				var html = "";
+				html += "<collectionset>"
+
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "	<div><span class='title sectiontitle'>Data sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 				 
 				html += self.renderNodes(collection,["source"]);
@@ -463,7 +568,7 @@ var glamPipe = function () {
 				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
-				
+
 				html += self.renderNodes(collection, ["process"]);
 				
 				html += "  <div class='sectiontitleblock'>"
@@ -480,12 +585,12 @@ var glamPipe = function () {
 
 				html += self.renderNodes(collection, ["view"]);
 
-				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
-				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-				html += "  </div><div class='holder params'></div>"
+				//html += "  <div class='sectiontitleblock'>"
+				//html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
+				//html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				//html += "  </div><div class='holder params'></div>"
 
-				html += self.renderNodes(collection, ["meta"]);
+				//html += self.renderNodes(collection, ["meta"]);
 			}
 			html += "</collectionset>"
 			
@@ -493,6 +598,7 @@ var glamPipe = function () {
 			$(self.nodeHolderDiv).empty();
 			$(self.nodeHolderDiv).append(html);
 				
+			
 		})
 	}
 	
@@ -514,12 +620,16 @@ var glamPipe = function () {
 
 	// COLLECTION CHOOSER
 	this.showCollections = function (e) {
-		console.log(self.collections);
-		
-		//var obj = $(e.target).parent();
-		//for (var i = 0; i < self.collections.length; i++) {
-			//obj.append("<div class='col_choose'>collection:" + self.collections[i].source.title + "</div");
-		//}
+		//console.log(self.collections);
+		$(self.collectionListDiv).empty()
+		console.log(self.collections.length);
+		for (var i = 0; i < self.collections.length; i++) {
+			var title = "no title";
+			if(self.collections[i].source.title !== "")
+				title = self.collections[i].source.title;
+			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
+		}
+		$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
 	}
 
 	
@@ -535,6 +645,7 @@ var glamPipe = function () {
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet]; 
 			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.renderBreadCrumb();
 			self.renderCollectionSet();
 			if(self.currentNodes[self.currentCollection.source.collection])
 				self.currentNodes[self.currentCollection.source.collection].open(); 
@@ -552,6 +663,7 @@ var glamPipe = function () {
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
 			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.renderBreadCrumb();
 			self.renderCollectionSet();
 			if(self.currentNodes[self.currentCollection.source.collection])
 				self.currentNodes[self.currentCollection.source.collection].open(); 
@@ -562,12 +674,55 @@ var glamPipe = function () {
 		}
 	}
 
+	this.chooseCollection = function(index) {
+		self.currentCollectionSet = parseInt(index)
+		self.setCollectionCounter();
+		self.currentCollection = self.collections[self.currentCollectionSet];
+		self.pickedCollectionId = self.currentCollection.source.collection;
+		self.renderBreadCrumb();
+		self.renderCollectionSet();
+		if(self.currentNodes[self.currentCollection.source.collection])
+			self.currentNodes[self.currentCollection.source.collection].open(); 
+		else
+			self.currentCollection.open();
+							
+		console.log("currentCollection = ", self.currentCollection.source.collection);
+	}
 
 	this.updateDocument = function (data, cb) {
 		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id, data, function( response ) {
 			console.log(response);
 			cb();
 		})
+	}
+
+	this.deleteDocument = function(event) {
+		var doc_id = $(event.target).data("id");
+		console.log(self.currentCollection.source);
+		$( "#dialog-confirm" ).empty().append("<div>Are you sure?</div>");
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:160,
+          title:"Deleting document " + doc_id,
+          modal: true,
+          buttons: {
+            "Delete document": function() {
+                $( this ).dialog( "close" );
+                var params = {};
+                $.delete(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + doc_id, params, function(retData) {
+                    console.log('document deleted');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+						$(event.target).parents("tr").remove();                        
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
 	}
 
 	this.openDynamicFieldSelector = function (event, source) {
@@ -598,8 +753,18 @@ var glamPipe = function () {
 
                 }
             html += "</ul>"
-                
             
+            // add select
+            html = "<select>";
+                
+                for (var i = 0; i < data.sorted.length; i++) {
+                    var key = data.keys[data.sorted[i]];
+                    html += "<option class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</option>";
+
+                }
+            html += "</select>";  
+            
+                      
             // open dialog
             $("#dynamic-fields").empty();
             $("#dynamic-fields").append(html);
@@ -679,6 +844,7 @@ var glamPipe = function () {
 	this.removeNode = function (event) {
         var obj = $(event.target);
         var node_id = obj.closest(".node").data("id");
+        $( "#dialog-confirm" ).empty().append("<div>Do you want to remove node?</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,

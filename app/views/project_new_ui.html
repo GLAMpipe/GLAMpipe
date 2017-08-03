@@ -1,174 +1,86 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>GLAMpipe</title>
-<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="/js/knockout.js"></script>
-<script type="text/javascript" src="/js/funcs.js"></script>
-<script type="text/javascript" src="/js/project.js"></script>
-<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
-<script type="text/javascript" src="/js/require.js"></script>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>GLAMpipe style</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,500,500i,700,700i" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="../css/jquery-ui.css" />
+		<link rel="stylesheet" type="text/css" href="../css/wikiglyphs.css">
+		<link rel="stylesheet" type="text/css" href="../css/style-new.css" />
+		<script type="text/javascript" src="../js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
 
+		<script type="text/javascript" src="../js/glampipe.js"></script>
+		<script type="text/javascript" src="../js/node-repository.js"></script>
+		<script type="text/javascript" src="../js/glamPipeDataTable.js"></script>
+		<script type="text/javascript" src="../js/glamPipeNode.js"></script>
+		<script type="text/javascript" src="../js/ui_project.js"></script>
 
-<link rel="stylesheet" type="text/css" href="/css/metapipe.css" />
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
+		<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
 
+	</head>
 
-<script type="text/html" id="node-collection-template">
-	
-	<div class="pipe">
-		<!-- ko template: { name: 'node-template', foreach: $root.projectNodes } -->
-
-		<!-- /ko -->
-	</div>
-
-</script>
-
-
-<script type="text/html" id="node-template">
-	<!-- ko if: params.collection == $parent.collection -->
-	<div data-bind="attr:{id:_id, 'data-collection':collection},css:type" class="block node draggable"> 
-		<div class="delete_icon" data-bind="click:$root.deleteNodeConfirm">X</div>
-		<div class="drag_icon"><img src="../images/drag.png"/></div>
-		
-		<h2 class="pointer" data-bind="click:$root.selectNode, html:type.toUpperCase() +': '+ title "></h2> 
-		
-
-
-		<div class="delete_confirm" style="display:none">
-			<button class="delete warning" data-bind="click:$root.reallyDeleteNode">Really delete?</button>
-			<button class="good" data-bind="click:$root.cancelDeleteNode">No delete, no!</button>
-		</div>
-		
-		<!-- ko if: type == 'collection' --> 
-		<div>
-				<button data-bind="click: $root.openSourceCreator" class="left">add source</button> 
-				<button data-bind="click: $root.openCreator" class="right">add node</button> 
-				<div class="clear"></div>
-		</div>
-		<!-- /ko -->
-
-		<div data-bind="html:$root.nodeInfo($data)"></div>
-		<div class="clear"></div>
-
-	</div>
-	<!-- /ko -->
-
-</script>
-
-
-<script type="text/html" id="tab-template">
-	
-
-	<div class="node_settings" data-bind="attr:{id:'tab-settings-'+_id}">
-
-		<div class="node_bar" data-bind="css:type">
-			<h2 data-bind="click:$root.displaySettings, html:type.toUpperCase() +': '+ title + ' (click for settings)'"></h2>
-
+	<body class="vbox">
+		<header>
+			<a href="/"><span class="title sitetitle">GLAMpipe</span></a>
+			<span id="version">version</span>
+			<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
+			<div id="login"></div>
+			<div id="node-status"></div> <!-- out.say('progress') in node script prints here.-->
+		</header>
+		<content class="main hbox space-between">
 			
-			
-			<div class="params_wrapper">
-				<div class="params" data-bind="html:$root.nodeParams($data)"></div>
-			</div>
-			
-			<div class="settings_wrapper">
-				<div class="node_info">
-					<div data-bind="html:description"></div>
-				</div>
-				<div class="settings" data-bind="html:$root.getSettings($data)"></div>
-				
-				<!-- ko if: type != 'collection' &&  type != 'view' --> 
-				<div>
-					<button data-bind="attr:{id:_id}" class="left run">run!</button>
-					<div class="node_console"></div>
-				</div>
-				<div class="clear"></div>
-				<!-- /ko -->
-			</div>
-			
-
-
-		</div>
-	</div>
-
-</script>
-
-
-</head>
-
-<body>
-   
-	<!-- PROJECT HEADER -->
-	<div id="project_header">
-		<h2 class="inline_header"><a href="/" title="back to projects"><</a></h2>
-		<h2 class="inline_header" id="project_title"></h2>
-		 <button data-bind="click: openCollectionCreator" class="right" >add collection</button>
-	</div>
-  
-	
-	<!-- PROJECT NODES -->
-	<div class="collection_pipe">
-		<!-- ko template: { name: 'node-collection-template', foreach: projectCollections } -->
-		<!-- /ko -->
-	</div>
-
-
-	
-	
-	<!-- VIEW TABS -->
-	<div id="collection_view">
-		<div id="node-settings">
-			<!-- NODE SETTINGS -->
-			<!-- ko template: { name: 'tab-template', foreach: projectNodes } -->
-			<!-- /ko -->
-		</div>
-        <div class="IframeWrapper">
-			<iframe id="iframe_view" class="iframetab" src="">Load Failed?</iframe>
-        </div>
-	</div>
-
-
-	<!-- NODE CREATOR -->
-	<div id="node_creator" title="Choose node" class="node_creator">
-		<!-- ko foreach: collection -->
-		<div data-bind="attr:{id:_id.type + '_node', class:_id.type}">
-			<h2 data-bind="text: _id.type,click:$parent.openNodeTypes"></h2>
-			<p class="nodetype_description" data-bind="html:_id.description"></p>
-			<div data-bind="foreach: subtypes" class="node_types" style="display:none">
-				<div data-bind="attr:{id:sub.subtype + '_node', class:sub.subtype}">
-					<h3 data-bind="text: sub.subtype"></h3>
-					<div class="node_types" >
-						<ul data-bind="foreach: nodes" class="node_types">
-							<!-- ko if: status == 'usable' || status == 'works' || status == 'test'--> 
-							<li>
-								<div data-bind="html:title + ' (' + status + ')' , click:$root.openNodeParams"></div>
-								
-								<div data-bind="html:params" ></div>
-							</li>
-							<!-- /ko -->
-							
-						</ul>
+			<pipe>
+				<div class="breadcrumbblock">
+					<div>
+						<div class="boxtag">MyProject > </div>
+					</div>
+					<div class="boxright"> 
+						<div id="collection-list-container"></div>
+						<a id="collection-list" href="#">
+							<div title="collection list" class="wikiglyph wikiglyph-stripe-menu icon" aria-hidden="true"></div>
+						</a>
+						<div title="previous collection" id="collection-prev" class="wikiglyph wikiglyph-caret-left icon" aria-hidden="true"></div>
+						<div id="collection-switch">1 / 1</div>
+						<div title="next collection" id="collection-next" class="wikiglyph wikiglyph-caret-right icon" aria-hidden="true"></div>
 					</div>
 				</div>
-			</div>
-		</div>
-		<!-- /ko -->
-	</div>
+				
+				<div class="pagetitleblock collection">
+				</div>
 
-	<!-- DYNAMIC FIELDS DIALOG -->
-	<div id='dynamic_fields'></div>
-
-	<!-- FOOTER AND CONSOLE -->
-	<div id="footer">
-		<div id="console"></div>
-	</div>
-
-
-	<div id="dialog-confirm" title="Delete node?">
-	  <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure?</p>
-	</div>
-
-</body>
+				<!-- project nodes -->
+				<div class="nodeset"></div>
+			</pipe>
+			
+			<data-workspace>
+				<settingscontainer>
+					<settingsheader>
+						<div class="title settingstitle">Settings for ...</div>
+						<div class="wikiglyph wikiglyph-caret-down icon boxicon" aria-hidden="true"></div>
+					</settingsheader>
+					<settingsblock>
+						<div class="settings"></div>  <!-- settings for running node are rendered here -->
+					</settingsblock>
+					<submitblock>
+					</submitblock>
+					
+				</settingscontainer>
+			  
+				<datacontainer>
+					<dataheader>
+						<data-controls></data-controls> <!-- paging controls, visible keys etc. -->
+						<!-- <div class="title settingstitle">Data for BL Pics</div> -->
+					</dataheader>
+					<datablock>
+					
+					</datablock>
+					
+				</datacontainer>
+		  </data-workspace>
+		</content>
+		<div id="dialog-confirm" style="display:none">Are you sure?</div>
+		<div id="cell-display"></div>
+		<div id="dynamic-fields"></div>
+	</body>
 </html>

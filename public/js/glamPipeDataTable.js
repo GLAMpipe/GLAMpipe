@@ -10,8 +10,8 @@ var dataTable = function (node) {
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
 	this.maxInputLength = 30; // limit whether input rendered as input or textarea on cell edit
 	
-	this.dataDisplayDiv 	= "data-workspace data data-display";
-	this.dataControlsDiv 	= "data-workspace data data-controls";
+	this.dataDisplayDiv 	= "data-workspace datablock";
+	this.dataControlsDiv 	= "data-workspace dataheader data-controls";
 	this.keySelectorDiv 	= "#field-selector";
 	this.baseAPI = node.baseAPI;
 
@@ -146,7 +146,7 @@ var dataTable = function (node) {
 		// edit, search, visible fields buttons 
 		html += "<div class='boxright' style='float:right'> ";
 		html += "    <div id='data-expand' class='wikiglyph wikiglyph-edit icon' aria-hidden='true' title='edit'></div>";
-		html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
+		//html += "    <div id='data-expand' class='wikiglyph wikiglyph-eye-lid icon' aria-hidden='true' title='expand cells'></div>";
 		html += "    <div id='data-search' class='wikiglyph wikiglyph-magnifying-glass icon' aria-hidden='true' title='search (not implemented)'></div>";
 		html += "    <div id='data-chooser' class='wikiglyph wikiglyph-stripe-menu icon' aria-hidden='true' title='visible fields'></div>";
 		html += "  </div>";
@@ -226,6 +226,13 @@ var dataTable = function (node) {
 	// displays data in table format
 	this.renderTablePage = function () {
 
+
+		if(self.node.data.docs.length == 0) {
+			var html = "<div class='fatbox'><h2>This collection is empty</h2><br><div>Add data source to get something to look at :)</div></div>";
+            $(self.dataDisplayDiv).empty().append(html);
+            return;
+        }
+
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
 		var html = "<table id='data' class='documents'><thead><tr>";
@@ -261,8 +268,6 @@ var dataTable = function (node) {
 
 	this.renderDataTable = function (config) {
 
-		if(self.node.data.docs.length == 0)
-			return "<h2>This collection is empty</h2><p>Add source node to get something to look at :)</p>";
 
 		// check if node wants to render data itself
 		if(self.node.source.scripts.view) {
@@ -293,9 +298,9 @@ var dataTable = function (node) {
 		var html = "";
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>run only this</div></td>";
+				html += "<td><div data-id='" + data._id + "' class='button run_single'>run for this</div></td>";
 			else
-				html += "<td>" + self.getRowIndex(key_index) + "</td>";
+				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
 			if(config && config.input_keys.indexOf(key_name) !== -1)
@@ -702,6 +707,7 @@ var dataTable = function (node) {
 		// edit mode
 		$("data-workspace").on('click','data-controls .wikiglyph-edit', function(e) {
 			$("data-workspace table tbody td div.edit").toggle();
+			$("data-workspace table tbody td div.delete").toggle();
 			self.editMode = !self.editMode;
 		})
 
@@ -777,6 +783,11 @@ var dataTable = function (node) {
 		// edit cell content
 		$("data-workspace").on('click','table tbody td div.edit', function(e) {
 			self.editCell(e);
+		});
+
+		// edit cell content
+		$("data-workspace").on('click','table tbody td div.delete', function(e) {
+			self.node.gp.deleteDocument(e);
 		});
 
 		// run node with single document

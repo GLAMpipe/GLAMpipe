@@ -69,8 +69,8 @@ var glamPipeNode = function (node, gp) {
 
 	
 	this.runFinished = function () {
-		$(".settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
-		$(".settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
+		//$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
+		//$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
 		
 		// we open node only if it is not a subnode of metanode
@@ -128,12 +128,12 @@ var glamPipeNode = function (node, gp) {
 	// render data with node spesific settings and display node settings
 	this.open = function (config) {
 		if(self.source.type == "collection") {
-			$("data-workspace .settingscontainer").hide();
+			$("data-workspace settingscontainer").hide();
 			self.display.render();
 		} else {
 			self.renderSettings();
 			self.display.render();
-			$("data-workspace .settingscontainer").show();
+			$("data-workspace settingscontainer").show();
 		}
 			
 	}
@@ -144,12 +144,12 @@ var glamPipeNode = function (node, gp) {
 		self.orphan_fields = [];
 		var node_in_keys = [];
 		self.orphan = "";
-		console.log(self.source.params)
+		//console.log(self.source.params)
 		for(var key in self.source.params) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
 				node_in_keys.push(self.source.params[key]);
 		}
-		console.log(node_in_keys);
+		
 		for(var i = 0; i < node_in_keys.length; i++) {
 			
 			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
@@ -176,11 +176,15 @@ var glamPipeNode = function (node, gp) {
 			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
+			
+		//var html = "<div class='box node' data-id='" + self.source._id + "'>"
 		var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
-		html +=   "  <div class='boxleft'>"
+		html +=   "  <div class='boxleft'>";
+		
 		if(self.orphan_fields.length)
 			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";
-		html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
+			
+		//html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
 		if(self.source.params.title && self.source.params.title != "") 
 			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
@@ -197,7 +201,14 @@ var glamPipeNode = function (node, gp) {
 
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
+
+		var run_button_text = "run for all documents";
+		if(self.source.type === "source")
+			run_button_text = "import data";
+		if(self.source.type === "export")
+			run_button_text = "export data";
 		
+
 		if(self.orphan) {
 			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
 			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
@@ -205,35 +216,57 @@ var glamPipeNode = function (node, gp) {
 			
 			
 		} else {
-			
+
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("data-workspace .settings").empty();
-			$("data-workspace .settings").append("<div class='params box right'><button class='run-node' data-id='" + self.source._id + "'>run</button></div>");
+			
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
 			
-			if(self.debug) {
-				$("data-workspace .settings").append("<div class='debug box right'><table><tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr><tr><td>_id:</td><td>" + self.source._id + "</td></tr></table></div>");
-			}
-			
-			// render parameters
-			var params_table = "<table><tbody>";
-			for(key in self.source.params) {
-				params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
-			}
-			params_table += "</tbody></table>";
-			$("data-workspace .settings .params").append(params_table);
-			
-			if(self.source.scripts.settings) {
-				var settingsScript = new Function('node', self.source.scripts.settings);
-				settingsScript(self.source);
-			}
-			
-			self.setSettingValues();
+
+			var collection = gp.currentCollection.source.params.collection;
+
+			// fetch fields
+			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
+				if(data.error)
+					alert(data.error);
+				var options = [];
+				for(var i = 0; i < data.sorted.length; i++) {
+					options.push("<option>" + data.sorted[i] + "</option>");
+				}
+				
+				// populate field selects
+				$(".settings select.dynamic_field").each(function(i) {
+					$(this).append(options.join(""));
+				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
+				})	
+
+				// execute node's settings.js if exists
+				if(self.source.scripts.settings) {
+					var settingsScript = new Function('node', self.source.scripts.settings);
+					settingsScript(self.source);
+				}
+
+				self.setSettingValues();
+			})
 		}
-		
 	}
 
+
+	this.renderDebug = function() {
+			
+		// render parameters
+		var params_table = "<table><tbody>";
+		for(key in self.source.params) {
+			params_table += "<tr><td>" + key + ":</td><td> " + self.source.params[key] + "</td></tr>";
+		}
+		params_table += "<tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr>";
+		params_table += "<tr><td>_id:</td><td>" + self.source._id + "</td></tr>";
+		params_table += "</tbody></table>";
+		return "<div class='debug right'>"+params_table+"</div>";
+	
+	}
 
 	this.setSettingValues = function () {
 		var data = self.source;
