@@ -132,12 +132,32 @@ exports.countDocs = function (collectionname, query, callback) {
 			console.log(err);
 			callback("error in count");
 		} else {
-			console.log("COUNT:", count)
 			callback(count.toString());
 		}
 	});
 }
 
+
+
+
+exports.findProjectNode = function (node_id, callback) {
+	
+	var collection = db.collection("mp_projects");
+	var query = {nodes:{$elemMatch:{_id:mongojs.ObjectId(node_id)}}};
+
+	collection.findOne(query, {title:1, "nodes.$":1}, function (err, result) {
+		if (err) {
+			console.log("ERROR:", err);
+			callback(err, result)
+		} else {
+			callback(err, result);
+		}
+	}); 
+
+	//exports.findOne (query, "mp_projects", function (err, node) {
+		//callback(err, node);
+	//})
+}
 
 
 
@@ -207,9 +227,9 @@ exports.update = function (collectionname, query, doc, callback) {
 	collection.update(query, doc , {multi:true}, function (err, result) {
 		if (err) {
 			console.log(err);
-			callback(err);
+			callback(err, result);
 		} else {
-			callback();
+			callback(null, result);
 		}
 	}); 
 }
@@ -229,10 +249,40 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 	}); 
 }
 
+exports.updateById = function (collectionname, doc_id, doc, callback) {
+
+	var collection = db.collection(collectionname);
+	var query = {_id: mongojs.ObjectId(doc_id)};
+	console.log(query)
+	//doc = {"$set":{"dc_contributor_author":"koira"}}
+	console.log(doc);
+	collection.update(query, doc , {multi:true}, function (err, result) {
+		if (err) {
+			console.log(err);
+			callback(err);
+		} else {
+			console.log(result);
+			callback();
+		}
+	}); 
+}
+
+// add empty fields to collection
 exports.addFieldToCollection = function (collectionname, field, cb) {
 	var add = {};
-	add[field] = null;
-	var update = {$set:add}
+	var update = {};
+	if(Array.isArray(field))
+		field.forEach(function(f) {if(f) add[f] = null});
+	else
+		if(f)
+			add[field] = null;
+			
+	
+	if(Object.keys(add).length)
+		update = {$set:add}
+	else
+		return cb();
+		
 	exports.update(collectionname, {}, update, cb);
 	
 }
@@ -250,7 +300,7 @@ exports.remove = function (doc_id, collectionname, callback) {
 			console.log(err);
 			callback({'error':err})
 		} else {
-			console.log('Removed');
+			console.log('DB: removed ' + doc_id);
 			callback(null, {status:'ok'});
 		}
 	}); 
@@ -320,15 +370,21 @@ exports.updateAll = function (collectionname, query, callback) {
 exports.nodes = function (callback) {
 
 	var collection = db.collection("mp_nodes");
+	var tags = {}
+	if(global.config.tags && Array.isArray(global.config.tags))
+		tags = {tags:{$in:global.config.tags}}
 
 	collection.aggregate([
 
+		// filter by tags
+		{$match:tags},
 		// group by subtype
 		{$group : {_id: {subtype:"$subtype", type:"$type"}, description : { $first: "$type_desc" },"nodes": {$push: {
 			title:"$title",
             status:"$status",
 			nodeid:"$nodeid",
 			type:"$type",
+			tags:"$tags",
 			subtype:"$subtype",
 			description: "$description",
 			views:"$views",
@@ -357,60 +413,52 @@ exports.group = function (node, array, callback) {
 	project[node.params.in_field] = 1;
 	project["_id"] = 1;
 	var project2 = { count:1, ids: 1, _id: 0 };
+	var project2 = { count:1, _id: 0 };
 	project2[node.params.in_field] = "$_id";	// preserve original field name
+	
+	if(array)
+		var unwind = {$unwind: field_name};
+	else
+		var unwind = {};
 
-	// we fist try group with array
-	if(array) {
-		collection.aggregate([
-			{$project: project},
-			{$unwind: field_name},
-			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-			{$project: { _id: 0, "name": "$_id", ids: 1, count:1 } },
-			{$sort: { count: 1 }}
-			// use $out for mongo 2.6 and newer
-			],
-			function (err, data) {
-				if(err) {
-					
-					// did not work, try with non-array
-					console.log("trying witn non-array");
-					collection.aggregate([
-						// {"$match": {"author":{"$ne": ""}} },
-						{$project: project},
-						{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-						{$project: project2 },
-						{$sort: { count: -1 }}
-						// use $out for mongo 2.6 and newer
-						],
-						function (err, data) {
-							if(err)
-								console.log(err);
-							callback(data);
-						}
-					)
-				} else {
-					callback(data);
-				}
-			}
-		)
-	} else {
-		collection.aggregate([
-			// {"$match": {"author":{"$ne": ""}} },
-			{$project: project},
-			{$group : {_id: field_name, count: {$sum:1}, "ids": {$push: "$_id"}}}, 
-			{$project: project2 },
-			{$sort: { count: -1 }}
-			// use $out for mongo 2.6 and newer
-			],
-			function (err, data) {
-				if(err)
-					console.log(err);
+
+	collection.aggregate([
+		{$project: project},
+		{$unwind: field_name},
+		{$group : {_id: field_name, count: {$sum:1}}}, 
+		{$project: { _id: 0, "name": "$_id", count:1 } },
+		{$sort: { count: 1 }}
+		// use $out for mongo 2.6 and newer
+		],
+		function (err, data) {
+
+			if(err) {
+				console.log(err.message);
+				// did not work, try with non-array
+				console.log("trying witn non-array");
+				collection.aggregate([
+					// {"$match": {"author":{"$ne": ""}} },
+					{$project: project},
+					{$group : {_id: field_name, count: {$sum:1}}}, 
+					{$project: project2 },
+					{$sort: { count: -1 }}
+					// use $out for mongo 2.6 and newer
+					],
+					function (err, data) {
+						if(err)
+							console.log(err);
+						callback(data);
+					}
+				)
+			} else {
 				callback(data);
 			}
-		)
-	}
+		}
+	)
+
 
 }
+
 
 // facet counts (double grouped also)
 exports.facet = function (req, callback) {
@@ -591,6 +639,7 @@ exports.getProjectNode = function (id, callback) {
 exports.dropCollection = function (collectionName, callback) {
 	var collection = db.collection(collectionName);
 	collection.drop(function (err) {
+		console.log("DB: dropped collection " + collectionName )
 		callback(err);
 	});
 }
@@ -610,10 +659,10 @@ function createParamsObject(arrayName, params) {
 		  result[arrayName + ".$." + p] =  params[p];
 		} 
 	}
-    console.log("******************************");
-    console.log(params);
-    console.log(result);
-    console.log("******************************");
+    //console.log("******************************");
+    //console.log(params);
+    //console.log(result);
+    //console.log("******************************");
 	return result;
 }
 

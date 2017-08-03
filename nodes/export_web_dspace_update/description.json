@@ -5,6 +5,7 @@
     "subtype": "web",
     "subsubtype": "dspace_update",
     "status": "usable",
+    "tags":["dspace"],
     "description": "Update DSpace data via REST API",
 
     "scripts": {

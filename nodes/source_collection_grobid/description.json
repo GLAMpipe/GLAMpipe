@@ -5,6 +5,7 @@
     "subsubtype": "grobid",
     "title": "GROBID",
     "status": "rubbish",
+    "tags":["library", "grobid"],
     "usage":"",
     "description": "Extracts references from academic articles",
     

@@ -32,10 +32,11 @@ exports.collectionToFile = function (node, sandbox, io) {
 		
 		// tell node how many records was found
 		sandbox.context.doc_count = doc.length;
-		nodescript.runNodeScriptInContext("init", node, sandbox, io);
+		//nodescript.runNodeScriptInContext("init", node, sandbox, io);
 
 		async.eachSeries(doc, function iterator(doc, next) {
 			joinMultipleValues(doc, node.settings.arr_sep);
+			//nodescript.runNodeScriptInContext("run", node, sandbox, io);
 			writer.write(doc);
 			next();			
 
@@ -52,14 +53,18 @@ exports.collectionToFile = function (node, sandbox, io) {
 // join
 function joinMultipleValues (doc, arr_sep) {
 	for(var key in doc) {
-		if(Array.isArray(doc[key])) {
-			// if there are more than one row in array, then join them
-			if(doc[key].length > 1) {
-				var joined = doc[key].join(arr_sep);
-				delete doc[key];
-				doc[key] = joined;
+		
+		if(key === '__mp_source' || key === '_id') {
+			delete doc[key];
+		} else {
+			if(Array.isArray(doc[key])) {
+				// if there are more than one row in array, then join them
+				if(doc[key].length > 1) {
+					var joined = doc[key].join(arr_sep);
+					delete doc[key];
+					doc[key] = joined;
+				}
 			}
-
 		}
 	}
 }

@@ -1,10 +1,11 @@
 {
     "nodeid": "export_web_omeka_s_additem",
-    "title": "Omeka-s: create items",
+    "title": "Omeka-S: create items",
     "type": "export",
     "subtype": "web",
     "subsubtype": "omeka_additem",
     "status": "usable",
+    "tags":["omeka-s"],
     "description": "Creates new items via REST api",
 
     "scripts": {

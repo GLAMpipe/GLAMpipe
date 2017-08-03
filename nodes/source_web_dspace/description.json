@@ -5,6 +5,7 @@
     "subsubtype": "two_rounds",
     "title": "DSpace 6: collection import",
     "status": "usable",
+    "tags":["dspace"],
     "usage":"",
     "description": "Import metadata from DSpace.",
     

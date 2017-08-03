@@ -1,44 +1,49 @@
 
 // outputs an array of metadata objects
 
-var uuid_value 		= context.doc[context.node.settings.uuid_field];
-var update_value 	= context.doc[context.node.settings.update_field];
-var original_value  = context.doc[context.node.settings.original_value];
-var language_value 	= context.doc[context.node.settings.language_field];
-var original_field 	= context.node.params.original_field; // field to be updated
+var uuid_value 		= context.doc[context.node.params.in_uuid_field];
+var update_value 	= context.doc[context.node.params.in_update_field];
+var language_value 	= context.doc[context.node.params.language_field];
+var original_value  = context.doc[context.node.params.in_original_value];
+var original_field 	= context.node.params.dspace_field; // field to be updated
 
 
-out.value 		= [];
+var update = [];
+var url =  context.node.params.url + "/items/" + uuid_value + "/metadata";
 
 
 if(!uuid_value || !context.validator.isUUID(uuid_value+""))
 	out.error = "UUID is not valid: " + uuid_value;
 
-
-// if original value and new value are the same, then we do not update
-if (context.node.settings.original_value && Array.isArray(update_value)) {
+// if original value is provided, then we update only when there is a difference between values
+if (context.node.params.in_original_value && Array.isArray(update_value) &&  Array.isArray(original_value)) {
 
 	var is_same = (update_value.length == original_value.length) && update_value.every(function(element, index) {
 		return element === original_value[index]; 
 	});
 
 	if(is_same) {
-		out.value = null;
-		out.url = null;
+		context.skip = true;
+		update = null;
 	} else {
-		out.console.log("setting values")
-		createNewVal(out.value);
-		out.console.log(out.value)
-		out.url =  context.node.params.dspace_url + "/items/" + uuid_value + "/metadata";
+		createNewVal(update);
+		
 	}
-	
+// else just update
 } else {
 // create new metadata object
-	createNewVal(out.value);
+	createNewVal(update);
 
-	out.url =  context.node.params.dspace_url + "/items/" + uuid_value + "/metadata";
 }
 
+
+
+out.pre_value = {
+	url: url,
+	json: update,
+	method: "put",
+	jar:true
+};
 
 
 // FUNCTIONS

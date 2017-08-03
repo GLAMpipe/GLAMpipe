@@ -1,0 +1,18 @@
+{
+    "nodeid": "source_web_eprints",
+    "title": "EPRINTS: data import",
+    "type": "source",
+    "subtype": "web",
+    "subsubtype": "eprints",
+    "status": "test",
+    "tags":["generic"],
+    "description": "Fetch dataset from Eprints. ",
+
+    "scripts": {
+        "hello": "out.say('news', '<h2>Hello, You just added a Eprints node!</h2>'); ",
+        "bye": "out.say('news', 'Deleted Eprints source node!  Bye!'); ",
+        "finish":"out.say('finish', 'Data fetched! (' + context.vars.total_count +')' ); "
+    },
+    
+    "views": {}
+}

@@ -1,56 +1,207 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
-var path        = require('path');
-var mongoquery 	= require("../app/mongo-query.js");
-var collection = require("../app/collection.js");
+var path		= require('path');
+var mongoquery	= require("../app/mongo-query.js");
+var collection	= require("../app/collection.js");
 const MP 		= require("../config/const.js");
 
 
 var exports = module.exports = {};
 
-exports.loop = function (node, sandbox, onDoc) {
+// loop for synchronous nodes and export nodes (export is done once per document)
+exports.documentLoop = function (node, sandbox, onDoc) {
 	
+
+	var query = {};
+	// ONE DOC (single run)
+	if(node.req && node.req.params.doc) {
+		console.log("LOOP: single doc")
+		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
+	}
+
+	// find everything
+	mongoquery.find2(query, node.collection, function (err, docs) {
+		
+		sandbox.context.doc_count = docs.length;
+		console.log(node.settings);
+		
+		// run node once per record
+		require("async").eachSeries(docs, function iterator (doc, next) {
+
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+
+			sandbox.context.doc = doc;
+			sandbox.context.count++;
+			sandbox.context.skip = null;
+			sandbox.out.value = null;
+			sandbox.out.setter = null;
+			sandbox.out.error = null;
+
+			try {
+				sandbox.pre_run.runInContext(sandbox);
+			} catch(e) {
+				console.log(e);
+				sandbox.out.error = "error in pre_run.js:" + e.message;
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+			
+			// call document processing function
+			onDoc(doc, sandbox, function processed () {
+				
+				//console.log("SETTER")
+				//console.log(sandbox.out.setter)
+				
+				if(Array.isArray(sandbox.out.setter))
+					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
+				
+				if(sandbox.out.setter != null) {
+					var setter = sandbox.out.setter; 
+				} else {
+					var setter = {};
+					setter[node.out_field] = sandbox.out.value;
+				}
+				//console.log("setter:", setter);
+				if(sandbox.context.skip || node.type === "meta")  {// metanodes do not save output
+					console.log("NODE: skipping")
+					next();
+				} else
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+			});
+			
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	});
+}
+
+
+
+
+// loop for running complex (asynchronous) nodes 
+// - pre_run.js is called *once* per document -> outputs an array (sandbox.pre_value)
+// - for(sandbox.pre_value)
+//       call "onDoc" 
+//           - output: sandbox.context.data
+//       call node's run.js 
+//           - processes: sandbox.context.data
+//           - output: out.setter (multiple fields) or out.value (single field)
+exports.fieldLoop = function (node, sandbox, onDoc) {
+
+	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {
-		console.log("NODE: single doc")
+		console.log("FIELD LOOP: single doc:" + node.req.params.doc)
+		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
+	}
+
+	// find everything
+	mongoquery.find2(query, node.collection, function (err, docs) {
+		
+		sandbox.context.doc_count = docs.length;
+		
+		// run node once per record
+		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
+
+			// check if user asked for termination of the node run
+			if(!node.req.query.force &&!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+
+			sandbox.context.doc = doc;
+			sandbox.context.count++;
+			sandbox.context.skip = null;
+			sandbox.out.value = null;
+			sandbox.out.setter = null;
+			sandbox.out.error = null;
 			
-		mongoquery.findOneById (node.req.params.doc, node.collection, function (doc) {
-			if(doc) {
-				sandbox.context.doc = doc;
-				sandbox.context.doc_count = 1;
-				// call document processing function
-				onDoc(doc, sandbox, function processed () {
-					console.log("sandbox.out:" + sandbox.out);
-					if(sandbox.out.setter != null) {
-						var setter = sandbox.out.setter; 
-					} else {
+			try {
+				sandbox.pre_run.runInContext(sandbox);
+			} catch(e) {
+				console.log(e);
+				sandbox.out.error = "errorin in pre_run.js:" + e.message;
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+			
+			console.log("sandbox.out.pre_value")
+			console.log(sandbox.out.pre_value)
+			
+			// check if pre_value is array
+			if(Array.isArray(sandbox.out.pre_value)) {
+				var result = [];
+				var setters = [];
+				
+				// loop over field array
+				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
+					sandbox.context.data = null;
+					
+					// call document processing function
+					onDoc(row, sandbox, function processed () {
+						if(sandbox.error)
+							console.log(sandbox.error);
+							
+						sandbox.out.setter = null;
+						sandbox.out.value = null;
+						sandbox.out.error = null;
+						sandbox.context.skip = null;
+						
+						try {
+							sandbox.run.runInContext(sandbox);
+						} catch(e) {
+							console.log(e);
+							sandbox.out.error = "errorin in run.js:" + e.message;
+							sandbox.finish.runInContext(sandbox);
+							return;
+						}
+						//console.log(sandbox.out.setter)
+						if(sandbox.out.setter)
+							setters.push(sandbox.out.setter)
+						else
+							result.push(sandbox.out.value);
+							
+						nextFieldRow();
+					});
+
+				}, function done () {
+					var setter = combineSetters(setters);
+					if(!setter) {
 						var setter = {};
+						setter[node.out_field] = result;
+					}
+
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
+				});
+				
+			} else {
+				// call document processing function
+				onDoc(sandbox.out.pre_value, sandbox, function processed () {
+					if(sandbox.error)
+						console.log(sandbox.error);
+						
+					sandbox.out.setter = null;
+					sandbox.run.runInContext(sandbox); 
+					var setter = sandbox.out.setter;
+					if(!setter) {
+						setter = {};
 						setter[node.out_field] = sandbox.out.value;
 					}
-					
-					if(sandbox.context.skip)
-						sandbox.finish.runInContext(sandbox);
-					else {
-						mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
-							sandbox.finish.runInContext(sandbox);
-						});
-					}
-				});	
-			}		
-		})
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
+				});
+			}
 
-	// LOOP ALL DOCS
-	} else {
-		loop (node, sandbox, onDoc);
-	}
-	
-	mongoquery.update("mp_projects", {_id:node.project}, {$addToSet:{"schemas": {"keys": sandbox.out.schema, "types": sandbox.out.key_type, "collection":node.collection}}}, function (error) {
-		if(error)
-			console.log(error);
-		else
-			console.log("SCHEMA saved");
-	})
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	});
 }
+
 
 
 
@@ -66,16 +217,29 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
+			
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
 
 			sandbox.context.doc = doc;
 			sandbox.context.count++;
-			//onsole.log(doc.basename);
-			sandbox.pre_run.runInContext(sandbox);
+			//console.log(doc.basename);
+			try {
+				sandbox.pre_run.runInContext(sandbox);
+			} catch(e) {
+				console.log(e);
+				sandbox.out.error = "errorin in pre_run.js:" + e.message;
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
 			
 			// call document processing function
 			onDoc(doc, sandbox, function processed () {
 				
-				//console.log("search:", sandbox.out.pre_value);
+				console.log("search:", sandbox.out.pre_value);
 				// we always set value even if there is no query
 				if(!sandbox.out.pre_value) {
 					var set_value = {};
@@ -126,6 +290,12 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 			
 			// run node once per record
 			require("async").eachSeries(docs, function iterator (doc, next) {
+				
+				// check if user asked for termination of the node run
+				if(!global.register[node.req.originalUrl]) {
+					sandbox.finish.runInContext(sandbox);
+					return;
+				}
 				sandbox.context.doc = doc;
 				sandbox.context.count++;
 				
@@ -145,6 +315,49 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 		
 
 	});
+}
+
+// import loop requests data based on array
+exports.importLoop = function (node, sandbox, onDoc) {
+
+	var async = require("async");
+
+	// empty node collection
+	mongoquery.empty(node.collection, {}, function() {
+		
+		//sandbox.context.doc_count = docs.length;
+		
+		// run node once per record
+		async.eachSeries(sandbox.context.pre_value, function iterator (url, next) {
+			
+			// check if user asked for termination of the node run
+			if(!global.register[node.req.originalUrl]) {
+				sandbox.finish.runInContext(sandbox);
+				return;
+			}
+			//sandbox.context.doc = doc;
+			sandbox.context.error = null;
+			sandbox.context.skip = null;
+			sandbox.context.count++;
+			var options = {url:url}
+			
+			// call document processing function
+			onDoc(options, sandbox, function processed (error) {
+				console.log(options);
+				sandbox.run.runInContext(sandbox);
+				if(error || sandbox.context.skip || !sandbox.out.value)
+					next();
+				else {
+					sandbox.out.value[MP.source] = node._id;
+					mongoquery.insert(node.collection, sandbox.out.value, next);
+				}
+			});
+
+		}, function done () {
+			sandbox.finish.runInContext(sandbox);
+		});
+	})
+
 }
 
 
@@ -183,103 +396,28 @@ exports.deleteLoop = function(node, sandbox, onDoc) {
 }
 
 
-// loop updates existing documents
-function loop (node, sandbox, onDoc) {
 
-	// find everything
-	mongoquery.find2({}, node.collection, function (err, docs) {
+// create one setter object for Mongo based on individual setter objects
+// NOTE: this assumes that setter objects have identical keys
+function combineSetters(setters) {
+	if(Array.isArray(setters) && setters.length) {
+		var keys = Object.keys(setters[0]);
+		var c_setter = {};
+		keys.forEach(function(key) {
+			c_setter[key] = [];
+		})
 		
-		sandbox.context.doc_count = docs.length;
-		console.log(node.settings);
-		
-		// run node once per record
-		require("async").eachSeries(docs, function iterator (doc, next) {
-
-			sandbox.context.doc = doc;
-			sandbox.context.count++;
-			
-			// call document processing function
-			onDoc(doc, sandbox, function processed () {
-				if(sandbox.out.setter != null) {
-					var setter = sandbox.out.setter; 
-				} else {
-					var setter = {};
-					setter[node.out_field] = sandbox.out.value;
-				}
-				//console.log("setter:", setter);
-				if(sandbox.context.skip)
-					next();
-				else
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-			});
-
-		}, function done () {
-			sandbox.finish.runInContext(sandbox);
-		});
-	});
+		setters.forEach(function(setter) {
+			var setter_keys = Object.keys(setter);
+			//console.log(setter)
+			console.log("setter_keys");
+			console.log(setter_keys);
+			setter_keys.forEach(function(s_key) {
+				c_setter[s_key].push(setter[s_key]);
+			})
+		})
+		//console.log(c_setter);
+		return c_setter;
+	} else
+		return null;
 }
-
-
-// loop updates existing documents and call node asynchronously *on every row* of array
-exports.fieldLoop = function (node, sandbox, onDoc) {
-
-	var query = {};
-	// ONE DOC
-	if(node.req && node.req.params.doc) {
-		console.log("NODE: single doc")
-		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
-	}
-
-	// find everything
-	mongoquery.find2(query, node.collection, function (err, docs) {
-		
-		sandbox.context.doc_count = docs.length;
-		console.log(onDoc);
-		
-		// run node once per record
-		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
-
-			sandbox.context.doc = doc;
-			sandbox.out.value = null;
-			sandbox.context.count++;
-			sandbox.pre_run.runInContext(sandbox);
-			console.log("sandbox.out.pre_value: " + sandbox.out.pre_value);
-			
-			// check if pre_value is array
-			if(Array.isArray(sandbox.out.pre_value)) {
-				var result = [];
-				
-				// loop over field array
-				require("async").eachSeries(sandbox.out.pre_value, function iterator (row, nextFieldRow) {
-
-					// call document processing function
-					onDoc(row, sandbox, function processed () {
-						console.log(row);
-						sandbox.run.runInContext(sandbox); // sets "context.out.value"
-						result.push(sandbox.out.value);
-						nextFieldRow();
-					});
-
-				}, function done () {
-					var setter = {};
-					setter[node.out_field] = result;
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
-				});
-				
-			} else {
-				console.log("not array");
-				// call document processing function
-				onDoc(sandbox.out.pre_value, sandbox, function processed () {
-					sandbox.run.runInContext(sandbox); // sets "context.out.value"
-					var setter = {};
-					setter[node.out_field] = sandbox.out.value;
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
-				});
-			}
-
-		}, function done () {
-			sandbox.finish.runInContext(sandbox);
-		});
-	});
-}
-

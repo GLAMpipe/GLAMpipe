@@ -8,10 +8,19 @@ var request			= require('request');
 var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
-global.config 		= require("./config/config.js");
+const version 		= require("./config/version.js");
 const env			= process.env;
 
+try {
+	global.config 		= require("./config/config.js");
+} catch(e) {
+	console.log("config.js not found or is malformed!");
+	console.log(e);
+	global.config 		= require("./config/config.js.example");
+}
 
+
+global.config.version = version.version;
 
 var GlamPipe = function() {
 
@@ -27,17 +36,21 @@ var GlamPipe = function() {
 	self.setupVariables = function() {
 
 		self.port      = 3000;
+		self.dataPath = global.config.dataPath;
+		
+		if(self.dataPath == "")
+			self.dataPath = path.join(__dirname, "glampipe-data");
+			
 		self.nodePath = global.config.nodePath;
 
-		// There should be MONGO env variables present if we were running inside docker
-		if(process.env.MONGO_PORT || process.env.DOCKER) {
+		// There should be DOCKER env variable present if we were running inside docker
+		if(process.env.DOCKER) {
 			console.log("Think I'm running in Docker/Compose, using 0.0.0.0");
 			self.ipaddress = "0.0.0.0";
-			self.dataPath = "/glampipe";
+			self.dataPath = "/glampipe-data";
 		} else {
 			console.log("Running locally, using 127.0.0.1");
 			self.ipaddress = "127.0.0.1";
-			self.dataPath = global.config.dataPath;
 		}
 	};
 
@@ -121,32 +134,46 @@ var GlamPipe = function() {
 	 * - if data path ok, load nodes
 	 * - if nodes ok, initialize server
 	 */
+	 
+	// TODO: promisify!
 	self.initialize = function(cb) {
 		self.setupVariables();
 		self.core 	= require("./app/core.js");
-	   
-		self.core.initDB(function (error) {
+		var node 	= require("./app/node.js");
+		
+		self.core.createDirIfNotExist(self.dataPath, function(error, msg) {
+			if(error) {
+				console.log(colors.red("DATAPATH problem: " + self.dataPath));
+				console.log(msg);
+				cb(error);
+			} else {
+			   
+				self.core.initDB(function (error) {
 
-			self.core.initNodes (self.nodePath, null, function() {
+					node.initNodes (self.nodePath, null, function() {
 
-				self.core.createProjectsDir(self.dataPath, function(error, msg) {
-			
-					if(error) {
-						console.log(colors.red("DATAPATH problem: " + self.dataPath));
-						console.log(msg);
-						cb(error);
-					} else {
-						global.config.dataPath = self.dataPath;
-						global.config.projectsPath = path.join(self.dataPath, "projects");
+						self.core.createDirIfNotExist(path.join(self.dataPath, "projects"), function(error, msg) {
+					
+							if(error) {
+								console.log(colors.red("DATAPATH problem: " + self.dataPath));
+								console.log(msg);
+								cb(error);
+							} else {
+								global.config.dataPath = self.dataPath;
+								global.config.projectsPath = path.join(self.dataPath, "projects");
 
-						// Create the express server and routes.
-						self.initializeServer();
-						console.log(colors.green("INIT done"));
-						cb(); 
-					}
+								// Create the express server and routes.
+								self.initializeServer();
+								console.log(colors.green("INIT done"));
+								cb(); 
+							}
+						});
+					});
 				});
-			});
-		});
+			}
+		})
+
+
 	};
 
 
@@ -173,7 +200,6 @@ var GlamPipe = function() {
 				var port = server.address().port;
 				console.log("\n********************* G L A M p i pe *************************");
 				console.log("* DATA PATH:",self.dataPath);
-				console.log("* NODE PATH:",self.nodePath);
 				console.log("* STATUS:    running on http://%s:%s", host, port);
 				console.log("********************* G L A M p i pe *************************");
 			});

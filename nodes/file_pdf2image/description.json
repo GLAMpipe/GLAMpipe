@@ -1,0 +1,32 @@
+{
+    "nodeid": "process_file_pdf2image",
+    "type": "process",
+    "subtype": "files",
+    "subsubtype": "pdf2image",
+    "title": "PDF cover image",
+    "status": "usable",
+    "tags":["pdf"],
+    "usage":"",
+    "description": "Create PDF cover image (page 0)",
+    
+    "scripts": {
+        "hello": "out.say('news', 'You added a checksum node'); ",
+        "bye": "out.say('finish', 'Bye!'); ",
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; ",
+			"out.add_display_key('checksum', 'array'); "
+		],
+		
+		"pre_run": "out.value = context.doc[context.node.params.in_field][0];" ,
+		
+        "finish":"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
+    },
+    
+    "views": {
+        "default_keys": ["name", "handle"]
+    
+    }
+  
+}

@@ -1,6 +1,10 @@
 var c = context;
 var collection_id = context.vars.collections[context.vars.initial_round_counter];
 
+// we must remove rest part from dspace_url (usually "/rest")
+var splitted = context.node.params.dspace_url.split("/");
+var dspace_url_stripped = splitted.slice(0, splitted.length-1).join("/");
+
 if (context.response && context.response.statusCode == 200 ) {
 	// count query rounds
 	c.vars.round_counter++;
@@ -50,18 +54,22 @@ if (context.response && context.response.statusCode == 200 ) {
 			}
 			
 			// BITSTREAMS expose some data from bitsream object
+			context.data[i]["bitstream_original_file_url"] = [];
+			context.data[i]["bitstream_original_name"] = [];
+			context.data[i]["bitstream_original_format"] = [];
+			context.data[i]["bitstream_thumb_file_url"] = [];
+			context.data[i]["bitstream_thumb_format"] = [];
+			
 			if (context.data[i].bitstreams && context.data[i].bitstreams.constructor.name == "Array") {
-				context.data[i]["bitstream_original_file_url"] = [];
-				context.data[i]["bitstream_original_name"] = [];
-				context.data[i]["bitstream_original_format"] = [];
 				for (var j = 0; j < context.data[i].bitstreams.length; j++) {
 					if (context.data[i].bitstreams[j].bundleName == "ORIGINAL" && context.data[i].bitstreams[j].type == "bitstream") {
-						// we must remove rest part from dspace_url (usually "/rest")
-						var splitted = context.node.params.dspace_url.split("/");
-						var dspace_url_stripped = splitted.slice(0, splitted.length-1).join("/");
 						context.data[i]["bitstream_original_file_url"].push(dspace_url_stripped + context.data[i].bitstreams[j].retrieveLink);
 						context.data[i]["bitstream_original_name"].push(context.data[i].bitstreams[j].name);
 						context.data[i]["bitstream_original_format"].push(context.data[i].bitstreams[j].format);
+					}
+					if (context.data[i].bitstreams[j].bundleName == "THUMBNAIL" && context.data[i].bitstreams[j].type == "bitstream") {
+						context.data[i]["bitstream_thumb_file_url"].push(dspace_url_stripped + context.data[i].bitstreams[j].retrieveLink);
+						context.data[i]["bitstream_thumb_format"].push(context.data[i].bitstreams[j].format);
 					}
 				}
 			}

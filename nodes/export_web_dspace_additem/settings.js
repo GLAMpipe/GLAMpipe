@@ -1,37 +1,31 @@
 
-
-var schemas = null;
-var schema_select = "<option value=''>none</option>";
+if(!node.params.url)
+	alert("Target DSpace address is missing! Re-create node and give url of the REST api.")
 
 // display current DSpace url nicely to user
 $("#export-data-dspace_serverinfo").text("Login for \"" +node.params.url+ "\"");
 
 // CREATE MAPPINGS
-
 var ignoreFields = ["id", "_id", "collection", "__mp_source"];
 
-$("#xml_basic_fetch").click(function(e){
+var url = g_apipath + "/collections/"+node.collection+"/docs?skip=0&limit=1";
 
-   var obj = $(e.target);
-   var url = "/api/v1/collections/"+node.collection+"/docs?skip=0&limit=1";
-   
-   fetchSchemas(function () {
-	   $.getJSON(url, function(data){
-		   var rec = data.data[0];
-		   var table = $('<table><th>current name</th><th>new name</th></table>');
-		   for(var f in rec){
-			   if(ignoreFields.indexOf(f) == -1 && f.indexOf("__lang") == -1) {
-					//var field=$('<tr><td><div>' +f+ '</div></td><td><input class="node-settings" name="_mapkey_'+f+'"/></td></tr>');
-					var field=$('<tr><td><div>' +f+ '</div></td><td><select class="node-settings" name="_mapkey_'+f+'">'+schema_select+'</select></td></tr>');
-					table.append(field);
-				}
-		   }
-		   $("#export_data_dspace_mappings").empty().append(table);
-	   })	   
-   })
-	   
+$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/registries/schema", function (schemas) {
+   $.getJSON(url, function(data){
+	   var rec = data.data[0];
+	   var table = $('<table><th>current field</th><th>target field</th></table>');
+	   for(var f in rec){
+		   if(ignoreFields.indexOf(f) == -1 && f.indexOf("__lang") == -1) {
+				//var field=$('<tr><td><div>' +f+ '</div></td><td><input class="node-settings" name="_mapkey_'+f+'"/></td></tr>');
+				var select = createOptions(schemas, f);
+				var field=$('<tr><td><div>' +f+ '</div></td><td><select class="node-settings" name="_mapkey_'+f+'">'+select+'</select></td></tr>');
+				table.append(field);
+			}
+	   }
+	   $("#export_data_dspace_mappings").empty().append(table);
+   })	   
+})  
 
-});
 
 
 $("#xml_basic_guess").click(function(e){
@@ -54,8 +48,13 @@ $("#export_data_dspace_fetch_collections").click(function (e) {
 	$("#export_data_dspace_coll_list").empty();
 	$("#export_data_dspace_coll_list").append("<h3>Fetching...</h3>");
 	$("#export_data_dspace_coll_list").show();
+	
+	if(!node.params.url) {
+		alert("Target DSpace url is missing!")
+		return;
+	}
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/hierarchy", function (data) {
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/hierarchy", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -76,24 +75,20 @@ $("#export_data_dspace_coll_list").on("click", "li.collection", function (event)
 })
 
 
-// CREATE SCHEMA LIST
-function fetchSchemas (cb) {
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/registries/schema", function (data) {
-		if(data.error)
-			alert(data.error);
-		else {
-			schemas = data;
-			data.forEach(function(schema) {
-				schema.fields.forEach(function(field) {
-					schema_select += "<option value='"+field.name+"'>" + field.name + "</options>"; 
-				})
-			}) 
-		}
-		cb();
+function createOptions (schemas, doc_field) {
+	var schema_select = "<option value=''></option>";
+	schemas.forEach(function(schema) {
+		schema.fields.forEach(function(schema_field) {
+
+			if(node.settings && node.settings["_mapkey_" + doc_field] && node.settings["_mapkey_" + doc_field] === schema_field.name)
+				schema_select += "<option value='"+schema_field.name+"' selected>" + schema_field.name + "</options>"; 
+			else
+				schema_select += "<option value='"+schema_field.name+"'>" + schema_field.name + "</options>"; 
+		})
 	})
+	return schema_select;
 }
-
 	
 function display (data, type) {
 	var html = "<ul>";

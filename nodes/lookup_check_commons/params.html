@@ -1,0 +1,19 @@
+
+
+<select id="process_lookup_check_commons_site" name="server">
+	<option value="prod">Production</option>
+	<option value="beta">Beta</option>
+</select>
+
+<label>SHA1 field (aka checksum)</label>
+<select class="dynamic_field" name="in_field"/>
+
+<label>Where to write the result? </label>
+<input id="process_lookup_check_commons_out" name="out_field" value="in_commons_prod"/>
+
+<script>
+	$("#process_lookup_check_commons_site").change(function() {
+		$("#process_lookup_check_commons_out").val("in_commons_" + $(this).val());
+	})
+
+</script>

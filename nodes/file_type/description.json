@@ -1,0 +1,27 @@
+{
+    "nodeid": "process_file_type",
+    "type": "process",
+    "subtype": "files",
+    "subsubtype": "type",
+    "title": "File types (extension/mime)",
+    "status": "usable",
+    "tags":["generic"],
+    "usage":"",
+    "description": "Try to find out file extensions of local files.",
+    
+    "scripts": {
+        
+        "init": 
+        [
+			"context.vars.success_counter = 0; "
+
+		],
+		
+         "finish":"out.say('finish', 'Done!'); "
+    },
+    
+    "views": {
+    
+    }
+  
+}

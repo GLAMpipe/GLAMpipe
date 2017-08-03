@@ -37,8 +37,11 @@ exports.createCollectionSchema = function (node, cb) {
 		
 		mongoquery.findOne({collection:node.collection}, "mp_schemas", function (error, doc) {
 			if(doc) {
-				mongoquery.updateSingle("mp_schemas", {collection:node.collection}, schema, function (error, doc) {
-					
+				mongoquery.remove(doc._id, "mp_schemas", function (error, doc) {
+					console.log(error);
+					mongoquery.insert("mp_schemas", schema, function(err, result) {
+						//cb(result);
+					})		
 				})
 			} else {
 				mongoquery.insert("mp_schemas", schema, function(err, result) {

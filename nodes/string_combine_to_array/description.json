@@ -1,0 +1,31 @@
+{
+	"nodeid": "process_field_combine_to_array",
+	"title": "Combine to array",
+	"type": "process",
+	"subtype": "strings",
+	"subsubtype": "string manipulation",
+    "status": "usable",
+	"description": "Combine values from fields to array.",
+	"scripts": {
+		"hello":
+		[ 
+			"out.say('news', 'You added a node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('news', 'Deleted node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting Extracting...');"
+		],
+		
+		"finish": "out.say('finish', 'Extract done!');"
+	},
+	
+	"views": {
+
+
+	}
+}

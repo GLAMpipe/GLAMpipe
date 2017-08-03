@@ -1,0 +1,29 @@
+{
+	"nodeid": "process_field_create_commons_metadata",
+	"title": "Create commons metadata",
+	"type": "process",
+	"subtype": "strings",
+	"status": "works",
+	"description": "Produce commons metadata",
+	"scripts": {
+		"hello": "out.say('news', 'You added a wikitext node'); ",
+		
+        "bye": "out.say('news', 'Deleted wikitext node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting converting to wikitext...'); ",
+			"/* set output field */",
+			"out.field = context.node.params.out_field; "
+		],
+
+
+		"finish": "out.say('finish', 'wikitext conversion done!');"
+
+	},
+	
+	"views": {
+
+
+	}
+}

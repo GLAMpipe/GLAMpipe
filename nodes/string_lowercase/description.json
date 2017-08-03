@@ -1,0 +1,23 @@
+{
+    "nodeid": "process_field_lowercase",
+    "title": "Convert to lower/upper case",
+    "type": "process",
+    "subtype": "strings",
+    "status": "usable",
+    "description": "Converts one field to lower/upper case",
+    "scripts": {
+    
+        
+        "init":
+        [
+            "out.say('progress', 'Starting lowercase node...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Done!');"
+    },
+    
+    "views": {
+
+    }
+}

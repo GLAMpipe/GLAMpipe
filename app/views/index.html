@@ -3,76 +3,83 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i" rel="stylesheet">
-<link rel="stylesheet" href="/css/wikiglyphs.css">
+<link rel="stylesheet" href="css/wikiglyphs.css">
 <title>GLAMpipe style</title>
-<link href="/css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui.css" />
+<link href="css/style-new.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" type="text/css" href="css/jquery-ui.css" />
 
-<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
-<script type="text/javascript" src="/js/data.js"></script>
-<script type="text/javascript" src="/js/glampipe.js"></script>
-<script type="text/javascript" src="/js/ui.js"></script>
+<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="js/data.js"></script>
+<script type="text/javascript" src="js/glampipe.js"></script>
+<script type="text/javascript" src="js/ui.js"></script>
 
 </head>
 
-<body class="vbox">
-  <header> <span class="title sitetitle">GLAMpipe</span> 
-	<span id="login"><a href="/login">login</a></span>
-  </header>
-  <content class="main hbox space-between">
-    <node-pipe>
-      <div class="pageheader">
-        <div class="title pagetitle">Projects</div>
-      </div>
-      <div id="project-box" class="fatbox">
-        <div class="inlinetitleblock">
-          <div><span class="title inlinetitle">Choose a project</span></div>
-        </div>
-        <div class="infotext">Choose the project you wish to work on or create a new one.</div>
-        <div id="projectList" class="optionlist"> 
-        <!-- projects are listed here -->
-        </div>
-      </div>
-      
-      
-      <div id="user-box" class="fatbox">
-        <div class="inlinetitleblock">
-          <div><span class="title inlinetitle">Choose a user</span></div>
-        </div>
-        <div class="infotext">Choose the user whose projects you would like see.</div>
-        <div id="userList" class="optionlist"> 
-        <!-- users are listed here -->
-        </div>
-      </div>
+	<body class="vbox">
+		<header>
+			<a href="/"><span class="title sitetitle">GLAMpipe</span></a>
+			<span id="version">version</span>
+			<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
+			<div id="login"></div>
+			<div id="node-status"></div> <!-- out.say('progress') in node script prints here.-->
+		</header>
+		<content class="main hbox space-between">
+			
+			<pipe>
+
+				
+				<div class="pagetitleblock collection">
+				</div>
+
+				<!-- project nodes -->
+				<div class="nodeset">
+				  <div id="user-box" class="fatbox">
+					<div class="inlinetitleblock">
+					  <div><span class="title inlinetitle">Choose a user</span></div>
+					</div>
+					<div class="infotext">Choose the user whose projects you would like see.</div>
+					<div id="userList" class="optionlist"> 
+					<!-- users are listed here -->
+					</div>
+				  </div>
+				</div>
+				
+
+				<div class="fatbox create_project">
+				  <div class="inlinetitleblock">
+					<div><span class="title inlinetitle">Create project</span></div>
+				  </div>
+				  <div class="infotext">Project contains your data, transforms, downloads etc.</div>
+				  <div class="optionlist">
+					<div class="listoption">
+					  <p class="listtitle">Title</p>
+					  <p class="listtext">
+						<label for="title"></label>
+						<input type="text" name="title" id="title" />
+					  </p>
+					</div>
+					<div id="create_project" class="button">Create project</div>
+				  </div>
+				  					<a href="http://glampipe.org">http://glampipe.org</a>
+					<div class="infotext">For GLAMs from GLAMs</div>
+				</div>
 
 
-
-    <div class="fatbox create_project">
-      <div class="inlinetitleblock">
-        <div><span class="title inlinetitle">Create project</span></div>
-      </div>
-      <div class="infotext">Project contains your data, transforms, downloads etc.</div>
-      <div class="optionlist">
-        <div class="listoption">
-          <p class="listtitle">Title</p>
-          <p class="listtext">
-            <label for="title"></label>
-            <input type="text" name="title" id="title" />
-          </p>
-        </div>
-        <div id="create_project" class="button">Create project</div>
-      </div>
-    </div>
 
     </node-pipe>
-    <data-workspace>
-        <div style="display: flex;align-items: center;justify-content: center;">
-            <img src="images/glampipe_mustache.png"/>
-        </div>
-        
-    </data-workspace>
-  </content>
-  <div id="dialog-confirm" style="display:none">Are you sure?</div>
-</body>
+				
+			</pipe>
+
+
+		<data-workspace>
+			<settingscontainer>
+			
+			<settingsheader><div class="title settingstitle">Projects</div></settingsheader>
+			</settingscontainer>
+			<div id="projectList"></div>
+		</data-workspace>
+	</content>
+	<div id="dialog-confirm" style="display:none">Are you sure?</div>
+	</body>
 </html>

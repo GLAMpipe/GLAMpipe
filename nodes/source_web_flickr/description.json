@@ -4,6 +4,7 @@
     "subtype": "web",
     "title": "Flickr: import",
     "status": "usable",
+    "tags":["generic"],
     "usage":"",
     "description": "Import image metadata from Flickr",
     

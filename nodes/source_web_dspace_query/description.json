@@ -4,6 +4,7 @@
     "subtype": "web",
     "title": "DSpace 6: query import",
     "status": "usable",
+    "tags":["dspace"],
     "usage":"",
     "description": "Import metadata from DSpace.",
     

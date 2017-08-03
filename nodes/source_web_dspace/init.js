@@ -8,7 +8,7 @@
 	context.vars.initial_round_counter = 0;
 	context.vars.round_counter = 0;
 	context.vars.record_counter = 0;
-	context.vars.offset = 20;
+	context.vars.offset = 100;
 	if(context.node.settings.metadata)
 		details.push("metadata");
 	if(context.node.settings.bitstreams)

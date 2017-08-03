@@ -1,0 +1,34 @@
+{
+	"nodeid": "process_field_combine",
+	"title": "Combine fields",
+	"type": "process",
+	"subtype": "strings",
+    "status": "usable",
+	"description": "Combine string fields with arbitrary strings",
+	"scripts": {
+		"hello":
+		[
+			"out.say('news', 'You added a combine node'); ",
+			"/* set output field */",
+			"context.node.out_field = context.node.params.out_field; "
+		],
+		
+        "bye": "out.say('news', 'Deleted combine node. Bye!'); ",
+        
+        "init":
+        [
+			"out.say('progress', 'Starting...');"
+		],
+		
+		"finish": "out.say('finish', 'Fields combined to ' +context.node.out_field+ '!');"
+		
+
+	},
+	
+	"views": {
+		"params": [
+			"<label>description</label> <input name='title' />",
+			"<label>where to save the result?</label> <input name='out_field'/ value='combined'/>"
+		]
+	}
+}

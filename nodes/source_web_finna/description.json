@@ -4,6 +4,7 @@
     "type": "source",
     "subtype": "web",
     "status": "test",
+    "tags":["generic"],
     "description": "Fetch online materials data from FINNA. ",
 
     "scripts": {

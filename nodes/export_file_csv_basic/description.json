@@ -5,6 +5,7 @@
     "subsubtype": "csv",
     "title": "CSV",
     "status": "works",
+    "tags":["generic"],
     "description": "Export collection as CSV file. Exports arrays but do not export objects.",
 
 

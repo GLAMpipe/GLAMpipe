@@ -5,6 +5,7 @@
 	"subsubtype": "pdf",
 	"title": "Import pdf",
     "status": "usable",
+    "tags":["library", "pdf"],
 	"description": "Import text from PDF",
 
 	"scripts": {

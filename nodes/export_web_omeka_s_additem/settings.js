@@ -15,7 +15,7 @@ var ignoreFields = ["id", "_id", "collection", "__mp_source"];
 $("#xml_basic_fetch").click(function(e){
 
    var obj = $(e.target);
-   var url = "/api/v1/collections/"+node.collection+"/docs?skip=0&limit=1";
+   var url = g_apipath + "/collections/"+node.collection+"/docs?skip=0&limit=1";
    
    fetchSchemas(function () {
 	   $.getJSON(url, function(data){
@@ -57,7 +57,7 @@ $("#export-web-omeka_fetch_collections").click(function (e) {
 	$("#export-web-omeka_coll_list").append("<h3>Fetching...</h3>");
 	$("#export-web-omeka_coll_list").show();
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/item_sets", function (data) {
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/item_sets", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -65,13 +65,13 @@ $("#export-web-omeka_fetch_collections").click(function (e) {
 			var html = display(data);
 			$("#export-web-omeka_coll_list").empty().append(html);
 		}
-	})				
+	})
 })
 
 
 
 // collection click handler
-$("#export-web-omeka_coll_list").on("click", "li.collection", function (event) {
+$("#export-web-omeka_coll_list").on("click", "li.set", function (event) {
 	event.stopPropagation();
 	$("#export-web-omeka_collection").val($(this).data("id"));
 	$("#export-web-omeka_coll_list").hide();
@@ -81,7 +81,7 @@ $("#export-web-omeka_coll_list").on("click", "li.collection", function (event) {
 // CREATE SCHEMA LIST
 function fetchSchemas (cb) {
 
-	$.getJSON("/api/v1/proxy?url=" + node.params.url + "/properties", function (data) {
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.url + "/properties", function (data) {
 		if(data.error)
 			alert(data.error);
 		else {
@@ -98,7 +98,7 @@ function fetchSchemas (cb) {
 function display (data) {
 	var html = "<ul>";
 	for(var i = 0; i < data.length; i++) {
-		html += "<li data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</li>";
+		html += "<li class='set' data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</li>";
 
 	}
 	html += "</ul>";

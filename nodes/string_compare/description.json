@@ -1,0 +1,16 @@
+{
+    "nodeid": "process_field_compare",
+    "title": "Compare fields",
+    "type": "process",
+    "subtype": "strings",
+    "status": "usable",
+    "description": "Compare two fields and set new field.",
+    "scripts": {
+    
+        "finish": "out.say('finish', 'Compare done!');"
+    },
+    
+    "views": {
+
+    }
+}

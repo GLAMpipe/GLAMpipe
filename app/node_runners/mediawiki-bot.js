@@ -6,7 +6,6 @@ var collection = require("../../app/collection.js");
 
 
 var exports = module.exports = {};
-console.log("inside bot");
 
 exports.login = function (node, sandbox, io, cb) {
 
@@ -16,9 +15,10 @@ exports.login = function (node, sandbox, io, cb) {
 
 	// ask bot config (username, pass etc.) from node
 	runNodeScriptInContext("login", node, sandbox, io);
+	if(sandbox.context.abort) // check for empty username or password
+		return cb("login failed");
+		
 	var client = new bot(sandbox.out.botconfig);
-	//console.log(sandbox.context.node);
-	console.log(sandbox.out.botconfig);
 
 	client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
 		
@@ -30,175 +30,62 @@ exports.login = function (node, sandbox, io, cb) {
             cb(null);
         }
     })
-
 }
 
-exports.uploadFile = function (doc, sandbox, next) {
 
-    sandbox.context.doc = doc;
-    sandbox.context.count++;
-    sandbox.context.data = null;
-    sandbox.context.error = null;
-    sandbox.context.skip = null;
-    
-    //runNodeScriptInContext("pre_run", node, sandbox, io);
-    sandbox.pre_run.runInContext(sandbox);
+exports.uploadFile = function (options, sandbox, next) {
+	
     if(sandbox.context.skip) {
-        console.log("skip!!!");
-        next();
+        sandbox.context.data = {pageexists: options.title};
+        return next();
     } else {
-        
-        console.log("GETTING:",sandbox.out.title);
-        if(!sandbox.out.title) {
-            next();
-        } else {
-            // get revisions (to see if page exists)
-            sandbox.client.getArticle('File:' +sandbox.out.title, function (err, d) {
-                if(err)
-                    console.log(err);
-                if(d != null) {
-                    io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-                    console.log("CONTENT:", d);
-                    return next();
-
-                } else {
-                    console.log("sandbox.out.filename: "+ sandbox.out.filename);
-                    fs.readFile(sandbox.out.filename, function (err,data) {
-                        if (err) {
-                            console.log("file not found:", err);
-                            io.sockets.emit("error", err);
-                            return next();	// skip if file not found
-                        } 
-                        // upload file
-                        sandbox.client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
-                            if(err) {
-                                io.sockets.emit("error", err);
-                            } else {
-                                // upload wikitext
-                                var content = sandbox.out.wikitext;
-                                console.log("STARTING TO EDIT", sandbox.out.title);
-                                console.log("******REAL URL", data.imageinfo.canonicaltitle);
-                                sandbox.client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-                                    sandbox.context.error = err;
-                                    sandbox.context.data = data;
-                                    sandbox.run.runInContext(sandbox);
-                                    next();
-                                });
-                            }
-                        });
-                    });
-                }
-            });
-        }
-    }
+		// get revisions (to see if page exists)
+		sandbox.client.getArticle('File:' +options.title, function (err, d) {
+			if(d != null) {
+				console.log("PAGE EXISTS: " + options.title);
+				// if page exists, then we pass the url to run.js 
+				sandbox.context.data = {pageexists: options.title};
+				return next();
+				
+			// read file
+			} else {
+				fs.readFile(options.filename, function (err,data) {
+					if (err) {
+						sandbox.out.say("error", err);
+						return next();	// skip if file not found
+					} 
+					
+					// upload file
+					sandbox.client.upload(options.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
+						sandbox.context.data = data;
+						if(err) {
+							//sandbox.out.say("error", err);
+							sandbox.context.error = err;
+							next();
+						} else {
+							// upload wikitext
+							sandbox.client.edit(data.imageinfo.canonicaltitle, options.wikitext, 'initial metadata', function(err) {
+								sandbox.context.error = err;
+								next();
+							});
+						}
+					});
+				
+				})
+			}
+		})
+	}
 }
 
 
-
-exports.uploadFileWithWikitext = function (node, sandbox, io) {
-
-	var bot = require('nodemw');
-	var async = require("async");
-	fs = require('fs');
-
-	// ask bot config (username, pass etc.) from node
-	runNodeScriptInContext("login", node, sandbox, io);
-	var client = new bot(sandbox.out.botconfig);
-	//console.log(sandbox.context.node);
-	console.log(sandbox.out.botconfig);
-
-	client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
-		
-		if(err) {
-			io.sockets.emit("error", "Login failed!");
-			return;
-		}
-		// find everything
-		mongoquery.find2({}, node.collection, function(err, doc) {
-			sandbox.context.doc_count = doc.length;
-			runNodeScriptInContext("init", node, sandbox, io);
-			
-			// run node once per record
-			async.eachSeries(doc, function iterator(doc, next) {
-
-				sandbox.context.doc = doc;
-				sandbox.context.count++;
-				sandbox.context.data = null;
-				sandbox.context.error = null;
-				sandbox.context.skip = null;
-				
-				runNodeScriptInContext("pre_run", node, sandbox, io);
-				if(0) {
-					console.log("skip!!!");
-					next();
-				} else {
-					
-					console.log("GETTING:",sandbox.out.title);
-					if(!sandbox.out.title) {
-						next();
-					} else {
-						// get revisions (to see if page exists)
-						client.getArticle('File:' +sandbox.out.title, function (err, d) {
-							if(err)
-								console.log(err);
-							if(d != null) {
-								io.sockets.emit("error", 'Page exists!' + sandbox.out.title);
-								console.log("CONTENT:", d);
-								return next();
-
-							} else {
-								console.log("sandbox.out.filename: "+ sandbox.out.filename);
-								fs.readFile(sandbox.out.filename, function (err,data) {
-									if (err) {
-										console.log("file not found:", err);
-										io.sockets.emit("error", err);
-										return next();	// skip if file not found
-									}
-									// upload file
-									client.upload(sandbox.out.title, data, "uploaded with GLAMpipe via nodemw", function (err, data) {
-										if(err) {
-											io.sockets.emit("error", err);
-											var setter = {};
-											setter[node.out_field] = err;
-											mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
-										} else {
-											//console.log(data);
-											
-											// upload wikitext
-											var content = sandbox.out.wikitext;
-											console.log("STARTING TO EDIT", sandbox.out.title);
-											console.log("******REAL URL", data.imageinfo.canonicaltitle);
-											client.edit(data.imageinfo.canonicaltitle, content, 'test', function(err) {
-												sandbox.context.error = err;
-												sandbox.context.data = data;
-												runNodeScriptInContext("run", node, sandbox, io);
-												// write commons page url to db
-												var setter = {};
-												setter[node.out_field] = data.imageinfo.descriptionurl;
-												mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
-													if(sandbox.context.abort)
-														return next(true);
-													else
-														next();
-												});
-											});
-										}
-									});
-								});
-							}
-							
-						});
-					}
-				}
-				
-				
-			}, function done () {
-				runNodeScriptInContext("finish", node, sandbox, io);
-			});
-		});
+exports.uploadWikitext = function (options, sandbox, next) {
+	
+	// upload wikitext
+	sandbox.client.edit(options.title, options.wikitext, 'test', function(err) {
+		sandbox.context.error = err;
+		next();
 	});
 }
-
 
 
 function runNodeScriptInContext (script, node, sandbox, io) {

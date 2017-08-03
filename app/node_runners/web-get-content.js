@@ -43,7 +43,7 @@ exports.uploadFile = function (doc, sandbox, next ) {
 	sandbox.context.doc = doc;
 	sandbox.out.value = null;  // reset output
 	sandbox.pre_run.runInContext(sandbox);
-
+	console.log("upload");
 
 	if(!sandbox.out.value)
 		return next("no upload object from node!");
@@ -72,15 +72,15 @@ exports.uploadFile = function (doc, sandbox, next ) {
 		jar:true,
 		headers: { // TODO: these should be set by node
 			"accept": "application/xml",
-			"content-type": "application/pdf"
+			"content-type": "application/pdf",
+			"User-Agent": "GLAMpipe/0.0.1",
 		},
 		formData: formData
 	}
 
-	console.log("GROBIDing......");
 	request.post(options, function optionalCallback(err, response, body) {
 		if (err) {
-			//console.error('upload failed:', err);
+			console.error('upload failed:', err);
 			sandbox.context.error = err;
 			sandbox.run.runInContext(sandbox);
 			next();

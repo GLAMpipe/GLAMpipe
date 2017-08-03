@@ -4,6 +4,7 @@
 	"subtype": "collection",
 	"subsubtype": "group_by_key",
     "status": "usable",
+    "tags":["generic"],
 	"title": "Group by field value",
 	"description": "Group records based on values in certain field (like author for example).",
 
@@ -22,12 +23,6 @@
 	},
 	
 	"views": {
-		"params": [
-			"<label>collection </label>",
-			"<input class='dynamic_collection' name='source_collection' /> ",
-			"<label>field to be grouped </label>",
-			"<input class='dynamic_field' name='in_field' /> "
-		],
 		"settings":"no settings"
 	}
 

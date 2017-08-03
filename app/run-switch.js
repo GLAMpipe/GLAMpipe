@@ -1,13 +1,13 @@
-var mongojs 	= require('mongojs');
-var async 		= require("async");
-var colors 		= require('ansicolors');
+var mongojs		= require('mongojs');
+var async		= require("async");
+var colors		= require('ansicolors');
 var path 		= require("path");
 var flatten 	= require("flat");
 const vm 		= require('vm');
 var validator 	= require('validator');
-var parser 		= require('xml2json');
+var parser		= require('xml2json');
 
-var mongoquery 	= require("../app/mongo-query.js");
+var mongoquery	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
@@ -21,7 +21,7 @@ exports.runNode = function (node, io) {
 	// create context for GP node
 	var sandbox = exports.createSandbox(node ,io);
 	// init node scripts
-	var init 	= CreateScriptVM(node, sandbox, "init");
+	var init 		= CreateScriptVM(node, sandbox, "init");
 	sandbox.pre_run = CreateScriptVM(node, sandbox, "pre_run");
 	sandbox.run 	= CreateScriptVM(node, sandbox, "run");
 	sandbox.finish 	= CreateScriptVM(node, sandbox, "finish");
@@ -30,9 +30,7 @@ exports.runNode = function (node, io) {
 	
 	// we quit in init_error
 	if(sandbox.out.init_error) {
-		console.log("*********** NODE INIT ERROR ***********************");
-		console.log("msg: " + sandbox.out.init_error);
-		io.sockets.emit("error", {"nodeid":node._id, "msg": sandbox.out.init_error});
+		sandbox.out.say("error", sandbox.out.init_error);
 		return;
 	}
 
@@ -44,89 +42,59 @@ exports.runNode = function (node, io) {
  *                                       METANODE                                                                *
  * *************************************************************************************************************/
 
-		// hard-coded demo
+
 		case "meta":
 			
 			//runNodeScriptInContext("init", node, sandbox, io);
 			if(sandbox.context.init_error) 
 				return;
+
+			runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+
+			// apply metanode's settings to settings of the first subnode
+			//for(var key in node.settings)
+				//node.pipe[0].settings[key] = node.settings[key];
 			
-			// THIS COMES FROM NODE ****************
-			//var nodes = [
-				//{
-					//collection: node.collection,
-					//nodeid: "process_field_split",
-					//params: {
-						//in_field: node.params.in_field,
-						//out_field:"meta1_split"
-					//},
-					//settings: {
-						//separator: node.settings.separator
-					//}
-				//},
-				//{
-					//collection: node.collection,
-					//nodeid: "process_field_count_chars",
-					//params: {
-						//in_field:"meta1_split",
-						//out_field:"meta1_count"
-					//},
-					//settings: {
-						
-					//}
-				//}
-			//]
-			
-			var nodes = node.metaparams;
-			nodes[0].settings = node.settings;
-			// ***************************************
-
-			var count = 0;
-
-			// run subnodes
-			require("async").eachSeries(node.metanodes, function iterator (metanode, next) {
-				console.log("THIS IS SUBNODE");
-				var baseurl = "http://localhost:3000";
-				var url = baseurl + "/api/v1/nodes/" + metanode + "/run";
-				console.log(url);	
-				console.log("subnode settings: " + nodes[count].settings);
-				
-				var settings = nodes[count].settings;
-				count++;
-				
-				// POST
-				 var options = {
-					url: url,
-					json: settings,
-					headers: {
-						"accecpt": "application/json"
-					},
-					jar:true
-				};
-				
-				var request = require("request");
-				//require('request').debug = true;
-
-				// make actual HTTP request
-				request.post(options, function (error, response, body) {
-					sandbox.context.data = body;
-					if (error) {
-						console.log(error);
-						next();
-					} else {
-						console.log(options.url);
-						console.log("update response:", body);
-						//sandbox.run.runInContext(sandbox);
-						next();
-					}
-				});
-	
-							
-			}, function done () {
-				console.log("METANODE: done all nodes!");
+			// dynamic settings
+			node.pipe.forEach(function(pipe, index) {
+				console.log(pipe.nodeid)
+				//console.log(pipe.params)
+				//console.log(pipe.settings)
+				//console.log(pipe.settingsFunc())
+				if(pipe.settingsFunc) {
+					console.log("settingsFunc");
+					console.log(pipe.settingsFunc());
+					console.log(pipe.settings)
+					//pipe.settings = pipe.settingsFunc();
+				}
 			})
+			
+			metanode = require("../app/node_runners/metanode.js")
+			asyncLoop.documentLoop(node, sandbox, metanode.run);
 				
 			break;
+
+
+//var request = Promise.promisifyAll(require("request"), {multiArgs: true});
+ 
+//var urlList = ["https://commons.wikimedia.org/wiki/Commons_talk:Structured_data#It.27s_alive.21", "https://commons.wikimedia.org/wiki/User:Basvb/Ideas/Single_Image_Batch_Upload", "hthtps://yle.fi/uutiset"];
+//Promise.mapSeries(urlList, function(url) {
+	//return request.getAsync(url).then(function(response,body) {
+		//console.log(url)
+		//return url;
+	//});
+//}).then(function(results) {
+	 //// results is an array of all the parsed bodies in order
+	 //console.log("then")
+	 //console.log(results)
+//}).catch(function(err) {
+	 //// handle error here
+	 //console.log(err.message)
+	 //sandbox.run.runInContext(sandbox);
+//});
+
+
+
 
 
 
@@ -149,16 +117,27 @@ exports.runNode = function (node, io) {
 						case "two_rounds" :
 							sourceAPI.fetchDataInitialMode (node,sandbox, io);
 						break;
-						
+
+						case "eprints" :
+							// we first get all item ids (is there a better way?)
+							var w = require("../app/node_runners/web.js");
+							var url = node.params.eprints_url + "/eprint/";
+                            url = url.replace("//eprint", "/eprint");
+							var options = {url: url}
+							w.fetchContent(options, sandbox, function() {
+								sandbox.pre_run.runInContext(sandbox);
+								asyncLoop.importLoop(node, sandbox, w.fetchContent);
+							})
+						break;
+
 						case "csv":
-							var downloader = require("../app/node_runners/download-file.js");
+							var web = require("../app/node_runners/web.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
-							downloader.downloadAndSave (node, download, function() {
+							web.downloadAndSave (node, download, function() {
 								csv.importUpdates(node, sandbox, download, io);
 							});
-							
 						break;
 						
 						default:
@@ -197,8 +176,8 @@ exports.runNode = function (node, io) {
 										//var array = record[node.params.in_field].constructor.name == "Array";
 										mongoquery.group(node, true, groupCB);
 									} else {
-										io.sockets.emit("error", {"nodeid":node._id, "msg":"Record or field not found!"});
-										io.sockets.emit("progress", {"nodeid":node._id, "msg":"Destroy node and create new one with correct field name."});
+										io.sockets.emit("error", {"node_uuid":node._id, "msg":"Record or field not found!"});
+										io.sockets.emit("progress", {"node_uuid":node._id, "msg":"Destroy node and create new one with correct field name."});
 									}
 								}) 
 							});
@@ -217,7 +196,7 @@ exports.runNode = function (node, io) {
 						break;	
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 								
 					}
@@ -294,59 +273,55 @@ exports.runNode = function (node, io) {
 				
 				case "web":
 				
+					var web = require("../app/node_runners/web.js");
+					sandbox.login = CreateScriptVM(node, sandbox, "login");
+				
 					switch (node.subsubtype) {
 		
 						case "omeka_additem":
-							var web = require("../app/node_runners/web.js");
-							asyncLoop.loop(node, sandbox, web.postJSON);
+							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
-										
+
 						case "dspace_additem":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.uploadItem);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
-							
 						break;
-						
+
 						case "dspace_update":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.updateData);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
 
 						case "dspace_addfield":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addMetadataField);
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
 						break;
 
-
 						case "dspace_addfile":
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node, sandbox, io, function(error) {
+							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, dspace.addFile);
+									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
 								}
 							});
 						break;
@@ -355,77 +330,26 @@ exports.runNode = function (node, io) {
 							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
 							mv_bot.login(node, sandbox, io, function(error) {
 								if(error)
-									sandbox.out.say("finish","login failed");
+									sandbox.out.say("error","login failed");
 								else {
 									console.log("LOGIN GOOD");
-									asyncLoop.loop(node, sandbox, mv_bot.uploadFile);
+									asyncLoop.fieldLoop(node, sandbox, mv_bot.uploadFile);
 								}
 							});
-							//mv_bot.uploadFileWithWikitext(node, sandbox, io);
-
 						break;
-						
+
+						case "upload_file":
+							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
+						break;
+
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					
 					}
 				
 				break;
 			}
-
-
-
-		break;
-
-/***************************************************************************************************************
- *                                       LOOKUP                                                                *
- * *************************************************************************************************************/
-
-		case "lookup":
-
-			var runFunc = null;
-			
-			switch (node.subtype) {
-				
-				case "web":
-				
-					switch (node.subsubtype) {
-				
-						case "link_checker":
-							var checker = require("../app/node_runners/link-checker.js");
-							asyncLoop.loop(node, sandbox, checker.checkLinks);
-						break;
-					}
-
-				break;
-				
-				case "file":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//fileStats (sandbox, node, onNodeScript, onError);
-					//}
-				break;
-				
-				case "collection":
-					console.log("not implemented");
-					//runFunc = function(sandbox, node, onNodeScript, onError) {
-						//mongoquery.collectionLookup (sandbox, node, onNodeScript, onError);
-					//}
-
-				break;
-			}
-			
-
-
-/***************************************************************************************************************
- *                                       DOWNLOAD                                                              *
- * *************************************************************************************************************/
-
-		case "download":
-				
-			var downloader = require("../app/node_runners/download-file.js");
-			asyncLoop.loop(node, sandbox, downloader.downloadFile);
 
 		break;
 
@@ -440,45 +364,50 @@ exports.runNode = function (node, io) {
 				case "files":
 				
 					switch (node.subsubtype) {
-						
-						case "extract_references":
-							var extractReferences = require("../app/node_runners/file-pdf.js");
-							asyncLoop.loop(node, sandbox, extractReferences.extractReferences);
+
+						case "pdf2image":
+							var pdf = require("../app/node_runners/file-pdf.js");
+							asyncLoop.fieldLoop(node, sandbox, pdf.pdf2image);
 						break;
-						
+
+						case "pdf2text":
+							var pdf = require("../app/node_runners/file-pdf.js");
+							asyncLoop.fieldLoop(node, sandbox, pdf.pdf2text);
+						break;
+
 						case "calculate_checksum":
-							var checksum = require("../app/node_runners/file-checksum.js");
-							asyncLoop.fieldLoop(node, sandbox, checksum.getHash);
+							var file = require("../app/node_runners/file.js");
+							asyncLoop.fieldLoop(node, sandbox, file.getHash);
 						break;
-						
+
+						case "type":
+							var file = require("../app/node_runners/file.js");
+							asyncLoop.fieldLoop(node, sandbox, file.getType);
+						break;
+
 						case "grobid":
 							var web = require("../app/node_runners/web-get-content.js");
-							asyncLoop.loop(node, sandbox, web.uploadFile);
+							asyncLoop.documentLoop(node, sandbox, web.uploadFile);
 						break;
 						
 						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
+							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
 					}
 					break;	
 
 
-				case "fields":
+				case "strings":
 				
 					switch (node.subsubtype) {
-						
-						case "link_checker":
-							var checker = require("../app/node_runners/link-checker.js");
-							asyncLoop.loop(node, sandbox, checker.checkLinks);
-						break;
 
 						case "detect_language":
 							var detect = require("../app/node_runners/field-detect-language.js");
-							asyncLoop.loop(node, sandbox, detect.language);
+							asyncLoop.documentLoop(node, sandbox, detect.language);
 						break;
 					
 						default: // syncronous nodes
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});
@@ -503,10 +432,16 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						
 						case "collection":
-							asyncLoop.mongoLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-								sandbox.run.runInContext(sandbox);
-								next();
-							});
+							// read map data
+							mongoquery.find({}, sandbox.context.node.params.source_collection, function(err, result) {
+								sandbox.context.data = result;
+								console.log(result);
+								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+									sandbox.run.runInContext(sandbox);
+									next();
+								});
+							})
+
 						break;	
 
 						case "web":
@@ -514,13 +449,33 @@ exports.runNode = function (node, io) {
 							asyncLoop.fieldLoop(node, sandbox, web.fetchJSON);
 						break;
 
+						case "web_check":
+							var web = require("../app/node_runners/web.js");
+							asyncLoop.fieldLoop(node, sandbox, web.headRequest);
+						break;
+
 						default:
-							asyncLoop.loop(node, sandbox, function ondoc (doc, sandbox, next) {
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});			
 
 					}
+					
+				case "downloads":
+				
+					switch (node.subsubtype) {
+						case "basic":
+							var web = require("../app/node_runners/web.js");
+							if(global.config.disableBatchDownloads && !node.res) {
+								sandbox.out.say("finish", "Batch downloads not available on this installation");
+								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
+							} else {
+								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
+							}
+						break;
+					}
+					
 					break;
 			}				
 
@@ -529,50 +484,6 @@ exports.runNode = function (node, io) {
 
 
 
-/***************************************************************************************************************
- *                                       UPLOAD                                                                *
- * *************************************************************************************************************/
-
-		case "upload":
-			switch (node.subtype) {
-				case "data":
-					switch (node.subsubtype) {
-						case "dspace":
-						
-							var dspace = require("../app/node_runners/dspace.js");
-							dspace.login(node,sandbox, io, function(error) {
-								if(error)
-									console.log("ERROR: login failed");
-								else {
-									console.log("LOGIN GOOD");
-									dspace.updateData(node,sandbox, io);
-								}
-							});
-						break;
-							
-						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
-							console.log("There is no run-switch for this node yet!");
-					}
-
-					break;
-				
-				case "file":
-					switch (node.subsubtype) {
-						case "mediawiki_bot":
-						
-							var mv_bot = require("../app/node_runners/mediawiki_bot.js");
-
-						break;
-						
-						default:
-							io.sockets.emit("finish", {"nodeid":node._id, "msg":"There is no run-switch for this node yet!"});
-							console.log("There is no run-switch for this node yet!");
-					}
-					
-				break;
-		}
-		break;
 
 
 /***************************************************************************************************************
@@ -610,8 +521,9 @@ exports.createSandbox = function (node, io) {
 			vars: {},
 			myvar: {},
 			node: node,
-			doc_count:0,
-			count:0,
+			doc_count: 0,
+			count: 0,
+			success_count: 0,
 			path: path,
 			get: getProp,
 			flat: flatten,
@@ -620,6 +532,8 @@ exports.createSandbox = function (node, io) {
 			MP: MP
 		},
 		out: {
+			self:this,
+			error_marker: "AAAA_error:",
 			pre_value:"",
 			value:"",
 			file:"",
@@ -635,19 +549,56 @@ exports.createSandbox = function (node, io) {
 					this.key_type.push(type);
 				}
 			},
-			say: function(ch, msg) {
+			say: function(ch, msg, options) {
 				console.log(ch.toUpperCase() + ":", msg);
-				io.sockets.emit(ch, {"nodeid":node._id, "msg":msg});
-				var date = new Date();
-				mongoquery.runLog({"mode": ch, "ts": date, "node_uuid": node._id.toString(), "nodeid":node.nodeid, "settings": node.settings}, function(err, result) {
-					// send http response if needed (i.e. node was executed by "run" instead of "start")
-					if(ch === "finish" && node.res) {
-						if(this.error)
-							node.res.json({status:"error", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
-						else
-							node.res.json({status:"finished", node_uuid: node._id.toString(), nodeid: node.nodeid, ts: date}) // toimii
-					}
+				io.sockets.emit(ch, {
+					"node_uuid":node._id, 
+					"msg":msg,
+					"options": options,
+					doc:node.req.params.doc
 				});
+
+				var date = new Date();
+				var log = {"mode": ch, "ts": date, "nodeid":node.nodeid, "msg": msg};
+				
+				// writle log to register
+				if(global.register[node.req.originalUrl])
+					global.register[node.req.originalUrl].log.push(log);
+
+				// remove node from register if finished or if error (aborting)
+				if(ch === "finish" || ch === "error") {
+					console.log("REGISTER: deleting " + node.req.originalUrl)
+					delete global.register[node.req.originalUrl];
+				}
+				
+				// send http response if needed (i.e. node was executed by "run" instead of "start")
+				if(ch === "finish" && node.res) {
+					node.res.json({
+						status:"finished", 
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						doc:node.req.params.doc,
+						result:{
+							value:sandbox.out.value,
+							setter:sandbox.out.setter
+							}
+						}) 
+					node.res = null;
+				} else if(ch === "error" && node.res) {
+					node.res.json({
+						status:"error", 
+						error: msg,
+						node_uuid: node._id.toString(), 
+						nodeid: node.nodeid, 
+						ts: date, 
+						msg: msg,
+						doc:node.req.params.doc
+					}) 
+					node.res = null;
+				}
+				
+
 			}
 		},
 		say: io.sockets.emit
@@ -657,6 +608,9 @@ exports.createSandbox = function (node, io) {
 
 }
 
+function sendRunResponse(no) {
+	console.log("out" + JSON.stringify(no.sandbox));
+}
 
 // currently not used
 function CreateScriptVM(node, sandbox, scriptName) {

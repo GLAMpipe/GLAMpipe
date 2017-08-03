@@ -1,0 +1,19 @@
+<div class="box-noflex">
+	
+	<select id="process_field_extract_pre">
+		<option value="">examples</option>
+		<option value="\d{4}">year (four digits)</option>
+		<option value=".{0,3}$">last three characters</option>
+		<option value="^.{0,3}">first three characters</option>
+        <option value=".{0,7}">chuncks of seven characters</option>
+		<option value='([A-ZÅÄÖ][\wåäö"-]+|\sde\b|\sla\b|\von\b)(\s[A-ZÅÄÖ"][\wåäö"-]*|\sde\b|\sla\b|\von\b)*'>person names (two words starting with capital letter)</option>
+	</select>
+	
+	<label>regular expression</label>
+	<input id="process_field_extract_regexp" class="node-settings long_input" name="regexp"/>
+
+	<div>
+		<input type="checkbox" class="node-settings" name="only_first"/>
+		<label>take only first match</label>
+	</div>
+</div>

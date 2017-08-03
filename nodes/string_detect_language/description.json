@@ -1,0 +1,33 @@
+{
+    "nodeid": "process_field_detect_language",
+    "type": "process",
+    "title": "detect language",
+    "subtype": "strings",
+    "subsubtype": "detect_language",
+    "status": "usable",
+    "description": "Detects language of the field (node-cld). Please note that detection is not reliable for short texts.",
+
+
+    "scripts": {
+        
+        "init":
+        [
+            "context.in_field = context.node.params.in_field; ",
+            "    /* lets make counter for succesful detects */",
+            "context.node.value_counter = 0; ",
+            "context.node.success_counter = 0; ",
+            "out.say('progress', 'I have ' + context.doc_count + ' fields to detect!'); "
+        ],
+                
+        "finish":
+        [
+			"var success_rate = (context.node.success_counter/context.node.value_counter) * 100; ",
+			"out.say('finish', '<h2>success rate: ' + success_rate + ' %</h2> Succesfully detected ' + context.node.success_counter + ' of ' + context.node.value_counter + ' fields in ' + context.doc_count + ' documents' );"
+		]
+    },
+    
+    "views": {
+           
+        "settings": ["no settings"]
+    }
+}

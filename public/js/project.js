@@ -444,8 +444,10 @@ $( document ).ready(function() {
 
 
     $(document).on('click','.run', function(e) {
-        
+        console.log("run");
         var obj = $(e.target);
+        console.log(obj);
+        obj.prop("value","stop");
         var map = {};
         // read input from settings (only direct child nodes and not checkboxes)
         obj.parent().parent().find(".settings > input:not([type='checkbox']), .settings > select, .settings table input:not([type='checkbox']), .settings table select").each(function() {

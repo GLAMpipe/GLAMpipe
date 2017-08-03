@@ -1,20 +1,18 @@
 
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
-DATA_DIR := /home/arihayri/GLAMpipe-data-docker
-DATA_DIR := $(shell pwd)/data
-NODE_DIR := /home/arihayri/GLAMpipe-data-docker
-PWD=$(shell pwd)
-
-all: build
+DATA_DIR := $(shell pwd)/glampipe-data
 
 
 clean:
 	docker rm -f $(CONTAINERS)
 	docker rmi -f $(IMAGES)
 
+create_network:
+	docker network create --driver bridge gp
+
 build_mongo:
-	docker run -d --name=mongo mongo
+	docker run -d --network=gp --name=mongo mongo
 
 start_mongo:
 	docker start mongo
@@ -27,9 +25,11 @@ build_glampipe:
 
 
 start_glampipe:
-	docker run -it --rm --link mongo:mongo --name glam \
-		-v $(DATA_DIR):/glampipe \
-		-p 3000:3000  artturimatias/glampipe bash
+	docker run -it --rm --network=gp --name glampipe \
+		-v $(DATA_DIR):/glampipe-data \
+		-p 3000:3000 \
+		-e DOCKER=1 \
+		 artturimatias/glampipe bash
 
 
 .PHONY: clean build_mongo start_mongo build_glampipe start_glampipe
