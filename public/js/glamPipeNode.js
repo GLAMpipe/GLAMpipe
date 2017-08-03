@@ -212,7 +212,7 @@ var glamPipeNode = function (node, gp) {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("data-workspace .settings").empty();
-			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run for all documents</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
 			

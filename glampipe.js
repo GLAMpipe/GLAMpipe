@@ -8,9 +8,16 @@ var request			= require('request');
 var bodyParser		= require("body-parser");
 var cors 			= require('cors');
 var colors 			= require('ansicolors');
-global.config 		= require("./config/config.js");
 const version 		= require("./config/version.js");
 const env			= process.env;
+
+try {
+	global.config 		= require("./config/config.js");
+} catch(e) {
+	console.log("config.js not found");
+	global.config 		= require("./config/config.js.example");
+}
+
 
 global.config.version = version.version;
 

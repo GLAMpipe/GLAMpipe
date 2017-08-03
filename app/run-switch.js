@@ -12,7 +12,6 @@ var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
-const config 	= require("../config/config.js");
 var exports 	= module.exports = {};
 
 
@@ -468,7 +467,7 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						case "basic":
 							var web = require("../app/node_runners/web.js");
-							if(config.disableBatchDownloads && !node.res) {
+							if(global.config.disableBatchDownloads && !node.res) {
 								sandbox.out.say("finish", "Batch downloads not available on this installation");
 								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
 							} else {

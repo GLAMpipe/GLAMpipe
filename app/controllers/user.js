@@ -3,7 +3,7 @@
 let mongojs = require('mongojs');
 var bcrypt   = require('bcrypt-nodejs');
 let database = require('../../config/database');
-let config = require('../../config/config');
+//let config = require('../../config/config');
 let db = mongojs(database.initDBConnect());
 let collection = db.collection("mp_users");
 
@@ -24,7 +24,7 @@ class User {
 	}
 
 	save(cb) {
-        if(config.canRegister) {
+        if(global.config.canRegister) {
             var self = this;
             if(this.validate()) {
                 collection.update(this.local, this, {upsert:true} ,function (err, result) {

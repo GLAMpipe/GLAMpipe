@@ -293,7 +293,7 @@ var dataTable = function (node) {
 		var html = "";
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>run only this</div></td>";
+				html += "<td><div data-id='" + data._id + "' class='button run_single'>run for this</div></td>";
 			else
 				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
 			

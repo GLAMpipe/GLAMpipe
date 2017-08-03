@@ -5,8 +5,6 @@ var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
 var node	 	= require("../app/node.js");
 var project 	= require("../app/project.js");
-//var User 		= require("../app/controllers/user.js");
-const conf 		= require("../config/config.js");
 
 global.register = {};
 
@@ -17,7 +15,7 @@ module.exports = function(express, glampipe, passport) {
     var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
-	express.set('superSecret', conf.secret); // secret variable
+	express.set('superSecret', global.config.secret); // secret variable
 	
     // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
@@ -37,7 +35,7 @@ module.exports = function(express, glampipe, passport) {
 			ip = req.headers['x-real-ip']
 
 		var pass = false;
-		conf.IP_passes.some(function(IP_pass) {
+		global.config.IP_passes.some(function(IP_pass) {
 			if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && ip === IP_pass.ip) {
 				pass = true;
 				console.log("INFO: allowed by IP_pass: " + IP_pass.label)
@@ -76,7 +74,7 @@ module.exports = function(express, glampipe, passport) {
 
 
 	// protect API routes
-	if(config.isServerInstallation) {
+	if(global.config.isServerInstallation) {
 		//console.log("AUTHENTICATION")
 		//console.log(req.ip)
 		var s = express.get('superSecret');
@@ -178,10 +176,10 @@ module.exports = function(express, glampipe, passport) {
     // SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
-			url:conf.url, 
-			isServerInstallation:conf.isServerInstallation, 
-			version:conf.version,
-			dataPath:conf.dataPath
+			url:global.config.url, 
+			isServerInstallation:global.config.isServerInstallation, 
+			version:global.config.version,
+			dataPath:global.config.dataPath
 		});
 	});
     

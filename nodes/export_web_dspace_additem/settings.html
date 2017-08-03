@@ -26,7 +26,8 @@
 <h3>Metada mapping</h3>
 <div class="box-noflex dspace-hidden">
 	<label>If metadata is allready DSpace REST api format, then choose field appropriate field.</label>
-	<input class="node-settings dynamic_field" name="rest_data" value=""/>
+	<select class="node-settings dynamic_field" name="rest_data" value=""/>
+	
 	<div>Otherwise map document fields to target Dspace fields. At minimum you must map some field to <b>dc.title</b>.</div>
 	<button id="xml_basic_fetch" class="fetch_record">re-fetch fields and schemas</button>
 	<button id="xml_basic_guess" class="fetch_record">guess mapping</button>
