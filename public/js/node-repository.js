@@ -16,12 +16,12 @@ var nodeRepository = function () {
 
 	this.renderNodeList = function (div, types) {
 		
-		// if holder is not empty, then we "collapse" it
+		// if node list is already open, then we "collapse" it
 		if(div.find(".listoption").length) {
 			div.empty();
 			return;
-		}
-			
+		} 
+		
 		var html = "";
 		html += "<div class='fatbox'>";
 		html += "  <div class='inlinetitleblock'>";
@@ -127,21 +127,21 @@ var nodeRepository = function () {
 			$(".holder.collection-params").empty().append(params);
 
 
-        // fetch fields
-        $.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
-            if(data.error)
-                alert(data.error);
-            var options = [];
-            for(var i = 0; i < data.sorted.length; i++) {
-                options.push("<option>" + data.sorted[i] + "</option>");
-            }
-            
-            // populate field selects
-            $(".params select.dynamic_field").each(function(i) {
-                $(this).append(options.join(""));
-            //    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
-            })	
-        })
+		// fetch fields
+		$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
+			if(data.error)
+				alert(data.error);
+			var options = [];
+			for(var i = 0; i < data.sorted.length; i++) {
+				options.push("<option>" + data.sorted[i] + "</option>");
+			}
+			
+			// populate field selects
+			$(".params select.dynamic_field").each(function(i) {
+				$(this).append(options.join(""));
+			//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
+			})	
+		})
 		// TODO: get node from /get/node/nodeid so that scripts are included    
 		// execute params.js if exists
 		//if(node.scripts.params) {

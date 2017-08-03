@@ -14,7 +14,8 @@ const env			= process.env;
 try {
 	global.config 		= require("./config/config.js");
 } catch(e) {
-	console.log("config.js not found");
+	console.log("config.js not found or is malformed!");
+	console.log(e);
 	global.config 		= require("./config/config.js.example");
 }
 

@@ -202,6 +202,13 @@ var glamPipeNode = function (node, gp) {
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
 
+		var run_button_text = "run for all documents";
+		if(self.source.type === "source")
+			run_button_text = "import data";
+		if(self.source.type === "export")
+			run_button_text = "export data";
+		
+
 		if(self.orphan) {
 			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
 			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
@@ -212,7 +219,8 @@ var glamPipeNode = function (node, gp) {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("data-workspace .settings").empty();
-			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>run for all documents</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
+			
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
 			

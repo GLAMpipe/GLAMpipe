@@ -226,6 +226,13 @@ var dataTable = function (node) {
 	// displays data in table format
 	this.renderTablePage = function () {
 
+
+		if(self.node.data.docs.length == 0) {
+			var html = "<div class='fatbox'><h2>This collection is empty</h2><br><div>Add data source to get something to look at :)</div></div>";
+            $(self.dataDisplayDiv).empty().append(html);
+            return;
+        }
+
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
 		var html = "<table id='data' class='documents'><thead><tr>";
@@ -261,8 +268,6 @@ var dataTable = function (node) {
 
 	this.renderDataTable = function (config) {
 
-		if(self.node.data.docs.length == 0)
-			return "<h2>This collection is empty</h2><p>Add data source to get something to look at :)</p>";
 
 		// check if node wants to render data itself
 		if(self.node.source.scripts.view) {

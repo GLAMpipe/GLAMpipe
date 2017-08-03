@@ -28,7 +28,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#logout", function(e) {
 		localStorage.removeItem("token");
-		$("#login").empty().append("<a id='login-pop' href=''>login</a>");
+		$("#login").empty().append("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
 		e.preventDefault();
 	});
 
@@ -113,8 +113,10 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
+		var run_button_texts = ["run for all documents", "import data", "export data"];
 		var button = $(e.target);
-		if(button.text() == "run") {
+		if(run_button_texts.includes(button.text())) {
+			button.attr("text", button.text());
 			button.text("stop");
 			gp.runNode(e);
 		} else if(button.text() == "stop") {
@@ -205,7 +207,8 @@ $( document ).ready(function() {
 			genericDisplay.append("<div class=\"bad\">" + data + "</div>");
 		}
 		// revert "run" button text
-		$("button[data-id='"+data.node_uuid+"']").text("run");
+		var button = $("button[data-id='"+data.node_uuid+"']");
+		button.text(button.attr("text"));
 		$("div[data-id='"+data.doc+"']").text("run only this");
 		//websockPopup(progressDisplay, "Node run error");
 	});

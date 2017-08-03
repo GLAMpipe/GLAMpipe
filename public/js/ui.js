@@ -8,6 +8,7 @@ $( document ).ready(function() {
             gp.getProjects("#projectList");
         } else {
             $("#project-box").hide();
+            gp.getProjectsByUser("data-workspace", gp.user);
             gp.getUsers("#userList");
         }
     });
@@ -31,7 +32,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#logout", function(e) {
 		localStorage.removeItem("token");
-		$("#login").empty().append("<a id='login-pop' href=''>login</a>");
+		$("#login").empty().append("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
 		e.preventDefault();
 	});
 
@@ -47,7 +48,7 @@ $( document ).ready(function() {
 	});
 
 	// remove project
-	$(document).on('click', ".wikiglyph-cross", function(e) {
+	$(document).on('click', ".del", function(e) {
 		gp.removeProject(e);
 		e.stopPropagation();
 		e.preventDefault();

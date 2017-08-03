@@ -26,14 +26,14 @@ var glamPipe = function () {
 		this.baseAPI = "../api/v1";
 	
 	// MAIN PAGE (projects)
-	this.getProjects = function (div) {
+	this.getProjectTitles = function (div) {
 
 		$.getJSON(self.baseAPI + "/projects/titles", function(data) { 
 			$(div).empty();
 			data.sort(compare);
 			
 			for(var i = 0; i< data.length; i++) {
-				var listOption = "<div data-id=" + data[i]._id + " class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
+				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
 				listOption += "<a href='project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
@@ -41,6 +41,21 @@ var glamPipe = function () {
 				listOption += "</div></a>\n";
 				$(div).append(listOption);
 			}
+		})
+	}
+
+	this.getProjects= function (div) {
+
+		$.getJSON(self.baseAPI + "/projects", function(data) { 
+			$(div).empty();
+			//data.sort(compare);
+			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
+
+			for(var i = 0; i< data.length; i++) {
+				html += self.genProjectRow(data[i]);
+				
+			}
+			$(div).append("</tr>" + html + "</table>");
 		})
 	}
 
@@ -83,12 +98,51 @@ var glamPipe = function () {
 					})
 				}
 				html += "</td>";
-				html += "<td><div data-id='" + projects[i]._id + "' class='wikiglyph-cross button icon boxicon'>delete</div></td>";
+				html += "<td><div data-id='" + projects[i]._id + "' class='del button icon boxicon'>delete</div></td>";
 				
 				
 			}
 			$(div).append("</tr>" + html + "</table>");
 		})
+	}
+
+	this.genProjectRow = function(project) {
+			var html = "<tr><td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
+
+			html += "<td>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type === "source")
+						html += "<div>" + node.title + "</div>";
+				})
+			}
+			html += "</td>";
+			
+			html += "<td><div>" + project.collection_count + "</div></td>";
+			
+			html += "<td><div>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type !== "collection")
+						html += "<li>" + node.nodeid + "</li>";
+				})
+			}
+			html += "</div></td>";
+			
+			html += "<td>";
+			if(project.nodes) {
+				
+				project.nodes.forEach(function(node) {
+					if(node.type === "export")
+						html += "<div>" + node.title + "</div>";
+				})
+			}
+			html += "</td>";
+			html += "<td><div data-id='" + project._id + "' class='del button icon boxicon'>delete</div></td>";
+			return html;
+			
 	}
 
 	this.getUsers = function (div) {
@@ -111,6 +165,7 @@ var glamPipe = function () {
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
 			if(data.isServerInstallation) {
+				self.desktop = false;
 				var d = {
 					url: self.baseAPI + "/auth", 
 					method:"GET", 
@@ -118,24 +173,32 @@ var glamPipe = function () {
 					error: function(data, s, xhr) {
 						console.log("not logged in");
 						$(div).html("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
+						if(cb)
+							cb(self.desktop);
 					},
 					success: function(data) {
 						console.log("Logged in");
+						self.user = data.user.local.email;
 						//console.log(data);
 						$(div).html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+			
+						if(cb)
+							cb(self.desktop);
 					}
 				}
 				$.ajax(d);
 				
-				self.desktop = false;
+				
 			} else {
 					$(div).empty();
 					self.desktop = true;
 					$(div).html("");
+					$("#version").empty().append("ver. " + data.version);
+								
+					if(cb)
+						cb(self.desktop);
 			}
-			$("#version").empty().append("ver. " + data.version);
-			if(cb)
-				cb(self.desktop);
+
 
 		})
 	}	
@@ -149,10 +212,11 @@ var glamPipe = function () {
 				email:user,
 				password:pass
 			},
-			error:function() {console.log("fail")},
+			error:function() {console.log("fail"), alert("login failed!")},
 			success: function(data) {
 				console.log(data);
 				if(data.success) {
+					self.user = data.user.local.email;
 					window.localStorage.setItem("token", data.token);
 					$("#login-popup").remove();
 					$("#login").html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
@@ -367,6 +431,7 @@ var glamPipe = function () {
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
 		console.log(obj.text())
+		//obj.text("cancel");
 		var types = [];
 		
 		if (obj.data("type") == "collection")
@@ -493,14 +558,14 @@ var glamPipe = function () {
 				html += "<collectionset>"
 
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Data sources</span> <a class='add-node' data-type='source' href='#'>Add data source</a></div>"
+				html += "	<div><span class='title sectiontitle'>Data sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 				 
 				html += self.renderNodes(collection,["source"]);
 				  
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add operation</a></div>"
+				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 
