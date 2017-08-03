@@ -1,5 +1,5 @@
 
-var version = "2017.07.17"
+var version = "2017.08.04"
 
 var exports = module.exports = {};
 

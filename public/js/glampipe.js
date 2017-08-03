@@ -164,6 +164,7 @@ var glamPipe = function () {
 
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
+			$("#version").empty().append("ver. " + data.version);
 			if(data.isServerInstallation) {
 				self.desktop = false;
 				var d = {
@@ -193,7 +194,7 @@ var glamPipe = function () {
 					$(div).empty();
 					self.desktop = true;
 					$(div).html("");
-					$("#version").empty().append("ver. " + data.version);
+					
 								
 					if(cb)
 						cb(self.desktop);
