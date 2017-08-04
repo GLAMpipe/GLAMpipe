@@ -279,9 +279,10 @@ exports.downloadAndSave = function (node, download, addext, next) {
 				file.close(function () {
 					const buffer = readChunk.sync(filePath, 0, 4100);
 					download.filetype = fileType(buffer);
+					console.log(download.filetype)
 					
 					// add extension to file name if user requested it
-					if(addext && download.filetype.ext) {
+					if(addext && download.filetype && download.filetype.ext) {
 						download.filename = download.filename + "." + download.filetype.ext;
 						fs.rename(filePath, filePath + "." + download.filetype.ext, function(err) {
 							if ( err ) console.log('ERROR: ' + err);

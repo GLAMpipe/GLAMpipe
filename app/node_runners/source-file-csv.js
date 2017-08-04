@@ -102,7 +102,8 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 	var parse = require('csv-parse');
 	var transform = require('stream-transform');
 
-	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	//var file = path.join(global.config.dataPath, "tmp", node.params.filename);
+	var file = sandbox.out.filename;
 	var db = "mongodb://" + database.initDBConnect();
 	var columns = null;
 	var count = 0;

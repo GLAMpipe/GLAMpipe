@@ -17,7 +17,7 @@
 		
         "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
         
-		"init":"out.say('progress', context.node.title); context.vars = {count:0};",
+		"init":"out.say('progress', context.node.title);",
 		
 		"finish":"out.say('finish', '<h2>Data imported</h2> from address ' + context.node.params.file_url);"
 		

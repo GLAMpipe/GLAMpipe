@@ -135,8 +135,11 @@ exports.runNode = function (node, io) {
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
-							web.downloadAndSave (node, download, function() {
-								csv.importUpdates(node, sandbox, download, io);
+							web.downloadAndSave (node, download, false, function() {
+								//csv.importUpdates(node, sandbox, download, io);
+								mongoquery.empty(node.collection, query, function() {
+									csv.importFile_stream(node, sandbox, io);
+								})
 							});
 						break;
 						
@@ -215,6 +218,7 @@ exports.runNode = function (node, io) {
 							query[MP.source] = node._id;
 							// remove previous data inserted by node and import file
 							mongoquery.empty(node.collection, query, function() {
+								sandbox.out.filename = path.join(global.config.dataPath, "tmp", node.params.filename);
 								csv.importFile_stream(node, sandbox, io);
 							});
 							
