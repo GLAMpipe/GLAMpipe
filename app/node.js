@@ -51,6 +51,7 @@ exports.run = function(req, io, res) {
 				require("../app/run-switch.js").runNode(node, io);
 			} catch (e) {
 				console.log("ERROR:" + e.message);
+				delete global.register[node.req.originalUrl];
 				io.sockets.emit("error", e.message);
 			}
 		})

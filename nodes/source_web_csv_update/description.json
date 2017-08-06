@@ -3,10 +3,10 @@
 	"type": "source",
 	"subtype": "web",
 	"subsubtype": "csv",
-	"title": "Online CSV: import",
-    "status": "usable",
+	"title": "Online CSV: append",
+    "status": "broken",
     "tags":["generic"],
-	"description": "Import data from online CSV",
+	"description": "Append data from online CSV",
 
 	"scripts": {
 		"hello": 
