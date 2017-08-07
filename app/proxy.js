@@ -5,7 +5,7 @@ var exports 	= module.exports = {};
 
 
 
-
+// simple white listed proxy
 exports.proxyJSON = function (url, query, res) {
     if (typeof url === "undefined" || url == "")
         return res.json({"error":"no url"});

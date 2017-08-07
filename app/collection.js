@@ -26,7 +26,7 @@ exports.getDocumentById = function (req, res) {
 	console.log(req.params.doc);
 	console.log(req.params.collection);
 	mongoquery.findOneById(req.params.doc, req.params.collection, function(result) {
-		console.log(result);
+		//console.log(result);
 		res.json({data:result});
 	})
 }
@@ -113,10 +113,13 @@ exports.edit = function (req, callback) {
 	console.log("setter:", setter);
 	
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
-		if(err)
+		if(err) {
 			console.log(err);
-		console.log(result);
-		callback(result); 
+			return callback({error:err.message});
+		} else {
+			console.log(result);
+			callback(result); 
+		}
 	});
 }
 
@@ -142,10 +145,13 @@ exports.edit2 = function (req, callback) {
 	console.log("setter:", setter);
 	
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
-		if(err)
+		if(err) {
 			console.log(err);
-        console.log(result);
-		callback(result); 
+			return callback({error:err.message});
+		} else {
+			console.log(result);
+			callback(result); 
+		}
 	});
 }
 
@@ -156,7 +162,7 @@ exports.addToSet = function (collection_id, req, callback) {
 	setter[req.body.field] = req.body.value;
 	console.log("setter:", setter);
 	
-	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$addToSet:setter}, function(result) {
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.body.doc_id)},{$addToSet:setter}, function(err, result) {
 		callback(result); 
 	});
 }

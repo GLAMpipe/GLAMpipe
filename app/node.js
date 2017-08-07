@@ -615,7 +615,7 @@ exports.getNodeLog = function (req, cb) {
 			return cb();
 			
 		result.forEach(function(row, i) {
-			delete row.settings.password; // let's not send passwords...
+			delete row.settings.password; // be sure to not expose passwords...
 			if(row.ts) {
 				var date = new Date(row.ts);
 				var y =  date.getUTCFullYear();

@@ -16,14 +16,8 @@
         "finish":
         [
             "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.file + '\"');"
-        ],
-        
-        "view": 
-        [
-            "var c = context; ",
-            "out.html = '<h2>I (export node) worked hard</h2>'; ",
-            "out.html += '<a href=\"/export/'+c.node.project_dir + '/' + c.node.number + '_' + c.node.nodeid + '/' + c.node.params.file + '\">download result</a>'; "
         ]
+
     },
     
     "views": {
