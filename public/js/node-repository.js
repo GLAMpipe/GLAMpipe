@@ -29,6 +29,7 @@ var nodeRepository = function () {
 		html += "  </div>"
 
 		// render node types
+		//self.nodes.sort(sortNodeTypes)
 		for (var i = 0; i < self.nodes.length; i++) {
 			
 			var node = self.nodes[i]._id;
@@ -162,6 +163,15 @@ function sortByTitle (a,b) {
   if (a.title.toLowerCase() < b.title.toLowerCase())
 	return -1;
   if (a.title.toLowerCase() > b.title.toLowerCase())
+	return 1;
+  return 0; 
+}
+
+function sortNodeTypes (a,b) {
+	console.log(b._id.type)
+  if (a._id.type < b._id.type)
+	return -1;
+  if (a._id.type > b._id.type)
 	return 1;
   return 0; 
 }

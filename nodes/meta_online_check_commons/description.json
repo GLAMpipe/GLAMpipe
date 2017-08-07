@@ -1,8 +1,8 @@
 {
     "nodeid": "process_meta_online_check_commons",
     "title": "Check if file is in Wikimedia commons",
-    "type": "meta",
-    "subtype": "web",
+    "type": "process",
+    "subtype": "meta",
     "status": "usable",
     "description": "Downloads a file, calculates a checksum and checks if it's in commons. ",
     "scripts": {

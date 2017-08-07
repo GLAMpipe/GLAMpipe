@@ -79,7 +79,7 @@ var glamPipeNode = function (node, gp) {
 			var output = self.getOutputFields();
 			
 			self.open({input_keys:input, output_keys:output});
-	}
+		}
 	}
 
 	// getter for input/output fields of the node (used as config for data rendering)
@@ -168,6 +168,7 @@ var glamPipeNode = function (node, gp) {
 			html +=   "  <div class='boxleft'>"
 			html += "<div class='metanode'>TASK "+self.source.title+"</div>";
 			html += "</div></div>"
+			return "";
 			return html;
 		}
 		

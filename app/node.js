@@ -206,7 +206,7 @@ function initNode (req, io, project, callback) {
 			{$push:{nodes: node}},
 			function(error) {
 				// if node is metanode, then we must continue to subnode creation
-				if (node.type == "meta") {
+				if (node.subtype == "meta") {
 					createMetaSubNodes(node, io, cb);
 				} else {
 				  cb(error);
@@ -255,6 +255,14 @@ function initNode (req, io, project, callback) {
 			for(var key in node.params) {
 				if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
 					add_keys.push(node.params[key]);
+				// all "in_" fields must have value
+				if(/^in_/.test(key)) {
+					if(!node.params[key] || (node.params[key] && node.params[key] == "")) {
+						console.log("NODE CREATION: missing input, canceling...")
+						return callback({"error": "input field missing: " + key});
+					}
+
+				}
 			}
 			
 			mongoquery.addFieldToCollection(node.collection, add_keys, function(){
@@ -447,7 +455,7 @@ exports.deleteNode = function (req, res, io) {
 
 				// if node is a metanode, then remove its subnodes
 				function (callback) {
-					if(node.type === "meta" && node.subnodes) {
+					if(node.subtype === "meta" && node.subnodes) {
 						var baseurl = "http://localhost:3000"; // localhost does not require authentication
 						require("async").eachSeries(node.subnodes, function iterator (subnode, next) {
 							var url = baseurl + "/api/v1/projects/"+node.project+"/nodes/" + subnode;

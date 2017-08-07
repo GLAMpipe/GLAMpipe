@@ -66,7 +66,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 					setter[node.out_field] = sandbox.out.value;
 				}
 				//console.log("setter:", setter);
-				if(sandbox.context.skip || node.type === "meta")  {// metanodes do not save output
+				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
 					console.log("NODE: skipping")
 					next();
 				} else

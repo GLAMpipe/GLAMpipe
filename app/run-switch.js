@@ -43,36 +43,7 @@ exports.runNode = function (node, io) {
  * *************************************************************************************************************/
 
 
-		case "meta":
-			
-			//runNodeScriptInContext("init", node, sandbox, io);
-			if(sandbox.context.init_error) 
-				return;
 
-			runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
-
-			// apply metanode's settings to settings of the first subnode
-			//for(var key in node.settings)
-				//node.pipe[0].settings[key] = node.settings[key];
-			
-			// dynamic settings
-			node.pipe.forEach(function(pipe, index) {
-				console.log(pipe.nodeid)
-				//console.log(pipe.params)
-				//console.log(pipe.settings)
-				//console.log(pipe.settingsFunc())
-				if(pipe.settingsFunc) {
-					console.log("settingsFunc");
-					console.log(pipe.settingsFunc());
-					console.log(pipe.settings)
-					//pipe.settings = pipe.settingsFunc();
-				}
-			})
-			
-			metanode = require("../app/node_runners/metanode.js")
-			asyncLoop.documentLoop(node, sandbox, metanode.run);
-				
-			break;
 
 
 //var request = Promise.promisifyAll(require("request"), {multiArgs: true});
@@ -281,7 +252,30 @@ exports.runNode = function (node, io) {
 					sandbox.login = CreateScriptVM(node, sandbox, "login");
 				
 					switch (node.subsubtype) {
-		
+
+						case "meta":
+							
+							if(sandbox.context.init_error) 
+								return;
+
+							runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+							
+							// dynamic settings
+							node.pipe.forEach(function(pipe, index) {
+								console.log(pipe.nodeid)
+								if(pipe.settingsFunc) {
+									console.log("settingsFunc");
+									console.log(pipe.settingsFunc());
+									console.log(pipe.settings)
+									//pipe.settings = pipe.settingsFunc();
+								}
+							})
+							
+							metanode = require("../app/node_runners/metanode.js")
+							asyncLoop.documentLoop(node, sandbox, metanode.run);
+								
+						break;
+
 						case "omeka_additem":
 							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
@@ -416,7 +410,7 @@ exports.runNode = function (node, io) {
 								next();
 							});
 						}
-					break;
+				break;
 					
 				case "documents":
 				
@@ -429,7 +423,7 @@ exports.runNode = function (node, io) {
 							});	
 						break;
 					}
-					break;
+				break;
 					
 				case "lookups":
 				
@@ -463,8 +457,8 @@ exports.runNode = function (node, io) {
 								sandbox.run.runInContext(sandbox);
 								next();
 							});			
-
 					}
+				break;
 					
 				case "downloads":
 				
@@ -479,8 +473,38 @@ exports.runNode = function (node, io) {
 							}
 						break;
 					}
+				break;
+				
+				case "meta":
 					
-					break;
+					//runNodeScriptInContext("init", node, sandbox, io);
+					if(sandbox.context.init_error) 
+						return;
+
+					runNodeScript("metanodes", node, null, null);  // sets "node.pipe"
+
+					// apply metanode's settings to settings of the first subnode
+					//for(var key in node.settings)
+						//node.pipe[0].settings[key] = node.settings[key];
+					
+					// dynamic settings
+					node.pipe.forEach(function(pipe, index) {
+						console.log(pipe.nodeid)
+						//console.log(pipe.params)
+						//console.log(pipe.settings)
+						//console.log(pipe.settingsFunc())
+						if(pipe.settingsFunc) {
+							console.log("settingsFunc");
+							console.log(pipe.settingsFunc());
+							console.log(pipe.settings)
+							//pipe.settings = pipe.settingsFunc();
+						}
+					})
+					
+					metanode = require("../app/node_runners/metanode.js")
+					asyncLoop.documentLoop(node, sandbox, metanode.run);
+						
+				break;
 			}				
 
 

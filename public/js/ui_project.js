@@ -214,7 +214,7 @@ $( document ).ready(function() {
 	});
 
 	socket.on('finish', function (data) {
-
+		console.log("FINISH: " + data.msg);
 		progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
 	   // websockPopup(finishDisplay, "Node done!");
 		$(".settings").removeClass("busy");
