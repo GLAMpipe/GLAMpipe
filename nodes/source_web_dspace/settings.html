@@ -1,16 +1,15 @@
 
-<div>detail level</div>
-<input class="node-settings" type="checkbox" name="metadata" checked="checked"> metadata <br/>
-<input class="node-settings" type="checkbox" name="bitstreams" checked="checked"> bitstream data
 
 <label>DSpace target: </label>
-<div id="source_api_dspace_url"></div>
-<button id="source_api_dspace_fetch">get collection hierarchy</button>
+<div id="source_web_dspace_url"></div>
+<label>query: </label>
+<input class="node-settings long-input" type="text" name="query" id="source_web_dspace_query"/>
 
-<div id="source_api_dspace_data"></div>
+<br/>
+<button id="source_web_dspace_fetch">get collection hierarchy</button>
 
-<div id="source_api_dspace_name"></div>
-<input class="node-settings" type="hidden" id="source_api_dspace_handle" name="dspace_handle"/>
+<div id="source_web_dspace_data"></div>
+
 
 <!-- LIMIT NOT CURRENTLY WORKING! 
 <label>how many records you want? (leave empty for all)</label>

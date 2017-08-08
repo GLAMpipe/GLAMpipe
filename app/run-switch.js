@@ -83,11 +83,6 @@ exports.runNode = function (node, io) {
 				case "web":
 
 					switch (node.subsubtype) {
-						
-						// two phase import
-						case "two_rounds" :
-							sourceAPI.fetchDataInitialMode (node,sandbox, io);
-						break;
 
 						case "eprints" :
 							// we first get all item ids (is there a better way?)
@@ -115,6 +110,7 @@ exports.runNode = function (node, io) {
 						break;
 						
 						default:
+							// query based APIs
 							sourceAPI.fetchData(node,sandbox, io);
 
 					}

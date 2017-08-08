@@ -15,7 +15,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 	var query = {};
 	// ONE DOC (single run)
 	if(node.req && node.req.params.doc) {
-		console.log("LOOP: single doc")
+		console.log("LOOP: single doc (" + node.req.params.doc + ")")
 		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
 	}
 
@@ -23,13 +23,14 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 	mongoquery.find2(query, node.collection, function (err, docs) {
 		
 		sandbox.context.doc_count = docs.length;
-		console.log(node.settings);
+		//console.log(node.settings);
 		
 		// run node once per record
 		require("async").eachSeries(docs, function iterator (doc, next) {
 
 			// check if user asked for termination of the node run
-			if(!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force && !global.register[node.req.originalUrl]) {
+				console.log("REGISTER: user terminated node run...");
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
@@ -109,7 +110,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 		require("async").eachSeries(docs, function iterator (doc, nextDocument) {
 
 			// check if user asked for termination of the node run
-			if(!node.req.query.force &&!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force && !global.register[node.req.originalUrl]) {
+				console.log("REGISTER: user terminated node run...");
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
@@ -125,13 +127,13 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				sandbox.pre_run.runInContext(sandbox);
 			} catch(e) {
 				console.log(e);
-				sandbox.out.error = "errorin in pre_run.js:" + e.message;
+				sandbox.out.error = "error in pre_run.js:" + e.message;
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
 			
-			console.log("sandbox.out.pre_value")
-			console.log(sandbox.out.pre_value)
+			//console.log("sandbox.out.pre_value")
+			//console.log(sandbox.out.pre_value)
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
@@ -219,7 +221,7 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 		require("async").eachSeries(docs, function iterator (doc, next) {
 			
 			// check if user asked for termination of the node run
-			if(!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force && !global.register[node.req.originalUrl]) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}
@@ -292,7 +294,7 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 			require("async").eachSeries(docs, function iterator (doc, next) {
 				
 				// check if user asked for termination of the node run
-				if(!global.register[node.req.originalUrl]) {
+				if(!node.req.query.force && !global.register[node.req.originalUrl]) {
 					sandbox.finish.runInContext(sandbox);
 					return;
 				}
@@ -331,7 +333,7 @@ exports.importLoop = function (node, sandbox, onDoc) {
 		async.eachSeries(sandbox.context.pre_value, function iterator (url, next) {
 			
 			// check if user asked for termination of the node run
-			if(!global.register[node.req.originalUrl]) {
+			if(!node.req.query.force && !global.register[node.req.originalUrl]) {
 				sandbox.finish.runInContext(sandbox);
 				return;
 			}

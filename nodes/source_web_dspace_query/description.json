@@ -15,7 +15,8 @@
     },
     
     "views": {
-
+        "default_keys": ["name", "dc_identifier_uri", "bitstream_original_name", "bitstream_original_file_url"]
+    
     }
     
 }

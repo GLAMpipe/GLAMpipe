@@ -873,3 +873,7 @@ th, td {
 	right: 0px;
 	margin: 10px;
 }
+
+.long-input {
+	width:600px;
+}

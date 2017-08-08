@@ -27,56 +27,7 @@ exports.fetchData = function (node, sandbox, io, cb) {
 }
 
 
-/**
- * Fetch item metadata from multiple collections
- */
-exports.fetchDataInitialMode = function (node, sandbox, io) {
-	
-	var async = require("async");
 
-	// remove previous data inserted by node and start query loop
-	var query = {}; 
-	query[MP.source] = node._id;
-	mongoquery.empty(node.collection, query, function() {
-		// init will give us a array of collections
-		nodescript.runNodeScriptInContext("init", node, sandbox, io);
-		
-		// then we fetch records per collection with async
-		async.eachSeries(sandbox.context.vars.collections, function iterator(collection, next) {
-			nodescript.runNodeScriptInContext("pre_run", node, sandbox, io);
-			console.log("WORKING WITH COLLECTION:" + collection);
-			console.log("INITIAL URL:", sandbox.out.url);
-			console.log("ROUND "+ sandbox.context.vars.initial_round_counter + " / "+ sandbox.context.vars.collections.length +" *************");
-			console.log("entering requestLoop");
-			
-			requestLoop (node, sandbox, io, function() {
-				sandbox.context.vars.initial_round_counter++;
-				sandbox.context.vars.round_counter = 0;
-				console.log("returning from requestloop\n\n");
-				next();
-			});
-			
-		}, function done() {
-			console.log("ALL REQUESTS DONE!\n\n");
-			console.log("creating schema");
-			schema.createCollectionSchema(node, null);
-			nodescript.runNodeScriptInContext("finish", node, sandbox, io);
-		});
-	});
-}
-
-
-function fetchDataInitialMode (node, sandbox, io, cb) {
-	// remove previous data inserted by node and start query loop
-	var query = {}; 
-	query[MP.source] = node._id;
-	mongoquery.empty(node.collection, query, function() {
-		console.log("URL:", sandbox.out.url)
-		requestLoop(node, sandbox, io, cb);
-	});
-
-
-}
 
 function requestLoop(node, sandbox, io, cb) {
 	var async = require("async");
@@ -141,40 +92,6 @@ function requestLoop(node, sandbox, io, cb) {
 	}
 )};
 
-
-function callAPI (url, callback) {
-	var request = require("request");
-
-	if (typeof url === "undefined" || url == "")
-		return callback("URL not set", null, null);
-
-	console.log("REQUEST:", url);
-
-	var headers = {
-		'User-Agent':       'GLAMpipe/0.0.1',
-	}
-
-	 var options = {
-		url: url,
-		method: 'GET',
-		headers: headers,
-		json: true
-	};
-
-	request(options, function (error, response, body) {
-		if (error) {
-			//console.log("ERROR:", error);
-			callback(error, response, body);
-		} else if (response.statusCode == 200) {
-			//console.log(body); 
-			console.log("SERVER RESPONSE:", response.statusCode);
-			callback(null, response, body);
-		} else {
-			//console.log("SERVER RESPONSE:", response);
-			callback("bad response from server:" + response.statusCode, response, body);
-		}
-	});
-}
 
 
 

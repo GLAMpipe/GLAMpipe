@@ -2,7 +2,6 @@
     "nodeid": "source_web_dspace",
     "type": "source",
     "subtype": "web",
-    "subsubtype": "two_rounds",
     "title": "DSpace 6: collection import",
     "status": "usable",
     "tags":["dspace"],
@@ -15,7 +14,7 @@
         "finish":"out.say('finish', 'Fetched ' + context.vars.record_counter + ' records!'); "
     },
     "views": {
-        "default_keys": ["name", "handle"]
+        "default_keys": ["name", "dc_identifier_uri", "bitstream_original_name", "bitstream_original_file_url"]
     
     }
   
