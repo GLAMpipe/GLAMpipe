@@ -13,9 +13,7 @@ services:
     environment:
      - DOCKER=1
     volumes:
-     - ./data/projects:/glampipe/projects
-     - ./data/nodes:/glampipe/nodes
-     - ./data/tmp:/glampipe/tmp
+     - ./glampipe-data:/glampipe-data
 
   mongo:
     image: mongo:3.3.10
