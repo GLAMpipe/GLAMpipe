@@ -1,0 +1,22 @@
+{
+    "nodeid": "export_web_wikidata",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "wikidata",
+    "title": "Wikidata: ",
+    "status": "works",
+    "tags":["generic"],
+    "description": "Export collection to Wikidata.",
+
+    "scripts": {
+        "hello": 
+        [
+                        "out.say('news', 'You just created a Wikidata export node'); "
+                ],
+
+        "bye": "out.say('finish', 'Deleted node!'); ",
+
+        "finish":"out.say('finish', context.success_count + ' items uploaded to Wikidata'); "
+    }
+
+}
