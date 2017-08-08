@@ -23,7 +23,7 @@ for(var i = 0; i < node.data.docs.length; i++) {
     if(Array.isArray(result))
 		result = result[0];  // we assume that we have only one search term
 
-	html += "<table class='match'><tr id='" + doc._id + "'><td>"
+	html += "<table class='match' style='width:100%'><tr id='" + doc._id + "'><td style='width:20em'>";
     html += "<div class='fatbox'>";
     html += "  <div class='inlinetitleblock'><span class='title'>" + title + "</span></div>";
     html += "</div><div class='match debug'>SELECTED MATCH:" + doc[node.source.params.out_match] + "</div></td><td>";
@@ -50,7 +50,7 @@ $("datablock").off().on("click", "button", function(e) {
 function renderWDResult(result, doc) {
 
 	if(result) {
-		var html = "<table class='match-set'>";
+		var html = "<table class='match-set' style='width:100%'>";
 		for(var i = 0; i < result.length; i++) {
 			var type = "";
 			if(result[i]["type"] && Array.isArray(result[i]["type"]) && result[i]["type"].length && result[i]["type"][0]["name"])
@@ -69,9 +69,9 @@ function renderWDResult(result, doc) {
 				html += "<tr>";
 				
 			html += "<td>"+result[i].name+"</td>";
-			html += "<td> ["+type+"] </td>";
-			html += "<td>"+result[i].score+"</td>";
-			html += "<td><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a>&nbsp; ";
+			html += "<td style='width:15em'> ["+type+"] </td>";
+			html += "<td style='width:5em'>"+result[i].score+"</td>";
+			html += "<td style='width:20em;text-align:right'><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a>&nbsp; ";
 			html += "<button class='select-match' data-match='"+result[i].id+"' data-doc='"+doc._id+"' >select match</button></td>";
 			html += "</tr>";
 		}
