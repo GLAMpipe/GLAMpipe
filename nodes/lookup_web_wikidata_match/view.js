@@ -14,7 +14,6 @@ var wikidata_url = "https://www.wikidata.org/wiki/";
 var api_url = g_apipath + "/collections/" + node.source.collection + "/docs/";
 html = "";
 
-
 // HTML RENDERING
 
 for(var i = 0; i < node.data.docs.length; i++) {
@@ -27,7 +26,7 @@ for(var i = 0; i < node.data.docs.length; i++) {
 	html += "<table class='match'><tr id='" + doc._id + "'><td>"
     html += "<div class='fatbox'>";
     html += "  <div class='inlinetitleblock'><span class='title'>" + title + "</span></div>";
-    html += "</div><div class='match'>SELECTED MATCH:" + doc[node.source.params.out_match] + "</div></td><td>";
+    html += "</div><div class='match debug'>SELECTED MATCH:" + doc[node.source.params.out_match] + "</div></td><td>";
     html += renderWDResult(result, doc) ;
     html += "<td></tr></table>";
 }
@@ -37,7 +36,9 @@ for(var i = 0; i < node.data.docs.length; i++) {
 // EVENT HANDLERS 
 
 // off() is important since view.js gets called every time user clicks node
-$("data-display").off().on("click", "a", function(e) {
+$("datablock").off().on("click", "button", function(e) {
+	$(this).closest("table").find("tr").removeClass("selected-match");
+	$(this).closest("tr").addClass("selected-match");
 	setMatch($(this).data("match"), $(this).data("doc"));
 	e.preventDefault();
 })
@@ -54,8 +55,15 @@ function renderWDResult(result, doc) {
 			var type = "";
 			if(result[i]["type"] && Array.isArray(result[i]["type"]) && result[i]["type"].length && result[i]["type"][0]["name"])
 				var type = result[i]["type"][0]["name"];
-				
-			if(result[i].score == "100")
+			
+			
+			var wikidata_id=doc[node.source.params.out_match];
+
+			if(result[i].id==wikidata_id)
+			{
+				html += "<tr class='selected-match'>";
+			}
+			else if(result[i].score == "100" && wikidata_id == "null")
 				html += "<tr class='good'>";
 			else
 				html += "<tr>";
@@ -63,8 +71,8 @@ function renderWDResult(result, doc) {
 			html += "<td>"+result[i].name+"</td>";
 			html += "<td> ["+type+"] </td>";
 			html += "<td>"+result[i].score+"</td>";
-			html += "<td><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a> ";
-			html += "<a class='select-match' target='_blank' data-match='"+result[i].id+"' data-doc='"+doc._id+"' href='#'>select match</a></td>";
+			html += "<td><a target='_blank' href='" + wikidata_url + result[i].id + "'>"+result[i].id+"</a>&nbsp; ";
+			html += "<button class='select-match' data-match='"+result[i].id+"' data-doc='"+doc._id+"' >select match</button></td>";
 			html += "</tr>";
 		}
 		return html + "</table>";
