@@ -688,29 +688,6 @@ function getProp(doc, keyname, index) {
 }
 
 
-/**
- * Make HTTP request in the record context
- */ 
-function callAPISerial (sandbox, node, onScript, onError) {
-
-	var request = require("request");
-
-	 var options = {
-		url: sandbox.out.url,
-		method: 'GET',
-		json: true
-	};
-
-	// make actual HTTP request
-	request(options, function (error, response, body) {
-			sandbox.context.error = error;
-			sandbox.context.response = response;
-			sandbox.context.data = body;
-			onScript(sandbox)
-	});
-
-}
-
 
 /**
  * Execute node's script without given context

@@ -5,8 +5,8 @@ services:
   glam:
     build: .
     image: artturimatias/glampipe
-    links:
-     - mongo
+    networks:
+     - gp
     ports:
      - "3000:3000"
     command: node glampipe.js
@@ -19,4 +19,9 @@ services:
 
   mongo:
     image: mongo:3.3.10
+    networks:
+    - gp
 
+networks:
+  gp:
+    driver: bridge

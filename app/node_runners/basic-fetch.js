@@ -92,6 +92,39 @@ function requestLoop(node, sandbox, io, cb) {
 	}
 )};
 
+function callAPI (url, callback) {
+	var request = require("request");
+
+	if (typeof url === "undefined" || url == "")
+		return callback("URL not set", null, null);
+
+	console.log("REQUEST:", url);
+
+	var headers = {
+		'User-Agent':       'GLAMpipe/0.0.1',
+	}
+
+	 var options = {
+		url: url,
+		method: 'GET',
+		headers: headers,
+		json: true
+	};
+
+	request(options, function (error, response, body) {
+		if (error) {
+			//console.log("ERROR:", error);
+			callback(error, response, body);
+		} else if (response.statusCode == 200) {
+			//console.log(body); 
+			console.log("SERVER RESPONSE:", response.statusCode);
+			callback(null, response, body);
+		} else {
+			//console.log("SERVER RESPONSE:", response);
+			callback("bad response from server:" + response.statusCode, response, body);
+		}
+	});
+}
 
 
 
