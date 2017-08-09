@@ -116,29 +116,22 @@ exports.uploadFile = function (req, res ) {
 	
 	console.log("req.file:", req.file);
 	var file_path = path.join(global.config.dataPath, 'tmp');
-	if(req.file.mimetype) {
-		return res.json({
-			"status": "ok",
-			"filename":req.file.filename,
-			"path": file_path,
-			"mimetype":req.file.mimetype,
-			"title": req.body.title,
-			"nodeid": req.body.nodeid,
-			"project": req.body.project,
-			"description": req.body.description
-		})
-	} else {
-		return res.json({
-			"status": "ok",
-			"filename":req.file.filename,
-			"path": file_path,
-			"mimetype":"unknown",
-			"title": req.body.title,
-			"nodeid": req.body.nodeid,
-			"project": req.body.project,
-			"description": req.body.description
-		})
+	var response = {
+		"status": "ok",
+		"filename":req.file.filename,
+		"originalname":req.file.originalname,
+		"path": file_path,
+		"mimetype": "unknown",
+		"title": req.body.title,
+		"nodeid": req.body.nodeid,
+		"project": req.body.project,
+		"description": req.body.description
 	}
+	if(req.file.mimetype) {
+		response.mimetype = req.file.mimetype;
+	} 
+	return res.json(response);
+	
 }
 
 exports.deleteFile = function(req, res) {

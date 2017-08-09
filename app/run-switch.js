@@ -279,9 +279,9 @@ exports.runNode = function (node, io) {
 						case "dspace_additem":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
-									sandbox.out.say("error","login failed");
+									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("LOGIN GOOD");
+									console.log("DSpace LOGIN GOOD");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -290,9 +290,9 @@ exports.runNode = function (node, io) {
 						case "dspace_update":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
-									sandbox.out.say("error","login failed");
+									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("LOGIN GOOD");
+									console.log("DSpace LOGIN GOOD");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -301,9 +301,9 @@ exports.runNode = function (node, io) {
 						case "dspace_addfield":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
-									sandbox.out.say("error","login failed");
+									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("LOGIN GOOD");
+									console.log("DSpace LOGIN GOOD");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -312,9 +312,9 @@ exports.runNode = function (node, io) {
 						case "dspace_addfile":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
-									sandbox.out.say("error","login failed");
+									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("LOGIN GOOD");
+									console.log("DSpace LOGIN GOOD");
 									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
 								}
 							});

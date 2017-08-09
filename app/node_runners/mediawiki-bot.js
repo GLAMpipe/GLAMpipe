@@ -16,14 +16,14 @@ exports.login = function (node, sandbox, io, cb) {
 	// ask bot config (username, pass etc.) from node
 	runNodeScriptInContext("login", node, sandbox, io);
 	if(sandbox.context.abort) // check for empty username or password
-		return cb("login failed");
+		return cb("Commons login failed");
 		
 	var client = new bot(sandbox.out.botconfig);
 
 	client.logIn(sandbox.out.botconfig.username, sandbox.out.botconfig.password, function (err, data) {
 		
 		if(err) {
-			io.sockets.emit("error", "Login failed!");
+			io.sockets.emit("error", "Commons Login failed!");
 			cb(err);
 		} else {
             sandbox.client = client;

@@ -390,9 +390,9 @@ module.exports = function(express, glampipe, passport) {
 		collection.addDocument(req, function(data) {res.send(data)});
 	});
 
-	express.post('/edit/collection/addtoset/:id', function (req, res) {
-		collection.addToSet(req.params.id, req, function(data) {res.send(data)});
-	});
+	//express.post('/edit/collection/addtoset/:id', function (req, res) {
+		//collection.addToSet(req.params.id, req, function(data) {res.send(data)});
+	//});
 
 	express.delete('/api/v1/collections/:collection/docs/:doc', function (req, res) {
 		collection.deleteDocument(req, function(data) {res.send(data)});
@@ -407,24 +407,22 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.deleteFile(req, res);
 	});
 	
-    // DOWNLOAD
-	express.get('/export/:projectdir/:nodedir/:file', function (req, res) {
-		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'export', req.params.nodedir, req.params.file));
-	});
-
-	express.get('/files/:projectdir/:nodedir/:file', function (req, res) {
-		res.sendFile(path.join(glampipe.dataPath, "projects", req.params.projectdir, 'process', req.params.nodedir, req.params.file));
+    // FILES
+	express.get('/api/v1/upload/:id', function (req, res) {
+		res.setHeader('Content-type', 'application/pdf');
+		res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
+		res.sendFile(path.join(glampipe.dataPath, "tmp", req.params.id));
 	});
 
 	// PIPES
-	express.post('/create/pipe', function (req, res) {
-		glampipe.core.createPipe(req, function(data) {res.send(data)});
-	});
+	//express.post('/create/pipe', function (req, res) {
+		//glampipe.core.createPipe(req, function(data) {res.send(data)});
+	//});
 
 	// NODE EDITOR
-	express.get('/node-viewer', function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
-	});
+	//express.get('/node-viewer', function (req, res) {
+		//res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
+	//});
     
 	// PROXY
 	express.get('/api/v1/proxy/', function (req, res) {

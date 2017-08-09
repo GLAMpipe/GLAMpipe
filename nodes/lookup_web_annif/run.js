@@ -6,7 +6,7 @@ var data = context.data;
 
 // check errors in request (for example 404)
 if(context.error) {
-	setter.error = context.error;
+	out.value = out.error_marker + context.error;
 // check errors in query
 } else if(data) {
 	
