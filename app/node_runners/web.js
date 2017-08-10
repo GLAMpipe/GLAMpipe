@@ -6,7 +6,7 @@ var exports = module.exports = {};
 
 exports.postJSON = function (doc, sandbox, next) {
 	
-	console.log("POST JSON request");
+	console.log("WEB: POST JSON request");
 	
 	// let node create an upload JSON
 	sandbox.pre_run.runInContext(sandbox);
@@ -79,7 +79,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 exports.fetchContent = function (options, sandbox, next) {
 	
 	if(!options.url)
-		return next("missing url! skipping...")
+		return next("WEB: missing url! skipping...")
 		
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
@@ -104,7 +104,7 @@ exports.headRequest = function(options, sandbox, next) {
 
 	console.log("REQUEST:", options.url);
 	if(!options.url)
-		return next("missing url! skipping...")
+		return next("WEB: missing url! skipping...")
 
 	request(options, function (error, response, body) {
 		sandbox.context.data = {"error": error, "response": response};
@@ -152,7 +152,7 @@ exports.uploadFile = function (upload, sandbox, next ) {
 			sandbox.run.runInContext(sandbox);
 			next();
 		} else {
-			console.log('Upload successful!  Server responded with:', body);
+			console.log('WEB: Upload successful!  Server responded with:', body);
 			sandbox.context.data = body;
 			sandbox.run.runInContext(sandbox);
 			next();
@@ -166,6 +166,14 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 
 	sandbox.context.response = null;
 
+	// skip if retrieve link already exists
+	if(upload.link) {
+		console.log("WEB: existing retrieve link, skipping upload")
+		sandbox.context.data = {"existing_link": upload.link};
+		sandbox.run.runInContext(sandbox);
+		return next("file already uploaded");
+	}
+
 	var req = 	request.post(upload.options, function optionalCallback(err, response, body) {
 
 		sandbox.context.response = response;
@@ -173,11 +181,11 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 		if (err) {
 			return console.error('upload failed:', err);
 		} else if (response.statusCode === 200) {
-			console.log('Upload successful!  Server responded with:', response.statusCode);
+			console.log('WEB: Upload successful!  Server responded with:', response.statusCode);
 			sandbox.context.data = JSON.parse(body);
 			next();
 		} else {
-			console.log('Upload failed!  Server responded with:', response.statusCode);
+			console.log('WEB: Upload failed!  Server responded with:', response.statusCode);
 			console.log('body:', body);
 			next();
 		}
@@ -186,19 +194,19 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 
 	file_stream = fs.createReadStream(upload.file);
 	file_stream.on('data', function(chunk) {
-		console.log("reading..." + chunk.length);
+		console.log("WEB: reading..." + chunk.length);
 		//size += chunk.length;
 	});
 
 	// if there is no file, write error to document
 	file_stream.on('error', function() {
-		console.log("file is NOT THERE");	
+		console.log("WEB: file is NOT THERE");	
 		sandbox.context.error = {type:"error", msg:"FILE not found", file:upload};
 		return next();	
 	});
 	
 	file_stream.on('end', function() {
-		console.log("file is read");	
+		console.log("WEB: file is read");	
 		//console.log(size);	
 		//console.log((size/1000).toFixed(2));	
 	});
@@ -248,7 +256,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 	const fileType = require('file-type');
 
 	if(isInvalidURL(download.url)) {
-		download.error = "Invalid URL!"
+		download.error = "WEB: Invalid URL!"
 		return next();
 	}
 
@@ -337,7 +345,7 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		cb(e.message);
 		return;
 	}
-	console.log("login url:" , sandbox.out.login.url);
+	console.log("WEB: login url:" , sandbox.out.login.url);
 
 	
 	// send login information
@@ -346,7 +354,7 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		if(error)
 			cb("Login error")
 		else if(response.statusCode === 200) {
-			sandbox.out.say("progress", "Login succesful"); 
+			sandbox.out.say("progress", "Login successful"); 
 			cb(null);
 		} else
 			cb("Authentication failed");

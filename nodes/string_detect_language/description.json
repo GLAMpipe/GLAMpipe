@@ -16,7 +16,7 @@
             "    /* lets make counter for succesful detects */",
             "context.node.value_counter = 0; ",
             "context.node.success_counter = 0; ",
-            "out.say('progress', 'Detectin from ' + context.node.params.in_field + ' fields!'); "
+            "out.say('progress', 'Detecting from ' + context.node.params.in_field + '!'); "
         ],
                 
         "finish":

@@ -3,6 +3,11 @@
 
 out.method = "post";
 
+// do not make request if project is invalid
+var projects = ["yso-finna-fi", "yso-finna-en", "yso-finna-sv"];
+if(!projects.includes(context.node.settings.project))
+	context.skip = true;
+
 var in_field_value = context.doc[context.node.params.in_field];
 
 if(Array.isArray(in_field_value)) {

@@ -412,8 +412,8 @@ function combineSetters(setters) {
 		setters.forEach(function(setter) {
 			var setter_keys = Object.keys(setter);
 			//console.log(setter)
-			console.log("setter_keys");
-			console.log(setter_keys);
+			//console.log("setter_keys");
+			//console.log(setter_keys);
 			setter_keys.forEach(function(s_key) {
 				c_setter[s_key].push(setter[s_key]);
 			})

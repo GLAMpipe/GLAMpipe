@@ -281,7 +281,7 @@ exports.runNode = function (node, io) {
 								if(error)
 									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("DSpace LOGIN GOOD");
+									console.log("WEB: DSpace login ok");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -292,7 +292,7 @@ exports.runNode = function (node, io) {
 								if(error)
 									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("DSpace LOGIN GOOD");
+									console.log("WEB: DSpace login ok");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -303,7 +303,7 @@ exports.runNode = function (node, io) {
 								if(error)
 									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("DSpace LOGIN GOOD");
+									console.log("WEB: DSpace login ok");
 									asyncLoop.documentLoop(node, sandbox, web.postJSON);
 								}
 							});
@@ -314,7 +314,7 @@ exports.runNode = function (node, io) {
 								if(error)
 									sandbox.out.say("error","DSpace login failed");
 								else {
-									console.log("DSpace LOGIN GOOD");
+									console.log("WEB: DSpace login ok");
 									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
 								}
 							});
@@ -591,7 +591,7 @@ exports.createSandbox = function (node, io) {
 
 				// remove node from register if finished or if error (aborting)
 				if(ch === "finish" || ch === "error") {
-					console.log("REGISTER: deleting " + node.req.originalUrl)
+					//console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
 				}
 				

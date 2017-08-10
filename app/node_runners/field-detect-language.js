@@ -31,7 +31,8 @@ exports.language = function (doc, sandbox, next) {
 	async.eachSeries(input, function iterator(value, nextvalue) {
 		
 		cld.detect(value, function(err, result) {
-			console.log("detection result", result);
+			console.log("detection result");
+			console.log(result);
 			sandbox.context.data.push(result);
 			nextvalue();
 		});
