@@ -2,11 +2,9 @@
 Visual tool for viewing, editing, downloading and uploading of GLAM-based data. 
 
 
-# what is this?
-http://artturimatias.github.io/GLAMpipe/
+# What is GLAMpipe?
+http://glampipe.org
 
-# what and where are nodes?
-https://github.com/artturimatias/metapipe-nodes
 
 # status
 toddler 2.1
