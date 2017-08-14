@@ -118,7 +118,7 @@ module.exports = function(express, glampipe, passport) {
  * *************************************************************************************************************/
 
 	// main page
-	express.get('/', function (req, res) {
+	express.get(global.config.uiPath, function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'index.html'));
 	});
 
@@ -128,12 +128,12 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	// project page
-	express.get('/project/:id', function (req, res) {
+	express.get(global.config.uiPath + '/project/:id', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
 	});
 
 	// facet view
-	express.get('/views/data/facets/:nodeid', function (req, res) {
+	express.get(global.config.uiPath + '/views/data/facets/:nodeid', function (req, res) {
 		var facet = require("../app/node_runners/view-facet.js");
 		facet.getFacetIndexHTML(req,res);
 		//res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facet.html'));
@@ -179,6 +179,7 @@ module.exports = function(express, glampipe, passport) {
 			url:global.config.url, 
 			isServerInstallation:global.config.isServerInstallation, 
 			version:global.config.version,
+			uiPath:global.config.uiPath,
 			dataPath:global.config.dataPath
 		});
 	});

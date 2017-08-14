@@ -8,7 +8,8 @@ var glamPipe = function () {
 	this.currentNodes = {}; // active node per collection
 
 	this.pickedCollectionId = "";
-	this.baseAPI = "api/v1"; 
+	this.baseAPI = "/api/v1"; 
+	this.uiPath = "/";
 	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
@@ -23,7 +24,7 @@ var glamPipe = function () {
 	// set api path
 	var paths = window.location.pathname.split("/");
 	if(paths.indexOf("project") !== -1)
-		this.baseAPI = "../api/v1";
+		this.baseAPI = "/api/v1";
 	
 	// MAIN PAGE (projects)
 	this.getProjectTitles = function (div) {
@@ -34,7 +35,7 @@ var glamPipe = function () {
 			
 			for(var i = 0; i< data.length; i++) {
 				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
-				listOption += "<a href='project/" + data[i]._id + "'>\n";
+				listOption += "<a href='" + self.uiPath + "/project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
@@ -65,7 +66,7 @@ var glamPipe = function () {
 			$(div).empty();
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
-				html += "<tr><td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+				html += "<tr><td><div><a href='" + self.uiPath + "/project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -165,6 +166,7 @@ var glamPipe = function () {
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
 			$("#version").empty().append("ver. " + data.version);
+			self.uiPath = data.uiPath;
 			if(data.isServerInstallation) {
 				self.desktop = false;
 				var d = {
@@ -245,7 +247,7 @@ var glamPipe = function () {
 					var params = {params:{title:"My collection"}}
 					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
 						if(!data.error)
-							window.location.href = "/project/" + project;
+							window.location.href = self.uiPath + "/project/" + project;
 						else
 							alert(data.error);
 					})

@@ -66,8 +66,9 @@ var GlamPipe = function() {
 		console.log("initializing server");
 
 		self.app = express();
-		self.app.use(express.static('public'));
+		self.app.use(global.config.uiPath, express.static('public'));
 		self.app.use("/publicview", express.static('app/views/datapublic'));
+		self.app.use(global.config.staticPath, express.static('public_external'));
 		self.app.use( bodyParser.json() );       // to support JSON-encoded bodies
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 			extended: true

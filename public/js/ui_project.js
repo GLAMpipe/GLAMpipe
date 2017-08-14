@@ -228,6 +228,8 @@ $( document ).ready(function() {
 
 function getWSPath() {
 	var paths = window.location.pathname.split("/");
+	return "";
+	
 	if(paths[1] != "project")
 		return "/" + paths[1];
 	else

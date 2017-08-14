@@ -1,0 +1,15 @@
+curl -XPOST -H "Content-type: application/json" -d '
+    {
+        "date":"2017-01-01", 
+        "urn":"urn:organisation:jyu"
+    }' 'https://api.cc.jyu.fi/call/organisation.get_suborganisations' | python -m json.tool > jyu_tree.json
+    
+
+curl -XPOST -H "Content-type: application/json" -d '
+    {
+        "query":[
+            "NOT",
+            ["ID",""]
+            ] 
+    }' 'https://api.cc.jyu.fi/call/organisation.search' | python -m json.tool > jyu_data.json
+    

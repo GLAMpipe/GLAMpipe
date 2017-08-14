@@ -5,10 +5,10 @@
 // default: ""
 var dataPath = "";
 
+var uiPath = "/";
+var staticPath = "/static"; // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 
 // MODE (server/desktop)
-// - false = do not use authentication
-// - true = use local authentication
 var isServerInstallation = false;
 var disableBatchDownloads = true;
 var canRegister = true;
@@ -58,6 +58,8 @@ exports.source =  MP + "_source";
 exports.loadNodesFromGithub = false;
 exports.dataPath = dataPath;
 exports.nodePath = nodePath;
+exports.uiPath = uiPath;
+exports.staticPath = staticPath;
 exports.url = url;
 exports.isServerInstallation = isServerInstallation;
 exports.disableBatchDownloads = disableBatchDownloads;
