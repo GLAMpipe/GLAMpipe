@@ -287,7 +287,10 @@ exports.downloadAndSave = function (node, download, addext, next) {
 				file.close(function () {
 					const buffer = readChunk.sync(filePath, 0, 4100);
 					download.filetype = fileType(buffer);
-					console.log(download.filetype)
+					if(!download.filetype)
+						console.log("WEB: no filetype detected!");
+					else
+						console.log("WEB: " + JSON.stringify(download.filetype));
 					
 					// add extension to file name if user requested it
 					if(addext && download.filetype && download.filetype.ext) {

@@ -27,8 +27,15 @@ if(context.node.settings.dry_run) {
 		out.say('progress', 'Downloaded ' + total.toFixed(2) + ' Mt'); 
 			
 		out.setter[context.node.params.out_field] = context.path.join(context.node.dir, data.filename); 
-		out.setter[context.node.params.out_ext] = data.filetype.ext; 
-		out.setter[context.node.params.out_mime] = data.filetype.mime; 
+		out.setter[context.node.params.out_ext] = "";
+		out.setter[context.node.params.out_mime] = "";
+		
+		if(data.filetype && data.filetype.ext) {
+			out.setter[context.node.params.out_ext] = data.filetype.ext; 
+		}
+		if(data.filetype && data.filetype.mime) {
+			out.setter[context.node.params.out_mime] = data.filetype.mime; 
+		}
 		
 		context.node.download_counter++;	
 		

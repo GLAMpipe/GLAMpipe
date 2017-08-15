@@ -5,8 +5,12 @@
 // default: ""
 var dataPath = "";
 
+// USER INTERFACE
+// location of ui
 var uiPath = "/";
-var staticPath = "/static"; // path for non-GLAMpipe html files (if there is a need to serve files from same container)
+
+// path for non-GLAMpipe html files (if there is a need to serve files from same container)
+var staticPath = "/static"; 
 
 // MODE (server/desktop)
 var isServerInstallation = false;
