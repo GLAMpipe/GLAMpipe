@@ -585,61 +585,7 @@ div.panel.show {
 	padding-left:10px !important;
 }
 
-.lookup:hover {
-	border-left:solid rgba(232, 176, 190,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
 
-.transform:hover {
-	border-left:solid rgba(255,181,13,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.viz:hover {
-	border-left:solid rgba(185,70,70,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.query:hover {
-	border-left:solid rgba(64,159,191,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.upload:hover {
-	border-left:solid rgba(128, 83, 172,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.export:hover {
-	border-left:solid rgba(143,215,239,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.download:hover {
-	border-left:solid rgba(159,191,64,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.file:hover {
-	border-left:solid rgba(181, 227, 181,1) 5px;
-	padding-left:5px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
 
 .panel .listoption {
 	font-size:12px;

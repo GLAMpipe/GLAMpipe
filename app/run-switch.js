@@ -276,29 +276,7 @@ exports.runNode = function (node, io) {
 							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
 
-						case "dspace_additem":
-							web.cookieLogin(node, sandbox, function(error) {
-								if(error)
-									sandbox.out.say("error","DSpace login failed");
-								else {
-									console.log("WEB: DSpace login ok");
-									asyncLoop.documentLoop(node, sandbox, web.postJSON);
-								}
-							});
-						break;
-
-						case "dspace_update":
-							web.cookieLogin(node, sandbox, function(error) {
-								if(error)
-									sandbox.out.say("error","DSpace login failed");
-								else {
-									console.log("WEB: DSpace login ok");
-									asyncLoop.documentLoop(node, sandbox, web.postJSON);
-								}
-							});
-						break;
-
-						case "dspace_addfield":
+						case "dspace":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
 									sandbox.out.say("error","DSpace login failed");
@@ -319,7 +297,18 @@ exports.runNode = function (node, io) {
 								}
 							});
 						break;
-						
+
+						case "plone":
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","Plone login failed");
+								else {
+									console.log("WEB: Plone login ok");
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
+								}
+							});
+						break;
+
 						case "mediawiki_bot":
 							var mv_bot = require("../app/node_runners/mediawiki-bot.js");
 							mv_bot.login(node, sandbox, io, function(error) {

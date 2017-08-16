@@ -8,7 +8,26 @@ c.var.limit = 20;
 c.var.total_count = 0;
 
 /* list of returned fields */
-var fields = ['buildings', 'formats', 'id', 'images', 'institutions', 'nonPresenterAuthors', 'summary', 'urls', 'title', 'year',  'onlineUrls']; 
+var fields = [
+	'buildings', 
+	'formats', 
+	'id', 
+	'images', 
+	'institutions', 
+	'nonPresenterAuthors', 
+	'summary', 
+	'urls', 
+	'title', 
+	'year',  
+	'onlineUrls', 
+	'isbns', 
+	'cleanIsbn', 
+	'subjects',
+	'series', 
+	'recordPage',
+	'physicalDescriptions'
+];
+ 
 var fields_str = ''; 
 for (var i = 0; i< fields.length; i++) { 
    fields_str += '&field[]=' + fields[i]; 

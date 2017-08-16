@@ -3,7 +3,7 @@
     "title": "DSpace 6: update metadata field",
     "type": "export",
     "subtype": "web",
-    "subsubtype": "dspace_update",
+    "subsubtype": "dspace",
     "status": "usable",
     "tags":["dspace"],
     "description": "Update DSpace data via REST API",

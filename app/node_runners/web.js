@@ -344,7 +344,7 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		sandbox.login.runInContext(sandbox);
 	} catch(e) {
 		console.log(e);
-		sandbox.out.error = "errorin in login.js:" + e.message;
+		sandbox.out.error = "error in login.js:" + e.message;
 		cb(e.message);
 		return;
 	}
@@ -353,11 +353,13 @@ exports.cookieLogin = function (node, sandbox, cb) {
 	
 	// send login information
 	request.post(sandbox.out.login, function(error, response, body) {
-		
+		console.log(response)
+		console.log(body)
 		if(error)
 			cb("Login error")
 		else if(response.statusCode === 200) {
 			sandbox.out.say("progress", "Login successful"); 
+			sandbox.context.login = body; // save result that this can be used also for token login
 			cb(null);
 		} else
 			cb("Authentication failed");
@@ -365,6 +367,7 @@ exports.cookieLogin = function (node, sandbox, cb) {
 	});
 
 }
+
 
 
 
