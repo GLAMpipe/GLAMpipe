@@ -353,8 +353,6 @@ exports.cookieLogin = function (node, sandbox, cb) {
 	
 	// send login information
 	request.post(sandbox.out.login, function(error, response, body) {
-		console.log(response)
-		console.log(body)
 		if(error)
 			cb("Login error")
 		else if(response.statusCode === 200) {

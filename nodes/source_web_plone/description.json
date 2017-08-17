@@ -1,0 +1,21 @@
+{
+    "nodeid": "source_web_plone",
+    "type": "source",
+    "subtype": "web",
+    "title": "Plone: collection import",
+    "status": "usable",
+    "tags":["plone"],
+    "usage":"",
+    "description": "Import data from Plone.",
+    
+    "scripts": {
+        "hello": "out.say('news', 'You added a Plone import node'); ",
+        "bye": "out.say('finish', 'Bye!'); ",
+        "finish":"out.say('finish', 'Fetched ' + context.vars.record_counter + ' records!'); "
+    },
+    "views": {
+        "default_keys": ["title", "dc_identifier_uri", "bitstream_original_name", "bitstream_original_file_url"]
+    
+    }
+  
+}

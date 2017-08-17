@@ -743,6 +743,10 @@ table.documents td {
 
 }
 
+table thead {
+    background-color: #efefef;
+}
+
 table.documents tbody td div {
 	max-height:10em;
 	max-width:350px;

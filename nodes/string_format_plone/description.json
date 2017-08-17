@@ -1,8 +1,8 @@
 {
-    "nodeid": "process_string_format_plone_export",
-    "title": "Format Plone JSON",
+    "nodeid": "process_format_plone_export",
+    "title": "Format Plone JSON (export)",
     "type": "process",
-    "subtype": "strings",
+    "subtype": "format",
     "status": "usable",
     "description": "Format Plone data (JSON)",
     "scripts": {

@@ -423,11 +423,11 @@ var dataTable = function (node) {
 				
 		//objects
 		} else if(typeof value === "object") {
-			html += "<ul>";
+			html += "<li><span class='bold'>" + key + "</span>:<ul>" ;
 			for(key in value) {
 				html += self.object2Html(value[key], key);
 			}
-			html += "</ul>";	
+			html += "</ul></li>";	
 		}
 
 

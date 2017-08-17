@@ -1,9 +1,20 @@
 
+
 <div class="box-noflex">
 
-	<div>
-		<input type="checkbox" class="node-settings" name="combine"/>
-		<label>If input is an array, then sum character counts to a single value</label>
-	</div>
+	<label>Character for joining arrays</label>
+	<select class="node-settings" name="mode">
+		<option value="allways" selected>Send all fields</option>
+		<option value="non-empty">Send non-empty field only</option>
+	</select>
+
+	<label>Character for joining arrays</label>
+	<input class="node-settings" name="join" value=";"/>
+
+</div>
+
+<div class="box-noflex">
+
+	<div id="format-plone-mapping"></div>
 
 </div>

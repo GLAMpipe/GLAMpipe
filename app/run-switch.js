@@ -396,7 +396,19 @@ exports.runNode = function (node, io) {
 							});
 						}
 				break;
+
+				case "format":
+				
+					switch (node.subsubtype) {
 					
+						default: // syncronous nodes
+							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+								sandbox.run.runInContext(sandbox);
+								next();
+							});
+						}
+				break;
+
 				case "documents":
 				
 					switch (node.subsubtype) {
@@ -526,6 +538,7 @@ exports.runNode = function (node, io) {
 
 exports.createSandbox = function (node, io) {
 
+	var urljoin = require('url-join');
 	// context for node scripts
 	var sandbox = {
 		context: {
@@ -538,6 +551,7 @@ exports.createSandbox = function (node, io) {
 			count: 0,
 			success_count: 0,
 			path: path,
+			urljoin: urljoin,
 			get: getProp,
 			flat: flatten,
 			validator: validator,

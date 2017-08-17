@@ -237,17 +237,19 @@ var glamPipeNode = function (node, gp) {
 					options.push("<option>" + data.sorted[i] + "</option>");
 				}
 				
-				// populate field selects
-				$(".settings select.dynamic_field").each(function(i) {
-					$(this).append(options.join(""));
-				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
-				})	
+
 
 				// execute node's settings.js if exists
 				if(self.source.scripts.settings) {
 					var settingsScript = new Function('node', self.source.scripts.settings);
 					settingsScript(self.source);
 				}
+
+				// populate field selects
+				$(".settings select.dynamic_field").each(function(i) {
+					$(this).append(options.join(""));
+				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
+				})	
 
 				self.setSettingValues();
 			})
@@ -272,6 +274,7 @@ var glamPipeNode = function (node, gp) {
 	this.setSettingValues = function () {
 		var data = self.source;
 		for(var prop in data.settings) {
+			console.log(prop)
 			if(typeof data.settings[prop] == "boolean") {
 				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
 				$("input[name='"+prop+"']").change();

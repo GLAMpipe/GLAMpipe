@@ -1,10 +1,10 @@
 {
 	"nodeid": "process_field_create_commons_metadata",
-	"title": "Create commons metadata",
+	"title": "Format commons metadata (export)",
 	"type": "process",
-	"subtype": "strings",
+	"subtype": "format",
 	"status": "works",
-	"description": "Produce commons metadata",
+	"description": "Format wikimedia commons metadata (wikitext)",
 	"scripts": {
 		"hello": "out.say('news', 'You added a wikitext node'); ",
 		
