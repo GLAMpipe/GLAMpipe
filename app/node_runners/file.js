@@ -52,3 +52,16 @@ exports.getType = function(options, sandbox, cb) {
 	cb();
 
 }
+
+exports.getBase64 = function(file, sandbox, cb) {
+	
+	fs.readFile(file, function(err, contents) {
+		if(!err) {
+			sandbox.context.data = contents.toString('base64');
+		} else {
+			console.log(err);
+		}
+		cb();
+	});
+
+}

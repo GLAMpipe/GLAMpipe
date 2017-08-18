@@ -50,6 +50,8 @@ function createDocs (recs) {
 			 out_rec.rights = '';
 			 out_rec.description = '';
 			 out_rec.title = '';
+			 out_rec.title_short = '';
+			 out_rec.title_sub = '';
 			 out_rec.image_url = '';
 			 out_rec.thumbnail_html = '';
 			 out_rec.id = '';
@@ -65,6 +67,7 @@ function createDocs (recs) {
 			 out_rec.series_name = [];
 			 out_rec.series_additional = [];
 			 out_rec.series_issn = [];
+			 out_rec.publishers = [];
 			 out_rec.subjects = [];
 			 out_rec.record_url = "";
 			 out_rec.physical_descriptions = [];
@@ -90,6 +93,12 @@ function createDocs (recs) {
 
 			 if (recs[i].title)
 				 out_rec.title = recs[i].title;
+
+			 if (recs[i].shortTitle)
+				 out_rec.title_short = recs[i].shortTitle;
+
+			 if (recs[i].subTitle)
+				 out_rec.title_sub = recs[i].subTitle;
 
 			 if (recs[i].year)
 				 out_rec.year = recs[i].year;
@@ -121,6 +130,9 @@ function createDocs (recs) {
 				 
 			if (recs[i].physicalDescriptions)
 				out_rec.physical_descriptions = recs[i].physicalDescriptions;
+
+			if (recs[i].publishers)
+				 out_rec.publishers = recs[i].publishers;
 
 			if(recs[i].recordPage)
 				 out_rec.record_url = finnaBase + recs[i].recordPage;

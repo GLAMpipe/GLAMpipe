@@ -187,12 +187,13 @@ var glamPipeNode = function (node, gp) {
 			
 		//html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
-		if(self.source.params.title && self.source.params.title != "") 
-			html +=   "    <div class='title boxtitle'>" + self.source.params.title + "</div>"
-		else 
-			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
+		html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 		
-		html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
+		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description  != "") 
+			html +=   "    <div class='boxtext'>" + self.source.settings.node_description + "</div>"
+		else
+			html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
+			
 		html +=   "  </div>"
 		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"
 		html +=   "</div>"
@@ -202,13 +203,15 @@ var glamPipeNode = function (node, gp) {
 
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
-
 		var run_button_text = "run for all documents";
 		if(self.source.type === "source")
 			run_button_text = "import data";
 		if(self.source.type === "export")
 			run_button_text = "export data";
-		
+
+		// node description
+		if(self.source.settings)
+			$(".node-description-value").val(self.source.settings.node_description);
 
 		if(self.orphan) {
 			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
@@ -221,9 +224,12 @@ var glamPipeNode = function (node, gp) {
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("data-workspace .settings").empty();
 			
-			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button><a class='debug-link' data-id='" + self.source._id + "' href='#'>i</a>");
+			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
+			
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
+			$(".show-node-params").data("id", self.source._id);
 			
 
 			var collection = gp.currentCollection.source.params.collection;
@@ -274,7 +280,6 @@ var glamPipeNode = function (node, gp) {
 	this.setSettingValues = function () {
 		var data = self.source;
 		for(var prop in data.settings) {
-			console.log(prop)
 			if(typeof data.settings[prop] == "boolean") {
 				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
 				$("input[name='"+prop+"']").change();
@@ -310,7 +315,21 @@ var glamPipeNode = function (node, gp) {
 		})		
 	}
 
-
+	this.saveDescription = function(desc) {
+		var d = {
+			url:self.baseAPI + "/nodes/" + self.source._id + "/settings/description", 
+			type:"POST",
+			data: {
+				description:desc
+			},
+			error:function() {console.log("description save failed!")},
+			success: function(data) {
+				console.log(data);
+				self.source.settings.node_description = desc;
+			}
+		}
+		$.ajax(d);
+	}
 
 	this.getSettings = function (node) {
 		
@@ -339,6 +358,13 @@ var glamPipeNode = function (node, gp) {
 				settings[$(this).attr("name")] = $(this).val();
 		});
 		
+		// finally read the node description
+		var desc = $(".node-description-value").val();
+		if(desc) {
+			settings.node_description = desc;
+			var id = node._id;
+			$(".node[data-id='"+id+"'] div.boxtext" ).text($(".node-description-value").val());
+		}
 		return settings;	
 	}
 	

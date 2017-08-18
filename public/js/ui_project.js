@@ -59,6 +59,7 @@ $( document ).ready(function() {
 		$(this).addClass("wikiglyph-caret-down");
 		$("data-workspace .settings").hide();
 		$("data-workspace submitblock").hide();
+		$("data-workspace .node-description").hide();
 	});
 
 	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
@@ -66,6 +67,7 @@ $( document ).ready(function() {
 		$(this).addClass("wikiglyph-caret-up");
 		$("data-workspace .settings").show();
 		$("data-workspace submitblock").show();
+		$("data-workspace .node-description").show();
 	});
 
 
@@ -146,6 +148,14 @@ $( document ).ready(function() {
 		//gp.openDynamicFieldSelector(e);
 	//});
 
+	// save node description 
+	$(document).on('click','#node-description-save', function(e) {
+		gp.saveNodeDescription($(".node-description-value").val());
+		var nodeid = gp.currentlyOpenNode.source._id;
+		$(".node[data-id='"+nodeid+"'] div.boxtext" ).text($(".node-description-value").val());
+		e.preventDefault();
+	})
+
 	// open dynamic field picker
 	$(document).on('click','.source_dynamic_field', function(e) {
 		gp.openDynamicFieldSelector(e, "source");
@@ -172,7 +182,7 @@ $( document ).ready(function() {
 	});
 
 	// show debug info of the node
-	$(document).on("click", ".debug-link", function(e) {
+	$(document).on("click", ".show-node-params", function(e) {
 		websockPopup(gp.debugInfo(e), "node parameters and id");
 	});
 

@@ -1,0 +1,18 @@
+{
+    "nodeid": "process_file_encode_base64",
+    "type": "process",
+    "subtype": "files",
+    "subsubtype": "encode_base64",
+    "title": "Encode to base64",
+    "status": "usable",
+    "usage":"",
+    "description": "Encode files to base64 strings",
+    
+    "scripts": {
+
+        "finish":"out.say('finish', 'Processed ' + context.vars.success_counter + ' records!'); "
+    }
+    
+
+  
+}

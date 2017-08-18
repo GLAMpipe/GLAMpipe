@@ -708,6 +708,27 @@ exports.setNodeParams = function (req, cb) {
 
 }
 
+exports.setNodeDescription = function (req, cb) {
+
+	exports.getNode(req.params.nodeid, function(err, node) {
+		if(!err) {
+			if(node.settings)
+				node.settings.node_description = req.body.description;
+			else {
+				node.settings = {"node_description": req.body.description};
+			}
+			
+			mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+				cb();
+			})			
+		} else {
+			cb();
+		}
+
+	})
+
+}
+
 
 
 exports.readNodes = function (io, nodePath, descriptions, callback) {

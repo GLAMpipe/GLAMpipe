@@ -1,10 +1,10 @@
 {
 	"nodeid": "process_field_combine",
-	"title": "Combine fields",
+	"title": "concatenate strings",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",
-	"description": "Combine string fields with arbitrary strings",
+	"description": "Concatenate strings in fields(2) with arbitrary strings",
 	"scripts": {
 		"hello":
 		[

@@ -6,6 +6,7 @@ var glamPipe = function () {
 	this.currentCollectionSet = 0;
 	this.currentCollection = null;
 	this.currentNodes = {}; // active node per collection
+	this.currentlyOpenNode = null; // currently open node
 
 	this.pickedCollectionId = "";
 	this.baseAPI = "/api/v1"; 
@@ -50,7 +51,7 @@ var glamPipe = function () {
 		$.getJSON(self.baseAPI + "/projects", function(data) { 
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
+			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -78,7 +79,7 @@ var glamPipe = function () {
 				}
 				html += "</td>";
 				
-				html += "<td><div>" + projects[i].collection_count + "</div></td>";
+				html += "<td><div>" + projects[i].owner + "</div></td>";
 				
 				html += "<td><div>";
 				if(projects[i].nodes) {
@@ -120,7 +121,7 @@ var glamPipe = function () {
 			}
 			html += "</td>";
 			
-			html += "<td><div>" + project.collection_count + "</div></td>";
+			html += "<td><div>" + project.owner + "</div></td>";
 			
 			html += "<td><div>";
 			if(project.nodes) {
@@ -230,7 +231,8 @@ var glamPipe = function () {
 		$.ajax(d);
 
 	}
-	
+
+
 	this.addProject = function (projectName) {
 
 		if ($(".create_project #title").val().trim() == "")
@@ -359,6 +361,7 @@ var glamPipe = function () {
 	this.openNode = function (e) {
 		//self.renderDataHeader();
 		var node = self.getNode(e);
+		self.currentlyOpenNode = node;
 		self.currentNodes[self.currentCollection.source.collection] = node;
 		if(node)
 			node.open();
@@ -498,10 +501,12 @@ var glamPipe = function () {
 				var node = new glamPipeNode(returnedData.node, self);
 				self.addProjectNode(node);
 				self.currentNodes[self.currentCollection.source.collection] = node;
+				self.currentlyOpenNode = node;
 				self.renderCollectionSet();
 				node.open();
 				$("data-workspace settingscontainer .settings").show();
-				$("data-workspace settingscontainer submitblock").show();
+				$("data-workspace settingscontainer .settings").show();
+				$("data-workspace settingscontainer .node-description").show();
 			});
 		}
 	}
@@ -844,7 +849,11 @@ var glamPipe = function () {
         $("#dynamic-fields").dialog("close");
 	}
 
+	this.saveNodeDescription = function(desc) {
+		self.currentlyOpenNode.saveDescription(desc);
+	}
 
+	// node id comes from DOM attribute
 	this.removeNode = function (event) {
         var obj = $(event.target);
         var node_id = obj.closest(".node").data("id");

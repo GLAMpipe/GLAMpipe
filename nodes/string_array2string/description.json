@@ -1,0 +1,24 @@
+{
+	"nodeid": "process_string_array2string",
+	"title": "join rows",
+	"type": "process",
+	"subtype": "strings",
+    "status": "usable",
+	"description": "Join rows of an array to a singel string",
+	"scripts": {
+
+        
+        "init":
+        [
+			"out.say('progress', 'Starting to join...');"
+		],
+		
+		"finish": "out.say('finish', 'Array joined to ' +context.node.out_field+ '!');"
+		
+
+	},
+	
+	"views": {
+
+	}
+}

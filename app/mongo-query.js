@@ -595,7 +595,9 @@ exports.editProjectNode = function (doc_id, params, callback) {
 	var collection = db.collection("mp_projects");
 	var setter = {};
 	setter.$set = createParamsObject("nodes", params);
-	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {callback(err,data);} )
+	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {
+		callback(err,data);
+	})
 
 }
 

@@ -55,9 +55,19 @@ function compare (value_1, value_2) {
 }
 
 function match(val1, val2, index) {
+	// if other field is empty(i.e. no match), and user has set reverse match for empties, then we copy other value to it
+	if(context.node.settings.mode === "empty-match") {
+		if(!val1)
+			val1 = val2;
+		if(!val2)
+			val2 = val1;
+	}
+		
 	if(val1 == val2) {
 		if(static_yes)
 			return static_yes;
+			
+		// try to find matching index from match value
 		if(dynamic_yes && Array.isArray(dynamic_yes)) {
 			if(typeof index !== "undefined" && dynamic_yes[index])
 				return dynamic_yes[index];
@@ -68,6 +78,8 @@ function match(val1, val2, index) {
 	} else {
 		if(static_no)
 			return static_no;
+			
+		// try to find matching index from match value
 		if(dynamic_no && Array.isArray(dynamic_no)) {
 			if(typeof index !== "undefined" && dynamic_no[index])
 				return dynamic_no[index];

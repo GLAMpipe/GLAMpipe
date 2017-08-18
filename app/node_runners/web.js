@@ -5,17 +5,19 @@ var exports = module.exports = {};
 
 
 exports.postJSON = function (doc, sandbox, next) {
-	
+
 	console.log("WEB: POST JSON request");
-	
+
 	// let node create an upload JSON
 	sandbox.pre_run.runInContext(sandbox);
-	var options = sandbox.out.pre_value; 
-	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
+	var options = sandbox.out.pre_value;
+	//console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
 	if(!options.url || sandbox.context.skip)
 		return next("skipping...")
-	
+
+	setUserAgent(options);
+
 	//require('request').debug = true;
 	function responseCallback(error, response, body) {
 		sandbox.context.data = body;
@@ -45,7 +47,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 	if(!options.url || sandbox.context.skip) {
 		return next("skipping...");
 	}
-	
+
 	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
 
@@ -77,10 +79,10 @@ exports.fetchJSON = function (options, sandbox, next) {
 
 
 exports.fetchContent = function (options, sandbox, next) {
-	
+
 	if(!options.url)
 		return next("WEB: missing url! skipping...")
-		
+
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
@@ -92,7 +94,7 @@ exports.fetchContent = function (options, sandbox, next) {
 			sandbox.context.data = body;
 			//console.log("update response:", body);
 			next();
-		} 
+		}
 	}
 
     request.get(options, responseCallback); // default method is GET
@@ -141,8 +143,8 @@ exports.uploadFile = function (upload, sandbox, next ) {
 	};
 	formData[upload.upload_field] = fs.createReadStream(upload.file)
 	//console.log(JSON.stringify(formData, null, 4));
-	
-	// make POST request 
+
+	// make POST request
 	request.post({url:upload.url, formData: formData}, function(err, response, body) {
 		sandbox.context.response = response;
 		if (err) {
@@ -190,7 +192,7 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 			next();
 		}
 	});
-	
+
 
 	file_stream = fs.createReadStream(upload.file);
 	file_stream.on('data', function(chunk) {
@@ -200,38 +202,38 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 
 	// if there is no file, write error to document
 	file_stream.on('error', function() {
-		console.log("WEB: file is NOT THERE");	
+		console.log("WEB: file is NOT THERE");
 		sandbox.context.error = {type:"error", msg:"FILE not found", file:upload};
-		return next();	
+		return next();
 	});
-	
+
 	file_stream.on('end', function() {
-		console.log("WEB: file is read");	
-		//console.log(size);	
-		//console.log((size/1000).toFixed(2));	
+		console.log("WEB: file is read");
+		//console.log(size);
+		//console.log((size/1000).toFixed(2));
 	});
-	
+
 	file_stream.pipe(req);
 
 }
 
 
 exports.downloadFile = function (download, sandbox, next ) {
-	
+
 	var fs = require("fs");
-	
+
 	var node = sandbox.context.node;
 	sandbox.context.data = download;
-	
+
 	// dry run
 	if(node.settings.dry_run) {
 		checkUrl(download);
 		next();
-	
+
 	// actual run
 	} else {
 		fileExists(node, download, function(error, filePath) {
-			
+
 			if(error == null) {
 				console.log("FILENAME:", download.filename);
 				console.log("REQUEST:", download.url);
@@ -244,7 +246,7 @@ exports.downloadFile = function (download, sandbox, next ) {
 				sandbox.context.data = download;
 				next();
 			}
-		});			
+		});
 	}
 
 }
@@ -260,27 +262,27 @@ exports.downloadAndSave = function (node, download, addext, next) {
 		return next();
 	}
 
-	var filePath = path.join(node.dir, download.filename); 
+	var filePath = path.join(node.dir, download.filename);
 	var file = fs.createWriteStream(filePath);
-	
+
 	var options = {
 		url:download.url,
 		followRedirect:false
 	}
-	
+
 	// use basic authentication if node did set "auth"
 	if(download.auth)
 		options.auth = download.auth;
-	
+
 	var sendReq = request.get(options);
 
 	// verify response code
 	sendReq.on('response', function(response) {
-		
+
 		download.response = response;
-		
+
 		if(response.statusCode === 200) {
-			
+
 			sendReq.pipe(file);
 
 			file.on('finish', function() {
@@ -291,7 +293,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 						console.log("WEB: no filetype detected!");
 					else
 						console.log("WEB: " + JSON.stringify(download.filetype));
-					
+
 					// add extension to file name if user requested it
 					if(addext && download.filetype && download.filetype.ext) {
 						download.filename = download.filename + "." + download.filetype.ext;
@@ -302,16 +304,16 @@ exports.downloadAndSave = function (node, download, addext, next) {
 					} else {
 						next();
 					}
-				}); 
+				});
 			});
 
-			file.on('error', function(err) { 
-				fs.unlink(filePath); // Delete the file async. 
+			file.on('error', function(err) {
+				fs.unlink(filePath); // Delete the file async.
 				console.log(err);
 				download.error = err;
 				return next();
 			});
-			
+
 		} else {
 			fs.unlink(filePath);
 			download.error = "file not found on server!";
@@ -330,7 +332,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 		return next();
 
 	});
-	
+
 }
 
 
@@ -348,15 +350,18 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		cb(e.message);
 		return;
 	}
+
+	setUserAgent(sandbox.out.login);
 	console.log("WEB: login url:" , sandbox.out.login.url);
 
-	
 	// send login information
 	request.post(sandbox.out.login, function(error, response, body) {
+		//console.log(response)
+		console.log(body)
 		if(error)
 			cb("Login error")
 		else if(response.statusCode === 200) {
-			sandbox.out.say("progress", "Login successful"); 
+			sandbox.out.say("progress", "Login successful");
 			sandbox.context.login = body; // save result that this can be used also for token login
 			cb(null);
 		} else
@@ -367,7 +372,12 @@ exports.cookieLogin = function (node, sandbox, cb) {
 }
 
 
-
+function setUserAgent(options) {
+	if(options.headers)
+		options.headers["User-Agent"]= "GLAMpipe ver. " + global.config.version;
+	else
+		options.headers = {"User-Agent": "GLAMpipe ver. " + global.config.version};
+}
 
 function fileExists (node, download, cb) {
 
@@ -396,12 +406,12 @@ function fileExists (node, download, cb) {
 
 
 function isInvalidURL(url) {
-	
+
 	if(url == null || url == "") {
 		return "URL missing";
 	} else if(url.search("http") != 0) {
 		return "URL not starting with 'http'";
 	} else
 		return false;
-	
+
 }

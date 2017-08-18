@@ -60,7 +60,19 @@
 						<div class="wikiglyph wikiglyph-caret-down icon boxicon" aria-hidden="true"></div>
 					</settingsheader>
 					<settingsblock>
-						<div class="settings"></div>  <!-- settings for running node are rendered here -->
+						<div class="settings">
+							<!-- settings for running node are rendered here -->
+						</div>  
+						<div class="node-description">
+							<label>purpose of this node:</label>
+							<textarea rows="5" name="node-description" class="node-description-value"></textarea>
+							<div>
+								<button id="node-description-save" class="button small">save</button>
+							</div>
+							<div>
+								<a class="show-node-params" href="#">show parameters</a>
+							</div>
+						</div>
 					</settingsblock>
 					<submitblock>
 					</submitblock>

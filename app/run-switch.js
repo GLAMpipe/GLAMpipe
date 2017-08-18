@@ -363,6 +363,11 @@ exports.runNode = function (node, io) {
 							asyncLoop.fieldLoop(node, sandbox, file.getHash);
 						break;
 
+						case "encode_base64":
+							var file = require("../app/node_runners/file.js");
+							asyncLoop.fieldLoop(node, sandbox, file.getBase64);
+						break;
+
 						case "type":
 							var file = require("../app/node_runners/file.js");
 							asyncLoop.fieldLoop(node, sandbox, file.getType);

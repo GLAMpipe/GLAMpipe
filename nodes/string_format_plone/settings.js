@@ -38,12 +38,20 @@ var record = {
   "issn": "1458-1094",
   "binding": "nidottu",
   "distribution_format": "am",
-  "keywords": "",
+  "keywords": [],
   "price": "0",
+
   "product_language": "fi",
   "product_category": "58d0c9cd2e8a4600bbd46bc4042a213d"
 }
 
+var img =   {"image": {
+    "data": "",
+    "encoding": "base64",
+    "filename": "",
+    "content-type": ""
+  }
+}
 
 var html = "<table>";
 html += "<thead><tr><th>Plone field</th><th>dynamic field</th><th>static field</th></tr></thead>";
@@ -65,7 +73,10 @@ for(key in record) {
 		html += "<td>" + key + "</td>";
 	
 		html += "<td><div><select name='_dynamic_" + key + "' class='node-settings dynamic_field middle_input' ><option value=''>no value, use static</option></select></div></td>";
-		html += "<td><div><input name='_static_" + key + "' class='node-settings' value='" + record[key]+ "'/></div></td>";
+		if(Array.isArray(record[key]))
+			html += "<td><div><input name='_static_" + key + "' class='node-settings' value='array' disabled/></div></td>";
+		else
+			html += "<td><div><input name='_static_" + key + "' class='node-settings' value='" + record[key]+ "'/></div></td>";
 		html += "</tr>";
 	}
 	

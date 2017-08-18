@@ -260,6 +260,10 @@ module.exports = function(express, glampipe, passport) {
 		node.setNodeParams(req, function(data) {res.send(data)});
 	});
 
+	express.post('/api/v1/nodes/:nodeid/settings/description', function (req, res) {
+		node.setNodeDescription(req, function(data) {res.send(data)});
+	});
+
 	express.put('/api/v1/projects/:project/nodes/:nodeid', function (req, res) {
 		node.createNode(req, res, glampipe.io);
 	});

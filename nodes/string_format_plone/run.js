@@ -30,22 +30,16 @@ for(var key in context.node.settings) {
 
 
 function setKey(key, value) {
-	if(key.indexOf("--") !== -1) { // dotted value
+	if(key.indexOf("--") !== -1) { // dotted value must be trasformed to an object
 		var splitted_key = key.split("--");
 		
 		if(!record[splitted_key[0]]) {
 			record[splitted_key[0]] = {};
 		}
-		if(Array.isArray(value))
-			record[splitted_key[0]][splitted_key[1]] = value.join(context.node.settings.join);
-		else
-			record[splitted_key[0]][splitted_key[1]] = value;
+		record[splitted_key[0]][splitted_key[1]] = value;
 		
 	} else {
-		if(Array.isArray(value))
-			record[key] = value.join(context.node.settings.join);
-		else
-			record[key] = value;
+		record[key] = value;
 	}
 }
 
