@@ -82,22 +82,23 @@ exports.runNode = function (node, io) {
 				
 				case "web":
 
+					var web = require("../app/node_runners/web.js");
+					sandbox.login = CreateScriptVM(node, sandbox, "login");
+					
 					switch (node.subsubtype) {
 
 						case "eprints" :
 							// we first get all item ids (is there a better way?)
-							var w = require("../app/node_runners/web.js");
 							var url = node.params.eprints_url + "/eprint/";
                             url = url.replace("//eprint", "/eprint");
 							var options = {url: url}
-							w.fetchContent(options, sandbox, function() {
+							web.fetchContent(options, sandbox, function() {
 								sandbox.pre_run.runInContext(sandbox);
-								asyncLoop.importLoop(node, sandbox, w.fetchContent);
+								asyncLoop.importArrayLoop(node, sandbox, web.fetchContent);
 							})
 						break;
 
 						case "csv":
-							var web = require("../app/node_runners/web.js");
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
@@ -108,7 +109,19 @@ exports.runNode = function (node, io) {
 								})
 							});
 						break;
-						
+
+						case "plone":
+							//sandbox.init = CreateScriptVM(node, sandbox, "init");
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","Plone login failed");
+								else {
+									console.log("WEB: Plone login ok");
+									asyncLoop.importLoop(node, sandbox, web.fetchJSON);
+								}
+							});
+						break;
+
 						default:
 							// query based APIs
 							sourceAPI.fetchData(node,sandbox, io);

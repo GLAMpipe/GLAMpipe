@@ -43,9 +43,10 @@ exports.proxyJSON = function (url, query, res) {
 	};
 
 	request(options, function (error, response, body) {
-		if (!error && response.statusCode == 200) {
+		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
 			//console.log(body); 
 			res.json(body);
+
 		} else {
 			console.log("error", error);
 			res.json({"error":"could not get data via proxy!"});

@@ -351,7 +351,7 @@ var dataTable = function (node) {
 			if(index != null)
 				html += "<div data-index="+index+" class='object-cell'>["+index+"] object</div>";
 			else
-				html += "<div class='object-cell'>object</div>";
+				html += "<div class='object-cell'>object</div><div class='object-string'>as string</div>";
 		}
 		return html;
 	}
@@ -398,7 +398,30 @@ var dataTable = function (node) {
 
 	}
 
-	this.object2Html = function (value, key) {
+	this.renderObjectAsString = function(event) {
+		var obj = $(event.target);
+		var index = obj.data("index");
+		
+		var doc = self.getDocByTableClick(event);
+		var key = self.getKeyByTableClick(event);
+		var value = doc[key];
+		if(value && Array.isArray(value) && index !== null)
+			value = value[index];
+			
+		$("#cell-display").empty().append("<textarea style='width:100%;height:260px;box-sizing:border-box'>" + JSON.stringify(value, null, '  ')) + "</textarea>";
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			width:400,
+			maxHeight: 400,
+			title: "cell data"
+		});
+	}
+
+	this.object2Html = function (value, key, index) {
 		var html = "";
 
 		// arrays
@@ -408,15 +431,16 @@ var dataTable = function (node) {
 			else
 				html += "<li><ul>";
 			for(var i=0; i < value.length; i++) {
-				html += "<li>[" + i + "]";
-				html += self.object2Html(value[i], key);
-				html += "</li>";
+				html += self.object2Html(value[i], key, i);
+				//html += "</li>";
 			}
 			html += "</ul></li>"
 		
 		// primitive values	
 		} else if(value === null || typeof value === "string" || typeof value === "number") {
-			if(key)
+			 if(typeof index !== "undefined")
+				html += "<li>" + "[" + index + "] " + value + "</li>";
+			else if(key)
 				html += "<li><span class='bold'>" + key + "</span>: " + value + "</li>";
 			else
 				html += "<li>" + value + "</li>";
@@ -801,6 +825,10 @@ var dataTable = function (node) {
 		
 		$("data-workspace").on("click", ".object-cell", function(e) {
 			self.renderObject(e);
+		});
+
+		$("data-workspace").on("click", ".object-string", function(e) {
+			self.renderObjectAsString(e);
 		});
 		
 	}

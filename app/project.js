@@ -115,6 +115,78 @@ exports.getProject = function (doc_id, res) {
 	mongoquery.findOneById(doc_id, "mp_projects", function(data) { res.json(data) });
 }
 
+exports.getProjectAsText = function (doc_id, res) {
+	mongoquery.findOneById(doc_id, "mp_projects", function(data) { 
+		var text = "GLAMPIPE PROJECT DESCRIPTION\n";
+		text += "\n******************************************";
+		text += "\n\nPROJECT: " + data.title;
+		text += "\n\n******************************************";
+		
+		
+		if(data.collections) {
+			data.collections.forEach(function(collection) {
+				
+				text += "\n\nNODES OF COLLECTION: " + collection;
+				
+				if(data.nodes) {
+					// sources
+					text += "\n\n** SOURCES **";
+					data.nodes.forEach(function(node) {
+						if(node.type === "source" && node.params.collection === collection[0]) {
+
+							if(node.settings && node.settings.node_description) {
+								text += "\n\n  ---------------------------------------";
+								text += "\n  " + node.settings.node_description;
+								text += "\n   SETTINGS:\n " + JSON.stringify(node.settings, null, " ");
+							} else {
+								text += "\n\n  ---------------------------------------";
+								text += "\n  " + node.title ;
+								text += "\n   SETTINGS:\n " + JSON.stringify(node.settings, null, " ");
+							}
+						}
+					})
+					
+					// other nodes
+					text += "\n\n** OPERATIONS **";
+					data.nodes.forEach(function(node) {
+						if(node.type !== "collection" && node.type !== "source" && node.type !== "export" && node.params.collection === collection[0]) {
+
+							if(node.settings && node.settings.node_description) {
+								text += "\n  --------------------------------------";
+								text += "\n  " + node.settings.node_description;
+								text += "\n   - " + node.title;
+							} else {
+								text += "\n  ---------------------------------------";
+								text += "\n  " + node.title ;
+							}
+						}
+					})
+					// exports
+					text += "\n\n** EXPORTS **";
+					data.nodes.forEach(function(node) {
+						if(node.type === "export" && node.params.collection === collection[0]) {
+
+							if(node.settings && node.settings.node_description) {
+								text += "\n\n  ---------------------------------------";
+								text += "\n  " + node.settings.node_description;
+								text += "\n   - " + node.title;
+							} else {
+								text += "\n\n  ---------------------------------------";
+								text += "\n  " + node.title ;
+							}
+						}
+					})
+				}
+				
+			})
+		}
+		
+
+		res.set("Content-Type","text/plain");
+		res.send(text) ;
+		//res.json(JSON.stringify(data, null, "\n")) 
+	});
+}
 
 
 

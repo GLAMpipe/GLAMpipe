@@ -1,14 +1,22 @@
 
 
-<label>DSpace target: </label>
-<div id="source_web_dspace_url"></div>
-<label>query: </label>
-<input class="node-settings long-input" type="text" name="query" id="source_web_dspace_query"/>
 
-<br/>
-<button id="source_web_dspace_fetch">get collection hierarchy</button>
+<h3 id="export-data-plone_serverinfo">Plone login</h3>
 
-<div id="source_web_dspace_data"></div>
+<div class="box-noflex dspace-hidden">
+	
+	<label>username </label>
+	<input class="node-settings" type="text" name="username" id="username" required />
+	<label>password</label>
+	<input class="node-settings" type="password" name="password" id="password"/>
+</div>
+
+
+
+<label>collection: </label>
+<input class="node-settings" type="text" name="collection"/>
+
+
 
 
 <!-- LIMIT NOT CURRENTLY WORKING! 

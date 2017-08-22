@@ -55,13 +55,14 @@ exports.fetchJSON = function (options, sandbox, next) {
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
 		console.log("RESPONSE: " + response.statusCode)
+		console.log("BODY:", body);
 		if (error) {
 			console.log(error);
 			next();
 		} else if (response.statusCode == 200) {
 			try {
 				sandbox.context.data = JSON.parse(body);
-				//console.log("BODY:", body);
+				console.log("BODY:", body);
 			} catch(e) {
 				console.log("JSON PARSE:" + e.message);
 				sandbox.context.error = "error JSON parse error";
@@ -341,6 +342,8 @@ exports.downloadAndSave = function (node, download, addext, next) {
  */
 exports.cookieLogin = function (node, sandbox, cb) {
 
+
+	console.log("cookielogin");
 	// ask login details from node
 	try {
 		sandbox.login.runInContext(sandbox);
@@ -362,7 +365,7 @@ exports.cookieLogin = function (node, sandbox, cb) {
 			cb("Login error")
 		else if(response.statusCode === 200) {
 			sandbox.out.say("progress", "Login successful");
-			sandbox.context.login = body; // save result that this can be used also for token login
+			sandbox.context.login = body; // save result so this can be used also for token login
 			cb(null);
 		} else
 			cb("Authentication failed");

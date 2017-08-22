@@ -151,8 +151,16 @@ $( document ).ready(function() {
 	// save node description 
 	$(document).on('click','#node-description-save', function(e) {
 		gp.saveNodeDescription($(".node-description-value").val());
-		var nodeid = gp.currentlyOpenNode.source._id;
-		$(".node[data-id='"+nodeid+"'] div.boxtext" ).text($(".node-description-value").val());
+		var node = gp.currentlyOpenNode.source;
+		var nodeid = node._id;
+		var desc = $(".node-description-value").val();
+		if(desc) {
+			$(".node[data-id='"+nodeid+"'] div.boxtitle").addClass("boxtext");
+			$(".node[data-id='"+nodeid+"'] div.boxtext" ).text($(".node-description-value").val());
+		} else {
+			$(".node[data-id='"+nodeid+"'] div.boxtitle").removeClass("boxtext");
+			$(".node[data-id='"+nodeid+"'] div.boxtitle" ).text(node.title);
+		}
 		e.preventDefault();
 	})
 

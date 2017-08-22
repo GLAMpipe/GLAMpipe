@@ -1,22 +1,4 @@
 
-// item in node parameters
-var record = {};
-
-// static values
-record["@type"] =  "jyu.getpaid.products.publication";
-record["product_language"] =  "fi";
-record["product_category"] =  "58d0c9cd2e8a4600bbd46bc4042a213d";
-
-record["title"] = "";
-record["isbn"] = "";
-record["keywords"] = "";
-
-record["text--content-type"] = "text/html";
-record["text--data"] = "";
-record["text--encoding"] = "";
-
-
-
 
 
 
@@ -41,11 +23,19 @@ var record = {
   "keywords": [],
   "price": "0",
 
+   "image": {
+    "data": "",
+    "encoding": "base64",
+    "filename": "",
+    "content-type": ""
+   },
+
   "product_language": "fi",
   "product_category": "58d0c9cd2e8a4600bbd46bc4042a213d"
 }
 
-var img =   {"image": {
+var img =   {
+	"image": {
     "data": "",
     "encoding": "base64",
     "filename": "",
@@ -56,7 +46,7 @@ var img =   {"image": {
 var html = "<table>";
 html += "<thead><tr><th>Plone field</th><th>dynamic field</th><th>static field</th></tr></thead>";
 for(key in record) {
-	if(typeof record[key] === "object") {
+	if(typeof record[key] === "object" && !Array.isArray(record[key])) {
 		for(var key2 in record[key]) {
 			var display_key = key + "." + key2;
 			var nondot_key = display_key.replace(".", "--")
@@ -74,7 +64,7 @@ for(key in record) {
 	
 		html += "<td><div><select name='_dynamic_" + key + "' class='node-settings dynamic_field middle_input' ><option value=''>no value, use static</option></select></div></td>";
 		if(Array.isArray(record[key]))
-			html += "<td><div><input name='_static_" + key + "' class='node-settings' value='array' disabled/></div></td>";
+			html += "<td><div><input name='_static_" + key + "' class='node-settings' value='[]' disabled/></div></td>";
 		else
 			html += "<td><div><input name='_static_" + key + "' class='node-settings' value='" + record[key]+ "'/></div></td>";
 		html += "</tr>";

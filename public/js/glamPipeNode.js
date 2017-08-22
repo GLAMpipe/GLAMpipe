@@ -127,6 +127,8 @@ var glamPipeNode = function (node, gp) {
 
 	// render data with node spesific settings and display node settings
 	this.open = function (config) {
+		$(".node").removeClass("current");
+		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
 			$("data-workspace settingscontainer").hide();
 			self.display.render();
@@ -135,7 +137,6 @@ var glamPipeNode = function (node, gp) {
 			self.display.render();
 			$("data-workspace settingscontainer").show();
 		}
-			
 	}
 	
 	// render node to project view (left column)
@@ -187,12 +188,15 @@ var glamPipeNode = function (node, gp) {
 			
 		//html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
 		
-		html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 		
-		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description  != "") 
-			html +=   "    <div class='boxtext'>" + self.source.settings.node_description + "</div>"
-		else
-			html +=   "    <div class='boxtext'>" + self.source.description + "</div>"
+		
+		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description  != "") {
+			html +=   "    <div class='boxtext title boxtitle'>" + self.source.settings.node_description + "</div>"
+			html +=   "    <div class=''>" + self.source.title + in_field + "</div>"
+		} else {
+			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
+			html +=   "    <div class=''>" + self.source.description + "</div>";
+		}
 			
 		html +=   "  </div>"
 		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"
@@ -217,6 +221,8 @@ var glamPipeNode = function (node, gp) {
 			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
 			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
 			$("data-workspace .settings").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
+			$("data-workspace submitblock").empty().append("<button class='run-node button error' >missing input field, cant'run!</button>");
+
 			
 			
 		} else {
@@ -225,7 +231,6 @@ var glamPipeNode = function (node, gp) {
 			$("data-workspace .settings").empty();
 			
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
-			
 			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);

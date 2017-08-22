@@ -82,6 +82,83 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 }
 
 
+exports.importLoop = function (node, sandbox, onDoc) {
+	console.log("IMPORT LOOP");
+
+	// remove previous data inserted by node and start query loop
+	var query = {}; 
+	query[MP.source] = node._id;
+	mongoquery.empty(node.collection, query, function() {
+		// init will give us an initial url
+		sandbox.pre_run.runInContext(sandbox);
+		console.log("URL:", sandbox.out.url)
+		requestLoop2(node, sandbox, onDoc);
+	});
+}
+
+
+
+// this keeps asking data until there is no url
+function requestLoop2(node, sandbox, onDoc) {
+	var async = require("async");
+	console.log("requestLoop")
+	console.log(sandbox.out.options);
+	async.series([
+		function (callback) {
+
+			sandbox.context.data = null;
+			onDoc(sandbox.out.options, sandbox, function processed () {
+
+					if(sandbox.error)
+						console.log(sandbox.error);
+						
+					sandbox.out.setter = null;
+					sandbox.out.value = null;
+					sandbox.out.error = null;
+					sandbox.context.skip = null;
+					
+					try {
+						sandbox.run.runInContext(sandbox);
+					} catch(e) {
+						console.log(e);
+						sandbox.out.error = "errorin in run.js:" + e.message;
+						sandbox.finish.runInContext(sandbox);
+						return;
+					}
+					console.log(sandbox.data);
+					//console.log(sandbox.out.setter)
+					//if(sandbox.out.setter)
+						//setters.push(sandbox.out.setter)
+					//else
+						//result.push(sandbox.out.value);
+						
+					callback();
+			});
+			
+		}
+
+	], function done(err, result) {
+		if(err) {
+			console.log(err);
+			return;
+		}
+			
+		// if node provides new url, then continue loop
+		if (sandbox.out.url != "") {
+			console.log("calling requestLoop from requestLoop");
+			requestLoop2(node, sandbox, onDoc)
+		} else {
+			
+			if(cb)
+				cb();
+			else {
+				nodescript.runNodeScriptInContext("finish", node, sandbox, io);
+				return;
+			}
+		}
+	}
+)};
+
 
 
 // loop for running complex (asynchronous) nodes 
@@ -320,7 +397,7 @@ exports.sourceLoop = function (node, sandbox, onDoc) {
 }
 
 // import loop requests data based on array
-exports.importLoop = function (node, sandbox, onDoc) {
+exports.importArrayLoop = function (node, sandbox, onDoc) {
 
 	var async = require("async");
 

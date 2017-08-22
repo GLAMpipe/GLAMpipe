@@ -222,6 +222,10 @@ module.exports = function(express, glampipe, passport) {
 		project.getProject(req.params.id, res);
 	});
 
+	express.get('/api/v1/projects/:id/text', function (req, res) {
+		project.getProjectAsText(req.params.id, res);
+	});
+
 	express.delete('/api/v1/projects/:id', function (req, res) {
 		project.deleteProject(req.params.id, res);
 	});

@@ -1,10 +1,10 @@
 {
     "nodeid": "process_field_compare",
-    "title": "Compare fields",
+    "title": "Copy if",
     "type": "process",
     "subtype": "strings",
     "status": "usable",
-    "description": "Compare two fields and set new field.",
+    "description": "Compare values and copy value depending of match.",
     "scripts": {
     
         "finish": "out.say('finish', 'Compare done!');"

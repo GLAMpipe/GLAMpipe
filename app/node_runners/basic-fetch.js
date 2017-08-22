@@ -28,7 +28,7 @@ exports.fetchData = function (node, sandbox, io, cb) {
 
 
 
-
+// this keeps asking data until there is no url
 function requestLoop(node, sandbox, io, cb) {
 	var async = require("async");
 	async.series([
@@ -36,6 +36,7 @@ function requestLoop(node, sandbox, io, cb) {
 
 			callAPI(sandbox.out.url, function(error, response, body) {
 				if(error) {
+					console.log(error);
 					//sandbox.out.say("error", error);
 				} else {
 					sandbox.context.error = error;
@@ -70,8 +71,8 @@ function requestLoop(node, sandbox, io, cb) {
 			
 		}
 
-	], function done (err, result){
-		if (err) {
+	], function done(err, result) {
+		if(err) {
 			console.log(err);
 			return;
 		}

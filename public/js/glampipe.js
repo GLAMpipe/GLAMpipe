@@ -359,7 +359,7 @@ var glamPipe = function () {
 	
 	// renders node settings and data
 	this.openNode = function (e) {
-		//self.renderDataHeader();
+		
 		var node = self.getNode(e);
 		self.currentlyOpenNode = node;
 		self.currentNodes[self.currentCollection.source.collection] = node;
@@ -505,7 +505,7 @@ var glamPipe = function () {
 				self.renderCollectionSet();
 				node.open();
 				$("data-workspace settingscontainer .settings").show();
-				$("data-workspace settingscontainer .settings").show();
+				$("data-workspace settingscontainer submitblock").show();
 				$("data-workspace settingscontainer .node-description").show();
 			});
 		}

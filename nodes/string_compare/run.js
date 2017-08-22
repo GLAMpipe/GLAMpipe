@@ -19,7 +19,13 @@ if(context.node.settings.dynamic_no)
 	dynamic_no = context.doc[context.node.settings.dynamic_no]
 
 var value_1 = context.doc[context.node.params.in_field]; 
-var value_2 = context.doc[context.node.params.in_field2]; 
+
+// check if users wants to compare to dynamic or string
+if(context.node.settings.comp_dynamic)
+	var value_2 = context.doc[context.node.settings.comp_dynamic];
+else
+	var value_2 = context.node.settings.comp_static;
+ 
 out.value = compare(value_1, value_2);  
 
 if(parseInt(context.count) % 1000 == 0) 

@@ -44,16 +44,10 @@ function testUrl (url, success, fail) {
 	var status = $.getJSON(g_apipath + "/proxy?url=" + url);
 	
 	status.done(function(data) {
-		if(data.error) 
-			fail("Server did not answer");
-		else
-			if(data["@id"])
-				success(data);
-			else
-				fail("Rest API error")
+		success(data);
 	});
 	
-	status.fail(function() {
+	status.fail(function(jqXHR) {
 		fail("Proxy not working");
 	});
 }

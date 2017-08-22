@@ -4,7 +4,7 @@
 	"type": "process",
 	"subtype": "strings",
 	"subsubtype": "string manipulation",
-    "status": "usable",
+    "status": "broken",
 	"description": "Combine values from fields to array.",
 	"scripts": {
 		"hello":

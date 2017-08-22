@@ -381,9 +381,9 @@ a .listoption:hover {
 	line-height: 11px;
 	margin: 0px;
 }
-.boxtext {
+.boxtext.boxtitle {
 	margin: 0px;
-	font-size:0.9em;
+	background-color: #efefef;
 }
 
 
@@ -840,4 +840,10 @@ th, td {
 
 .small {
 	transform: scale(0.8);
+}
+
+.current {
+	border:solid rgb(189, 232, 246)  1px;
+	border-left:solid rgb(189, 232, 246)  10px;
+	padding-left:5px;
 }
