@@ -1,5 +1,5 @@
 
-var nodeRepository = function () {
+function nn () {
 	var self = this;
 	this.nodes = [];
 	this.showBrokenNodes = false;
@@ -7,11 +7,13 @@ var nodeRepository = function () {
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];
 	
-	this.loadNodes = function () {
+	this.loadNodes = function (cb) {
 		$.getJSON(self.baseAPI + "/nodes", function(data) { 
 			for(var i = 0; i< data.length; i++) {
 				self.nodes.push(data[i]);
 			}
+			if(cb)
+				cb();
 		})
 	}
 

@@ -429,9 +429,9 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	// NODE EDITOR
-	//express.get('/node-viewer', function (req, res) {
-		//res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
-	//});
+	express.get('/node-viewer', function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
+	});
     
 	// PROXY
 	express.get('/api/v1/proxy/', function (req, res) {
