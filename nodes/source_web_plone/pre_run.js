@@ -1,22 +1,18 @@
 
 
-if(context.node.settings.collection)
-	out.url = context.urljoin(context.node.params.url, context.node.settings.collection, "@search");
-else
-	out.url = context.urljoin(context.node.params.url, "@search");
-	
-out.url = "https://kirjasto.jyu.fi/kauppa/@search";
+
 
 var options = {
-	url: out.url,  
+	url: context.search_url, // set by init.js 
+	method: "GET",
 	headers: {
-		"accecpt": "application/json",
+		"accept": "application/json",
 		"authorization": "Bearer " + context.login.token
 	}
 };
 
 out.options = options;
-out.say('progress', 'Starting to import from plone ' + out.url); 
+out.say('progress', 'Starting to import from plone ' + out.options.url); 
 
 // variables for node
 context.vars = {};

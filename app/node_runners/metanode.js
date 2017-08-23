@@ -38,7 +38,7 @@ exports.run = function(doc, sandbox, next) {
 				url: url,
 				json: settings,
 				headers: {
-					"accecpt": "application/json"
+					"accept": "application/json"
 				},
 				jar:true
 			};

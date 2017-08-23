@@ -89,9 +89,9 @@ exports.importLoop = function (node, sandbox, onDoc) {
 	var query = {}; 
 	query[MP.source] = node._id;
 	mongoquery.empty(node.collection, query, function() {
-		// init will give us an initial url
+		// pre_run will give us an initial url
 		sandbox.pre_run.runInContext(sandbox);
-		console.log("URL:", sandbox.out.url)
+		console.log("URL:", sandbox.out.options.url)
 		requestLoop2(node, sandbox, onDoc);
 	});
 }
@@ -101,10 +101,9 @@ exports.importLoop = function (node, sandbox, onDoc) {
 // this keeps asking data until there is no url
 function requestLoop2(node, sandbox, onDoc) {
 	var async = require("async");
-	console.log("requestLoop")
-	console.log(sandbox.out.options);
 	async.series([
-		function (callback) {
+		function (done) {
+
 
 			sandbox.context.data = null;
 			onDoc(sandbox.out.options, sandbox, function processed () {
@@ -125,14 +124,18 @@ function requestLoop2(node, sandbox, onDoc) {
 						sandbox.finish.runInContext(sandbox);
 						return;
 					}
-					console.log(sandbox.data);
-					//console.log(sandbox.out.setter)
-					//if(sandbox.out.setter)
-						//setters.push(sandbox.out.setter)
-					//else
-						//result.push(sandbox.out.value);
-						
-					callback();
+					
+					if(sandbox.out.value) {
+						if(Array.isArray(sandbox.out.value)) {
+							// mark items with node id
+							sandbox.out.value.forEach(function(item) {
+								item[MP.source] = node._id;
+							})
+							mongoquery.insert(node.collection, sandbox.out.value, done);
+						}
+					} else {
+						done();
+					}
 			});
 			
 		}
@@ -142,13 +145,18 @@ function requestLoop2(node, sandbox, onDoc) {
 			console.log(err);
 			return;
 		}
-			
+
+		// check if user asked for termination of the node run
+		if(!node.req.query.force && !global.register[node.req.originalUrl]) {
+			console.log("REGISTER: user terminated node run...");
+			sandbox.finish.runInContext(sandbox);
+			return;
+		}
+
 		// if node provides new url, then continue loop
-		if (sandbox.out.url != "") {
-			console.log("calling requestLoop from requestLoop");
+		if (sandbox.out.options) {
 			requestLoop2(node, sandbox, onDoc)
 		} else {
-			
 			if(cb)
 				cb();
 			else {

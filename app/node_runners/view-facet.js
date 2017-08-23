@@ -40,8 +40,8 @@ exports.getFacetIndexHTML = function (req, res) {
 	var fsync = require("fs-sync");
 	var path = require("path");
 	
-	var core 	= require("./../../app/core.js");
-	core.getNode(req.params.nodeid, function(err, node) {
+	var node 	= require("./../../app/node.js");
+	node.getNode(req.params.nodeid, function(err, node) {
 		if(err) {
 			console.log("FACET VIEW: node not found! nodeid = " + req.params.nodeid);
 			return res.send("<h2>View not found!</h2>");

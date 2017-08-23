@@ -133,7 +133,7 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	// facet view
-	express.get(global.config.uiPath + '/views/data/facets/:nodeid', function (req, res) {
+	express.get('/views/data/facets/:nodeid', function (req, res) {
 		var facet = require("../app/node_runners/view-facet.js");
 		facet.getFacetIndexHTML(req,res);
 		//res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facet.html'));

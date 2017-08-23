@@ -43,7 +43,7 @@ var options = {
 	url: out.url,  // from init.js
 	json: context.doc[context.node.params.in_field],
 	headers: {
-		"accecpt": "application/json",
+		"accept": "application/json",
 		"authorization": "Bearer " + context.login.token
 	}
 };

@@ -1,7 +1,8 @@
 
 var nodeRepository = function () {
 	var self = this;
-	this.nodes = []
+	this.nodes = [];
+	this.showBrokenNodes = false;
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];
@@ -51,7 +52,7 @@ var nodeRepository = function () {
 					// render nodes
 					for (var k = 0; k < sub.nodes.length; k++) {
 						// skip nodes with status "broken"
-						if(sub.nodes[k].status == "broken")
+						if(!self.showBrokenNodes && sub.nodes[k].status == "broken")
 							continue;
 							
 						self.plainNodes.push(sub.nodes[k]);

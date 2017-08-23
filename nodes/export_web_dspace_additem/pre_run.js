@@ -9,7 +9,7 @@ var options = {
 	url: out.url,  // from init.js
 	json: item,
 	headers: {
-		"accecpt": "application/json"
+		"accept": "application/json"
 	},
 	jar:true
 };

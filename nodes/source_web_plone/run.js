@@ -1,6 +1,10 @@
 
 var c = context;
+var mode = "";
 
+// check if fullobjects are requested by user
+if(context.node.settings.mode === "all")
+	mode = "&fullobjects";
 
 if (context.response && context.response.statusCode == 200 ) {
 	// count query rounds
@@ -12,20 +16,18 @@ if (context.response && context.response.statusCode == 200 ) {
 		//out.say("progress", "TOTAL " + context.data.item-count );
 		
 		for (var i = 0; i < context.data.items.length; i++) {
-
 			// count records 
 			context.vars.record_counter++;
-			
-
-
 		}
 
 		// OUTPUT
 		out.value = context.data.items;
 		
 		// URL for next round
-        if(context.data.batching && context.data.batching.next )  /* check if there is any data left on the server */
-             out.url = context.data.batching.next; 
+		if(context.data.batching && context.data.batching.next )  /* check if there is any data left on the server */
+			out.options.url = context.data.batching.next + mode; 
+		else
+			out.options = null;
              
         out.say("progress", "Items fetched: " + context.vars.record_counter); 
 

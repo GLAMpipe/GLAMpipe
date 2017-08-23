@@ -464,7 +464,7 @@ exports.deleteNode = function (req, res, io) {
 							var options = {
 								url: url,
 								headers: {
-									"accecpt": "application/json"
+									"accept": "application/json"
 								}
 							};
 							if(req.headers.authorization)
