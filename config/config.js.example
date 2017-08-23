@@ -7,7 +7,7 @@ var dataPath = "";
 
 // USER INTERFACE
 // location of ui
-var uiPath = "";
+var uiPath = "/";
 
 // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 var staticPath = "/static"; 

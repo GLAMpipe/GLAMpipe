@@ -1,0 +1,20 @@
+{
+    "nodeid": "export_mapping_omeka_s",
+    "title": "Map data to Omeka-S",
+    "type": "export",
+    "subtype": "mapping",
+    "status": "usable",
+    "description": "Map data to Omeka-S data for export(JSON)",
+    "scripts": {
+    
+        "init":
+        [
+            "out.say('progress', 'Omeka-S format started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Omeka-S format done!');"
+    },
+    
+    "views": {}
+}

@@ -1,8 +1,8 @@
 {
-	"nodeid": "process_field_create_commons_metadata",
-	"title": "Format commons metadata (export)",
-	"type": "process",
-	"subtype": "format",
+	"nodeid": "export_mapping_create_commons_metadata",
+	"title": "Map data to Wikimedia Commons ",
+	"type": "export",
+	"subtype": "mapping",
 	"status": "works",
 	"description": "Format wikimedia commons metadata (wikitext)",
 	"scripts": {

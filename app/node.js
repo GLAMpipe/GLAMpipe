@@ -256,7 +256,7 @@ function initNode (req, io, project, callback) {
 				if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
 					add_keys.push(node.params[key]);
 				// all "in_" fields must have value
-				if(/^in_/.test(key)) {
+				if(/^in_/.test(key) || /^required_/.test(key)) {
 					if(!node.params[key] || (node.params[key] && node.params[key] == "")) {
 						console.log("NODE CREATION: missing input, canceling...")
 						return callback({"error": "input field missing: " + key});

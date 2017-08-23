@@ -241,6 +241,16 @@ exports.runNode = function (node, io) {
 		
 			switch (node.subtype) {
 				
+				case "mapping":
+				
+					//default: // syncronous nodes
+					asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+						sandbox.run.runInContext(sandbox);
+						next();
+					});
+					
+				break;
+				
 				case "file":
 				
 					switch (node.subsubtype) {

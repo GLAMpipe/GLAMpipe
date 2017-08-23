@@ -1,10 +1,10 @@
 {
-    "nodeid": "process_format_plone_export",
-    "title": "Format Plone JSON (export)",
-    "type": "process",
-    "subtype": "format",
+    "nodeid": "export_mapping_plone",
+    "title": "Map data to Plone",
+    "type": "export",
+    "subtype": "mapping",
     "status": "usable",
-    "description": "Format Plone data (JSON)",
+    "description": "Map data to Plone (JSON)",
     "scripts": {
     
         "hello": 

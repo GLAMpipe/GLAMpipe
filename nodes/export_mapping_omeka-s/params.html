@@ -1,6 +1,8 @@
 
+
+
 <label>Choose Omeka REST API url or write url below.</label>
-<select id="export-data-omeka_url" name="url">
+<select id="export-data-omeka_url" name="required_url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="http://localhost:8080/api">http://localhost:8080/api</option>
 </select>
@@ -18,17 +20,8 @@
 <div id="export-data-omeka_status" class="status"></div>
 
 <div id="export-data-omeka_hidden" style="display:none">
-	<label>Choose Omeka ID field</label>
-	<select class="dynamic_field" name="in_field" value="omeka_id" required ></select>
-
-	<label>Choose file name field</label>
-	<select class="dynamic_field" name="in_file" ></select>
-
-	<label>Give file path (if file name does not include full path)</label>
-	<input  name="file_path" />
-
 	<label>Where to write ID of item?</label>
-	<input name="out_field" value="omeka_media_id" required />
+	<input name="out_field" value="export_omeka_s_json" required />
 </div>
 
 <script>
@@ -83,6 +76,7 @@ function addUrl (url) {
 		fetchParams();
 	});
 }
+
 
 test_button.click(function (e) {
 	var url = add_url_input.val();
@@ -146,3 +140,6 @@ $("#export-data-omeka_url").change(function() {
 fetchParams();
 
 </script>
+
+
+

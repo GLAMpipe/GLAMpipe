@@ -5,7 +5,7 @@ pre_run.js must provide an array of options for request-module
 
 
 var file = context.doc[context.node.params.in_file];
-var filepath = context.node.params.in_file_path;
+var filepath = context.node.params.file_path;
 var item = context.doc[context.node.params.in_field]; 
 var uploads = [];
 var output = [];

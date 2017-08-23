@@ -123,17 +123,17 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	// setup page
-	express.get('/setup', function (req, res) {
+	express.get(global.config.uiPath + 'setup', function (req, res) {
 		glampipe.core.sendErrorPage(res, glampipe.initError);
 	});
 
 	// project page
-	express.get(global.config.uiPath + '/project/:id', function (req, res) {
+	express.get(global.config.uiPath + 'project/:id', function (req, res) {
 		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
 	});
 
 	// facet view
-	express.get('/views/data/facets/:nodeid', function (req, res) {
+	express.get(global.config.uiPath + 'views/data/facets/:nodeid', function (req, res) {
 		var facet = require("../app/node_runners/view-facet.js");
 		facet.getFacetIndexHTML(req,res);
 		//res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facet.html'));
