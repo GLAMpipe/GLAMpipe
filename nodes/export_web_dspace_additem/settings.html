@@ -17,23 +17,4 @@
 	<div id="export_data_dspace_coll_list"></div>
 </div>
 
-<h3>Settings</h3>
-<div class="box-noflex dspace-hidden">
-	<label>Separator for multiple values in CSV. Handy if you have values like "Matilda Lynninen, Matti Nykänen" in "author" field in your CSV file.</label>
-	<input class="node-settings" name="array_separator" value=""/>
-</div>
-
-<h3>Metada mapping</h3>
-<div class="box-noflex dspace-hidden">
-	<label>If metadata is allready DSpace REST api format, then choose field appropriate field.</label>
-	<select class="node-settings dynamic_field" name="rest_data">
-		<option value="">choose</option>
-	</select>
-	
-	<div>Otherwise map document fields to target Dspace fields. At minimum you must map some field to <b>dc.title</b>.</div>
-	<button id="xml_basic_fetch" class="fetch_record">re-fetch fields and schemas</button>
-	<button id="xml_basic_guess" class="fetch_record">guess mapping</button>
-
-	<div id="export_data_dspace_mappings"></div>
-</div>
 

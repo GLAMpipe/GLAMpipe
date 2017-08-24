@@ -37,7 +37,7 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 	}
 
 	// options object for POST request
-	var url = context.node.params.url + "/items/" + uuid + "/bitstreams";
+	var url = context.node.params.required_url + "/items/" + uuid + "/bitstreams";
 	output.forEach(function(upload) {
 		upload.options = {
 			url: url + "?name=" + upload.title,

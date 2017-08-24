@@ -249,7 +249,7 @@ var glamPipe = function () {
 					var params = {params:{title:"My collection"}}
 					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
 						if(!data.error)
-							window.location.href = self.uiPath + "/project/" + project;
+							window.location.href = self.uiPath + "project/" + project;
 						else
 							alert(data.error);
 					})

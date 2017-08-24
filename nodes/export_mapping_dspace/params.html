@@ -1,44 +1,29 @@
 
-
 <label>Choose DSpace REST API url or write url below.</label>
-<select id="export-data-dspace-addfile_url" name="required_url">
+<select id="export-data-dspace-additem_url" name="required_url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
-<button id="export-data-dspace-addfile_plus">+</button>
+<button id="export-data-dspace-additem_plus">+</button>
 
 <!-- add options starts -->
-<div id="export-data-dspace-addfile_addoption" style="display:none">
-	<input id="export-data-dspace-addfile_url_add" placeholder="https://demo.dspace.org/rest/" name="url_add" />
-	<button id="export-data-dspace-addfile_test" title="test DSpace rest api">test</button>
-	<button id="export-data-dspace-addfile_add" title="add url to predefined urls">add</button>
+<div id="export-data-dspace-additem_addoption" style="display:none">
+	<input id="export-data-dspace-additem_url_add" placeholder="https://demo.dspace.org/rest/" name="url_add" />
+	<button id="export-data-dspace-additem_test" title="test DSpace rest api">test</button>
+	<button id="export-data-dspace-additem_add" title="add url to predefined urls">add</button>
 </div>
 <!-- add options ends -->
 
 
-<div id="export-data-dspace-addfile_status" class="status"></div>
+<div id="export-data-dspace-additem_status" class="status"></div>
 
-<div id="export-data-dspace-addfile_hidden" style="display:none">
-	
-	<label>Choose Dspace UUID field</label>
-	<select class="dynamic_field" name="in_uuid" />
-
-	<label>Choose file location field</label>
-	<select class="dynamic_field" name="in_file" />
-
-	<label>Choose file title field</label>
-	<select class="dynamic_field" name="in_file_title" />
-
-	<label>Give file path (if file field does not have full path)</label>
-	<input name="file_path" />
-
-	<label>Where to write result</label>
-	<input name="out_field" value="dspace_upload_response" required />
-	<input name="out_link" value="dspace_upload_link" required />
+<div id="export-data-dspace-additem_hidden" style="display:none">
+	<label>Where to write mapping?</label>
+	<input name="out_field" value="export_dspace_mapping" required />
 </div>
 
 <script>
-var nodeid = "#export-data-dspace-addfile";
+var nodeid = "#export-data-dspace-additem";
 var params_url = g_apipath + "/nodes/source_web_dspace/params"
 
 // *************** CODE FOR ADDING NEW URLS starts **************
@@ -72,7 +57,6 @@ function testUrl (url, success, fail) {
 }
 
 
-
 function addUrl (url) {
 	console.log("addurl")
 	var options = {
@@ -91,7 +75,6 @@ function addUrl (url) {
 	});
 }
 
-
 test_button.click(function (e) {
 	var url = add_url_input.val();
 	if(url == "") {
@@ -108,6 +91,8 @@ add_button.click(function () {
 	function success() {addUrl(params_url)};
 	function fail(msg) {alert("DSpace rest url seems to invalid, can not add!")};
 	testUrl(add_url_input.val(), success, fail);
+	
+
 })	
 
 plus_button.click(function () {
@@ -139,20 +124,16 @@ function fetchParams () {
 
 
 // CHOOSE SERVER HANDLER
-$("#export-data-dspace-addfile_url").change(function() {
-	add_div.hide();
+$("#export-data-dspace-additem_url").change(function() {
 	function success() {
-		$("#export-data-dspace-addfile_status").empty().append("DSpace responded OK").addClass("good");
-		$("#export-data-dspace-addfile_hidden").show();
+		$("#export-data-dspace-additem_status").empty().append("DSpace responded OK").addClass("good");
+		$("#export-data-dspace-additem_hidden").show();
 	};
 	function fail(msg) {alert("DSpace rest API not working!")};
-	testUrl($("#export-data-dspace-addfile_url :selected").val(), success, fail);
+	testUrl($("#export-data-dspace-additem_url :selected").val(), success, fail);
 });
 
 
 fetchParams();
 
 </script>
-
-
-

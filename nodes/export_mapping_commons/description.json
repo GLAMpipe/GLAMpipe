@@ -1,10 +1,10 @@
 {
 	"nodeid": "export_mapping_create_commons_metadata",
-	"title": "Map data to Wikimedia Commons ",
+	"title": "Wikimedia commons: Map data",
 	"type": "export",
 	"subtype": "mapping",
 	"status": "works",
-	"description": "Format wikimedia commons metadata (wikitext)",
+	"description": "Map data to wikimedia commons metadata (wikitext)",
 	"scripts": {
 		"hello": "out.say('news', 'You added a wikitext node'); ",
 		

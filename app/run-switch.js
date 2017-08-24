@@ -103,6 +103,8 @@ exports.runNode = function (node, io) {
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
 							web.downloadAndSave (node, download, false, function() {
+								var query = {}; 
+								query[MP.source] = node._id;
 								//csv.importUpdates(node, sandbox, download, io);
 								mongoquery.empty(node.collection, query, function() {
 									csv.importFile_stream(node, sandbox, io);

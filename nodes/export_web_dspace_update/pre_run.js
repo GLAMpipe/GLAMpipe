@@ -9,7 +9,7 @@ var original_field 	= context.node.params.dspace_field; // field to be updated
 
 
 var update = [];
-var url =  context.node.params.url + "/items/" + uuid_value + "/metadata";
+var url =  context.node.params.required_url + "/items/" + uuid_value + "/metadata";
 
 
 if(!uuid_value || !context.validator.isUUID(uuid_value+""))

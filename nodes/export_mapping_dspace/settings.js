@@ -1,0 +1,83 @@
+
+
+// display current DSpace url nicely to user
+$("#export-mapping-dspace_serverinfo").text("Mapping for \"" +node.params.required_url+ "\"");
+$("#export-mapping-dspace_mappings").text("Fetching schemas from \"" +node.params.required_url+ "\"");
+
+
+
+var ignoreFields = ["id", "_id", "collection", "__mp_source"];
+
+mapping();
+
+// TODO: because this is async, this script must handle remembering settings itself
+// we fetch target properties and then first document from GLAMpipe for mapping
+function mapping() {
+
+   var url = g_apipath + "/collections/"+node.collection+"/docs?skip=0&limit=1";
+
+	$.getJSON(g_apipath + "/proxy?url=" + node.params.required_url + "/registries/schema", function (schemas) {
+		$.getJSON(url, function(data) {
+			var table = '<table><thead><tr><th>Dspace field</th><th>dynamic field</th><th>static field</th></tr></thead>';
+
+			schemas.forEach(function(schema) {
+				schema.fields.forEach(function(schema_field) {
+
+					//if(node.settings && node.settings["_mapkey_" + doc_field] && node.settings["_mapkey_" + doc_field] === schema_field.name)
+						//schema_select += "<option value='"+schema_field.name+"' selected>" + schema_field.name + "</options>"; 
+					//else
+						//schema_select += "<option value='"+schema_field.name+"'>" + schema_field.name + "</options>"; 
+					table += "<tr> <td>" + schema_field.name + "</td>";
+					table += "<td><div><select name='_dynamic_" + schema_field.name + "' class='node-settings dynamic_field middle_input' ><option value=''>no value, use static</option></select></div></td>";
+					table += "<td><div><input name='_static_" + schema_field.name + "' class='node-settings' value=''/></div></td> </tr>"; 
+				})
+			})
+			
+			
+			$("#export-mapping-dspace_mappings").empty().append(table);  
+			
+			// populate selects with document fields
+			var rec = data.data[0];
+			var data_fields = "";
+			for(var f in rec) {
+				data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
+		   }
+		   $("#export-mapping-dspace_mappings select").append(data_fields);
+		})
+   })
+	   
+
+}
+
+
+function createOptions (schemas, doc_field) {
+	var schema_select = "<option value=''></option>";
+	schemas.forEach(function(schema) {
+		schema.fields.forEach(function(schema_field) {
+
+			if(node.settings && node.settings["_mapkey_" + doc_field] && node.settings["_mapkey_" + doc_field] === schema_field.name)
+				schema_select += "<option value='"+schema_field.name+"' selected>" + schema_field.name + "</options>"; 
+			else
+				schema_select += "<option value='"+schema_field.name+"'>" + schema_field.name + "</options>"; 
+		})
+	})
+	return schema_select;
+}
+
+
+$("#xml_basic_guess").click(function(e){
+   var obj=$(e.target);
+   obj.parent().find("table tr").each(function(index) {
+	   
+	   var field = $( this ).find("td div").text();
+	   field = field.replace(/_/g, ".");
+	   $( this ).find("select").val(field).change();
+	   
+   });
+});
+
+
+
+
+
+

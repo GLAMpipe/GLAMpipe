@@ -11,7 +11,7 @@ if(context.data.existing_link) {
 } else {
 
 	// create DSpace root address from API address
-	var splitted = context.node.params.url.split("/");
+	var splitted = context.node.params.required_url.split("/");
 	var link_root = splitted.slice(0, splitted.length-1).join("/");
 
 	// increase success counter

@@ -1,6 +1,6 @@
 {
     "nodeid": "export_mapping_plone",
-    "title": "Map data to Plone",
+    "title": "Plone: Map data",
     "type": "export",
     "subtype": "mapping",
     "status": "usable",

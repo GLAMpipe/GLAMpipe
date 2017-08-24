@@ -1,6 +1,6 @@
 
 <label>Choose Omeka REST API url or write url below.</label>
-<select id="export-data-omeka_url" name="url">
+<select id="export-data-omeka_url" name="required_url">
 	<option value="" selected disabled>predefined servers</option>
 	<option value="http://localhost:8080/api">http://localhost:8080/api</option>
 </select>
@@ -18,6 +18,9 @@
 <div id="export-data-omeka_status" class="status"></div>
 
 <div id="export-data-omeka_hidden" style="display:none">
+	<label>Where is mapping?</label>
+	<select name="in_field" class="dynamic_field" required />
+
 	<label>Where to write ID of item?</label>
 	<input name="out_field" value="omeka_id" required />
 </div>
