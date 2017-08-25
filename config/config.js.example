@@ -1,22 +1,32 @@
 
 
-// DATAPATH
+// *** PATHS ***
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
 var dataPath = "";
 
-// USER INTERFACE
 // location of ui
+// default: "/"
 var uiPath = "/";
+
+// location of api endpoint (NOT USED CURRENTLY)
+// default: "/api/"
+var apiPath = "/api/";
 
 // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 var staticPath = "/static"; 
 
-// MODE (server/desktop)
+// - file location of node files
+// default: "" (means that GP uses internal nodes)
+var nodePath = ""; 
+
+
+// *** MODE *** (server/desktop)
 var isServerInstallation = false;
 var disableBatchDownloads = true;
 var canRegister = true;
 var secret = "Set something here";
+
 
 // VISIBLE nodes
 // defines what nodes are available for use
@@ -33,26 +43,7 @@ var PROXY_passes = [
 ]
 
 
-
-
-// IP passes (NOT USED)
-// - one can define IPs that are allowed to execute certain API paths
-var IP_passes = [
-	{
-		path: "/api/v1/collections/p15_admin-embargopyynnt_c0_requests/", 
-		method: "PUT", 
-		ip:"127.0.0.1",
-		label: "embargo-pyynnöt"
-	}
-]
-
-
-// NODEPATH
-// - where are GLAMpipe node files?
-// default: "" (means that GP uses internal nodes)
-var nodePath = ""; 
-
-var MP = "__mp";
+var MP = "__mp"; // prefix 
 var url = "http://localhost";
 
 var exports = module.exports = {};

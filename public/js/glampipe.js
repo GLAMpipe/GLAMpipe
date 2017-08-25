@@ -592,7 +592,7 @@ var glamPipe = function () {
 				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 
-				//html += self.renderNodes(collection, ["view"]);
+				html += self.renderNodes(collection, ["view"]);
 
 				//html += "  <div class='sectiontitleblock'>"
 				//html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
