@@ -1,20 +1,14 @@
 {
 	"nodeid": "file_pdf2text",
 	"type": "process",
+	"title":"PDF: extract text",
 	"subtype": "files",
 	"subsubtype": "pdf2text",
-	"title": "PDF2text",
 	"status": "usable",
 	"tags":["library", "pdf"],
 	"description": "Extract text from PDF",
 
 	"scripts": {
-		"hello": 
-		[
-			"context.node.title = context.node.params.file; "
-		],
-		
-		"bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
 		
 		"init":"out.say('progress', context.node.title); context.vars = {success_count:0};",
 

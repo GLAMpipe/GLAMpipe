@@ -3,7 +3,7 @@
     "type": "process",
     "subtype": "files",
     "subsubtype": "pdf2image",
-    "title": "PDF cover image",
+    "title": "PDF: cover image",
     "status": "usable",
     "tags":["pdf"],
     "usage":"",

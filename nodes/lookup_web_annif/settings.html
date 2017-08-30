@@ -4,8 +4,14 @@
 	
 	<div><a href="http://annif.org/" target="_blank">annif.org</a></div>
 	<div>
-		<label>text language</label> 
-		<select class="node-settings" name="project">
+		
+		<label>text language (dynamic)</label> 
+		<select class="node-settings dynamic_field" name="_dynamic_project">
+			<option value="">choose language field</option>
+		</select>
+	
+		<label>text language (static)</label> 
+		<select class="node-settings" name="_static_project">
 			<option value="yso-finna-fi">FI</option>
 			<option value="yso-finna-sv">SV</option>
 			<option value="yso-finna-en">EN</option>

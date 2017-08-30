@@ -24,6 +24,7 @@
     "jsonwebtoken": "^7.4.0",
     "mongojs": "^2.3.0",
     "multer": "^1.1.0",
+    "node-pandoc": "^0.3.0",
     "node-stream-csv": "0.0.2",
     "nodemw": "0.10.1",
     "passport": "^0.3.2",

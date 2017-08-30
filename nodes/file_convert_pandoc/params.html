@@ -1,0 +1,12 @@
+
+<label>File location</label>
+<select id="file_convert_pandoc_in" name="in_field" class="dynamic_field"/>
+
+<label>Converted file name</label>
+<input id="file_convert_pandoc_out" name="out_field" value="_converted"> 
+
+<script>
+	$("#file_convert_pandoc_in").change(function() {
+		$("#file_convert_pandoc_out").val($(this).val() + "_converted");
+	})
+</script>

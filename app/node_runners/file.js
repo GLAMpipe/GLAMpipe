@@ -65,3 +65,28 @@ exports.getBase64 = function(file, sandbox, cb) {
 	});
 
 }
+
+
+// convert files with Pandoc
+exports.convert = function (doc, sandbox, next) {
+	
+	var pandoc = require("node-pandoc");
+	var src = "/home/arihayri/Downloads/paper.pdf";
+	var args = "pandoc -s -o /home/arihayri/Downloads/paper.html";
+	
+	var options = {outputDirectory: sandbox.context.node.dir};
+	
+	pandoc(src, args, function(err, result) {
+		
+	})
+	
+	pandoc.convertPage(0).then(function (imagePath) {
+		sandbox.context.data = imagePath;
+		//fs.existsSync("/tmp/slide-0.png") // => true 
+		next();
+	}).catch(function(error) {
+		console.log("ERROR: "+ error.message);
+		next();
+	});
+
+}

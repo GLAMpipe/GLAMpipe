@@ -377,11 +377,13 @@ var dataTable = function (node) {
 		var obj = $(event.target);
 		var index = obj.data("index");
 		
+		
 		var doc = self.getDocByTableClick(event);
 		var key = self.getKeyByTableClick(event);
 		var value = doc[key];
+		console.log(index)
 		if(value && Array.isArray(value) && index !== null)
-			value = value[index];
+			value = value[parseInt(index)];
 		
 		var html = self.object2Html(value);
 		$("#cell-display").empty().append(html);
@@ -442,7 +444,7 @@ var dataTable = function (node) {
 				html += "<li>" + "[" + index + "] " + value + "</li>";
 			else if(key)
 				html += "<li><span class='bold'>" + key + "</span>: " + value + "</li>";
-			else
+			else 
 				html += "<li>" + value + "</li>";
 				
 		//objects

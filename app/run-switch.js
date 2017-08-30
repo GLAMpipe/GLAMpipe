@@ -403,6 +403,11 @@ exports.runNode = function (node, io) {
 							asyncLoop.documentLoop(node, sandbox, web.uploadFile);
 						break;
 						
+						case "convert":
+							var file = require("../app/node_runners/file.js");
+							asyncLoop.fieldLoop(node, sandbox, file.convert);
+						break;
+						
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");

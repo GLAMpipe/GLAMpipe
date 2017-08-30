@@ -1,0 +1,28 @@
+{
+    "nodeid": "file_convert_pandoc",
+    "type": "process",
+    "title": "Pandoc: convert files",
+    "subtype": "files",
+    "subsubtype": "convert",
+    "status": "broken",
+    "description": "File format conversion via Pandoc",
+
+
+    "scripts": {
+        
+        "init":
+        [
+            "out.say('progress', 'Detecting from ' + context.node.params.in_field + '!'); "
+        ],
+                
+        "finish":
+        [
+			"out.say('finish', 'Converted!' );"
+		]
+    },
+    
+    "views": {
+           
+        "settings": ["no settings"]
+    }
+}
