@@ -12,6 +12,8 @@ var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
+require("string_score");
+
 var exports 	= module.exports = {};
 
 
@@ -243,7 +245,7 @@ exports.runNode = function (node, io) {
 		
 			switch (node.subtype) {
 				
-				case "mapping":
+				case "metadata mapping":
 				
 					//default: // syncronous nodes
 					asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
@@ -463,9 +465,11 @@ exports.runNode = function (node, io) {
 						
 						case "collection":
 							// read map data
-							mongoquery.find({}, sandbox.context.node.params.source_collection, function(err, result) {
+							var fields = {};
+							fields[sandbox.context.node.params.key_field] = 1;
+							fields[sandbox.context.node.params.copy_field] = 1;
+							mongoquery.findFields({}, fields, {}, sandbox.context.node.params.source_collection, function(err, result) {
 								sandbox.context.data = result;
-								console.log(result);
 								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 									sandbox.run.runInContext(sandbox);
 									next();

@@ -2,14 +2,17 @@
 
 <input class="dynamic_collection button" name="source_collection" placeholder="choose lookup collection"/> 
 
-<label>Which field to compare from lookup collection?</label> 
+<label>Key field in lookup collection?</label> 
 <input class="source_dynamic_field" name="key_field" /> 
+
+<label>Key field in this collection</label> 
+<select class="dynamic_field" name="in_field" /> 
 
 <label>Which field to copy from lookup collection?</label> 
 <input class="source_dynamic_field" name="copy_field" /> 
 
-<label>key field in this collection</label> 
-<select class="dynamic_field" name="in_field" /> 
-
 <label>Where to write the result</label>
 <input name="out_field" value="lookup"/> 
+
+<label>Where to write the score</label>
+<input name="out_score" value="score"/> 

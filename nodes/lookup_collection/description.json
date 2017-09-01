@@ -9,15 +9,10 @@
 	"description": "Collection lookup. Suitable for example term lookups.",
 
 	"scripts": {
-		"hello": [
-			"out.say('news', 'You added a collection lookup node'); "
 
-		],
-		
-        "bye": "out.say('news', 'Deleted lookup node. Bye!'); ",
 		
 		"init": [
-			"out.say('progress', 'Starting getting data...'); "
+			"out.say('progress', 'Starting map data...'); "
 		],
 		
 		"finish":"out.say('finish', 'Lookup finished');"

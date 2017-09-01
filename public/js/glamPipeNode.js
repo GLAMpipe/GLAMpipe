@@ -216,7 +216,9 @@ var glamPipeNode = function (node, gp) {
 		// node description
 		if(self.source.settings)
 			$(".node-description-value").val(self.source.settings.node_description);
-
+		else
+			$(".node-description-value").val("");
+			
 		if(self.orphan) {
 			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
 			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
@@ -321,6 +323,8 @@ var glamPipeNode = function (node, gp) {
 	}
 
 	this.saveDescription = function(desc) {
+
+			
 		var d = {
 			url:self.baseAPI + "/nodes/" + self.source._id + "/settings/description", 
 			type:"POST",
@@ -330,7 +334,11 @@ var glamPipeNode = function (node, gp) {
 			error:function() {console.log("description save failed!")},
 			success: function(data) {
 				console.log(data);
-				self.source.settings.node_description = desc;
+				// settings does not exist if node hasn't been executed
+				if(!self.source.settings)
+					self.source.settings = {"node_description": desc};
+				else
+					self.source.settings.node_description = desc;
 			}
 		}
 		$.ajax(d);
