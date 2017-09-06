@@ -1,7 +1,7 @@
 {
     "nodeid": "export_xml_basic",
     "type": "export",
-    "subtype": "file",
+    "subtype": "to file",
     "title": "XML",
     "status": "broken",
     "description": "Export collection as XML file. Very simple version. Do not export objects.",

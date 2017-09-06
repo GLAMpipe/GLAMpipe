@@ -36,7 +36,8 @@ var nodeRepository = function () {
 			var node = self.nodes[i]._id;
 			if(types.indexOf(node.type) != -1) {
 				html += "  <div class='optionlist'>"
-				
+				self.nodes[i].subtypes.sort(sortBySubType);
+				console.log(self.nodes[i].subtypes);
 				// render subtypes
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
@@ -164,6 +165,14 @@ function sortByTitle (a,b) {
   if (a.title.toLowerCase() < b.title.toLowerCase())
 	return -1;
   if (a.title.toLowerCase() > b.title.toLowerCase())
+	return 1;
+  return 0; 
+}
+
+function sortBySubType (a,b) {
+  if (a.sub.subtype.toLowerCase() < b.sub.subtype.toLowerCase())
+	return -1;
+  if (a.sub.subtype.toLowerCase() > b.sub.subtype.toLowerCase())
 	return 1;
   return 0; 
 }

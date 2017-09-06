@@ -255,7 +255,7 @@ exports.runNode = function (node, io) {
 					
 				break;
 				
-				case "file":
+				case "to file":
 				
 					switch (node.subsubtype) {
 						case "csv":
@@ -269,7 +269,7 @@ exports.runNode = function (node, io) {
 					
 				break;
 				
-				case "web":
+				case "to web":
 				
 					var web = require("../app/node_runners/web.js");
 					sandbox.login = CreateScriptVM(node, sandbox, "login");

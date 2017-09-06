@@ -2,7 +2,7 @@
     "nodeid": "export_web_omeka_s_additem",
     "title": "Omeka-S: create items",
     "type": "export",
-    "subtype": "web",
+    "subtype": "to web",
     "subsubtype": "omeka_additem",
     "status": "usable",
     "tags":["omeka-s"],

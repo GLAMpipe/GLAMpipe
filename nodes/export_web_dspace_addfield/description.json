@@ -2,7 +2,7 @@
     "nodeid": "export_web_dspace_addfield",
     "title": "DSpace 6: add metadata field",
     "type": "export",
-    "subtype": "web",
+    "subtype": "to web",
     "subsubtype": "dspace",
     "tags":["dspace"],
     "status": "usable",

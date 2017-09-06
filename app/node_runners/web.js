@@ -258,7 +258,8 @@ exports.downloadAndSave = function (node, download, addext, next) {
 	const fileType = require('file-type');
 
 	if(isInvalidURL(download.url)) {
-		download.error = "WEB: Invalid URL!"
+		download.error = "WEB: Invalid URL!";
+		console.log("WEB: " + isInvalidURL(download.url));
 		return next();
 	}
 
@@ -411,7 +412,7 @@ function isInvalidURL(url) {
 
 	if(url == null || url == "") {
 		return "URL missing";
-	} else if(url.search("http") != 0) {
+	} else if(url.search("http") === -1) {
 		return "URL not starting with 'http'";
 	} else
 		return false;

@@ -2,7 +2,7 @@
     "nodeid": "process_meta_online_commons_upload",
     "title": "Download file and upload to commons",
     "type": "export",
-    "subtype": "web",
+    "subtype": "to web",
     "subsubtype": "meta",
     "status": "usable",
     "description": "Upload online files to wikimedia commons",

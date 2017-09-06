@@ -1,14 +1,21 @@
 
 
-
-
 <label>file name or full path </label>
-<select class="dynamic_field" name="in_field"/>
+<select id="files_pdf2image_in" class="dynamic_field" name="in_field"/>
 
 <label>file path (optional)</label>
 <input name="filepath"/>
 
-<label>Where to write result?  </label>
-<input id="file_checksum_out" name="out_field" value="pdf_images"/>
+<label>Where to write local image path?  </label>
+<input id="files_pdf2image_out"name="out_field" value="pdfimages"/>
+
+<label>Where to write API link?  </label>
+<input id="files_pdf2image_link" name="out_link" value="pdfimages_link"/>
 
 
+<script>
+	$("#files_pdf2image_in").change(function() {
+		$("#files_pdf2image_out").val($(this).val() + "_pdfimages");
+		$("#files_pdf2image_link").val($(this).val() + "_pdfimages_link");
+	})
+</script>

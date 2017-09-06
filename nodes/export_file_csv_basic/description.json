@@ -1,7 +1,7 @@
 {
     "nodeid": "export_csv_basic",
     "type": "export",
-    "subtype": "file",
+    "subtype": "to file",
     "subsubtype": "csv",
     "title": "CSV",
     "status": "works",

@@ -19,13 +19,17 @@
 
 <div id="export-data-dspace-additem_hidden" style="display:none">
 	<label>Where is mapping?</label>
-	<select name="in_field" class="dynamic_field" required />
+	<select id="export-data-dspace-additem_mapping" name="in_field" class="dynamic_field" required />
+	
 	<label>Where to write DSpace UUID?</label>
-	<input name="out_uuid" value="dspace_uuid" required />
+	<input id="export-data-dspace-additem_uuid" name="out_uuid" value="dspace_uuid" required />
+	
 	<label>Where to write DSpace handle?</label>
-	<input name="out_handle" value="dspace_handle" required />
+	<input id="export-data-dspace-additem_handle" name="out_handle" value="dspace_handle" required />
+	
 	<label>Where to write DSpace link?</label>
-	<input name="out_link" value="dspace_link" required />
+	<input id="export-data-dspace-additem_link" name="out_link" value="dspace_link" required />
+	
 	<label>Dspace UI address?</label>
 	<input name="dspace_ui" value="/xmlui" required />
 </div>
@@ -139,6 +143,14 @@ $("#export-data-dspace-additem_url").change(function() {
 	};
 	function fail(msg) {alert("DSpace rest API not working!")};
 	testUrl($("#export-data-dspace-additem_url :selected").val(), success, fail);
+});
+
+
+$("#export-data-dspace-additem_mapping").change(function() {
+	$("#export-data-dspace-additem_uuid").val($(this).val() + "_uuid");
+	$("#export-data-dspace-additem_handle").val($(this).val() + "_handle");
+	$("#export-data-dspace-additem_link").val($(this).val() + "_link");
+
 });
 
 

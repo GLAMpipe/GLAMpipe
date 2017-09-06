@@ -2,7 +2,7 @@
     "nodeid": "export_web_dspace_addfile",
     "title": "DSpace 6: add bitstreams",
     "type": "export",
-    "subtype": "web",
+    "subtype": "to web",
     "subsubtype": "dspace_addfile",
     "tags":["dspace", "bitstream"],
     "status": "rubbish",

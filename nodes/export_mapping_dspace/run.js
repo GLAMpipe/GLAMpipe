@@ -13,13 +13,18 @@ for(var key in context.node.settings) {
 	if(is_static.test(key)) {
 		var plain_key = key.replace("_static_", "");
 		if(context.node.settings[key])
-			pushField(item, context.node.settings[key], plain_key);
+			pushField(item, context.node.settings[key], plain_key, "");
 	}
 }
 
 // then override with dynamic fields if set
 for(var key in context.node.settings) {
 	var value = context.doc[context.node.settings[key]];
+	// value might be undefined
+	if(!value)
+		value = "";
+		
+	var language = "";
 	
 	if(is_dynamic.test(key)) {
 		
@@ -30,12 +35,12 @@ for(var key in context.node.settings) {
 			   for (var i = 0; i < value.length; i++ ) { 
 					if(context.doc[plain_key + "__lang"])
 						language = context.doc[plain_key + "__lang"][i];
-					pushField(item, value[i], key_mapped, plain_key, language);	
+					pushField(item, value[i], key, plain_key, language);	
 			   }
 		   } else { 
 				if(context.doc[plain_key + "__lang"])
 					language = context.doc[plain_key + "__lang"];
-				pushField(item, value, key_mapped, plain_key, language);	
+				pushField(item, value, key, plain_key, language);	
 		   }
 	}
 }

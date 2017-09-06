@@ -11,7 +11,7 @@ var ignoreFields = ["id", "_id", "collection", "__mp_source"];
 mapping();
 
 // TODO: because this is async, this script must handle remembering settings itself
-// we fetch target properties and then first document from GLAMpipe for mapping
+// we fetch target properties and then we fetch first document from GLAMpipe for mapping
 function mapping() {
 
    var url = g_apipath + "/collections/"+node.collection+"/docs?skip=0&limit=1";
@@ -43,12 +43,32 @@ function mapping() {
 				data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
 		   }
 		   $("#export-mapping-dspace_mappings select").append(data_fields);
+			setSettings();
+
 		})
    })
 	   
 
+	
+
 }
 
+
+function setSettings() {
+	var is_static = /^_static_/;
+	var is_dynamic = /^_dynamic_/;
+
+	// apply settings to mappings (remembering previous run)
+	for(var key in node.settings) {
+		if(is_static.test(key)) {
+			$("input[name='" + key + "']").val(node.settings[key]);
+		}
+		
+		if(is_dynamic.test(key)) {
+			$("select[name='" + key + "']").val(node.settings[key]);
+		}
+	}
+}
 
 function createOptions (schemas, doc_field) {
 	var schema_select = "<option value=''></option>";

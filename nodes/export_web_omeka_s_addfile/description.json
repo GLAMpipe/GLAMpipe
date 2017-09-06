@@ -2,7 +2,7 @@
     "nodeid": "export_web_omeka_s_addfile",
     "title": "Omeka-S: add file",
     "type": "export",
-    "subtype": "web",
+    "subtype": "to web",
     "subsubtype": "upload_file",
     "status": "rubbish",
     "tags":["omeka-s"],

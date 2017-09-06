@@ -2,7 +2,7 @@
     "nodeid": "export_web_commons_file",
     "title": "WM Commons: upload files",
     "type": "export",
-    "subtype":"web",
+    "subtype":"to web",
     "subsubtype": "mediawiki_bot",
     "status": "rubbish",
     "tags": ["wikimedia"],
