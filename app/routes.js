@@ -16,7 +16,8 @@ module.exports = function(express, glampipe, passport) {
                                                             // 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 	express.set('superSecret', global.config.secret); // secret variable
-	
+
+
     // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
@@ -74,15 +75,17 @@ module.exports = function(express, glampipe, passport) {
 
 
 	// protect API routes
-	if(global.config.isServerInstallation) {
+	if(global.config.authentication !== "none") {
 		//console.log("AUTHENTICATION")
 		//console.log(req.ip)
-		var s = express.get('superSecret');
-		express.post('/api/v1/*', jwt2({secret: s}));
-		express.put('/api/v1/*', jwt2({secret: s}));
-		express.delete('/api/v1/*', jwt2({secret: s}));
-        
-        // projects
+		if(global.config.authentication === "local") {
+			var s = express.get('superSecret');
+			express.post('/api/v1/*', jwt2({secret: s}));
+			express.put('/api/v1/*', jwt2({secret: s}));
+			express.delete('/api/v1/*', jwt2({secret: s}));
+		}
+		
+        // project permissions
         express.all('/api/v1/projects/:project/*', function(req, res, next) {
             if(req.method === "GET")
                 next();
@@ -96,19 +99,19 @@ module.exports = function(express, glampipe, passport) {
             }
         })
         
-        // node run
+        // node run permissions
         express.post('/api/v1/nodes/:id/*', function(req, res, next) {
 			console.log(req.ip)
-			if(req.ip == "127.0.0.1")
-				next();
-			else {
+			//if(req.ip == "127.0.0.1")
+				//next();
+			//else {
 				project.isAuthenticated(req, function(authenticated) {
 					if(authenticated)
 						next();
 					else
 						res.json({error:"Node run not authenticated!"});
 				})
-			}
+			//}
         })
     }
 
@@ -146,14 +149,14 @@ module.exports = function(express, glampipe, passport) {
 
 	// login page
 	express.get('/signup', function (req, res) {
-		if(global.config.isServerInstallation)
+		if(global.config.authentication === "local")
 			res.sendFile(path.join(__dirname, 'views', 'signup.html'));
 		else
 			res.redirect('/');
 	});
 
 	express.get('/signup_error', function (req, res) {
-		if(global.config.isServerInstallation)
+		if(global.config.authentication === "local")
 			res.sendFile(path.join(__dirname, 'views', 'signup_error.html'));
 		else
 			res.redirect('/');
@@ -177,7 +180,7 @@ module.exports = function(express, glampipe, passport) {
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
 			url:global.config.url, 
-			isServerInstallation:global.config.isServerInstallation, 
+			authentication:global.config.authentication, 
 			version:global.config.version,
 			uiPath:global.config.uiPath,
 			dataPath:global.config.dataPath
@@ -442,9 +445,26 @@ module.exports = function(express, glampipe, passport) {
 		proxy.proxyJSON(req.body.url, req.body.query, res);
 	});
 
-
-	express.get('/api/v1/auth', jwt2({secret:express.get("superSecret")}), function (req, res) {
-			res.json({user:req.user});
+	express.get('/api/v1/auth',  function (req, res) {
+		
+		if(global.config.authentication === "local") {
+			var token = req.headers['authorization'].replace(/^Bearer\s/, '');
+			try {
+				var decoded = jwt.verify(token, express.get("superSecret"));
+				res.json(decoded)
+			} catch(err) {
+				// err
+				console.log(err)
+				res.json({"error": "not authenticated"});
+			}
+			
+			
+		} else if(global.config.authentication === "shibboleth") {
+			if(req.headers[global.config.shibbolethHeaderId])
+				res.json({shibboleth:{user:req.headers[global.config.shibbolethHeaderId]}});
+			else
+				res.json({"error": "not authenticated"});
+		}
 	});
 
 

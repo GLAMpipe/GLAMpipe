@@ -36,7 +36,7 @@ var glamPipe = function () {
 			
 			for(var i = 0; i< data.length; i++) {
 				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
-				listOption += "<a href='" + self.uiPath + "/project/" + data[i]._id + "'>\n";
+				listOption += "<a href='" + self.uiPath + "project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
@@ -67,7 +67,7 @@ var glamPipe = function () {
 			$(div).empty();
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
-				html += "<tr><td><div><a href='" + self.uiPath + "/project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+				html += "<tr><td><div><a href='" + self.uiPath + "project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -168,7 +168,8 @@ var glamPipe = function () {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
 			$("#version").empty().append("ver. " + data.version);
 			self.uiPath = data.uiPath;
-			if(data.isServerInstallation) {
+			
+			if(data.authentication === "local") {
 				self.desktop = false;
 				var d = {
 					url: self.baseAPI + "/auth", 

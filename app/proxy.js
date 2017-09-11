@@ -11,7 +11,7 @@ exports.proxyJSON = function (url, query, res) {
         return res.json({"error":"no url"});
 
 	// if server installation then we restrict the proxy to white list
-	if(global.config.isServerInstallation) {
+	if(global.config.authentication !== "none") {
 		var allowed = global.config.PROXY_passes.some(function(pass) {
 			pass = pass.replace("/", "\/");
 			var re = new RegExp("^" + pass);

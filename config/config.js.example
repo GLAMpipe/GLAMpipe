@@ -28,6 +28,12 @@ var canRegister = true;
 var secret = "Set something here";
 
 
+// SHIBBOLETH
+var shibbolethHeaders = true;
+var shibbolethUsers = [];
+var shibbolethHeaderId = "mail";
+
+
 // VISIBLE nodes
 // defines what nodes are available for use
 // default: "null" -> all nodes are available
@@ -42,6 +48,7 @@ var PROXY_passes = [
 	"http://demoprints.eprints.org/"
 ]
 
+var IP_passes = [];
 
 var MP = "__mp"; // prefix 
 var url = "http://localhost";
@@ -61,6 +68,11 @@ exports.disableBatchDownloads = disableBatchDownloads;
 exports.canRegister = canRegister;
 exports.secret = secret;
 exports.tags = visible_tags;
+
 exports.IP_passes = IP_passes;
 exports.PROXY_passes = PROXY_passes;
+
+exports.shibbolethHeaders = shibbolethHeaders;
+exports.shibbolethUsers = shibbolethUsers;
+exports.shibbolethHeaderId = shibbolethHeaderId;
 

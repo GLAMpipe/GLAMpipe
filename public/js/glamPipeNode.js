@@ -30,6 +30,13 @@ var glamPipeNode = function (node, gp) {
 			console.log(data);
 			if(data.error) {
 				$(".settings").removeClass("busy");
+				// reset run button
+				if(!self.source.params.parent) {
+					var input = self.getInputFields();
+					var output = self.getOutputFields();
+					
+					self.open({input_keys:input, output_keys:output});
+				}
 				alert(data.error);
 			}
 		}).fail(function() {
@@ -47,6 +54,13 @@ var glamPipeNode = function (node, gp) {
 			console.log(data);
 			if(data.error) {
 				$(".settings").removeClass("busy");
+				// reset run button
+				if(!self.source.params.parent) {
+					var input = self.getInputFields();
+					var output = self.getOutputFields();
+					
+					self.open({input_keys:input, output_keys:output});
+				}
 				alert(data.error);
 			}
 		}).fail(function() {

@@ -47,8 +47,12 @@ exports.createProject = function (req, res) {
 				};
 				
 				// mark the owner
-				if(req.user && req.user.local && req.user.local.email)
-					project.owner = req.user.local.email;
+				if(global.config.authentication === "local") {
+					if(req.user && req.user.local && req.user.local.email)
+						project.owner = req.user.local.email;
+				} else if(global.config.authentication === "shibboleth") {
+					project.owner = req.headers[global.config.shibbolethHeaderId];
+				}
 				
 				mongoquery.insertProject (project, function(err, data) {
 					console.log("project \"" + title + "\" created!");
@@ -196,35 +200,68 @@ function finish (next) {
 
 
 exports.isAuthenticated = function (req, cb) {
-    if(req.user && req.user.local && req.user.local.email && req.user.local.email) {
-        var id = req.params.project;
-        //  we are authenticating for project operation (add/remove node)
-        if(id) {
-            mongoquery.findOneById(id, "mp_projects", function(data) {
-                console.log("PROJECT: owner = " + data.owner);
-                if(req.user.local.email == data.owner)
-                    cb(true);
-                else
-                    cb(false);
-            });
-        // we are authenticating for node run
-        } else {
-            var nodeid = mongojs.ObjectId(req.params.id);
-            mongoquery.findOne({nodes:{$elemMatch:{_id:nodeid}}}, "mp_projects", function(err, project) {
-                if(!err) {
-                    console.log("OWNER " +project.owner);
-                    if(project && project.owner == req.user.local.email )
-                        cb(true);
-                    else
-                        cb(false);
-                } else {
-                    cb(false);
-                }
-            })
-        }
-    } else {
-        cb(false); // we do not have user
-    }
+	if(global.config.authentication === "local") {
+		if(req.user && req.user.local && req.user.local.email && req.user.local.email) {
+			var id = req.params.project;
+			//  we are authenticating for project operation (add/remove node)
+			if(id) {
+				mongoquery.findOneById(id, "mp_projects", function(data) {
+					console.log("PROJECT: owner = " + data.owner);
+					if(req.user.local.email == data.owner)
+						cb(true);
+					else
+						cb(false);
+				});
+			// we are authenticating for node run (separate since there is no project id on node run URL)
+			} else {
+				var nodeid = mongojs.ObjectId(req.params.id);
+				mongoquery.findOne({nodes:{$elemMatch:{_id:nodeid}}}, "mp_projects", function(err, project) {
+					if(!err) {
+						console.log("OWNER " +project.owner);
+						if(project && project.owner == req.user.local.email )
+							cb(true);
+						else
+							cb(false);
+					} else {
+						cb(false);
+					}
+				})
+			}
+		} else {
+			cb(false); // we do not have user
+		}
+	} else if (global.config.authentication === "shibboleth") {
+		console.log(req.headers[global.config.shibbolethHeaderId])
+		if(req.headers[global.config.shibbolethHeaderId]) {
+			var id = req.params.project;
+			//  we are authenticating for project operation (add/remove node)
+			if(id) {
+				mongoquery.findOneById(id, "mp_projects", function(data) {
+					console.log("PROJECT: owner = " + data.owner);
+					if(data.owner === req.headers[global.config.shibbolethHeaderId])
+						cb(true);
+					else
+						cb(false);
+				});
+			// we are authenticating for node run (separate since there is no project id on node run URL)
+			} else {
+				var nodeid = mongojs.ObjectId(req.params.id);
+				mongoquery.findOne({nodes:{$elemMatch:{_id:nodeid}}}, "mp_projects", function(err, project) {
+					if(!err) {
+						console.log("OWNER " +project.owner);
+						if(project && project.owner == req.headers[global.config.shibbolethHeaderId] )
+							cb(true);
+						else
+							cb(false);
+					} else {
+						cb(false);
+					}
+				})
+			}
+		} else {
+			cb(false); // we do not have user
+		}
+	}
 }
 
 exports.run = function (projectId, gp, cb) {

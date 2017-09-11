@@ -86,7 +86,9 @@ var GlamPipe = function() {
 			resave: true,
 			saveUninitialized: true
 		}));
-		
+
+
+
 		require('./config/passport')(passport); // pass passport for configuration
 		self.app.use(passport.initialize()); 		
 		self.app.use(passport.session()); // persistent login sessions
