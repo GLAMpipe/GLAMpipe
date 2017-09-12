@@ -17,7 +17,6 @@ module.exports = function(express, glampipe, passport) {
 	var upload 		= multer({ dest: p });
 	express.set('superSecret', global.config.secret); // secret variable
 
-
     // print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);

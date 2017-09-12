@@ -31,5 +31,14 @@ start_glampipe:
 		-e DOCKER=1 \
 		 artturimatias/glampipe bash
 
+start_glampipe_dev:
+	docker run -it --rm --network=gp --name glampipe \
+		-v $(DATA_DIR):/glampipe-data \
+		-p 3000:3000 \
+		-e DOCKER=1 \
+		 artturimatias/glampipe:dev bash
+
+
+
 
 .PHONY: clean build_mongo start_mongo build_glampipe start_glampipe

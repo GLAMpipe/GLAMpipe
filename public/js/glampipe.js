@@ -9,7 +9,7 @@ var glamPipe = function () {
 	this.currentlyOpenNode = null; // currently open node
 
 	this.pickedCollectionId = "";
-	this.baseAPI = "/api/v1"; 
+	this.baseAPI = g_apipath; 
 	this.uiPath = "/";
 	this.desktop = true;
 	
@@ -22,10 +22,6 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
-	// set api path
-	var paths = window.location.pathname.split("/");
-	if(paths.indexOf("project") !== -1)
-		this.baseAPI = "/api/v1";
 	
 	// MAIN PAGE (projects)
 	this.getProjectTitles = function (div) {

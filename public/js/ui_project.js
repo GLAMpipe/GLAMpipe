@@ -1,5 +1,5 @@
 
-const g_apipath = "/api/v1" // global api path for node parameters scripts
+
 
 $( document ).ready(function() {
 	

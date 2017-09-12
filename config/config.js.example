@@ -1,6 +1,6 @@
 
 
-// *** PATHS ***
+// PATHS 
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
 var dataPath = "";
@@ -8,10 +8,6 @@ var dataPath = "";
 // location of ui
 // default: "/"
 var uiPath = "/";
-
-// location of api endpoint (NOT USED CURRENTLY)
-// default: "/api/"
-var apiPath = "/api/";
 
 // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 var staticPath = "/static"; 
@@ -21,17 +17,24 @@ var staticPath = "/static";
 var nodePath = ""; 
 
 
-// *** MODE *** (server/desktop)
-var isServerInstallation = false;
-var disableBatchDownloads = true;
-var canRegister = true;
-var secret = "Set something here";
 
+// AUTHENTICATION 
+// - "none" = do not use authentication, i.e. local install
+// - "local" = use local authentication
+// - "shibboleth" = use shibboleth headers
+//var authentication = "shibboleth";
+var authentication = "none";
 
-// SHIBBOLETH
-var shibbolethHeaders = true;
+// local
+var localCanRegister = true;
+
+// shibboleth
 var shibbolethUsers = [];
 var shibbolethHeaderId = "mail";
+
+var disableBatchDownloads = false;
+var secret = "Set something here";
+
 
 
 // VISIBLE nodes
@@ -55,7 +58,6 @@ var url = "http://localhost";
 
 var exports = module.exports = {};
 
-
 exports.source =  MP + "_source";
 exports.loadNodesFromGithub = false;
 exports.dataPath = dataPath;
@@ -63,16 +65,14 @@ exports.nodePath = nodePath;
 exports.uiPath = uiPath;
 exports.staticPath = staticPath;
 exports.url = url;
-exports.isServerInstallation = isServerInstallation;
+exports.authentication = authentication;
 exports.disableBatchDownloads = disableBatchDownloads;
-exports.canRegister = canRegister;
+exports.canRegister = localCanRegister;
 exports.secret = secret;
 exports.tags = visible_tags;
 
 exports.IP_passes = IP_passes;
 exports.PROXY_passes = PROXY_passes;
 
-exports.shibbolethHeaders = shibbolethHeaders;
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
-
