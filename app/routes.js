@@ -100,17 +100,16 @@ module.exports = function(express, glampipe, passport) {
         
         // node run permissions
         express.post('/api/v1/nodes/:id/*', function(req, res, next) {
-			console.log(req.ip)
-			//if(req.ip == "127.0.0.1")
-				//next();
-			//else {
+			if(req.ip == "127.0.0.1")
+				next();
+			else {
 				project.isAuthenticated(req, function(authenticated) {
 					if(authenticated)
 						next();
 					else
 						res.json({error:"Node run not authenticated!"});
 				})
-			//}
+			}
         })
     }
 

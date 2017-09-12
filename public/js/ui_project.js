@@ -248,10 +248,12 @@ function getWSPath() {
 	var paths = window.location.pathname.split("/");
 	return "";
 	
-	if(paths[1] != "project")
-		return "/" + paths[1];
-	else
+	if(paths[paths.length-2] === "project"){
+		return "/" + paths.slice(1, paths.length-2).join("/");
+	} else {
 		return "";
+	}
+
 }
 
 function websockPopup(div, title) {
