@@ -7,7 +7,7 @@
     "status": "usable",
     "tags":["library", "finna"],
     "usage":"",
-    "description": "Get metadata based ISBN or ISSN from Finna",
+    "description": "Get metadata based ISBN or ISSN from Finna.fi",
     
     "scripts": {
         "hello": "out.say('news', 'You added a commons checker node'); ",

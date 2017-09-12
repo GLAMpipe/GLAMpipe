@@ -1,21 +1,18 @@
-<h1>FINNA</h1> 
+<label>Make a search in <a href="https://finna.fi/" target="_blank">finna.fi</a> and copy the URL here:</label>
+<textarea>class="node-settings" id="source_api_finna_search" name="search"></textarea>
+<div id="source_api_finna_search_url">The URL has not been set!</div>
 
-
-<label>Make a search in <a href="https://finna.fi/" target="_blank">Finna</a> ja copy URL here:</label>
-<p><input class="node-settings" id="source_api_finna_search" name="search"></input></p>
-<div id="source_api_finna_search_url">Urlia ei ole asetettu</div>
-
-<label>montako sivua haetaan (20 tietuetta/sivu) 0 tarkoittaa hae kaikki</label>
+<label>The number of pages to retreive (20 items/page). = retreives all.</label>
 <input class="node-settings" id="source_api_finna_limit" name="limit" value="2"></input>
 
-<label>Fetch only items with following license</label>
+<label>Fetch only items with the following license</label>
 <select class="node-settings" id="source_api_finna_license" name="license">
     <option value="">ei rajausta</option>
-    <option value="usage_rights_str_mv:usage_B">Saa muokata, myös kaupallinen</option>
-    <option value="usage_rights_str_mv:usage_C">Muutoksia tekemättä, myös kaupallinen</option>
-    <option value="usage_rights_str_mv:usage_D">Saa muokata, ei-kaupallinen</option>
+    <option value="usage_rights_str_mv:usage_B">Derivatives allowed, commercial reuse allowed</option>
+    <option value="usage_rights_str_mv:usage_C">No derivatives, commercial reuse allowed</option>
+    <option value="usage_rights_str_mv:usage_D">Derivatives allowed, no commercial reuse</option>
 </select>
 
-<label>save raw result</label>
+<label>Save raw result</label>
 <input class="node-settings" name="raw" type="checkbox"/>
 

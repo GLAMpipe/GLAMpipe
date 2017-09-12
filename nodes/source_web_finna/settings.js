@@ -20,6 +20,6 @@ $('#source_api_finna_hae').on('click', function() {
 		   alert(data.resultCount);  
 	   }) 
    } else { 
-	   alert('Haku on viallinen! Kopioitko osoiterivin oikein?'); 
+	   alert('The search string is corrupt! Did you copy the URL correctly?'); 
    } 
 })
