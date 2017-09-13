@@ -253,16 +253,16 @@ module.exports = function(express, glampipe, passport) {
 		node.getNodeLog(req, function(data) {res.send(data)});
 	});
 
-	express.get('/api/v1/nodes/:nodeid/params', function (req, res) {
-		node.getNodeParams(req, function(data) {res.send(data)});
+	express.get('/api/v1/nodes/:nodeid/options', function (req, res) {
+		node.getOptions(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/nodes/:nodeid/files/:file', function (req, res) {
 		node.getNodeFile(req, res);
 	});
 
-	express.post('/api/v1/nodes/:nodeid/params', function (req, res) {
-		node.setNodeParams(req, function(data) {res.send(data)});
+	express.post('/api/v1/nodes/:nodeid/options', function (req, res) {
+		node.setOptions(req, function(data) {res.send(data)});
 	});
 
 	express.post('/api/v1/nodes/:nodeid/settings/description', function (req, res) {

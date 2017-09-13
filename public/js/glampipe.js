@@ -10,7 +10,7 @@ var glamPipe = function () {
 
 	this.pickedCollectionId = "";
 	this.baseAPI = g_apipath; 
-	this.uiPath = "/";
+	this.uiPath = g_uipath;
 	this.desktop = true;
 	
 	this.projectPipeDiv = "#project-pipe";
@@ -163,9 +163,8 @@ var glamPipe = function () {
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(data) { 
 			$("#version").empty().append("ver. " + data.version);
-			self.uiPath = data.uiPath;
 			
-			if(data.authentication === "local") {
+			if(data.authentication === "local" || data.authentication === "shibboleth") {
 				self.desktop = false;
 				var d = {
 					url: self.baseAPI + "/auth", 
@@ -179,10 +178,14 @@ var glamPipe = function () {
 					},
 					success: function(data) {
 						console.log("Logged in");
-						self.user = data.user.local.email;
-						//console.log(data);
-						$(div).html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
-			
+						if(data.authentication === "local") {
+							self.user = data.user.local.email;
+							$(div).html("<a id='logout'href=''>logout " + self.user + "</a>");
+						} else {
+							self.user = data.shibboleth.user;
+							$(div).html("<a id='logout'href=''>logout " + self.user + "</a>");
+						}
+
 						if(cb)
 							cb(self.desktop);
 					}

@@ -643,9 +643,39 @@ exports.getNodeLog = function (req, cb) {
 }
 
 
-exports.getNodeParams = function (req, cb) {
+// save node specific options used in node params (currently only URLs)
+exports.setOptions = function (req, cb) {
+
+	var query = {nodeid:req.params.nodeid};
 	
-	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_params", function(err, result) {
+	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_options", function(err, result) {
+		if(err)
+			console.log(err);
+		// if there is no node params for this node, then create that first	
+		if(!result) {
+			var doc = {
+				nodeid:req.params.nodeid,
+				url:[req.body.url]
+			};
+			mongoquery.insert("mp_node_options", doc, function(err, result) {
+				cb(result);
+			})
+		// otherwise update the existing record	
+		} else {
+			var doc = {$addToSet:{url:req.body.url}}
+			mongoquery.update("mp_node_options", query, doc, function(err, result) {
+				if(err)
+					console.log(err);
+				cb(result);
+			})			
+		}
+	})	
+}
+
+
+exports.getOptions = function (req, cb) {
+	
+	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_options", function(err, result) {
 		if(err)
 			console.log(err);
 		cb(result);
@@ -679,34 +709,6 @@ exports.getNodeKey = function (key, nodeid, cb) {
 }
 
 
-exports.setNodeParams = function (req, cb) {
-
-	var query = {nodeid:req.params.nodeid};
-	
-	mongoquery.find({"nodeid":req.params.nodeid}, "mp_node_params", function(err, result) {
-		if(err)
-			console.log(err);
-		// if there is no node params for this node, then create that first	
-		if(!result) {
-			var doc = {
-				nodeid:req.params.nodeid,
-				url:[req.body.url]
-			};
-			mongoquery.insert("mp_node_params", doc, function(err, result) {
-				cb(result);
-			})
-		// otherwise update the existing record	
-		} else {
-			var doc = {$addToSet:{url:req.body.url}}
-			mongoquery.update("mp_node_params", query, doc, function(err, result) {
-				if(err)
-					console.log(err);
-				cb(result);
-			})			
-		}
-	})	
-
-}
 
 exports.setNodeDescription = function (req, cb) {
 
