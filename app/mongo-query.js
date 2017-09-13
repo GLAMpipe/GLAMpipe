@@ -626,7 +626,7 @@ exports.getAllProjects = function (callback) {
 	var collection = db.collection("mp_projects");
 
 	//collection.count(function(err, docs) {console.log("COUNT:", docs)});
-	collection.find({}).sort({title:1}, function(err, docs) { callback(docs); });
+	collection.find({}).sort({_id:-1}, function(err, docs) { callback(docs); });
 
 }
 

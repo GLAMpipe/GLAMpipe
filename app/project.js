@@ -97,8 +97,8 @@ exports.deleteProject = function (doc_id, res) {
 					console.log("PROJECT: removing " + project_path);
 					rimraf(project_path, function(err) {
 						if(err) {
-							console.log("PROJECT:  error! " + err.msg);
-							res.json({error: err.msg})
+							console.log("PROJECT:  error! " + err.message);
+							res.json({error: err.message})
 						} else {
 							console.log("PROJECT: " + project.title + " dir deleted!");
 							res.json(data);						

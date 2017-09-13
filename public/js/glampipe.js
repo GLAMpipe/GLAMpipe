@@ -47,7 +47,7 @@ var glamPipe = function () {
 		$.getJSON(self.baseAPI + "/projects", function(data) { 
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
+			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -58,7 +58,7 @@ var glamPipe = function () {
 	}
 
 	this.getProjectsByUser = function (div, user) {
-		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>collections</th><th>nodes</th><th>exports to</th><th>delete</th></tr>";
+		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			var projects = data.data;
@@ -77,15 +77,15 @@ var glamPipe = function () {
 				
 				html += "<td><div>" + projects[i].owner + "</div></td>";
 				
-				html += "<td><div>";
-				if(projects[i].nodes) {
+				//html += "<td><div>";
+				//if(projects[i].nodes) {
 					
-					projects[i].nodes.forEach(function(node) {
-						if(node.type !== "collection")
-							html += "<li>" + node.nodeid + "</li>";
-					})
-				}
-				html += "</div></td>";
+					//projects[i].nodes.forEach(function(node) {
+						//if(node.type !== "collection")
+							//html += "<li>" + node.nodeid + "</li>";
+					//})
+				//}
+				//html += "</div></td>";
 				
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -119,15 +119,15 @@ var glamPipe = function () {
 			
 			html += "<td><div>" + project.owner + "</div></td>";
 			
-			html += "<td><div>";
-			if(project.nodes) {
+			//html += "<td><div>";
+			//if(project.nodes) {
 				
-				project.nodes.forEach(function(node) {
-					if(node.type !== "collection")
-						html += "<li>" + node.nodeid + "</li>";
-				})
-			}
-			html += "</div></td>";
+				//project.nodes.forEach(function(node) {
+				//	if(node.type !== "collection")
+				//		html += "<li>" + node.nodeid + "</li>";
+				//})
+			//}
+			//html += "</div></td>";
 			
 			html += "<td>";
 			if(project.nodes) {
@@ -144,7 +144,7 @@ var glamPipe = function () {
 	}
 
 	this.getUsers = function (div) {
-		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=name", function(datal) { 
+		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) { 
 			$(div).empty();
 			var data = datal.count;
 			for(var i = 0; i< data.length; i++) {
@@ -161,10 +161,10 @@ var glamPipe = function () {
 	}
 
 	this.getLoginStatus = function (div, cb) {
-		$.getJSON(self.baseAPI + "/config", function(data) { 
-			$("#version").empty().append("ver. " + data.version);
+		$.getJSON(self.baseAPI + "/config", function(config) { 
+			$("#version").empty().append("ver. " + config.version);
 			
-			if(data.authentication === "local" || data.authentication === "shibboleth") {
+			if(config.authentication === "local" || config.authentication === "shibboleth") {
 				self.desktop = false;
 				var d = {
 					url: self.baseAPI + "/auth", 
@@ -177,13 +177,12 @@ var glamPipe = function () {
 							cb(self.desktop);
 					},
 					success: function(data) {
-						console.log("Logged in");
-						if(data.authentication === "local") {
-							self.user = data.user.local.email;
-							$(div).html("<a id='logout'href=''>logout " + self.user + "</a>");
-						} else {
+						if(config.authentication === "local") {
+							self.user = data.local.email;
+							$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
+						} else if(config.authentication === "shibboleth") {
 							self.user = data.shibboleth.user;
-							$(div).html("<a id='logout'href=''>logout " + self.user + "</a>");
+							$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
 						}
 
 						if(cb)
@@ -224,6 +223,7 @@ var glamPipe = function () {
 					window.localStorage.setItem("token", data.token);
 					$("#login-popup").remove();
 					$("#login").html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+					self.getProjectsByUser("#projectList", self.user);
 				} else
 					alert("Login failed!")
 				}
@@ -278,7 +278,10 @@ var glamPipe = function () {
                     if(retData.error)
                         alert(retData.error);
                     else {
-                        self.getProjects("#projectList");
+						if(self.desktop)
+							self.getProjects("#projectList");
+						else
+							self.getProjectsByUser("#projectList", self.user);
                     }
                 });
             },
@@ -949,7 +952,12 @@ $.delete = function(url, data, callback, type){
     data: data,
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}
-  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
+  }).fail(function(jqXHR, textStatus, errorThrown ) {
+		if(errorThrown === "Unauthorized")
+			alert("You are not logged in or you are not the owner of the project!")
+		else
+			alert(errorThrown)
+	});
 }
 
 
@@ -966,10 +974,14 @@ post = function(url, data, callback, type){
     type: 'POST',
     data: data,
     success:callback,
-    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
+  }).fail(function(jqXHR, textStatus, errorThrown ) {
+		if(errorThrown === "Unauthorized")
+			alert("You are not logged in or you are not the owner of the project!")
+		else
+			alert(errorThrown)
+	});
 }
 
 $.put = function(url, data, callback, type){
@@ -985,10 +997,14 @@ $.put = function(url, data, callback, type){
     type: 'PUT',
     data: data,
     success:callback,
-    error:function(data, t, xhr){alert("Failure! \n" + xhr)},
     contentType: type,
     headers: {"Authorization": "Bearer " + localStorage.getItem("token")}, function(){alert("pat")}
-  }).fail(function(jqXHR, textStatus, errorThrown ) {alert(errorThrown)});
+  }).fail(function(jqXHR, textStatus, errorThrown ) {
+		if(errorThrown === "Unauthorized")
+			alert("You are not logged in or you are not the owner of the project!")
+		else
+			alert(errorThrown)
+	});
 }
 
 

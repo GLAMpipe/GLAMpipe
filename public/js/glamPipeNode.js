@@ -40,7 +40,7 @@ var glamPipeNode = function (node, gp) {
 				alert(data.error);
 			}
 		}).fail(function() {
-			alert("GLAMpipe server did not respond!")
+			//alert("GLAMpipe server did not respond!")
 		});
 	}
 
@@ -52,19 +52,16 @@ var glamPipeNode = function (node, gp) {
 		
 		post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
 			console.log(data);
-			if(data.error) {
-				$(".settings").removeClass("busy");
-				// reset run button
-				if(!self.source.params.parent) {
-					var input = self.getInputFields();
-					var output = self.getOutputFields();
-					
-					self.open({input_keys:input, output_keys:output});
-				}
-				alert(data.error);
-			}
+
 		}).fail(function() {
-			alert("GLAMpipe server did not respond!")
+			$(".settings").removeClass("busy");
+			// reset run button
+			if(!self.source.params.parent) {
+				var input = self.getInputFields();
+				var output = self.getOutputFields();
+				
+				self.open({input_keys:input, output_keys:output});
+			}
 		});
 	}
 	

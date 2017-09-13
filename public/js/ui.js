@@ -8,7 +8,7 @@ $( document ).ready(function() {
             gp.getProjects("#projectList");
         } else {
             $("#project-box").hide();
-            gp.getProjectsByUser("data-workspace", gp.user);
+            gp.getProjects("#projectList");
             gp.getUsers("#userList");
         }
     });
@@ -38,7 +38,7 @@ $( document ).ready(function() {
 
     $("#user-box").on("click", "a", function (e) {
         var user = $(e.target).parents("a").data("id");
-		gp.getProjectsByUser("data-workspace", user);
+		gp.getProjectsByUser("#projectList", user);
         e.preventDefault();
 	});
 

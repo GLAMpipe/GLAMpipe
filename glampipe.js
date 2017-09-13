@@ -95,6 +95,10 @@ var GlamPipe = function() {
 
 		self.http 		= require('http').Server(self.app);
 		self.io 		= require('socket.io')(self.http);
+		//self.app.use(function(err, req, res, next) {
+			// This is error handler
+			//console.log("errori")
+		//});
 		require('./app/routes.js')(self.app, self, passport);
 
 	};

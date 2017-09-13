@@ -93,7 +93,7 @@ module.exports = function(express, glampipe, passport) {
                     if(authenticated)
                         next();
                     else
-                        res.json({error:"not authenticated!"});
+                        res.json(401, {error:"not authenticated!"});
                 })
             }
         })
@@ -107,7 +107,7 @@ module.exports = function(express, glampipe, passport) {
 					if(authenticated)
 						next();
 					else
-						res.json({error:"Node run not authenticated!"});
+						res.json(401, {error:"Node run not authenticated!"});
 				})
 			}
         })
@@ -445,27 +445,37 @@ module.exports = function(express, glampipe, passport) {
 
 	express.get('/api/v1/auth',  function (req, res) {
 		
-		if(global.config.authentication === "local") {
+		if(global.config.authentication === "local" && req.headers['authorization']) {
 			var token = req.headers['authorization'].replace(/^Bearer\s/, '');
-			try {
-				var decoded = jwt.verify(token, express.get("superSecret"));
-				res.json(decoded)
-			} catch(err) {
-				// err
-				console.log(err)
-				res.json({"error": "not authenticated"});
-			}
 			
+			jwt.verify(token, express.get("superSecret"), function(err, decoded) {
+				if(err) {
+					console.log(err.message);
+					res.status(401).json({"error": err.message});
+				} else {
+					res.json(decoded)
+				}
+			});
 			
 		} else if(global.config.authentication === "shibboleth") {
 			if(req.headers[global.config.shibbolethHeaderId])
 				res.json({shibboleth:{user:req.headers[global.config.shibbolethHeaderId]}});
 			else
-				res.json({"error": "not authenticated"});
+				res.status(401).json({"error": "not authenticated"});
+		} else {
+			res.status(401).json({"error": "not authenticated"});
 		}
 	});
 
 
+	express.use(function (err, req, res, next) {
+		console.error("ERROR: " + err.message)
+		if (err.name === 'UnauthorizedError') {
+			res.status(401).json({error: "Not logged in!"});
+		} else {
+			res.status(500).send('Something broke!')
+		}
+	})
 	// express.route("/users").get(User.findAll);
 
 
