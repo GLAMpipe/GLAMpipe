@@ -8,55 +8,62 @@ var runswitch 	= require("../app/run-switch.js");
 exports.createProject = function (req, res) {
 	
 	var title = req.body.title
-	var dirs = ["export", "source", "view", "process", "meta"]; // these dirs are created for every project
+	var dirs = ["process", "export", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
 	title_dir = title_dir.replace(/[ ]/g,"_");
-	// create projects/project_name directory 
-	var projectPath = path.join(global.config.projectsPath, title_dir); 
-	fs.mkdir(projectPath, function(err) {
-		var error_msg = "error in project directory creation!";
-		if(err) {
-			if(err.code === "EEXIST") 
-				error_msg = "Project directory exists! Please use other name for the project or delete project directory: " + projectPath;
-			else
-				error_msg = err;
+				
+	// update project count and create project. Project count is *permanent* counter
+	mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
+		mongoquery.findOne({}, "mp_settings", function(err, meta) {
+			var prefix = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
+			prefix = prefix.replace(/ /g,"_");
+			prefix = "p" + meta.project_count + "_" + prefix;
+			title_dir = title_dir + "_p" + meta.project_count;
 			
-			console.log("ERROR:", error_msg);
-			res.json({"error": error_msg});
-			return;
-		}
-		// create node output directories (blocking)
-		for(var i = 0; i < dirs.length; i++) {
-			fs.mkdirSync(path.join(projectPath, dirs[i]));
-		} 
-		// update project count and create project. Project count is *permanent* counter
-		mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
-			mongoquery.findOne({}, "mp_settings", function(err, meta) {
-				var collectionName = title_dir.substring(0,60).toLowerCase(); // limit 30 chars
-				collectionName = collectionName.replace(/ /g,"_");
-				var project = {
-					"title": title,
-					"dir": title_dir,
-					"prefix": "p" + meta.project_count + "_" + collectionName ,
-					"collection_count": 0,
-					"node_count":0,
-					"schemas": [],
-					"owner": "" 
-				};
+			var project = {
+				"title": title,
+				"dir": title_dir,
+				"prefix":  prefix,
+				"collection_count": 0,
+				"node_count":0,
+				"schemas": [],
+				"owner": "" 
+			};
+			
+			// mark the owner
+			if(global.config.authentication === "local") {
+				if(req.user && req.user.local && req.user.local.email)
+					project.owner = req.user.local.email;
+			} else if(global.config.authentication === "shibboleth") {
+				project.owner = req.headers[global.config.shibbolethHeaderId];
+			}
+			
+			mongoquery.insertProject (project, function(err, data) {
 				
-				// mark the owner
-				if(global.config.authentication === "local") {
-					if(req.user && req.user.local && req.user.local.email)
-						project.owner = req.user.local.email;
-				} else if(global.config.authentication === "shibboleth") {
-					project.owner = req.headers[global.config.shibbolethHeaderId];
-				}
-				
-				mongoquery.insertProject (project, function(err, data) {
-					console.log("project \"" + title + "\" created!");
-					res.json({"status": "project created", "project": data});
+				// create projects/project_name directory 
+				var projectPath = path.join(global.config.projectsPath, title_dir); 
+				fs.mkdir(projectPath, function(err) {
+					var error_msg = "error in project directory creation!";
+					if(err) {
+						if(err.code === "EEXIST") 
+							error_msg = "Project directory exists! Please use other name for the project or delete project directory: " + projectPath;
+						else
+							error_msg = err;
+						
+						console.log("ERROR:", error_msg);
+						res.json({"error": error_msg});
+						return;
+					} else {
+						// create node output directories (blocking)
+						for(var i = 0; i < dirs.length; i++) {
+							fs.mkdirSync(path.join(projectPath, dirs[i]));
+						}
+						 
+						console.log("project \"" + title + "\" created!");
+						res.json({"status": "project created", "project": data});
+					}
 				});
 			});
 		});
@@ -84,14 +91,21 @@ exports.deleteProject = function (doc_id, res) {
 				// remove project directory
 				var rimraf = require("rimraf");	
 				var project_path = path.join(global.config.projectsPath, project.dir);
+				console.log(project_path);
+				console.log(project_path.includes(global.config.dataPath));
 				if(project_path && project_path.includes(global.config.dataPath)) {
 					console.log("PROJECT: removing " + project_path);
-					rimraf(project.dir, function(err) {
-						console.log("PROJECT: " + project.title + " deleted!");
-						res.json(data);						
+					rimraf(project_path, function(err) {
+						if(err) {
+							console.log("PROJECT:  error! " + err.msg);
+							res.json({error: err.msg})
+						} else {
+							console.log("PROJECT: " + project.title + " dir deleted!");
+							res.json(data);						
+						}
 					});
 				} else {
-					console.log("PROJECT: " + project.title + " deleted!");
+					console.log("PROJECT: could not delete directory!" + project_path);
 					res.json(data);
 				}
 

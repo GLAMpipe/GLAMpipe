@@ -234,14 +234,8 @@ function initNode (req, io, project, callback) {
 
 			node.params.collection = node.collection;
 			
-			// copy static data view to project node's view if defined
-			if(typeof node.views.data_static !== "undefined")
-				node.views.data = node.views.data_static;
-			
 			runNodeScript("hello", node, req, io);
 			runNodeScript("metanodes", node, req, io);  // sets "node.pipe"
-			//console.log("node.pipe:"); 
-			//console.log(node.pipe)
 			node._id = mongojs.ObjectId();
 
 			// "out_field" overrides "_suffix" set by hello script
@@ -308,7 +302,9 @@ function initNode (req, io, project, callback) {
 
 
 function createNodeDirs (node, project, cb) {
-	
+	if(node.type !== "process" && node.type !== "export" && node.type !== "view")
+		return cb(null);
+		
 	var fs = require("fs");
 	var dir = path.join(global.config.projectsPath, project.dir, node.type,  node.nodeid + "_" + project.node_count );
 	fs.mkdir(dir, function(err) {
