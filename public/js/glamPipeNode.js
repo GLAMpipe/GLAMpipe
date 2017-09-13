@@ -181,7 +181,7 @@ var glamPipeNode = function (node, gp) {
 			html += "<div class='metanode'>TASK "+self.source.title+"</div>";
 			html += "</div></div>"
 			return "";
-			return html;
+			//return html;
 		}
 		
 		var subsubtype = "";

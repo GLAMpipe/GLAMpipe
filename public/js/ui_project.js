@@ -211,34 +211,40 @@ $( document ).ready(function() {
 	var genericDisplay = $("#generic-messages");
 
 	socket.on('progress', function (data) {
-		progressDisplay.show();
-		progressDisplay.empty();
-		progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+		if(data.project == gp.currentProject) {
+			progressDisplay.show();
+			progressDisplay.empty();
+			progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+		}
 	});
 
 	socket.on('error', function (data) {
-		if(data.node_uuid) {
-			progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-			$(".settings").removeClass("busy");
-			progressDisplay.addClass("done");
-		} else {
-			genericDisplay.append("<div class=\"bad\">" + data + "</div>");
+		if(data.project == gp.currentProject) {
+			if(data.node_uuid) {
+				progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
+				$(".settings").removeClass("busy");
+				progressDisplay.addClass("done");
+			} else {
+				genericDisplay.append("<div class=\"bad\">" + data + "</div>");
+			}
+			// revert "run" button text
+			var button = $("button[data-id='"+data.node_uuid+"']");
+			button.text(button.attr("text"));
+			$("div[data-id='"+data.doc+"']").text("run only this");
 		}
-		// revert "run" button text
-		var button = $("button[data-id='"+data.node_uuid+"']");
-		button.text(button.attr("text"));
-		$("div[data-id='"+data.doc+"']").text("run only this");
 		//websockPopup(progressDisplay, "Node run error");
 	});
 
 	socket.on('finish', function (data) {
-		console.log("FINISH: " + data.msg);
-		progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
-	   // websockPopup(finishDisplay, "Node done!");
-		$(".settings").removeClass("busy");
-		progressDisplay.addClass("done");
-		progressDisplay.hide();
-		gp.nodeRunFinished(data); 
+		if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
+			console.log("FINISH: " + data.msg);
+			progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+		   // websockPopup(finishDisplay, "Node done!");
+			$(".settings").removeClass("busy");
+			progressDisplay.addClass("done");
+			progressDisplay.hide();
+			gp.nodeRunFinished(data); 
+		}
 
 	});
 
@@ -246,9 +252,11 @@ $( document ).ready(function() {
 
 function getWSPath() {
 	var paths = window.location.pathname.split("/");
-	return "";
-	
-	if(paths[paths.length-2] === "project"){
+	if(paths.length === 3)
+		return "";
+		
+	if(paths[paths.length-2] === "project") {
+
 		return "/" + paths.slice(1, paths.length-2).join("/");
 	} else {
 		return "";

@@ -245,15 +245,11 @@ module.exports = function(express, glampipe, passport) {
 		node.getNodeFromDir(req.params.id, res);
 	});
 
-	//express.get('/node/view/:id', function (req, res) {
-		//glampipe.core.nodeView(req, function(data) {res.send(data)});
-	//});
-
 	express.get('/api/v1/nodes/:id/log', function (req, res) {
 		node.getNodeLog(req, function(data) {res.send(data)});
 	});
 
-	express.get('/api/v1/nodes/:nodeid/options', function (req, res) {
+	express.get('/api/v1/options/:nodeid', function (req, res) {
 		node.getOptions(req, function(data) {res.send(data)});
 	});
 
@@ -261,7 +257,7 @@ module.exports = function(express, glampipe, passport) {
 		node.getNodeFile(req, res);
 	});
 
-	express.post('/api/v1/nodes/:nodeid/options', function (req, res) {
+	express.post('/api/v1/options/:nodeid', function (req, res) {
 		node.setOptions(req, function(data) {res.send(data)});
 	});
 
@@ -276,10 +272,6 @@ module.exports = function(express, glampipe, passport) {
 	express.delete('/api/v1/projects/:project/nodes/:node', function (req, res) {
 		node.deleteNode(req, res, glampipe.io);
 	});
-
-	//express.post('/set/node/:id/visible-fields', function (req, res) {
-		//glampipe.core.setVisibleFields(req.params.id, res);
-	//});
 	
 	// check if node is running before running
 	express.post('/api/v1/nodes/:id/run|start', function (req, res, next) {
@@ -473,6 +465,7 @@ module.exports = function(express, glampipe, passport) {
 		if (err.name === 'UnauthorizedError') {
 			res.status(401).json({error: "Not logged in!"});
 		} else {
+			console.error("STACK: " + err.stack)
 			res.status(500).send('Something broke!')
 		}
 	})

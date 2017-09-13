@@ -618,6 +618,7 @@ exports.createSandbox = function (node, io) {
 			say: function(ch, msg, options) {
 				console.log(ch.toUpperCase() + ":", msg);
 				io.sockets.emit(ch, {
+					"project": node.project,
 					"node_uuid":node._id, 
 					"msg":msg,
 					"options": options,
@@ -643,6 +644,7 @@ exports.createSandbox = function (node, io) {
 						status:"finished", 
 						node_uuid: node._id.toString(), 
 						nodeid: node.nodeid, 
+						project: node.project,
 						ts: date, 
 						doc:node.req.params.doc,
 						result:{
