@@ -2,7 +2,7 @@
     "nodeid": "export_web_dspace_update",
     "title": "DSpace 6: update metadata field",
     "type": "export",
-    "subtype": "to web",
+    "subtype": "web",
     "subsubtype": "dspace",
     "status": "usable",
     "tags":["dspace"],

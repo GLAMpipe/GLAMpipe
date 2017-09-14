@@ -847,3 +847,20 @@ th, td {
 	border-left:solid rgb(189, 232, 246)  10px;
 	padding-left:5px;
 }
+
+#login-popup input {
+	margin-right: 20px;
+}
+
+img.centered {
+	display: block;
+	margin-left: auto;
+	margin-right: auto 
+}
+
+#node-progress {
+	background-color: #959595;
+	color: white;
+	padding: 2px 15px 2px 15px;
+	margin-left: 165px;
+}

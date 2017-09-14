@@ -9,26 +9,27 @@ var project 	= require("../app/project.js");
 global.register = {};
 
 module.exports = function(express, glampipe, passport) {
-    
+
 	var multer 		= require("multer");
 	var path 		= require('path');
-    var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
-                                                            // 		This allows us to start everything normally
+	var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
+															// 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 	express.set('superSecret', global.config.secret); // secret variable
 
-    // print all request to console, could use morgan?
+	// print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
-        next();
+		// req.headers.mail = "artturimatias"; // shibboleth test header
+		next();
 	});
 
 	// make login api open
 	var openPOSTRoutes = ["/api/v1/login"];
 
-	// authentication checker 
+	// authentication checker
 	var isLoggedInAPI = function (req, res, next) {
-		
+
 		// check and set ip in case we are behind proxy
 		var ip = req.ip;
 		if(req.headers['x-real-ip'])
@@ -41,7 +42,7 @@ module.exports = function(express, glampipe, passport) {
 				console.log("INFO: allowed by IP_pass: " + IP_pass.label)
 			}
 		})
-		
+
 		if(pass)
 			return next();
 
@@ -49,14 +50,14 @@ module.exports = function(express, glampipe, passport) {
 		// open some POST routes
 		if(openPOSTRoutes.includes(req.path)) return next();
 		//GET routes are all open
-		if(req.method === "GET" && req.path !== "/api/v1/auth") return next();
+		//if(req.method === "GET" && req.path !== "/api/v1/auth") return next();
 		if (req.isAuthenticated())
 			return next();
-			
-		res.json({error:"not authenticated!"});
+
+		res.status(401).json({error:"not authenticated!"});
 	}
 
-	
+
 	// API AUTH
 	express.post('/api/v1/login', passport.authenticate('local-login', { session: false }), function(req, res) {
 		console.log("logged in", req.user.id)
@@ -72,46 +73,71 @@ module.exports = function(express, glampipe, passport) {
 		});
 	});
 
-
-	// protect API routes
+	// if authentication is used, then we must take care project privileges
 	if(global.config.authentication !== "none") {
-		//console.log("AUTHENTICATION")
-		//console.log(req.ip)
+
+		// require valid user both local and shibboleth authentications
 		if(global.config.authentication === "local") {
 			var s = express.get('superSecret');
 			express.post('/api/v1/*', jwt2({secret: s}));
 			express.put('/api/v1/*', jwt2({secret: s}));
 			express.delete('/api/v1/*', jwt2({secret: s}));
+			
+		} else if(global.config.authentication === "shibboleth") {
+			express.post("/api/v1/*", project.shibbolethAuth);	
+			express.put("/api/v1/*", project.shibbolethAuth);	
+			express.delete("/api/v1/*", project.shibbolethAuth);	
 		}
+
+		// are all GET requests open or not
+		express.get("/api/v1/*", project.isPublic);
 		
-        // project permissions
-        express.all('/api/v1/projects/:project/*', function(req, res, next) {
-            if(req.method === "GET")
-                next();
-            else {
-                project.isAuthenticated(req, function(authenticated) {
-                    if(authenticated)
-                        next();
-                    else
-                        res.json(401, {error:"not authenticated!"});
-                })
-            }
-        })
-        
-        // node run permissions
-        express.post('/api/v1/nodes/:id/*', function(req, res, next) {
-			if(req.ip == "127.0.0.1")
-				next();
-			else {
-				project.isAuthenticated(req, function(authenticated) {
-					if(authenticated)
-						next();
-					else
-						res.json(401, {error:"Node run not authenticated!"});
-				})
-			}
-        })
-    }
+		// project permissions
+		express.post("/api/v1/projects/:project*", project.authProject);
+		express.put("/api/v1/projects/:project*", project.authProject);
+		express.delete("/api/v1/projects/:project*", project.authProject);
+		
+		// node run permissions
+		express.post("/api/v1/nodes/:id*", project.authNode);
+		express.put("/api/v1/nodes/:id*", project.authNode);
+		express.delete("/api/v1/nodes/:id*", project.authNode);
+	}
+	//// protect API routes
+	//if(global.config.authentication !== "none") {
+		////console.log(req.ip)
+		//if(global.config.authentication === "local") {
+			//console.log(global.config.authentication)
+			//var s = express.get('superSecret');
+			//express.post('/api/v1/*', jwt2({secret: s}));
+			//express.put('/api/v1/*', jwt2({secret: s}));
+			//express.delete('/api/v1/*', jwt2({secret: s}));
+		//}
+
+		//// project permissions
+		//express.all('/api/v1/projects/:project*', function(req, res, next) {
+			//project.isAuthenticated(req, function(authenticated) {
+				//if(authenticated)
+					//next();
+				//else
+					//res.status(401).json({error:"not authenticated!"});
+			//})
+		//})
+
+		//// node run permissions
+		//express.post('/api/v1/nodes/:id*', function(req, res, next) {
+			//if(req.ip == "127.0.0.1") { // allow local request so that metanodes can work
+				//console.log("localhost bypass")
+				//next();
+			//} else {
+				//project.isAuthenticated(req, function(authenticated) {
+					//if(authenticated)
+						//next();
+					//else
+						//res.status(401).json({error:"Node run not authenticated!"});
+				//})
+			//}
+		//})
+	//}
 
 
 /***************************************************************************************************************
@@ -138,7 +164,7 @@ module.exports = function(express, glampipe, passport) {
 		var facet = require("../app/node_runners/view-facet.js");
 		facet.getFacetIndexHTML(req,res);
 		//res.sendFile(path.join(__dirname, 'views', 'dataviews', 'facet.html'));
-	});	
+	});
 
 
 /***************************************************************************************************************
@@ -165,31 +191,32 @@ module.exports = function(express, glampipe, passport) {
 	express.post('/signup', passport.authenticate('local-signup', {
 		successRedirect : '/',
 		failureRedirect : '/signup_error'
-	}));	
-	
-	
+	}));
+
+
 /***************************************************************************************************************
  *                                       API                                                              *
  * *************************************************************************************************************/
 
 
 
-    // SETUP AND STATUS
+	// SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
-			url:global.config.url, 
-			authentication:global.config.authentication, 
+			url:global.config.url,
+			authentication:global.config.authentication,
 			version:global.config.version,
 			uiPath:global.config.uiPath,
-			dataPath:global.config.dataPath
+			public:global.config.public
+			//dataPath:global.config.dataPath
 		});
 	});
-    
+
 	express.get('/api/v1/status', function (req, res) {
-        if(glampipe.initError)
-            res.json(glampipe.initError);
-        else
-            res.json({"status":"ok"});
+		if(glampipe.initError)
+			res.json(glampipe.initError);
+		else
+			res.json({"status":"ok"});
 	});
 
 	express.post('/api/v1/datapaths', function (req, res) {
@@ -205,11 +232,6 @@ module.exports = function(express, glampipe, passport) {
 	express.put('/api/v1/projects', function (req, res) {
 		project.createProject(req, res);
 	});
-
-	//TODO: reimplement this!
-	//express.post('/api/v1/projects/:id/run', function (req, res) {
-		//glampipe.core.runProject(req, glampipe, res);
-	//});
 
 	express.get('/api/v1/projects/titles', function (req, res) {
 		project.getProjectTitles(res);
@@ -272,12 +294,12 @@ module.exports = function(express, glampipe, passport) {
 	express.delete('/api/v1/projects/:project/nodes/:node', function (req, res) {
 		node.deleteNode(req, res, glampipe.io);
 	});
-	
+
 	// check if node is running before running
 	express.post('/api/v1/nodes/:id/run|start', function (req, res, next) {
 		if(req.query.force) // we can skip register when running nodes from api (?force=true)
 			next();
-		else { 
+		else {
 			if(global.register[req.originalUrl]) {
 				console.log("REGISTER: request is running already!")
 				res.send({error:"request is running already!"})
@@ -314,12 +336,12 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	// DATA
-    
-    // protect user data
+
+	// protect user data
 	express.get('/api/v1/collections/mp_users/*', function (req, res) {
 		res.send("buu");
 	});
-    
+
 	express.get('/api/v1/collections/:collection/docs', function (req, res) {
 		collection.getTableData(req, res);
 	});
@@ -408,8 +430,8 @@ module.exports = function(express, glampipe, passport) {
 	express.delete('/api/v1/upload/:id', function (req, res) {
 		glampipe.core.deleteFile(req, res);
 	});
-	
-    // FILES
+
+	// FILES
 	express.get('/api/v1/upload/:id', function (req, res) {
 		res.setHeader('Content-type', 'application/pdf');
 		res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
@@ -425,7 +447,7 @@ module.exports = function(express, glampipe, passport) {
 	//express.get('/node-viewer', function (req, res) {
 		//res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
 	//});
-    
+
 	// PROXY
 	express.get('/api/v1/proxy/', function (req, res) {
 		proxy.proxyJSON(req.query.url, req.query.query, res);
@@ -436,10 +458,10 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	express.get('/api/v1/auth',  function (req, res) {
-		
+
 		if(global.config.authentication === "local" && req.headers['authorization']) {
 			var token = req.headers['authorization'].replace(/^Bearer\s/, '');
-			
+
 			jwt.verify(token, express.get("superSecret"), function(err, decoded) {
 				if(err) {
 					console.log(err.message);
@@ -448,11 +470,15 @@ module.exports = function(express, glampipe, passport) {
 					res.json(decoded)
 				}
 			});
-			
+
 		} else if(global.config.authentication === "shibboleth") {
-			if(req.headers[global.config.shibbolethHeaderId])
-				res.json({shibboleth:{user:req.headers[global.config.shibbolethHeaderId]}});
-			else
+			if(req.headers[global.config.shibbolethHeaderId]) {
+				var shib_user = req.headers[global.config.shibbolethHeaderId];
+				if(global.config.shibbolethUsers.includes(shib_user))
+					res.json({shibboleth:{user:shib_user}});
+				else
+					res.json({shibboleth:{visitor:shib_user}});
+			} else
 				res.status(401).json({"error": "not authenticated"});
 		} else {
 			res.status(401).json({"error": "not authenticated"});
@@ -475,34 +501,34 @@ module.exports = function(express, glampipe, passport) {
 
 	//express.post('/download/nodes', function (req, res) {
 		//glampipe.core.downloadNodes(glampipe.io, function (error) {
-            //var dataPath = global.config.dataPath;
-        //// let's try to load nodes
-            //if(error) {
-                //glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
-                //res.json({"status": "error"});
-            //} else {
-                //glampipe.initError = null;
-                //res.json({"status": "ok","datapath": dataPath});
-            //}
-        //});
+			//var dataPath = global.config.dataPath;
+		//// let's try to load nodes
+			//if(error) {
+				//glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
+				//res.json({"status": "error"});
+			//} else {
+				//glampipe.initError = null;
+				//res.json({"status": "ok","datapath": dataPath});
+			//}
+		//});
 	//});
 
 	//express.post('/read/nodes', function (req, res) {
 		//glampipe.core.initNodes(glampipe.io, function(error) {
-            //var dataPath = global.config.dataPath;
-        //// let's try to load nodes
-            //if(error) {
-                //glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
-                //res.json({"status": "error"});
-            //} else {
-                //glampipe.initError = null;
-                //res.json({"status": "ok","datapath": dataPath});
-            //}
-        //});
+			//var dataPath = global.config.dataPath;
+		//// let's try to load nodes
+			//if(error) {
+				//glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
+				//res.json({"status": "error"});
+			//} else {
+				//glampipe.initError = null;
+				//res.json({"status": "ok","datapath": dataPath});
+			//}
+		//});
 	//});
 
 
-    
+
 }
 
 

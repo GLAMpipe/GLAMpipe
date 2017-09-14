@@ -214,19 +214,15 @@ $( document ).ready(function() {
 		if(data.project == gp.currentProject) {
 			progressDisplay.show();
 			progressDisplay.empty();
-			progressDisplay.append("<div class=\"progress\">" + data.msg + "</div>");
+			progressDisplay.append("<div>" + data.msg + "</div>");
 		}
 	});
 
 	socket.on('error', function (data) {
 		if(data.project == gp.currentProject) {
-			if(data.node_uuid) {
-				progressDisplay.append("<div class=\"bad\">" + data.msg + "</div>");
-				$(".settings").removeClass("busy");
-				progressDisplay.addClass("done");
-			} else {
-				genericDisplay.append("<div class=\"bad\">" + data + "</div>");
-			}
+
+			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
+
 			// revert "run" button text
 			var button = $("button[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
@@ -238,17 +234,19 @@ $( document ).ready(function() {
 	socket.on('finish', function (data) {
 		if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
 			console.log("FINISH: " + data.msg);
-			progressDisplay.empty().append("<div class=\"good\">" + data.msg + "</div>");
+			progressDisplay.empty().append("<div>" + data.msg + "</div>");
 		   // websockPopup(finishDisplay, "Node done!");
 			$(".settings").removeClass("busy");
 			progressDisplay.addClass("done");
-			progressDisplay.hide();
+			//progressDisplay.hide();
 			gp.nodeRunFinished(data); 
 		}
 
 	});
 
 });
+
+
 
 function getWSPath() {
 	var paths = window.location.pathname.split("/");

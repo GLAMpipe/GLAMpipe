@@ -14,7 +14,7 @@
         "bye": "out.say('news', 'Deleted directory scan node. Data removed. Bye!'); ",
 		"init":"out.say('progress', context.node.title);",
 
-		"finish":"out.say('finish', '<h2>Data imported</h2> from directory ' + context.node.params.root);"
+		"finish":"out.say('finish', 'Data imported from directory ' + context.node.params.root);"
 	},
 	
 	"views": {}

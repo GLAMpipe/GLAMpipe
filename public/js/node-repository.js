@@ -43,7 +43,14 @@ var nodeRepository = function () {
 					var sub = self.nodes[i].subtypes[j];
 
 					html += "    <button class='accordion "+node.type+"'>"
-					html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
+					// add some verbosity
+					if(node.type === "source")
+						html += "      <p class='listtitle'>from "+sub.sub.subtype+"</p>"
+					else if(node.type === "export" && sub.sub.subtype !== "metadata mapping")
+						html += "      <p class='listtitle'>to "+sub.sub.subtype+"</p>"
+					else
+						html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
+						
 					html += "      <p class='listtext'></p>"
 					html += "    </button>"
 					html += "    <div class='panel'>"

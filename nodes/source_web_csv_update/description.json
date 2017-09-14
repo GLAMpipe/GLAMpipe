@@ -19,7 +19,7 @@
         
 		"init":"out.say('progress', context.node.title);",
 		
-		"finish":"out.say('finish', '<h2>Data imported</h2> from address ' + context.node.params.file_url);"
+		"finish":"out.say('finish', 'Data imported from address ' + context.node.params.file_url);"
 		
 	},
 	

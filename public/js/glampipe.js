@@ -44,10 +44,11 @@ var glamPipe = function () {
 
 	this.getProjects= function (div) {
 
+		$(".settingstitle").text("All projects");
 		$.getJSON(self.baseAPI + "/projects", function(data) { 
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr>";
+			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -58,7 +59,9 @@ var glamPipe = function () {
 	}
 
 	this.getProjectsByUser = function (div, user) {
-		html = "<table class='documents'><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr>";
+		
+		$(".settingstitle").text("Projects by " + user);
+		html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			var projects = data.data;
@@ -172,7 +175,10 @@ var glamPipe = function () {
 					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
 					error: function(data, s, xhr) {
 						console.log("not logged in");
-						$(div).html("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
+						if(config.authentication !== "shibboleth")
+							$(div).html("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
+						else
+							$(div).html("no shibboleth header found!");
 						if(cb)
 							cb(self.desktop);
 					},
@@ -181,8 +187,12 @@ var glamPipe = function () {
 							self.user = data.local.email;
 							$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
 						} else if(config.authentication === "shibboleth") {
-							self.user = data.shibboleth.user;
-							$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
+							if(data.shibboleth.user) {
+								self.user = data.shibboleth.user;
+								$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
+							} else if(data.shibboleth.visitor) {
+								$(div).html("visitor: " + data.shibboleth.visitor);
+							}
 						}
 
 						if(cb)
@@ -197,12 +207,9 @@ var glamPipe = function () {
 					self.desktop = true;
 					$(div).html("");
 					
-								
 					if(cb)
 						cb(self.desktop);
 			}
-
-
 		})
 	}	
 	
@@ -233,31 +240,26 @@ var glamPipe = function () {
 	}
 
 
-	this.addProject = function (projectName) {
+	this.addProject = function (title) {
 
-		if ($(".create_project #title").val().trim() == "")
-			alert("Please give a title for the project!");
-		else {
-			var title = $(".create_project #title").val().trim();
-			var data = {"title": title};
-		}
-
+		var data = {"title": title};
 		$.put(self.baseAPI + "/projects", data, function(data) {
-				if(!data.error) {
-					console.log('created project', data.project);
-					var project = data.project._id;
-					var params = {params:{title:"My collection"}}
-					$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
-						if(!data.error)
-							window.location.href = self.uiPath + "project/" + project;
-						else
-							alert(data.error);
-					})
-				} else {
-					alert(data.error);
-				}
+			if(!data.error) {
+				console.log('created project', data.project);
+				var project = data.project._id;
+				var params = {params:{title:"My collection"}}
+				$.put(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
+					if(!data.error)
+						window.location.href = self.uiPath + "project/" + project;
+					else
+						alert(data.error);
+				})
+			} else {
+				alert(data.error);
+			}
 		})
 	}
+
 
 	this.removeProject = function (event) {
 		console.log("starting to remove node:", $(event.target).data("id"));
@@ -549,11 +551,17 @@ var glamPipe = function () {
 	}
 
 	this.renderBreadCrumb = function () {
-		$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+		if(self.currentCollection)
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+		else
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > ");
 	}
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function () {
+		
+		if(!self.currentCollection)
+			return "";
 		
 		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
 			self.currentCollection.fields = data; 
@@ -570,7 +578,7 @@ var glamPipe = function () {
 				html += "<collectionset>"
 
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Data sources</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Data imports</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 				 

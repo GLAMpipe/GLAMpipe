@@ -91,8 +91,6 @@ exports.deleteProject = function (doc_id, res) {
 				// remove project directory
 				var rimraf = require("rimraf");	
 				var project_path = path.join(global.config.projectsPath, project.dir);
-				console.log(project_path);
-				console.log(project_path.includes(global.config.dataPath));
 				if(project_path && project_path.includes(global.config.dataPath)) {
 					console.log("PROJECT: removing " + project_path);
 					rimraf(project_path, function(err) {
@@ -212,8 +210,83 @@ function finish (next) {
 	next();
 }
 
+exports.isPublic = function(req, res, next) {
+
+	// GET request are open if public install
+	if( global.config.public)
+		next();
+	else
+		res.status(401).json({error: "not public installation"});
+
+}
+
+
+// check if user can add/remove nodes
+exports.authProject = function(req, res, next) {
+	var user = getUser(req)
+	var project_uuid = req.params.project;
+	
+	// check if user is the owner of the project
+	if(project_uuid) {
+		mongoquery.findOneById(project_uuid, "mp_projects", function(data) {
+			if(user && user == data.owner)
+				next();
+			else
+				res.status(401).json({error:"Node run not authenticated!"});
+		});
+	} else {
+		res.status(404).json({error:"Project not found!"});
+	}
+}
+
+
+// check if user can run node
+exports.authNode = function(req, res, next) {
+	var user = getUser(req)
+	var node_uuid = req.params.id;
+	
+	try {
+		node_uuid = mongojs.ObjectId(req.params.id);
+	} catch(e) {
+		res.status(404).json({error:"Node not found!"});
+	}
+
+	mongoquery.findOne({nodes:{$elemMatch:{_id:node_uuid}}}, "mp_projects", function(err, project) {
+		if(!err) {
+			console.log("OWNER " +project.owner);
+			if(project && user && project.owner == user )
+				next()
+			else
+				res.status(401).json({error:"Node run not authenticated!"});
+		} else {
+			res.status(401).json({error:"Node run not authenticated!"});
+		}
+	})
+
+
+}
+
+// checks that we have valid shibboleth user
+exports.shibbolethAuth = function(req, res, next) {
+
+	var user = getUser(req);
+	if(user) {
+		if(global.config.shibbolethUsers.includes(user)) 
+			next();
+		else
+			res.status(401).json({error:"Not authenticated!"});
+	} else {
+			res.status(401).json({error:"Not authenticated!"});
+	}
+
+}
 
 exports.isAuthenticated = function (req, cb) {
+	
+	if(req.method === "GET" && global.config.authentication === "local")
+		return cb(true);
+
+	
 	if(global.config.authentication === "local") {
 		if(req.user && req.user.local && req.user.local.email && req.user.local.email) {
 			var id = req.params.project;
@@ -277,6 +350,8 @@ exports.isAuthenticated = function (req, cb) {
 		}
 	}
 }
+
+
 
 exports.run = function (projectId, gp, cb) {
 		
@@ -349,4 +424,19 @@ function sortNodes (project) {
 		})
 	})
 	return nodes;
+}
+
+function isOwner(owner, user) {
+	return owner === user;
+}
+
+function getUser(req) {
+	if(global.config.authentication === "shibboleth" && req.headers[global.config.shibbolethHeaderId]) 
+		return req.headers[global.config.shibbolethHeaderId];
+	else if(global.config.authentication === "local") {
+		if(req.user && req.user.local && req.user.local.email && req.user.local.email) {
+			return req.user.local.email;
+		}
+	}
+	return "";
 }

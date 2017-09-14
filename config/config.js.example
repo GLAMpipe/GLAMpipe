@@ -25,6 +25,9 @@ var nodePath = "";
 //var authentication = "shibboleth";
 var authentication = "none";
 
+// can anyone browse data? (defines if GET request are open or not)
+var public = true;
+
 // local
 var localCanRegister = true;
 
@@ -66,6 +69,7 @@ exports.uiPath = uiPath;
 exports.staticPath = staticPath;
 exports.url = url;
 exports.authentication = authentication;
+exports.public = public;
 exports.disableBatchDownloads = disableBatchDownloads;
 exports.canRegister = localCanRegister;
 exports.secret = secret;

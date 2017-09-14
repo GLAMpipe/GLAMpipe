@@ -2,7 +2,7 @@
     "nodeid": "export_web_plone",
     "title": "Plone: add page",
     "type": "export",
-    "subtype": "to web",
+    "subtype": "web",
     "subsubtype": "plone",
     "status": "usable",
     "tags":["plone"],
