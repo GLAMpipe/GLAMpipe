@@ -12,7 +12,7 @@ var nodeview 	= require("../app/nodeview.js");
 var sourceAPI	= require("../app/node_runners/basic-fetch.js");
 var asyncLoop	= require("../app/async-loop.js");
 const MP 		= require("../config/const.js");
-require("string_score");
+//require("string_score");
 
 var exports 	= module.exports = {};
 

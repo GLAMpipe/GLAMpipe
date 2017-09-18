@@ -40,7 +40,8 @@ function mapping() {
 			var rec = data.data[0];
 			var data_fields = "";
 			for(var f in rec) {
-				data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
+				//data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
+				data_fields += "<option value='" + f + "'>" + f + "</option>";
 		   }
 		   $("#export-mapping-dspace_mappings select").append(data_fields);
 			setSettings();
@@ -85,18 +86,34 @@ function createOptions (schemas, doc_field) {
 }
 
 
-$("#xml_basic_guess").click(function(e){
-   var obj=$(e.target);
-   obj.parent().find("table tr").each(function(index) {
+$("#export-mapping-dspace-basic_guess").click(function(e){
+	
+   $(".settings table tr").each(function(index) {
 	   
-	   var field = $( this ).find("td div").text();
-	   field = field.replace(/_/g, ".");
-	   $( this ).find("select").val(field).change();
+		var field = $( this ).find("td:first").text();
+		field = field.replace(/\./g, "_");
+		$( this ).find("select").val(field).change();
 	   
    });
 });
 
+$("#export-mapping-dspace-show_mapped").click(function(e){
+	
+   $(".settings table tr").each(function(index) {
+	   
+		var dynamic = $( this ).find("select").val();
+		var static = $( this ).find("input").val();
+		if(!dynamic && !static)
+			$(this).hide();
+	   
+   });
+});
 
+$("#export-mapping-dspace-show_all").click(function(e){
+	
+	$(".settings table tr").show();
+
+});
 
 
 

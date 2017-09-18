@@ -34,6 +34,8 @@ var localCanRegister = true;
 // shibboleth
 var shibbolethUsers = [];
 var shibbolethHeaderId = "mail";
+// defines if the shibboleth header data is added to the document submitted when data is added to a collection via REST api. 
+var shibbolethHeaderIdToData = true;
 
 var disableBatchDownloads = false;
 var secret = "Set something here";
@@ -80,3 +82,4 @@ exports.PROXY_passes = PROXY_passes;
 
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
+exports.shibbolethHeaderIdToData = shibbolethHeaderIdToData;

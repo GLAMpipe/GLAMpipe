@@ -20,18 +20,7 @@ if(Array.isArray(in_field_value)) {
 			out.pre_value.push({});
 			
 		} else {
-			var options = {
-				url:  "http://api.annif.org/v0/autoindex",
-				headers: {
-					"accept": "application/json"
-				},
-				formData: {
-					text: 		limitText(value),
-					project: 	project,
-					maxhits: 	parseInt(context.node.settings.maxhits),
-					threshold: 	parseFloat(context.node.settings.threshold)
-					}
-			};
+			var options = createOptions(value);
 			out.pre_value.push(options);
 		}
 	})
@@ -39,25 +28,34 @@ if(Array.isArray(in_field_value)) {
 } else {
 
 	// check that project is valid
-	var project = annifProject(index);
+	var project = annifProject();
 	if(!projects.includes(project)) {
 		out.pre_value = {};
 		
 	} else {
 	
-		out.pre_value = {
+		out.pre_value = createOptions(in_field_value);
+	}
+}
+
+
+
+
+function createOptions(text) {
+		return {
+			method: "POST",
 			url:  "http://api.annif.org/v0/autoindex",
 			headers: {
-				"accept": "application/json"
+				"accept": "application/json",
+				"Content-Type": "application/x-www-form-urlencoded"
 			},
 			formData: {
-				text: 		limitText(in_field_value), 
-				project: 	annifProject(),
+				text: 		limitText(text), 
+				project: 	project,
 				maxhits: 	parseInt(context.node.settings.maxhits),
 				threshold: 	parseFloat(context.node.settings.threshold)
-				}
-		};	
-	}
+			}
+		}
 }
 
 function annifProject(index) {
@@ -74,13 +72,15 @@ function annifProject(index) {
 
 // limit text to certain number of lines
 function limitText(str) {
+	//return str.replace(/\r\n|\r|\n/g,"\n");
+	
 	var limited = [];
 	var lines = str.split(/\r\n|\r|\n/);
 	out.console.log("NODE: ANNIF input has " + lines.length + " lines");
 	if(lines.length > context.node.settings.lines) {
 		for(i = 0; i < context.node.settings.lines; i++) {
 			var line = lines[i].trim();
-			if(line !== "")
+			if(line && line.length > 5)
 				limited.push(line);
 		}
 		return limited.join("\n");

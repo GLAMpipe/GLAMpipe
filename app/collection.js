@@ -170,6 +170,12 @@ exports.addToSet = function (collection_id, req, callback) {
 
 exports.addDocument = function (req, callback) {
 
+	// add shibboleth header to data
+	if(global.config.authentication === "shibboleth" && global.config.shibbolethHeaderIdToData) {
+		req.body[global.config.shibbolethHeaderId] = req.headers[global.config.shibbolethHeaderId];
+		console.log(req.body)
+	}
+
 	mongoquery.insert(req.params.collection, req.body, function(error, result) {
 		if(error) {
 			console.log("ERROR: could not insert document!");

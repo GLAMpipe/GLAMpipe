@@ -1,6 +1,6 @@
 var request = require("request");
 var path    = require("path");
-
+//request.debug = true;
 var exports = module.exports = {};
 
 
@@ -41,8 +41,10 @@ exports.postJSON = function (doc, sandbox, next) {
 		request.post(options, responseCallback);
 }
 
+
 // get JSON response via GET or POST
 exports.fetchJSON = function (options, sandbox, next) {
+//return next()
 
 	if(!options.url || sandbox.context.skip) {
 		return next("skipping...");
@@ -50,18 +52,19 @@ exports.fetchJSON = function (options, sandbox, next) {
 
 	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
+	console.log("HEADERS:", options.headers);
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
 		console.log("RESPONSE: " + response.statusCode)
+		console.log("BODY:", body);
 		if (error) {
 			console.log(error);
 			next();
 		} else if (response.statusCode == 200) {
 			try {
 				sandbox.context.data = JSON.parse(body);
-				//console.log("BODY:", body);
 			} catch(e) {
 				console.log("JSON PARSE:" + e.message);
 				sandbox.context.error = "error JSON parse error";

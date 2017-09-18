@@ -13,9 +13,10 @@ const env			= process.env;
 
 try {
 	global.config 		= require("./config/config.js");
+	global.config.file = "config.js (your local settings)";
 } catch(e) {
 	console.log("config.js not found or is malformed!");
-	console.log(e);
+	global.config.file = "config.js.example (default settings)";
 	global.config 		= require("./config/config.js.example");
 }
 
@@ -202,8 +203,14 @@ var GlamPipe = function() {
 				var host = server.address().address;
 				var port = server.address().port;
 				console.log("\n********************* G L A M p i pe *************************");
-				console.log("* DATA PATH:",self.dataPath);
-				console.log("* STATUS:    running on http://%s:%s", host, port);
+				if(process.env.DOCKER)
+					console.log("* ENVIRONMENT:      Docker");
+				else
+					console.log("* ENVIRONMENT:      native Nodejs");
+				console.log("* CONFIG FILE:     ", global.config.file);
+				console.log("* DATA PATH:       ",self.dataPath);
+				console.log("* AUTHENTICATION   ", global.config.authentication);
+				console.log("* STATUS:           running on http://%s:%s", host, port);
 				console.log("********************* G L A M p i pe *************************");
 			});
 	};
