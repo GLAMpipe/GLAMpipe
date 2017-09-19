@@ -13,7 +13,7 @@ for(var key in context.node.settings) {
 	if(is_static.test(key)) {
 		var plain_key = key.replace("_static_", "");
 		if(context.node.settings[key])
-			pushField(item, context.node.settings[key], plain_key, "");
+			pushField(item, plain_key, "");
 	}
 }
 
@@ -35,12 +35,12 @@ for(var key in context.node.settings) {
 			   for (var i = 0; i < value.length; i++ ) { 
 					if(context.doc[plain_key + "__lang"])
 						language = context.doc[plain_key + "__lang"][i];
-					pushField(item, value[i], key, plain_key, language);	
+					pushField(item, value[i], plain_key, language);	
 			   }
 		   } else { 
 				if(context.doc[plain_key + "__lang"])
 					language = context.doc[plain_key + "__lang"];
-				pushField(item, value, key, plain_key, language);	
+				pushField(item, value, plain_key, language);	
 		   }
 	}
 }
@@ -65,30 +65,30 @@ function splitValue (val) {
 
 
 
-function pushField (item, value, key_mapped, key_plain, language) {
+function pushField (item, value, key, language) {
 
 	if(typeof value === "string")
 		value = value.trim();
 
 	// do not add key if there is no mapped key
-	if(key_mapped.trim() != "" && value !== null && value !== "") { 
+	if(value !== null && value !== "") { 
 		// if array separator is set, then split values
 		if(context.node.settings.array_separator != "") {
 			
 			var arr = splitValue(value);
 			if(arr.constructor.name == "Array") {
 				for(var i = 0; i < arr.length; i++) {
-					var field = {"key": key_mapped, "value": arr[i], "language": language};
+					var field = {"key": key, "value": arr[i], "language": language};
 					item.metadata.push(field);
 				}
 			} else {
-				var field = {"key": key_mapped, "value": value, "language": language};
+				var field = {"key": key, "value": value, "language": language};
 				item.metadata.push(field);				
 			}
 			
 		} else {
 			
-			var field = {"key": key_mapped, "value": value, "language": language};
+			var field = {"key": key, "value": value, "language": language};
 			item.metadata.push(field);
 		}
 	}

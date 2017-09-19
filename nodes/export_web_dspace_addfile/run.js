@@ -4,7 +4,7 @@ out.setter[context.node.params.out_field] = "";
 out.setter[context.node.params.out_link] = "";
 
 // if retrieve link exists, then copy that to setter so that the link remains in document
-if(context.data.existing_link) {
+if(context.data && context.data.existing_link) {
 	out.setter[context.node.params.out_link] = context.data.existing_link;
 	out.setter[context.node.params.out_field] = "";
 	
