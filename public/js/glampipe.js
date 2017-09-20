@@ -398,11 +398,9 @@ var glamPipe = function () {
 	}
 
 	this.debugInfo = function (e) {
-		var node = self.getNode(e);
-		if(node) {
-			return node.renderDebug();
-		} else
-			alert("node id not found");
+		if(self.currentlyOpenNode) 
+			return self.currentlyOpenNode.renderDebug();
+
 	}
 
 	// called by "finished" websocket message
