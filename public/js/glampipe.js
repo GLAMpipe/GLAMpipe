@@ -568,7 +568,10 @@ var glamPipe = function () {
 				var collection = self.currentCollection;
 				
 				// render collection
-				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span></div>";
+				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span>";
+				col_html += "<a class='add-collection' href='#'> Add </a>";
+				col_html += "<a class='remove-collection' href='#' data-id='"+collection.source._id+"'> Remove</a></div>";
+				
 				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
 				$("pipe .collection").empty().append(col_html);
 
@@ -863,9 +866,13 @@ var glamPipe = function () {
 	}
 
 	// node id comes from DOM attribute
-	this.removeNode = function (event) {
+	this.removeNode = function (event, nodeid) {
         var obj = $(event.target);
-        var node_id = obj.closest(".node").data("id");
+		if(typeof nodeid === "undefined")
+			var node_id = obj.closest(".node").data("id");
+		else
+			var node_id = nodeid;
+		
         $( "#dialog-confirm" ).empty().append("<div>Do you want to remove node?</div>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,

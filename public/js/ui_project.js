@@ -143,6 +143,14 @@ $( document ).ready(function() {
 		e.preventDefault();
 	})
 
+	$(document).on('click','.remove-collection', function(e) {
+		var nodeid = $(e.target).data("id");
+		gp.removeNode(e, nodeid);
+		e.stopPropagation();
+		e.preventDefault();
+		gp.loadProject();
+	});
+
 	// open dynamic field picker
 	//$(document).on('click','.dynamic_field', function(e) {
 		//gp.openDynamicFieldSelector(e);

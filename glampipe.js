@@ -16,8 +16,8 @@ try {
 	global.config.file = "config.js (your local settings)";
 } catch(e) {
 	console.log("config.js not found or is malformed!");
-	global.config.file = "config.js.example (default settings)";
 	global.config 		= require("./config/config.js.example");
+	global.config.file = "config.js.example (default settings)";
 }
 
 

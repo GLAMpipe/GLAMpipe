@@ -1,67 +1,95 @@
 
 
-// PATHS 
+// PATHS
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
-var dataPath = "";
+var dataPath = "/home/arihayri/GLAMpipe-data";
 
-// location of ui
-// default: "/"
+// location of ui (must end with "/")
 var uiPath = "/";
 
-// path for non-GLAMpipe html files (if there is a need to serve files from same container)
-var staticPath = "/static"; 
-
-// - file location of node files
+// - location of GP node scripts
 // default: "" (means that GP uses internal nodes)
 var nodePath = ""; 
+
+// location of non-GLAMpipe html files (if there is a need to serve files from same container)
+var staticPath = "/"; 
 
 
 
 // AUTHENTICATION 
-// - "none" = do not use authentication, i.e. local install
+// - default: "none" = do not use authentication, i.e. local install
 // - "local" = use local authentication
 // - "shibboleth" = use shibboleth headers
-//var authentication = "shibboleth";
-var authentication = "none";
+var authentication = "shibboleth";
 
 // can anyone browse data? (defines if GET request are open or not)
 var public = true;
 
-// local
+// LOCAL
 var localCanRegister = true;
 
-// shibboleth
-var shibbolethUsers = [];
-var shibbolethHeaderId = "";
+// SHIBBOLETH 
+var shibbolethUsers = ["arttu"];
+var shibbolethHeaderId = "mail";
 // defines which shibboleth headers are added to the document submitted when data is added to a collection via REST api. 
-var shibbolethHeadersToData = [];
+var shibbolethHeadersToData = ["mail", "displayname"];
+
 
 var disableBatchDownloads = false;
 var secret = "Set something here";
 
-
-
-// VISIBLE nodes
-// defines what nodes are available for use
-// default: "null" -> all nodes are available
+// VISIBLE nodes tags
+// - defines what nodes are available for use
+// - default: "null" -> all nodes are available
 var visible_tags = null;
 
 
 // PROXY passes
-// - urls that are allowed for UI to make requests via GLAMpipe's own proxy (bypassing CORS restrictions)
+// - urls that are allowed for UI to make requests via GLAMpipe's own proxy
 var PROXY_passes = [
 	"http://localhost/",
+	"http://localhost/8080/",
 	"https://demo.dspace.org/",
-	"http://demoprints.eprints.org/"
+	"http://demoprints.eprints.org/",
+	"https://jyx-beta.jyu.fi/",
+	"http://siljo.lib.jyu.fi:8080/",
+	"http://www.unesco.org/mediabank/",
+	"https://kirjasto.jyu.fi/kauppa/",
+	"http://dev.omeka.org/omeka-s-sandbox/api" 
 ]
 
-var IP_passes = [];
+// IP passes (NOT USED)
+// - one can define IPs that are allowed to execute certain API paths
+var IP_passes = [
+	{
+		path: "/api/v1/", 
+		method: "POST", 
+		ip:"127.0.0.1",
+		label: "local"
+	},
+	{
+		path: "/api/v1/", 
+		method: "PUT", 
+		ip:"*",
+		label: "local"
+	},
+	{
+		path: "/api/v1/", 
+		method: "POST", 
+		ip:"localhost:3000",
+		label: "local"
+	}
+]
 
-var MP = "__mp"; // prefix 
+
+
+
+var MP = "__mp";
 var url = "http://localhost";
 
 var exports = module.exports = {};
+
 
 exports.source =  MP + "_source";
 exports.loadNodesFromGithub = false;
@@ -83,3 +111,5 @@ exports.PROXY_passes = PROXY_passes;
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
 exports.shibbolethHeadersToData = shibbolethHeadersToData;
+
+

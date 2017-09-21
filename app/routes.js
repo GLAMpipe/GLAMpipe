@@ -5,6 +5,7 @@ var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
 var node	 	= require("../app/node.js");
 var project 	= require("../app/project.js");
+var shibboleth 	= require("../app/shibboleth.js");
 
 global.register = {};
 
@@ -84,9 +85,9 @@ module.exports = function(express, glampipe, passport) {
 			express.delete('/api/v1/*', jwt2({secret: s}));
 			
 		} else if(global.config.authentication === "shibboleth") {
-			express.post("/api/v1/*", project.shibbolethAuth);	
-			express.put("/api/v1/*", project.shibbolethAuth);	
-			express.delete("/api/v1/*", project.shibbolethAuth);	
+			express.post("/api/v1/*", shibboleth.isValidUser);	
+			express.put("/api/v1/*", shibboleth.isValidUser);	
+			express.delete("/api/v1/*", shibboleth.isValidUser);	
 		}
 
 		// are all GET requests open or not
@@ -102,42 +103,7 @@ module.exports = function(express, glampipe, passport) {
 		express.put("/api/v1/nodes/:id*", project.authNode);
 		express.delete("/api/v1/nodes/:id*", project.authNode);
 	}
-	//// protect API routes
-	//if(global.config.authentication !== "none") {
-		////console.log(req.ip)
-		//if(global.config.authentication === "local") {
-			//console.log(global.config.authentication)
-			//var s = express.get('superSecret');
-			//express.post('/api/v1/*', jwt2({secret: s}));
-			//express.put('/api/v1/*', jwt2({secret: s}));
-			//express.delete('/api/v1/*', jwt2({secret: s}));
-		//}
 
-		//// project permissions
-		//express.all('/api/v1/projects/:project*', function(req, res, next) {
-			//project.isAuthenticated(req, function(authenticated) {
-				//if(authenticated)
-					//next();
-				//else
-					//res.status(401).json({error:"not authenticated!"});
-			//})
-		//})
-
-		//// node run permissions
-		//express.post('/api/v1/nodes/:id*', function(req, res, next) {
-			//if(req.ip == "127.0.0.1") { // allow local request so that metanodes can work
-				//console.log("localhost bypass")
-				//next();
-			//} else {
-				//project.isAuthenticated(req, function(authenticated) {
-					//if(authenticated)
-						//next();
-					//else
-						//res.status(401).json({error:"Node run not authenticated!"});
-				//})
-			//}
-		//})
-	//}
 
 
 /***************************************************************************************************************
@@ -408,6 +374,11 @@ module.exports = function(express, glampipe, passport) {
 
 	express.put('/api/v1/collections/:collection/docs/:doc', function (req, res) {
 		collection.edit2(req, function(data) {res.send(data)});
+	});
+
+	express.put('/api/v1/collections/:collection/docs', function (req, res, next) {
+		shibboleth.addHeadersToData(req);
+		next();
 	});
 
 	express.put('/api/v1/collections/:collection/docs', function (req, res) {
