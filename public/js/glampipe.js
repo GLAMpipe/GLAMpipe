@@ -163,6 +163,21 @@ var glamPipe = function () {
 		})
 	}
 
+	this.getStatus = function(div) {
+		var d = {
+			url: self.baseAPI + "/status", 
+			method:"GET", 
+			headers: {"Accept":"application/json"},
+			error: function(data, s, xhr) {
+				$(div).empty().append("No connection to GLAMpipe!");
+			},
+			success: function(data) {
+				$(div).empty().append("GLAMpipe is ready...");
+			}
+		}
+		$.ajax(d);
+	}
+
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(config) { 
 			$("#version").empty().append("ver. " + config.version);

@@ -1,8 +1,11 @@
 
 $( document ).ready(function() {
 	
-	
+
     var gp = new glamPipe();
+    
+    gp.getStatus("#node-progress");
+    
     gp.getLoginStatus("#login", function(desktop) {
         if(desktop) {
             $("#user-box").hide();
