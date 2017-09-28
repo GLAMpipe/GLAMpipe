@@ -3,6 +3,7 @@ var glamPipeNode = function (node, gp) {
 	var self = this;
 	this.gp = gp;
 	this.debug = true;
+	this.backend = false;
 	this.source = node;
 	this.orphan = "";
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
@@ -19,6 +20,11 @@ var glamPipeNode = function (node, gp) {
 	//if(node.type == "collection")
 		//self.source.collection = node._id;
 
+		
+	// backend nodes does not have GUI
+	if(self.source.tags && self.source.tags.includes("backend")) {
+		self.backend = true;
+	}
 
 	// execute node 
 	this.run = function () {
@@ -218,7 +224,9 @@ var glamPipeNode = function (node, gp) {
 
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
+
 		var run_button_text = "Batch run";
+
 		if(self.source.type === "source")
 			run_button_text = "import data";
 		if(self.source.type === "export")
@@ -244,7 +252,11 @@ var glamPipeNode = function (node, gp) {
 			$("data-workspace .settings").empty();
 			
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
-			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
+			if(self.backend)
+				$("data-workspace submitblock").empty().append("<div>backend nodes can't be run via GUI</div>");
+			else
+				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
+				
 			$("data-workspace .settings").append(self.source.views.settings);
 			$("data-workspace .settings .params").append(self.source.params);
 			$(".show-node-params").data("id", self.source._id);

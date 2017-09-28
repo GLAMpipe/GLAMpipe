@@ -1,0 +1,14 @@
+{
+    "nodeid": "export_email_to_anyone",
+    "title": "Email message to anyone",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "email",
+    "status": "usable",
+    "tags":["backend"],
+    "description": "Email message via SMTP ('to' is defined in settings)",
+
+    "scripts": {
+
+    }
+}

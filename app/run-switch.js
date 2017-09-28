@@ -351,10 +351,23 @@ exports.runNode = function (node, io) {
 						case "upload_file":
 							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
 						break;
+						
+						case "email":
+							sandbox.pre_run.runInContext(sandbox);
+							console.log(sandbox.out.pre_value);
+							var mailer = require("../app/mailer.js");
+							mailer.sendMail(sandbox.out.pre_value, function(err, info) {
+								if(err)
+									console.log(err);
+									
+								node.res.json({email:info});
+							})
+						break;
 
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
+							
 					
 					}
 				
