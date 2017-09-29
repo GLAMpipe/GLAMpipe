@@ -1,7 +1,7 @@
 {
     "nodeid": "process_documents_select_delete",
     "type": "process",
-    "subtype": "deletions",
+    "subtype": "documents",
     "subsubtype": "select_delete",
     "title": "select&delete",
     "status": "rubbish",

@@ -15,7 +15,7 @@ for(var i = 0; i < node.data.docs.length; i++) {
     var doc = node.data.docs[i];
     var wikitext_url = encodeURIComponent(doc[node.source.params.out_field]);
     var title = "";
-    if(node.source.settings.title_dyn1) // settings are not there before first run. 
+    if(doc && node.source.settings && node.source.settings.title_dyn1) // settings are not there before first run. 
 		title = doc[node.source.settings.title_dyn1]
 
     html += "<div class='fatbox'>";

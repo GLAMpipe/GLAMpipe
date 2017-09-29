@@ -1,51 +1,138 @@
 
+
 var c = context; 
-var templates = ["Photograph", "Map", "Artwork"]; 
-var wikitext = '{{' + templates[parseInt(c.node.params.template)] + "\n"; 
 var settings = context.node.settings; 
 var wikifield = ''; 
 
 
-
-// TITLES
-wikitext += "|title = " + makeValues("title") + "\n";
-wikitext += "|description = " + makeValues("description") + "\n";
-// TITLE languages
+var item = {"metadata": {}};
 
 
-// DESCRIPTIONS
-            
-for (key in settings) {
-    if (key.indexOf('_wt_') === 0) {       
-       if (key.indexOf('_wt_1') === 0 || key.indexOf('_wt_3') === 0 || key.indexOf('_wt_5') === 0 ) { 
-           wikifield += settings[key]; 
-       } else {
-           wikifield += c.get(context.doc, settings[key]); 
-       }
-            
-/* set wikitext on last field of series */
-       if (key.indexOf('_wt_5') === 0 ) { 
-           var stripped = key.replace(/_wt_5_/,''); 
-           if(wikifield !== "")
-                wikitext += "|" + stripped + " = " + wikifield + "\n"; 
-                
-           wikifield = ""; 
-       } 
-    }
+
+
+var is_static = /_static/;
+var is_dynamic = /_dynamic$/;
+
+
+// handle static fields
+for(var key in context.node.settings) {
+	if(is_static.test(key)) {
+		var plain_key = key.replace("_static", "");
+		if(context.node.settings[key])
+			pushField(item, context.node.settings[key], plain_key, "");
+	}
+}
+
+// then override with dynamic fields if set
+for(var key in context.node.settings) {
+	//out.console.log("KEY:" + key)
+	var value = context.doc[context.node.settings[key]];
+	// value might be undefined
+	if(!value)
+		value = "";
+		
+	var language = "";
+	
+	if(is_dynamic.test(key)) {
+		
+		var plain_key = key.replace("_dynamic", "");
+		out.console.log("PLAIN key:" + plain_key)
+		if(context.doc[context.node.settings[key]])
+		out.console.log("key value:" + value)
+
+		   if(Array.isArray(value)) {
+			   for (var i = 0; i < value.length; i++ ) { 
+					if(context.doc[plain_key + "__lang"])
+						language = context.doc[plain_key + "__lang"][i];
+					pushField(item, value[i], plain_key, language);	
+			   }
+		   } else { 
+				if(context.doc[plain_key + "__lang"])
+					language = context.doc[plain_key + "__lang"];
+				pushField(item, value, plain_key, language);	
+		   }
+	}
+}
+
+
+
+if(parseInt(context.count) % 10 == 0) 
+    out.say("progress", context.node.type.toUpperCase() + ": processed " + context.count + "/" + context.doc_count);
+
+
+
+/*********************** FUNCTIONS *********************/
+
+function splitValue (val) { 
+   if( typeof val == "string") { 
+       var arr = val.split("||"); 
+       return arr 
+   } else if ( typeof val == "number") {
+       return val; 
+   }
+}
+
+
+
+function pushField (item, value, key, language) {
+
+	if(typeof value === "string")
+		value = value.trim();
+
+	// do not add key if there is no mapped key
+	if(value !== null && value !== "") { 
+
+		item.metadata[key] = {"value": value, "language": language};
+		
+	}
+}
+
+
+out.console.log(item)
+
+// write wikitext
+var templates = ["Photograph", "Map", "Artwork"]; 
+var wikitext = '{{' + templates[parseInt(c.node.params.template)] + "\n"; 
+
+if(item.metadata) {
+	for(var key in item.metadata) {
+		wikitext += "|" + key + " = " + item.metadata[key].value + "\n";
+	}
 }
 
 wikitext += "}}\n"; 
 
-// add record spesific categories 
-var cats = context.doc[settings.categories]; 
-if (Array.isArray(cats)) {
-    for(var i = 0; i < cats.length; i++) {
-        if(cats[i] != "")
-            wikitext += "[[Category:" + cats[i] + "]]\n"; 
-    }
-} else if (cats && cats != "" ) {
-    wikitext += "[[Category:" + cats + "]]\n"; 
-}
+
+
+
+
+
+
+
+
+
+
+
+
+// TITLES
+//wikitext += "|title = " + makeValues("title") + "\n";
+//wikitext += "|description = " + makeValues("description") + "\n";
+// TITLE languages
+
+
+
+
+
+//// add record spesific categories 
+//var cats = context.doc[settings.categories]; 
+//if (Array.isArray(cats)) {
+    //for(var i = 0; i < cats.length; i++) {
+        //if(cats[i] != "")
+            //wikitext += "[[Category:" + cats[i] + "]]\n"; 
+    //}
+//} else if (cats && cats != "" ) {
+    //wikitext += "[[Category:" + cats + "]]\n"; 
+//}
 
 // add categories for all images
 if(settings.category_all && settings.category_all != "") {

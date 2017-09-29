@@ -268,11 +268,11 @@ var dataTable = function (node) {
 
 	this.renderDataTable = function (config) {
 
-
+		var render = null;
 		// check if node wants to render data itself
-		if(self.node.source.scripts.view) {
-			var render = new Function('node', self.node.source.scripts.view);
-		}
+		//if(self.node.source.scripts.view) {
+			//var render = new Function('node', self.node.source.scripts.view);
+		//}
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
