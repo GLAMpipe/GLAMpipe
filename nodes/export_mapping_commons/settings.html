@@ -1,23 +1,7 @@
 
 
-<h3>Categories</h3>
-<div class="box-noflex">
-	<label>Item specific categories (select field if any)</label>
-	<select class="node-settings dynamic_field" name="categories">
-		<option>choose category field</option>
-	</select><br>
-	
-	<label>Categories for all items (comma separated list)</label>
-	<textarea class="node-settings big" name="category_all"></textarea>
-    
-	<label>Extra text after template</label>
-	<textarea class="node-settings big" name="extra"></textarea>
-</div>
-
-
-
-
-<h3>Mapping</h3>
+<h3>Generic mapping</h3>
+<div class="help">Here you can match your fields to the fields of wikitext template.</div>
 
 <table>
 	<tr>
@@ -51,8 +35,8 @@
 		<td>date</td>
 		<td><input class="node-settings middle_input" name="date_static"/></td>
 		<td><select class="node-settings dynamic_field middle_input" name="date_dynamic"><option value="">no value</option></select></td>
-		<td></td>
-		<td></td>
+		<td>no language</td>
+		<td>no language</td>
 	</tr>
 	
 	<tr>
@@ -72,35 +56,56 @@
 	</tr>
 	
 	<tr>
-		<td>institution and department</td>
+		<td>institution</td>
 		<td><textarea class="node-settings big" name="institution_static"></textarea></td>
 		<td><select class="node-settings dynamic_field" name="institution_dynamic"><option value="">no value</option></select></td>
+		<td>no language</td>
+		<td>no language</td>
+	</tr>
+	
+	<tr>
+		<td>accession number</td>
+		<td><input class="node-settings middle_input" name="accnumber_static"/></td>
+		<td><select class="node-settings dynamic_field middle_input" name="accnumber_dynamic"><option value="">no value</option></select></td>
+		<td>no language</td>
+		<td>no language</td>
+	</tr>
+	
+	<tr>
+		<td>notes</td>
+		<td><input class="node-settings middle_input" name="notes_static"/></td>
+		<td><select class="node-settings dynamic_field" name="notes_dynamic"><option value="">no value</option></select></td>
+		<td>no language</td>
+		<td>no language</td>
+	</tr>
+	
+	<tr>
+		<td>inscriptions</td>
+		<td></td>
+		<td><select class="node-settings dynamic_field" name="inscriptions_dynamic"><option value="">no value</option></select></td>
 		<td>no language</td>
 		<td>no language</td>
 	</tr>
 </table>
 
 
-
-
-<h3>Accession number, notes and inscriptions</h3>
-<div class="box-noflex">
-	<label>accession number</label>
-	<input class="node-settings middle_input" name="accnumber_static"/>
-    <select class="node-settings dynamic_field middle_input" name="accnumber_dynamic"><option value="">no value</option></select>
-    
-    <label>notes</label>
-    <select class="node-settings dynamic_field" name="notes_dynamic"><option value="">no value</option></select>
-    
-    <label>inscriptions</label>
-    <select class="node-settings dynamic_field" name="inscriptions_dynamic"><option value="">no value</option></select>
-
-</div>
-
-<h3>Template specific fields</h3>
+<h3>Template specific mapping</h3>
 <div class="box-noflex">
     <div class="help">Here you can match your fields to the fields of wikitext template.</div>
     <div id="node_set___node_id__" class="template_map"></div>
 </div>
 
+<h3>Categories</h3>
+<div class="box-noflex">
+	<label>Item specific categories (select field if any)</label>
+	<select class="node-settings dynamic_field" name="categories">
+		<option>choose category field</option>
+	</select><br>
+	
+	<label>Categories for all items (comma separated list)</label>
+	<textarea class="node-settings big" name="category_all"></textarea>
+    
+	<label>Extra text after template</label>
+	<textarea class="node-settings big" name="extra"></textarea>
+</div>
 
