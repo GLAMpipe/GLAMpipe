@@ -106,13 +106,21 @@ exports.edit = function (req, callback) {
 	} catch (e) {
 		return callback({error:"doc_id is invalid! It must be a valid MongoDB id."});
 	}
+
+	var keys = [];
+	for(var key in req.body) {
+		if(key != "doc_id")
+			keys.push(key);
+	}
 	
 	var setter = {};
 	//setter[req.body.field] = req.body.value;
-	setter = req.body;
-	console.log("setter:", setter);
+	setter["$set"] = req.body;
 	
-	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)},{$set:setter}, function(err, result) {
+	// mark edited fields as manual edits
+	setter["$addToSet"] = {"MP_manual":{$each:keys}};
+	
+	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)}, setter, function(err, result) {
 		if(err) {
 			console.log(err);
 			return callback({error:err.message});

@@ -115,7 +115,7 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
-		var run_button_texts = ["run for all documents", "import data", "export data"];
+		var run_button_texts = ["Batch run", "import data", "export data"];
 		var button = $(e.target);
 		if(run_button_texts.includes(button.text())) {
 			button.attr("text", button.text());

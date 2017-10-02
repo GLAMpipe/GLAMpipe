@@ -73,14 +73,32 @@ exports.find = function (query, collectionname, callback) {
 	});   
 }
 
-exports.findOne = function (query, collectionname, callback) {
-    
+
+exports.findWithResultFields = function (query, resultField, collectionname, callback) {
+
 	var collection = db.collection(collectionname);
 
+	collection.find(query ,resultField ,function (err, result) {
+		if (err) {
+			console.log(err);
+			callback({"error":err})
+		} else if (result.length) {
+			callback(err, result);
+		} else {
+			console.log("No document(s) found from", collectionname);
+			callback({"error":err})
+		}
+	});   
+}
+
+exports.findOne = function (query, collectionname, callback) {
     
+  
+	var collection = db.collection(collectionname);
+
 	collection.findOne(query ,function (err, result) {
 		if (err) {
-			console.log("ERROR:", err);
+			//console.log("ERROR:", err.message);
 			callback(err, result)
 		} else {
 			callback(err, result);
@@ -105,9 +123,14 @@ exports.findOneProjection = function (query, projection, collectionname, callbac
 
 
 exports.findOneById = function (doc_id, collectionname, callback) {
-	exports.findOne ({_id: mongojs.ObjectId(doc_id)}, collectionname, function (err, data) {
-		callback(data);
-	})
+	try {
+		exports.findOne ({_id: mongojs.ObjectId(doc_id)}, collectionname, function (err, data) {
+			callback(data);
+		})
+	} catch(e) {
+		console.log("ERROR: mongo-query.findOneById:" + e.message)
+		callback(null);
+	}
 }
 
 
@@ -239,7 +262,10 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 
 	var collection = db.collection(collectionname);
 
-	collection.update(query, doc , {multi:false}, function (err, result) {
+	collection.update(query, doc , {multi:true}, function (err, result) {
+		console.log(result)
+		console.log(query)
+		console.log(doc)
 		if (err) {
 			console.log(err);
 			callback(err);
@@ -582,24 +608,6 @@ exports.closeDB = function () {
 }
 
 
-exports.editProjectNode = function (doc_id, params, callback) {
-    
-    // we do not save passwords, user names and api keys
-    if(params.settings) {
-		if(params.settings.username) params.settings.username = null;
-		if(params.settings.passwd) params.settings.passwd = null;
-		if(params.settings.password) params.settings.password = null;
-		if(params.settings.apikey) params.settings.apikey = null;
-	}
-
-	var collection = db.collection("mp_projects");
-	var setter = {};
-	setter.$set = createParamsObject("nodes", params);
-	collection.update({"nodes._id":mongojs.ObjectId(doc_id)},setter, function (err, data) {
-		callback(err,data);
-	})
-
-}
 
 
 
@@ -663,7 +671,7 @@ function createParamsObject(arrayName, params) {
 	}
     //console.log("******************************");
     //console.log(params);
-    //console.log(result);
+    console.log(result);
     //console.log("******************************");
 	return result;
 }

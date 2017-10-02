@@ -28,10 +28,10 @@ exports.run = function(req, io, res) {
 		node.req = req;	
 		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
 		// from it without affecting settings that are used by node
-        var copy = Object.assign({}, node.settings) 
+        var settings_copy = Object.assign({}, node.settings) 
 		
 		// save node settings TODO: set callback
-		mongoquery.editProjectNode(node._id, {"settings":copy}, function() {
+		exports.edit(node._id, settings_copy, function() {
 
 			console.log("\n>>>>>>>>>>>>>> RUNNING NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);
@@ -60,22 +60,118 @@ exports.run = function(req, io, res) {
 
 }
 
-exports.getNode = function (node_id, cb) {
 
-	mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
-		if(!project) {
-			return cb("not found", null);
-		}
-		var index = indexByKeyValue(project.nodes, "_id", node_id);
-		var node = project.nodes[index];
-		node.project = project._id;
-		node.project_title = project.title;
-		node.project_dir = project.dir;
-		cb(null, node);	
+exports.edit = function (doc_id, settings, callback) {
+    
+    // we do not save passwords, user names and api keys
+    if(settings) {
+		if(settings.username) settings.username = null;
+		if(settings.passwd) settings.passwd = null;
+		if(settings.password) settings.password = null;
+		if(settings.apikey) settings.apikey = null;
+	}
+
+	// we don't save empty setting values
+	for(var key in settings) {
+		if(!settings[key])
+			delete settings[key];
+	}
+
+	if(!settings)
+		return callback();
+		
+	var setter = {};
+	setter.$set = {"nodes.$.settings": settings};
+	var query = {"nodes._id": mongojs.ObjectId(doc_id)};
+	mongoquery.updateSingle("mp_projects", query, setter, function() {
+		callback();
 	})
-	
 }
 
+
+exports.getNode = function (node_id, cb) {
+
+	try {
+		mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
+			if(!project) {
+				return cb("not found", null);
+			}
+			var index = indexByKeyValue(project.nodes, "_id", node_id);
+			var node = project.nodes[index];
+			node.project = project._id;
+			node.project_title = project.title;
+			node.project_dir = project.dir;
+				
+			cb(null, node);	
+		})
+	} catch(e) {
+		console.log(e.message);
+		return cb(e.message, null);
+	}
+}
+
+exports.getNodeSettings = function (node_id, cb) {
+
+	exports.getNode(node_id, function(err, node) {
+		if(!err)
+			cb(node.settings);	
+		else 
+			return cb({});
+	})
+}
+
+exports.getNodeParams = function (node_id, cb) {
+
+	exports.getNode(node_id, function(err, node) {
+		if(!err)
+			cb(node.params);	
+		else 
+			return cb({});
+	})
+}
+
+exports.getCollectionNodes = function (collection_id, cb) {
+
+	mongoquery.findWithResultFields(
+		{ nodes:
+			{$elemMatch:
+				{collection:collection_id}
+			}
+		}, 
+		{
+			"nodes.nodeid":1,
+			"nodes.version":1,
+			"nodes.type":1,
+			"nodes._id":1,
+			"nodes.project":1,
+			"nodes.params":1,
+			"nodes.settings":1,
+			
+		}
+		, "mp_projects"
+		, function(err, nodes) {
+			if(!err)
+				cb(nodes);	
+			else 
+				return cb([]);
+	})
+}
+
+
+exports.getProjectByNode = function (node_id, cb) {
+
+	try {
+		mongoquery.findOne({"nodes._id":mongojs.ObjectId(node_id)}, "mp_projects", function(err, project) {
+			if(!project) {
+				return cb("not found", null);
+			}
+			cb(null, project);	
+		})
+	} catch(e) {
+		console.log(e.message);
+		return cb(e.message, null);
+	}
+}
 
 
 exports.createNode = function (req, res, io) {
@@ -221,6 +317,7 @@ function initNode (req, io, project, callback) {
 			node.collection = req.body.collection;
 			node.number = req.node_count;
 			node.dirsuffix = ""; // node can set this in "hello" script
+			node.version = global.config.version;
 			
 			if(req.body.params)
 				node.params = req.body.params;
@@ -231,6 +328,8 @@ function initNode (req, io, project, callback) {
 			// node creation can also include settings for running node 
 			if(req.body.settings)
 				node.settings = req.body.settings;
+			else
+				node.settings = {};
 
 			node.params.collection = node.collection;
 			
@@ -612,9 +711,9 @@ exports.nodeFileView = function  (req, cb) {
 
 
 
-exports.getNodeLog = function (req, cb) {
+exports.getNodeLog = function (node_id, cb) {
 	
-	mongoquery.find({"node_uuid":req.params.id}, "mp_runlog", function(err, result) {
+	mongoquery.find({"node_uuid": node_id}, "mp_runlog", function(err, result) {
 		if(err)
 			return cb();
 			
@@ -1054,5 +1153,22 @@ function indexByKeyValue(arraytosearch, key, value) {
 		}
 	}
 	return null;
+}
+
+
+// creates an object for mongoquery array update wiht positional operator ($)
+function createParamsObject(arrayName, params) {
+
+	var result = {};
+	for (var p in params) {
+		if( params.hasOwnProperty(p) && p != "apikey") {
+		  result[arrayName + "." + p] =  params[p];
+		} 
+	}
+    //console.log("******************************");
+    //console.log(params);
+    //console.log(result);
+    //console.log("******************************");
+	return result;
 }
 

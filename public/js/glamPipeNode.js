@@ -218,7 +218,7 @@ var glamPipeNode = function (node, gp) {
 
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
-		var run_button_text = "run for all documents";
+		var run_button_text = "Batch run";
 		if(self.source.type === "source")
 			run_button_text = "import data";
 		if(self.source.type === "export")

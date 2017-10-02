@@ -5,6 +5,7 @@ var proxy 		= require("../app/proxy.js");
 var collection 	= require("../app/collection.js");
 var node	 	= require("../app/node.js");
 var project 	= require("../app/project.js");
+var flow 		= require("../app/flow.js");
 var shibboleth 	= require("../app/shibboleth.js");
 
 global.register = {};
@@ -219,22 +220,36 @@ module.exports = function(express, glampipe, passport) {
 		project.deleteProject(req.params.id, res);
 	});
 
-
-	// NODES
 	express.get('/api/v1/projects/:project/nodes', function (req, res) {
 		node.getProjectNodes(req.params.project, res);
 	});
 
-	express.get('/api/v1/nodes', function (req, res) {
+
+	// NODE REPOSITORY
+	express.get('/api/v1/repository/nodes', function (req, res) {
 		node.getNodes(res);
 	});
 
-	express.get('/api/v1/nodes/:nodeid', function (req, res) {
+	express.get('/api/v1/repository/nodes/:nodeid', function (req, res) {
 		node.getNodeFromDir(req.params.id, res);
 	});
 
-	express.get('/api/v1/nodes/:id/log', function (req, res) {
-		node.getNodeLog(req, function(data) {res.send(data)});
+
+	// PROJECT NODES
+	express.get('/api/v1/nodes/:node', function (req, res) {
+		node.getNode(req.params.node, function(err, data) {res.send(data)});
+	});
+
+	express.get('/api/v1/nodes/:node/log', function (req, res) {
+		node.getNodeLog(req.params.node, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/nodes/:id/settings', function (req, res) {
+		node.getNodeSettings(req.params.id, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/nodes/:id/params', function (req, res) {
+		node.getNodeParams(req.params.id, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/options/:nodeid', function (req, res) {
@@ -244,6 +259,16 @@ module.exports = function(express, glampipe, passport) {
 	express.get('/api/v1/nodes/:nodeid/files/:file', function (req, res) {
 		node.getNodeFile(req, res);
 	});
+
+	express.get('/api/v1/collections/:collection/nodes', function (req, res) {
+		node.getCollectionNodes(req.params.collection, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/collections/:collection/nodes/:node', function (req, res) {
+		node.getNode(req.params.node, function(err, data) {res.send(data)});
+	});
+
+
 
 	express.post('/api/v1/options/:nodeid', function (req, res) {
 		node.setOptions(req, function(data) {res.send(data)});
@@ -300,6 +325,8 @@ module.exports = function(express, glampipe, passport) {
 		delete global.register["/api/v1/nodes/"+req.params.id+"/start"];
 		res.send({removed: req.originalUrl});
 	});
+
+
 
 	// DATA
 
@@ -410,9 +437,14 @@ module.exports = function(express, glampipe, passport) {
 	});
 
 	// PIPES
-	//express.post('/create/pipe', function (req, res) {
-		//glampipe.core.createPipe(req, function(data) {res.send(data)});
-	//});
+	express.get('/api/v1/pipes/nodes/:node', function (req, res) {
+		flow.getReversePipe(req, res);
+	});
+
+	express.get('/api/v1/pipes/collections/:collection', function (req, res) {
+		flow.getPipe(req, res);
+	});
+
 
 	// NODE EDITOR
 	//express.get('/node-viewer', function (req, res) {
@@ -463,7 +495,7 @@ module.exports = function(express, glampipe, passport) {
 			res.status(401).json({error: "Not logged in!"});
 		} else {
 			console.error("STACK: " + err.stack)
-			res.status(500).send('Something broke!')
+			res.status(500).send('Server error!')
 		}
 	})
 	// express.route("/users").get(User.findAll);

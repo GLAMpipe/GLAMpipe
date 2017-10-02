@@ -8,7 +8,7 @@ var nodeRepository = function () {
 	this.visible_tags = ["wmf"];
 	
 	this.loadNodes = function () {
-		$.getJSON(self.baseAPI + "/nodes", function(data) { 
+		$.getJSON(self.baseAPI + "/repository/nodes", function(data) { 
 			for(var i = 0; i< data.length; i++) {
 				self.nodes.push(data[i]);
 			}

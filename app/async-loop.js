@@ -55,7 +55,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 			onDoc(doc, sandbox, function processed () {
 				
 				//console.log("SETTER")
-				console.log(sandbox.data)
+				//console.log(sandbox.data)
 				
 				if(Array.isArray(sandbox.out.setter))
 					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!

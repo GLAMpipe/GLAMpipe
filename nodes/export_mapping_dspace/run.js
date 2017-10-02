@@ -2,7 +2,7 @@
 
 var item = {"metadata": []};
 out.value = item;
-
+context.success_count++;
 
 var is_static = /^_static_/;
 var is_dynamic = /^_dynamic_/;
@@ -69,6 +69,8 @@ function pushField (item, value, key, language) {
 
 	if(typeof value === "string")
 		value = value.trim();
+
+	key = key.replace(/_/g, ".");
 
 	// do not add key if there is no mapped key
 	if(value !== null && value !== "") { 
