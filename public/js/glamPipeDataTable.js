@@ -229,9 +229,9 @@ var dataTable = function (node) {
 
 		if(self.node.data.docs.length == 0) {
 			var html = "<div class='fatbox'><h2>This collection is empty</h2><br><div>Add data source to get something to look at :)</div></div>";
-            $(self.dataDisplayDiv).empty().append(html);
-            return;
-        }
+			$(self.dataDisplayDiv).empty().append(html);
+			return;
+		}
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
@@ -296,6 +296,10 @@ var dataTable = function (node) {
 
 	this.renderCell = function(key_name, key_index, data, config) {
 		var html = "";
+		var manual_edit = "";
+		if(data.MP_manual && data.MP_manual.includes(key_name))
+			manual_edit = "manual-edit";
+			
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
 				html += "<td><div data-id='" + data._id + "' class='button run_single'>single run</div></td>";
@@ -303,12 +307,14 @@ var dataTable = function (node) {
 				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
+			
+		   
 			if(config && config.input_keys.indexOf(key_name) !== -1)
-				html += "<td class='input'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, "", key_name)  + "</td>";
+				html += "<td class='input'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else if(config && config.output_keys.indexOf(key_name) !== -1)
-				html += "<td class='output'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, "", key_name)  + "</td>";
+				html += "<td class='output'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else 
-				html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCellContent(data[key_name], null, "", key_name) + "</td>";
+				html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
 			
 		}
 		return html;
@@ -529,16 +535,16 @@ var dataTable = function (node) {
 
 
 	this.runSingle = function(event) {
-        var doc_id = $(event.target).data("id");
-        if(typeof doc_id === "undefined")
-            doc_id = $(event.target).parent().data("id");
-        
+		var doc_id = $(event.target).data("id");
+		if(typeof doc_id === "undefined")
+			doc_id = $(event.target).parent().data("id");
+		
 		//var doc = self.getDocByTableClick(event);
-        if(typeof doc_id === "undefined")
-            alert("No doc id found");
-        else {
+		if(typeof doc_id === "undefined")
+			alert("No doc id found");
+		else {
 			$(event.target).text("running...");
-            self.node.runSingle(doc_id);
+			self.node.runSingle(doc_id);
 		}
 	}
 
@@ -569,13 +575,13 @@ var dataTable = function (node) {
 				data[field] = [];
 		
 		$("#cell-display input, #cell-display textarea").each(function(i) {
-            
-            // if input name has form "set[something1]", then we want to gather all of them to array
-            if(nameSplitted.length > 1) {
-                data[field].push($(this).val());
-            } else {
-                data[field] = $(this).val();
-            }
+			
+			// if input name has form "set[something1]", then we want to gather all of them to array
+			if(nameSplitted.length > 1) {
+				data[field].push($(this).val());
+			} else {
+				data[field] = $(this).val();
+			}
 		})
 		data.doc_id = doc_id;
 		console.log(data);

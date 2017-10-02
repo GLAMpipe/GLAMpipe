@@ -864,3 +864,7 @@ img.centered {
 	padding: 2px 15px 2px 15px;
 	margin-left: 165px;
 }
+
+.manual-edit {
+	background-color: yellow;
+}

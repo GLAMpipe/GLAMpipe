@@ -30,8 +30,8 @@ exports.run = function(req, io, res) {
 		// from it without affecting settings that are used by node
         var settings_copy = Object.assign({}, node.settings) 
 		
-		// save node settings TODO: set callback
-		exports.edit(node._id, settings_copy, function() {
+		// save node settings
+		exports.saveSettings(node._id, settings_copy, function() {
 
 			console.log("\n>>>>>>>>>>>>>> RUNNING NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);
@@ -60,8 +60,35 @@ exports.run = function(req, io, res) {
 
 }
 
+exports.getNodeInputs = function(node) {
+	var inputs = [];
+	for(var key in node.params) {
+		if(/^in_/.test(key))
+			inputs.push(node.params[key]);
+	}
+	for(var key in node.settings) {
+		if(/^in_/.test(key))
+			inputs.push(node.settings[key]);
+	}
+	return inputs;
+}
 
-exports.edit = function (doc_id, settings, callback) {
+
+exports.getNodeOutputs = function(node) {
+	var outputs = [];
+	for(var key in node.params) {
+		if(/^out_/.test(key))
+			outputs.push(node.params[key]);
+	}
+	for(var key in node.settings) {
+		if(/^out_/.test(key))
+			outputs.push(node.settings[key]);
+	}
+	return outputs;
+}
+
+// edit node settings
+exports.saveSettings = function (doc_id, settings, callback) {
     
     // we do not save passwords, user names and api keys
     if(settings) {
@@ -88,6 +115,19 @@ exports.edit = function (doc_id, settings, callback) {
 	})
 }
 
+// edit node content
+exports.edit = function (doc_id, doc, callback) {
+
+	var keys = Object.keys(doc)
+	var key = "nodes.$." + keys[0];
+	var setter = {$set:{}};
+	setter.$set[key] =  doc[keys[0]];
+	var query = {"nodes._id": mongojs.ObjectId(doc_id)};
+	mongoquery.updateSingle("mp_projects", query, setter, function() {
+		callback();
+	})
+}
+
 
 exports.getNode = function (node_id, cb) {
 
@@ -101,6 +141,8 @@ exports.getNode = function (node_id, cb) {
 			node.project = project._id;
 			node.project_title = project.title;
 			node.project_dir = project.dir;
+			node.inputs = exports.getNodeInputs(node);
+			node.outputs = exports.getNodeOutputs(node);
 				
 			cb(null, node);	
 		})
@@ -274,7 +316,7 @@ function createMetaSubNodes (node, io, cb) {
 	}, function done () {
 		console.log("DONE ASYNC CREATING OF SUBNODES")
 		// write subnode ids to metanode
-		mongoquery.editProjectNode(node._id, {"subnodes":nodelist}, function() {
+		exports.edit(node._id, {"subnodes":nodelist}, function() {
 			cb();
 		})
 		
@@ -815,7 +857,7 @@ exports.setNodeDescription = function (req, cb) {
 				node.settings = {"node_description": req.body.description};
 			}
 			
-			mongoquery.editProjectNode(node._id, {"settings":node.settings}, function() {
+			exports.edit(node._id, {"settings":node.settings}, function() {
 				cb();
 			})			
 		} else {
@@ -979,7 +1021,7 @@ exports.downloadNodes = function (io, cb) {
 */ 
 exports.setVisibleFields = function (nodeid, params, res) {
 
-	mongoquery.editProjectNode(nodeid, {"visible_keys": params.keys},
+	exports.edit(nodeid, {"visible_keys": params.keys},
 		function() {
 			res.json({"status":"node updated"});
 		}

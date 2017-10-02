@@ -56,6 +56,9 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				
 				//console.log("SETTER")
 				//console.log(sandbox.data)
+				//var found = false;
+				//if(doc.MP_manual && Array.isArray(doc.MP_manual))
+					//found = doc.MP_manual.some(r=> node.output.indexOf(r) >= 0)
 				
 				if(Array.isArray(sandbox.out.setter))
 					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!

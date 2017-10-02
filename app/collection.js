@@ -26,7 +26,7 @@ exports.getDocumentById = function (req, res) {
 	console.log(req.params.doc);
 	console.log(req.params.collection);
 	mongoquery.findOneById(req.params.doc, req.params.collection, function(result) {
-		//console.log(result);
+		console.log(result);
 		res.json({data:result});
 	})
 }
