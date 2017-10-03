@@ -11,12 +11,13 @@ var exports = module.exports = {};
 // loop for synchronous nodes and export nodes (export is done once per document)
 exports.documentLoop = function (node, sandbox, onDoc) {
 	
-
+	var mode = "batch";
 	var query = {};
 	// ONE DOC (single run)
 	if(node.req && node.req.params.doc) {
-		console.log("LOOP: single doc (" + node.req.params.doc + ")")
-		query = {"_id" : mongojs.ObjectId(node.req.params.doc)}
+		console.log("LOOP: single doc (" + node.req.params.doc + ")");
+		query = {"_id" : mongojs.ObjectId(node.req.params.doc)};
+		mode = "single";
 	}
 
 	// find everything
@@ -56,9 +57,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				
 				//console.log("SETTER")
 				//console.log(sandbox.data)
-				//var found = false;
-				//if(doc.MP_manual && Array.isArray(doc.MP_manual))
-					//found = doc.MP_manual.some(r=> node.output.indexOf(r) >= 0)
+				
 				
 				if(Array.isArray(sandbox.out.setter))
 					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
@@ -69,12 +68,15 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 					var setter = {};
 					setter[node.out_field] = sandbox.out.value;
 				}
-				//console.log("setter:", setter);
+				
+				updateDoc = createUpdateDoc(node, setter, doc, mode);
+				
+				console.log("updateDoc:", updateDoc);
 				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
 					console.log("NODE: skipping")
 					next();
 				} else
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, next);
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
 			});
 			
 
@@ -84,6 +86,28 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 	});
 }
 
+// checks if there are manual edits in fields that are in setter object
+function createUpdateDoc(node, setter, doc, mode) {
+
+	var updateDoc = {};
+	var manualRemovals = [];
+	for(var key in setter) {
+		if(doc.MP_manual && doc.MP_manual.includes(key)) {
+			// in "batch" mode we do not override manual edit
+			if(mode === "batch")
+				delete setter[key];
+			// in "single" mode we do override + we remove manual edit flags
+			else
+				manualRemovals.push(key);
+		}
+	}
+	
+	if(manualRemovals)
+		updateDoc.$pull = {MP_manual: {$in:manualRemovals}};
+		
+	updateDoc.$set = setter;
+	return updateDoc;
+}
 
 exports.importLoop = function (node, sandbox, onDoc) {
 	console.log("IMPORT LOOP");
