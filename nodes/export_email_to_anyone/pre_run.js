@@ -3,6 +3,7 @@
 if(!context.doc[context.node.params.out_field]) {
 
 	var data = {
+		from: context.node.params.from,
 		to: context.node.settings.to,
 		subject: context.node.settings.subject,
 		text: context.node.settings.text

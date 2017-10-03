@@ -168,7 +168,7 @@ module.exports = function(express, glampipe, passport) {
 
 
 	express.post('/email', function (req, res) {
-		require("../app/mailer.js").sendMail(req, res);
+		require("../app/mailer.js").sendMailRest(req, res);
 	});
 
 

@@ -9,6 +9,6 @@
     "description": "Email message via SMTP ('to' is defined in settings)",
 
     "scripts": {
-
+		"finish":"out.say('finish', 'Email sent!');"
     }
 }

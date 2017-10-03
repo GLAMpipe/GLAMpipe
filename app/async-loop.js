@@ -8,6 +8,8 @@ const MP 		= require("../config/const.js");
 
 var exports = module.exports = {};
 
+
+
 // loop for synchronous nodes and export nodes (export is done once per document)
 exports.documentLoop = function (node, sandbox, onDoc) {
 	
@@ -20,7 +22,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 		mode = "single";
 	}
 
-	// find everything
+	// get documents (batch run) or document (single run)
 	mongoquery.find2(query, node.collection, function (err, docs) {
 		
 		sandbox.context.doc_count = docs.length;

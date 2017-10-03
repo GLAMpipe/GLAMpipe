@@ -1,9 +1,30 @@
 var mongojs 	= require('mongojs');
+var mongoquery	= require("../app/mongo-query.js");
 var async 		= require("async");
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 
 
+
+exports.emailNodeRun = function(node, sandbox) {
+
+
+	if(node.req && node.req.params.doc) {
+		console.log("EMAIL: single doc (" + node.req.params.doc + ")");
+		var query = {"_id" : mongojs.ObjectId(node.req.params.doc)};
+
+	
+		mongoquery.findOne(query, node.collection, function (err, doc) {
+			//if(err || !doc)
+			sandbox.context.doc = doc;
+			sandbox.pre_run.runInContext(sandbox);
+			console.log(sandbox.out.pre_value);
+			exports.sendMail(sandbox.out.pre_value, function(err, info) {
+				sandbox.finish.runInContext(sandbox);
+			})
+		})
+	}
+}
 
 exports.sendMail = function(data, cb) {
 

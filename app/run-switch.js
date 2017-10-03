@@ -353,15 +353,10 @@ exports.runNode = function (node, io) {
 						break;
 						
 						case "email":
-							sandbox.pre_run.runInContext(sandbox);
-							console.log(sandbox.out.pre_value);
 							var mailer = require("../app/mailer.js");
-							mailer.sendMail(sandbox.out.pre_value, function(err, info) {
-								if(err)
-									console.log(err);
-									
-								node.res.json({email:info});
-							})
+							// sending email is a special kind of run
+							mailer.emailNodeRun(node, sandbox);
+
 						break;
 
 						default:
