@@ -13,15 +13,24 @@ exports.emailNodeRun = function(node, sandbox) {
 		console.log("EMAIL: single doc (" + node.req.params.doc + ")");
 		var query = {"_id" : mongojs.ObjectId(node.req.params.doc)};
 
-	
 		mongoquery.findOne(query, node.collection, function (err, doc) {
 			//if(err || !doc)
 			sandbox.context.doc = doc;
 			sandbox.pre_run.runInContext(sandbox);
-			console.log(sandbox.out.pre_value);
-			exports.sendMail(sandbox.out.pre_value, function(err, info) {
+			if(sandbox.out.pre_value) {
+				exports.sendMail(sandbox.out.pre_value, function(err, info) {
+					sandbox.context.data = info;
+					sandbox.run.runInContext(sandbox);
+						
+					var updateDoc = {$set: sandbox.out.setter};
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, function(err, result) {
+							sandbox.finish.runInContext(sandbox);
+					});
+				})
+			} else {
+				console.log("skipped");
 				sandbox.finish.runInContext(sandbox);
-			})
+			}
 		})
 	}
 }
@@ -36,7 +45,7 @@ exports.sendMail = function(data, cb) {
 	}
 
 	var transporter = nodemailer.createTransport(smtpTransport({
-		service: global.config.smtp
+		host: global.config.smtp
 	}));
 	
 	// add html if provided
@@ -44,8 +53,6 @@ exports.sendMail = function(data, cb) {
 		data.html = req.body.html;
 	
 	transporter.sendMail(data, function(err, info) {
-		console.log(err);
-		console.log(info);
 		cb(err, info);
 	});
 }
@@ -63,7 +70,7 @@ exports.sendMailRest = function(req, res) {
 	}
 
 	var transporter = nodemailer.createTransport(smtpTransport({
-		service: global.config.smtp
+		host: global.config.smtp
 	}));
 
 
@@ -79,8 +86,6 @@ exports.sendMailRest = function(req, res) {
 		data.html = req.body.html;
 	
 	transporter.sendMail(data, function(err, info) {
-		console.log(err);
-		console.log(info);
 		res.json(data);
 	});
 
