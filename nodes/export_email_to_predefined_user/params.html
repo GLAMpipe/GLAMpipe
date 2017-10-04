@@ -12,17 +12,12 @@
 <label>message</label>
 <textarea  name="text" id="text"></textarea>
 
-<label>variable name </label>
-<div class="help">You can use this in subject and message texts by using double square brackets ("[[variable]]")</div>
-<input type="text" name="field1_varname"/>
 
-
-<label>variable field</label>
-<select class="dynamic_field" name="field1">
-	<option value="">choose field</option> 
-</select> 
-
+<label>document fields (comma separated list or "*")</label>
+<div class="help">You can use "[[data_fields]]" variable in message in order to render document fields defined below to a message body.</div>
+<div class="help">"*" renders all document fields.</div>
+<input name="data_fields" value="*" />
 
 
 <label>out field</label>
-<input name="out_field" value="email_anybody">
+<input name="out_field" value="email_predefined">

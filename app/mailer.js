@@ -53,6 +53,8 @@ console.log(data);
 	if(data.html)
 		data.html = req.body.html;
 	
+	//return cb(null, null); // for testing
+	
 	transporter.sendMail(data, function(err, info) {
 		cb(err, info);
 	});
