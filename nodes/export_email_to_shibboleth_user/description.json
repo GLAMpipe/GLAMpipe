@@ -1,6 +1,6 @@
 {
     "nodeid": "export_email_to_shibboleth_user",
-    "title": "Email: to shibboleth user",
+    "title": "Email: to shibboleth user & predefined content",
     "type": "export",
     "subtype": "web",
     "subsubtype": "email",

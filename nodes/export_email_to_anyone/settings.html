@@ -1,16 +1,35 @@
 
-<h3 id="export-data-dspace_serverinfo">DSpace login</h3>
+<h3 id="export-email-anyone">Backend: Sent email to any email address</h3>
+
+<div class="help">This node can be used for confirmation emails in Shibboleth authenticated services.Message content, subject and receiver can not be altered via REST. 
+<br>
+
+
+In order to use this node, one must have an ability to send unauthorised emails. Shibboleth header name is defined in config.js by "shibbolethHeaderId".
+</div>
+
 
 <div class="box-noflex dspace-hidden">
 	
-	<label>to</label>
-	<input class="node-settings" type="text" name="to" id="to" required />
-	
-	<label>subject</label>
-	<input class="node-settings" type="text" name="subject" id="subject"/>
-	
-	<label>message</label>
-	<textarea class="node-settings" name="text" id="text"></textarea>
-</div>
+<label>send to</label>
+<input class="node-settings" type="email" name="to" id="to" required />
+
+<label>subject</label>
+<input class="node-settings" type="text" name="subject" id="subject"/>
+
+<label>message</label>
+<textarea class="node-settings" name="text" id="text"></textarea>
+
+
+
+<label>variable name </label>
+<div class="help">You can use this in subject and message texts by using double square brackets ("[[variable]]")</div>
+<input class="node-settings" type="text" name="field1_varname"/>
+
+
+<label>variable field</label>
+<select class="node-settings dynamic_field" name="field1">
+	<option value="">choose field</option> 
+</select> 
 
 

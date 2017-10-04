@@ -253,7 +253,7 @@ var glamPipeNode = function (node, gp) {
 			
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
 			if(self.backend)
-				$("data-workspace submitblock").empty().append("<div>backend nodes can't be run via GUI</div>");
+				$("data-workspace submitblock").empty().append("<div class='info'>backend nodes can't be batch run</div>");
 			else
 				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 				

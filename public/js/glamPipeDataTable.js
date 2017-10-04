@@ -302,7 +302,7 @@ var dataTable = function (node) {
 			
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 
-			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view" && !self.node.backend)
+			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
 				html += "<td><div data-id='" + data._id + "' class='button run_single'>run for this</div></td>";
 
 			else
