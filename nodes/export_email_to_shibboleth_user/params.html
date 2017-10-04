@@ -2,5 +2,27 @@
 <label>send from (no authentication)</label>
 <input name="from" type="email"/>
 
+
+
+<label>subject</label>
+<input type="text" name="subject" id="subject"/>
+
+<label>message</label>
+<textarea  name="text" id="text"></textarea>
+
+<label>variable name </label>
+<div class="help">You can use this in subject and message texts by using double square brackets ("[[variable]]")</div>
+<input type="text" name="field1_varname"/>
+
+
+<label>variable field</label>
+<select class="dynamic_field" name="field1">
+	<option value="">choose field</option> 
+</select> 
+
+
+
 <label>out field</label>
 <input name="out_field" value="email_shibboleth_confirm">
+
+

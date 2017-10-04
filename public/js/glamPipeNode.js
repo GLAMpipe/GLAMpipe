@@ -302,6 +302,7 @@ var glamPipeNode = function (node, gp) {
 		}
 		params_table += "<tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr>";
 		params_table += "<tr><td>_id:</td><td>" + self.source._id + "</td></tr>";
+		params_table += "<tr><td>version</td><td>" + self.source.version + "</td></tr>";
 		params_table += "</tbody></table>";
 		return "<div class='debug right'>"+params_table+"</div>";
 	

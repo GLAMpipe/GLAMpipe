@@ -53,10 +53,9 @@ console.log(data);
 	if(data.html)
 		data.html = req.body.html;
 	
-	//transporter.sendMail(data, function(err, info) {
-		//cb(err, info);
-	//});
-	cb(null,{sdf:"sdf"})
+	transporter.sendMail(data, function(err, info) {
+		cb(err, info);
+	});
 }
 
 
