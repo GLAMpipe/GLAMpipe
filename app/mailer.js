@@ -17,6 +17,7 @@ exports.emailNodeRun = function(node, sandbox) {
 			//if(err || !doc)
 			sandbox.context.doc = doc;
 			sandbox.pre_run.runInContext(sandbox);
+			
 			if(sandbox.out.pre_value) {
 				exports.sendMail(sandbox.out.pre_value, function(err, info) {
 					sandbox.context.data = info;
@@ -36,6 +37,7 @@ exports.emailNodeRun = function(node, sandbox) {
 }
 
 exports.sendMail = function(data, cb) {
+console.log(data);
 
 	if(!global.config.smtp || !global.config.smtpSender)
 		return cb("SMTP not configured!");
@@ -43,7 +45,6 @@ exports.sendMail = function(data, cb) {
 	if(!data.to || !data.subject || !data.text) {
 		return cb("You must set 'to', 'subject' and 'text'!");
 	}
-
 	var transporter = nodemailer.createTransport(smtpTransport({
 		host: global.config.smtp
 	}));
@@ -52,9 +53,10 @@ exports.sendMail = function(data, cb) {
 	if(data.html)
 		data.html = req.body.html;
 	
-	transporter.sendMail(data, function(err, info) {
-		cb(err, info);
-	});
+	//transporter.sendMail(data, function(err, info) {
+		//cb(err, info);
+	//});
+	cb(null,{sdf:"sdf"})
 }
 
 

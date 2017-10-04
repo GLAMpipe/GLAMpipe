@@ -501,7 +501,12 @@ var glamPipe = function () {
         
         // read params
         obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
-            data.params[$(this).attr("name")] = $(this).val(); 
+			if($(this).attr("type") == "checkbox") {
+				if($(this).is(':checked'))
+					data.params[$(this).attr("name")] = "on"; 
+            } else {
+				data.params[$(this).attr("name")] = $(this).val(); 
+			}
         });
         
 		// set parent collection

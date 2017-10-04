@@ -453,6 +453,7 @@ submitblock {
 
 .settings {
 	margin-right:20px;
+	min-width:600px;
 }
 
 .settings:first-child {
@@ -498,22 +499,20 @@ input[type=text]:focus {
     border-bottom: 1px solid #444;
 }
 
-input[type=textarea] {
+textarea {
     font-size:13px;
 	font-weight:300;
-	height: 50px;
+	height: 60px;
     padding: 5px 0px;
     margin: 5px 0;
-	border: none;
     border-bottom: 1px solid #efefef;
     -webkit-transition: 0.5s;
     transition: 0.5s;
-    outline: none;
-	overflow-wrap: normal;
-	overflow-x: scroll;
+
+	width:100%;
 }
 
-input[type=textarea]:focus {
+textarea:focus {
     border-bottom: 1px solid #444;
 }
 

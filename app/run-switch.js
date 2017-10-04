@@ -603,6 +603,7 @@ exports.createSandbox = function (node, io) {
 			flat: flatten,
 			validator: validator,
 			parser: parser,
+			config: global.config,
 			MP: MP
 		},
 		out: {
