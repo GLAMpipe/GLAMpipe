@@ -136,21 +136,33 @@ exports.getNode = function (node_id, cb) {
 			if(!project) {
 				return cb("not found", null);
 			}
+			
 			var index = indexByKeyValue(project.nodes, "_id", node_id);
 			var node = project.nodes[index];
+
 			node.project = project._id;
 			node.project_title = project.title;
 			node.project_dir = project.dir;
 			node.inputs = exports.getNodeInputs(node);
 			node.outputs = exports.getNodeOutputs(node);
-				
-			cb(null, node);	
+
+			// in nodeDevMode we load node scripts directly from directory 
+			if(global.config.nodeDevMode && node.src_dir) {
+				var skip = function() {cb("error in loading!", null)};
+				readNodeDirectory (path.join(global.config.nodePath, node.src_dir), skip, function(nodeFromDir) {
+					node.scripts = nodeFromDir.scripts;
+					cb(null, node);	
+				})
+			} else {
+				cb(null, node);	
+			}
 		})
 	} catch(e) {
 		console.log(e.message);
 		return cb(e.message, null);
 	}
 }
+
 
 exports.getNodeSettings = function (node_id, cb) {
 
@@ -162,6 +174,7 @@ exports.getNodeSettings = function (node_id, cb) {
 	})
 }
 
+
 exports.getNodeParams = function (node_id, cb) {
 
 	exports.getNode(node_id, function(err, node) {
@@ -171,6 +184,7 @@ exports.getNodeParams = function (node_id, cb) {
 			return cb({});
 	})
 }
+
 
 exports.getCollectionNodes = function (collection_id, cb) {
 
@@ -870,10 +884,11 @@ exports.setNodeDescription = function (req, cb) {
 
 
 
-exports.readNodes = function (io, nodePath, descriptions, callback) {
+exports.readNodes = function (io, nodePath, callback) {
 		
 	readFiles(nodePath, function onNodeContent (filename, node, next) {
 		// save node.json to db
+		node.src_dir = filename; // save *real* source dir
 		mongoquery.insert("mp_nodes",node , function(err, result) {
 			if(err) {
 				console.log(err);
@@ -959,27 +974,17 @@ exports.initNodes = function (nodePath, io, callback) {
 		
 	mongoquery.drop("mp_nodes", function() {
 
-		fs = require('fs');
-		// read first node type descriptions
-		fs.readFile(path.join(nodePath, "nodes", "config", "node_type_descriptions.json"), 'utf8', function (err, data) {
-			if(err) {
-				console.log("NOTICE: node type descriptions not found from " + nodePath);
-				desc = {};
-			} else 
-				
-				var desc = JSON.parse(data);
-				console.log("INIT: Loading nodes from " + path.join(nodePath, "nodes/") );
-				exports.readNodes(io, path.join(nodePath, "nodes/"), desc, function (error) {
-					if(error){
-						// otherwise default nodes (included in the image)
-						console.log("ERROR: Loading nodes failed!");
-						callback(error);
+		console.log("INIT: Loading nodes from " + path.join(nodePath, "/") );
+		exports.readNodes(io, path.join(nodePath, "/"), function (error) {
+			if(error){
+				// otherwise default nodes (included in the image)
+				console.log("ERROR: Loading nodes failed!");
+				callback(error);
 
-					} else
-						callback(null);     
-				});        
-		});
-	});
+			} else
+				callback(null);     
+		}); 
+	});       
 }
 
 

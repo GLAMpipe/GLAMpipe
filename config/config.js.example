@@ -1,4 +1,7 @@
 
+// DEVELOPER MODE
+// when set true, GLAMpipe node scripts are loaded from file on each run. Handy for development.
+var nodeDevMode = false;
 
 // PATHS 
 // - where GLAMpipe can strore project data on *non-docker* installation
@@ -9,12 +12,12 @@ var dataPath = "";
 // default: "/"
 var uiPath = "/";
 
+// - file location of node files
+// default: "nodes" (means that GP uses internal nodes)
+var nodePath = "nodes"; 
+
 // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 var staticPath = "/static"; 
-
-// - file location of node files
-// default: "" (means that GP uses internal nodes)
-var nodePath = ""; 
 
 
 
@@ -22,7 +25,6 @@ var nodePath = "";
 // - "none" = do not use authentication, i.e. local install
 // - "local" = use local authentication
 // - "shibboleth" = use shibboleth headers
-//var authentication = "shibboleth";
 var authentication = "none";
 
 // can anyone browse data? (defines if GET request are open or not)
@@ -31,7 +33,8 @@ var public = true;
 // local
 var localCanRegister = true;
 
-// shibboleth
+
+// SHIBBOLETH
 var shibbolethUsers = [];
 var shibbolethHeaderId = "";
 // defines which shibboleth headers are added to the document submitted when data is added to a collection via REST api. 
@@ -83,3 +86,5 @@ exports.PROXY_passes = PROXY_passes;
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
 exports.shibbolethHeadersToData = shibbolethHeadersToData;
+
+exports.nodeDevMode = nodeDevMode;

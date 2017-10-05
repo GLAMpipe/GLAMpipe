@@ -1,6 +1,5 @@
 var request     = require("request");
 const MP 		= require("../config/const.js");
-//const config 	= require("../config/config.js");
 var exports 	= module.exports = {};
 
 
@@ -27,7 +26,7 @@ exports.proxyJSON = function (url, query, res) {
 	
 
 	var headers = {
-		'User-Agent':       'GLAMpipe/0.0.1',
+		'User-Agent': 'GLAMpipe/0.0.1',
 	}
 	
 	if(query)
