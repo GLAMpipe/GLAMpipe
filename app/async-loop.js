@@ -73,7 +73,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				
 				updateDoc = createUpdateDoc(node, setter, doc, mode);
 				
-				console.log("updateDoc:", updateDoc);
+				//console.log("updateDoc:", updateDoc);
 				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
 					console.log("NODE: skipping")
 					next();

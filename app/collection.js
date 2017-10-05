@@ -289,13 +289,12 @@ exports.getKeys = function (collection_name, cb) {
 	var source_keys = [];
 	var node_keys = []
 
-
-	
 	// all keys that are not in schema are node output fields
 	mongoquery.findOne({collection:collection_name}, "mp_schemas", function(err, doc) {
 		if(doc) {
 			all_keys = doc.keys;
 		}
+		console.log(all_keys)
 		
 		// first we take the first record and extract key names from that
 		mongoquery.findOne({}, collection_name, function(err, doc) {
@@ -311,10 +310,7 @@ exports.getKeys = function (collection_name, cb) {
 			cb({node_keys:node_keys,keys:key_list, sorted:all_keys.sort()});
 		
 		})		
-		
 	})
-	
-
 }
 
 /**

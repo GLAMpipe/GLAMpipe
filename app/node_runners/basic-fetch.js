@@ -82,7 +82,7 @@ function requestLoop(node, sandbox, io, cb) {
 			console.log("calling requestLoop from requestLoop");
 			requestLoop(node, sandbox, io, cb)
 		} else {
-			
+			schema.createCollectionSchema(node);
 			if(cb)
 				cb();
 			else {
