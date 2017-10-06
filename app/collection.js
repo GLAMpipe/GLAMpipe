@@ -294,7 +294,6 @@ exports.getKeys = function (collection_name, cb) {
 		if(doc) {
 			all_keys = doc.keys;
 		}
-		console.log(all_keys)
 		
 		// first we take the first record and extract key names from that
 		mongoquery.findOne({}, collection_name, function(err, doc) {

@@ -886,6 +886,7 @@ exports.setNodeDescription = function (req, cb) {
 
 exports.readNodes = function (io, nodePath, callback) {
 		
+	var nodeCount = 0;
 	readFiles(nodePath, function onNodeContent (filename, node, next) {
 		// save node.json to db
 		node.src_dir = filename; // save *real* source dir
@@ -893,7 +894,7 @@ exports.readNodes = function (io, nodePath, callback) {
 			if(err) {
 				console.log(err);
 			} else {
-				console.log("LOADED: " + filename );
+				nodeCount++;
 				if(io)
 					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
 				next();
@@ -911,7 +912,7 @@ exports.readNodes = function (io, nodePath, callback) {
 
 		
 	}, function onDone () {
-		console.log("INIT: nodes loaded from " + nodePath);
+		console.log("INIT: " + nodeCount + " nodes loaded from " + nodePath);
 		console.log("******************************************");
 		callback(null);
 	});
@@ -1035,7 +1036,7 @@ exports.setVisibleFields = function (nodeid, params, res) {
 
 
 function readNodeDirectory (nodeDir, skip, cb) {
-	console.log("READING directory: " + nodeDir);
+	//console.log("READING directory: " + nodeDir);
 	
 	// read description.js from node directory
 	fs.readFile(path.join(nodeDir, "description.json"), 'utf-8', function(err, content) {

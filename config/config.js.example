@@ -43,7 +43,9 @@ var shibbolethHeadersToData = [];
 var disableBatchDownloads = false;
 var secret = "Set something here";
 
-
+// SMTP for email nodes (for backend use)
+var smtp = "";
+var smtpSender = "";
 
 // VISIBLE nodes
 // defines what nodes are available for use
@@ -86,5 +88,8 @@ exports.PROXY_passes = PROXY_passes;
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
 exports.shibbolethHeadersToData = shibbolethHeadersToData;
+
+exports.smtp = smtp;
+exports.smtpSender = smtpSender;
 
 exports.nodeDevMode = nodeDevMode;
