@@ -166,12 +166,6 @@ module.exports = function(express, glampipe, passport) {
  * *************************************************************************************************************/
 
 
-
-	express.post('/email', function (req, res) {
-		require("../app/mailer.js").sendMailRest(req, res);
-	});
-
-
 	// SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
 		res.json({

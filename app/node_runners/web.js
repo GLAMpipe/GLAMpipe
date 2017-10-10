@@ -1,6 +1,6 @@
 var request = require("request");
 var path    = require("path");
-//request.debug = true;
+request.debug = false;
 var exports = module.exports = {};
 
 
@@ -11,7 +11,7 @@ exports.postJSON = function (doc, sandbox, next) {
 	// let node create an upload JSON
 	sandbox.pre_run.runInContext(sandbox);
 	var options = sandbox.out.pre_value;
-	//console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
+	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
 	if(!options.url || sandbox.context.skip)
 		return next("skipping...")
@@ -52,7 +52,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 
 	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
-	console.log("HEADERS:", options.headers);
+	//console.log("HEADERS:", options.headers);
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
@@ -74,6 +74,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 			next();
 		}
 	}
+
 	if(sandbox.out.method === "post")
 		request.post(options, responseCallback);
 	else

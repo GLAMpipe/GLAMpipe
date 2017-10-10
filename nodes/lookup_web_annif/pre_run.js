@@ -42,20 +42,18 @@ if(Array.isArray(in_field_value)) {
 
 
 function createOptions(text) {
-		return {
-			method: "POST",
-			url:  "http://api.annif.org/v0/autoindex",
-			headers: {
-				"accept": "application/json",
-				"Content-Type": "application/x-www-form-urlencoded"
-			},
-			formData: {
-				text: 		limitText(text), 
-				project: 	project,
-				maxhits: 	parseInt(context.node.settings.maxhits),
-				threshold: 	parseFloat(context.node.settings.threshold)
-			}
+
+	return {
+		method: "POST",
+		url:  "http://api.annif.org/v0/autoindex",
+		headers: {Accept: "application/json"},
+		form: {
+			text: 		text, 
+			project: 	project,
+			maxhits: 	parseInt(context.node.settings.maxhits),
+			threshold: 	parseFloat(context.node.settings.threshold)
 		}
+	}
 }
 
 function annifProject(index) {
