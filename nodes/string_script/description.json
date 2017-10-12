@@ -1,0 +1,28 @@
+{
+    "nodeid": "process_script",
+    "title": "Script",
+    "type": "process",
+    "subtype": "strings",
+    "subsubtype": "script",
+    "status": "usable",
+    "description": "Script super node ",
+    "scripts": {
+    
+        "hello": 
+        [
+            "out.say('news', 'You added a count node'); "
+        ],
+        
+        "bye": "out.say('news', 'Deleted node. Bye!'); ",
+        
+        "init":
+        [
+            "out.say('progress', 'Count started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Count done!');"
+    },
+    
+    "views": {}
+}

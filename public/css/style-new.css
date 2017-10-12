@@ -512,6 +512,10 @@ textarea {
 	width:100%;
 }
 
+textarea.editor {
+	height: 300px;
+}
+
 textarea:focus {
     border-bottom: 1px solid #444;
 }

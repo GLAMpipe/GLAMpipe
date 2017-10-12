@@ -1,0 +1,20 @@
+
+<div class="box-noflex">
+
+	<p>This is a very experimental script node.</p>
+	<p><strong>context.doc</strong> holds the current document. You can access document fields normally, i.e "context.doc.field_name". <br>Just keep in mind that <br>a) value of the field can be string, array, object etc., <br>b) you cannot change those values.</p>
+	<p>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node.</p>
+
+	<label>run.js</label>
+	<textarea class="node-settings editor" name="js">// this is the current document
+var doc = context.doc;
+
+// this writes the result to the field of the current document
+out.value = "Hello World!"
+	</textarea>
+
+</div>
+
+<script>
+
+</script>

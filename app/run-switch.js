@@ -433,7 +433,26 @@ exports.runNode = function (node, io) {
 							var detect = require("../app/node_runners/field-detect-language.js");
 							asyncLoop.documentLoop(node, sandbox, detect.language);
 						break;
-					
+
+
+						case "script":
+							var js = "out.value = 'kissa';"
+							try {
+								var run = new vm.createScript(node.settings.js);
+								sandbox.run = run;
+								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+									sandbox.run.runInContext(sandbox);
+									next();
+								});
+							} catch (e) {
+								console.log("ERROR:", e.stack);
+								sandbox.finish.runInContext(sandbox);
+								sandbox.out.say("finish", "Error in node: 'run' script: " + e.name +" " + e.message);
+							}
+							
+
+						break;
+
 						default: // syncronous nodes
 							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
