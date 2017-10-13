@@ -144,6 +144,10 @@ var glamPipeNode = function (node, gp) {
 
 	// render data with node spesific settings and display node settings
 	this.open = function (config) {
+	$.get("http://localhost:3000/api/v1/nodes/" + self.source._id + "/scripts",  function(data) {
+		if(data.view)
+			self.source.scripts.view = data.view;
+			
 		$(".node").removeClass("current");
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
@@ -154,6 +158,7 @@ var glamPipeNode = function (node, gp) {
 			self.display.render();
 			$("data-workspace settingscontainer").show();
 		}
+	})
 	}
 	
 	// render node to project view (left column)

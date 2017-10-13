@@ -417,7 +417,17 @@ exports.runNode = function (node, io) {
 							var file = require("../app/node_runners/file.js");
 							asyncLoop.fieldLoop(node, sandbox, file.convert);
 						break;
-						
+
+						case "download":
+							var web = require("../app/node_runners/web.js");
+							if(global.config.disableBatchDownloads && !node.res) {
+								sandbox.out.say("finish", "Batch downloads not available on this installation");
+								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
+							} else {
+								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
+							}
+						break;
+
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
@@ -436,7 +446,6 @@ exports.runNode = function (node, io) {
 
 
 						case "script":
-							var js = "out.value = 'kissa';"
 							try {
 								var run = new vm.createScript(node.settings.js);
 								sandbox.run = run;
@@ -522,21 +531,7 @@ exports.runNode = function (node, io) {
 							});			
 					}
 				break;
-					
-				case "downloads":
-				
-					switch (node.subsubtype) {
-						case "basic":
-							var web = require("../app/node_runners/web.js");
-							if(global.config.disableBatchDownloads && !node.res) {
-								sandbox.out.say("finish", "Batch downloads not available on this installation");
-								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
-							} else {
-								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
-							}
-						break;
-					}
-				break;
+
 				
 				case "meta":
 					
@@ -662,7 +657,7 @@ exports.createSandbox = function (node, io) {
 
 				// remove node from register if finished or if error (aborting)
 				if(ch === "finish" || ch === "error") {
-					//console.log("REGISTER: deleting " + node.req.originalUrl)
+					console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
 				}
 				

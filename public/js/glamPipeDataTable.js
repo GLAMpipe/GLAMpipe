@@ -269,17 +269,18 @@ var dataTable = function (node) {
 	this.renderDataTable = function (config) {
 
 		var render = null;
+		
 		// check if node wants to render data itself
-		//if(self.node.source.scripts.view) {
-			//var render = new Function('node', self.node.source.scripts.view);
-		//}
+		if(self.node.source.scripts.view) {
+			var render = new Function('node', 'self', self.node.source.scripts.view);
+		}
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
 
 		var html = "";
 		if(render) {
-			html = render(self.node);
+			html = render(self.node, self);
 		} else {
 			for(var j = 0; j < self.node.data.docs.length; j++) {
 				html += "<tr>";
@@ -290,6 +291,8 @@ var dataTable = function (node) {
 			}
 		}
 		return html;
+		
+
 	}
 
 

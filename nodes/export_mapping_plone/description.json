@@ -3,7 +3,7 @@
     "title": "Plone: Map data",
     "type": "export",
     "subtype": "metadata mapping",
-    "status": "usable",
+    "status": "broken",
     "description": "Map data to Plone (JSON)",
     "scripts": {
     

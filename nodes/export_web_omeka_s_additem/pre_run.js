@@ -1,4 +1,12 @@
 
+
+var out_link = context.doc[context.node.params.out_field];
+
+// if there is an url in out_link, then we do not run again
+if(out_link && typeof out_link == "string" && out_link.match(/^http/))
+	context.skip = true;
+
+
 if(context.doc[context.node.params.in_field]) {
 	var item = context.doc[context.node.params.in_field];
 

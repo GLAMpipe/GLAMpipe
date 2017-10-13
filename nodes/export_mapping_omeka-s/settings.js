@@ -40,12 +40,31 @@ function mapping() {
 				data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
 		   }
 		   $("#export-web-omeka_mappings select").append(data_fields);
+		   setSettings();
 		})
    })
 	   
 
 }
 
+
+function setSettings() {
+	var is_static = /^_static_/;
+	var is_dynamic = /^_dynamic_/;
+	console.log("setsettings")
+
+	// apply settings to mappings (remembering previous run)
+	for(var key in node.settings) {
+		console.log(key)
+		if(is_static.test(key)) {
+			$("input[name='" + key + "']").val(node.settings[key]);
+		}
+		
+		if(is_dynamic.test(key)) {
+			$("select[name='" + key + "']").val(node.settings[key]);
+		}
+	}
+}
 
 $("#xml_basic_guess").click(function(e){
    var obj=$(e.target);

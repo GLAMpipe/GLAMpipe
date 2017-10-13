@@ -18,11 +18,14 @@
 <div id="export-data-omeka_status" class="status"></div>
 
 <div id="export-data-omeka_hidden" style="display:none">
+	<label>Omeka site URL slug (like "my_site", optional)</label>
+	<input name="site_slug"/>
+	
 	<label>Where is mapping?</label>
 	<select name="in_field" class="dynamic_field" required />
 
-	<label>Where to write ID of item?</label>
-	<input name="out_field" value="omeka_id" required />
+	<label>Where to write a link to item?</label>
+	<input name="out_field" value="omeka_item_link" required />
 </div>
 
 <script>

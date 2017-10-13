@@ -117,11 +117,11 @@ exports.extractReferences = function (doc, sandbox, next) {
 
 
 exports.pdf2image = function (doc, sandbox, next) {
-	
+	console.log(doc)
 	var PDFImage = require("pdf-image").PDFImage;
 	var options = {outputDirectory: sandbox.context.node.dir};
-	var pdfImage = new PDFImage(doc, options);
-	pdfImage.convertPage(0).then(function (imagePath) {
+	var pdfImage = new PDFImage(doc.file, options);
+	pdfImage.convertPage(parseInt(doc.page)).then(function (imagePath) {
 		sandbox.context.data = imagePath;
 		//fs.existsSync("/tmp/slide-0.png") // => true 
 		next();

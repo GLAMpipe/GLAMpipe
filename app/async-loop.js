@@ -54,33 +54,33 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				return;
 			}
 			
-			// call document processing function
-			onDoc(doc, sandbox, function processed () {
+			// try to call document processing function
+			try {
+				onDoc(doc, sandbox, function processed () {
+					
+					if(Array.isArray(sandbox.out.setter))
+						sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
+					
+					if(sandbox.out.setter != null) {
+						var setter = sandbox.out.setter; 
+					} else {
+						var setter = {};
+						setter[node.out_field] = sandbox.out.value;
+					}
+					
+					updateDoc = createUpdateDoc(node, setter, doc, mode);
+					
+					//console.log("updateDoc:", updateDoc);
+					if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
+						console.log("NODE: skipping")
+						next();
+					} else
+						mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
+				});
 				
-				//console.log("SETTER")
-				//console.log(sandbox.data)
-				
-				
-				if(Array.isArray(sandbox.out.setter))
-					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
-				
-				if(sandbox.out.setter != null) {
-					var setter = sandbox.out.setter; 
-				} else {
-					var setter = {};
-					setter[node.out_field] = sandbox.out.value;
-				}
-				
-				updateDoc = createUpdateDoc(node, setter, doc, mode);
-				
-				//console.log("updateDoc:", updateDoc);
-				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
-					console.log("NODE: skipping")
-					next();
-				} else
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
-			});
-			
+			} catch(e) {
+				sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+			}
 
 		}, function done () {
 			sandbox.finish.runInContext(sandbox);

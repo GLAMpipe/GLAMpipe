@@ -197,6 +197,9 @@ var GlamPipe = function() {
 			// handle the error safely
 		    console.log("MAJOR ERROR!")
 		    console.log(err)
+		    // let's clear node run register so that node can be run again
+		    // TODO: we should sent response to node execution request
+		    global.register = [];
 		})
 
 		//  Start the app on the specific interface (and port).

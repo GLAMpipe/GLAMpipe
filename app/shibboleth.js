@@ -31,6 +31,7 @@ exports.addHeadersToData = function(req) {
 	
 	if(global.config.authentication === "shibboleth" && Array.isArray(global.config.shibbolethHeadersToData)) {
 		global.config.shibbolethHeadersToData.forEach(function(header) {
+			var encoding = require("encoding");
 			req.body[header] = encoding.convert(req.headers[header], "Latin_1").toString(); 
 		});
 		//console.log(req.body)

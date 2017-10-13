@@ -180,7 +180,10 @@ var glamPipe = function () {
 
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(config) { 
-			$("#version").empty().append("ver. " + config.version);
+			if(config.nodedevmode)
+				$("#version").empty().append("ver. " + config.version + " (devmode)");
+			else
+				$("#version").empty().append("ver. " + config.version);
 			
 			if(config.authentication === "local" || config.authentication === "shibboleth") {
 				self.desktop = false;

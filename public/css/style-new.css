@@ -871,3 +871,7 @@ img.centered {
 .manual-edit {
 	background-color: yellow;
 }
+
+.cover-frame {
+	width:300px;
+}
