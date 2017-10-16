@@ -228,7 +228,7 @@ var dataTable = function (node) {
 
 
 		if(self.node.data.docs.length == 0) {
-			var html = "<div class='fatbox'><h2>This collection is empty</h2><br><div>Add data source to get something to look at :)</div></div>";
+			var html = "<div class='message'><h2>This data collection does not have any data yet!</h2><br><div>Add a data source to start working!</div></div>";
 			$(self.dataDisplayDiv).empty().append(html);
 			return;
 		}

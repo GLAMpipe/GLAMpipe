@@ -35,7 +35,7 @@ var glamPipeNode = function (node, gp) {
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
-				$(".settings").removeClass("busy");
+				$("setting").removeClass("busy");
 				// reset run button
 				if(!self.source.params.parent) {
 					var input = self.getInputFields();
@@ -60,7 +60,7 @@ var glamPipeNode = function (node, gp) {
 			console.log(data);
 
 		}).fail(function() {
-			$(".settings").removeClass("busy");
+			$("setting").removeClass("busy");
 			// reset run button
 			if(!self.source.params.parent) {
 				var input = self.getInputFields();
@@ -76,7 +76,7 @@ var glamPipeNode = function (node, gp) {
 		post(self.baseAPI + "/nodes/" + self.source._id + "/stop", {} , function(data) {
 			console.log(data);
 			if(data.error) {
-				$(".settings").removeClass("busy");
+				$("setting").removeClass("busy");
 				alert(data.error);
 			}
 		}).fail(function() {
@@ -244,9 +244,9 @@ var glamPipeNode = function (node, gp) {
 			$(".node-description-value").val("");
 			
 		if(self.orphan) {
-			$("data-workspace .settings").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
-			$("data-workspace .settings").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
-			$("data-workspace .settings").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
+			$("data-workspace setting").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
+			$("data-workspace setting").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
+			$("data-workspace setting").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
 			$("data-workspace submitblock").empty().append("<button class='run-node button error' >missing input field, cant'run!</button>");
 
 			
@@ -254,7 +254,7 @@ var glamPipeNode = function (node, gp) {
 		} else {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
-			$("data-workspace .settings").empty();
+			$("data-workspace setting").empty();
 			
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
 			if(self.backend)
@@ -262,8 +262,8 @@ var glamPipeNode = function (node, gp) {
 			else
 				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 				
-			$("data-workspace .settings").append(self.source.views.settings);
-			$("data-workspace .settings .params").append(self.source.params);
+			$("data-workspace setting").append(self.source.views.settings);
+			$("data-workspace setting .params").append(self.source.params);
 			$(".show-node-params").data("id", self.source._id);
 			
 
@@ -287,7 +287,7 @@ var glamPipeNode = function (node, gp) {
 				}
 
 				// populate field selects
-				$(".settings select.dynamic_field").each(function(i) {
+				$("setting select.dynamic_field").each(function(i) {
 					$(this).append(options.join(""));
 				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
 				})	
@@ -377,7 +377,7 @@ var glamPipeNode = function (node, gp) {
 		
 		var settings = {};
 		// read input from settings (only inputs with class "node-settings")
-		$("data-workspace .settings input.node-settings:not([type='checkbox']), .settings  select.node-settings").each(function() {
+		$("data-workspace setting input.node-settings:not([type='checkbox']), setting  select.node-settings").each(function() {
 			var nameSplitted = $(this).attr("name").split("[");
 			// if input name has form "set[something1]", then we want to gather all of them to array
 			//console.log($(this).attr("name") + ":" +  $(this).val());
@@ -390,13 +390,13 @@ var glamPipeNode = function (node, gp) {
 		});
 		
 		// handle checkboxes separately. Checbox is included only if it is checked
-		$("data-workspace .settings input.node-settings[type='checkbox']").each(function() {
+		$("data-workspace setting input.node-settings[type='checkbox']").each(function() {
 			if($(this).is(':checked'))
 				settings[$(this).attr("name")] = $(this).is(':checked');
 		});
 
 		// handle textareas separately. Checbox is included only if it is checked
-		$("data-workspace .settings textarea.node-settings").each(function() {
+		$("data-workspace setting textarea.node-settings").each(function() {
 				settings[$(this).attr("name")] = $(this).val();
 		});
 		

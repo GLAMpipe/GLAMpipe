@@ -66,7 +66,7 @@ linkcell {
 }
 
 .settingslist th, td {
-    padding-left:10px;
+    padding-left:20px;
 	border-bottom:none;
 }
 
@@ -207,7 +207,7 @@ pipe {
 	color:#444;
 	background-color: #FFF;
 	border-radius: 5px;
-	height: 50px;
+	min-height: 50px;
 	overflow: hidden;
 	padding: 10px 5px 10px 10px;
 	margin-bottom:10px;
@@ -267,7 +267,6 @@ pipe {
 
 .boxtitle {
 	font-weight:400;
-	margin-top:3px;
 	width:240px;
 }
 
@@ -338,6 +337,7 @@ a .pageheader:hover {
 	left: -10px;
 	right:10px;
 	padding: 20px;
+	margin-bottom: 20px;
 }
 
 .optionlist {
@@ -386,16 +386,6 @@ a .listoption:hover {
 	background-color: #efefef;
 }
 
-
-.source {
-	border-left:solid rgba(52,123,255,0.2) 10px;
-	-webkit-transition-duration: 0.2s; /* Safari */
-    transition-duration: 0.2s;
-}
-
-.source:hover {
-	border-left:solid rgba(52,123,255,1) 10px;
-}
 
 settingscontainer {
 	display:block;
@@ -451,13 +441,21 @@ submitblock {
 	padding: 0px 20px;
 }
 
-.settings {
-	margin-right:20px;
-	min-width:600px;
+setting {
+   display: flex;
+   width: 100%;
+   background-color: #efefef;
+   margin: 7px 20px;
+   padding: 10px;
+   /* min-height: 50px; */
+   border-radius: 5px;
+   flex: 0 1 auto;
+   justify-content: space-between;
+   align-items: stretch;
 }
 
-.settings:first-child {
-	margin-left: 20px;
+settingaction {
+   width: 300px;
 }
 
 
@@ -482,34 +480,55 @@ data-controls {
 	padding: 0 20px;
 }
 
-input[type=text] {
-	font-size:13px;
-	font-weight:300;
-	color:#333;
-	padding: 5px 0px;
-	margin: 5px 0;
-	border: none;
-	border-bottom: 1px solid #efefef;
-	-webkit-transition: 0.5s;
-	transition: 0.5s;
-	outline: none;
+input[type=text], input[type=number] {
+   font-size: 13px;
+   font-weight: 300;
+   color: #333;
+   padding: 5px 3px;
+   margin: 5px 0;
+   /* border: none; */
+   border-top-color: rgba(0, 0, 0, 0);
+   border-top-style: solid;
+   border-top-width: 1px;
+   border-right-color: rgba(0, 0, 0, 0);
+   border-right-style: solid;
+   border-right-width: 1px;
+   border-bottom-color: rgba(0, 0, 0, 0.15);
+   border-bottom-style: solid;
+   border-bottom-width: 1px;
+   border-left-color: rgba(0, 0, 0, 0);
+   border-left-style: solid;
+   border-left-width: 1px;
+   /* border: solid rgba(0, 0, 0, 0.15); */
+   -webkit-transition: 0.5s;
+   transition: 0.5s;
+   outline: none;
+   width: 100%;
+   background: transparent;
 }
 
-input[type=text]:focus {
-    border-bottom: 1px solid #444;
+input[type=text]:focus, input[type=number]:focus{
+   background-color: rgba(255, 255, 255, 0.5);
+   border-color: black
 }
 
 textarea {
-    font-size:13px;
-	font-weight:300;
-	height: 60px;
-    padding: 5px 0px;
-    margin: 5px 0;
-    border-bottom: 1px solid #efefef;
-    -webkit-transition: 0.5s;
-    transition: 0.5s;
+   font-size: 13px;
+   font-weight: 300;
+   height: 60px;
+   padding: 5px 3px;
+   margin: 5px 0;
+   border: 1px solid rgba(0, 0, 0, 0.15);
+   -webkit-transition: 0.5s;
+   transition: 0.5s;
+   width: 100%;
+   background-color: rgba(255, 255, 255, 0);
+   outline: none;
+}
 
-	width:100%;
+textarea:focus {
+   border: 1px solid #000;
+   background-color: rgba(255, 255, 255, 0.5);
 }
 
 textarea.editor {
@@ -565,6 +584,10 @@ button.accordion {
 }
 
 button.accordion.active, button.accordion:hover {
+    border-left: solid rgba(52,123,255,1) 7px;
+    padding-left: 5px;
+    transition-duration: 0.2s;
+
 }
 
 .create-node{
@@ -591,9 +614,15 @@ div.panel.show {
 
 
 .panel .listoption {
-	font-size:12px;
-	padding-left:20px;
-	border-bottom:dotted #efefef 1px;
+	padding-left:5px;
+    border-bottom: solid #efefef 1px;
+    border-left: solid rgba(52,123,255,0.2) 7px;
+    transition-duration: 0.2s;
+    -webkit-transition-duration: 0.2s;
+}
+
+.panel .listoption:hover {
+	border-left: solid rgba(52,123,255,1) 7px;
 }
 
 ::-webkit-scrollbar {
@@ -739,7 +768,6 @@ b {
 
 table.documents thead td div {
 	font-weight:bold;
-    margin-left: 2em;
 }
 
 table.documents td {
@@ -754,7 +782,6 @@ table.documents tbody td div {
 	max-height:10em;
 	max-width:350px;
 	overflow: auto;
-	margin-left: 2em;
 	overflow-wrap: break-word;
 	margin-bottom:1em;
 }
@@ -878,4 +905,9 @@ img.centered {
 
 input.short {
 	width:3em;
+}
+
+.message {
+    width: 100%;
+    margin: 20px;
 }

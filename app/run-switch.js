@@ -450,7 +450,7 @@ exports.runNode = function (node, io) {
 								var run = new vm.createScript(node.settings.js);
 								sandbox.run = run;
 								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-									sandbox.run.runInContext(sandbox);
+									sandbox.run.runInContext(sandbox,{timeout:10});
 									next();
 								});
 							} catch (e) {

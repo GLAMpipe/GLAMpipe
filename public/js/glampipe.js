@@ -602,21 +602,21 @@ var glamPipe = function () {
 				html += "<collectionset>"
 
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Data imports</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Read data</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
 				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 				 
 				html += self.renderNodes(collection,["source"]);
 				  
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Operations</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Clean the data</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["process"]);
 				
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Exports</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Write the data</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
 				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 
