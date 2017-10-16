@@ -132,6 +132,14 @@ exports.uploadFile = function (upload, sandbox, next ) {
 
 	console.log(JSON.stringify(upload, null, 4));
 
+	// skip if retrieve link already exists
+	if(upload.link) {
+		console.log("WEB: existing retrieve link, skipping upload")
+		sandbox.context.data = {"existing_link": upload.link};
+		sandbox.run.runInContext(sandbox);
+		return next("file already uploaded");
+	}
+
 	// skip if file does not exist
 	try {
 		var stats = fs.statSync(upload.file);
@@ -143,17 +151,17 @@ exports.uploadFile = function (upload, sandbox, next ) {
 
 	// create form data and set file reading stream
 	var formData = {
-		data:JSON.stringify(upload.data)
+		data:JSON.stringify(upload.options.data)
 	};
 	formData[upload.upload_field] = fs.createReadStream(upload.file)
 	//console.log(JSON.stringify(formData, null, 4));
 
 	// make POST request
-	request.post({url:upload.url, formData: formData}, function(err, response, body) {
+	request.post({url:upload.options.url, formData: formData}, function(err, response, body) {
 		sandbox.context.response = response;
-		if (err) {
-			console.error('upload failed:', err);
-			console.log(body);
+		sandbox.context.data = body;
+		if (response.statusCode !== 200 || err) {
+			console.error('upload failed:', response.statusCode);
 			sandbox.context.error = err;
 			sandbox.run.runInContext(sandbox);
 			next();
@@ -171,6 +179,8 @@ exports.uploadFile = function (upload, sandbox, next ) {
 exports.uploadFile2 = function (upload, sandbox, next ) {
 
 	sandbox.context.response = null;
+	sandbox.context.data = null;
+	console.log(upload);
 
 	// skip if retrieve link already exists
 	if(upload.link) {
@@ -187,6 +197,7 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 		if (err) {
 			return console.error('upload failed:', err);
 		} else if (response.statusCode === 200) {
+			console.log(response)
 			console.log('WEB: Upload successful!  Server responded with:', response.statusCode);
 			sandbox.context.data = JSON.parse(body);
 			next();

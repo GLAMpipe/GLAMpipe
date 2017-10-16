@@ -1,20 +1,74 @@
 
 <div class="box-noflex">
 
-	<p>This is a very experimental script node.</p>
-	<p><strong>context.doc</strong> holds the current document. You can access document fields normally, i.e "context.doc.field_name". <br>Just keep in mind that <br>a) value of the field can be string, array, object etc., <br>b) you cannot change those values.</p>
-	<p>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node.</p>
+	<label>example setting 1 (static value)</label>
+	<input name="setting_1" class="node-settings" />
+
+
+	<label>example setting 2 (field selection)</label>
+	<select name="setting_2" class="node-settings dynamic_field">
+		<option value="">choose field</option>
+	</select>
+
+	<h3>This is a very experimental script node. </h3>
+
+	<p>Few things to keep in mind:
+	<br>a) the script is <strong>executed in the server</strong>, not in your browser
+	<br>b) document values (fields) can be primitive types (string, number etc), arrays or objects. So you must check type. 
+	<br>c) you cannot change those values, instead you write your result to a variable <strong>out.value</strong>.
+	<br>d) script is <strong>synchronous</strong>, you can not make any IO calls
+	<br>e) there is a <strong>10 ms timeout</strong> (in order to prevent infinite loops)</p>
+
+	<p><strong>context.doc</strong> holds the current document. You can access document fields with dot notation, i.e <strong>context.doc.field_name</strong>. 
+	
+	<p>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node (output field).</p>
+
+	<p>You can access example params and settings like this: 
+	<br>params: <strong>context.node.params.param_1</strong> 
+	<br>settings: <strong> context.node.settings.setting_1</strong>
+	<br>field selection (dynamic value): <strong> context.doc[context.node.settings.setting_2]</strong><br></p>
+	<p>Have fun!</p>
 
 	<label>run.js</label>
-	<textarea class="node-settings editor" name="js">// this is the current document
+	<select id="script_node_examples">
+		<option value="">example scripts</option>
+		<option value="typed_hello">Hello world with type checking</option>
+	</select>
+	<textarea id="script_node_editor" class="node-settings editor" name="js" >
+// this is the current document
 var doc = context.doc;
 
 // this writes the result to the field of the current document
-out.value = "Hello World!"
+out.value = "Hello World! The document id is: " + doc._id;
+
 	</textarea>
+
 
 </div>
 
 <script>
+	
+var examples = {
+	"typed_hello": `// this is the current document
+var doc = context.doc;
+var setting_2 = context.node.settings.setting_2;
+var greeting = "Hello world";
+
+// check the type of document field ("example setting" 2 in settings)
+if(Array.isArray(doc[setting_2]))
+	greeting = "Array, " + greeting;
+else if(typeof doc[setting_2] === "string")
+	greeting = "String, " + greeting;
+else
+	greeting = "Who knows or cares, " + greeting;
+	
+out.value = greeting;`
+
+}
+
+
+$("#script_node_examples").on("change", function() {
+	$("#script_node_editor").val(examples[$(this).val()]);
+})
 
 </script>

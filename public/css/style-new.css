@@ -873,5 +873,9 @@ img.centered {
 }
 
 .cover-frame {
-	width:300px;
+	width:150px;
+}
+
+input.short {
+	width:3em;
 }

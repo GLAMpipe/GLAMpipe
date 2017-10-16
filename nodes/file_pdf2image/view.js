@@ -15,14 +15,22 @@ for(var i = 0; i < node.data.docs.length; i++) {
 	if(!page)
 		page = 0;
 
-    html += "<div class='fatbox'>";
-    //html += "  <textarea class='big'>"+ doc[node.source.params.out_field] +"</textarea>";
-    html += "  <div data-id='"+doc._id+"' class='button run_single_view' data-id='"+doc._id+"'>run for this</div>";
+    html += "<div class='hbox'>";
+    html += "<div>";
+    html += "  <br><div class='bold'>"+ doc[node.source.settings.title] +"</div>";
+    //html += "  <div data-id='"+doc._id+"' class='button run_single_view' data-id='"+doc._id+"'>run for this</div>";
     html += "  <div data-id='"+doc._id+"' class='button pdfcover_prev_page'> < </div>";
-    html += "  <input data-id='"+doc._id+"' id='pdfcover_page' value='" + page + "'/>";
+    html += "  <input class='pdfcover_page short' data-id='"+doc._id+"' value='" + page + "'/>";
     html += "  <div data-id='"+doc._id+"' class='button pdfcover_next_page'> > </div>";
+    html += "<div>";
     if(doc[node.source.params.out_link] && doc[node.source.params.out_link][0])
 		html += "<img class='cover-frame' src='http://localhost:3000" + doc[node.source.params.out_link][0] +"'/>";
+    html += "</div>";
+    html += "</div>";
+
+
+
+
     html += "</div>";
 }
 
@@ -33,7 +41,7 @@ $("datablock").off();
 // off() is important since view.js gets called every time user clicks node
 
 $("datablock").on("click", ".pdfcover_next_page", function(e) {
-	var page = parseInt($("#pdfcover_page").val());
+	var page = parseInt($(this).siblings(".pdfcover_page").val());
 	var doc_id = $(this).data("id");
 	page++;
 	updateDb(page, doc_id, function() {
@@ -43,7 +51,7 @@ $("datablock").on("click", ".pdfcover_next_page", function(e) {
 })
 
 $("datablock").on("click", ".pdfcover_prev_page", function(e) {
-	var page = parseInt($("#pdfcover_page").val());
+	var page = parseInt($(this).siblings(".pdfcover_page").val());
 	var doc_id = $(this).data("id");
 	page--;
 	if(page < 0)
