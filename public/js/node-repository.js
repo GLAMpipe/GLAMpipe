@@ -17,10 +17,21 @@ var nodeRepository = function () {
 
 	this.verbose = {
 		"source": {
-			"collection": "Read files from your local hard drive",
-			"directory": "Read directory from your local hard drive",
-			"web": "Read files from your local hard drive",
-			"file": "Read files from your local hard drive"
+			"collection": "Read data from GLAMpipe collection",
+			"web": "Read data from web",
+			"file": "Read data from files"
+		},
+		"process": {
+			"strings": "Modify text",
+			"documents": "Modify whole records",
+			"files": "File operations",
+			"lookups": "Lookup up data",
+			"meta": "Series of operations",
+		},
+		"export": {
+			"file": "Export data to file",
+			"web": "Export data to web",
+			"view": "Export data to view",
 		}
 	}
 
@@ -53,14 +64,10 @@ var nodeRepository = function () {
 
 					html += "    <button class='accordion "+node.type+"'>"
 					// add some verbosity
-					if(node.type === "source")
-						html += "      <p class='listtitle'>from "+sub.sub.subtype+"</p>"
-					else if(node.type === "export" && sub.sub.subtype !== "metadata mapping")
-						html += "      <p class='listtitle'>to "+sub.sub.subtype+"</p>"
+					if(self.verbose[node.type] && self.verbose[node.type][sub.sub.subtype])
+						html += "      <p class='listtitle'>" + self.verbose[node.type][sub.sub.subtype] + "</p>";
 					else
 						html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
-						
-					html += self.verbose[node.type][sub.sub.subtype];
 						
 					html += "      <p class='listtext'></p>"
 					html += "    </button>"

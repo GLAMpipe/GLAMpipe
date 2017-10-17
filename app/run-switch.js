@@ -238,16 +238,6 @@ exports.runNode = function (node, io) {
 		
 			switch (node.subtype) {
 				
-				case "metadata mapping":
-				
-					//default: // syncronous nodes
-					asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-						sandbox.run.runInContext(sandbox);
-						next();
-					});
-					
-				break;
-				
 				case "file":
 				
 					switch (node.subsubtype) {
@@ -358,7 +348,16 @@ exports.runNode = function (node, io) {
 							
 					
 					}
-				
+					
+				case "view":
+					switch (node.subsubtype) {
+						case "facet":
+							var facet = require("../app/node_runners/view-facet.js");
+							facet.writeConfig(node, sandbox);
+						break;
+					}
+
+
 				break;
 			}
 
@@ -485,7 +484,16 @@ exports.runNode = function (node, io) {
 								next();
 							});	
 						break;
+
+					default: // syncronous metadata mappings
+						asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+							sandbox.run.runInContext(sandbox);
+							next();
+						});
+						
+					break;
 					}
+					
 				break;
 					
 				case "lookups":
@@ -560,26 +568,6 @@ exports.runNode = function (node, io) {
 
 
 		break;
-
-
-
-
-
-/***************************************************************************************************************
- *                                       VIEW                                                              *
- * *************************************************************************************************************/
-
-		case "view":
-			switch (node.subtype) {
-				case "facet":
-					var facet = require("../app/node_runners/view-facet.js");
-					facet.writeConfig(node, sandbox);
-				break;
-			}
-
-
-		break;
-
 
 		default:
 			sandbox.out.say("finish", "This node is not runnable");

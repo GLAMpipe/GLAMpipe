@@ -603,38 +603,22 @@ var glamPipe = function () {
 
 				html += "  <div class='sectiontitleblock'>"
 				html += "	<div><span class='title sectiontitle'>Read data</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
-				html += "	<div title='help' class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 				 
 				html += self.renderNodes(collection,["source"]);
 				  
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Clean the data</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
-				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
+				html += "	<div><span class='title sectiontitle'>Process the data</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["process"]);
 				
 				html += "  <div class='sectiontitleblock'>"
 				html += "	<div><span class='title sectiontitle'>Write the data</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
-				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["export"]);
 
-				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Views</span> <a class='add-node' data-type='view' href='addnode.html'>Add</a></div>"
-				html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-				html += "  </div><div class='holder params'></div>"
-
-				html += self.renderNodes(collection, ["view"]);
-
-				//html += "  <div class='sectiontitleblock'>"
-				//html += "	<div><span class='title sectiontitle'>Tasks</span> <a class='add-node' data-type='meta' href='addnode.html'>Add</a></div>"
-				//html += "	<div class='wikiglyph wikiglyph-user-talk sectionicon icon' aria-hidden='true'></div>"
-				//html += "  </div><div class='holder params'></div>"
-
-				//html += self.renderNodes(collection, ["meta"]);
 			}
 			html += "</collectionset>"
 			

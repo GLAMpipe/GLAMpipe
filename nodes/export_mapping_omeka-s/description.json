@@ -1,8 +1,8 @@
 {
     "nodeid": "export_mapping_omeka_s",
     "title": "Omeka-S: Map data",
-    "type": "export",
-    "subtype": "metadata mapping",
+    "type": "process",
+    "subtype": "documents",
     "status": "usable",
     "description": "Map data to Omeka-S data for export(JSON)",
     "scripts": {

@@ -315,11 +315,11 @@ var dataTable = function (node) {
 			
 		   
 			if(config && config.input_keys.indexOf(key_name) !== -1)
-				html += "<td class='input'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
+				html += "<td class='input'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else if(config && config.output_keys.indexOf(key_name) !== -1)
-				html += "<td class='output'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
+				html += "<td class='output'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else 
-				html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
+				html += "<td></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
 			
 		}
 		return html;
@@ -818,7 +818,7 @@ var dataTable = function (node) {
 		// ****************************** DATA display *************************
 
 		// edit cell content
-		$("data-workspace").on('click','table tbody td div.edit', function(e) {
+		$("data-workspace").on('click','table tbody td div', function(e) {
 			self.editCell(e);
 		});
 
