@@ -449,13 +449,23 @@ setting {
    padding: 10px;
    /* min-height: 50px; */
    border-radius: 5px;
-   flex: 0 1 auto;
    justify-content: space-between;
-   align-items: stretch;
+   flex-wrap: wrap;
+}
+
+settingtitle {
+	display:block;
+	font-weight: 500;
+}
+
+settinginfo {
+	flex: 1 0 300px;
 }
 
 settingaction {
    width: 300px;
+   vertical-align: middle;
+   flex: 1 0 300px;
 }
 
 
@@ -569,6 +579,14 @@ textarea:focus {
 data {
 	overflow-x:auto;
 }
+
+setting button {
+    vertical-align: middle;
+    margin: 0.5em 0em;
+    padding: 0.5em;
+    color: #333;
+}
+
 button.accordion {
     cursor: pointer;
     width: 100%;
@@ -654,8 +672,6 @@ select {
 }
 
 label {
-	font-weight:500;
-	margin-top:0.8em;
 	display:block;
 }
 
@@ -910,4 +926,14 @@ input.short {
 .message {
     width: 100%;
     margin: 20px;
+}
+
+.initial {
+	background-color: #ccc;
+	font-size: 1.3em;
+	font-weight: 500;
+	color: #efefef;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }

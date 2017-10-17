@@ -79,7 +79,10 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				});
 				
 			} catch(e) {
-				sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+				if(e && e.name)
+					sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+				else
+					sandbox.out.say("error", "Error in node: 'run' script");
 			}
 
 		}, function done () {

@@ -1,22 +1,14 @@
 {
 	"nodeid": "source_directory_scan",
 	"type": "source",
-	"subtype": "directory",
+	"subtype": "file",
+	"subsubtype": "directory",
 	"title": "Recursive directory scan",
 	"description": "Recursive directory scan",
 	"tags":["generic"],
 
 	"scripts": {
-		"hello": 
-		[
-			"out.say('news', 'You added a directory scan');"
-		],
-        "bye": "out.say('news', 'Deleted directory scan node. Data removed. Bye!'); ",
-		"init":"out.say('progress', context.node.title);",
-
 		"finish":"out.say('finish', 'Data imported from directory ' + context.node.params.root);"
-	},
-	
-	"views": {}
+	}
 
 }

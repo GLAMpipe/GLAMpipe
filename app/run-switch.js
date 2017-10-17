@@ -205,7 +205,6 @@ exports.runNode = function (node, io) {
 								sandbox.out.filename = path.join(global.config.dataPath, "tmp", node.params.filename);
 								csv.importFile_stream(node, sandbox, io);
 							});
-							
 						break;
 
 						case "pdf":
@@ -218,23 +217,17 @@ exports.runNode = function (node, io) {
 							mongoquery.empty(node.collection, query, function() {
 								pdf.extractText(node, sandbox, io);
 							});
-							
+						break;
+
+						case "directory":
+						
+							var dir = require("../app/node_runners/source-directory.js");
+							dir.read(node, sandbox, io);
 						break;
 
 					}
-						
-				
-				break;
-
-
-				case "directory":
-				
-					var dir = require("../app/node_runners/source-directory.js");
-					dir.read(node, sandbox, io);
-				
 				break;
 			}
-
 		break;
 
 /***************************************************************************************************************

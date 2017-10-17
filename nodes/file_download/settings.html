@@ -1,43 +1,106 @@
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			File naming
+		</settingtitle>
+		<settinginstructions>
+			Choose the way the downloaded files are named.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>How to name files? </label> 
+		<select class="node-settings" name="filename_type" id="download_file_name_type"> 
+			<option value="id" selected="selected">use document id</option> 
+			<option value="url">use last part of link (direct download URL)</option> 
+			<option value="record" >filename can be found on records</option> 
+			<option value="own">make your own</option>
+		</select> 
+	</settingaction>
+</setting>
 
-<label>How to name files? </label> 
 
-
-<select class="node-settings" name="filename_type" id="download_file_name_type"> 
-    <option value="id" selected="selected">use document id</option> 
-    <option value="url">use last part of link (direct download URL)</option> 
-    <option value="record" >filename can be found on records</option> 
-    <option value="own">make your own</option>
-</select> 
+<setting style="display:none" id="download_file_has_filename">
+	<settinginfo>
+		<settingtitle>
+			Filename can be found on records 
+		</settingtitle>
+		<settinginstructions>
+			Choose the field where the file name is
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Filename field</label> 
+		<input type="text" name="filename__record" class="node-settings dynamic_field" /><span class=""> </span><br>
+	</settingaction>  
+</setting>
        
-<div style="display:none" id="download_file_has_filename">
-	<label>Filename can be found on records (remember to choose this from options above)</label> 
-	<input name="filename__record" class="node-settings dynamic_field" /><span class=""> </span><br>
-</div>             
+           
+<setting style="display:none" id="download_file_create_filename">
+	<settinginfo>
+		<settingtitle>
+			Create your own filename
+		</settingtitle>
+		<settinginstructions>
+			Here you can construct filename.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Make your own filename (remember to choose this from options above)</label> 
+		<input type="text" name="file__1" class="node-settings short_input "/> + 
+		<input type="text" name="file__2" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
+		<input type="text" name="file__3" class="node-settings short_input "/><span class=""> + </span>
+		<input type="text" name="file__4" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
+		<input type="text" name="file__5" class="node-settings short_input "/><span class=""> +  </span>
+		<input type="text" name="file__6" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
 
-<div style="display:none" id="download_file_create_filename">
-	<label>Make your own filename (remember to choose this from options above)</label> 
-	<input name="file__1" class="node-settings short_input "/> + 
-	<input name="file__2" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
-	<input name="file__3" class="node-settings short_input "/><span class=""> + </span>
-	<input name="file__4" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
-	<input name="file__5" class="node-settings short_input "/><span class=""> +  </span>
-	<input name="file__6" class="node-settings dynamic_field middle_input " /><span class=""> + </span><br>
+
+		<select class="node-settings" name="counter"> 
+			<option value="no" selected="selected">no counter</option>
+			<option value="yes">document counter</option> 
+		</select> *)
+
+		<div>*) using document counter prevents duplicate file names</div>
+	</settingaction>  
+</setting>
+                  
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Dynamic extension for file name
+		</settingtitle>
+		<settinginstructions>
+			By choosing this an detected file extension is added to file.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Add a detected file extension</label> 
+		<input type="checkbox" name="extension" class="node-settings short_input " checked="checked"/> 
+	</settingaction>
+</setting>
 
 
-	<select class="node-settings" name="counter"> 
-		<option value="no" selected="selected">no counter</option>
-		<option value="yes">document counter</option> 
-	</select> *)
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Static extension in file name
+		</settingtitle>
+		<settinginstructions>
+			If you know that all downloaded files are for example PDF-files, then you can add "pdf" extension to all of them.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>                    
+		<label>static file extension if needed </label> 
+		<input type="text" name="file__ext" class="node-settings short_input "/> 
+	</settingaction>
+</setting>
 
-	<div>*) using document counter prevents duplicate file names</div>
-</div>                    
-
-<label>Add a detected file extension to a file name</label> 
-<input type="checkbox" name="extension" class="node-settings short_input " checked="checked"/> 
-                    
-<label>Here you can add a static file extension if needed (like .jpg) </label> 
-<input name="file__ext" class="node-settings short_input "/> 
 
 
 

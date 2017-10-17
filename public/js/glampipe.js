@@ -497,7 +497,7 @@ var glamPipe = function () {
         var node = self.nodeRepository.getNodeByIndex(index);
         
         // check if are importing file 
-        if(node.type == "source" && node.subtype == "file") {
+        if(node.type == "source" && node.subtype == "file" && node.nodeid != "source_directory_scan") {
 			self.uploadFileAndCreateNode(obj, node);
 			return;
 		}

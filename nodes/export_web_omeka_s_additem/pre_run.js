@@ -11,7 +11,7 @@ if(context.doc[context.node.params.in_field]) {
 	var item = context.doc[context.node.params.in_field];
 
 	// set item set
-	item["o:item_set"] = [{"o:id":context.node.settings.collection}] 
+	item["o:item_set"] = [{"o:id":context.node.settings.item_set}] 
 
 
 	if(parseInt(context.count) % 10 == 0) 

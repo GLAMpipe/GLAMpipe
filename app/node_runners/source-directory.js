@@ -15,7 +15,8 @@ exports.read = function  (node, sandbox, io) {
 			if(err) {
 				if(err.code == "ENOENT") {
 					console.log("ERROR: directory not found", node.params.root);
-					io.sockets.emit("error", "directory not found: " + node.params.root);
+					sandbox.context.error = "directory not found: " + node.params.root;
+					sandbox.finish.runInContext(sandbox);
 				} else
 					console.log(err);
 				return;

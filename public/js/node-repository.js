@@ -15,6 +15,15 @@ var nodeRepository = function () {
 		})
 	}
 
+	this.verbose = {
+		"source": {
+			"collection": "Read files from your local hard drive",
+			"directory": "Read directory from your local hard drive",
+			"web": "Read files from your local hard drive",
+			"file": "Read files from your local hard drive"
+		}
+	}
+
 	this.renderNodeList = function (div, types) {
 		
 		// if node list is already open, then we "collapse" it
@@ -50,6 +59,8 @@ var nodeRepository = function () {
 						html += "      <p class='listtitle'>to "+sub.sub.subtype+"</p>"
 					else
 						html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
+						
+					html += self.verbose[node.type][sub.sub.subtype];
 						
 					html += "      <p class='listtext'></p>"
 					html += "    </button>"
