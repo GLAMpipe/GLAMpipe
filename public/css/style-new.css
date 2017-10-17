@@ -908,7 +908,8 @@ img.centered {
 	background-color: #959595;
 	color: white;
 	padding: 2px 15px 2px 15px;
-	margin-left: 165px;
+	margin-left: 370px;
+	position:absolute;
 }
 
 .manual-edit {

@@ -251,11 +251,6 @@ var dataTable = function (node) {
 		$(self.dataDisplayDiv).empty();
 		$(self.dataDisplayDiv).append("<div id='count'></div>");
 		$(self.dataDisplayDiv).append(html);
-		
-		// make edit buttons visible id edit mode is on
-		if(self.editMode)
-			$("data-workspace table tbody td div.edit").css('display','inline');
-		
 
 	}
 
@@ -306,10 +301,10 @@ var dataTable = function (node) {
 		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
 
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>run for this</div></td>";
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>run for this</a></td>";
 
 			else
-				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
+				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
 			
@@ -471,6 +466,7 @@ var dataTable = function (node) {
 		return html;
 	}
 
+
 	this.openSearchDialog = function () {
 
 		var text = window.getSelection().toString();
@@ -507,7 +503,6 @@ var dataTable = function (node) {
 	}
 
 	this.editCell = function(event) {
-		
 		var obj = $(event.target);
 		var doc = self.getDocByTableClick(event);
 		var key = self.getKeyByTableClick(event);
@@ -743,9 +738,19 @@ var dataTable = function (node) {
 
 		// edit mode
 		$("data-workspace").on('click','data-controls .wikiglyph-edit', function(e) {
-			$("data-workspace table tbody td div.edit").toggle();
-			$("data-workspace table tbody td div.delete").toggle();
 			self.editMode = !self.editMode;
+			//alert(self.editMode)
+			if(self.editMode) {
+				$("data-workspace table tbody td a.delete").show();
+				$("data-workspace").on('click','table tbody td div', function(er) {
+					self.editCell(er);
+				});
+			} else {
+				$("data-workspace table tbody td a.delete").hide();
+				$("data-workspace").off('click','table tbody td div');
+			}
+
+			
 		})
 
 		// shrink all cells
@@ -816,19 +821,23 @@ var dataTable = function (node) {
 
 
 		// ****************************** DATA display *************************
+		if(self.editMode) {
+			$("data-workspace table tbody td a.delete").show();
+			$("data-workspace").off('click','table tbody td div').on('click','table tbody td div', function(e) {
+				self.editCell(e);
+			});
+		} else {
+			$("data-workspace table tbody td a.delete").hide();
+			$("data-workspace").off('click','table tbody td div');
+		}
 
-		// edit cell content
-		$("data-workspace").on('click','table tbody td div', function(e) {
-			self.editCell(e);
-		});
-
-		// edit cell content
-		$("data-workspace").on('click','table tbody td div.delete', function(e) {
+		// delete document button handler
+		$("data-workspace").on('click','table tbody td a.delete', function(e) {
 			self.node.gp.deleteDocument(e);
 		});
 
 		// run node with single document
-		$("data-workspace").on('click','table tbody td div.run_single', function(e) {
+		$("data-workspace").on('click','table tbody td a.run_single', function(e) {
 			self.runSingle(e);
 		});
 	

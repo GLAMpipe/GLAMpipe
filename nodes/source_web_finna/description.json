@@ -8,12 +8,10 @@
     "description": "Fetch online materials data from finna.fi. ",
 
     "scripts": {
-        "hello": "out.say('news', '<h2>Hello, You just added a finna.fi node!</h2>'); ",
-        "bye": "out.say('news', 'Deleted finna.fi source node!  Bye!'); ",
         "finish":"out.say('finish', 'Got content from Finna! (' + context.var.total_count +')' ); "
     },
     
     "views": {
-        "params":"no params"
+        "params":""
     }
 }

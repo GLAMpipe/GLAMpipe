@@ -25,7 +25,7 @@ var nodeRepository = function () {
 			"strings": "Modify text",
 			"documents": "Modify whole records",
 			"files": "File operations",
-			"lookups": "Lookup up data",
+			"lookups": "Look up data",
 			"meta": "Series of operations",
 		},
 		"export": {
@@ -56,8 +56,16 @@ var nodeRepository = function () {
 			var node = self.nodes[i]._id;
 			if(types.indexOf(node.type) != -1) {
 				html += "  <div class='optionlist'>"
-				self.nodes[i].subtypes.sort(sortBySubType);
-				console.log(self.nodes[i].subtypes);
+				
+				// add verbose text
+				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
+					var sub = self.nodes[i].subtypes[j];
+					if(self.verbose[node.type] && self.verbose[node.type][sub.sub.subtype])
+						console.log(self.nodes[i].subtypes[j].text = self.verbose[node.type][sub.sub.subtype])
+				}
+				// and sort by verbose texts
+				self.nodes[i].subtypes.sort(sortByVerbose);
+				
 				// render subtypes
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
@@ -194,10 +202,10 @@ function sortByTitle (a,b) {
   return 0; 
 }
 
-function sortBySubType (a,b) {
-  if (a.sub.subtype.toLowerCase() < b.sub.subtype.toLowerCase())
+function sortByVerbose (a,b) {
+  if (a.text.toLowerCase() < b.text.toLowerCase())
 	return -1;
-  if (a.sub.subtype.toLowerCase() > b.sub.subtype.toLowerCase())
+  if (a.text.toLowerCase() > b.text.toLowerCase())
 	return 1;
   return 0; 
 }

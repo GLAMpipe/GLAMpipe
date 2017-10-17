@@ -530,7 +530,7 @@ var glamPipe = function () {
 				self.currentlyOpenNode = node;
 				self.renderCollectionSet();
 				node.open();
-				$("data-workspace settingscontainer .settings").show();
+				$("data-workspace settingsblock").show();
 				$("data-workspace settingscontainer submitblock").show();
 				$("data-workspace settingscontainer .node-description").show();
 			});
@@ -657,7 +657,7 @@ var glamPipe = function () {
 				title = self.collections[i].source.title;
 			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
 		}
-		$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
+		//$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
 	}
 
 	
