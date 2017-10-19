@@ -2,8 +2,8 @@ var title = context.doc[context.node.params.in_field];
 var source = context.doc[context.node.params.in_location]; 
 
 var ext = "";
-if(context.node.params.in_location_ext)
-	ext = context.doc[context.node.params.in_location_ext];
+if(context.node.params.location_ext)
+	ext = context.doc[context.node.params.location_ext];
 
 var upload = {};
 

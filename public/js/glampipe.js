@@ -192,7 +192,6 @@ var glamPipe = function () {
 					method:"GET", 
 					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
 					error: function(data, s, xhr) {
-						console.log("not logged in");
 						if(config.authentication !== "shibboleth")
 							$(div).html("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
 						else

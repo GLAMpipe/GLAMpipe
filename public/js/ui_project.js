@@ -11,7 +11,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
-		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>login</div> <a id='login-cancel' href='#'>cancel</a> </div>");
 		e.preventDefault();
 	});
 
@@ -23,6 +23,12 @@ $( document ).ready(function() {
 		else 
 			gp.login(user, pass)
 			
+		e.preventDefault();
+	});
+
+	$(document).on("click", "#login-cancel", function(e) {
+		$("#login").empty();
+		$("#login").append("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
 		e.preventDefault();
 	});
 
@@ -228,10 +234,10 @@ $( document ).ready(function() {
 
 			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
 
-			// revert "run" button text
-			var button = $("button[data-id='"+data.node_uuid+"']");
+			// revert run button text
+			var button = $("a[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
-			$("div[data-id='"+data.doc+"']").text("run only this");
+			$("a[data-id='"+data.doc+"']").text("run for this");
 		}
 		//websockPopup(progressDisplay, "Node run error");
 	});

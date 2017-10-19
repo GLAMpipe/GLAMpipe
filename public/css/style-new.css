@@ -857,26 +857,15 @@ table.documents tbody td div{
 }
 
 
-table.documents tbody td div.edit {
+
+table.documents tbody td a.delete {
     display:none;
     float:left;
-}
-
-table.documents tbody td div.delete {
-    display:none;
-    float:left;
-}
-
-table.documents tbody td div.edit:hover {
-    cursor:pointer;
-    opacity:1;
+    color:red;
+    margin-right:1em;
 }
 
 
-table.documents tbody td div.edit {
-    display:none;
-    float:left;
-}
 
 table.documents tbody td div.edit:hover {
     cursor:pointer;
@@ -946,6 +935,7 @@ table.documents tbody td div.edit:hover {
 
 #login-popup input {
 	margin-right: 20px;
+	width: 200px;
 }
 
 img.centered {
