@@ -31,6 +31,19 @@ a:hover {
 	color:#347BFF;
 }
 
+a.run_single {
+    white-space: nowrap;
+}
+
+a.delete {
+    white-space: nowrap;
+    color: #d42700;
+}
+
+a.delete:hover {
+    color: #ff2f00;
+}
+
 table {
 	border-collapse: collapse;
 	width:100%;
@@ -58,6 +71,14 @@ table.documents {
 
 table.documents td:first-child, table.documents th:first-child {
    padding-left: 20px;
+}
+
+#projectList {
+    margin-top: 20px;
+}
+
+#projectList td:first-child, #projectList th:first-child {
+    padding-left: 20px;
 }
 
 linklist {
@@ -240,7 +261,9 @@ pipe {
 }
 
 .box:hover {
-	cursor:pointer;
+    cursor: pointer;
+    border-left: solid rgba(52,123,255,1) 10px;
+    padding-left: 10px;
 }
 
 .boxleft {
@@ -570,6 +593,10 @@ input:focus{
    border-color: black
 }
 
+input#username, input#password {
+    width: 150px;
+}
+
 textarea {
    font-size: 13px;
    font-weight: 300;
@@ -853,9 +880,8 @@ table.documents tbody td div{
    max-width: 350px;
    overflow: auto;
    overflow-wrap: break-word;
-   margin: 3px 10px 3px 0;
+   margin: 5px 10px 5px 0;
 }
-
 
 
 table.documents tbody td a.delete {
@@ -872,19 +898,22 @@ table.documents tbody td div.edit:hover {
     opacity:1;
 }
 
-.box-noflex {
-    display:block;
-	color:#444;
-	background-color: #FFF;
-	border-radius: 5px;
-	/*height: 50px; */
+.button.toggle_all {
+    margin-right: 10px;
+}
 
-	padding: 10px 5px 10px 10px;
-	margin-bottom:10px;
+.box-noflex {
+    display: block;
+    color: #444;
+    background-color: #FFF;
+    border-radius: 5px;
+    /* height: 50px; */
+    padding: 20px;
+    margin-bottom: 10px;
 }
 
 .output {
-	background-color:#e7f2e2;
+    background-color: #F5F5F5;
 }
 
 .input {
@@ -935,7 +964,6 @@ table.documents tbody td div.edit:hover {
 
 #login-popup input {
 	margin-right: 20px;
-	width: 200px;
 }
 
 img.centered {

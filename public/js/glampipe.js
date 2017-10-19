@@ -809,10 +809,7 @@ var glamPipe = function () {
         var obj = $(event.target);
         self.currentInput = obj; 
 
-        
-        
-        
-        var html = "<ul>";
+        var html = "<select>";
         for(var i = 0; i < self.collections.length; i++) {
             var node = self.collections[i];
             if(node.source._id != self.currentCollection.source._id) {
@@ -821,25 +818,17 @@ var glamPipe = function () {
 					var cName = parts[parts.length - 1];
 				else
 					var cName = node.source.collection;
-                html += '<li class="pick_collection" data-field="source_collection" data-val="'+node.source.collection+'">' + cName + '</li>';
+                html += '<option class="pick_collection" value="'+node.source.collection+'">' + cName + '</option>';
             }
         }
-        html += "</ul>";
+        html += "</select>";
         
         if(self.collections.length == 1)
-			html = "No other collections";
+			alert("No other collections");
 
         // open dialog
-        $("#dynamic-fields").empty();
-        $("#dynamic-fields").append(html);
-        $("#dynamic-fields").dialog({
-            position: { 
-                my: 'left top',
-                at: 'right top',
-                of: obj
-            },
-            title: "choose collection"
-        });
+        obj.replaceWith(html);
+
 	}
 	
 	

@@ -2,7 +2,7 @@
 var nodeRepository = function () {
 	var self = this;
 	this.nodes = [];
-	this.showBrokenNodes = false;
+	this.showBrokenNodes = true;
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];
@@ -134,9 +134,8 @@ var nodeRepository = function () {
 		
 		var html = "";
 		html += "<div class='fatbox " + node.type + " " + node.status + "'>"
-		html += "  <div class='inlinetitleblock'>"
-		html += "    <div><span class='title inlinetitle'>" + node.description + "</span></div>"
-		html += "  </div>"
+		html += "  <fatboxtitle>" + node.title + "</fatboxtitle>";
+		html += "  <fatboxdescription>" + node.description + "</fatboxdescription>"
 
 		// we need to create form for file import (upload)
 		if(node.type == "source") {
@@ -150,10 +149,11 @@ var nodeRepository = function () {
 		} else {
 			html += node.views.params;
 		}
-		
-		html += "    <br><br><a href='#'>"
-		html += "   <div data-index='" + index + "'  class='button create-node'>Create node</div>"
-		html += "  </a> </div>"
+		html += "  <fatboxsubmitblock>";
+		html += "    <a href='#'>"
+		html += "      <div data-index='" + index + "'  class='button create-node'>Create node</div>"
+		html += "    </a>";
+		html += "  <fatboxsubmitblock>";
 		html += "</div>"
 		
 		var params = $(html);
