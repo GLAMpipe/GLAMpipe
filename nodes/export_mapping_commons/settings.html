@@ -1,7 +1,122 @@
 
 
-<h3>Generic mapping</h3>
-<div class="help">Here you can match your fields to the fields of wikitext template.</div>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Title
+		</settingtitle>
+		<settinginstructions>
+			You can define your mapping below.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<table>
+			<tr>
+				<td><label>title field</label></td>
+				<td><label>language field</label></td>
+				<td><label>static language value </label></td>
+			</tr>
+			<tr>
+				<td><select class="node-settings dynamic_field middle_input" name="title_dynamic"><option value="">no value</option></select></td>
+				<td><select class="node-settings dynamic_field middle_input" name="title_lang_dyn"><option value="">no value</option></select></td>
+				<td><input type="text" class="node-settings short_input" name="title_lang_static"/></td>
+			</tr>
+		</table>
+		
+		
+		
+		
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Description
+		</settingtitle>
+		<settinginstructions>
+			You can define your mapping below.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>title field</label>
+		<select class="node-settings dynamic_field middle_input" name="description_dynamic"><option value="">no value</option></select>
+		
+		<label>language field</label>
+		<select class="node-settings dynamic_field middle_input" name="description_lang_dyn"><option value="">no value</option></select>
+		
+		<label>static language value </label>
+		<input type="text" class="node-settings short_input" name="description_lang_static"/>
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Permission
+		</settingtitle>
+		<settinginstructions>
+			You MUST give permission.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+				<label>static permission </label>
+				<textarea class="node-settings big" name="permission_static"></textarea>
+				
+				<label>permission field</label>
+				<select class="node-settings dynamic_field" name="permission_dynamic"><option value="">no value</option></select>
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Date
+		</settingtitle>
+		<settinginstructions>
+			Date that the image was created.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>title field</label>
+		<select class="node-settings dynamic_field middle_input" name="date_dynamic"><option value="">no value</option></select>
+		
+		<label>language field</label>
+		<select class="node-settings dynamic_field middle_input" name="date_lang_dyn"><option value="">no value</option></select>
+		
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Date
+		</settingtitle>
+		<settinginstructions>
+			Date that the image was created.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>title field</label>
+		<select class="node-settings dynamic_field middle_input" name="date_dynamic"><option value="">no value</option></select>
+		
+		<label>language field</label>
+		<select class="node-settings dynamic_field middle_input" name="date_lang_dyn"><option value="">no value</option></select>
+		
+	</settingaction>
+</setting>
+
+<setting>
 
 <table>
 	<tr>
@@ -12,40 +127,9 @@
 		<th>dynamic language</th>
 	
 	</tr>
-	<tr>
-		<td>title</td>
-		<td><input class="node-settings middle_input" name="title_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="title_dynamic"><option value="">no value</option></select></td>
-		<td>    <input class="node-settings short_input" name="title_lang_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="title_lang_dyn"><option value="">no value</option></select></td>
-	</tr>
+
 	
-	
-	
-	<tr>
-		<td>description</td>
-		<td><input class="node-settings middle_input" name="description_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="description_dynamic"><option value="">no value</option></select></td>
-		<td><input class="node-settings short_input" name="description_lang_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="description_lang_dyn"><option value="">no value</option></select></td>
-	
-	</tr>
-	
-	<tr>
-		<td>date</td>
-		<td><input class="node-settings middle_input" name="date_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="date_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>permission</td>
-		<td><textarea class="node-settings big" name="permission_static"></textarea></td>
-		<td><select class="node-settings dynamic_field" name="permission_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
+
 	
 	<tr>
 		<td>source</td>
@@ -88,8 +172,24 @@
 	</tr>
 </table>
 
+</setting>
 
-<h3>Template specific mapping</h3>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Template spesific mapping
+		</settingtitle>
+		<settinginstructions>
+			Here you can match your fields to the fields of wikitext template.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+	</settingaction>
+</setting>
+
 <div class="box-noflex">
     <div class="help">Here you can match your fields to the fields of wikitext template.</div>
     <div id="node_set___node_id__" class="template_map"></div>

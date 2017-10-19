@@ -20,7 +20,7 @@ for(var i = 0; i < node.data.docs.length; i++) {
 
     html += "<div class='fatbox'>";
     html += "  <div class='inlinetitleblock'><span class='title'>" + title + "</span></div>";
-    //html += "  <textarea class='big'>"+ doc[node.source.params.out_field] +"</textarea>";
+    html += "  <textarea class='big'>"+ doc[node.source.params.out_field] +"</textarea>";
     html += "  <a target='_blank' href='" + preview_url + wikitext_url + "'><div class='button'>Preview wikitext</div></a>";
     html += "</div>";
 }

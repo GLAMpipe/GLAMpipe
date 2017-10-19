@@ -337,7 +337,7 @@ var dataTable = function (node) {
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			// render urls as links
-			if(typeof data == "string" && data.match(/^http/)) {
+			if(typeof data == "string" && data.match(/^http/) && !self.editMode) {
 				if(index === 0 || index)
 					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				else
@@ -355,9 +355,9 @@ var dataTable = function (node) {
 		// render objects
 		} else {
 			if(index != null)
-				html += "<div data-index="+index+" class='object-cell'>["+index+"] object</div>";
+				html += "<div data-index="+index+" class='object-cell'>["+index+"] subdocument</div>";
 			else
-				html += "<div class='object-cell'>object</div><div class='object-string'>as string</div>";
+				html += "<div class='object-cell'>subdocument</div><div class='object-string'>as string</div>";
 		}
 		return html;
 	}
@@ -741,16 +741,12 @@ var dataTable = function (node) {
 			self.editMode = !self.editMode;
 			//alert(self.editMode)
 			if(self.editMode) {
-				$("data-workspace table tbody td a.delete").show();
-				$("data-workspace").on('click','table tbody td div', function(er) {
-					self.editCell(er);
-				});
+				$("datacontainer table tbody td div").addClass("edit");
+				$("datacontainer table tbody td a.delete").show();
 			} else {
-				$("data-workspace table tbody td a.delete").hide();
-				$("data-workspace").off('click','table tbody td div');
+				$("datacontainer table tbody td div").removeClass("edit");
+				$("datacontainer table tbody td a.delete").hide();
 			}
-
-			
 		})
 
 		// shrink all cells
@@ -821,18 +817,12 @@ var dataTable = function (node) {
 
 
 		// ****************************** DATA display *************************
-		if(self.editMode) {
-			$("data-workspace table tbody td a.delete").show();
-			$("data-workspace").off('click','table tbody td div').on('click','table tbody td div', function(e) {
-				self.editCell(e);
-			});
-		} else {
-			$("data-workspace table tbody td a.delete").hide();
-			$("data-workspace").off('click','table tbody td div');
-		}
+		$("data-workspace").on('click','datacontainer table tbody td div.edit', function(e) {
+			self.editCell(e);
+		});
 
 		// delete document button handler
-		$("data-workspace").on('click','table tbody td a.delete', function(e) {
+		$("data-workspace").on('click','datacontainer table tbody td a.delete', function(e) {
 			self.node.gp.deleteDocument(e);
 		});
 

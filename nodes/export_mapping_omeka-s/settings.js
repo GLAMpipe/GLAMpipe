@@ -20,7 +20,7 @@ function mapping() {
    
 	$.getJSON(g_apipath + "/proxy?url=" + node.params.required_url + "/properties", function (props) {
 		$.getJSON(url, function(data) {
-			var table = '<table><thead><tr><th>Omeka-S property</th><th>dynamic field</th><th>static field</th></tr></thead>';
+			var table = '<table><thead><tr><th>Omeka-S field</th><th>record field</th><th>static value</th></tr></thead>';
 			if(props.error)
 				alert(data.error);
 			else {

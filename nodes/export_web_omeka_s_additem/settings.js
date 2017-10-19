@@ -29,7 +29,7 @@ function getItemSets() {
 function display2 (data) {
 	var html = "<option value=''>choose item set</option>";
 	for(var i = 0; i < data.length; i++) {
-		html += "<option data-id='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</option>";
+		html += "<option value='" + data[i]['o:id'] + "'>" + data[i]['dcterms:title'][0]['@value'] + "</option>";
 	}
 	return html;
 }

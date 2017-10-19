@@ -33,6 +33,7 @@ a:hover {
 
 table {
 	border-collapse: collapse;
+	width:100%;
 }
 
 th {
@@ -41,12 +42,22 @@ th {
 
 th, td {
     border-bottom: 1px solid #ddd;
+    padding-left: 10px;
+    text-align:left;
 }
 
 tr:hover {background-color: #fefefe}
 
 td:first-child, th:first-child {
-	padding-left:20px;
+    padding-left: 0;
+}
+
+table.documents {
+   width: 100%;
+}
+
+table.documents td:first-child, table.documents th:first-child {
+   padding-left: 20px;
 }
 
 linklist {
@@ -61,11 +72,20 @@ linkcell {
 	padding:1px 10px 1px 0px;
 }
 
+.settingtable td:first-child, .settingtable th:first-child {
+   padding-left: 0px;
+}
+
+.settingtable th, .settingtable td {
+   padding-left: 10px;
+}
+
+
 .settingslist {
 	margin: 1em 0;
 }
 
-.settingslist th, td {
+.settingslist th, .settingslist td {
     padding-left:20px;
 	border-bottom:none;
 }
@@ -146,17 +166,18 @@ footer {
 }
 
 pipe {
-	background-color: #EFEFEF;
-	width: 370px;
-	padding-left: 20px;
-	overflow-y:auto;
-	overflow-x:hidden;
+   background-color: #EFEFEF;
+   width: 370px;
+   padding: 0 0 20px 20px;
+   overflow-y: auto;
+   overflow-x: hidden;
 }
 
-.title {
-	font-family: 'Open Sans', sans-serif;
-	font-weight: 300;
+.title, h1, h2, h3, h4 {
+   font-family: 'Open Sans', sans-serif;
+   font-weight: 300;
 }
+
 
 .sitetitle {
 	font-size: 24px;
@@ -180,8 +201,8 @@ pipe {
 	padding-left: 0px;
 }
 
-.pagetitle {
-	font-size: 20px;
+.pagetitle, h1 {
+   font-size: 20px;
 }
 
 .sectiontitleblock {
@@ -192,11 +213,11 @@ pipe {
 	padding: 5px 0px 5px 0px;
 }
 
-.sectiontitle {
-	font-size: 16px;
-	-webkit-align-self: flex-start;
-	align-self: flex-start;
+.sectiontitle, h3 {
+   font-size: 16px;
+   margin: 0px;
 }
+
 
 .sectionicon {
 	margin-left: auto;
@@ -270,8 +291,8 @@ pipe {
 	width:240px;
 }
 
-.inlinetitle {
-	font-size: 18px;
+.inlinetitle, h4 {
+    font-size: 16px;
 }
 
 .inlinetitleblock {
@@ -340,6 +361,11 @@ a .pageheader:hover {
 	margin-bottom: 20px;
 }
 
+fatboxbuttons {
+   margin-top: 20px;
+   display: block;
+}
+
 .optionlist {
 	padding-top:5px;
 }
@@ -386,7 +412,6 @@ a .listoption:hover {
 	background-color: #efefef;
 }
 
-
 settingscontainer {
 	display:block;
 	background-color: rgba(255,255,255,1);
@@ -404,8 +429,8 @@ settingsheader {
 	padding: 0px 20px;
 }
 
-.settingstitle {
-	font-size: 18px;
+.settingstitle, h2 {
+   font-size: 18px;
 }
 
 settingssubtitle {
@@ -417,12 +442,12 @@ settingssubtitle {
 }
 
 settingsblock {
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	-webkit-flex-direction: row;
-	flex-direction: row;
-	display: flex;
-	flex-wrap: wrap;
+   display: -ms-flexbox;
+   display: -webkit-flex;
+   -webkit-flex-direction: row;
+   flex-direction: row;
+   display: flex;
+   flex-wrap: wrap;
 }
 
 settingsrow {
@@ -434,12 +459,12 @@ settingsrow {
 }
 
 submitblock {
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
-	height: 60px;
-	padding: 0px 20px;
+   display: -ms-flexbox;
+   display: -webkit-flex;
+   display: flex;
+   padding: 10px 20px 20px 20px;
 }
+
 
 setting {
    display: flex;
@@ -447,11 +472,16 @@ setting {
    background-color: #efefef;
    margin: 7px 20px;
    padding: 10px;
-   /* min-height: 50px; */
    border-radius: 5px;
    justify-content: space-between;
    flex-wrap: wrap;
 }
+
+.one {
+    flex-direction: column;
+}
+
+
 
 settingtitle {
 	display:block;
@@ -459,7 +489,7 @@ settingtitle {
 }
 
 settinginfo {
-	flex: 1 0 300px;
+   flex: 1 0 300px;
 }
 
 settingaction {
@@ -468,35 +498,51 @@ settingaction {
    flex: 1 0 300px;
 }
 
-
 dataheader {
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;
-	-ms-flex-align: center;
-	-webkit-align-items: center;
-	-webkit-box-align: center;
-	height: 60px;
-	padding: 0px 20px;
+   display: -ms-flexbox;
+   display: -webkit-flex;
+   display: flex;
+   -ms-flex-align: center;
+   -webkit-align-items: center;
+   -webkit-box-align: center;
+   height: 60px;
+   padding: 0px 20px;
+   justify-content: space-between;
 }
+
 
 data-controls {
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	-webkit-flex-direction: row;
-	flex-direction: row;
-	display: flex;
-	justify-content: space-between;
-	padding: 0 20px;
+   display: -ms-flexbox;
+   display: -webkit-flex;
+   -webkit-flex-direction: row;
+   flex-direction: row;
+   display: flex;
+   justify-content: space-between;
 }
 
-input[type=text], input[type=number] {
+filter {
+   background-color: #cfcfcf;
+   display: flex;
+   padding: 3px 10px;
+   border-radius: 10px;
+   transition-duration: 0.3s;
+}
+
+
+filter:hover {
+   background-color: white;
+}
+
+.filtercross {
+   margin-left: 3px;
+}
+
+input {
    font-size: 13px;
    font-weight: 300;
    color: #333;
    padding: 5px 3px;
    margin: 5px 0;
-   /* border: none; */
    border-top-color: rgba(0, 0, 0, 0);
    border-top-style: solid;
    border-top-width: 1px;
@@ -509,15 +555,17 @@ input[type=text], input[type=number] {
    border-left-color: rgba(0, 0, 0, 0);
    border-left-style: solid;
    border-left-width: 1px;
-   /* border: solid rgba(0, 0, 0, 0.15); */
    -webkit-transition: 0.5s;
    transition: 0.5s;
    outline: none;
    width: 100%;
    background: transparent;
+   box-sizing: border-box;
+   -moz-box-sizing: border-box;
 }
 
-input[type=text]:focus, input[type=number]:focus{
+
+input:focus{
    background-color: rgba(255, 255, 255, 0.5);
    border-color: black
 }
@@ -534,6 +582,8 @@ textarea {
    width: 100%;
    background-color: rgba(255, 255, 255, 0);
    outline: none;
+   box-sizing: border-box;
+   -moz-box-sizing: border-box;
 }
 
 textarea:focus {
@@ -550,25 +600,24 @@ textarea:focus {
 }
 
 .button {
-    background-color: #347BFF;
-	font-weight: 300;
-    border: none;
-    color: white;
-    padding:.6em 1.5em;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 15px;
-    margin: 4px 2px;
-    cursor: pointer;
-	border-radius:2px;
-	-webkit-border-radius:2px;
-	-webkit-transition-duration: 0.1s; /* Safari */
-    transition-duration: 0.1s;
-	font-family: 'Open Sans', sans-serif;
-	align-self: center;
-
+   background-color: #347BFF;
+   font-weight: 300;
+   border: none;
+   color: white;
+   padding: .6em 1.5em;
+   text-align: center;
+   text-decoration: none;
+   display: inline-block;
+   font-size: 15px;
+   cursor: pointer;
+   border-radius: 2px;
+   -webkit-border-radius: 2px;
+   -webkit-transition-duration: 0.1s;
+   transition-duration: 0.1s;
+   font-family: 'Open Sans', sans-serif;
+   align-self: center;
 }
+
 
 .button:hover {
 	box-shadow:0 1px rgba(0,0,0,.1), inset 0 -3px rgba(0,0,0,.2);
@@ -659,21 +708,30 @@ div.panel.show {
 }
 
 select {
-	vertical-align:middle;
-	margin:0.5em 0em;
-	padding:0.5em;
-	color:#333;
+   vertical-align: middle;
+   margin: 0.5em 0em;
+   padding: 0.5em;
+   color: #333;
+   color: #666;
+   width: 100%;
+   height: 30px;
+   font-size: 13px;
+   background: transparent;
+   border: 1px solid rgba(0, 0, 0, 0.15);
+   font-weight: 300;
+   outline: none;
 }
 
 .help {
-	margin: 0.1em 0 0.5em 0;
-	color:#666;
-	font-size:0.9em;
+   margin: 0.5em 0 1em 0;
 }
 
+
 label {
-	display:block;
+   font-weight: 500;
+   display: block;
 }
+
 
 .params label {
 	font-weight:500;
@@ -712,7 +770,7 @@ b {
 }
 
 .selected-match {
- background-color:lightgreen;
+   background-color: #cfcfcf;
 }
 
 .bad {
@@ -786,21 +844,18 @@ table.documents thead td div {
 	font-weight:bold;
 }
 
-table.documents td {
-
-}
-
 table thead {
     background-color: #efefef;
 }
 
-table.documents tbody td div {
-	max-height:10em;
-	max-width:350px;
-	overflow: auto;
-	overflow-wrap: break-word;
-	margin-bottom:1em;
+table.documents tbody td div{
+   max-height: 10em;
+   max-width: 350px;
+   overflow: auto;
+   overflow-wrap: break-word;
+   margin: 3px 10px 3px 0;
 }
+
 
 table.documents tbody td div.edit {
     display:none;
@@ -826,10 +881,6 @@ table.documents tbody td div.edit {
 table.documents tbody td div.edit:hover {
     cursor:pointer;
     opacity:1;
-}
-
-th, td {
-    border-bottom: 1px solid #ddd;
 }
 
 .box-noflex {
@@ -889,9 +940,8 @@ th, td {
 }
 
 .current {
-	border:solid rgb(189, 232, 246)  1px;
-	border-left:solid rgb(189, 232, 246)  10px;
-	padding-left:5px;
+	border-left: solid rgba(52,123,255,1) 10px;
+	padding-left:10px;
 }
 
 #login-popup input {
