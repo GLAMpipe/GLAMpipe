@@ -143,11 +143,24 @@ var glamPipeNode = function (node, gp) {
 
 
 	// render data with node spesific settings and display node settings
-	this.open = function (config) {
-	//$.get("http://localhost:3000/api/v1/nodes/" + self.source._id + "/scripts",  function(data) {
-		//if(data.view)
-			//self.source.scripts.view = data.view;
-			
+	this.open = function(config) {
+		// in nodedev mode we load node's view scripts directly from node directory
+		if(gp.config.nodedevmode) {
+			$.get("http://localhost:3000/api/v1/nodes/" + self.source._id + "/scripts",  function(data) {
+				if(data.view)
+					self.source.scripts.view = data.view;
+				if(data.action_view)
+					self.source.scripts.action_view = data.action_view;
+				self.openRender();
+			})
+		} else {
+			self.openRender();
+		}
+	}
+	
+	
+	this.openRender = function() {
+				
 		$(".node").removeClass("current");
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
@@ -158,7 +171,6 @@ var glamPipeNode = function (node, gp) {
 			self.display.render();
 			$("data-workspace settingscontainer").show();
 		}
-	//})
 	}
 	
 	// render node to project view (left column)
@@ -213,11 +225,12 @@ var glamPipeNode = function (node, gp) {
 		
 		
 		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description  != "") {
-			html +=   "    <div class='boxtext title boxtitle'>" + self.source.settings.node_description + "</div>"
-			html +=   "    <div class=''>" + self.source.title + in_field + "</div>"
+			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
+			html +=   "    <div class='description'>" + self.source.settings.node_description+ "</div>"
+			
 		} else {
 			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
-			html +=   "    <div class=''>" + self.source.description + "</div>";
+			html +=   "    <div class='description'>" + self.source.description + "</div>";
 		}
 			
 		html +=   "  </div>"
@@ -237,19 +250,11 @@ var glamPipeNode = function (node, gp) {
 		if(self.source.type === "export")
 			run_button_text = "export data";
 
-		// node description
-		if(self.source.settings)
-			$(".node-description-value").val(self.source.settings.node_description);
-		else
-			$(".node-description-value").val("");
-			
 		if(self.orphan) {
 			$("settingsblock").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
 			$("settingsblock").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
 			$("settingsblock").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
 			$("data-workspace submitblock").empty().append("<button class='run-node button error' >missing input field, cant'run!</button>");
-
-			
 			
 		} else {
 
@@ -266,6 +271,25 @@ var glamPipeNode = function (node, gp) {
 			$("settingsblock .params").append(self.source.params);
 			$(".show-node-params").data("id", self.source._id);
 			
+			
+			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
+			debug += "<settinginstructions>Here you can write your own description of what this node does.";
+			debug += "<p><a class='show-node-params' href='#'>show node parameters</a></p>"
+			debug += "</settinginstructions></settinginfo>"
+			debug += "<settingaction>";
+			debug += "<label>node description:</label>";
+			debug += "<textarea rows='5' name='node-description' class='node-description-value'></textarea>";
+			
+			debug += "<a href='#' id='node-description-save'>save description</a>";
+			debug += "</settingaction>";
+			debug += "</setting>";
+			$("settingsblock").append(debug);
+
+			// node description
+			if(self.source.settings)
+				$(".node-description-value").val(self.source.settings.node_description);
+			else
+				$(".node-description-value").val("");
 
 			var collection = gp.currentCollection.source.params.collection;
 

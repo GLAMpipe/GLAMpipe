@@ -587,6 +587,9 @@ input {
    -moz-box-sizing: border-box;
 }
 
+input[type=checkbox] {
+	width:20px;
+}
 
 input:focus{
    background-color: rgba(255, 255, 255, 0.5);
@@ -747,6 +750,10 @@ select {
    border: 1px solid rgba(0, 0, 0, 0.15);
    font-weight: 300;
    outline: none;
+}
+
+select[multiple=multiple] {
+	height:300px;
 }
 
 .help {
@@ -916,9 +923,7 @@ table.documents tbody td div.edit:hover {
     background-color: #F5F5F5;
 }
 
-.input {
 
-}
 
 #collection-list-container { 
 	position:absolute;
@@ -1005,4 +1010,16 @@ input.short {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+}
+
+settinglistcontainer {
+	display: block;
+	visibility: hidden;
+	max-height:200px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+	overflow:scroll;
+}
+
+settinglistcontainer input {
+	width: 20px;
 }

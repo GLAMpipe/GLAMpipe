@@ -22,7 +22,7 @@
         "finish":
         [
 			"var success_rate = (context.node.success_counter/context.node.value_counter) * 100; ",
-			"out.say('finish', '<h2>success rate: ' + success_rate + ' %</h2> Succesfully detected ' + context.node.success_counter + ' of ' + context.node.value_counter + ' fields in ' + context.doc_count + ' documents' );"
+			"out.say('finish', 'success rate: ' + success_rate + ' %: succesfully detected ' + context.node.success_counter + ' of ' + context.node.value_counter + ' fields in ' + context.doc_count + ' documents' );"
 		]
     },
     

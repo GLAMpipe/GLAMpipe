@@ -12,6 +12,7 @@ var glamPipe = function () {
 	this.baseAPI = g_apipath; 
 	this.uiPath = g_uipath;
 	this.desktop = true;
+	this.config = {};
 	
 	this.projectPipeDiv = "#project-pipe";
 	this.collectionSwitchDiv = "#collection-switch";
@@ -180,6 +181,7 @@ var glamPipe = function () {
 
 	this.getLoginStatus = function (div, cb) {
 		$.getJSON(self.baseAPI + "/config", function(config) { 
+			self.config = config;
 			if(config.nodedevmode)
 				$("#version").empty().append("ver. " + config.version + " (devmode)");
 			else
@@ -717,7 +719,7 @@ var glamPipe = function () {
 	}
 
 	this.updateDocument = function (data, cb) {
-		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id, data, function( response ) {
+		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
 			console.log(response);
 			cb();
 		})

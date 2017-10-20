@@ -2,7 +2,7 @@
 var nodeRepository = function () {
 	var self = this;
 	this.nodes = [];
-	this.showBrokenNodes = true;
+	this.showBrokenNodes = false;
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];

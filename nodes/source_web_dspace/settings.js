@@ -11,12 +11,12 @@
 	$("#source_web_dspace_fetch").click(function (e) {
 		
 		$("#source_web_dspace_data").empty();
+		$("#source_web_dspace_data").css('visibility', 'visible');
 		$("#source_web_dspace_data").append("<h3>Fetching...</h3>");
 		$.getJSON(g_apipath + "/proxy?url=" + params.dspace_url + "/hierarchy", function (data) {
 			if(data.error)
 				alert(data.error);
 			else {
-				$("#source_web_dspace_data").append("<h2>"+data.name+"</h2>");
 				var html = display(data.community, "community");
 				$("#source_web_dspace_data").empty();
 				$("#source_web_dspace_data").append(html);

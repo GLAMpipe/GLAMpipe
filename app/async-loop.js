@@ -13,6 +13,8 @@ var exports = module.exports = {};
 // loop for synchronous nodes and export nodes (export is done once per document)
 exports.documentLoop = function (node, sandbox, onDoc) {
 	
+	sandbox.out.say("progress", "Processing started...");
+	
 	var mode = "batch";
 	var query = {};
 	// ONE DOC (single run)
@@ -97,7 +99,7 @@ function createUpdateDoc(node, setter, doc, mode) {
 	var updateDoc = {};
 	var manualRemovals = [];
 	for(var key in setter) {
-		if(doc.MP_manual && doc.MP_manual.includes(key)) {
+		if(doc._mp_manual && doc._mp_manual.includes(key)) {
 			// in "batch" mode we do not override manual edit
 			if(mode === "batch")
 				delete setter[key];
@@ -108,7 +110,7 @@ function createUpdateDoc(node, setter, doc, mode) {
 	}
 	
 	if(manualRemovals)
-		updateDoc.$pull = {MP_manual: {$in:manualRemovals}};
+		updateDoc.$pull = {_mp_manual: {$in:manualRemovals}};
 		
 	updateDoc.$set = setter;
 	return updateDoc;
@@ -211,6 +213,7 @@ function requestLoop2(node, sandbox, onDoc) {
 //           - output: out.setter (multiple fields) or out.value (single field)
 exports.fieldLoop = function (node, sandbox, onDoc) {
 
+	sandbox.out.say("progress", "Processing started...");
 	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {

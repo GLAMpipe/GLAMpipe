@@ -3,7 +3,7 @@
 // "node.data.docs" contains current (paged) set of documents
 
 
-html = "";
+html = "<table>";
 
     //console.log(node.source.title);
     //console.log(doc);
@@ -11,26 +11,29 @@ html = "";
     
 for(var i = 0; i < node.data.docs.length; i++) {
     var doc = node.data.docs[i];
+    var title = "";
 	var page = doc[node.source.params.out_page];
 	if(!page)
 		page = 0;
 
-    html += "<div class='hbox'>";
-    html += "<div>";
-    html += "  <br><div class='bold'>"+ doc[node.source.settings.title] +"</div>";
+	if(doc[node.source.settings.title])
+		title = doc[node.source.settings.title];
+	else
+		title = doc._id;
+
+    html += "<div class='fatbox' style='display:flex'>";
+    html += "    <div>";
     //html += "  <div data-id='"+doc._id+"' class='button run_single_view' data-id='"+doc._id+"'>run for this</div>";
-    html += "  <div data-id='"+doc._id+"' class='button pdfcover_prev_page'> < </div>";
-    html += "  <input class='pdfcover_page short' data-id='"+doc._id+"' value='" + page + "'/>";
-    html += "  <div data-id='"+doc._id+"' class='button pdfcover_next_page'> > </div>";
-    html += "<div>";
     if(doc[node.source.params.out_link] && doc[node.source.params.out_link][0])
 		html += "<img class='cover-frame' src='http://localhost:3000" + doc[node.source.params.out_link][0] +"'/>";
-    html += "</div>";
-    html += "</div>";
-
-
-
-
+    html += "   </div>";
+    
+    html += "   <div>";
+    html += "      <p class='bold'>"+ title +"</p>";
+    html += "      <a href='#' data-id='"+doc._id+"' class='pdfcover_prev_page'> < </a>";
+    html += "      <input class='pdfcover_page short' data-id='"+doc._id+"' value='" + page + "'/>";
+    html += "      <a href='#'  data-id='"+doc._id+"' class='pdfcover_next_page'> > </a>";
+    html += "    </div>";
     html += "</div>";
 }
 

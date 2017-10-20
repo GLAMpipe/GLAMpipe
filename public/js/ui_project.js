@@ -166,8 +166,7 @@ $( document ).ready(function() {
 		var nodeid = node._id;
 		var desc = $(".node-description-value").val();
 		if(desc) {
-			$(".node[data-id='"+nodeid+"'] div.boxtitle").addClass("boxtext");
-			$(".node[data-id='"+nodeid+"'] div.boxtext" ).text($(".node-description-value").val());
+			$(".node[data-id='"+nodeid+"'] div.description" ).text($(".node-description-value").val());
 		} else {
 			$(".node[data-id='"+nodeid+"'] div.boxtitle").removeClass("boxtext");
 			$(".node[data-id='"+nodeid+"'] div.boxtitle" ).text(node.title);

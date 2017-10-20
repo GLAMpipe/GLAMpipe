@@ -118,7 +118,8 @@ exports.edit = function (req, callback) {
 	setter["$set"] = req.body;
 	
 	// mark edited fields as manual edits
-	setter["$addToSet"] = {"MP_manual":{$each:keys}};
+	if(req.query.manual)
+		setter["$addToSet"] = {"_mp_manual":{$each:keys}};
 	
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)}, setter, function(err, result) {
 		if(err) {

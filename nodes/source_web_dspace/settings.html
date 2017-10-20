@@ -1,14 +1,43 @@
 
 
-<label>DSpace target: </label>
-<div id="source_web_dspace_url"></div>
-<label>query: </label>
-<input class="node-settings long-input" type="text" name="query" id="source_web_dspace_query"/>
 
-<br/>
-<button id="source_web_dspace_fetch">get collection hierarchy</button>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace ollections
+		</settingtitle>
+		<settinginstructions>
+			Choose collection(s) from server: <strong><span id="source_web_dspace_url"></span></strong>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<button id="source_web_dspace_fetch">get collection hierarchy</button>
+		<settinglistcontainer id="source_web_dspace_data"></settinglistcontainer>
+	</settingaction>
+</setting>
 
-<div id="source_web_dspace_data"></div>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace query
+		</settingtitle>
+		<settinginstructions>
+			Query generated based on collection selection above.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>query </label>
+		<textarea class="node-settings" name="query" id="source_web_dspace_query"></textarea>
+	</settingaction>
+</setting>
+
+
+
+
 
 
 <!-- LIMIT NOT CURRENTLY WORKING! 

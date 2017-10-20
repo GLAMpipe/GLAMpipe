@@ -40,7 +40,7 @@ exports.getReversePipe = function(req, res) {
 	});
 }
 
-
+// get all nodes that that must be run before this node
 function reversePipe(project, node_o) {
 	var collection = node_o.collection;
 	console.log(collection);

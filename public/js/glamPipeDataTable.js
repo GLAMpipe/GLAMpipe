@@ -179,7 +179,7 @@ var dataTable = function (node) {
 		// if node has input/output field, then use them as visible fields
 		if(config) {
 			var keys = config.input_keys.concat(config.output_keys);
-			keys.unshift("row");
+			keys.unshift("action","row");
 			
 			if(self.keys.visible_keys == null) {
 				self.keys.visible_keys = keys;
@@ -199,9 +199,11 @@ var dataTable = function (node) {
 
 		// otherwise let the user decide what to see
 		if(self.keys.visible_keys == null) {
+			
 			// if there are no visible keys, then try default keys
 			if(self.node.source.views.default_keys) {
 				self.keys.visible_keys = self.node.source.views.default_keys;		
+				
 			// if there are no default keys, then visible keys are first 5 keys 
 			} else {
 				var keys = self.keys.all_keys.sorted.slice(0,5);
@@ -211,7 +213,7 @@ var dataTable = function (node) {
 				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
 			}
 		}
-		
+
 		// add "row"
 		if(self.keys.visible_keys.indexOf("row") === -1) {
 			self.keys.visible_keys.splice(0, 0, "row");
@@ -226,6 +228,8 @@ var dataTable = function (node) {
 	// displays data in table format
 	this.renderTablePage = function () {
 
+		var render = null;
+		var html = "";
 
 		if(self.node.data.docs.length == 0) {
 			var html = "<div class='message'><h2>This data collection does not have any data yet!</h2><br><div>Add a data source to start working!</div></div>";
@@ -235,18 +239,26 @@ var dataTable = function (node) {
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
-		var html = "<table id='data' class='documents'><thead><tr>";
 		
-		// RENDER KEYS
-		for (var i = 0; i < visible_keys.length; i++) {
-			html += "<td><div>" +  visible_keys[i] + "</div></td>";
+		// check if node wants to render data itself
+		if(self.node.source.scripts.view) {
+			render = new Function('node', 'self', self.node.source.scripts.view);
+			html = render(self.node, self);
+			
+		} else {
+			html = "<table id='data' class='documents'><thead><tr>";
+			
+			// RENDER KEYS
+			for (var i = 0; i < visible_keys.length; i++) {
+				html += "<td><div>" +  visible_keys[i] + "</div></td>";
+			}
+			
+			html += "</tr></thead><tbody>"
+			
+			html += self.renderDataTable(config);
+			
+			html += "</tbody></table>" ;
 		}
-		
-		html += "</tr></thead><tbody>"
-		
-		html += self.renderDataTable(config);
-		
-		html += "</tbody></table>" ;
 
 		$(self.dataDisplayDiv).empty();
 		$(self.dataDisplayDiv).append("<div id='count'></div>");
@@ -263,28 +275,21 @@ var dataTable = function (node) {
 
 	this.renderDataTable = function (config) {
 
-		var render = null;
-		
-		// check if node wants to render data itself
-		if(self.node.source.scripts.view) {
-			var render = new Function('node', 'self', self.node.source.scripts.view);
-		}
-
-		var config = self.node.getConfig();
+		if(!config)
+			config = self.node.getConfig();
+			
 		var visible_keys = self.getVisibleFields(config);
 
 		var html = "";
-		if(render) {
-			html = render(self.node, self);
-		} else {
-			for(var j = 0; j < self.node.data.docs.length; j++) {
-				html += "<tr>";
-				for(var k = 0; k < visible_keys.length; k++) {
-					html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
-				}
-				html += "</tr>"
+
+		for(var j = 0; j < self.node.data.docs.length; j++) {
+			html += "<tr>";
+			for(var k = 0; k < visible_keys.length; k++) {
+				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
 			}
+			html += "</tr>"
 		}
+		
 		return html;
 		
 
@@ -295,16 +300,28 @@ var dataTable = function (node) {
 	this.renderCell = function(key_name, key_index, data, config) {
 		var html = "";
 		var manual_edit = "";
-		if(data.MP_manual && data.MP_manual.includes(key_name))
+		
+		// mark manual edits
+		if(data._mp_manual && data._mp_manual.includes(key_name))
 			manual_edit = "manual-edit";
 			
-		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
+		// "action" column
+		if(key_name == "action") { // "action" is not an actual key
 
-			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>run for this</a></td>";
-
-			else
+			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>run for this</a>";
+				
+				// if node has action_view.js, then let that append html to "action" cell
+				if(self.node.source.scripts.action_view) {
+					render = new Function('node', 'doc', self.node.source.scripts.action_view);
+					html += render(self.node, data) + "</td>";
+				}
+				html += "</td>";
+			} else
 				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a>" + self.getRowIndex(key_index) + "</td>";
+				
+		} else if(key_name == "row") { // "action" is not an actual key
+			html = "<td>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
 			
@@ -327,6 +344,10 @@ var dataTable = function (node) {
 		var html = "";
 		if(data == null)
 			return "<div></div>";
+		
+		// if in edit mode, then add "edit" class
+		if(self.editMode)
+			className += " edit";
 		
 		// render arrays recursively
 		if (Array.isArray(data)) {
@@ -739,14 +760,7 @@ var dataTable = function (node) {
 		// edit mode
 		$("data-workspace").on('click','data-controls .wikiglyph-edit', function(e) {
 			self.editMode = !self.editMode;
-			//alert(self.editMode)
-			if(self.editMode) {
-				$("datacontainer table tbody td div").addClass("edit");
-				$("datacontainer table tbody td a.delete").show();
-			} else {
-				$("datacontainer table tbody td div").removeClass("edit");
-				$("datacontainer table tbody td a.delete").hide();
-			}
+			self.renderTablePage();
 		})
 
 		// shrink all cells
