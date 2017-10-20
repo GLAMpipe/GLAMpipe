@@ -1,13 +1,39 @@
 
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Fuzzy match level
+		</settingtitle>
+		<settinginstructions>
+			You can use fuzzy matching for mapping. Perfect match is 1.0.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>fuzzy level  </label>
+		<input type="number" name="fuzzy_level" class="node-settings" value="1.0"/>
+	</settingaction>
+</setting>
 
-<div class="box-noflex"> 
 
-	<label>fuzzy level (1.0 is perfect match) </label>
-	<input name="fuzzy_level" class="node-settings" value="1.0"/>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy original value
+		</settingtitle>
+		<settinginstructions>
+			If there is no match, then copy original value
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>copy original</label>
+		<input type="checkbox" class="node-settings" name="copy"/>
+	</settingaction>
+</setting>
 
-	<label>if there is no match, then copy original value</label>
-	<input type="checkbox" class="node-settings" name="copy"/>
 
-</div>
+
+
 

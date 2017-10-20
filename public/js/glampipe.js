@@ -513,6 +513,9 @@ var glamPipe = function () {
 			}
         });
         
+        if(self.outputExists(data.params)) 
+			return;
+
 		// set parent collection
 		if(self.currentCollection == null) 
 			alert("parent collection is missing");
@@ -536,6 +539,18 @@ var glamPipe = function () {
 				$("data-workspace settingscontainer .node-description").show();
 			});
 		}
+	}
+
+	// check if any output field (starts with "out_") exists 
+	this.outputExists = function(params) {
+		for(var param in params) {
+			console.log(param);
+			if(/^out_/.test(param) && self.currentCollection.fields.sorted.includes(params[param])) {
+				alert("'" + params[param] + "' output field exists! Please rename field." );
+				return true;
+			}
+		}
+		return false;
 	}
 
 	this.createCollection = function (e) {
