@@ -25,6 +25,7 @@ if(Array.isArray(context.doc[context.node.params.in_location]))
 else
 	upload.filename = context.doc[context.node.params.in_location]
 
+
 // add file extension
 if(ext) {
 	title = title + "." + ext;
@@ -42,6 +43,11 @@ if(url_val.match(/^https:\/\//)) {
     context.skip = true; 
             
 } 
+
+// we skip upload if information is missing
+if(!upload.filename || !upload.title || !upload.wikitext)
+	context.skip = true;
+
 // OUTPUT
 out.pre_value = upload; 
 

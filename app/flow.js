@@ -58,5 +58,63 @@ function reversePipe(project, node_o) {
 		}
 	})
 	
+	return pipe(light_nodes, node_o);
+	
 	return light_nodes;
+}
+
+// check if nodes has 
+function pipe(nodes, node_o) {
+	var inputs = getNodeInputs(node_o);
+	//return inputs;
+	for(var i = 0; i < nodes.length; i++) {
+		var node = nodes[i];
+		console.log(node.id)
+		console.log(node.params)
+		if(node.id != node_o._id) {
+			var outputs = getNodeOutputs(node);
+
+			
+			if(findOne(inputs, outputs))
+				return node;
+			//console.log(ip)
+				//
+		}
+	}
+}
+
+
+function findOne(haystack, arr) {
+	console.log("input" +haystack)
+	console.log("---")
+	console.log(arr)
+	return arr.some(function (v) {
+		return haystack.indexOf(v) >= 0;
+	});
+};
+
+function getNodeInputs(node) {
+	var inputs = [];
+	for(var key in node.params) {
+		if(/^in_/.test(key))
+			inputs.push(node.params[key]);
+	}
+	for(var key in node.settings) {
+		if(/^in_/.test(key))
+			inputs.push(node.settings[key]);
+	}
+	return inputs;
+}
+
+function getNodeOutputs(node) {
+	var outputs = [];
+	for(var key in node.params) {
+		if(/^out_/.test(key))
+			outputs.push(node.params[key]);
+	}
+	for(var key in node.settings) {
+		if(/^out_/.test(key))
+			outputs.push(node.settings[key]);
+	}
+	return outputs;
 }

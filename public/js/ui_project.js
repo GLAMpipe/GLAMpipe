@@ -233,9 +233,10 @@ $( document ).ready(function() {
 
 			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
 
-			// revert run button text
-			var button = $("a[data-id='"+data.node_uuid+"']");
+			// revert batch run button text
+			var button = $("button[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
+			// revert singe run links
 			$("a[data-id='"+data.doc+"']").text("run for this");
 		}
 		//websockPopup(progressDisplay, "Node run error");

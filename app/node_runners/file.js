@@ -22,6 +22,7 @@ exports.getHash = function (file, sandbox, cb) {
 	fd.on('end', function() {
 		hash.end();
 		sandbox.context.data = hash.read();
+		console.log(sandbox.context.data)
 		cb();
 	});
 
