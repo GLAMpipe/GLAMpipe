@@ -85,10 +85,6 @@ var dataTable = function (node) {
 	}
 
 
-	this.expandCell = function (event) {
-		$(event.target).parent().css({"max-height":"600px", "overflow-y":"auto"});
-	}
-
 
 	this.nextTablePage = function () {
 		self.params.skip_func(15);
@@ -352,6 +348,56 @@ var dataTable = function (node) {
 		// render arrays recursively
 		if (Array.isArray(data)) {
 			for(var i = 0; i < data.length; i++) {
+				//if(index === null)
+				if(Array.isArray(data[i]))
+					html += "<div data-index='" + i + "' class='object-cell'>["+i+"] array</div>"
+				else
+					html += self.renderCellContent(data[i], i, className, key);
+			}
+
+		// render string, numbers and nulls
+		} else if (typeof data == "string" || typeof data == "number" || data === null) {
+			// render urls as links
+			if(typeof data == "string" && data.match(/^http/) && !self.editMode) {
+				if(index === 0 || index)
+					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				else
+					html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				
+			} else {
+				if(typeof data == "string" && data.match("^AAAA_error"))
+					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
+				else if(index != null)
+					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
+				else 
+					html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
+			}
+
+		// render objects
+		}  else {
+			if(index != null)
+				html += "<div data-index="+index+" class='object-cell'>["+index+"] subdocument</div>";
+			else
+				html += "<div class='object-cell'>subdocument</div><div class='object-string'>as string</div>";
+		}
+		return html;
+	}
+
+
+
+	this.renderCellContent_backup = function (data, index, className, key) {
+		
+		var html = "";
+		if(data == null)
+			return "<div></div>";
+		
+		// if in edit mode, then add "edit" class
+		if(self.editMode)
+			className += " edit";
+		
+		// render arrays recursively
+		if (Array.isArray(data)) {
+			for(var i = 0; i < data.length; i++) {
 				html += self.renderCellContent(data[i], i, className, key);
 			}
 
@@ -382,8 +428,6 @@ var dataTable = function (node) {
 		}
 		return html;
 	}
-
-
 
 	this.getDocByTableClick = function (event) {
 		var obj = $(event.target);
@@ -458,7 +502,7 @@ var dataTable = function (node) {
 			if(key)
 				html += "<li><span class='bold'>" + key + "</span>:<ul>";
 			else
-				html += "<li><ul>";
+				html += "<li>array<ul>";
 			for(var i=0; i < value.length; i++) {
 				html += self.object2Html(value[i], key, i);
 				//html += "</li>";
@@ -476,7 +520,10 @@ var dataTable = function (node) {
 				
 		//objects
 		} else if(typeof value === "object") {
-			html += "<li><span class='bold'>" + key + "</span>:<ul>" ;
+			if(typeof index !== "undefined")
+				html += "<li><span class='bold'>[" + index + "]</span><ul>" ;
+			else
+				html += "<li><span class='bold'></span>object<ul>" ;
 			for(key in value) {
 				html += self.object2Html(value[key], key);
 			}
@@ -485,6 +532,30 @@ var dataTable = function (node) {
 
 
 		return html;
+	}
+
+
+	this.expandCell = function(event) {
+		var obj = $(event.target);
+		var index = obj.data("index");
+		
+		var doc = self.getDocByTableClick(event);
+		var key = self.getKeyByTableClick(event);
+		var value = doc[key];
+		if(value && Array.isArray(value) && index !== null)
+			value = value[index];
+			
+		$("#cell-display").empty().append("<textarea style='width:100%;height:260px;box-sizing:border-box'>" + JSON.stringify(value, null, '  ')) + "</textarea>";
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			width:400,
+			maxHeight: 400,
+			title: "cell data"
+		});
 	}
 
 
@@ -856,12 +927,18 @@ var dataTable = function (node) {
 		$("data-workspace").on("click", ".object-string", function(e) {
 			self.renderObjectAsString(e);
 		});
+
+		$("data-workspace").on("click", ".expand", function(e) {
+			self.expandCell(e);
+		});
 		
 	}
 
 
 
 	this.nl2br = function (str, is_xhtml) {   
+		if(str.length > 1000)
+			str = str.substring(0,1000) + "...<a class='expand' href='#'>show (not implemented)</a>\n\n";
 		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
 		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}

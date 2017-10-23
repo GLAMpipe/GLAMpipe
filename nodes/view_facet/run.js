@@ -29,7 +29,7 @@ var facets = [];
 facets.push(context.node.settings.in_field_1);
 facets.push(context.node.settings.in_field_2);
 facets.push(context.node.settings.in_field_3);
-facets.push(context.node.settings.in_field_4);
+//facets.push(context.node.settings.in_field_4);
 
 facets.forEach(function(field, index) {
 	if(field != "") {
@@ -60,7 +60,7 @@ var renders = [];
 renders.push(context.node.settings.render_1);
 renders.push(context.node.settings.render_2);
 renders.push(context.node.settings.render_3);
-renders.push(context.node.settings.render_4);
+//renders.push(context.node.settings.render_4);
 
 renders.forEach(function(key, index) {
 	if(key != "") {
@@ -90,8 +90,8 @@ if(config.item_table.rows.length == 0)
 	config.item_table.rows.push({key:context.node.settings.in_field_1});
 	
 
-if(context.node.settings.pageinfo != "")
-	config.pageinfo = context.node.settings.pageinfo;
+//if(context.node.settings.pageinfo != "")
+	//config.pageinfo = context.node.settings.pageinfo;
 
 out.value = config;
 

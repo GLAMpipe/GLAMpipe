@@ -259,7 +259,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
-				console.log(sandbox.out.pre_value)
 				var result = [];
 				var setters = [];
 				
@@ -291,7 +290,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							setters.push(sandbox.out.setter)
 						else
 							result.push(sandbox.out.value);
-							
+						
+						sandbox.context.data = null;
 						nextFieldRow();
 					});
 
@@ -301,7 +301,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 						var setter = {};
 						setter[node.out_field] = result;
 					}
-
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
 				});
 				

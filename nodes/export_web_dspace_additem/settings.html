@@ -1,20 +1,43 @@
 
-<h3 id="export-data-dspace_serverinfo">DSpace login</h3>
 
-<div class="box-noflex dspace-hidden">
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace login
+		</settingtitle>
+		<settinginstructions>
+			DSpace login for server: <span id="export-data-dspace_serverinfo"></span>
+		</settinginstructions>
+	</settinginfo>
 	
-	<label>username </label>
-	<input class="node-settings" type="text" name="username" id="username" required />
-	<label>password</label>
-	<input class="node-settings" type="password" name="password" id="password"/>
-</div>
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
 
-<h3>Collection</h3>
-<div class="box-noflex dspace-hidden">
-	<label>Choose collection you want to save items (uuid)?</label>	
-	<button id="export_data_dspace_fetch_collections">Fetch collections</button>
-	<input class="node-settings" id="export_data_dspace_collection" name="collection" />
-	<div id="export_data_dspace_coll_list"></div>
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Collection selection
+		</settingtitle>
+		<settinginstructions>
+			Choose collection you want to save items (or give UUID)
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>collection</label>	
+		<button id="export_data_dspace_fetch_collections">Fetch collections</button>
+		<input class="node-settings" id="export_data_dspace_collection" name="collection" />
+		<settinglistcontainer id="export_data_dspace_coll_list"></settinglistcontainer>
+	</settingaction>
+</setting>
+
+
+
 
 

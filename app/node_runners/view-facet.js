@@ -68,5 +68,6 @@ function prepareHTML (html, node) {
 	collection = collection[collection.length-1];
 	html = html.replace("[PROJECT]", "<a href='/project/"+node.project+"'>" + node.project_title + "</a>");
 	html = html.replace("[COLLECTION]", collection);
+	html = html.replace("[TITLE]", node.settings.pagetitle);
 	return html;
 }

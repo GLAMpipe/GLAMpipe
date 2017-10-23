@@ -23,6 +23,7 @@ $("#xml_basic_guess").click(function(e){
 $("#export_data_dspace_fetch_collections").click(function (e) {
 		
 	$("#export_data_dspace_coll_list").empty();
+	$("#export_data_dspace_coll_list").css('visibility', 'visible');
 	$("#export_data_dspace_coll_list").append("<h3>Fetching...</h3>");
 	$("#export_data_dspace_coll_list").show();
 	

@@ -340,6 +340,7 @@ var glamPipeNode = function (node, gp) {
 	this.setSettingValues = function () {
 		var data = self.source;
 		for(var prop in data.settings) {
+			console.log(prop)
 			if(typeof data.settings[prop] == "boolean") {
 				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
 				$("input[name='"+prop+"']").change();
@@ -401,7 +402,7 @@ var glamPipeNode = function (node, gp) {
 		
 		var settings = {};
 		// read input from settings (only inputs with class "node-settings")
-		$("settingsblock input.node-settings:not([type='checkbox']), setting  select.node-settings").each(function() {
+		$("settingsblock input.node-settings:not([type='checkbox']), settingsblock  select.node-settings").each(function() {
 			var nameSplitted = $(this).attr("name").split("[");
 			// if input name has form "set[something1]", then we want to gather all of them to array
 			//console.log($(this).attr("name") + ":" +  $(this).val());
