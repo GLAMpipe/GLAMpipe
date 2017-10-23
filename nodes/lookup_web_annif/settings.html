@@ -1,33 +1,120 @@
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			<a href="http://annif.org/" target="_blank">Annif</a> - automated subject indexing using Finna as a corpus
+		</settingtitle>
+		<settinginstructions>
+			Annif is a statistical automated indexing tool for libraries, archives and museums.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 
-<div class="box-noflex">
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Text language (dynamic)
+		</settingtitle>
+		<settinginstructions>
+			Choose language field.
+		</settinginstructions>
+	</settinginfo>
 	
-	<div><a href="http://annif.org/" target="_blank">annif.org</a></div>
-	<div>
-		
-		<label>Text language (dynamic)</label> 
+	<settingaction>
+		<label>language field</label> 
 		<select class="node-settings dynamic_field" name="_dynamic_project">
-			<option value="">choose language field</option>
+			<option value="">choose</option>
 		</select>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Text language (static)
+		</settingtitle>
+		<settinginstructions>
+			If you know that all texts have same language, then you can choose it here.
+		</settinginstructions>
+	</settinginfo>
 	
-		<label>Text language (static)</label> 
+	<settingaction>
+	
+		<label>language</label> 
 		<select class="node-settings" name="_static_project">
 			<option value="yso-finna-fi">FI</option>
 			<option value="yso-finna-sv">SV</option>
 			<option value="yso-finna-en">EN</option>
 		</select>
-	</div>	
+	</settingaction>
+</setting>
 
-	<label>Maximum number of results</label>
-	<input class="node-settings" name="maxhits" value="12" />
 
-	<label>Minimum score threshold</label>
-	<input class="node-settings" name="threshold" value="0.45" />
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Annif settings
+		</settingtitle>
+		<settinginstructions>
+			Maximum number of results
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>number of results</label>
+		<input class="node-settings" name="maxhits" value="12" />
+	</settingaction>
+</setting>
 
-	<label>Maximum number of lines that is sent to ANNIF (max. 1000)</label>
-	<input class="node-settings" name="lines" value="1000" />
 
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Minimum score threshold
+		</settingtitle>
+		<settinginstructions>
+			Define how "good" hits are accepted.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>score threshold</label>
+		<input class="node-settings" name="threshold" value="0.45" />
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Maximum number of lines
+		</settingtitle>
+		<settinginstructions>
+			Maximum number of lines that is sent to ANNIF (max. 1000)
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>lines</label>
+		<input class="node-settings" name="lines" value="1000" />
+	</settingaction>
+</setting>
+
+
+
+
+
+
 
 
 

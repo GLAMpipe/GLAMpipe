@@ -7,21 +7,8 @@
     "status": "usable",
     "description": "Script super node ",
     "scripts": {
-    
-        "hello": 
-        [
-            "out.say('news', 'You added a count node'); "
-        ],
         
-        "bye": "out.say('news', 'Deleted node. Bye!'); ",
-        
-        "init":
-        [
-            "out.say('progress', 'Count started...'); "
-        ],
-        
-        
-        "finish": "out.say('finish', 'Count done!');"
+        "finish": "out.say('finish', 'Script done!');"
     },
     
     "views": {}

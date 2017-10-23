@@ -1,5 +1,23 @@
 
 
-<label>Your message</label> 
-<input class="node-settings" name="msg" value="Hello World!" />
-<!-- NOTE: only inputs with class "node-settings" are sent to server  -->
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Your message
+		</settingtitle>
+		<settinginstructions>
+			Define text that is written as output
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>message</label>
+		
+		<!-- NOTE: only inputs with class "node-settings" are sent to server  -->
+		<input type="text" class="node-settings" name="msg" value="Hello World!" />
+	</settingaction>
+</setting>
+
+
+

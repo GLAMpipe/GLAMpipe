@@ -1,18 +1,46 @@
 
-<div class="help fatbox">
-Create query first with query tools, click Generate Query and then click run.
-</div>
 
-<h3>DSpace login (optional, NOT IMPLEMENTED)</h3>
-<div class="box-noflex">
-	<label>username </label>
-	<input class="node-settings" type="text" name="username" id="username" required />
-	<label>password</label>
-	<input class="node-settings" type="password" name="password" id="password"/>
-</div>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Dspace query for server: <strong><span id="source_web_dspace_url"></span></strong>
+		</settingtitle>
+		<settinginstructions>
+			Create query first with query tools below, click "Generate Query" and then click "import data". 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>generated query</label>
+		<textarea class="node-settings" name="query" id="source_api_dspace_query"></textarea>
+	</settingaction>
+</setting>
 
-<h3>DSpace query tools</h3>
-<div id="querydiv">
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace login (optional, NOT IMPLEMENTED)
+		</settingtitle>
+		<settinginstructions>
+			Create query first with query tools, click Generate Query and then click run. 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settingsubtitle>Query tools</settingsubtitle>
+
+<div id="querydiv" style="width:100%">
   <div id='metadatadiv'>
     <h3>Collection Selector</h3>
     <div id="collSelector">
@@ -76,10 +104,8 @@ Create query first with query tools, click Generate Query and then click run.
     
 
 </div>
+</setting>
 
-<h3>Generated query</h3>
-<div class="box-noflex">
-	<input class="node-settings" type="text" name="query" id="source_api_dspace_query"/>
-</div>
+
 
 

@@ -1,4 +1,8 @@
 
+
+if(context.error)
+	out.say("error", "Error");
+
 var file_objects = []; 
 context.data.forEach(function(file, i) {
 	var f = {}; 

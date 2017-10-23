@@ -3,15 +3,13 @@
     "type": "process",
     "subtype": "documents",
     "subsubtype": "select_delete",
-    "title": "select&delete",
+    "title": "Select&delete",
     "status": "rubbish",
     "tags":["generic"],
     "usage":"",
     "description": "Deletes documents based on search criteria",
     
     "scripts": {
-        "hello": "out.say('news', 'You added a select node'); ",
-        "bye": "out.say('finish', 'Bye!'); ",
         
         "init": 
         [

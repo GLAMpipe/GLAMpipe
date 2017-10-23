@@ -104,35 +104,16 @@ wikitext += "}}\n";
 
 
 
-
-
-
-
-
-
-
-
-
-
-// TITLES
-//wikitext += "|title = " + makeValues("title") + "\n";
-//wikitext += "|description = " + makeValues("description") + "\n";
-// TITLE languages
-
-
-
-
-
 //// add record spesific categories 
-//var cats = context.doc[settings.categories]; 
-//if (Array.isArray(cats)) {
-    //for(var i = 0; i < cats.length; i++) {
-        //if(cats[i] != "")
-            //wikitext += "[[Category:" + cats[i] + "]]\n"; 
-    //}
-//} else if (cats && cats != "" ) {
-    //wikitext += "[[Category:" + cats + "]]\n"; 
-//}
+var cats = context.doc[settings.categories]; 
+if (Array.isArray(cats)) {
+    for(var i = 0; i < cats.length; i++) {
+        if(typeof cats[i] === "string" && cats[i] != "")
+            wikitext += "[[Category:" + cats[i] + "]]\n"; 
+    }
+} else if (typeof cats[i] === "string"  && cats && cats != "" ) {
+    wikitext += "[[Category:" + cats + "]]\n"; 
+}
 
 // add categories for all images
 if(settings.category_all && settings.category_all != "") {
@@ -159,8 +140,6 @@ output[context.node.params.out_field] = wikitext;
 
 // out put wikitext
 out.setter = output; 
-
-
 
 
 

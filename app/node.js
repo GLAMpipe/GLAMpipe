@@ -148,10 +148,11 @@ exports.getNode = function (node_id, cb) {
 
 			// in nodeDevMode we load node scripts directly from directory 
 			if(global.config.nodeDevMode && node.src_dir) {
-				var skip = function() {cb("error in loading!", null)};
-				readNodeDirectory (path.join(global.config.nodePath, node.src_dir), skip, function(nodeFromDir) {
-					node.scripts = nodeFromDir.scripts;
-					cb(null, node);	
+				loadScriptsFromFile(node, function(err, node) {
+					if(err)
+						cb("error in loading!", null);
+					else
+						cb(null, node);
 				})
 			} else {
 				cb(null, node);	
@@ -185,6 +186,33 @@ exports.getNodeParams = function (node_id, cb) {
 	})
 }
 
+function loadScriptsFromFile(node, cb) {
+	if(node.src_dir) {
+		console.log("DEV MODE: loading node source " + node.src_dir)
+		var skip = function() {cb("error in loading!", null)};
+		readNodeDirectory (path.join(global.config.nodePath, node.src_dir), skip, function(nodeFromDir) {
+			node.scripts = nodeFromDir.scripts;
+			cb(null, node);	
+		})
+	} else {
+		cb(null, node);	
+	}
+}
+
+exports.getNodeScripts = function (req, cb) {
+
+	exports.getNode(req.params.id, function(err, node) {
+		if(!err) {
+
+			if(req.params.script && node.scripts[req.params.script])
+				cb(node.scripts[req.params.script]);	
+			else
+				cb(node.scripts);					
+			
+		} else 
+			return cb({});
+	})
+}
 
 exports.getCollectionNodes = function (collection_id, cb) {
 

@@ -36,7 +36,7 @@ exports.login = function (node, sandbox, io, cb) {
 exports.uploadFile = function (options, sandbox, next) {
 	
     if(sandbox.context.skip) {
-        sandbox.context.data = {pageexists: options.title};
+        sandbox.context.data = null;
         return next();
     } else {
 		// get revisions (to see if page exists)
@@ -60,13 +60,16 @@ exports.uploadFile = function (options, sandbox, next) {
 						sandbox.context.data = data;
 						if(err) {
 							//sandbox.out.say("error", err);
-							sandbox.context.error = err;
+							sandbox.context.error = err.message;
 							next();
 						} else {
 							// upload wikitext
 							sandbox.client.edit(data.imageinfo.canonicaltitle, options.wikitext, 'initial metadata', function(err) {
 								sandbox.context.error = err;
-								next();
+                                // let's delete file
+                                fs.unlink(options.filename, function(error) {
+                                    next();
+                                });
 							});
 						}
 					});
