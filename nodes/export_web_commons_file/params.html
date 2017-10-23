@@ -1,28 +1,50 @@
 
-<label>file location (local file)</label>
-<select class="dynamic_field" type="text" name="in_location" required />
+<label>choose site (practise with beta)</label>
+<select id="export_web_commons_server" name="server">
+	<option value="beta">beta</option>
+	<option value="production">production</option>
+</select>
 
-<label>file extension to be added to commons tile (leave blank title has a proper extension)</label>
-<select class="dynamic_field" type="text" name="in_location_ext" required />
 
-<label>page name</label>
-<select class="dynamic_field" name="in_title"/>
+<label>page name (this must be unique)</label>
+<select class="dynamic_field" name="in_title">
+	<option value="">choose</option>
+</select>
+
 
 <label>wikitext</label>
-<select class="dynamic_field" name="in_wikitext"/>
+<select class="dynamic_field" name="in_wikitext">
+	<option value="">choose</option>
+</select>
 
-<label>Checksum query result field</label>
-<select class="dynamic_field" name="in_checksum_result"/>
+
+<label>"is file in commons?" test result </label>
+<select class="dynamic_field" name="in_checksum_result">
+	<option value="">choose</option>
+</select>
+
+<label>file location (same that was used for checksum calculation)</label>
+<select class="dynamic_field" type="text" name="in_location" required >
+	<option value="">choose</option>
+</select>
+
+<label>file extension to be added to commons title (leave blank title has a proper extension)</label>
+<select class="dynamic_field" type="text" name="location_ext" required >
+	<option value="">choose</option>
+</select>
+
+
 
 <label>final URL</label>
-<input type="text" name="out_field" value="commons_url"/>
+<input id="export_web_commons_output" type="text" name="out_field" value="commons_beta_url"/>
 
 
 <script>
-  $("#download_file_basic_input").change(function() {
-     $("#download_file_basic_output").val($("#download_file_basic_input").val() + "_download");
-     $("#download_file_basic_ext").val($("#download_file_basic_input").val() + "_ext");
-     $("#download_file_basic_mime").val($("#download_file_basic_input").val() + "_mime");
-  });
+	$("#export_web_commons_server").change(function() {
+		if($(this).val() === "production")
+			$("#export_web_commons_output").val("commons_production_url");
+		else if($(this).val() === "beta")
+			$("#export_web_commons_output").val("commons_beta_url");
+	});
 
 </script>

@@ -1,0 +1,14 @@
+{
+    "nodeid": "export_email_to_anyone",
+    "title": "Email: to any user & any content",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "email",
+    "status": "usable",
+    "tags":["backend"],
+    "description": "Send email message via SMTP.",
+
+    "scripts": {
+		"finish":"out.say('finish', 'Email sent!');"
+    }
+}

@@ -1,9 +1,10 @@
 {
 	"nodeid": "view_chart_count",
-	"type": "view",
-	"subtype": "chart",
+	"type": "export",
+	"subtype": "view",
+	"subsubtype": "chart",
 	"title": "Count chart",
-	"status": "rubbish",
+	"status": "broken",
 	"description": "Count records by certain field and draw chart",
 
 	"scripts": {

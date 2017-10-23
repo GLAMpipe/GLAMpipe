@@ -11,7 +11,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
-		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><button id='login-submit'>login</button></div>");
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>login</div> <a id='login-cancel' href='#'>cancel</a> </div>");
 		e.preventDefault();
 	});
 
@@ -26,6 +26,12 @@ $( document ).ready(function() {
 		e.preventDefault();
 	});
 
+	$(document).on("click", "#login-cancel", function(e) {
+		$("#login").empty();
+		$("#login").append("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
+		e.preventDefault();
+	});
+
 	$(document).on("click", "#logout", function(e) {
 		localStorage.removeItem("token");
 		$("#login").empty().append("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
@@ -33,8 +39,7 @@ $( document ).ready(function() {
 	});
 
 	// hide node settings panel on start
-	$("data-workspace .settings").hide();
-	$("data-workspace settingscontainer").hide();
+	$("settingsblock").hide();
 	$("data-workspace submitblock").hide();
 
 	// COLLECTION CHOOSER
@@ -57,17 +62,15 @@ $( document ).ready(function() {
 	$("settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
 		$(this).removeClass("wikiglyph-caret-up");
 		$(this).addClass("wikiglyph-caret-down");
-		$("data-workspace .settings").hide();
+		$("settingsblock").hide();
 		$("data-workspace submitblock").hide();
-		$("data-workspace .node-description").hide();
 	});
 
 	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
 		$(this).removeClass("wikiglyph-caret-down");
 		$(this).addClass("wikiglyph-caret-up");
-		$("data-workspace .settings").show();
+		$("settingsblock").show();
 		$("data-workspace submitblock").show();
-		$("data-workspace .node-description").show();
 	});
 
 
@@ -163,8 +166,7 @@ $( document ).ready(function() {
 		var nodeid = node._id;
 		var desc = $(".node-description-value").val();
 		if(desc) {
-			$(".node[data-id='"+nodeid+"'] div.boxtitle").addClass("boxtext");
-			$(".node[data-id='"+nodeid+"'] div.boxtext" ).text($(".node-description-value").val());
+			$(".node[data-id='"+nodeid+"'] div.description" ).text($(".node-description-value").val());
 		} else {
 			$(".node[data-id='"+nodeid+"'] div.boxtitle").removeClass("boxtext");
 			$(".node[data-id='"+nodeid+"'] div.boxtitle" ).text(node.title);
@@ -231,10 +233,11 @@ $( document ).ready(function() {
 
 			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
 
-			// revert "run" button text
+			// revert batch run button text
 			var button = $("button[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
-			$("div[data-id='"+data.doc+"']").text("run only this");
+			// revert singe run links
+			$("a[data-id='"+data.doc+"']").text("run for this");
 		}
 		//websockPopup(progressDisplay, "Node run error");
 	});

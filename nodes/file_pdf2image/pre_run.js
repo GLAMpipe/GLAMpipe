@@ -7,21 +7,32 @@ if(Array.isArray(filenames)) {
 		if(filename)
 			paths.push(getPath(context.node.params.filepath, filename));
 		else
-			paths.push("");
+			paths.push({});
 	})
-	out.pre_value = paths;
+	
 } else {
 	if(filenames)
-		out.pre_value = getPath(context.node.params.filepath, context.doc[context.node.params.in_field]);
+		paths.push(getPath(context.node.params.filepath, context.doc[context.node.params.in_field]));
 	else
-		paths.push("");
+		paths.push({});
 }
+
+out.pre_value = paths;
 
 
 function getPath(path, filename) {
+	var page = getPageNumber();
     if(path)
-        return context.path.join(path, filename)
+        return {"page": page, "file": context.path.join(path, filename)};
     else
-        return filename;
+        return {"page": page, "file": filename};
         
+}
+
+function getPageNumber() {
+	out.console.log(context.doc[context.node.params.out_page])
+	if(context.doc[context.node.params.out_page])
+		return context.doc[context.node.params.out_page]
+	else
+		return "0";
 }

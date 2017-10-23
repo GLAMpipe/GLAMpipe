@@ -1,10 +1,24 @@
-<div class="box-noflex">
-	<label>mode </label>
-	<select class="node-settings" name="mode">
-		<option value="reliable">reliable</option>
-		<option value="percentage">percentage</option>
-	</select>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			mode
+		</settingtitle>
+		<settinginstructions>
+			You can accept any reliable detection or by percentage. Percentage can be used to detect the main language in multilinguagl texts.
+		</settinginstructions>
+	</settinginfo>
 	
-	<label>percentage</label>
-	<input class="node-settings" type="text" name="percentage" value="50"/>
-</div>
+	<settingaction>
+		<label>mode </label>
+		<select class="node-settings" name="mode">
+			<option value="reliable">reliable</option>
+			<option value="percentage">percentage</option>
+		</select>
+
+		<label>percentage</label>
+		<input class="node-settings" type="text" name="percentage" value="50"/>
+
+	</settingaction>
+</setting>
+
+

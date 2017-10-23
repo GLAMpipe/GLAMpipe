@@ -85,10 +85,6 @@ var dataTable = function (node) {
 	}
 
 
-	this.expandCell = function (event) {
-		$(event.target).parent().css({"max-height":"600px", "overflow-y":"auto"});
-	}
-
 
 	this.nextTablePage = function () {
 		self.params.skip_func(15);
@@ -179,7 +175,7 @@ var dataTable = function (node) {
 		// if node has input/output field, then use them as visible fields
 		if(config) {
 			var keys = config.input_keys.concat(config.output_keys);
-			keys.unshift("row");
+			keys.unshift("action","row");
 			
 			if(self.keys.visible_keys == null) {
 				self.keys.visible_keys = keys;
@@ -199,9 +195,11 @@ var dataTable = function (node) {
 
 		// otherwise let the user decide what to see
 		if(self.keys.visible_keys == null) {
+			
 			// if there are no visible keys, then try default keys
 			if(self.node.source.views.default_keys) {
 				self.keys.visible_keys = self.node.source.views.default_keys;		
+				
 			// if there are no default keys, then visible keys are first 5 keys 
 			} else {
 				var keys = self.keys.all_keys.sorted.slice(0,5);
@@ -211,7 +209,7 @@ var dataTable = function (node) {
 				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
 			}
 		}
-		
+
 		// add "row"
 		if(self.keys.visible_keys.indexOf("row") === -1) {
 			self.keys.visible_keys.splice(0, 0, "row");
@@ -226,36 +224,41 @@ var dataTable = function (node) {
 	// displays data in table format
 	this.renderTablePage = function () {
 
+		var render = null;
+		var html = "";
 
 		if(self.node.data.docs.length == 0) {
-			var html = "<div class='fatbox'><h2>This collection is empty</h2><br><div>Add data source to get something to look at :)</div></div>";
+			var html = "<div class='message'><h2>This data collection does not have any data yet!</h2><br><div>Add a data source to start working!</div></div>";
 			$(self.dataDisplayDiv).empty().append(html);
 			return;
 		}
 
 		var config = self.node.getConfig();
 		var visible_keys = self.getVisibleFields(config);
-		var html = "<table id='data' class='documents'><thead><tr>";
 		
-		// RENDER KEYS
-		for (var i = 0; i < visible_keys.length; i++) {
-			html += "<td><div>" +  visible_keys[i] + "</div></td>";
+		// check if node wants to render data itself
+		if(self.node.source.scripts.view) {
+			render = new Function('node', 'self', self.node.source.scripts.view);
+			html = render(self.node, self);
+			
+		} else {
+			html = "<table id='data' class='documents'><thead><tr>";
+			
+			// RENDER KEYS
+			for (var i = 0; i < visible_keys.length; i++) {
+				html += "<td><div>" +  visible_keys[i] + "</div></td>";
+			}
+			
+			html += "</tr></thead><tbody>"
+			
+			html += self.renderDataTable(config);
+			
+			html += "</tbody></table>" ;
 		}
-		
-		html += "</tr></thead><tbody>"
-		
-		html += self.renderDataTable(config);
-		
-		html += "</tbody></table>" ;
 
 		$(self.dataDisplayDiv).empty();
 		$(self.dataDisplayDiv).append("<div id='count'></div>");
 		$(self.dataDisplayDiv).append(html);
-		
-		// make edit buttons visible id edit mode is on
-		if(self.editMode)
-			$("data-workspace table tbody td div.edit").css('display','inline');
-		
 
 	}
 
@@ -268,28 +271,24 @@ var dataTable = function (node) {
 
 	this.renderDataTable = function (config) {
 
-		var render = null;
-		// check if node wants to render data itself
-		//if(self.node.source.scripts.view) {
-			//var render = new Function('node', self.node.source.scripts.view);
-		//}
-
-		var config = self.node.getConfig();
+		if(!config)
+			config = self.node.getConfig();
+			
 		var visible_keys = self.getVisibleFields(config);
 
 		var html = "";
-		if(render) {
-			html = render(self.node);
-		} else {
-			for(var j = 0; j < self.node.data.docs.length; j++) {
-				html += "<tr>";
-				for(var k = 0; k < visible_keys.length; k++) {
-					html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
-				}
-				html += "</tr>"
+
+		for(var j = 0; j < self.node.data.docs.length; j++) {
+			html += "<tr>";
+			for(var k = 0; k < visible_keys.length; k++) {
+				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
 			}
+			html += "</tr>"
 		}
+		
 		return html;
+		
+
 	}
 
 
@@ -297,24 +296,38 @@ var dataTable = function (node) {
 	this.renderCell = function(key_name, key_index, data, config) {
 		var html = "";
 		var manual_edit = "";
-		if(data.MP_manual && data.MP_manual.includes(key_name))
+		
+		// mark manual edits
+		if(data._mp_manual && data._mp_manual.includes(key_name))
 			manual_edit = "manual-edit";
 			
-		if(key_name == "row") { // "row" is not an actual key, just an internal row counter
-			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view")
-				html += "<td><div data-id='" + data._id + "' class='button run_single'>single run</div></td>";
-			else
-				html += "<td><div class='delete'><button class='button' data-id='"+data._id+"'>delete</button></div>" + self.getRowIndex(key_index) + "</td>";
+		// "action" column
+		if(key_name == "action") { // "action" is not an actual key
+
+			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>run for this</a>";
+				
+				// if node has action_view.js, then let that append html to "action" cell
+				if(self.node.source.scripts.action_view) {
+					render = new Function('node', 'doc', self.node.source.scripts.action_view);
+					html += render(self.node, data) + "</td>";
+				}
+				html += "</td>";
+			} else
+				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a>" + self.getRowIndex(key_index) + "</td>";
+				
+		} else if(key_name == "row") { // "action" is not an actual key
+			html = "<td>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {
 			
 		   
 			if(config && config.input_keys.indexOf(key_name) !== -1)
-				html += "<td class='input'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
+				html += "<td class='input'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else if(config && config.output_keys.indexOf(key_name) !== -1)
-				html += "<td class='output'><div class='edit wikiglyph-edit'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
+				html += "<td class='output'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else 
-				html += "<td><div class='edit wikiglyph-edit'></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
+				html += "<td></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
 			
 		}
 		return html;
@@ -328,6 +341,60 @@ var dataTable = function (node) {
 		if(data == null)
 			return "<div></div>";
 		
+		// if in edit mode, then add "edit" class
+		if(self.editMode)
+			className += " edit";
+		
+		// render arrays recursively
+		if (Array.isArray(data)) {
+			for(var i = 0; i < data.length; i++) {
+				//if(index === null)
+				if(Array.isArray(data[i]))
+					html += "<div data-index='" + i + "' class='object-cell'>["+i+"] array</div>"
+				else
+					html += self.renderCellContent(data[i], i, className, key);
+			}
+
+		// render string, numbers and nulls
+		} else if (typeof data == "string" || typeof data == "number" || data === null) {
+			// render urls as links
+			if(typeof data == "string" && data.match(/^http/) && !self.editMode) {
+				if(index === 0 || index)
+					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				else
+					html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
+				
+			} else {
+				if(typeof data == "string" && data.match("^AAAA_error"))
+					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
+				else if(index != null)
+					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
+				else 
+					html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
+			}
+
+		// render objects
+		}  else {
+			if(index != null)
+				html += "<div data-index="+index+" class='object-cell'>["+index+"] subdocument</div>";
+			else
+				html += "<div class='object-cell'>subdocument</div><div class='object-string'>as string</div>";
+		}
+		return html;
+	}
+
+
+
+	this.renderCellContent_backup = function (data, index, className, key) {
+		
+		var html = "";
+		if(data == null)
+			return "<div></div>";
+		
+		// if in edit mode, then add "edit" class
+		if(self.editMode)
+			className += " edit";
+		
 		// render arrays recursively
 		if (Array.isArray(data)) {
 			for(var i = 0; i < data.length; i++) {
@@ -337,7 +404,7 @@ var dataTable = function (node) {
 		// render string, numbers and nulls
 		} else if (typeof data == "string" || typeof data == "number" || data === null) {
 			// render urls as links
-			if(typeof data == "string" && data.match(/^http/)) {
+			if(typeof data == "string" && data.match(/^http/) && !self.editMode) {
 				if(index === 0 || index)
 					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				else
@@ -355,14 +422,12 @@ var dataTable = function (node) {
 		// render objects
 		} else {
 			if(index != null)
-				html += "<div data-index="+index+" class='object-cell'>["+index+"] object</div>";
+				html += "<div data-index="+index+" class='object-cell'>["+index+"] subdocument</div>";
 			else
-				html += "<div class='object-cell'>object</div><div class='object-string'>as string</div>";
+				html += "<div class='object-cell'>subdocument</div><div class='object-string'>as string</div>";
 		}
 		return html;
 	}
-
-
 
 	this.getDocByTableClick = function (event) {
 		var obj = $(event.target);
@@ -437,7 +502,7 @@ var dataTable = function (node) {
 			if(key)
 				html += "<li><span class='bold'>" + key + "</span>:<ul>";
 			else
-				html += "<li><ul>";
+				html += "<li>array<ul>";
 			for(var i=0; i < value.length; i++) {
 				html += self.object2Html(value[i], key, i);
 				//html += "</li>";
@@ -455,7 +520,10 @@ var dataTable = function (node) {
 				
 		//objects
 		} else if(typeof value === "object") {
-			html += "<li><span class='bold'>" + key + "</span>:<ul>" ;
+			if(typeof index !== "undefined")
+				html += "<li><span class='bold'>[" + index + "]</span><ul>" ;
+			else
+				html += "<li><span class='bold'></span>object<ul>" ;
 			for(key in value) {
 				html += self.object2Html(value[key], key);
 			}
@@ -465,6 +533,31 @@ var dataTable = function (node) {
 
 		return html;
 	}
+
+
+	this.expandCell = function(event) {
+		var obj = $(event.target);
+		var index = obj.data("index");
+		
+		var doc = self.getDocByTableClick(event);
+		var key = self.getKeyByTableClick(event);
+		var value = doc[key];
+		if(value && Array.isArray(value) && index !== null)
+			value = value[index];
+			
+		$("#cell-display").empty().append("<textarea style='width:100%;height:260px;box-sizing:border-box'>" + JSON.stringify(value, null, '  ')) + "</textarea>";
+		$("#cell-display").dialog({
+			position: { 
+				my: 'left top',
+				at: 'right top',
+				of: obj
+			},
+			width:400,
+			maxHeight: 400,
+			title: "cell data"
+		});
+	}
+
 
 	this.openSearchDialog = function () {
 
@@ -502,7 +595,6 @@ var dataTable = function (node) {
 	}
 
 	this.editCell = function(event) {
-		
 		var obj = $(event.target);
 		var doc = self.getDocByTableClick(event);
 		var key = self.getKeyByTableClick(event);
@@ -738,9 +830,8 @@ var dataTable = function (node) {
 
 		// edit mode
 		$("data-workspace").on('click','data-controls .wikiglyph-edit', function(e) {
-			$("data-workspace table tbody td div.edit").toggle();
-			$("data-workspace table tbody td div.delete").toggle();
 			self.editMode = !self.editMode;
+			self.renderTablePage();
 		})
 
 		// shrink all cells
@@ -811,19 +902,17 @@ var dataTable = function (node) {
 
 
 		// ****************************** DATA display *************************
-
-		// edit cell content
-		$("data-workspace").on('click','table tbody td div.edit', function(e) {
+		$("data-workspace").on('click','datacontainer table tbody td div.edit', function(e) {
 			self.editCell(e);
 		});
 
-		// edit cell content
-		$("data-workspace").on('click','table tbody td div.delete', function(e) {
+		// delete document button handler
+		$("data-workspace").on('click','datacontainer table tbody td a.delete', function(e) {
 			self.node.gp.deleteDocument(e);
 		});
 
 		// run node with single document
-		$("data-workspace").on('click','table tbody td div.run_single', function(e) {
+		$("data-workspace").on('click','table tbody td a.run_single', function(e) {
 			self.runSingle(e);
 		});
 	
@@ -838,12 +927,18 @@ var dataTable = function (node) {
 		$("data-workspace").on("click", ".object-string", function(e) {
 			self.renderObjectAsString(e);
 		});
+
+		$("data-workspace").on("click", ".expand", function(e) {
+			self.expandCell(e);
+		});
 		
 	}
 
 
 
 	this.nl2br = function (str, is_xhtml) {   
+		if(str.length > 1000)
+			str = str.substring(0,1000) + "...<a class='expand' href='#'>show (not implemented)</a>\n\n";
 		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
 		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}

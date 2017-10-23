@@ -8,8 +8,12 @@ const MP 		= require("../config/const.js");
 
 var exports = module.exports = {};
 
+
+
 // loop for synchronous nodes and export nodes (export is done once per document)
 exports.documentLoop = function (node, sandbox, onDoc) {
+	
+	sandbox.out.say("progress", "Processing started...");
 	
 	var mode = "batch";
 	var query = {};
@@ -20,7 +24,7 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 		mode = "single";
 	}
 
-	// find everything
+	// get documents (batch run) or document (single run)
 	mongoquery.find2(query, node.collection, function (err, docs) {
 		
 		sandbox.context.doc_count = docs.length;
@@ -52,33 +56,36 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 				return;
 			}
 			
-			// call document processing function
-			onDoc(doc, sandbox, function processed () {
+			// try to call document processing function
+			try {
+				onDoc(doc, sandbox, function processed () {
+					
+					if(Array.isArray(sandbox.out.setter))
+						sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
+					
+					if(sandbox.out.setter != null) {
+						var setter = sandbox.out.setter; 
+					} else {
+						var setter = {};
+						setter[node.out_field] = sandbox.out.value;
+					}
+					
+					updateDoc = createUpdateDoc(node, setter, doc, mode);
+					
+					//console.log("updateDoc:", updateDoc);
+					if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
+						console.log("NODE: skipping")
+						next();
+					} else
+						mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
+				});
 				
-				//console.log("SETTER")
-				//console.log(sandbox.data)
-				
-				
-				if(Array.isArray(sandbox.out.setter))
-					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
-				
-				if(sandbox.out.setter != null) {
-					var setter = sandbox.out.setter; 
-				} else {
-					var setter = {};
-					setter[node.out_field] = sandbox.out.value;
-				}
-				
-				updateDoc = createUpdateDoc(node, setter, doc, mode);
-				
-				console.log("updateDoc:", updateDoc);
-				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
-					console.log("NODE: skipping")
-					next();
-				} else
-					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
-			});
-			
+			} catch(e) {
+				if(e && e.name)
+					sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+				else
+					sandbox.out.say("error", "Error in node: 'run' script");
+			}
 
 		}, function done () {
 			sandbox.finish.runInContext(sandbox);
@@ -92,7 +99,7 @@ function createUpdateDoc(node, setter, doc, mode) {
 	var updateDoc = {};
 	var manualRemovals = [];
 	for(var key in setter) {
-		if(doc.MP_manual && doc.MP_manual.includes(key)) {
+		if(doc._mp_manual && doc._mp_manual.includes(key)) {
 			// in "batch" mode we do not override manual edit
 			if(mode === "batch")
 				delete setter[key];
@@ -103,7 +110,7 @@ function createUpdateDoc(node, setter, doc, mode) {
 	}
 	
 	if(manualRemovals)
-		updateDoc.$pull = {MP_manual: {$in:manualRemovals}};
+		updateDoc.$pull = {_mp_manual: {$in:manualRemovals}};
 		
 	updateDoc.$set = setter;
 	return updateDoc;
@@ -206,6 +213,7 @@ function requestLoop2(node, sandbox, onDoc) {
 //           - output: out.setter (multiple fields) or out.value (single field)
 exports.fieldLoop = function (node, sandbox, onDoc) {
 
+	sandbox.out.say("progress", "Processing started...");
 	var query = {};
 	// ONE DOC
 	if(node.req && node.req.params.doc) {
@@ -234,6 +242,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 			sandbox.out.value = null;
 			sandbox.out.setter = null;
 			sandbox.out.error = null;
+			sandbox.context.data = null;
+			sandbox.context.error = null;
 			
 			try {
 				sandbox.pre_run.runInContext(sandbox);
@@ -244,8 +254,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				return;
 			}
 			
-			//console.log("sandbox.out.pre_value")
-			//console.log(sandbox.out.pre_value)
+			console.log("sandbox.out.pre_value")
+			console.log(sandbox.out.pre_value)
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {
@@ -265,6 +275,7 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 						sandbox.out.value = null;
 						sandbox.out.error = null;
 						sandbox.context.skip = null;
+						sandbox.context.error = null;
 						
 						try {
 							sandbox.run.runInContext(sandbox);
@@ -279,7 +290,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							setters.push(sandbox.out.setter)
 						else
 							result.push(sandbox.out.value);
-							
+						
+						sandbox.context.data = null;
 						nextFieldRow();
 					});
 
@@ -289,7 +301,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 						var setter = {};
 						setter[node.out_field] = result;
 					}
-
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, nextDocument);
 				});
 				

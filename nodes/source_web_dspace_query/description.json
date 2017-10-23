@@ -2,7 +2,7 @@
     "nodeid": "source_web_dspace_query",
     "type": "source",
     "subtype": "web",
-    "title": "DSpace 6: query import",
+    "title": "DSpace 6: import by query",
     "status": "usable",
     "tags":["dspace"],
     "usage":"",
@@ -15,7 +15,7 @@
     },
     
     "views": {
-        "default_keys": ["name", "dc_identifier_uri", "bitstream_original_name", "bitstream_original_file_url"]
+        "default_keys": ["name", "dc_contributor_author", "bitstream_original_file_url"]
     
     }
     

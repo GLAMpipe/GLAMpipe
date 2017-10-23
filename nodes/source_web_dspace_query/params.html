@@ -1,8 +1,7 @@
 
 
-<label>Choose DSpace REST API url or write url below.</label>
+<label>Choose DSpace API URL</label>
 <select id="source-web-dspace-query_url" name="dspace_url">
-	<option value="" selected disabled>predefined servers</option>
 	<option value="https://demo.dspace.org/rest">https://demo.dspace.org/rest</option>
 </select>
 <button id="source-web-dspace-query_plus">+</button>
@@ -100,7 +99,6 @@ function fetchParams () {
 			if(data && Array.isArray(data)) {
 				dspace_status.empty();
 				url_select.empty();
-				url_select.append("<option value='' selected disabled>predefined servers</option>");
 				url_select.append("<option value='https://demo.dspace.org/rest'>https://demo.dspace.org/rest</option>");
 				data[0].url.forEach(function(url_opt) {
 					url_select.append($("<option></option>").text(url_opt).attr("value", url_opt));

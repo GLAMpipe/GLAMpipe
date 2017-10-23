@@ -1,8 +1,8 @@
 {
-    "nodeid": "process_download_basic",
+    "nodeid": "process_file_download",
     "type": "process",
-    "subtype": "downloads",
-    "subsubtype": "basic",
+    "subtype": "files",
+    "subsubtype": "download",
     "title": "Download file",
     "status": "usable",
     "tags":["generic"],

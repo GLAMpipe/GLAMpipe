@@ -22,7 +22,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
-		$("#login").append("<div id='login-popup'>username: <input id='username'/>password: <input id='password' type='password'/><button class='button' id='login-submit'>login</button></div>");
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>login</div> <a id='login-cancel' href='#'>cancel</a> </div>");
 		$("#username").focus();
 		e.preventDefault();
 	});
@@ -39,6 +39,12 @@ $( document ).ready(function() {
 		 if(key == 13)  {
 			login(gp);  
 		}
+	});
+
+	$(document).on("click", "#login-cancel", function(e) {
+		$("#login").empty();
+		$("#login").append("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
+		e.preventDefault();
 	});
 
 

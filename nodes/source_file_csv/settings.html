@@ -1,40 +1,114 @@
 
-<h3>import</h3>
-<div class="box-noflex">
-	<label>separator</label>
-	<input class="node-settings short_input" name="separator" value=","/>
-
-	<div>
-		<input type="checkbox" class="node-settings" name="tabs"/>
-		<label class="inline">Tab separated TSV (overrides separator)</label>
-	</div>
-
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Separator
+		</settingtitle>
+		<settinginstructions>
+			Define how columns are separated in CSV. If tabulator is used, then check "Tab separated" checkbox.
+		</settinginstructions>
+	</settinginfo>
 	
-	<label>Character encoding</label>
-	<select class="node-settings" name="encoding" >
-		<option value="utf8" selected="selected">UTF-8</option>
-		<option value="latin1">iso-8859-1 (latin1)</option>
-	</select>
+	<settingaction>
+		<label>separator</label>
+		<input type="text" class="node-settings short_input" name="separator" value=","/>
+		
+		<input type="checkbox" class="node-settings" name="tabs"/>
+		<label class="inline">Tab separated</label>
+	</settingaction>
+</setting>
 
 
 
-	<div>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Character encoding
+		</settingtitle>
+		<settinginstructions>
+			If you get weird characters, then try different encoding.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>encoding</label>
+		<select class="node-settings" name="encoding" >
+			<option value="utf8" selected="selected">UTF-8</option>
+			<option value="latin1">iso-8859-1 (latin1)</option>
+		</select>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Field names
+		</settingtitle>
+		<settinginstructions>
+			The first row of CSV file usually holds the names of the columns. If not, then uncheck this.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 		<input type="checkbox" class="node-settings" name="columns" checked="checked" />
 		<label class="inline">Field names in first row</label>
-	</div>
+	</settingaction>
+</setting>
 
-	<div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Trim values
+		</settingtitle>
+		<settinginstructions>
+			Selecting this removes any extra spaces from values.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 		<input type="checkbox" class="node-settings" name="trim" checked="checked" />
-		<label class="inline">Trim</label>
-	</div>
+		<label class="inline">trim</label>
+	</settingaction>
+</setting>
 
-	<div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Empty lines
+		</settingtitle>
+		<settinginstructions>
+			If this is checked, empty lines are not imported.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 		<input type="checkbox" class="node-settings" name="skip" />
-		<label class="inline">Do not import empty values</label>
-	</div>
+		<label class="inline">do not import empty values</label>
+	</settingaction>
+</setting>
 
-	<label>Multiple value separator</label>
-	<input class="node-settings short_input" name="split" value=""/>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Multiple value separator
+		</settingtitle>
+		<settinginstructions>
+			If CSV includes multiple values, then those values can be splitted by defining the separator here.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+	<label>multiple value separator</label>
+	<input type="text" class="node-settings short_input" name="split" value=""/>
+	</settingaction>
+</setting>
+
+
 
 <!-- 
 	<div class="help">You can take just sample from records</div>
@@ -43,10 +117,8 @@
 
 	<input class="node-settings short_input" name="sample_to"/>
 	<label>to (leave empty for all) </label>
--->
-</div>
 
-<h3>extra options</h3>
+
 <div class="box-noflex">
 	<div>
 		<input type="checkbox" class="node-settings " name="extract_language"/>
@@ -54,3 +126,4 @@
 	</div>
 
 </div>
+-->

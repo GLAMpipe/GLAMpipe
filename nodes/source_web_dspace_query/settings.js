@@ -2,8 +2,7 @@
 
 var params = node.params
 var dspace_url = node.params.dspace_url;
-
-
+$("#source_web_dspace_url").text(params.dspace_url);
 
 /*
  * The contents of this file are subject to the license and copyright

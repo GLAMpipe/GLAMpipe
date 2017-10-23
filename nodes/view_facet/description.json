@@ -1,7 +1,8 @@
 {
 	"nodeid": "view_facet",
-	"type": "view",
-	"subtype": "facet",
+	"type": "export",
+	"subtype": "view",
+	"subsubtype": "facet",
 	"title": "Faceted view",
 	"status": "test",
 	"tags":["generic"],

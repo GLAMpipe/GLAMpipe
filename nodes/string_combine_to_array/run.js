@@ -1,4 +1,4 @@
-var in_field = context.node.settings.in_field;
+var in_field1 = context.node.settings.in_field1;
 var output = [];
 
 function combine (field) { 
@@ -61,17 +61,13 @@ function getPreferredLang(field) {
 }
 
 
-if(Array.isArray(in_field)) {
-	in_field.forEach(function(field) {
-		if(context.node.settings.preferred_lang !== "" && getPreferredLang(field)) {
+
+		if(context.node.settings.preferred_lang !== "" && getPreferredLang(in_field1)) {
 			
 		} else {
-			combine(field);
+			combine(in_field1);
 		}
-	})
-} else {
-	var val = context.doc[context.node.settings.in_field]; 	
-}
+
 
 
 out.value = output;

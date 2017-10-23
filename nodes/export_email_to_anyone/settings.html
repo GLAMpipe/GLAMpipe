@@ -1,0 +1,29 @@
+
+<h3 id="export-email-anyone">Backend: Sent email to any email address</h3>
+
+<div class="help">This node can be used for sending mail. Message content, subject and receiver are defined in settings and so they can be set via REST. 
+<br>In order to use this node, one must have an ability to send unauthorised emails.
+</div>
+
+
+<div class="box-noflex dspace-hidden">
+	
+<label>send to</label>
+<input class="node-settings" type="email" name="to" id="to" required />
+
+<label>subject</label>
+<div class="help">You can use dynamic document values in text by writing field name surrounded by square brackets like this: [[dc_title]]</div>
+<input class="node-settings" type="text" name="subject" id="subject"/>
+
+<label>message</label>
+<div class="help">You can use dynamic document values in text by writing field name surrounded by square brackets like this: [[dc_title]]</div>
+<textarea class="node-settings" name="text" id="text"></textarea>
+
+
+
+<label>document fields (comma separated list or "*")</label>
+<div class="help">You can use "[[data_fields]]" variable in message in order to render document fields to a message body.</div>
+<div class="help">"*" renders all document fields.</div>
+<input class="node-settings" name="data_fields" value="*"/>
+
+

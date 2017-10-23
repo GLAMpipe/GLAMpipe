@@ -3,15 +3,13 @@
     "type": "source",
     "subtype": "collection",
     "subsubtype": "grobid",
-    "title": "GROBID",
-    "status": "rubbish",
+    "title": "GROBID: extract from collection",
+    "status": "broken",
     "tags":["library", "grobid"],
     "usage":"",
-    "description": "Extracts references from academic articles",
+    "description": "Extract references from academic articles that are in other GLAMpipe collection.",
     
     "scripts": {
-        "hello": "out.say('news', 'You added a reference extract node'); ",
-        "bye": "out.say('finish', 'Bye!'); ",
         
         "init": 
         [

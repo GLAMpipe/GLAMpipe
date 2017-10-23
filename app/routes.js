@@ -166,7 +166,6 @@ module.exports = function(express, glampipe, passport) {
  * *************************************************************************************************************/
 
 
-
 	// SETUP AND STATUS
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
@@ -174,7 +173,8 @@ module.exports = function(express, glampipe, passport) {
 			authentication:global.config.authentication,
 			version:global.config.version,
 			uiPath:global.config.uiPath,
-			public:global.config.public
+			public:global.config.public,
+			nodedevmode:global.config.nodeDevMode
 			//dataPath:global.config.dataPath
 		});
 	});
@@ -250,6 +250,10 @@ module.exports = function(express, glampipe, passport) {
 
 	express.get('/api/v1/nodes/:id/params', function (req, res) {
 		node.getNodeParams(req.params.id, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/nodes/:id/scripts/:script?', function (req, res) {
+		node.getNodeScripts(req, function(data) {res.send(data)});
 	});
 
 	express.get('/api/v1/options/:nodeid', function (req, res) {

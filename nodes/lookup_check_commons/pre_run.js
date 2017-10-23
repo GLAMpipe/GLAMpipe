@@ -1,18 +1,13 @@
 
 // this outputs options objects for request module
 
-var servers = [
-	"https://commons.wikimedia.org",
-	"https://commons.wikimedia.beta.wmflabs.org"
-	]
+var servers = {
+	"beta":			"https://commons.wikimedia.beta.wmflabs.org", 
+	"production": 	"https://commons.wikimedia.org"
+	}; 
+	
+var server = servers[context.node.params.server];
 var api = "/w/api.php?action=query&list=allimages&prop=imageinfo&format=json&aisha1=";
-
-
-var server = servers[0];
-
-if(context.node.params.server == "beta")
-	server = servers[1];
-
 
 var values = context.doc[context.node.params.in_field];
 

@@ -1,9 +1,9 @@
 {
     "nodeid": "export_mapping_plone",
     "title": "Plone: Map data",
-    "type": "export",
-    "subtype": "metadata mapping",
-    "status": "usable",
+    "type": "process",
+    "subtype": "documents",
+    "status": "broken",
     "description": "Map data to Plone (JSON)",
     "scripts": {
     

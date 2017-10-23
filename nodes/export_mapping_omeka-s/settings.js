@@ -20,7 +20,7 @@ function mapping() {
    
 	$.getJSON(g_apipath + "/proxy?url=" + node.params.required_url + "/properties", function (props) {
 		$.getJSON(url, function(data) {
-			var table = '<table><thead><tr><th>Omeka-S property</th><th>dynamic field</th><th>static field</th></tr></thead>';
+			var table = '<table><thead><tr><th>Omeka-S field</th><th>record field</th><th>static value</th></tr></thead>';
 			if(props.error)
 				alert(data.error);
 			else {
@@ -40,12 +40,31 @@ function mapping() {
 				data_fields += "<option value='" + f + "'>" + f.replace("dc_", "dc.") + "</option>";
 		   }
 		   $("#export-web-omeka_mappings select").append(data_fields);
+		   setSettings();
 		})
    })
 	   
 
 }
 
+
+function setSettings() {
+	var is_static = /^_static_/;
+	var is_dynamic = /^_dynamic_/;
+	console.log("setsettings")
+
+	// apply settings to mappings (remembering previous run)
+	for(var key in node.settings) {
+		console.log(key)
+		if(is_static.test(key)) {
+			$("input[name='" + key + "']").val(node.settings[key]);
+		}
+		
+		if(is_dynamic.test(key)) {
+			$("select[name='" + key + "']").val(node.settings[key]);
+		}
+	}
+}
 
 $("#xml_basic_guess").click(function(e){
    var obj=$(e.target);

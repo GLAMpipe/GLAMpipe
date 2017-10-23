@@ -14,52 +14,50 @@ if(Array.isArray(in_field_value)) {
 	out.pre_value = [];
 	in_field_value.forEach(function(value, index) {
 		
-		// check that project is valid
 		var project = annifProject(index);
+		
+		// check that project is valid
 		if(!projects.includes(project)) {
 			out.pre_value.push({});
-			
 		} else {
-			var options = createOptions(value);
+			var options = createOptions(value, project);
 			out.pre_value.push(options);
 		}
 	})
 
 } else {
 
-	// check that project is valid
 	var project = annifProject();
+	
+	// check that project is valid
 	if(!projects.includes(project)) {
 		out.pre_value = {};
 		
 	} else {
 	
-		out.pre_value = createOptions(in_field_value);
+		out.pre_value = createOptions(in_field_value, project);
 	}
 }
 
 
 
 
-function createOptions(text) {
-		return {
-			method: "POST",
-			url:  "http://api.annif.org/v0/autoindex",
-			headers: {
-				"accept": "application/json",
-				"Content-Type": "application/x-www-form-urlencoded"
-			},
-			formData: {
-				text: 		limitText(text), 
-				project: 	project,
-				maxhits: 	parseInt(context.node.settings.maxhits),
-				threshold: 	parseFloat(context.node.settings.threshold)
-			}
+function createOptions(text, project) {
+
+	return {
+		method: "POST",
+		url:  "http://api.annif.org/v0/autoindex",
+		headers: {Accept: "application/json"},
+		form: {
+			text: 		text, 
+			project: 	project,
+			maxhits: 	parseInt(context.node.settings.maxhits),
+			threshold: 	parseFloat(context.node.settings.threshold)
 		}
+	}
 }
 
 function annifProject(index) {
-
 	if(context.node.settings._dynamic_project) {
 		if(typeof index !== "undefined")
 			return "yso-finna-" + context.doc[context.node.settings._dynamic_project][index];

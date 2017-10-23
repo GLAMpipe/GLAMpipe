@@ -1,111 +1,243 @@
 
 
-<h3>Generic mapping</h3>
-<div class="help">Here you can match your fields to the fields of wikitext template.</div>
-
-<table>
-	<tr>
-		<th>wikitext field</th>
-		<th>static content</th>
-		<th>dynamic content</th>
-		<th>static language</th>
-		<th>dynamic language</th>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Title
+		</settingtitle>
+		<settinginstructions>
+			Note that this is the title in wikitext, not page title.
+		</settinginstructions>
+	</settinginfo>
 	
-	</tr>
-	<tr>
-		<td>title</td>
-		<td><input class="node-settings middle_input" name="title_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="title_dynamic"><option value="">no value</option></select></td>
-		<td>    <input class="node-settings short_input" name="title_lang_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="title_lang_dyn"><option value="">no value</option></select></td>
-	</tr>
-	
-	
-	
-	<tr>
-		<td>description</td>
-		<td><input class="node-settings middle_input" name="description_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="description_dynamic"><option value="">no value</option></select></td>
-		<td><input class="node-settings short_input" name="description_lang_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="description_lang_dyn"><option value="">no value</option></select></td>
-	
-	</tr>
-	
-	<tr>
-		<td>date</td>
-		<td><input class="node-settings middle_input" name="date_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="date_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>permission</td>
-		<td><textarea class="node-settings big" name="permission_static"></textarea></td>
-		<td><select class="node-settings dynamic_field" name="permission_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>source</td>
-		<td><textarea class="node-settings big" name="source_static"></textarea></td>
-		<td><select class="node-settings dynamic_field" name="source_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>institution</td>
-		<td><textarea class="node-settings big" name="institution_static"></textarea></td>
-		<td><select class="node-settings dynamic_field" name="institution_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>accession number</td>
-		<td><input class="node-settings middle_input" name="accnumber_static"/></td>
-		<td><select class="node-settings dynamic_field middle_input" name="accnumber_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>notes</td>
-		<td><input class="node-settings middle_input" name="notes_static"/></td>
-		<td><select class="node-settings dynamic_field" name="notes_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-	
-	<tr>
-		<td>inscriptions</td>
-		<td></td>
-		<td><select class="node-settings dynamic_field" name="inscriptions_dynamic"><option value="">no value</option></select></td>
-		<td>no language</td>
-		<td>no language</td>
-	</tr>
-</table>
+	<settingaction>
+		<table>
+			<tr>
+				<td><label>title</label></td>
+				<td><label>language</label></td>
+				<td><label>language (static) </label></td>
+			</tr>
+			<tr>
+				<td><select class="node-settings dynamic_field middle_input" name="title_dynamic"><option value="">no value</option></select></td>
+				<td><select class="node-settings dynamic_field middle_input" name="title_lang_dyn"><option value="">no value</option></select></td>
+				<td><input type="text" class="node-settings short_input" name="title_lang_static"/></td>
+			</tr>
+		</table>
+		
+		
+		
+		
+	</settingaction>
+</setting>
 
 
-<h3>Template specific mapping</h3>
-<div class="box-noflex">
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Description
+		</settingtitle>
+		<settinginstructions>
+			You can define your mapping below.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<table>
+			<tr>
+				<td><label>description</label></td>
+				<td><label>language</label></td>
+				<td><label>language (static) </label></td>
+			</tr>
+			<tr>
+				<td><select class="node-settings dynamic_field middle_input" name="description_dynamic"><option value="">no value</option></select></td>
+				<td><select class="node-settings dynamic_field middle_input" name="description_lang_dyn"><option value="">no value</option></select></td>
+				<td><input type="text" class="node-settings short_input" name="description_lang_static"/></td>
+			</tr>
+		</table>
+
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Permission
+		</settingtitle>
+		<settinginstructions>
+			When you upload a file, you must indicate its license status. See <a href="https://commons.wikimedia.org/wiki/Commons:Licensing" target="_blank">Commons:Licensing</a> for a quick tutorial about licenses.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>static permission </label>
+		<textarea class="node-settings big" name="permission_static"></textarea>
+				
+		<label>permission field</label>
+		<select class="node-settings dynamic_field" name="permission_dynamic"><option value="">no value</option></select>
+
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Source
+		</settingtitle>
+		<settinginstructions>
+			This usually on web address where image was downloaded.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>source</label>
+		<select class="node-settings dynamic_field" name="source_dynamic"><option value="">no value</option></select>
+		<label>source (static)</label>
+		<textarea class="node-settings big" name="source_static"></textarea>
+		
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Date
+		</settingtitle>
+		<settinginstructions>
+			Date that the image was created.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>date</label>
+		<select class="node-settings dynamic_field" name="date_dynamic"><option value="">no value</option></select>
+		
+	</settingaction>
+</setting>
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Institution
+		</settingtitle>
+		<settinginstructions>
+			
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>institution</label>
+		<select class="node-settings dynamic_field" name="institution_dynamic"><option value="">no value</option></select>
+		<label>institution (static)</label>
+		<textarea class="node-settings" name="institution_static"></textarea>
+		
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Accession number
+		</settingtitle>
+		<settinginstructions>
+			
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>accession number</label>
+		<select class="node-settings dynamic_field middle_input" name="accnumber_dynamic"><option value="">no value</option></select>
+		
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Notes
+		</settingtitle>
+		<settinginstructions>
+			Notes on images.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>notes</label>
+		<select class="node-settings dynamic_field" name="notes_dynamic"><option value="">no value</option></select>
+		
+		<label>notes (static)</label>
+		<input class="node-settings middle_input" name="notes_static"/>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Inscriptions
+		</settingtitle>
+		<settinginstructions>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>notes</label>
+		<select class="node-settings dynamic_field" name="inscriptions_dynamic"><option value="">no value</option></select>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Categories
+		</settingtitle>
+		<settinginstructions>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Item specific categories (select field if any)</label>
+		<select class="node-settings dynamic_field" name="categories">
+			<option>choose category field</option>
+		</select><br>
+		
+		<label>Categories for all items (comma separated list)</label>
+		<textarea class="node-settings big" name="category_all"></textarea>
+		
+		<label>Extra text after template</label>
+		<textarea class="node-settings big" name="extra"></textarea>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Template spesific mapping
+		</settingtitle>
+		<settinginstructions>
+			Here you can match your fields to the fields of wikitext template.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+	</settingaction>
+</setting>
+
+
+<setting>
     <div class="help">Here you can match your fields to the fields of wikitext template.</div>
     <div id="node_set___node_id__" class="template_map"></div>
-</div>
+</setting>
 
-<h3>Categories</h3>
-<div class="box-noflex">
-	<label>Item specific categories (select field if any)</label>
-	<select class="node-settings dynamic_field" name="categories">
-		<option>choose category field</option>
-	</select><br>
-	
-	<label>Categories for all items (comma separated list)</label>
-	<textarea class="node-settings big" name="category_all"></textarea>
-    
-	<label>Extra text after template</label>
-	<textarea class="node-settings big" name="extra"></textarea>
-</div>
+
+
 

@@ -1,8 +1,8 @@
 {
 	"nodeid": "export_mapping_create_commons_metadata",
 	"title": "Wikimedia commons: Map data",
-	"type": "export",
-	"subtype": "metadata mapping",
+	"type": "process",
+	"subtype": "documents",
 	"status": "works",
 	"description": "Map data to wikimedia commons metadata (wikitext)",
 	"scripts": {

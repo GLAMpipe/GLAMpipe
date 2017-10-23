@@ -205,7 +205,6 @@ exports.runNode = function (node, io) {
 								sandbox.out.filename = path.join(global.config.dataPath, "tmp", node.params.filename);
 								csv.importFile_stream(node, sandbox, io);
 							});
-							
 						break;
 
 						case "pdf":
@@ -218,23 +217,17 @@ exports.runNode = function (node, io) {
 							mongoquery.empty(node.collection, query, function() {
 								pdf.extractText(node, sandbox, io);
 							});
-							
+						break;
+
+						case "directory":
+						
+							var dir = require("../app/node_runners/source-directory.js");
+							dir.read(node, sandbox, io);
 						break;
 
 					}
-						
-				
-				break;
-
-
-				case "directory":
-				
-					var dir = require("../app/node_runners/source-directory.js");
-					dir.read(node, sandbox, io);
-				
 				break;
 			}
-
 		break;
 
 /***************************************************************************************************************
@@ -244,16 +237,6 @@ exports.runNode = function (node, io) {
 		case "export":
 		
 			switch (node.subtype) {
-				
-				case "metadata mapping":
-				
-					//default: // syncronous nodes
-					asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
-						sandbox.run.runInContext(sandbox);
-						next();
-					});
-					
-				break;
 				
 				case "file":
 				
@@ -351,13 +334,30 @@ exports.runNode = function (node, io) {
 						case "upload_file":
 							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
 						break;
+						
+						case "email":
+							var mailer = require("../app/mailer.js");
+							// sending email is a special kind of run
+							mailer.emailNodeRun(node, sandbox);
+
+						break;
 
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
+							
 					
 					}
-				
+					
+				case "view":
+					switch (node.subsubtype) {
+						case "facet":
+							var facet = require("../app/node_runners/view-facet.js");
+							facet.writeConfig(node, sandbox);
+						break;
+					}
+
+
 				break;
 			}
 
@@ -409,7 +409,17 @@ exports.runNode = function (node, io) {
 							var file = require("../app/node_runners/file.js");
 							asyncLoop.fieldLoop(node, sandbox, file.convert);
 						break;
-						
+
+						case "download":
+							var web = require("../app/node_runners/web.js");
+							if(global.config.disableBatchDownloads && !node.res) {
+								sandbox.out.say("finish", "Batch downloads not available on this installation");
+								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
+							} else {
+								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
+							}
+						break;
+
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
@@ -425,7 +435,25 @@ exports.runNode = function (node, io) {
 							var detect = require("../app/node_runners/field-detect-language.js");
 							asyncLoop.documentLoop(node, sandbox, detect.language);
 						break;
-					
+
+
+						case "script":
+							try {
+								var run = new vm.createScript(node.settings.js);
+								sandbox.run = run;
+								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+									sandbox.run.runInContext(sandbox,{timeout:10});
+									next();
+								});
+							} catch (e) {
+								console.log("ERROR:", e.stack);
+								sandbox.finish.runInContext(sandbox);
+								sandbox.out.say("finish", "Error in node: 'run' script: " + e.name +" " + e.message);
+							}
+							
+
+						break;
+
 						default: // syncronous nodes
 							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);
@@ -456,7 +484,16 @@ exports.runNode = function (node, io) {
 								next();
 							});	
 						break;
+
+					default: // syncronous metadata mappings
+						asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
+							sandbox.run.runInContext(sandbox);
+							next();
+						});
+						
+					break;
 					}
+					
 				break;
 					
 				case "lookups":
@@ -495,21 +532,7 @@ exports.runNode = function (node, io) {
 							});			
 					}
 				break;
-					
-				case "downloads":
-				
-					switch (node.subsubtype) {
-						case "basic":
-							var web = require("../app/node_runners/web.js");
-							if(global.config.disableBatchDownloads && !node.res) {
-								sandbox.out.say("finish", "Batch downloads not available on this installation");
-								//io.sockets.emit("finish", {"node_uuid":node._id, "msg": "Batch downloads not available on this installation"});
-							} else {
-								asyncLoop.fieldLoop(node, sandbox, web.downloadFile);
-							}
-						break;
-					}
-				break;
+
 				
 				case "meta":
 					
@@ -546,26 +569,6 @@ exports.runNode = function (node, io) {
 
 		break;
 
-
-
-
-
-/***************************************************************************************************************
- *                                       VIEW                                                              *
- * *************************************************************************************************************/
-
-		case "view":
-			switch (node.subtype) {
-				case "facet":
-					var facet = require("../app/node_runners/view-facet.js");
-					facet.writeConfig(node, sandbox);
-				break;
-			}
-
-
-		break;
-
-
 		default:
 			sandbox.out.say("finish", "This node is not runnable");
 			return;
@@ -595,6 +598,7 @@ exports.createSandbox = function (node, io) {
 			flat: flatten,
 			validator: validator,
 			parser: parser,
+			config: global.config,
 			MP: MP
 		},
 		out: {
@@ -634,7 +638,7 @@ exports.createSandbox = function (node, io) {
 
 				// remove node from register if finished or if error (aborting)
 				if(ch === "finish" || ch === "error") {
-					//console.log("REGISTER: deleting " + node.req.originalUrl)
+					console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
 				}
 				

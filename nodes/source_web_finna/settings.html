@@ -1,18 +1,91 @@
-<label>Make a search in <a href="https://finna.fi/" target="_blank">finna.fi</a> and copy the URL here:</label>
-<textarea class="node-settings" id="source_api_finna_search" name="search"></textarea>
-<div id="source_api_finna_search_url">The URL has not been set!</div>
 
-<label>The number of pages to retreive (20 items/page). Use 0 to retrieve all.</label>
-<input class="node-settings" id="source_api_finna_limit" name="limit" value="2"></input>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Search Finna
+		</settingtitle>
+		<settinginstructions>
+			Go to finna and create your search using the available search tools. 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<a href="https://finna.fi/" target="_blank">finna.fi</a> 
+	</settingaction>
+</setting>
 
-<label>Fetch only items with the following license</label>
-<select class="node-settings" id="source_api_finna_license" name="license">
-    <option value="">ei rajausta</option>
-    <option value="usage_rights_str_mv:usage_B">Derivatives allowed, commercial reuse allowed</option>
-    <option value="usage_rights_str_mv:usage_C">No derivatives, commercial reuse allowed</option>
-    <option value="usage_rights_str_mv:usage_D">Derivatives allowed, no commercial reuse</option>
-</select>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy the search URL
+		</settingtitle>
+		<settinginstructions>
+			Copy the resulting URL from the browser address bar and paste it here. 
+			<div id="source_api_finna_search_url">The URL has not been set!</div>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Paste the query here:</label>
+		<textarea class="node-settings" id="source_api_finna_search" name="search"></textarea>
+	</settingaction>
+</setting>
 
-<label>Save raw result</label>
-<input class="node-settings" name="raw" type="checkbox"/>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Set the number of pages to retrieve
+		</settingtitle>
+		<settinginstructions>
+			The number of pages to retreive (20 items/page). Use 0 to retrieve all.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>The number of pages </label>	
+		<input type="number" class="node-settings" id="source_api_finna_limit" name="limit" value="2"></input>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Fetch only items with the certain license
+		</settingtitle>
+		<settinginstructions>
+			Select between licenses allowing or prohibiting derivatives and licenses allowing or prohibiting commerciall use.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Fetch only items with following license</label>
+		<select class="node-settings" id="source_api_finna_license" name="license">
+			<option value="">choose</option>
+			<option value="usage_rights_str_mv:usage_B">Derivatives allowed, commercial reuse allowed</option>
+			<option value="usage_rights_str_mv:usage_C">No derivatives, commercial reuse allowed</option>
+			<option value="usage_rights_str_mv:usage_D">Derivatives allowed, no commercial reuse</option>
+		</select>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Save raw result
+		</settingtitle>
+		<settinginstructions>
+			This allows you to fetch data as provided by Finna. This is merely for debugging purposes, the result is not processable by GLAMpipe. 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Save raw result</label>
+		<input class="node-settings" name="raw" type="checkbox"/>
+	</settingaction>
+</setting>
+
+
 

@@ -118,7 +118,8 @@ exports.edit = function (req, callback) {
 	setter["$set"] = req.body;
 	
 	// mark edited fields as manual edits
-	setter["$addToSet"] = {"MP_manual":{$each:keys}};
+	if(req.query.manual)
+		setter["$addToSet"] = {"_mp_manual":{$each:keys}};
 	
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)}, setter, function(err, result) {
 		if(err) {
@@ -289,8 +290,6 @@ exports.getKeys = function (collection_name, cb) {
 	var source_keys = [];
 	var node_keys = []
 
-
-	
 	// all keys that are not in schema are node output fields
 	mongoquery.findOne({collection:collection_name}, "mp_schemas", function(err, doc) {
 		if(doc) {
@@ -311,10 +310,7 @@ exports.getKeys = function (collection_name, cb) {
 			cb({node_keys:node_keys,keys:key_list, sorted:all_keys.sort()});
 		
 		})		
-		
 	})
-	
-
 }
 
 /**

@@ -1,0 +1,24 @@
+
+<label>send from (no authentication)</label>
+<input name="from" type="email"/>
+
+
+
+<label>subject</label>
+<input type="text" name="subject" id="subject"/>
+
+<label>message</label>
+<textarea  name="text" id="text"></textarea>
+
+
+<label>document fields (comma separated list or "*")</label>
+<div class="help">You can use "[[data_fields]]" variable in message in order to render document fields defined below to message.</div>
+<div class="help">"*" renders all document fields.</div>
+<input name="data_fields" value="*" />
+
+<label>out field</label>
+<input name="out_field" value="email_shibboleth">
+
+
+
+

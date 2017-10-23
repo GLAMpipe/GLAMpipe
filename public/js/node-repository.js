@@ -15,6 +15,26 @@ var nodeRepository = function () {
 		})
 	}
 
+	this.verbose = {
+		"source": {
+			"collection": "Read data from GLAMpipe collection",
+			"web": "Read data from web",
+			"file": "Read data from files"
+		},
+		"process": {
+			"strings": "Modify text",
+			"documents": "Modify whole records",
+			"files": "File operations",
+			"lookups": "Look up data",
+			"meta": "Series of operations",
+		},
+		"export": {
+			"file": "Export data to file",
+			"web": "Export data to web",
+			"view": "Export data to view",
+		}
+	}
+
 	this.renderNodeList = function (div, types) {
 		
 		// if node list is already open, then we "collapse" it
@@ -36,18 +56,24 @@ var nodeRepository = function () {
 			var node = self.nodes[i]._id;
 			if(types.indexOf(node.type) != -1) {
 				html += "  <div class='optionlist'>"
-				self.nodes[i].subtypes.sort(sortBySubType);
-				console.log(self.nodes[i].subtypes);
+				
+				// add verbose text
+				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
+					var sub = self.nodes[i].subtypes[j];
+					if(self.verbose[node.type] && self.verbose[node.type][sub.sub.subtype])
+						console.log(self.nodes[i].subtypes[j].text = self.verbose[node.type][sub.sub.subtype])
+				}
+				// and sort by verbose texts
+				self.nodes[i].subtypes.sort(sortByVerbose);
+				
 				// render subtypes
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
 
 					html += "    <button class='accordion "+node.type+"'>"
 					// add some verbosity
-					if(node.type === "source")
-						html += "      <p class='listtitle'>from "+sub.sub.subtype+"</p>"
-					else if(node.type === "export" && sub.sub.subtype !== "metadata mapping")
-						html += "      <p class='listtitle'>to "+sub.sub.subtype+"</p>"
+					if(self.verbose[node.type] && self.verbose[node.type][sub.sub.subtype])
+						html += "      <p class='listtitle'>" + self.verbose[node.type][sub.sub.subtype] + "</p>";
 					else
 						html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
 						
@@ -108,9 +134,8 @@ var nodeRepository = function () {
 		
 		var html = "";
 		html += "<div class='fatbox " + node.type + " " + node.status + "'>"
-		html += "  <div class='inlinetitleblock'>"
-		html += "    <div><span class='title inlinetitle'>" + node.description + "</span></div>"
-		html += "  </div>"
+		html += "  <fatboxtitle>" + node.title + "</fatboxtitle>";
+		html += "  <fatboxdescription>" + node.description + "</fatboxdescription>"
 
 		// we need to create form for file import (upload)
 		if(node.type == "source") {
@@ -124,10 +149,11 @@ var nodeRepository = function () {
 		} else {
 			html += node.views.params;
 		}
-		
-		html += "    <br><br><a href='#'>"
-		html += "   <div data-index='" + index + "'  class='button create-node'>Create node</div>"
-		html += "  </a> </div>"
+		html += "  <fatboxsubmitblock>";
+		html += "    <a href='#'>"
+		html += "      <div data-index='" + index + "'  class='button create-node'>Create node</div>"
+		html += "    </a>";
+		html += "  <fatboxsubmitblock>";
 		html += "</div>"
 		
 		var params = $(html);
@@ -176,10 +202,10 @@ function sortByTitle (a,b) {
   return 0; 
 }
 
-function sortBySubType (a,b) {
-  if (a.sub.subtype.toLowerCase() < b.sub.subtype.toLowerCase())
+function sortByVerbose (a,b) {
+  if (a.text.toLowerCase() < b.text.toLowerCase())
 	return -1;
-  if (a.sub.subtype.toLowerCase() > b.sub.subtype.toLowerCase())
+  if (a.text.toLowerCase() > b.text.toLowerCase())
 	return 1;
   return 0; 
 }

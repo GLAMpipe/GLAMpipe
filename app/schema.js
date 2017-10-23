@@ -21,9 +21,8 @@ exports.createCollectionSchema = function (node, cb) {
 	var keys = [];
 
 	db[node.collection].find(function (err, docs) {
-		console.log(docs.length);
+		
 		docs.forEach(function(doc) {
-
 			for (key in doc) {
 				if(keys.indexOf(key) < 0)
 					keys.push(key);

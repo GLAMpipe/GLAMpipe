@@ -26,14 +26,15 @@ exports.isValidUser = function(req, res, next) {
 }
 
 
-// checks that we have valid shibboleth user
+// add shibboleth headers to data (like displayname and email)
 exports.addHeadersToData = function(req) {
-	// add shibboleth headers to data
+	
 	if(global.config.authentication === "shibboleth" && Array.isArray(global.config.shibbolethHeadersToData)) {
 		global.config.shibbolethHeadersToData.forEach(function(header) {
-			req.body[header] = req.headers[header];
+			var encoding = require("encoding");
+			req.body[header] = encoding.convert(req.headers[header], "Latin_1").toString(); 
 		});
-		console.log(req.body)
+		//console.log(req.body)
 	}
 
 }

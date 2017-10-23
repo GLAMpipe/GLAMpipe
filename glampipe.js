@@ -70,9 +70,10 @@ var GlamPipe = function() {
 		self.app.use(global.config.uiPath, express.static('public'));
 		self.app.use("/publicview", express.static('app/views/datapublic'));
 		self.app.use(global.config.staticPath, express.static('public_external'));
-		self.app.use( bodyParser.json() );       // to support JSON-encoded bodies
+		self.app.use( bodyParser.json({limit: '10mb'}));       // to support JSON-encoded bodies
 		self.app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-			extended: true
+			extended: true,
+			limit: '10mb'
 		})); 
 
 		self.app.set('json spaces', 2); // pretty print
@@ -196,6 +197,9 @@ var GlamPipe = function() {
 			// handle the error safely
 		    console.log("MAJOR ERROR!")
 		    console.log(err)
+		    // let's clear node run register so that node can be run again
+		    // TODO: we should sent response to node execution request
+		    global.register = [];
 		})
 
 		//  Start the app on the specific interface (and port).
@@ -206,9 +210,10 @@ var GlamPipe = function() {
 				if(process.env.DOCKER)
 					console.log("* ENVIRONMENT:      Docker");
 				else
-					console.log("* ENVIRONMENT:      native Nodejs");
+					console.log("* ENVIRONMENT:      native Nodejs (non-docker)");
 				console.log("* CONFIG FILE:     ", global.config.file);
-				console.log("* DATA PATH:       ",self.dataPath);
+				console.log("* DATA PATH:       ", self.dataPath);
+				console.log("* NODE PATH:       ", self.nodePath);
 				console.log("* AUTHENTICATION   ", global.config.authentication);
 				console.log("* STATUS:           running on http://%s:%s", host, port);
 				console.log("********************* G L A M p i pe *************************");

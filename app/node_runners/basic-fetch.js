@@ -14,6 +14,7 @@ var exports = module.exports = {};
 
 exports.fetchData = function (node, sandbox, io, cb) {
 	console.log("fetch data with basic fetch");
+	sandbox.out.say("progress", "Fetch started...");
 
 	// remove previous data inserted by node and start query loop
 	var query = {}; 
@@ -37,7 +38,10 @@ function requestLoop(node, sandbox, io, cb) {
 			callAPI(sandbox.out.url, function(error, response, body) {
 				if(error) {
 					console.log(error);
-					//sandbox.out.say("error", error);
+					//nodescript.runNodeScriptInContext("finish", node, sandbox, io);
+					sandbox.finish.runInContext(sandbox);
+					sandbox.out.say("error", error);
+					return;
 				} else {
 					sandbox.context.error = error;
 					sandbox.context.response = response;
@@ -82,7 +86,7 @@ function requestLoop(node, sandbox, io, cb) {
 			console.log("calling requestLoop from requestLoop");
 			requestLoop(node, sandbox, io, cb)
 		} else {
-			
+			schema.createCollectionSchema(node);
 			if(cb)
 				cb();
 			else {

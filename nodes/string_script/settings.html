@@ -1,0 +1,132 @@
+<setting>
+	<settinginfo>
+		<settingtitle>
+			This is a very experimental script node.
+		</settingtitle>
+		<settinginstructions>
+
+			<p>Few things to keep in mind:
+			<br>a) the script is <strong>executed in the server</strong>, not in your browser
+			<br>b) document values (fields) can be primitive types (string, number etc), arrays or objects. So you must check type. 
+			<br>c) you cannot change those values, instead you write your result to a variable <strong>out.value</strong>.
+			<br>d) script is <strong>synchronous</strong>, you can not make any IO calls
+			<br>e) there is a <strong>10 ms timeout</strong> (in order to prevent infinite loops)</p>
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<p><strong>context.doc</strong> holds the current document. You can access document fields with dot notation, i.e <strong>context.doc.field_name</strong>. 
+		
+		<p>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node (output field).</p>
+
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Example scripts
+		</settingtitle>
+		<settinginstructions>
+			Some sample scripts. Actually, just one for now.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>example scripts</label>
+		<select id="script_node_examples">
+			<option value="">choose</option>
+			<option value="typed_hello">Hello world with type checking</option>
+		</select>
+
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Example setting: text input (greeting)
+		</settingtitle>
+		<settinginstructions>
+			Type some value. <br>
+			You can access the value in your script like this: <strong>context.node.settings.greeting</strong>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+	<label>greeting</label>
+	<input name="greeting" class="node-settings" value="Hello World!"/>
+
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Example setting: field selection (in field)
+		</settingtitle>
+		<settinginstructions>
+			Choose a field from record fields.<br>
+			In your script you can get the value of the field like this: <br>
+			<strong>context.doc[context.node.settings.in_field]</strong>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>record field</label>
+		<select name="in_field" class="node-settings dynamic_field">
+			<option value="">choose field</option>
+		</select>
+	</settingaction>
+</setting>
+
+
+
+
+
+<setting>
+	<textarea id="script_node_editor" class="node-settings editor" name="js" >
+	// this is the current document
+	var doc = context.doc;
+	var greeting = context.node.settings.greeting;
+
+	// this writes the result to the field of the current document
+	out.value = greeting + " The document id is: " + doc._id;
+
+	</textarea>
+</setting>
+
+
+
+
+<script>
+	
+var examples = {
+	"typed_hello": `// this is the current document
+var doc = context.doc;
+var rec_field = context.node.settings.in_field;
+var greeting = context.node.settings.greeting;
+
+// check the type of document field ("in_field" 2 in settings)
+if(Array.isArray(doc[rec_field]))
+	greeting = "Array, " + greeting;
+else if(typeof doc[rec_field] === "string")
+	greeting = "String, " + greeting;
+else
+	greeting = "Who knows or cares, " + greeting;
+	
+out.value = greeting;`
+
+}
+
+
+$("#script_node_examples").on("change", function() {
+	$("#script_node_editor").val(examples[$(this).val()]);
+})
+
+</script>

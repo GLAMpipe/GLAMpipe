@@ -1,0 +1,14 @@
+{
+    "nodeid": "export_email_to_shibboleth_user",
+    "title": "Email: to shibboleth user & predefined content",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "email",
+    "status": "usable",
+    "tags":["backend"],
+    "description": "Email message via SMTP to Shibboleth user (shibbolethHeaderId in config.js)",
+
+    "scripts": {
+		"finish":"out.say('finish', 'Email sent!');"
+    }
+}
