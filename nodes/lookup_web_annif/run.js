@@ -14,6 +14,5 @@ if(context.error) {
 	context.vars.success_counter++;
 }
 
-if(parseInt(context.count) % 10 == 0) 
-	out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
+out.say('progress', context.count + '/' + context.doc_count + ' processed...');
 

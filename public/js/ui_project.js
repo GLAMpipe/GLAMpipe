@@ -237,7 +237,7 @@ $( document ).ready(function() {
 			var button = $("button[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
 			// revert singe run links
-			$("a[data-id='"+data.doc+"']").text("run for this");
+			$("a[data-id='"+data.doc+"']").text("RUN FOR THIS");
 		}
 		//websockPopup(progressDisplay, "Node run error");
 	});

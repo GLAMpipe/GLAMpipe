@@ -209,13 +209,18 @@ var dataTable = function (node) {
 				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
 			}
 		}
+		
+
 
 		// add "row"
-		if(self.keys.visible_keys.indexOf("row") === -1) {
+		if(self.keys.visible_keys.indexOf("row") === -1) 
 			self.keys.visible_keys.splice(0, 0, "row");
-			return self.keys.visible_keys;
-		} else
-			return self.keys.visible_keys;
+			
+
+		if(self.keys.visible_keys.indexOf("action") === -1) 
+			self.keys.visible_keys.splice(0, 0, "action");
+
+		return self.keys.visible_keys;
 			
 	} 
 
@@ -305,7 +310,7 @@ var dataTable = function (node) {
 		if(key_name == "action") { // "action" is not an actual key
 
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
-				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>run for this</a>";
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>RUN FOR THIS</a>";
 				
 				// if node has action_view.js, then let that append html to "action" cell
 				if(self.node.source.scripts.action_view) {
@@ -313,10 +318,14 @@ var dataTable = function (node) {
 					html += render(self.node, data) + "</td>";
 				}
 				html += "</td>";
-			} else
-				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a>" + self.getRowIndex(key_index) + "</td>";
+			} else if(self.editMode)
+				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a></td>";
+			else
+				html += "<td></td>";
+			
 				
-		} else if(key_name == "row") { // "action" is not an actual key
+				
+		} else if(key_name == "row") { // "row" is not an actual key
 			html = "<td>" + self.getRowIndex(key_index) + "</td>";
 			
 		} else {

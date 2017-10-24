@@ -11,9 +11,10 @@ var exports = module.exports = {};
 
 
 function toText2 (file, info, sandbox, cb) {	
+	console.log("extracting text " + file);
 	pdfUtil.pdfToText(file, {}, function(err, text) {
 		if (err) {
-			sandbox.out.error = err;
+			sandbox.context.error = err;
 			return cb();
 		} else {
 			console.log("done extracting");
@@ -30,11 +31,11 @@ exports.pdf2text = function (file, sandbox, next) {
 		return next();
 		
 	} else {
-		console.log("extracting text " + file);
+		console.log("extracting info " + file);
 		pdfUtil.info(file, function(err, info) {
 			if (err) {
 				console.log("error");
-				sandbox.out.error = err;
+				sandbox.context.error = err;
 				return next();
 			} else {
 				toText2(file, info, sandbox, next);

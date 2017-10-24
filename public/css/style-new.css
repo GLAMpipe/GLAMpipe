@@ -892,7 +892,7 @@ table.documents tbody td div{
 
 
 table.documents tbody td a.delete {
-    display:none;
+
     float:left;
     color:red;
     margin-right:1em;

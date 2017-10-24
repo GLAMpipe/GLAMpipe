@@ -274,13 +274,13 @@ var glamPipeNode = function (node, gp) {
 			
 			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
 			debug += "<settinginstructions>Here you can write your own description of what this node does.";
-			debug += "<p><a class='show-node-params' href='#'>show node parameters</a></p>"
+			debug += "<p><a class='show-node-params' href='#'>SHOW NODE PARAMETERS</a></p>"
 			debug += "</settinginstructions></settinginfo>"
 			debug += "<settingaction>";
 			debug += "<label>node description:</label>";
 			debug += "<textarea rows='5' name='node-description' class='node-description-value'></textarea>";
 			
-			debug += "<a href='#' id='node-description-save'>save description</a>";
+			debug += "<a href='#' id='node-description-save'>SAVE DESCRIPTION</a>";
 			debug += "</settingaction>";
 			debug += "</setting>";
 			$("settingsblock").append(debug);

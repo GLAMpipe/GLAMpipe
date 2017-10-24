@@ -1,10 +1,34 @@
 
-<h3>Flickr</h3>
-<div class="box-noflex">
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Flickr album
+		</settingtitle>
+		<settinginstructions>
+			Flickr album ID 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Album ID</label>
+		<input class="node-settings" type="text" name="album" id="album" required />
+	</settingaction>
+</setting>
 
-    <div>You need an <a target=\"_blank\" href=\"https://www.flickr.com/services/api/misc.api_keys.html\">API key</a></div>
-    <label>Album ID</label>
-    <input class="node-settings" type="text" name="album" id="album" required />
-    <label>Flickr API key </label>
-    <input class="node-settings" type="text" name="apikey" id="apikey" />
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Flickr apikey
+		</settingtitle>
+		<settinginstructions>
+			<div>You need an <a target=\"_blank\" href=\"https://www.flickr.com/services/api/misc.api_keys.html\">API key</a></div>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Flickr API key </label>
+		<input class="node-settings" type="text" name="apikey" id="apikey" />
+	</settingaction>
+</setting>
+

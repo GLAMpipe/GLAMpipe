@@ -207,6 +207,7 @@ var GlamPipe = function() {
 				var host = server.address().address;
 				var port = server.address().port;
 				console.log("\n********************* G L A M p i pe *************************");
+				console.log("* VERSION :        ", version.version);
 				if(process.env.DOCKER)
 					console.log("* ENVIRONMENT:      Docker");
 				else

@@ -24,7 +24,7 @@ if(context.node.settings.dry_run) {
 		out.say('progress', 'server said: ' + data.response.headers['content-type']); 
 		var len = parseInt(data.response.headers['content-length'], 10); 
 		var total = len / 1048576; 
-		out.say('progress', 'Downloaded ' + total.toFixed(2) + ' Mt'); 
+		//out.say('progress', 'Downloaded ' + total.toFixed(2) + ' Mt'); 
 			
 		out.setter[context.node.params.out_field] = context.path.join(context.node.dir, data.filename); 
 		out.setter[context.node.params.out_ext] = "";
@@ -38,9 +38,10 @@ if(context.node.settings.dry_run) {
 		}
 		
 		context.node.download_counter++;	
+		out.say("progress", context.node.download_counter + " downloaded...")
 		
 	} else {
-		//out.say('error', 'Downloaded failed:' + data.url); 
+		out.say('progress', 'Downloaded failed:' + data.url); 
 		out.setter[context.node.params.out_field] = out.error_marker + data.response.statusCode + "]:" + data.url; 
 	}
 

@@ -14,6 +14,11 @@ create_network:
 build_mongo:
 	docker run -d --network=gp --name=mongo mongo
 
+start:
+	docker start mongo
+	timeout 5
+	make start_glampipe
+
 start_mongo:
 	docker start mongo
 

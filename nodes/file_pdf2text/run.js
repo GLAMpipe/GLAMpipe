@@ -5,7 +5,7 @@ out.setter = {};
 
 if(out.error) {
 	out.setter[out_info_field] = out.error;
-	out.setter[out_text_field] = "";
+	out.setter[out_text_field] = "error";
 } else {
 	if(context.data) {
 		if(context.data.info)
@@ -13,5 +13,6 @@ if(out.error) {
 		if(context.data.text)
 			out.setter[out_text_field] = context.data.text;
 		context.vars.success_count++;
+		out.say("progress", context.vars.success_count + " extracted..." );
 	}
 }

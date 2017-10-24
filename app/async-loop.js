@@ -273,9 +273,6 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 
 						sandbox.out.setter = null;
 						sandbox.out.value = null;
-						sandbox.out.error = null;
-						sandbox.context.skip = null;
-						sandbox.context.error = null;
 						
 						try {
 							sandbox.run.runInContext(sandbox);
@@ -292,6 +289,9 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 							result.push(sandbox.out.value);
 						
 						sandbox.context.data = null;
+						sandbox.context.skip = null;
+						sandbox.context.error = null;
+						sandbox.out.error = null;
 						nextFieldRow();
 					});
 
