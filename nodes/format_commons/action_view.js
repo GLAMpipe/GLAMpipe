@@ -7,6 +7,6 @@ var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:Expan
 var wikitext_url = encodeURIComponent(doc[node.source.params.out_field]);
 
 // this gets appended to an "action" cell
-return  "  <div><a target='_blank' href='" + preview_url + wikitext_url + "'>PREVIEW</a><div>";
+return  "  <div><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a><div>";
 
 

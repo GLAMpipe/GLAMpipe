@@ -246,9 +246,9 @@ var glamPipeNode = function (node, gp) {
 		var run_button_text = "Batch run";
 
 		if(self.source.type === "source")
-			run_button_text = "import data";
+			run_button_text = "Import data";
 		if(self.source.type === "export")
-			run_button_text = "export data";
+			run_button_text = "Export data";
 
 		if(self.orphan) {
 			$("settingsblock").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
@@ -263,7 +263,7 @@ var glamPipeNode = function (node, gp) {
 			
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
 			if(self.backend)
-				$("data-workspace submitblock").empty().append("<div class='info'>backend nodes can't be batch run</div>");
+				$("data-workspace submitblock").empty().append("<div class='info'>Backend nodes can't be batch run</div>");
 			else
 				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 				

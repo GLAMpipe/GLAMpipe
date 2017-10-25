@@ -2,7 +2,7 @@
     "nodeid": "export_mapping_omeka_s",
     "title": "Omeka-S: Map data",
     "type": "process",
-    "subtype": "documents",
+    "subtype": "format",
     "status": "usable",
     "description": "Map data to Omeka-S data for export(JSON)",
     "scripts": {

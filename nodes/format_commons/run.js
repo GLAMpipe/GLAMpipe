@@ -111,7 +111,7 @@ if (Array.isArray(cats)) {
         if(typeof cats[i] === "string" && cats[i] != "")
             wikitext += "[[Category:" + cats[i] + "]]\n"; 
     }
-} else if (typeof cats[i] === "string"  && cats && cats != "" ) {
+} else if (typeof cats === "string"  && cats && cats != "" ) {
     wikitext += "[[Category:" + cats + "]]\n"; 
 }
 

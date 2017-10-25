@@ -9,10 +9,10 @@ clean:
 	docker rmi -f $(IMAGES)
 
 create_network:
-	docker network create --driver bridge gp
+	docker network create --driver bridge glampipe_net
 
 build_mongo:
-	docker run -d --network=gp --name=mongo mongo
+	docker run -d --network=glampipe_net --name=mongo mongo
 
 start:
 	docker start mongo
@@ -30,14 +30,14 @@ build_glampipe:
 
 
 start_glampipe:
-	docker run -it --rm --network=gp --name glampipe \
+	docker run -it --rm --network=glampipe_net --name glampipe \
 		-v $(DATA_DIR):/glampipe-data \
 		-p 3000:3000 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe bash
 
 start_glampipe_dev:
-	docker run -it --rm --network=gp --name glampipe \
+	docker run -it --rm --network=glampipe_net --name glampipe \
 		-v $(DATA_DIR):/glampipe-data \
 		-p 3000:3000 \
 		-e DOCKER=1 \

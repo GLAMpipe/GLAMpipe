@@ -2,14 +2,13 @@
     "nodeid": "export_mapping_dspace",
     "title": "DSpace 6: Map data",
     "type": "process",
-    "subtype": "documents",
+    "subtype": "format",
     "status": "usable",
     "tags":["dspace"],
     "description": "Creates JSON object for data export",
 
     "scripts": {
 
-            
         "finish":"out.say('finish', context.success_count + ' items mapped'); "
     },
     

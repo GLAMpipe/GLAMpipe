@@ -118,14 +118,14 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
-		var run_button_texts = ["Batch run", "import data", "export data"];
+		var run_button_texts = ["Batch run", "Import data", "Export data"];
 		var button = $(e.target);
 		if(run_button_texts.includes(button.text())) {
 			button.attr("text", button.text());
-			button.text("stop");
+			button.text("Stop");
 			gp.runNode(e);
 		} else if(button.text() == "stop") {
-			button.text("stopping node...");
+			button.text("Stopping node...");
 			gp.stopNode(e);
 		} 
 		e.preventDefault();
@@ -237,7 +237,7 @@ $( document ).ready(function() {
 			var button = $("button[data-id='"+data.node_uuid+"']");
 			button.text(button.attr("text"));
 			// revert singe run links
-			$("a[data-id='"+data.doc+"']").text("RUN FOR THIS");
+			$("a[data-id='"+data.doc+"']").text("Run for this");
 		}
 		//websockPopup(progressDisplay, "Node run error");
 	});

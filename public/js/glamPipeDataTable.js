@@ -310,7 +310,7 @@ var dataTable = function (node) {
 		if(key_name == "action") { // "action" is not an actual key
 
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
-				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>RUN FOR THIS</a>";
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>Run for this</a>";
 				
 				// if node has action_view.js, then let that append html to "action" cell
 				if(self.node.source.scripts.action_view) {
@@ -330,7 +330,6 @@ var dataTable = function (node) {
 			
 		} else {
 			
-		   
 			if(config && config.input_keys.indexOf(key_name) !== -1)
 				html += "<td class='input'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
 			else if(config && config.output_keys.indexOf(key_name) !== -1)

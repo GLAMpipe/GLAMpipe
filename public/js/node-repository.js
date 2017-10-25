@@ -24,6 +24,7 @@ var nodeRepository = function () {
 		"process": {
 			"strings": "Modify text",
 			"documents": "Modify whole records",
+			"format": "Map metadata",
 			"files": "File operations",
 			"lookups": "Look up data",
 			"meta": "Series of operations",
