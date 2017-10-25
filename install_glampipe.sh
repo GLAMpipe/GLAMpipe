@@ -8,27 +8,27 @@ echo "* Installation downloads several hundreds of megabytes..."
 echo "* directory: " $DATA_DIR
 echo "**********************************************************"
 
-echo "Creating custon network for connecting mongo and GLAMpipe..."
+echo "Creating custom network for connecting mongo and GLAMpipe..."
 
 if ! docker network ls|grep -q 'glampipe_net'
 	then docker network create --driver bridge glampipe_net
-	else echo "glampipe_net network exists, good..."
+	else echo "'glampipe_net' network exists, good..."
 fi
 
 echo "Setting up Mongo database..."
 
-if docker ps|grep -wq 'mongo'
+if docker ps|grep -wq 'glampipe_mongo'
 	then
 		echo "Mongo container running, good..."
 	else
-		if docker ps -a|grep -wq 'mongo'
+		if docker ps -a|grep -wq 'glampipe_mongo'
 			then
 				echo "Mongo container exists but not running, starting it..."
-				docker start mongo
+				docker start glampipe_mongo
 			else 
 				echo "Mongo container not found..."
 				echo  "Downloading and starting Mongo..."
-				docker run -d --network=glampipe_net --name=mongo mongo
+				docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.5
 		fi		
 fi
 

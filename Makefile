@@ -12,18 +12,18 @@ create_network:
 	docker network create --driver bridge glampipe_net
 
 build_mongo:
-	docker run -d --network=glampipe_net --name=mongo mongo
+	docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.5
 
 start:
-	docker start mongo
+	docker start glampipe_mongo
 	timeout 5
 	make start_glampipe
 
 start_mongo:
-	docker start mongo
+	docker start glampipe_mongo
 
 stop_mongo:
-	docker stop mongo      
+	docker stop glampipe_mongo      
 
 build_glampipe:
 	docker build -t artturimatias/glampipe .
