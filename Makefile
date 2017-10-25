@@ -1,7 +1,7 @@
 
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
-DATA_DIR := $(shell pwd)/glampipe-data
+VOLUME := glampipe-data
 
 
 clean:
@@ -10,6 +10,9 @@ clean:
 
 create_network:
 	docker network create --driver bridge glampipe_net
+
+create_volume:
+	docker volume create glampipe-data
 
 build_mongo:
 	docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.5
@@ -31,14 +34,14 @@ build_glampipe:
 
 start_glampipe:
 	docker run -it --rm --network=glampipe_net --name glampipe \
-		-v $(DATA_DIR):/glampipe-data \
+		-v $(VOLUME):/glampipe-data \
 		-p 3000:3000 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe bash
 
 start_glampipe_dev:
 	docker run -it --rm --network=glampipe_net --name glampipe \
-		-v $(DATA_DIR):/glampipe-data \
+		-v $(DVOLUME):/glampipe-data \
 		-p 3000:3000 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe:dev bash
