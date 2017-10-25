@@ -3,7 +3,7 @@
     "title": "Check if file is in Wikimedia commons",
     "type": "process",
     "subtype": "meta",
-    "status": "usable",
+    "status": "broken,
     "description": "Downloads a file, calculates a checksum and checks if it's in commons. ",
     "scripts": {
     

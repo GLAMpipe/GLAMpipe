@@ -4,7 +4,7 @@
     "type": "export",
     "subtype": "web",
     "subsubtype": "meta",
-    "status": "usable",
+    "status": "broken",
     "description": "Upload online files to wikimedia commons",
     "scripts": {
     
