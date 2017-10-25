@@ -1,0 +1,22 @@
+{
+    "nodeid": "export_web_wikidata",
+    "type": "export",
+    "subtype": "file",
+    "subsubtype": "csv",
+    "title": "Quickstatements",
+    "status": "works",
+    "tags":["generic"],
+    "description": "Export collection to Wikidata using Quickstatements.",
+
+
+    "scripts": {
+        "hello": "out.say('news', 'You added a Quickstatements export node');",
+        "bye": "out.say('news', 'Deleted Quickstatemens export node. Bye!'); ",
+        
+        "finish":
+        [
+            "out.say('finish','Generated quickstatements commands.');"
+        ]
+
+    }    
+}
