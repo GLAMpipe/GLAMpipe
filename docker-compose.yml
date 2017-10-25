@@ -2,7 +2,7 @@
 version: '2'
 
 services:
-  glam:
+  glampipe:
     build: .
     image: artturimatias/glampipe
     networks:
@@ -13,9 +13,9 @@ services:
     environment:
      - DOCKER=1
     volumes:
-     - ./glampipe-data:/glampipe-data
+     - glampipe-data:/glampipe-data
 
-  mongo:
+  glampipe_mongo:
     image: mongo:3.3.10
     networks:
     - gp
@@ -23,3 +23,6 @@ services:
 networks:
   gp:
     driver: bridge
+
+volumes:
+  glampipe-data:

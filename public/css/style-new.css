@@ -23,25 +23,46 @@ body {
 a {
 	color: #2B67C9;
 	text-decoration: none;
-	-webkit-transition-duration: 0.1s; /* Safari */
-    transition-duration: 0.1s;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
 }
 
 a:hover {
 	color:#347BFF;
+	cursor: pointer;
+}
+
+.ibutton {
+    white-space: nowrap;
+	color:#347BFF;
+    font-weight: 500!important;
+    text-transform:uppercase;
+    background: none!important;
+    border:none;
+    padding:0!important;
+    font: inherit;      /*border is optional*/
+    cursor: pointer;
 }
 
 a.run_single {
     white-space: nowrap;
 }
 
-a.delete {
+.delete, .idelbutton {
     white-space: nowrap;
     color: #d42700;
+    font-weight: 500!important;
+    text-transform:uppercase;
+    background: none!important;
+    border:none;
+    padding:0!important;
+    font: inherit;      /*border is optional*/
+    cursor: pointer;
 }
 
-a.delete:hover {
+a.delete:hover, .idelbutton:hover {
     color: #ff2f00;
+    cursor: pointer;
 }
 
 table {
@@ -57,6 +78,7 @@ th, td {
     border-bottom: 1px solid #ddd;
     padding-left: 10px;
     text-align:left;
+    /* border: solid 1px; */
 }
 
 tr:hover {background-color: #fefefe}
@@ -256,8 +278,8 @@ pipe {
 	margin-right:20px;
 	display: -webkit-flex;
     display: flex;
-	-webkit-transition-duration: 0.1s; /* Safari */
-    transition-duration: 0.1s;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
 }
 
 .box:hover {
@@ -314,8 +336,9 @@ pipe {
 	width:240px;
 }
 
-.inlinetitle, h4 {
+.inlinetitle, fatboxtitle, h4 {
     font-size: 16px;
+    display: block;
 }
 
 .inlinetitleblock {
@@ -329,8 +352,8 @@ pipe {
 
 a .inlinetitleblock {
 	color:#444;
-	-webkit-transition-duration: 0.1s; /* Safari */
-    transition-duration: 0.1s;
+	-webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
 }
 
 a .inlinetitleblock:hover {
@@ -384,8 +407,13 @@ a .pageheader:hover {
 	margin-bottom: 20px;
 }
 
-fatboxbuttons {
-   margin-top: 20px;
+fatboxdescription {
+	padding: 10px 0 0 0;
+	display:block;
+}
+
+fatboxbuttons, fatboxsubmitblock {
+   margin-top: 10px;
    display: block;
 }
 
@@ -530,7 +558,7 @@ dataheader {
    -webkit-box-align: center;
    height: 60px;
    padding: 0px 20px;
-   justify-content: space-between;
+   justify-content: flex-end;
 }
 
 
@@ -548,7 +576,7 @@ filter {
    display: flex;
    padding: 3px 10px;
    border-radius: 10px;
-   transition-duration: 0.3s;
+   transition-duration: 0.2s;
 }
 
 
@@ -589,6 +617,11 @@ input {
 
 input[type=checkbox] {
 	width:20px;
+}
+
+input[type="file"] {
+    padding-left: 0;
+    border-bottom: none;
 }
 
 input:focus{
@@ -642,8 +675,8 @@ textarea:focus {
    cursor: pointer;
    border-radius: 2px;
    -webkit-border-radius: 2px;
-   -webkit-transition-duration: 0.1s;
-   transition-duration: 0.1s;
+   -webkit-transition-duration: 0.2s;
+   transition-duration: 0.2s;
    font-family: 'Open Sans', sans-serif;
    align-self: center;
 }
@@ -800,7 +833,7 @@ b {
 /*  added by AH */
 
 .good {
- background-color:#BFCCCA;
+ background-color: #efefef;
 }
 
 .selected-match {
@@ -882,27 +915,19 @@ table thead {
     background-color: #efefef;
 }
 
-table.documents tbody td div{
-   max-height: 10em;
-   max-width: 350px;
-   overflow: auto;
-   overflow-wrap: break-word;
-   margin: 5px 10px 5px 0;
+table.documents tbody td {
+    max-height: 10em;
+    max-width: 350px;
+    overflow: auto;
+    overflow-wrap: break-word;
+    padding: 5px 0 5px 10px;
 }
-
-
-table.documents tbody td a.delete {
-
-    float:left;
-    color:red;
-    margin-right:1em;
-}
-
 
 
 table.documents tbody td div.edit:hover {
     cursor:pointer;
     opacity:1;
+    background-color: #efefef;
 }
 
 .button.toggle_all {
@@ -977,6 +1002,8 @@ img.centered {
 	margin-right: auto 
 }
 
+
+
 #node-progress {
 	background-color: #959595;
 	color: white;
@@ -1022,4 +1049,35 @@ settinglistcontainer {
 
 settinglistcontainer input {
 	width: 20px;
+}
+
+table.documents tbody td {
+    max-height: 10em;
+    max-width: 350px;
+    overflow: auto;
+    overflow-wrap: break-word;
+    padding: 5px 0 5px 10px;
+}
+
+table.wikidata_export_conf tbody tr td {
+    border-bottom: none;
+    height: 45px;
+}
+
+.button.add-filter {
+    margin: 10px 0;
+}
+
+.edit {
+    color: #616161;
+    background-color: white;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+#field-selector div div {
+    cursor: pointer;
+    padding: 2px 5px;
+    margin: 1px;
+    border-radius: 4px;
 }

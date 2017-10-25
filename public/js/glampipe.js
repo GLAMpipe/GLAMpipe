@@ -195,7 +195,7 @@ var glamPipe = function () {
 					headers: {"Authorization":"Bearer " + window.localStorage.getItem("token")},
 					error: function(data, s, xhr) {
 						if(config.authentication !== "shibboleth")
-							$(div).html("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
+							$(div).html("<div class='button' id='login-pop'>Login</div> or <a href='/signup'>Signup</a>");
 						else
 							$(div).html("no shibboleth header found!");
 						if(cb)
@@ -204,11 +204,11 @@ var glamPipe = function () {
 					success: function(data) {
 						if(config.authentication === "local") {
 							self.user = data.local.email;
-							$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
+							$(div).html("<a id='logout' href=''>Logout " + self.user + "</a>");
 						} else if(config.authentication === "shibboleth") {
 							if(data.shibboleth.user) {
 								self.user = data.shibboleth.user;
-								$(div).html("<a id='logout' href=''>logout " + self.user + "</a>");
+								$(div).html("<a id='logout' href=''>Logout " + self.user + "</a>");
 							} else if(data.shibboleth.visitor) {
 								$(div).html("visitor: " + data.shibboleth.visitor);
 							}
@@ -248,7 +248,7 @@ var glamPipe = function () {
 					self.user = data.user.local.email;
 					window.localStorage.setItem("token", data.token);
 					$("#login-popup").remove();
-					$("#login").html("<a id='logout'href=''>logout " +data.user.local.email + "</a>");
+					$("#login").html("<a id='logout'href=''>Logout " +data.user.local.email + "</a>");
 					self.getProjectsByUser("#projectList", self.user);
 				} else
 					alert("Login failed!")

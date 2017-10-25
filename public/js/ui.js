@@ -22,7 +22,7 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
-		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>login</div> <a id='login-cancel' href='#'>cancel</a> </div>");
+		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>Login</div> <a id='login-cancel' href='#'>Cancel</a> </div>");
 		$("#username").focus();
 		e.preventDefault();
 	});
@@ -43,14 +43,14 @@ $( document ).ready(function() {
 
 	$(document).on("click", "#login-cancel", function(e) {
 		$("#login").empty();
-		$("#login").append("<div class='button' id='login-pop'>login</div> or <a href='/signup'>signup</a>");
+		$("#login").append("<div class='button' id='login-pop'>Login</div> or <a href='/signup'>Signup</a>");
 		e.preventDefault();
 	});
 
 
 	$(document).on("click", "#logout", function(e) {
 		localStorage.removeItem("token");
-		$("#login").empty().append("<a class='button' id='login-pop' href=''>login</a> or <a href='/signup'>signup</a>");
+		$("#login").empty().append("<a class='button' id='login-pop' href=''>Login</a> or <a href='/signup'>Signup</a>");
 		gp.getProjects("#projectList");
 		e.preventDefault();
 	});
