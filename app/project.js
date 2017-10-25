@@ -8,7 +8,7 @@ var runswitch 	= require("../app/run-switch.js");
 exports.createProject = function (req, res) {
 	
 	var title = req.body.title
-	var dirs = ["process", "export", "view"]; // these dirs are created for every project
+	var dirs = ["source", "process", "export", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");

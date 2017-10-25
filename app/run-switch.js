@@ -104,6 +104,7 @@ exports.runNode = function (node, io) {
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
 							var download = sandbox.out.urls[0]; // we have only one download
+							
 							web.downloadAndSave (node, download, false, function() {
 								var query = {}; 
 								query[MP.source] = node._id;

@@ -36,6 +36,7 @@ exports.run = function(req, io, res) {
 			console.log("\n>>>>>>>>>>>>>> RUNNING NODE >>>>>>>>>>>>>>>>>>>>>>>>");
 			console.log("title: " + node.title);
 			console.log("type: ", node.type);
+			console.log("subtype: ", node.subtype);
 			console.log("node params:");
 			console.log(node.params);
 			console.log("node settings:");
@@ -485,7 +486,7 @@ function initNode (req, io, project, callback) {
 
 
 function createNodeDirs (node, project, cb) {
-	if(node.type !== "process" && node.type !== "export" && node.type !== "view")
+	if(node.type !== "source" && node.type !== "process" && node.type !== "export" && node.type !== "view")
 		return cb(null);
 		
 	var fs = require("fs");

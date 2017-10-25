@@ -4,18 +4,11 @@
 	"subtype": "web",
 	"subsubtype": "csv",
 	"title": "Online CSV: import",
-    "status": "usable",
+    "status": "broken",
     "tags":["generic"],
 	"description": "Import data from online CSV",
 
 	"scripts": {
-		"hello": 
-		[
-			"out.say('news', 'You added a online CSV import');",
-			"context.node.title = context.node.params.file_url; "
-		],
-		
-        "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
         
 		"init":"out.say('progress', context.node.title); context.vars = {count:0};",
 		

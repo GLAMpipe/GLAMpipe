@@ -280,12 +280,13 @@ exports.downloadAndSave = function (node, download, addext, next) {
 
 	var filePath = path.join(node.dir, download.filename);
 	var file = fs.createWriteStream(filePath);
+	console.log("saving " + filePath);
 
 	var options = {
 		url:download.url,
-		followRedirect:false
+		followRedirect:true
 	}
-
+console.log(options);
 	// use basic authentication if node did set "auth"
 	if(download.auth)
 		options.auth = download.auth;
@@ -296,6 +297,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 	sendReq.on('response', function(response) {
 
 		download.response = response;
+		console.log(response.statusCode)
 
 		if(response.statusCode === 200) {
 
