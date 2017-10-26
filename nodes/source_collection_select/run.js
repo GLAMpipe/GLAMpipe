@@ -9,7 +9,7 @@
 var params = context.node.params;
 var settings = context.node.settings;
 
-var input_field = params.in_field;
+var input_field = params.source_field;
 var input_value = context.doc[input_field];
 var select_value = settings.select;
 

@@ -318,7 +318,7 @@ var glamPipe = function () {
 	
 	// loads node repository
 	this.loadNodes = function() {
-		this.nodeRepository = new nodeRepository();
+		this.nodeRepository = new nodeRepository(this);
 		this.nodeRepository.baseAPI = this.baseAPI;
 		this.nodeRepository.loadNodes();
 	}
@@ -769,64 +769,39 @@ var glamPipe = function () {
         });
 	}
 
-	this.openDynamicFieldSelector = function (event, source) {
+	this.renderDynamicCollectionFieldList = function (fieldSelect, event) {
 		var obj = $(event.target);
-		self.currentInput = obj;   // put input to global variable so that we can update it later
-		
-		var collection = self.pickedCollectionId;
-		console.log(source)
-		console.log(self.currentCollection.source.collection);
-		
-		if(self.pickedCollectionId == null && source) {
+		var collection = obj.val();
+		var html = "";
+
+		if(!collection) {
 			alert("You must choose collection first!")
 			return;
-		} else if(!source) {
-			collection = self.currentCollection.source.collection;
 		} 
 		
         // fetch fields
         $.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
             if(data.error)
                 alert(data.error);
-
-
-            var html = "<ul>";
-                for (var i = 0; i < data.sorted.length; i++) {
-                    var key = data.keys[data.sorted[i]];
-                    html += "<li class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</li>";
-
-                }
-            html += "</ul>"
             
             // add select
-            html = "<select>";
+            html = "";
                 
                 for (var i = 0; i < data.sorted.length; i++) {
                     var key = data.keys[data.sorted[i]];
                     html += "<option class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</option>";
 
                 }
-            html += "</select>";  
+            html += "";  
             
-                      
-            // open dialog
-            $("#dynamic-fields").empty();
-            $("#dynamic-fields").append(html);
-            $("#dynamic-fields").dialog({
-                title: "choose field"
-            });
-				
-			//self.pickedCollectionId = null; // reset
+			fieldSelect.empty().append(html);
         })
 	}
 
 
-	this.openDynamicCollectionSelector = function (event) {
+	this.collectionList = function (obj) {
 
-        var obj = $(event.target);
-        self.currentInput = obj; 
-
-        var html = "<select>";
+		var html = "";
         for(var i = 0; i < self.collections.length; i++) {
             var node = self.collections[i];
             if(node.source._id != self.currentCollection.source._id) {
@@ -838,14 +813,7 @@ var glamPipe = function () {
                 html += '<option class="pick_collection" value="'+node.source.collection+'">' + cName + '</option>';
             }
         }
-        html += "</select>";
-        
-        if(self.collections.length == 1)
-			alert("No other collections");
-
-        // open dialog
-        obj.replaceWith(html);
-
+        return html;
 	}
 	
 	

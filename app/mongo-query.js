@@ -434,13 +434,13 @@ exports.nodes = function (callback) {
 exports.group = function (node, array, callback) {
 
 	var collection = db.collection(node.params.source_collection);
-	var field_name = "$" + node.params.in_field;
+	var field_name = "$" + node.params.source_field;
 	var project = {};
-	project[node.params.in_field] = 1;
+	project[node.params.source_field] = 1;
 	project["_id"] = 1;
 	var project2 = { count:1, ids: 1, _id: 0 };
 	var project2 = { count:1, _id: 0 };
-	project2[node.params.in_field] = "$_id";	// preserve original field name
+	project2[node.params.source_field] = "$_id";	// preserve original field name
 	
 	if(array)
 		var unwind = {$unwind: field_name};

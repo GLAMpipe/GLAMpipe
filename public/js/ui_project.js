@@ -174,19 +174,16 @@ $( document ).ready(function() {
 		e.preventDefault();
 	})
 
-	// open dynamic field picker
-	$(document).on('click','.source_dynamic_field', function(e) {
-		gp.openDynamicFieldSelector(e, "source");
-	});
+
 
 	// pick field
 	$(document).on('click','.pick_field', function(e) {
 		gp.pickField(e)
 	});
 
-	// open dynamic collection picker
-	$(document).on('click','.dynamic_collection', function(e) {
-		gp.openDynamicCollectionSelector(e);
+	// fetch fields when non-current collection is chosen
+	$(document).on('change','.dynamic_collection', function(e) {
+		gp.renderDynamicCollectionFieldList($('.source_dynamic_field'), e);
 	})
 
 	// pick collection

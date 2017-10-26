@@ -1,21 +1,31 @@
 
 
-<h3>Settings for select node</h3>
 
-<div class="box-noflex">
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Match
+		</settingtitle>
+		<settinginstructions>
+			Select record if field matches to this.
+		</settinginstructions>
+	</settinginfo>
 	
-	<label>match to this:</label>
-	<input class="node-settings" type="text" name="select"/>
+	<settingaction>
+		<label>Match to this:</label>
+		<input class="node-settings" type="text" name="select"/>
 
-	<div>
-		<input name="numeric" id="source_collection_select_numeric" class="node-settings" type="checkbox"/>numeric comparision
-	</div>
-	
-	<div id="source_collection_select_numeric_div">
-		<label>comparision</label>
+		<label>Use numeric comparision</label>
+		<input name="numeric" id="source_collection_select_numeric" class="node-settings" type="checkbox"/>
+		
+		<label>Comparision</label>
 		<select class="node-settings" name="comparision">
 			<option value=">">greater than</option>
 			<option value="<">lesser than</option>
 		</select>
-	</div>
-</div>
+
+	</settingaction>
+</setting>
+
+
+	

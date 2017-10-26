@@ -5,25 +5,18 @@
 	"subsubtype": "group_by_key",
     "status": "usable",
     "tags":["generic"],
-	"title": "Group by field value",
-	"description": "Group records based on values in certain field (like author for example).",
+	"title": "Group records by field value",
+	"description": "Group records based on the value of a field.",
 
 	"scripts": {
-		"hello": 
-		[
-			"out.say('news', 'You added a cluster node');"
-		],
-		
-        "bye": "out.say('news', 'Deleted group node. Bye!'); ",
-		"init":"out.say('progress', context.node.title);",
-		
+
 		"run":"out.value = context.data;",
 		
 		"finish":"out.say('finish', 'Data grouped from collection ' + context.node.params.source_collection);"
 	},
 	
 	"views": {
-		"settings":"no settings"
+		"settings":""
 	}
 
 }

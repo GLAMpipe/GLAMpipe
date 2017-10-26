@@ -1,16 +1,57 @@
 
 
-<h3>Categories</h3>
-<div class="box-noflex">
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Construct query
+		</settingtitle>
+		<settinginstructions>
+			 Go to Internet Archive and create your search using the available search tools.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<a target="_blank" href="https://archive.org/advancedsearch.php">arhcive.org</a>
+	</settingaction>
+</setting>
 
-    <p>Construct your query here:<br><a target="_blank" href="https://archive.org/advancedsearch.php">advanced search</a>
 
-    <label>Write or copy query here (copy from browser)</label> 
-    <input  class="node-settings" name="query"/>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy the search URL
+		</settingtitle>
+		<settinginstructions>
+			 Copy the resulting URL from the browser address bar and paste it here.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Paste the query here:</label> 
+		<input  class="node-settings" name="query"/>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			How many records?
+		</settingtitle>
+		<settinginstructions>
+			 If you do not want to fetch all records, then define page maximum page count below. Leave empty for all records.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
     
-    <label>records per page</label>
-    <input  class="node-settings" name="docs_per_page" value="50"/>
+		<label>Records per page</label>
+		<input  class="node-settings" name="docs_per_page" value="50"/>
 
-    <div class="help">If you do not want to fetch all records, then define page maximum page count below.</div>
-    <label>max page count</label>leave empty for all<input class="node-settings" name="sample_to"/>
-</div>
+		<label>max page count</label>
+		<input class="node-settings" name="sample_to"/>
+	</settingaction>
+</setting>
+
+
+

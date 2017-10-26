@@ -7,7 +7,6 @@ if (context.data.responseHeader) {
 
    var currentPage = start/context.node.settings.docs_per_page + 1; 
    out.say ("progress", "working on page " + currentPage + "/" + totalPages);
-   out.say ("progress", context.query_url);
 
    if(start < numFound) {
         /* stop if sample is set and count is bigger than sample */

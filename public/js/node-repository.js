@@ -1,7 +1,8 @@
 
-var nodeRepository = function () {
+var nodeRepository = function (gp) {
 	var self = this;
 	this.nodes = [];
+	this.gp = gp;
 	this.showBrokenNodes = false;
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
@@ -185,6 +186,8 @@ var nodeRepository = function () {
 			//var paramsScript = new Function('node', node.scripts.params);
 			//paramsScript(node);
 		//}
+		$('.dynamic_collection').append(self.gp.collectionList()); 
+		//$('.dynamic_collection').replaceWith("<p>koira</p>");
 	}
 
 
