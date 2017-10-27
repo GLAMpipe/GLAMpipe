@@ -58,19 +58,10 @@ $( document ).ready(function() {
 	});
 
 
-	// hide/show node settings TODO: move to node
-	$("settingscontainer").on("click", ".wikiglyph-caret-up", function (e) {
-		$(this).removeClass("wikiglyph-caret-up");
-		$(this).addClass("wikiglyph-caret-down");
-		$("settingsblock").hide();
-		$("data-workspace submitblock").hide();
-	});
-
-	$("settingscontainer").on("click", ".wikiglyph-caret-down", function (e) {
-		$(this).removeClass("wikiglyph-caret-down");
-		$(this).addClass("wikiglyph-caret-up");
-		$("settingsblock").show();
-		$("data-workspace submitblock").show();
+	// toggle node settings
+	$("settingscontainer").on("click", "settingsheader", function (e) {
+		$("settingsblock").toggle();
+		$("data-workspace submitblock").toggle();
 	});
 
 
@@ -164,12 +155,11 @@ $( document ).ready(function() {
 		gp.saveNodeDescription($(".node-description-value").val());
 		var node = gp.currentlyOpenNode.source;
 		var nodeid = node._id;
-		var desc = $(".node-description-value").val();
+		var desc = $(".node-description-value").val().trim();
 		if(desc) {
 			$(".node[data-id='"+nodeid+"'] div.description" ).text($(".node-description-value").val());
 		} else {
-			$(".node[data-id='"+nodeid+"'] div.boxtitle").removeClass("boxtext");
-			$(".node[data-id='"+nodeid+"'] div.boxtitle" ).text(node.title);
+			$(".node[data-id='"+nodeid+"'] div.description" ).text(node.description);
 		}
 		e.preventDefault();
 	})

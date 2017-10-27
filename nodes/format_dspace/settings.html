@@ -1,21 +1,46 @@
 
-<h3 id="export-mapping-dspace_serverinfo">DSpace mapping</h3>
 
 
-<div class="box-noflex dspace-hidden">
-	<label>Separator for multiple values in CSV. Handy if you have values like "Matilda Lynninen, Matti Nykänen" in "author" field in your CSV file.</label>
-	<input class="node-settings" name="array_separator" value=""/>
-</div>
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Multivalue separator
+		</settingtitle>
+		<settinginstructions>
+			Separator for multiple values in CSV. Handy if you have, for example,  values like "Matilda Lynninen, Matti Nykänen" for in "author" field in your CSV file.
 
-<div class="box-noflex dspace-hidden">
-	<div>Map document fields to target Dspace fields. At minimum you must map some field to <b>dc.title</b>.</div>
-	<button id="export-mapping-dspace-basic_guess" class="fetch_record">guess mapping</button>
-	<button id="export-mapping-dspace-show_mapped">show only mapped</button>
-	<button id="export-mapping-dspace-show_all">show all</button>
-
-</div>
+		</settinginstructions>
+	</settinginfo>
 	
-<div id="export-mapping-dspace_mappings">fetching schemas...</div>
-	
+	<settingaction>
+		<label>Separator for multiple values</label>
+		<input class="node-settings" name="array_separator" value=""/>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Mapping
+		</settingtitle>
+		<settinginstructions>
+			Map document fields to target Dspace fields. At minimum you must map some field to <b>dc.title</b>.
+
+		</settinginstructions>
+	</settinginfo>
+	<settingaction>
+
+		<button id="export-mapping-dspace-basic_guess" class="fetch_record">guess mapping</button>
+		<button id="export-mapping-dspace-show_mapped">show only mapped</button>
+		<button id="export-mapping-dspace-show_all">show all</button>
+
+		<settinglistcontainer>
+			<div id="export-mapping-dspace_mappings">fetching schemas...</div>
+		</settinglistcontainer>
+	</settingaction>
+</setting>
+
 

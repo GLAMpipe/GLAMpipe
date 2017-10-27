@@ -49,8 +49,8 @@ var table = "<table>";
 for(var i = 0; i < wikiFields[sel].length; i++) { 
 	table += "<tr>";
 	table += "<td>" + wikiFields[sel][i] + "<td>";  
-	table += "<td><input name='" + wikiFields[sel][i] + "_static' class='node-settings middle_input' /></td>"; 
 	table += "<td><select name='" + wikiFields[sel][i] + "_dynamic' class='node-settings dynamic_field' ><option value=''>no value</option></select></td>"; 
+	table += "<td><input name='" + wikiFields[sel][i] + "_static' class='node-settings middle_input' /></td>"; 
 	table += "</tr>";
 }
 

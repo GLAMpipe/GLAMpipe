@@ -91,7 +91,7 @@ function createOptions (schemas, doc_field) {
 
 $("#export-mapping-dspace-basic_guess").click(function(e){
 	
-   $(".settings table tr").each(function(index) {
+   $("#export-mapping-dspace_mappings table tr").each(function(index) {
 	   
 		var field = $( this ).find("td:first").text();
 		field = field.replace(/\./g, "_");
@@ -102,7 +102,7 @@ $("#export-mapping-dspace-basic_guess").click(function(e){
 
 $("#export-mapping-dspace-show_mapped").click(function(e){
 	
-   $(".settings table tr").each(function(index) {
+   $("#export-mapping-dspace_mappings table tr").each(function(index) {
 	   
 		var dynamic = $( this ).find("select").val();
 		var static = $( this ).find("input").val();
@@ -114,7 +114,7 @@ $("#export-mapping-dspace-show_mapped").click(function(e){
 
 $("#export-mapping-dspace-show_all").click(function(e){
 	
-	$(".settings table tr").show();
+	$("#export-mapping-dspace_mappings table tr").show();
 
 });
 

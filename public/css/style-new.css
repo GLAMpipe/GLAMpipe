@@ -478,6 +478,12 @@ settingsheader {
 	-webkit-box-align: center;
 	height: 60px;
 	padding: 0px 20px;
+	cursor: pointer;
+}
+
+settingsheader:hover {
+	border-left: solid rgba(52,123,255,1) 10px;
+	padding-left:10px;
 }
 
 .settingstitle, h2 {
@@ -526,6 +532,8 @@ setting {
    border-radius: 5px;
    justify-content: space-between;
    flex-wrap: wrap;
+   max-height:500px;
+   overflow: scroll;
 }
 
 .one {
@@ -1041,13 +1049,13 @@ input.short {
 
 settinglistcontainer {
 	display: block;
-	visibility: hidden;
-	max-height:200px;
+	max-height:400px;
     border: 1px solid rgba(0, 0, 0, 0.15);
 	overflow:scroll;
+	padding:10px;
 }
 
-settinglistcontainer input {
+settinglistcontainer input[type=checkbox] {
 	width: 20px;
 }
 

@@ -310,7 +310,7 @@ var dataTable = function (node) {
 		if(key_name == "action") { // "action" is not an actual key
 
 			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
-				html += "<td><a href='#' data-id='" + data._id + "' class='run_single'>Run for this</a>";
+				html += "<td><a href='#' data-id='" + data._id + "' class='run_single ibutton'>Run for this</a>";
 				
 				// if node has action_view.js, then let that append html to "action" cell
 				if(self.node.source.scripts.action_view) {
@@ -716,7 +716,7 @@ var dataTable = function (node) {
 	this.showVisibleKeysSelector = function (event) {
 		var visible_keys = self.getVisibleFields();
 		var obj = $(event.target);
-		var html = "<div class='button toggle_all'>invert selection</div><div class='button unselect_all'>unselect all</div>";
+		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div>";
 		html += "<hr/><div class='flex visible-keys'>";
 		for(var i = 0; i < self.keys.all_keys.sorted.length; i++) {
 			if(visible_keys.indexOf(self.keys.all_keys.sorted[i]) === -1)
@@ -730,7 +730,7 @@ var dataTable = function (node) {
 		$("#field-selector").empty().append(html);
 		$("#field-selector").dialog({
 			height:"500",
-			width: "900",
+			width: "600",
 			close:self.render,
 			position: { 
 				my: 'left top',

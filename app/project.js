@@ -5,9 +5,9 @@ var mongoquery 	= require("../app/mongo-query.js");
 var runswitch 	= require("../app/run-switch.js");
 
 
-exports.createProject = function (req, res) {
+exports.createProject = function (project_title, res) {
 	
-	var title = req.body.title
+	var title = project_title;
 	var dirs = ["source", "process", "export", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
@@ -71,6 +71,114 @@ exports.createProject = function (req, res) {
 }
 
 
+exports.copyProject = function(project_id, project_title,  res) {
+	
+	var nodeCreator 	= require("../app/node.js");
+	var project_id = req.params.id;
+	var project.title =  req.body.title;
+	var original_project = null;
+	var new_project = null;
+
+	var io = {
+		emit: function() {}
+	}
+
+	// a callback that is called when first collection is created for new project
+	var node_creation_cb = {
+		json: function(node_res) {
+			next()
+		}
+	}
+	// a callback that is called when first collection is created for new project
+	var col_creation_cb = {
+		json: function(data) {
+
+			// currently we copy only first collection and its nodes
+			if(original_project.collections[0] && original_project.collections[0][0]) {
+				
+				// we must create new ObjectIDs for nodes and we must change node directory and collection
+				original_project.nodes.forEach(function(node, index, arr) {
+					
+					// we must copy only nodes that are linked to first collection of the copied project
+					if(node.collection === original_project.collections[0][0]) {
+						arr[index]._id = mongojs.ObjectId();
+						arr[index].collection = data.collection;
+					} else {
+						arr[index].reject = true;
+					}
+					// do not copy collection nodes
+					if(node.type === "collection")
+						arr[index].reject = true;
+				})
+				
+				// insert nodes one by one to the new project
+				require("async").eachSeries(original_project.nodes, function iterator (node, next) {
+					console.log(node);
+					if(node.reject)
+						return next(); 
+						
+					if(!node.params)
+						node.params = {};
+					// create collection
+					var req_node = {
+						query: {},
+						body: {
+							params: node.params,
+							settings: node.settings,
+							collection: data.collection
+						},
+						params:{
+							project: new_project.project._id,
+							nodeid: node.nodeid
+						}
+					}
+					
+					nodeCreator.createNode(req_node, {json:function() {next()}}, io);
+					
+				}, function done () {
+					res.json(data);
+				});
+			}
+		}
+	}
+	
+	// callback that is called when new project is created
+	var proj_creation_cb = {json:function(data){
+			console.log(data)
+			new_project = data;
+			// copy collections and nodes from original project to the new project
+			mongoquery.findOneById(project_id, "mp_projects", function(project) {
+				if(!project)
+					return res.json({});
+
+				original_project = project;
+				
+				// create collection
+				var col_req = {
+					body: {
+						params: {title: "collection"}
+					},
+					params:{
+						project: data.project._id,
+						nodeid: "collection_basic"
+					}
+				}
+				// user
+				if(req.user && req.user.local && req.user.local.email)
+					col_req.user = req.user;
+					
+				req.params.id, req.body.title
+				
+				nodeCreator.createCollectionNode(col_req, col_creation_cb, {});
+			})
+		}
+	}
+	
+	// create new project with title
+	exports.createProject(project_title, proj_creation_cb);
+	
+
+}
 
 
 exports.deleteProject = function (doc_id, res) {

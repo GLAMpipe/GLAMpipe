@@ -418,7 +418,7 @@ function initNode (req, io, project, callback) {
 
 			node.params.collection = node.collection;
 			
-			runNodeScript("hello", node, req, io);
+			//runNodeScript("hello", node, req, io);
 			runNodeScript("metanodes", node, req, io);  // sets "node.pipe"
 			node._id = mongojs.ObjectId();
 
@@ -507,7 +507,7 @@ function createNodeDirs (node, project, cb) {
 }
 
 
-function initCollectionNode (req, res, io) {
+function initCollectionNode (req, res) {
 	
 	// copy node to project with its settings
 	mongoquery.findOne({"nodeid":req.params.nodeid}, "mp_nodes", function(err, node) {
@@ -525,7 +525,7 @@ function initCollectionNode (req, res, io) {
 			node.collection = req.body.params.collection;
 			node.number = req.node_count;
 			
-			runNodeScript("hello", node, req, io);
+			//runNodeScript("hello", node, req, io);
 			
 			node._id = mongojs.ObjectId();
 			mongoquery.update("mp_projects",

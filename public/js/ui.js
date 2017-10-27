@@ -73,8 +73,15 @@ $( document ).ready(function() {
 		}
 	});
 
+	// copy project
+	$(document).on('click', ".copy", function(e) {
+		gp.copyProject(e);
+		e.stopPropagation();
+		e.preventDefault();
+	})
+
 	// remove project
-	$(document).on('click', ".del", function(e) {
+	$(document).on('click', ".delete", function(e) {
 		gp.removeProject(e);
 		e.stopPropagation();
 		e.preventDefault();

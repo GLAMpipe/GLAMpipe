@@ -47,9 +47,10 @@ var glamPipe = function () {
 
 		$(".settingstitle").text("All projects");
 		$.getJSON(self.baseAPI + "/projects", function(data) { 
+			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr></thead>";
+			html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -62,13 +63,20 @@ var glamPipe = function () {
 	this.getProjectsByUser = function (div, user) {
 		
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>delete</th></tr></thead>";
+		html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
+			self.projects = data.data;
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
-				html += "<tr><td><div><a href='" + self.uiPath + "project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+				html += "<tr>";
+				if(projects[i].owner == self.user)
+					html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a> | <a data-id='" + projects[i]._id + "' class='delete'>delete</a></td>";
+				else
+					html += "<td></td>";
 
+				html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+				
 				html += "<td>";
 				if(projects[i].nodes) {
 					
@@ -100,7 +108,6 @@ var glamPipe = function () {
 					})
 				}
 				html += "</td>";
-				html += "<td><div data-id='" + projects[i]._id + "' class='del button icon boxicon'>delete</div></td>";
 				
 				
 			}
@@ -109,7 +116,9 @@ var glamPipe = function () {
 	}
 
 	this.genProjectRow = function(project) {
-			var html = "<tr><td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
+			var html = "<tr>";
+			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";
+			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
 
 			html += "<td>";
 			if(project.nodes) {
@@ -142,7 +151,6 @@ var glamPipe = function () {
 				})
 			}
 			html += "</td>";
-			html += "<td><div data-id='" + project._id + "' class='del button icon boxicon'>delete</div></td>";
 			return html;
 			
 	}
@@ -279,15 +287,65 @@ var glamPipe = function () {
 		})
 	}
 
+	this.getProject = function(id) {
+		if(self.projects) {
+			for(var i=0; i < self.projects.length; i++) {
+				if(self.projects[i]._id === id)
+					return self.projects[i];
+			}
+		}
+	}
 
-	this.removeProject = function (event) {
-		console.log("starting to remove node:", $(event.target).data("id"));
+	this.copyProject = function (event) {
+		console.log("starting to copy project:", $(event.target).data("id"));
         var project_id =  $(event.target).data("id");
+        var project = self.getProject(project_id);
 
-		$( "#dialog-confirm" ).empty().append("<div>Do want to remove the project? All data and files are lost.</div>");
+		$( "#dialog-confirm" ).empty().append("<label>Name for a new project</label><input id='copy_project_title' value='"+project.title+"'/>");
         $( "#dialog-confirm" ).dialog({
           resizable: false,
           height:160,
+          title:"Copy project",
+          modal: true,
+          buttons: {
+            "Copy project": function() {
+				var title = $("#copy_project_title").val();
+				if(!title) {
+					alert("You must give project title!");
+					( this ).dialog( "close" );
+				}
+					
+				
+                $( this ).dialog( "close" );
+                var params = {"title": title};
+                $.put(self.baseAPI + "/projects/" + project_id + "/copy", params, function(retData) {
+                    console.log('project copied');
+                    if(retData.error)
+                        alert(retData.error);
+                    else {
+						if(self.desktop)
+							self.getProjects("#projectList");
+						else
+							self.getProjectsByUser("#projectList", self.user);
+                    }
+                });
+            },
+            Cancel: function() {
+              $( this ).dialog( "close" );
+            }
+          }
+        });
+	} 
+
+
+	this.removeProject = function (event) {
+        var project_id =  $(event.target).data("id");
+        var project = self.getProject(project_id);
+
+		$( "#dialog-confirm" ).empty().append("<div>Do you want to remove the project <strong>'"+project.title+"'</strong>? </div><br><div class='alert'>All data and files are lost!</div>");
+        $( "#dialog-confirm" ).dialog({
+          resizable: false,
+          height:180,
           title:"Deleting project",
           modal: true,
           buttons: {
@@ -392,6 +450,7 @@ var glamPipe = function () {
 		else
 			alert("node id not found");
 	}
+
 
 	this.openCurrentNode = function () {
 		self.currentNodes[self.currentCollection.source.collection].open();
@@ -532,11 +591,14 @@ var glamPipe = function () {
 				self.addProjectNode(node);
 				self.currentNodes[self.currentCollection.source.collection] = node;
 				self.currentlyOpenNode = node;
-				self.renderCollectionSet();
-				node.open();
-				$("data-workspace settingsblock").show();
-				$("data-workspace settingscontainer submitblock").show();
-				$("data-workspace settingscontainer .node-description").show();
+				self.renderCollectionSet(function() {
+					node.open();
+					$("data-workspace settingsblock").show();
+					$("data-workspace settingscontainer submitblock").show();
+				});
+				
+
+				//$("data-workspace settingscontainer .node-description").show();
 			});
 		}
 	}
@@ -595,7 +657,7 @@ var glamPipe = function () {
 	}
 
 	// renders node boxes sorted by types (source, process etc.)
-	this.renderCollectionSet = function () {
+	this.renderCollectionSet = function (cb) {
 		
 		if(!self.currentCollection)
 			return "";
@@ -642,7 +704,8 @@ var glamPipe = function () {
 			$(self.nodeHolderDiv).empty();
 			$(self.nodeHolderDiv).append(html);
 				
-			
+			if(cb)
+				cb(html);
 		})
 	}
 	

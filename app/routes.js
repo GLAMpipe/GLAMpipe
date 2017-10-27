@@ -197,7 +197,11 @@ module.exports = function(express, glampipe, passport) {
 
 	// PROJECTS
 	express.put('/api/v1/projects', function (req, res) {
-		project.createProject(req, res);
+		project.createProject(req.body.title, res);
+	});
+
+	express.put('/api/v1/projects/:id/copy', function (req, res) {
+		project.copyProject(req, res);
 	});
 
 	express.get('/api/v1/projects/titles', function (req, res) {

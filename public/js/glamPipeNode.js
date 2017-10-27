@@ -224,7 +224,7 @@ var glamPipeNode = function (node, gp) {
 		
 		
 		
-		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description  != "") {
+		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description.trim()  != "") {
 			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 			html +=   "    <div class='description'>" + self.source.settings.node_description+ "</div>"
 			
@@ -277,10 +277,10 @@ var glamPipeNode = function (node, gp) {
 			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a></p>"
 			debug += "</settinginstructions></settinginfo>"
 			debug += "<settingaction>";
-			debug += "<label>node description:</label>";
-			debug += "<textarea rows='5' name='node-description' class='node-description-value'></textarea>";
+			debug += "<label>description:</label>";
+			debug += "<textarea rows='3' name='node-description' class='node-description-value'></textarea>";
 			
-			debug += "<a href='#' id='node-description-save'>Save description</a>";
+			debug += "<a href='#' id='node-description-save' class='ibutton'>Save description</a>";
 			debug += "</settingaction>";
 			debug += "</setting>";
 			$("settingsblock").append(debug);
