@@ -5,14 +5,17 @@ var mongoquery 	= require("../app/mongo-query.js");
 var runswitch 	= require("../app/run-switch.js");
 
 
-exports.createProject = function (project_title, res) {
+exports.createProject = function (req, res) {
 	
-	var title = project_title;
+	var title = req.body.title;
 	var dirs = ["source", "process", "export", "view"]; // these dirs are created for every project
 	console.log("PROJECT: creating project", title);
 	var title_dir = title.toLowerCase();
 	title_dir = title_dir.replace(/[^a-z0-9- ]/g,"");
 	title_dir = title_dir.replace(/[ ]/g,"_");
+	
+	if(!title_dir)
+		return res.json({"error": "Invalid project name"});
 				
 	// update project count and create project. Project count is *permanent* counter
 	mongoquery.update("mp_settings",{}, {$inc: { project_count: 1} }, function() {
@@ -71,11 +74,11 @@ exports.createProject = function (project_title, res) {
 }
 
 
-exports.copyProject = function(project_id, project_title,  res) {
+exports.copyProject = function(req, res) {
 	
 	var nodeCreator 	= require("../app/node.js");
 	var project_id = req.params.id;
-	var project.title =  req.body.title;
+	var project_title =  req.body.title;
 	var original_project = null;
 	var new_project = null;
 
@@ -174,8 +177,17 @@ exports.copyProject = function(project_id, project_title,  res) {
 		}
 	}
 	
+	var proj_req = {
+		body: {
+			title: req.body.title
+		}
+	}
+	// user
+	if(req.user && req.user.local && req.user.local.email)
+		proj_req.user = req.user;
+	
 	// create new project with title
-	exports.createProject(project_title, proj_creation_cb);
+	exports.createProject(proj_req, proj_creation_cb);
 	
 
 }

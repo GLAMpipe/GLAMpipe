@@ -70,10 +70,13 @@ var glamPipe = function () {
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
 				html += "<tr>";
+				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
+				
+				// delete link only for owners
 				if(projects[i].owner == self.user)
-					html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a> | <a data-id='" + projects[i]._id + "' class='delete'>delete</a></td>";
-				else
-					html += "<td></td>";
+					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
+				
+				html += "</td>";
 
 				html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 				
@@ -318,7 +321,7 @@ var glamPipe = function () {
 				
                 $( this ).dialog( "close" );
                 var params = {"title": title};
-                $.put(self.baseAPI + "/projects/" + project_id + "/copy", params, function(retData) {
+                $.put(self.baseAPI + "/copy/project/" + project_id, params, function(retData) {
                     console.log('project copied');
                     if(retData.error)
                         alert(retData.error);
