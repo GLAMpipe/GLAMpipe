@@ -201,7 +201,7 @@ module.exports = function(express, glampipe, passport) {
 	//});
 
 	express.put('/api/v1/projects', function (req, res) {
-		project.createProject(req.body.title, res);
+		project.createProject(req, res);
 	});
 
 	express.put('/api/v1/copy/project/:id', function (req, res) {
@@ -409,6 +409,10 @@ module.exports = function(express, glampipe, passport) {
 
 	express.post('/api/v1/collections/:collection/docs/:doc', function (req, res) {
 		collection.edit(req, function(data) {res.send(data)});
+	});
+
+	express.post('/api/v1/collections/:collection/docs/:source/:doc', function (req, res) {
+		collection.copyDoc(req, function(data) {res.send(data)});
 	});
 
 	express.put('/api/v1/collections/:collection/docs/:doc', function (req, res) {
