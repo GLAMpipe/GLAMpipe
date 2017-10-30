@@ -1,9 +1,7 @@
 
 out.setter = {};
-out.setter[context.node.params.out_field] = "";
-out.setter[context.node.params.out_link] = "";
 
-// if retrieve link exists, then copy that to setter so that the link remains in document
+// if retrieve link exists, then copy that to setter so that the link and UUID remains in document
 if(context.data && context.data.existing_link) {
 	out.setter[context.node.params.out_link] = context.data.existing_link;
 	out.setter[context.node.params.out_field] = "";
@@ -21,6 +19,10 @@ if(context.data && context.data.existing_link) {
 		out.setter[context.node.params.out_field] = context.response.statusCode;
 		if(context.data && context.data.retrieveLink)
 			out.setter[context.node.params.out_link] = link_root + context.data.retrieveLink;
+
+		if(context.data && context.data.uuid)
+			out.setter[context.node.params.out_uuid] = {"uuid": context.data.uuid};
+
 			
 	} else if (context.error) {
 		out.setter[context.node.params.out_field] = out.error_marker + context.error;

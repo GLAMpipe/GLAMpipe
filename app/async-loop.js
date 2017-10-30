@@ -254,8 +254,8 @@ exports.fieldLoop = function (node, sandbox, onDoc) {
 				return;
 			}
 			
-			console.log("sandbox.out.pre_value")
-			console.log(sandbox.out.pre_value)
+			//console.log("sandbox.out.pre_value")
+			//console.log(sandbox.out.pre_value)
 			
 			// check if pre_value is array
 			if(Array.isArray(sandbox.out.pre_value)) {

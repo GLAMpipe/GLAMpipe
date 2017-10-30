@@ -44,12 +44,12 @@ exports.postJSON = function (doc, sandbox, next) {
 
 // get JSON response via GET or POST
 exports.fetchJSON = function (options, sandbox, next) {
-//return next()
 
 	if(!options.url || sandbox.context.skip) {
+		sandbox.context.error = "no URL";
 		return next("skipping...");
 	}
-
+	
 	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
 	console.log("REQUEST:", options.url);
 	//console.log("HEADERS:", options.headers);
@@ -61,6 +61,7 @@ exports.fetchJSON = function (options, sandbox, next) {
 		console.log("BODY:", body);
 		if (error) {
 			console.log(error);
+			sandbox.context.error = error;
 			next();
 		} else if (response.statusCode == 200) {
 			try {
@@ -197,7 +198,7 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 		if (err) {
 			return console.error('upload failed:', err);
 		} else if (response.statusCode === 200) {
-			console.log(response)
+			//console.log(response)
 			console.log('WEB: Upload successful!  Server responded with:', response.statusCode);
 			sandbox.context.data = JSON.parse(body);
 			next();
