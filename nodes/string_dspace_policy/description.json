@@ -1,0 +1,16 @@
+{
+	"nodeid": "process_object_dspace_policy",
+	"title": "DSpace 6: Edit policy objects ",
+	"type": "process",
+	"subtype": "strings",
+    "status": "usable",
+	"description": "Edit bitstream policy objects.",
+	"scripts": {
+
+		"finish": "out.say('finish', 'Done!');"
+	},
+	
+	"views": {
+
+	}
+}

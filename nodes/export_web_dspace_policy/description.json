@@ -1,12 +1,12 @@
 {
-    "nodeid": "export_web_dspace_additem",
-    "title": "DSpace 6: edit bitstream policies",
+    "nodeid": "export_web_dspace_policy",
+    "title": "DSpace 6: update bitstream policies",
     "type": "export",
     "subtype": "web",
-    "subsubtype": "dspace",
+    "subsubtype": "dspace_policy",
     "status": "usable",
     "tags":["dspace"],
-    "description": "Edit bitstreams policies on DSpace server",
+    "description": "Export bitstream policies",
 
     "scripts": {
 

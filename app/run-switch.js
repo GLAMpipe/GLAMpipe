@@ -122,7 +122,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","Plone login failed");
 								else {
 									console.log("WEB: Plone login ok");
-									asyncLoop.importLoop(node, sandbox, web.fetchJSON);
+									asyncLoop.importLoop(node, sandbox, web.requestJSON);
 								}
 							});
 						break;
@@ -297,6 +297,18 @@ exports.runNode = function (node, io) {
 								}
 							});
 						break;
+
+						case "dspace_policy":
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","DSpace login failed");
+								else {
+									console.log("WEB: DSpace login ok");
+									asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
+								}
+							});
+						break;
+
 
 						case "dspace_addfile":
 							web.cookieLogin(node, sandbox, function(error) {
@@ -518,7 +530,7 @@ exports.runNode = function (node, io) {
 
 						case "web":
 							var web = require("../app/node_runners/web.js");
-							asyncLoop.fieldLoop(node, sandbox, web.fetchJSON);
+							asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
 						break;
 
 						case "web_check":

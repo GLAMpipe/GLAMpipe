@@ -43,16 +43,20 @@ exports.postJSON = function (doc, sandbox, next) {
 
 
 // get JSON response via GET or POST
-exports.fetchJSON = function (options, sandbox, next) {
+exports.requestJSON = function (options, sandbox, next) {
 
 	if(!options.url || sandbox.context.skip) {
 		sandbox.context.error = "no URL";
 		return next("skipping...");
 	}
 	
-	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
-	console.log("REQUEST:", options.url);
+	console.log("REQUEST:", options.method + " -> " + options.url);
 	//console.log("HEADERS:", options.headers);
+	
+	if(options.headers) 
+		optios.headers.Accept = "application/json";
+	else
+		options.headers = {Accept: "application/json"};
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
@@ -75,9 +79,13 @@ exports.fetchJSON = function (options, sandbox, next) {
 			next();
 		}
 	}
-
-	if(sandbox.out.method === "post")
+	
+	if(options.method === "DELETE") 
+		request.delete(options, responseCallback);
+	else if(options.method === "POST")
 		request.post(options, responseCallback);
+	else if(options.method === "PUT")
+		request.put(options, responseCallback);
 	else
 		request.get(options, responseCallback); // default method is GET
 }
