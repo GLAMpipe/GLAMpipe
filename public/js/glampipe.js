@@ -50,7 +50,7 @@ var glamPipe = function () {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
+			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -63,14 +63,13 @@ var glamPipe = function () {
 	this.getProjectsByUser = function (div, user) {
 		
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
+		html = "<table><thead><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><<tr><th>action</th>/tr></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			self.projects = data.data;
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
 				html += "<tr>";
-				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
 				
 				// delete link only for owners
 				if(projects[i].owner == self.user)
@@ -112,6 +111,8 @@ var glamPipe = function () {
 				}
 				html += "</td>";
 				
+				// actions
+				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
 				
 			}
 			$(div).append("</tr>" + html + "</table>");
@@ -120,7 +121,6 @@ var glamPipe = function () {
 
 	this.genProjectRow = function(project) {
 			var html = "<tr>";
-			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";
 			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
 
 			html += "<td>";
@@ -154,6 +154,10 @@ var glamPipe = function () {
 				})
 			}
 			html += "</td>";
+			
+			// actions
+			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";
+
 			return html;
 			
 	}
