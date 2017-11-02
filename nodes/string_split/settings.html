@@ -1,21 +1,58 @@
 
-<div class="box-noflex">
 
-	<label>Split by this character or characters:</label> 
-	<input class="node-settings" name="separator"/>
-
-	<div>
-		<input type="checkbox" class="node-settings" name="trim" checked="checked"/>
-		<label>Trim</label>
-	</div>
-
-	<div>
-		<input type="checkbox" class="node-settings" name="linebreaks"/>
-		<label>Split only by linebreaks</label>
-	</div>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Split string by
+		</settingtitle>
+		<settinginstructions>
+			Split by this character or characters.
+		</settinginstructions>
+	</settinginfo>
 	
-	<div>
-		<input type="checkbox" class="node-settings" name="skip_empty" checked="checked"/>
+	<settingaction>
+		<label>character</label> 
+		<input class="node-settings" name="separator"/>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Split options
+		</settingtitle>
+		<settinginstructions>
+			You can trim the result, split by linebreaks only and remove empty lines from result array.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Trim</label>
+		<input type="checkbox" class="node-settings" name="trim" checked="checked"/>
+
+		<label>Split by linebreaks</label>
+		<input type="checkbox" class="node-settings" name="linebreaks"/>
+	
 		<label>Skip empty lines</label>
-	</div>
-</div>
+		<input type="checkbox" class="node-settings" name="skip_empty" checked="checked"/>
+	</settingaction>
+</setting>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Output options
+		</settingtitle>
+		<settinginstructions>
+			By default output is an array per string, but if you check "one array", everything is combined to one array.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>One output array</label>
+		<input type="checkbox" class="node-settings" name="one_array" />
+	</settingaction>
+</setting>
+
+

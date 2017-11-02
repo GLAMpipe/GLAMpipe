@@ -1,10 +1,10 @@
 {
     "nodeid": "process_field_split",
-    "title": "Split",
+    "title": "Field: split to array",
     "type": "process",
     "subtype": "strings",
     "status": "usable",
-    "description": "Split field to an array.",
+    "description": "Split string to an array. Useful for CSV imports.",
     "scripts": {
         
         "finish": "out.say('finish', 'Split done!');"

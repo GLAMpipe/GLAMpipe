@@ -1,10 +1,10 @@
 {
 	"nodeid": "process_field_combine",
-	"title": "concatenate strings",
+	"title": "Field: concatenate fields",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",
-	"description": "Concatenate strings in fields(2) with arbitrary strings",
+	"description": "Concatenate 2 fields with arbitrary strings",
 	"scripts": {
 		"hello":
 		[
@@ -27,8 +27,7 @@
 	
 	"views": {
 		"params": [
-			"<label>description</label> <input name='title' />",
-			"<label>where to save the result?</label> <input name='out_field'/ value='combined'/>"
+			"<label>Output field</label> <input name='out_field'/ value='combined'/>"
 		]
 	}
 }

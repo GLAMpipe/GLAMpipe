@@ -1,15 +1,52 @@
 
-<label>Write static texts to inputs and select fields from selects</label>
-<input class="node-settings middle_input" name="prefix" /> + <br>
 
-<select class="node-settings dynamic_field middle_input" name="field1">
-	<option>choose field</option> 
-</select> + <br>
 
-<input class="node-settings middle_input" name="after_field1" /> + <br>
-<select class="node-settings dynamic_field middle_input" name="field2">
-	<option>choose field</option> 
-</select> + <br>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Concatenate fields
+		</settingtitle>
+		<settinginstructions>
+			Write static texts to inputs and select fields from selects
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 
-<input class="node-settings middle_input" name="suffix"/>
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+
+	<table>
+		<tr>
+			<th>string</th><th></th><th>field</th><th></th><th>string</th><th></th><th>field</th><th></th><th>string</th>
+		</tr>
+		<tr>
+			<td><input class="node-settings " name="prefix" /></td>
+			<td> + </td>
+			<td>
+				<select class="node-settings dynamic_field" name="field1">
+					<option>choose field</option> 
+				</select> 
+			</td>
+			<td> + </td>
+			<td><input class="node-settings " name="after_field1" /> </td>
+			<td> + </td>
+			<td>
+				<select class="node-settings dynamic_field " name="field2">
+					<option>choose field</option> 
+				</select> 
+			</td>
+			<td> + </td>
+			<td><input class="node-settings " name="suffix"/></td>
+		</tr>
+
+	</table>
+
+</setting>
+
 		

@@ -1,12 +1,12 @@
 {
     "nodeid": "export_web_dspace_update",
-    "title": "DSpace 6: update metadata field",
+    "title": "DSpace 6: update item field",
     "type": "export",
     "subtype": "web",
     "subsubtype": "dspace",
     "status": "usable",
     "tags":["dspace"],
-    "description": "Update DSpace data via REST API",
+    "description": "Update one item field via REST API",
 
     "scripts": {
         "hello": 

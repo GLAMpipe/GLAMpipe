@@ -45,9 +45,6 @@ if(Array.isArray(context.doc[context.node.params.in_bitstream])) {
 				var newPolicy = makePublic(bitstream.uuid);
 				out.value[index].push(newPolicy);
 			}
-			
 		}
-		
 	})
-	
 }

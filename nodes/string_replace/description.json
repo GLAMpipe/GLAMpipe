@@ -1,6 +1,6 @@
 {
 	"nodeid": "process_field_replace",
-	"title": "Search and Replace",
+	"title": "Field: search&replace",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",

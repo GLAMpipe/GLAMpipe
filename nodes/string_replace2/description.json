@@ -3,7 +3,7 @@
 	"title": "Search and Replace 2",
 	"type": "process",
 	"subtype": "strings",
-    "status": "usable",
+    "status": "broken",
 	"description": "Search and replace a string. You can use regular expressions.",
 	"scripts": {
 

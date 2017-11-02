@@ -403,24 +403,27 @@ var glamPipeNode = function (node, gp) {
 		var settings = {};
 		// read input from settings (only inputs with class "node-settings")
 		$("settingsblock input.node-settings:not([type='checkbox']), settingsblock  select.node-settings").each(function() {
-			var nameSplitted = $(this).attr("name").split("[");
-			// if input name has form "set[something1]", then we want to gather all of them to array
-			//console.log($(this).attr("name") + ":" +  $(this).val());
-			if(nameSplitted.length > 1) {
-				(settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
-			} else {
-				settings[$(this).attr("name")] = $(this).val();
+			
+			if($(this).attr("name")) {
+				var nameSplitted = $(this).attr("name").split("[");
+				// if input name has form "set[something1]", then we want to gather all of them to array
+				//console.log($(this).attr("name") + ":" +  $(this).val());
+				if(nameSplitted.length > 1) {
+					(settings[nameSplitted[0]] || (settings[nameSplitted[0]] = [])).push($(this).val());
+				} else {
+					settings[$(this).attr("name")] = $(this).val();
+				}
 			}
 	   
 		});
 		
-		// handle checkboxes separately. Checbox is included only if it is checked
+		// handle checkboxes separately. 
 		$("settingsblock input.node-settings[type='checkbox']").each(function() {
-			if($(this).is(':checked'))
-				settings[$(this).attr("name")] = $(this).is(':checked');
+			//if($(this).is(':checked'))
+			settings[$(this).attr("name")] = $(this).is(':checked');
 		});
 
-		// handle textareas separately. Checbox is included only if it is checked
+		// handle textareas separately. 
 		$("settingsblock textarea.node-settings").each(function() {
 				settings[$(this).attr("name")] = $(this).val();
 		});

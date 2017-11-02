@@ -1,17 +1,28 @@
 
 
-<div class="box-noflex">
-	<p>empty array, "", 0, "0", null and "undefined" results "no".</p>
-	<h3>options</h3>
-	<div class="checkbox_holder">
-		<input type="checkbox" class="node-settings " name="trim" checked="checked" />	
-		<label>Trim</label>
-	</div>
-<!-- 
-	<div class="checkbox_holder">
-		<input type="checkbox" class="node-settings " name="onevalue" checked="checked" />
-		<label>Output only one value (even if input is an array)</label>
-	</div>
--->
 
-</div>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Has value
+		</settingtitle>
+		<settinginstructions>
+			If the content of the <span id="process-has-value_in">field</span> is empty array, "", 0, "0", null or "undefined", then the field has no value. 
+			You can define here what is written to the <span id="process-has-value_out">output field</span> depending the value of the input field.
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Text for non empty field</label>	
+		<input class="node-settings " name="yes" value="yes"/>	
+		
+		<label>Text for empty field</label>	
+		<input class="node-settings " name="no" value="no" />	
+		
+		<label>Trim</label>
+		<input type="checkbox" class="node-settings " name="trim" checked="checked" />	
+		
+	</settingaction>
+</setting>
+

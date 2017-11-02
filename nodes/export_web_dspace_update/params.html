@@ -18,24 +18,12 @@
 <div id="export-data-dspace-update_status" class="status"></div>
 
 <div id="export-data-dspace-update_hidden" style="display:none">
-	<select id="export-data-dspace-update_field_sel" name="dspace_field">
+	
+	<select id="export-data-dspace-update_field_sel" name="in_field">
 		<option value="" selected disabled>Choose</option>
 	</select>
 
-
-	<label>UUID of the item</label>
-	<input class="dynamic_field" name="in_uuid_field" value="uuid" required />
-
-	<label>new value field</label>
-	<input class="dynamic_field" name="in_update_field" required />
-
-	<label>current value field (optional, updates only if new value differs from this)</label>
-	<input class="dynamic_field" name="in_original_value"/>
-
-	<label>language field (optional)</label>
-	<input class="dynamic_field" name="language_field"/>
-
-	<label>write response here</label>
+	<label>response output</label>
 	<input id="export-data-dspace-update_out" type="text" name="out_field" value="update"/>
 </div>
 

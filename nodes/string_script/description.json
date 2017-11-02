@@ -1,11 +1,11 @@
 {
     "nodeid": "process_script",
-    "title": "Script",
+    "title": "Field: script",
     "type": "process",
     "subtype": "strings",
     "subsubtype": "script",
     "status": "usable",
-    "description": "Script super node ",
+    "description": "Script super node.",
     "scripts": {
         
         "finish": "out.say('finish', 'Script done!');"

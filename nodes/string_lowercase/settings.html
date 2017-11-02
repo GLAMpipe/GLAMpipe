@@ -1,15 +1,42 @@
 
-<div class="box-noflex">
 
-	<select name="mode" class="node-settings">
-		<option value="lower">convert to lower case</option>
-		<option value="upper">convert to upper case</option>
-	</select>
 
-	<div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Case
+		</settingtitle>
+		<settinginstructions>
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Case</label>	
+		<select name="mode" class="node-settings">
+			<option value="lower">convert to lower case</option>
+			<option value="upper">convert to upper case</option>
+		</select>
+
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Trim
+		</settingtitle>
+		<settinginstructions>
+			If you want to strip white spaces from the beginning and the end of the string, check this.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 		<label>Trim</label>
 		<input type="checkbox" class="node-settings" name="trim" checked="checked"/>
-	</div>
+	</settingaction>
+</setting>
 
 
-</div>

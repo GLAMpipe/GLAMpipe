@@ -1,21 +1,12 @@
 {
 	"nodeid": "process_field_has_value",
-	"title": "Has field value or not",
+	"title": "Field: has value or not",
 	"type": "process",
 	"subtype": "strings",
-	"subsubtype": "string manipulation",
     "status": "usable",
 	"description": "This can be used for boolean type marking of field value. Handy for for faceted view.",
 	"scripts": {
-		"hello":
-		[ 
-			"out.say('news', 'You added a node'); ",
-			"/* set output field */",
-			"context.node.out_field = context.node.params.out_field; "
-		],
-		
-        "bye": "out.say('news', 'Deleted node. Bye!'); ",
-        
+
         "init":
         [
 			"out.say('progress', 'Starting...');"

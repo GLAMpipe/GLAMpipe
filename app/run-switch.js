@@ -459,9 +459,9 @@ exports.runNode = function (node, io) {
 									next();
 								});
 							} catch (e) {
-								console.log("ERROR:", e.stack);
+								console.log("ERROR:", e);
 								sandbox.finish.runInContext(sandbox);
-								sandbox.out.say("finish", "Error in node: 'run' script: " + e.name +" " + e.message);
+								sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
 							}
 							
 
