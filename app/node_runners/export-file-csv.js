@@ -15,29 +15,36 @@ var exports = module.exports = {};
 exports.collectionToFile = function (node, sandbox, io) {
 
 	// make sure that we have an export filename
-	if(node.params.file == "") {
+	if(node.params.required_file == "") {
 		console.log("ERROR: filename missing!");
 		io.sockets.emit("error", {"nodeid":node._id, "msg":"ERROR: filename missing! Re-create node and give file name."});
 		return;
 	}
 
+	if(sandbox.out.csvheaders.length == 0) {
+		sandbox.out.say("error", "You must choose some fields!");
+		return;
+	}
+
 	// we stream directly to file
 	var fs = require('fs');
-	var filePath = path.join(node.dir, node.params.file);
-	var writer = csvWriter({separator:node.settings.sep});
+	var filePath = path.join(node.dir, node.params.required_file);
+	var writer = csvWriter({separator:node.settings.sep, headers: sandbox.out.csvheaders});
 	writer.pipe(fs.createWriteStream(filePath));
 
 	// find everything
-	mongoquery.find2({}, node.collection, function (err, doc) {
+	mongoquery.find2({}, node.collection, function (err, docs) {
 		
 		// tell node how many records was found
-		sandbox.context.doc_count = doc.length;
+		sandbox.context.doc_count = docs.length;
 		//nodescript.runNodeScriptInContext("init", node, sandbox, io);
 
-		async.eachSeries(doc, function iterator(doc, next) {
-			joinMultipleValues(doc, node.settings.arr_sep);
+		async.eachSeries(docs, function iterator(doc, next) {
+			//joinMultipleValues(doc, node.settings.arr_sep);
 			//nodescript.runNodeScriptInContext("run", node, sandbox, io);
-			writer.write(doc);
+			sandbox.context.doc = doc;
+			sandbox.run.runInContext(sandbox);
+			writer.write(sandbox.out.value);
 			next();			
 
 		}, function done() {

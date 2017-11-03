@@ -250,7 +250,7 @@ exports.downloadFile = function (download, sandbox, next ) {
 	sandbox.context.data = download;
 
 	// dry run
-	if(node.settings.dry_run) {
+	if(node.settings.dry_run === "true") {
 		checkUrl(download);
 		next();
 

@@ -863,14 +863,16 @@ exports.getOptions = function (req, cb) {
 }
 
 exports.getNodeFile = function (req, res) {
-	
 	exports.getNodeKey("dir", req.params.nodeid, function(err, data) {
 		if(err)
 			res.json({"error": err});
 		else {
 			var file = path.join(data.value,req.params.file);
-			console.log(file)
-			res.sendFile(file);
+			res.sendFile(file, function(err) {
+				if(err)
+					res.status(404).json({error:"File not found!"});
+			});
+
 		}
 	})	
 }

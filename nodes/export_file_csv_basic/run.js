@@ -1,3 +1,8 @@
+var c = context;
+c.sep = context.node.settings.sep; 
+c.arr_sep = context.node.settings.arr_sep; 
+
+
 function getVal (val) { 
    if( typeof val == "string" || typeof val == "number")  
        return val; 
@@ -15,26 +20,32 @@ function quote (str) {
             
 var row = [];
 
-for(f in context.doc) {
-    if(f != '__mp_source' && f != '_id') {
-       if (context.doc[f] !== null && context.doc[f].constructor.name === 'Array') {
+out.console.log("GET FIELDS")
+for(var f in context.doc) {
+	out.console.log(f);
+	if(out.csvheaders.includes(f)) {
+		
+       if (context.doc[f] !== null && Array.isArray(context.doc[f])) {
            var arr_row = []; 
            for (var i = 0; i < context.doc[f].length; i++ ) { 
                /* ignore objects in arrays */
                if (typeof context.doc[f][i] !== 'object') 
                    arr_row.push(getVal(context.doc[f][i])); 
            }
-           var arr_str = quote(arr_row.join(c.arr_sep)); 
+           var arr_str = arr_row.join(c.arr_sep); 
            row.push(arr_str); 
        } else {  
-           row.push(quote(getVal(context.doc[f]))); 
+           row.push(getVal(context.doc[f])); 
        }
     }
 };
 
+context.count++;
+//out.console.log(context.node.settings.fields);
+//out.console.log("KOIRAAA")
 
 
 if(parseInt(context.count) % 100 == 0) 
     out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
-out.value = context.doc; 
+out.value = row;

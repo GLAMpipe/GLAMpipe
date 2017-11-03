@@ -1032,6 +1032,14 @@ input.short {
 	width:3em;
 }
 
+select.narrow {
+	width: auto;
+}
+
+input.narrow {
+	width:auto;
+}
+
 .message {
     width: 100%;
     margin: 20px;

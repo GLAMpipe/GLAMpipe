@@ -10,22 +10,18 @@
 
 
     "scripts": {
-        "hello": "out.say('news', 'You added a CSVexport node'); context.node.title = context.node.params.file; ",
-        "bye": "out.say('news', 'Deleted CSV export node. Bye!'); ",
+
         
         "finish":
         [
-            "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.file + '\"');"
+            "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.required_file + '\"');"
         ]
 
     },
     
     "views": {
 
-        "params":"<label>file name</label><input name=\"file\"/>",
-        "settings": [
-            "<label>separator </label><input class=\"node-settings\" name=\"sep\" value=\",\"/>",
-            "<label>array separator </label><input class=\"node-settings\" name=\"arr_sep\" value=\"|\"/>"
-        ]
+        "params":"<label>File name</label><input name=\"required_file\" value=\"export.csv\" />"
+
     }
 }

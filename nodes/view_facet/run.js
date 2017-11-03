@@ -46,7 +46,7 @@ facets.forEach(function(field, index) {
 		else
 			filter.title = "facet " + facet_index;
 			
-		if(!context.node.settings["collapsed_" + facet_index])
+		if(context.node.settings["collapsed_" + facet_index] === "false")
 			filter.collapse = "in";
 
 		if(context.node.settings["display_" + facet_index] === "right")
@@ -76,7 +76,7 @@ renders.forEach(function(key, index) {
 			config.item_table.headers.push(key);
 			
 		// link render
-		if(context.node.settings["render_link_" + key_index]) {
+		if(context.node.settings["render_link_" + key_index] === "true") {
 			column.link = true;
 			column.domain = context.node.settings["render_link_start_" + key_index]
 		}
