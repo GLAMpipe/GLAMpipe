@@ -2,7 +2,7 @@
     "nodeid": "source_web_dspace",
     "type": "source",
     "subtype": "web",
-    "title": "DSpace 6: import by collection(s)",
+    "title": "DSpace 6: import",
     "status": "usable",
     "tags":["dspace"],
     "usage":"",

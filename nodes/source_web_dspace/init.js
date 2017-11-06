@@ -1,7 +1,7 @@
 
 
 
-var base_url = context.node.params.dspace_url;
+var base_url = context.node.params.required_dspace_url;
 
 // variables for node
 context.vars = {};

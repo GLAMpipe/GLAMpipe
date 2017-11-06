@@ -1038,6 +1038,7 @@ select.narrow {
 
 input.narrow {
 	width:auto;
+	margin-left: 10px;
 }
 
 .message {

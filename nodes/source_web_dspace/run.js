@@ -2,7 +2,7 @@
 var c = context;
 
 // we must remove rest part from dspace_url (usually "/rest")
-var splitted = context.node.params.dspace_url.split("/");
+var splitted = context.node.params.required_dspace_url.split("/");
 var dspace_url_stripped = splitted.slice(0, splitted.length-1).join("/");
 
 
@@ -80,7 +80,7 @@ if (context.response && context.response.statusCode == 200 ) {
 		// URL for next round
 		var offset = c.vars.round_counter * c.vars.limit;
         if(context.data["unfiltered-item-count"] == context.vars.limit)  /* check if there is any data left on the server */
-             out.url = context.node.params.dspace_url + "/filtered-items" + context.node.settings.query + '&limit=' + c.vars.limit + '&offset=' + c.vars.round_counter * c.vars.limit; 
+             out.url = context.node.params.required_dspace_url + "/filtered-items" + context.node.settings.query + '&limit=' + c.vars.limit + '&offset=' + c.vars.round_counter * c.vars.limit; 
              
         out.say("progress", "Items fetched: " + context.vars.record_counter); 
 

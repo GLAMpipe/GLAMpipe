@@ -5,24 +5,18 @@
 	var params = node.params
 	var collections = [];
 
-	$("#source_web_dspace_url").text(params.dspace_url);
+	$("#source_web_dspace_url").text(params.required_dspace_url);
+
+	hierarchyList();
+	if(node.settings) {
+		
+	} else {
+		schemaList();
+	}
 
 	//$(document).on("click", "#source_web_dspace_fetch", function () {
 	$("#source_web_dspace_fetch").click(function (e) {
-		
-		$("#source_web_dspace_data").empty();
-		$("#source_web_dspace_data").css('visibility', 'visible');
-		$("#source_web_dspace_data").append("<h3>Fetching...</h3>");
-		$.getJSON(g_apipath + "/proxy?url=" + params.dspace_url + "/hierarchy", function (data) {
-			if(data.error)
-				alert(data.error);
-			else {
-				var html = display(data.community, "community");
-				$("#source_web_dspace_data").empty();
-				$("#source_web_dspace_data").append(html);
-				$("#source_web_dspace_data").show();
-			}
-		})
+		hierarchyList();
 	})
 
 	// collection change handler
@@ -89,3 +83,91 @@
 		
 	}
 
+
+
+	function hierarchyList() {
+		$("#source_web_dspace_data").empty();
+		$("#source_web_dspace_data").css('visibility', 'visible');
+		$("#source_web_dspace_data").append("<h3>Fetching...</h3>");
+		$.getJSON(g_apipath + "/proxy?url=" + params.required_dspace_url + "/hierarchy", function (data) {
+			if(data.error)
+				alert(data.error);
+			else {
+				var html = display(data.community, "community");
+				$("#source_web_dspace_data").empty();
+				$("#source_web_dspace_data").append(html);
+				$("#source_web_dspace_data").show();
+			}
+		})
+	}
+
+
+
+
+	function schemaList() {
+		$.getJSON(g_apipath + "/proxy?url=" + params.required_dspace_url + "/registries/schema", function (schemas) {
+			var fields = "<div class='field-query'><select class='node-settings narrow' name='query_field[]'><option value=''>choose</option>"
+			schemas.forEach(function(schema) {
+				schema.fields.forEach(function(schema_field) {
+					fields += "<option value='" + schema_field.name + "'>" + schema_field.name + "</option>";
+				})
+				
+				
+				
+			})
+			fields += "</select>"
+			
+			fields += operators();
+			fields += "<input class='node-settings narrow' name='query_val[]' /><a class='ibutton add_op'> + </a></div>";
+			
+			$("#source_web_dspace_metadata_query").append(fields);
+		})
+	}
+
+
+function operators() {
+	var ops="";
+	ops += "		<select class=\"node-settings narrow\" name=\"query_op[]\">";
+	ops += "			<option value=\"exists\">exists<\/option>";
+	ops += "			<option value=\"doesnt_exist\">does not exist<\/option>";
+	ops += "			<option selected=\"\" value=\"equals\">equals<\/option>";
+	ops += "			<option value=\"not_equals\">does not equal<\/option>";
+	ops += "			<option value=\"like\">like<\/option>";
+	ops += "			<option value=\"not_like\">not like<\/option>";
+	ops += "			<option value=\"contains\">contains<\/option>";
+	ops += "			<option value=\"doesnt_contain\">does not contain<\/option>";
+	ops += "			<option value=\"matches\">matches<\/option>";
+	ops += "			<option value=\"doesnt_match\">does not match<\/option>";
+	ops += "		<\/select>";
+	return ops;
+}
+
+
+
+	function collectFieldQuery() {
+		var query = "";
+		$(".field-query").each(function() {
+			
+			// use only if field is chosen
+			if( $(this).find("select[name='query_field[]']").val()) {
+				query += "&query_field[]=" + $(this).find("select[name='query_field[]']").val();
+				query += "&query_op[]=" + $(this).find("select[name='query_op[]']").val();
+				query += "&query_val[]=" + $(this).find("input[name='query_val[]']").val();
+			}
+		})
+		
+		query = query.replace("&", "?");
+		$("#source_web_dspace_query").val(query);
+	}
+
+	$("setting").on("click", ".add_op", function() {
+		schemaList();
+	})
+
+	$("setting").on("change", "select", function() {
+		collectFieldQuery();
+	})
+
+	$("setting").on("keyup", "input", function() {
+		collectFieldQuery();
+	})
