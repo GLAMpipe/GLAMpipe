@@ -1,6 +1,23 @@
 
 
-
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace login (optional)
+		</settingtitle>
+		<settinginstructions>
+			Login is optional. If you do not login, then you get data that is publicly available. <br>
+			Current DSpace server: <strong><span id="source_web_dspace_url"></span></strong>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
 
 <setting>
 	<settinginfo>
@@ -27,15 +44,22 @@
 			DSpace ollections
 		</settingtitle>
 		<settinginstructions>
-			Choose collection(s) from server: <strong><span id="source_web_dspace_url"></span></strong>
+			Choose collection(s) from the list. If you do not choose collections, then search is targeted to the whole repository.<br><br>
+			
+
 		</settinginstructions>
+
 	</settinginfo>
 	
 	<settingaction>
-		<button id="source_web_dspace_fetch">refresh collection hierarchy</button>
+		<label>Selected collections</label>
+		<settinglistcontainer id="source_web_dspace_selected"></settinglistcontainer>
+		<label class="inline">All collections</label> | <a id="source_web_dspace_fetch" class="ibutton">refresh</a> | <a id="source_web_dspace_unselect" class="ibutton">unselect all</a>
 		<settinglistcontainer id="source_web_dspace_data"></settinglistcontainer>
+		
 	</settingaction>
 </setting>
+
 
 
 

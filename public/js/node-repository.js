@@ -63,7 +63,7 @@ var nodeRepository = function (gp) {
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
 					if(self.verbose[node.type] && self.verbose[node.type][sub.sub.subtype])
-						console.log(self.nodes[i].subtypes[j].text = self.verbose[node.type][sub.sub.subtype])
+						self.nodes[i].subtypes[j].text = self.verbose[node.type][sub.sub.subtype];
 				}
 				// and sort by verbose texts
 				self.nodes[i].subtypes.sort(sortByVerbose);

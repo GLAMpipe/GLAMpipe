@@ -340,7 +340,7 @@ var glamPipeNode = function (node, gp) {
 	this.setSettingValues = function () {
 		var data = self.source;
 		for(var prop in data.settings) {
-			console.log(prop)
+			//console.log(prop)
 			if(typeof data.settings[prop] == "boolean") {
 				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
 				$("input[name='"+prop+"']").change();

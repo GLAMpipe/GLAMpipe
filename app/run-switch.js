@@ -103,7 +103,7 @@ exports.runNode = function (node, io) {
 						case "csv":
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
-							var download = sandbox.out.urls[0]; // we have only one download
+							var download = sandbox.out.urls[0]; // we can have only one download
 							
 							web.downloadAndSave (node, download, false, function() {
 								var query = {}; 
@@ -128,8 +128,15 @@ exports.runNode = function (node, io) {
 						break;
 
 						default:
-							// query based APIs
-							sourceAPI.fetchData(node,sandbox, io);
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("progress","login failed");
+								else 
+									sandbox.out.say("progress","login OK");
+									
+								sourceAPI.fetchData(node,sandbox, io);
+								
+							});
 
 					}
 					

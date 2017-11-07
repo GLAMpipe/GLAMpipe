@@ -1,0 +1,20 @@
+{
+    "nodeid": "process_field_count_rows",
+    "title": "Field: count values",
+    "type": "process",
+    "subtype": "strings",
+    "status": "usable",
+    "description": "Count values (rows) of certain field.",
+    "scripts": {
+
+        "init":
+        [
+            "out.say('progress', 'Count started...'); "
+        ],
+        
+        
+        "finish": "out.say('finish', 'Count done!');"
+    },
+    
+    "views": {}
+}

@@ -525,7 +525,6 @@ var glamPipe = function () {
 
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
-		console.log(obj.text())
 		//obj.text("cancel");
 		var types = [];
 		
@@ -586,10 +585,10 @@ var glamPipe = function () {
 		if(self.currentCollection == null) 
 			alert("parent collection is missing");
 		else {data.collection = self.currentCollection.source.collection;
-			console.log("currentCollection on node create:", self.currentCollection.source.collection);
+			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
 			
 			$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
-				console.log("node create:", returnedData);
+				//console.log("node create:", returnedData);
 				if(returnedData.error) {
 					alert(returnedData.error);
 					return;
@@ -613,7 +612,7 @@ var glamPipe = function () {
 	// check if any output field (starts with "out_") exists 
 	this.outputExists = function(params) {
 		for(var param in params) {
-			console.log(param);
+			//console.log(param);
 			if(/^out_/.test(param) && self.currentCollection.fields.sorted.includes(params[param])) {
 				alert("'" + params[param] + "' output field exists! Please rename field." );
 				return true;
@@ -934,7 +933,7 @@ var glamPipe = function () {
                 $( this ).dialog( "close" );
                 var params = {node:node_id, project:self.currentProject};
                 $.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
-                    console.log('node deleted');
+                    //console.log('node deleted');
                     if(retData.error)
                         alert(retData.error);
                     else {

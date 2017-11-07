@@ -295,7 +295,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 		url:download.url,
 		followRedirect:true
 	}
-console.log(options);
+	console.log(download)
 	// use basic authentication if node did set "auth"
 	if(download.auth)
 		options.auth = download.auth;

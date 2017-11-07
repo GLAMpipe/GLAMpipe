@@ -1,10 +1,10 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
-var path        = require('path');
-var mongoquery 	= require("../../app/mongo-query.js");
-var collection = require("../../app/collection.js");
-var nodescript = require("../../app/run-node-script.js");
-var schema 		= require("../../app/schema.js");
+var path		= require('path');
+var mongoquery	= require("../../app/mongo-query.js");
+var collection	= require("../../app/collection.js");
+var nodescript	= require("../../app/run-node-script.js");
+var schema		= require("../../app/schema.js");
 const MP 		= require("../../config/const.js");
 
 
@@ -19,12 +19,17 @@ exports.fetchData = function (node, sandbox, io, cb) {
 	// remove previous data inserted by node and start query loop
 	var query = {}; 
 	query[MP.source] = node._id;
-	mongoquery.empty(node.collection, query, function() {
-		// init will give us an initial url
-		nodescript.runNodeScriptInContext("init", node, sandbox, io);
-		console.log("URL:", sandbox.out.url)
-		requestLoop(node, sandbox, io, cb);
-	});
+	
+	if(node.settings.mode === "update") {
+		consolelog("Update not yet implemented")
+	} else {
+		mongoquery.empty(node.collection, query, function() {
+			// init will give us an initial url
+			nodescript.runNodeScriptInContext("init", node, sandbox, io);
+			console.log("URL:", sandbox.out.url)
+			requestLoop(node, sandbox, io, cb);
+		});
+	}
 }
 
 
@@ -80,7 +85,14 @@ function requestLoop(node, sandbox, io, cb) {
 			console.log(err);
 			return;
 		}
-			
+
+		// check if user asked for termination of the node run
+		if(!node.req.query.force && !global.register[node.req.originalUrl]) {
+			console.log("REGISTER: user terminated node run...");
+			sandbox.finish.runInContext(sandbox);
+			return;
+		}
+
 		// if node provides new url, then continue loop
 		if (sandbox.out.url != "") {
 			console.log("calling requestLoop from requestLoop");
@@ -113,7 +125,8 @@ function callAPI (url, callback) {
 		url: url,
 		method: 'GET',
 		headers: headers,
-		json: true
+		json: true,
+		jar: true
 	};
 
 	request(options, function (error, response, body) {

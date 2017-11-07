@@ -605,7 +605,7 @@ exports.deleteNode = function (req, res, io) {
 					}
 				},
 
-				// if node is a transform node, then remove its output field
+				// if node is a transform node, then remove its output fields
 				function (callback) {
 					if(node.type != "source") {
 						// delete all output keys (starting with "out_") from all records
