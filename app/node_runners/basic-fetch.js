@@ -20,8 +20,21 @@ exports.fetchData = function (node, sandbox, io, cb) {
 	var query = {}; 
 	query[MP.source] = node._id;
 	
+	// In update mode we compare some field of the existing records to same field of imported records.
+	// implementation is not optimal but works...
 	if(node.settings.mode === "update") {
-		consolelog("Update not yet implemented")
+		if(node.settings.update_key) {
+			console.log("WEB: update mode")
+			mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
+				sandbox.context.records = records;
+				nodescript.runNodeScriptInContext("init", node, sandbox, io);
+				console.log("URL:", sandbox.out.url)
+				requestLoop(node, sandbox, io, cb);
+			})
+		} else {
+			sandbox.out.say("error", "You must set update field in update mode");
+			return;
+		}
 	} else {
 		mongoquery.empty(node.collection, query, function() {
 			// init will give us an initial url

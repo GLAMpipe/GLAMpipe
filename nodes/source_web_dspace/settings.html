@@ -19,23 +19,29 @@
 	</settingaction>
 </setting>
 
+
+
 <setting>
 	<settinginfo>
 		<settingtitle>
-			Metadata field queries
+			Import mode
 		</settingtitle>
 		<settinginstructions>
-			You can make a metadata query here.
+			<b>Clear and import</b> clears previously imported data and then imports data again.<br>
+			<b>Update</b> mode does not remove previous records. Instead it add records only if there is no such UUID before.
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<settinglistcontainer id="source_web_dspace_metadata_query">
-
-		</settinglistcontainer>
+		<label>mode</label>
+		<select class="node-settings" name="mode">
+			<option value="clear">clear and import</option>
+			<option value="update">update</option>
+		</select>
+		<label>update field</label>
+		<input class="node-settings " name="update_key" value="uuid" />
 	</settingaction>
 </setting>
-
 
 
 <setting>
@@ -61,6 +67,23 @@
 </setting>
 
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Metadata field queries
+		</settingtitle>
+		<settinginstructions>
+			You can make a metadata query here.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<settinglistcontainer id="source_web_dspace_metadata_query">
+
+		</settinglistcontainer>
+	</settingaction>
+</setting>
+
 
 
 <setting>
@@ -78,6 +101,7 @@
 		<textarea class="node-settings" name="query" id="source_web_dspace_query"></textarea>
 	</settingaction>
 </setting>
+
 
 
 

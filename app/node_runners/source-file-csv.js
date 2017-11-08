@@ -129,7 +129,7 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 
 	parser.on('data', function(c){
 		count++;
-		if(!(count % 1000)) console.log(count)
+		if(!(count % 100)) console.log(count)
 	});
 
 	parser.on('finish', function(){

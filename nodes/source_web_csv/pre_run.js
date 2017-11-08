@@ -28,11 +28,11 @@ var ss =  date.getMilliseconds();
 download.filename= y + "-" + m + "-" + d + " " + h + ":" + mm + ":" + s + "-" + ss + ".csv";
 
 // we download file only if that is requested by the user
-if(context.node.settings.download === "true") {
+//if(context.node.settings.download === "true") {
 	// saved file location
 	out.filename = context.path.join(context.node.dir, download.filename);
 	download.url = context.node.params.file_url;
-}
+//}
 
 out.urls.push(download);
 

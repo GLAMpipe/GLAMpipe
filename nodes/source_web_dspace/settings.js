@@ -24,6 +24,7 @@
 		}
 	})
 
+	$("#source_web_dspace_selected").empty().append(collectionsfromQuery().join(""));
 	hierarchyList();
 
 	$("#source_web_dspace_url").text(params.required_dspace_url);
@@ -64,13 +65,15 @@
 			schemaList(dspace_schema);
 	})
 
-	$("setting").on("change", "select", function() {
+	$("setting").on("change", "select[name='query_field[]']", function() {
 		createQuery()
 	})
 
 	$("setting").on("keyup", "input[name='query_val[]']", function() {
 		createQuery()
 	})
+
+
 
 	// extract collection UUIDs from query string
 	function collectionsfromQuery() {
@@ -132,6 +135,7 @@
 			}
 			// update selected collections list
 			collectCollections();
+			//$("setting select[name='query_field[]']").prop('disabled', false);
 		})
 	}
 
@@ -163,6 +167,7 @@
 			fields += "<a class='add_op'><i class='wikiglyph wikiglyph-plus'></i></a><input class='node-settings' name='query_val[]' /></div>";
 		
 		$("#source_web_dspace_metadata_query").append(fields);
+		//$("setting select[name='query_field[]']").prop('disabled', true);
 	}
 
 
@@ -198,7 +203,7 @@
 			var collection_id = $(this).parent().data("id");
 			if ($(this).is(':checked')) {
 				collections.push("&collSel[]=" + collection_id);
-				collectionsList.push("<div>" + $(this).next("label").text() + "</div>");
+				collectionsList.push("<div data-id='" + collection_id + "'>" + $(this).next("label").text() + "</div>");
 			}
 		})
 		$("#source_web_dspace_selected").empty().append(collectionsList.join(""));

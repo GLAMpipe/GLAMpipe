@@ -4,7 +4,7 @@
 	"subtype": "web",
 	"subsubtype": "csv",
 	"title": "Online CSV: import",
-    "status": "broken",
+    "status": "usable",
     "tags":["generic"],
 	"description": "Import data from online CSV",
 
