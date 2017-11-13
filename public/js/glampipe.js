@@ -63,7 +63,7 @@ var glamPipe = function () {
 	this.getProjectsByUser = function (div, user) {
 		
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><<tr><th>action</th>/tr></thead>";
+		html = "<table><thead><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			self.projects = data.data;
@@ -71,9 +71,7 @@ var glamPipe = function () {
 			for(var i = 0; i< projects.length; i++) {
 				html += "<tr>";
 				
-				// delete link only for owners
-				if(projects[i].owner == self.user)
-					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
+
 				
 				html += "</td>";
 
@@ -113,9 +111,13 @@ var glamPipe = function () {
 				
 				// actions
 				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
+				// delete link only for owners
+				if(projects[i].owner == self.user)
+					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
+				html += "</td></tr>";
 				
 			}
-			$(div).append("</tr>" + html + "</table>");
+			$(div).append(html + "</table>");
 		})
 	}
 
