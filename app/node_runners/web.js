@@ -54,7 +54,7 @@ exports.requestJSON = function (options, sandbox, next) {
 	//console.log("HEADERS:", options.headers);
 	
 	if(options.headers) 
-		optios.headers.Accept = "application/json";
+		options.headers.Accept = "application/json";
 	else
 		options.headers = {Accept: "application/json"};
 
@@ -379,24 +379,30 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		cb(e.message);
 		return;
 	}
+	
+	// we try to login only if there is "login" object set
+	if(sandbox.out.login) {
 
-	setUserAgent(sandbox.out.login);
-	console.log("WEB: login url:" , sandbox.out.login.url);
+		setUserAgent(sandbox.out.login);
+		console.log("WEB: login url:" , sandbox.out.login.url);
 
-	// send login information
-	request.post(sandbox.out.login, function(error, response, body) {
-		//console.log(response)
-		console.log(body)
-		if(error)
-			cb("Login error")
-		else if(response.statusCode === 200) {
-			sandbox.out.say("progress", "Login successful");
-			sandbox.context.login = body; // save result so this can be used also for token login
-			cb(null);
-		} else
-			cb("Authentication failed");
+		// send login information
+		request.post(sandbox.out.login, function(error, response, body) {
+			//console.log(response)
+			console.log(body)
+			if(error)
+				cb("Login error")
+			else if(response.statusCode === 200) {
+				sandbox.out.say("progress", "Login successful");
+				sandbox.context.login = body; // save result so this can be used also for token login
+				cb(null);
+			} else
+				cb("Authentication failed");
 
-	});
+		});
+	} else {
+		cb("no login")
+	}
 
 }
 

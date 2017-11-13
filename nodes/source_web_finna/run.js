@@ -10,7 +10,7 @@ if(context.response && context.response.statusCode == 200 && context.data.result
 		c.var.page++;
 
 		if (context.data.records && Array.isArray(context.data.records)) {
-			if(context.node.settings.raw)
+			if(context.node.settings.raw === "true")
 				out_records = context.data.records;
 			else
 				createDocs(context.data.records);

@@ -5,7 +5,7 @@ var uuid_value 		= context.doc[context.node.settings.in_uuid_field];
 var update_value 	= context.doc[context.node.settings.in_update_field];
 var language_value 	= context.doc[context.node.settings.dynamic_language_field];
 var original_value  = context.doc[context.node.settings.in_field];
-var original_field 	= context.node.params.in_field; // field to be updated
+var original_field 	= context.node.params.in_field.replace(/_/g, "."); // field to be updated
 
 
 var update = [];

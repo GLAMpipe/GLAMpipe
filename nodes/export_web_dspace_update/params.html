@@ -20,7 +20,7 @@
 <div id="export-data-dspace-update_hidden" style="display:none">
 	
 	<select id="export-data-dspace-update_field_sel" name="in_field">
-		<option value="" selected disabled>Choose</option>
+		<option value="" disabled>Choose</option>
 	</select>
 
 	<label>response output</label>
@@ -150,10 +150,10 @@ function fetchFields (url) {
 		if(data.error)
 			alert(data.error);
 		else {
-			var html = "";
+			var html = "<option value=''>choose</option>";
 			data.forEach(function(schema) {
 				schema.metadataFields.forEach(function(field) {
-					html += "<option value='"+field.name+"'>" + field.name + "</option>"; 
+					html += "<option value='"+field.name.replace(/\./g, "_")+"'>" + field.name + "</option>"; 
 				})
 			}) 
 
