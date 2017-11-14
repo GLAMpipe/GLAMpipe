@@ -55,6 +55,7 @@ function createDocs (recs) {
 			 out_rec.image_url = '';
 			 out_rec.thumbnail_html = '';
 			 out_rec.id = '';
+			 out_rec.full_record = '';
 			 out_rec.rights = '';
 			 out_rec.year = '';
 			 out_rec.subjects = [];
@@ -105,6 +106,9 @@ function createDocs (recs) {
 
 			 if (recs[i].id)
 				 out_rec.finna_id = recs[i].id;
+
+			 if (recs[i].fullRecord)
+				 out_rec.full_record = recs[i].fullRecord;
 
 			 if (recs[i].summary)
 				 out_rec.description = recs[i].summary;

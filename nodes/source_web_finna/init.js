@@ -12,6 +12,7 @@ var fields = [
 	'buildings', 
 	'formats', 
 	'id', 
+	'fullRecord',
 	'images', 
 	'institutions', 
 	'nonPresenterAuthors', 

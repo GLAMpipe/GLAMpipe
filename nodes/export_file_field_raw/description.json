@@ -1,0 +1,27 @@
+{
+    "nodeid": "export_file_field_raw",
+    "type": "export",
+    "subtype": "file",
+    "subsubtype": "text",
+    "title": "Field as text",
+    "status": "works",
+    "tags":["generic"],
+    "description": "Export one field values as plain text file.",
+
+
+    "scripts": {
+
+        
+        "finish":
+        [
+            "out.say('finish','Export done to \"' + context.node.dir + '/' + context.node.params.required_file + '\"');"
+        ]
+
+    },
+    
+    "views": {
+
+        "params":"<label>File name</label><input name=\"required_file\" value=\"export_field.txt\" />"
+
+    }
+}

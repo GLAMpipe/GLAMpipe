@@ -22,7 +22,7 @@ exports.collectionToFile = function (node, sandbox, io) {
 
 	// we stream directly to file
 	var fs = require('fs');
-	var filePath = path.join(node.dir, node.params.file);
+	var filePath = path.join(node.dir, node.params.required_file);
 	var wstream = fs.createWriteStream(filePath);
 
 	// find everything
