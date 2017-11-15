@@ -51,7 +51,9 @@
     "url-join": "^2.0.2",
     "validator": "^6.2.0",
     "xml-formatter": "^1.0.1",
-    "xml2json": "^0.11.0"
+    "xml2json": "^0.11.0",
+    "xmldom": "^0.1.27",
+    "xpath": "0.0.24"
   },
   "devDependencies": {
     "chai": "^3.5.0",
