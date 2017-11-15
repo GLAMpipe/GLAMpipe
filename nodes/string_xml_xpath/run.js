@@ -1,36 +1,33 @@
 
-var value = context.doc[context.node.params.in_field];
-//value = "<root><title><nimi>Musti</nimi><rotu>Seka</rotu></title></root>"
-//out.console.log(value)
-var doc = new context.xmlParser().parseFromString(value, "text/xml")
-var serializer = new context.xmlSerializer();
-//var doc = parser.parseFromString(value)
-var select = context.xpath.useNamespaces();
+out.value 	= "";
+var value 	= context.doc[context.node.params.in_field];
 
-//var nodes = select("//marc:leader", doc);
+var doc 		= new context.xmlParser().parseFromString(value, "text/xml")
+var serializer 	= new context.xmlSerializer();
+var select 		= context.xpath.useNamespaces();
 
-
-var xmlnodes = select("//*[local-name() = 'controlfield']", doc);
-out.console.log(xmlnodes.length)
-//var tags = doc.getElementsByTagName("record")
-//out.console.log(tags[0].toString())
+// var select = context.xpath.useNamespaces({"marc": "http://www.loc.gov/MARC21/slim"});
+// var nodes = select("//marc:leader", doc);
 
 
-//out.console.log(nodes[0].localName + ": " + nodes[0].firstChild.data)
-//out.console.log("Node: " + nodes[0].toString())
+var xmlnodes = select(context.node.settings.query, doc);
 
-out.value = "";
 
-xmlnodes.forEach(function(xmlnode) {
-	out.value += serializer.serializeToString(xmlnode) + "\n";
-})
+if(context.node.settings.xmldoc == "true") {
+	// create a new XML document
+	var ndoc = new context.xmlParser().parseFromString("<root></root>", "text/xml")
+	xmlnodes.forEach(function(xmlnode) {
+		var c = xmlnode.cloneNode(true);
+		ndoc.documentElement.appendChild(ndoc.importNode(c, true));
+	})
+	out.value = serializer.serializeToString(ndoc);
+	
+} else {
+	// serialize to strings 
+	xmlnodes.forEach(function(xmlnode) {
+		out.value += serializer.serializeToString(xmlnode) + "\n";
+	})
+}
 
-//var doc = context.xmldom.createDocument ('http://www.w3.org/1999/xhtml', 'html', null);
-//var body = document.createElementNS('http://www.w3.org/1999/xhtml', 'body');
-//body.setAttribute('id', 'abc');
-
-var ndoc = new context.xmlParser().parseFromString("<root></root>", "text/xml")
-
-//var ser = serializer.serializeToString(nodes);
-//out.console.log(ser);
-out.value = serializer.serializeToString(ndoc);
+if(!(context.count % 100)) 
+	out.say("progress", context.count + " processed...");

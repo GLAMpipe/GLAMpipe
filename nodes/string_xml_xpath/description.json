@@ -1,10 +1,10 @@
 {
 	"nodeid": "process_field_xml_xpath",
-	"title": "Field: XML xpath",
+	"title": "XML: XPath copy",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",
-	"description": "Copy data from field with XPath",
+	"description": "Copy nodes from XML with XPath",
 	"scripts": {
 
         "init":

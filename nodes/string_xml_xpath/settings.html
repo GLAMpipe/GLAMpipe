@@ -4,25 +4,42 @@
 <setting>
 	<settinginfo>
 		<settingtitle>
-			XPath
+			XPath query
 		</settingtitle>
 		<settinginstructions>
-			If the content of the <span id="process-has-value_in">field</span> is empty array, "", 0, "0", null or "undefined", then the field has no value. 
-			You can define here what is written to the <span id="process-has-value_out">output field</span> depending the value of the input field.
+			With this node you can copy nodes from XML to the output field. 
+			
+			<br>Currently xpath node does not support namespaces. If you have namespace in XML, then you must use following form for query:<br>
+			//*[local-name() = 'name_of_the_tag_you_want']
 
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<label>Text for non empty field</label>	
-		<input class="node-settings " name="yes" value="yes"/>	
-		
-		<label>Text for empty field</label>	
-		<input class="node-settings " name="no" value="no" />	
-		
-		<label>Trim</label>
-		<input type="checkbox" class="node-settings " name="trim" checked="checked" />	
-		
+
+		<label>xpath query</label>	
+		<input class="node-settings " name="query" />	
+
 	</settingaction>
 </setting>
 
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			XML document
+		</settingtitle>
+		<settinginstructions>
+			Here you can define if a new XML document is created or are nodes just copied without root element. If you want to export XML as a one file, then do not select this.
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>create document</label>
+		<input type="checkbox" class="node-settings " name="xmldoc"  />	
+		
+	</settingaction>
+</setting>

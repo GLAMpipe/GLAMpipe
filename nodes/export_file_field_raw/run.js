@@ -1,4 +1,5 @@
 
+
 var val = context.doc[context.node.params.in_field];
 out.console.log(context.node.settings.separator)
 
