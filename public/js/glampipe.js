@@ -659,7 +659,7 @@ var glamPipe = function () {
 
 	this.renderBreadCrumb = function () {
 		if(self.currentCollection)
-			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.params.title);
 		else
 			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > ");
 	}
@@ -740,8 +740,8 @@ var glamPipe = function () {
 		console.log(self.collections.length);
 		for (var i = 0; i < self.collections.length; i++) {
 			var title = "no title";
-			if(self.collections[i].source.title !== "")
-				title = self.collections[i].source.title;
+			if(self.collections[i].source.params.title !== "")
+				title = self.collections[i].source.params.title;
 			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
 		}
 		//$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
