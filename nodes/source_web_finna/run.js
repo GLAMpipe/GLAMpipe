@@ -1,36 +1,38 @@
+
 var c = context;
+
 if(context.response && context.response.statusCode == 200 && context.data.resultCount) {
 	var numFound = parseInt(context.data.resultCount, 10);
-		var pageCount = Math.ceil(numFound/c.var.limit)  ;
-		out.say('progress', 'Fetching page ' + c.var.page + ' of '+pageCount+ ' Total records: ' + numFound);
-		var imgBase = 'https://api.finna.fi';
-		var finnaBase = 'https://finna.fi';
-		var result = [];
-		var out_records = [];
-		c.var.page++;
+	var pageCount = Math.ceil(numFound/c.var.limit)  ;
+	out.say('progress', 'Fetching page ' + c.var.page + ' of '+pageCount+ ' Total records: ' + numFound);
+	var imgBase = 'https://api.finna.fi';
+	var finnaBase = 'https://finna.fi';
+	var result = [];
+	var out_records = [];
+	c.var.page++;
 
-		if (context.data.records && Array.isArray(context.data.records)) {
-			if(context.node.settings.raw === "true")
-				out_records = context.data.records;
-			else
-				createDocs(context.data.records);
-		}
+	if (context.data.records && Array.isArray(context.data.records)) {
+		if(context.node.settings.raw === "true")
+			out_records = context.data.records;
+		else
+			createDocs(context.data.records);
+	}
 
-		// check that we do have some records
-		if(out_records.length === 0) {
-			out.value = null;
-			out.say('error', 'Your query failed! No records in the set');
-		} else {
-			out.value = out_records;
-			c.var.total_count += out_records.length;
-			 var limit = parseInt(context.node.settings.limit);
-			 if (limit <= 0 || isNaN(limit))
-				 limit = 999999999;
+	// check that we do have some records
+	if(out_records.length === 0) {
+		out.value = null;
+		out.say('error', 'Your query failed! No records in the set');
+	} else {
+		out.value = out_records;
+		c.var.total_count += out_records.length;
+		 var limit = parseInt(context.node.settings.limit);
+		 if (limit <= 0 || isNaN(limit))
+			 limit = 999999999;
 
-			 /* check if there is any data left on the server */
-			if(c.var.page <= pageCount && c.var.page <= limit)
-				 out.url = c.var.url + '&page=' + c.var.page + c.var.fields_str;
-		}
+		 /* check if there is any data left on the server */
+		if(c.var.page <= pageCount && c.var.page <= limit)
+			 out.url = c.var.url + '&page=' + c.var.page + c.var.fields_str;
+	}
 
 } else {
 	out.say('error', 'Your query failed! Please check query');
@@ -39,11 +41,10 @@ if(context.response && context.response.statusCode == 200 && context.data.result
 
 
 
-
 function createDocs (recs) {
 
 		/* we do some data cleaning here */
-		out.say("progress", recs);
+		//out.say("progress", recs);
 		for(var i = 0; i < recs.length; i++) {
 
 			 var out_rec = {};

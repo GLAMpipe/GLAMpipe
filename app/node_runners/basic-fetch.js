@@ -123,7 +123,7 @@ function requestLoop(node, sandbox, io, cb) {
 )};
 
 function callAPI (url, callback) {
-	var request = require("request");
+	var request = require("requestretry");
 
 	if (typeof url === "undefined" || url == "")
 		return callback("URL not set", null, null);
@@ -139,7 +139,9 @@ function callAPI (url, callback) {
 		method: 'GET',
 		headers: headers,
 		json: true,
-		jar: true
+		jar: true,
+		maxAttempts: 5,
+		retryDelay: 1000
 	};
 
 	request(options, function (error, response, body) {

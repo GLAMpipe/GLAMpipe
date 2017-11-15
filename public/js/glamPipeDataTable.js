@@ -945,9 +945,11 @@ var dataTable = function (node) {
 
 
 	this.nl2br = function (str, is_xhtml) {   
+		str = str.replace(/</g, "&lt;"); 
+		str = str.replace(/>/g, "&gt;"); 
 		if(str.length > 1000)
-			str = str.substring(0,1000) + "...<a class='expand' href='#'>show (not implemented)</a>\n\n";
-		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+			str = str.substring(0,1000) + "...<br><a class='expand' href='#'>show (not implemented)</a>\n\n";
+		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';   
 		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}
 

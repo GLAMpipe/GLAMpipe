@@ -1,11 +1,14 @@
-var mongojs		= require('mongojs');
+var mongojs		= require("mongojs");
 var async		= require("async");
-var colors		= require('ansicolors');
+var colors		= require("ansicolors");
 var path 		= require("path");
 var flatten 	= require("flat");
-const vm 		= require('vm');
-var validator 	= require('validator');
-var parser		= require('xml2json');
+const vm 		= require("vm");
+var validator 	= require("validator");
+var parser		= require("xml2json");
+var xpath		= require("xpath");
+var xmlParser	= require("xmldom").DOMParser;
+var xmlSerializer	= require("xmldom").XMLSerializer;
 
 var mongoquery	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
@@ -618,6 +621,9 @@ exports.createSandbox = function (node, io) {
 			flat: flatten,
 			validator: validator,
 			parser: parser,
+			xpath: xpath,
+			xmlParser: xmlParser,
+			xmlSerializer: xmlSerializer,
 			config: global.config,
 			MP: MP
 		},
