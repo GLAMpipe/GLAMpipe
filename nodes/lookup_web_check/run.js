@@ -19,3 +19,5 @@ function process (element, index) {
 process(context.data);
 
 
+if(parseInt(context.count) % 10 == 0) 
+    out.say("progress", context.node.type.toUpperCase() + ": processed " + context.count + "/" + context.doc_count);

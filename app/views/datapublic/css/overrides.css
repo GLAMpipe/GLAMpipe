@@ -9,7 +9,7 @@
 }
 
 .container {
-	width:90%;
+	width:100%;
 	
 }
 
@@ -302,4 +302,8 @@
 
 .checkbox label {
     margin-left: 10px;
+}
+
+table td {
+	word-break:break-all;
 }

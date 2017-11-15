@@ -4,7 +4,7 @@ var local_key = context.doc[context.node.params.in_field];
 out.setter = {};
 var fuzzy = 1.0;
 
-//context.node.params.key_field = "key";
+//context.node.params.source_field = "key";
 //context.node.params.copy_field = "value";
 
 if(Array.isArray(local_key)) {
@@ -40,8 +40,8 @@ function map(key) {
 
 	
 	for(var i = 0; i < mapping.length; i++) {
-		var map_key = mapping[i][context.node.params.key_field];
-		var map_value = mapping[i][context.node.params.copy_field];
+		var map_key = mapping[i][context.node.params.source_field];
+		var map_value = mapping[i][context.node.params.source_copy_field];
 		if(Array.isArray(map_key)) {
 			map_key = map_key[0];
 		}

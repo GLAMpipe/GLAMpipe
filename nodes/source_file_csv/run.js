@@ -87,14 +87,14 @@ function processValue (value) {
 		var arr = value.split(context.node.settings.split);
 		
 		// trim
-		if(context.node.settings.trim) {
+		if(context.node.settings.trim === "true") {
 			arr = arr.map(function (e) {
 				return e.trim();
 			});
 		}
 		
 		// skip empty
-		if(context.node.settings.skip) {
+		if(context.node.settings.skip === "true") {
 			arr = arr.filter(Boolean)
 		}
 		
@@ -102,13 +102,13 @@ function processValue (value) {
 		
 	} else {
 		// skip
-		if(context.node.settings.skip)
+		if(context.node.settings.skip === "true")
 			if(value == "")
 				return [];
 		// trim
-		if(context.node.settings.trim) {
+		if(context.node.settings.trim === "true") {
 			value = value.trim();
-			if(context.node.settings.skip)
+			if(context.node.settings.skip === "true")
 				if(value == "")
 					return [];
 			return [value];

@@ -1,24 +1,24 @@
 <setting>
 	<settinginfo>
 		<settingtitle>
-			This is a very experimental script node.
+			This is an experimental script node.
 		</settingtitle>
 		<settinginstructions>
 
 			<p>Few things to keep in mind:
-			<br>a) the script is <strong>executed in the server</strong>, not in your browser
-			<br>b) document values (fields) can be primitive types (string, number etc), arrays or objects. So you must check type. 
-			<br>c) you cannot change those values, instead you write your result to a variable <strong>out.value</strong>.
-			<br>d) script is <strong>synchronous</strong>, you can not make any IO calls
-			<br>e) there is a <strong>10 ms timeout</strong> (in order to prevent infinite loops)</p>
+			<ul>
+				<li>Current document is in <strong>context.doc</strong>. You can access document fields with dot notation, i.e <strong>context.doc.field_name</strong>. </li>
+				<li>Your script is <strong>executed in the server</strong>, not in your browser</li>
+				<li>Document values (fields) can be primitive types (string, number etc), arrays or objects. So you must check the type.</li>
+				<li>The script is <strong>synchronous</strong>, you can not make any IO calls</li>
+				<li>There is a <strong>10 ms timeout</strong> (in order to prevent infinite loops)</li>
+				<li>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node (<span id="process_script_out">output field</span>).</li>
+			</ul>
 
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<p><strong>context.doc</strong> holds the current document. You can access document fields with dot notation, i.e <strong>context.doc.field_name</strong>. 
-		
-		<p>You define your output via <strong>out.value</strong> that gets written to the field that you defined when you created this node (output field).</p>
 
 
 	</settingaction>
@@ -49,7 +49,7 @@
 <setting>
 	<settinginfo>
 		<settingtitle>
-			Example setting: text input (greeting)
+			Example input
 		</settingtitle>
 		<settinginstructions>
 			Type some value. <br>
@@ -68,7 +68,7 @@
 <setting>
 	<settinginfo>
 		<settingtitle>
-			Example setting: field selection (in field)
+			Example field selection 
 		</settingtitle>
 		<settinginstructions>
 			Choose a field from record fields.<br>

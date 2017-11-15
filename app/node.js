@@ -605,7 +605,7 @@ exports.deleteNode = function (req, res, io) {
 					}
 				},
 
-				// if node is a transform node, then remove its output field
+				// if node is a transform node, then remove its output fields
 				function (callback) {
 					if(node.type != "source") {
 						// delete all output keys (starting with "out_") from all records
@@ -863,14 +863,16 @@ exports.getOptions = function (req, cb) {
 }
 
 exports.getNodeFile = function (req, res) {
-	
 	exports.getNodeKey("dir", req.params.nodeid, function(err, data) {
 		if(err)
 			res.json({"error": err});
 		else {
 			var file = path.join(data.value,req.params.file);
-			console.log(file)
-			res.sendFile(file);
+			res.sendFile(file, function(err) {
+				if(err)
+					res.status(404).json({error:"File not found!"});
+			});
+
 		}
 	})	
 }

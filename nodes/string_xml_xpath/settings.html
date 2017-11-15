@@ -1,0 +1,45 @@
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			XPath query
+		</settingtitle>
+		<settinginstructions>
+			With this node you can copy nodes from XML to the output field. 
+			
+			<br>Currently xpath node does not support namespaces. If you have namespace in XML, then you must use following form for query:<br>
+			//*[local-name() = 'name_of_the_tag_you_want']
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>xpath query</label>	
+		<input class="node-settings " name="query" />	
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			XML document
+		</settingtitle>
+		<settinginstructions>
+			Here you can define if a new XML document is created or are nodes just copied without root element. If you want to export XML as a one file, then do not select this.
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>create document</label>
+		<input type="checkbox" class="node-settings " name="xmldoc"  />	
+		
+	</settingaction>
+</setting>

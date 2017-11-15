@@ -1,8 +1,16 @@
 
-<div class="box-noflex">
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Compare 
+		</settingtitle>
+		<settinginstructions>
 
-<div>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 	<label>compare to this field</label>
 	<select class="node-settings dynamic_field" name="comp_dynamic" >
 		<option value="">no value, use string</option>
@@ -10,39 +18,99 @@
 	
 	<label>compare to this string</label>
 	<input class="node-settings" name="comp_static" />
-</div>
+	</settingaction>
+</setting>
 
-	<div>
-		<label>If match, then copy this value to output</label>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy this if there IS match
+		</settingtitle>
+		<settinginstructions>
+			Here you can set static string OR dynamic field that should be written to output field when there is a match.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>String</label>
 		<input class="node-settings" name="static_yes"/>
-		
-		<label>If no match, then copy this value to output</label>
-		<input class="node-settings" name="static_no"/>
-	</div>
 
-
-	<div>
-		<label>If match, then copy this <b>field</b> to output</label>
+		<label>Field</label>
 		<select class="node-settings dynamic_field" name="dynamic_yes">
-			<option>if match field</option>
+			<option value="">choose</option>
 		</select>
-		
-		<label>If no match, then copy this <b>field</b> to output</label>
+
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy this if there IS NO match
+		</settingtitle>
+		<settinginstructions>
+			Here you can set static string OR dynamic field that should be written to output field when there is no match.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>String</label>
+		<input class="node-settings" name="static_no"/>
+
+		<label>Field</label>
 		<select class="node-settings dynamic_field" name="dynamic_no">
-			<option>no match field</option>
+			<option value="">choose</option>
 		</select>
-	</div>
+
+	</settingaction>
+</setting>
 
 
-	<div>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Match mode
+		</settingtitle>
+		<settinginstructions>
+			Normal match means that if there is a match, copy selected value to output field.<br>
+			Emtpy match means that if one of the match fields is empty, then it is considered as a match and select value is copied to output field. 
+			This useful when you want to make sure that there is always a value in copy field even if another field was empty.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
 		<label>Match mode</label>
 		<select class="node-settings" name="mode">
 			<option value="empty-no-match">use normal match</option>
-			<option value="empty-match">reverse match if other field is empty</option>
+			<option value="empty-match">empty match</option>
 		</select>
-		
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Trim
+		</settingtitle>
+		<settinginstructions>
+			Values get trimmed before comparision if this is checked.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
 		<label>Trim</label>
 		<input type="checkbox" class="node-settings" name="trim" checked="checked"/>
-	</div>
+	</settingaction>
+</setting>
 
-</div>

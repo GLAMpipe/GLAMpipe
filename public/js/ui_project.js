@@ -115,7 +115,7 @@ $( document ).ready(function() {
 			button.attr("text", button.text());
 			button.text("Stop");
 			gp.runNode(e);
-		} else if(button.text() == "stop") {
+		} else if(button.text() == "Stop") {
 			button.text("Stopping node...");
 			gp.stopNode(e);
 		} 

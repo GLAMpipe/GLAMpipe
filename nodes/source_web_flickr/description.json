@@ -2,15 +2,13 @@
     "nodeid": "source_web_flickr",
     "type": "source",
     "subtype": "web",
-    "title": "Flickr: import",
+    "title": "Flickr: album import",
     "status": "usable",
     "tags":["generic"],
     "usage":"",
     "description": "Import image metadata from Flickr",
     
     "scripts": {
-        "hello": "out.say('news', 'You added a Flickr import node'); ",
-        "bye": "out.say('finish', 'Bye!'); ",
         "finish":"out.say('finish', 'Flickr images fetched to' + context.node.params.collection); "
     },
     

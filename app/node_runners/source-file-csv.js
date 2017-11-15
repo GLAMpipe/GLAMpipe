@@ -107,7 +107,7 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 	var db = "mongodb://" + database.initDBConnect();
 	var columns = null;
 	var count = 0;
-	if(node.settings.columns)
+	if(node.settings.columns === "true")
 		columns = true;
 		
 	var settings = {
@@ -118,7 +118,7 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 		skip_empty_lines:true
 	} 
 	
-	if(node.settings.tabs)
+	if(node.settings.tabs === "true")
 		settings.delimiter = "\t";
 
 	var parser = parse(settings)
@@ -129,7 +129,7 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 
 	parser.on('data', function(c){
 		count++;
-		if(!(count % 1000)) console.log(count)
+		if(!(count % 100)) console.log(count)
 	});
 
 	parser.on('finish', function(){
@@ -168,7 +168,7 @@ exports.importFile = function  (node, sandbox, io, cb) {
 	var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var counter = 0;
 	var columns = null;
-	if(node.settings.columns)
+	if(node.settings.columns === "true")
 		columns = true;
 	
 	console.log("IMPORT STARTED...");

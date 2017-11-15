@@ -1,8 +1,30 @@
 
-<div class="box-noflex">
-	<label>If this matches to any row</label> 
-	<input class="node-settings" name="search"/>
 
-	<label>then add row with this content</label>
-	<input class="node-settings" name="content"/>
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Add row
+		</settingtitle>
+		<settinginstructions>
+			Define match and new row content. <br>
+			You can use regular expressions.<br>
+			For example, "^hello" matches word "hello" in the beginning of the string.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>If this matches to any row...</label> 
+		<input class="node-settings" name="search"/>
+
+		<label>.. then add row with this content</label>
+		<input class="node-settings" name="content"/>
+		
+		<label>Exact match</label>
+		<input type="checkbox" checked="checked" name="exact" class="node-settings" />
+
+		<label>Case sensitive match</label>
+		<input type="checkbox" checked="checked" name="case_sensitive" class="node-settings" />
+	</settingaction>
+</setting>
+

@@ -7,7 +7,7 @@
 			View title
 		</settingtitle>
 		<settinginstructions>
-			Set facets, run node and then <a class="view_facet_link" target="_blank" href="">open faceted view</a>
+			Set the title of the facets page.
 		</settinginstructions>
 	</settinginfo>
 	
@@ -20,163 +20,106 @@
 <setting>
 	<settinginfo>
 		<settingtitle>
-			Facet 1 
+			Facets
 		</settingtitle>
 		<settinginstructions>
-			Set facets, run node and then <a class="view_facet_link" target="_blank" href="">open faceted view</a>
+			Choose what fields you want see as facets, which side of the page you want see them and whether they are collapsed or not.
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="label_1"/>	
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="in_field_1">
+		<input class="node-settings" name="label_1" value="facet 1"/>	
+		<select class="dynamic_field node-settings narrow" name="in_field_1">
 			<option value="">choose</option>
 		</select>
 
-		<select class="node-settings" name="display_1">
+		<select class="node-settings narrow" name="display_1">
 			<option value="left">on the left</option>
 			<option value="right">on the right</option>
 		</select>
 
 		<input type="checkbox" class="node-settings " name="collapsed_1"  />	
-		<label class="inline">collapsed by default</label>
-	</settingaction>
-</setting>
-
-
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Facet 2
-		</settingtitle>
-		<settinginstructions>
-			Set facets, run node and then <a class="view_facet_link" target="_blank" href="">open faceted view</a>
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="label_2"/>	
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="in_field_2">
+		<label class="inline">collapsed</label>
+		
+		
+		
+		<input class="node-settings" name="label_2" value="facet 2"/>	
+		<select class="dynamic_field node-settings narrow" name="in_field_2">
 			<option value="">choose</option>
 		</select>
 
-		<select class="node-settings" name="display_2">
+		<select class="node-settings narrow" name="display_2">
 			<option value="left">on the left</option>
 			<option value="right">on the right</option>
 		</select>
 
 		<input type="checkbox" class="node-settings " name="collapsed_2"  />	
-		<label class="inline">collapsed by default</label>
-
-	</settingaction>
-</setting>
+		<label class="inline">collapsed</label>
 
 
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Facet 3
-		</settingtitle>
-		<settinginstructions>
-			Set facets, run node and then <a class="view_facet_link" target="_blank" href="">open faceted view</a>
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="label_3"/>	
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="in_field_3">
+
+		<input class="node-settings" name="label_3" value="facet 3"/>	
+		<select class="dynamic_field node-settings narrow" name="in_field_3">
 			<option value="">choose</option>
 		</select>
 
-		<select class="node-settings" name="display_3">
+		<select class="node-settings narrow" name="display_3">
 			<option value="left">on the left</option>
 			<option value="right">on the right</option>
 		</select>
 
 		<input type="checkbox" class="node-settings " name="collapsed_3"  />	
-		<label class="inline">collapsed by default</label>
+		<label class="inline">collapsed</label>
+		
 
 	</settingaction>
 </setting>
 
 
+
+
+
+
 <setting>
 	<settinginfo>
 		<settingtitle>
-			Item rendering 1
+			Item rendering 
 		</settingtitle>
 		<settinginstructions>
-			Here you can define what record fields are rendered as a result.
+			Here you can define what record fields are rendered as a result.<br>
+			If you check "link", then the field value is rendered as a link. If value is not a full link, you can write start of the link in the last input.
+			<br><br>
+			When you are ready, run node (click "Export data") and then <a class="view_facet_link" target="_blank" href="">open your faceted view</a>
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="render_label_1"/>
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="render_1">
+		<input class="node-settings" name="render_label_1" value="" placeholder="label" />
+		<select class="dynamic_field node-settings narrow" name="render_1">
 			<option value="">choose</option>
 		</select>
 		<input type="checkbox" class="node-settings " name="render_link_1" />	
-		<label>render as link</label>
-		<label>start of the link if the value is not a full link:</label> 
-		<input class="node-settings" name="render_link_start_1"/>
-	</settingaction>
-</setting>
-
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Item rendering 2
-		</settingtitle>
-		<settinginstructions>
-			Here you can define what record fields are rendered as a result.
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="render_label_2"/>
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="render_2">
+		<label class="inline">link</label>
+		<input class="node-settings narrow" name="render_link_start_1" placeholder="http://"/>
+		
+		
+		<input class="node-settings" name="render_label_2" value="" placeholder="label"/>
+		<select class="dynamic_field node-settings narrow" name="render_2">
 			<option value="">choose</option>
 		</select>
 		<input type="checkbox" class="node-settings " name="render_link_2" />	
-		<label>render as link</label>
-		<label>start of the link if the value is not a full link:</label> 
-		<input class="node-settings" name="render_link_start_2"/>
-	</settingaction>
-</setting>
-
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Item rendering 3
-		</settingtitle>
-		<settinginstructions>
-			Here you can define what record fields are rendered as a result.
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>label:</label> 
-		<input class="node-settings" name="render_label_3"/>
-		<label>field:</label> 
-		<select class="dynamic_field node-settings" name="render_3">
+		<label class="inline">link</label>
+		<input class="node-settings narrow" name="render_link_start_2" placeholder="http://"/>
+		
+		
+		<input class="node-settings" name="render_label_3" value="" placeholder="label"/>
+		<select class="dynamic_field node-settings narrow" name="render_3">
 			<option value="">choose</option>
 		</select>
 		<input type="checkbox" class="node-settings " name="render_link_3" />	
-		<label>render as link</label>
-		<label>start of the link if the value is not a full link:</label> 
-		<input class="node-settings" name="render_link_start_3"/>
+		<label class="inline">link</label>
+		<input class="node-settings narrow" name="render_link_start_3" placeholder="http://"/>
 	</settingaction>
 </setting>
-
 
 

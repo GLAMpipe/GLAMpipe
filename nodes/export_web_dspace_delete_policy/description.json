@@ -1,0 +1,17 @@
+{
+    "nodeid": "export_web_dspace_delete_policy",
+    "title": "DSpace 6: delete bitstream policies",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_policy",
+    "status": "usable",
+    "tags":["dspace"],
+    "description": "Delete certain bitstream policies",
+
+    "scripts": {
+
+        "finish":"out.say('finish', context.success_count + ' items modified'); "
+    },
+    
+    "views": {}
+}

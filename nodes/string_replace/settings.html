@@ -1,56 +1,62 @@
 
-<table>
-	<thead>
-		<tr>
-			<th>find this</th>
-			<th>replace with this</th>
-		</tr>
-	</thead>
+<setting>
+	<table>
+		<thead>
+			<tr>
+				<th>Find this</th>
+				<th>Replace with this</th>
+			</tr>
+		</thead>
 
-	<tr>
-		<td>
-			<input class="node-settings" name="search[1]"/>
-		</td>
-		<td>
-			<input class="node-settings" name="replace[1]"/>
-		</td>
-	</tr>
-	
-	<tr><td>
-	 <input class="node-settings" name="search[2]"/>
-	</td><td>
-	<input class="node-settings" name="replace[2]"/>
-	</td></tr>
-	<tr><td>
-	 <input class="node-settings" name="search[3]"/>
-	</td><td>
-	<input class="node-settings" name="replace[3]"/>
-	</td></tr>
-	<tr><td>
-	 <input class="node-settings" name="search[4]"/>
-	</td><td>
-	<input class="node-settings" name="replace[4]"/>
-	</td></tr>
-	<tr><td>
-	 <input class="node-settings" name="search[5]"/>
-	</td><td>
-	<input class="node-settings" name="replace[5]"/>
-	</td></tr>
-</table>
-
-<div>Start and end</div>
-	
-<table>	
-	<thead>
 		<tr>
-			<th>add this to the start</th>
-			<th>add this to the end</th>
+			<td>
+				<input class="node-settings" name="search[1]"/>
+			</td>
+			<td>
+				<input class="node-settings" name="replace[1]"/>
+			</td>
 		</tr>
-	</thead>
-	<tr><td>
-	<input class="node-settings" name="add_start"/>
-	</td><td>
-	<input class="node-settings" name="add_end"/>
-	</td></tr>
-</table>
+		
+		<tr><td>
+		 <input class="node-settings" name="search[2]"/>
+		</td><td>
+		<input class="node-settings" name="replace[2]"/>
+		</td></tr>
+		<tr><td>
+		 <input class="node-settings" name="search[3]"/>
+		</td><td>
+		<input class="node-settings" name="replace[3]"/>
+		</td></tr>
+		<tr><td>
+		 <input class="node-settings" name="search[4]"/>
+		</td><td>
+		<input class="node-settings" name="replace[4]"/>
+		</td></tr>
+		<tr><td>
+		 <input class="node-settings" name="search[5]"/>
+		</td><td>
+		<input class="node-settings" name="replace[5]"/>
+		</td></tr>
+	</table>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Start and end
+		</settingtitle>
+		<settinginstructions>
+			These strings are added to the start and the end of ALL strings. Handy for example for adding brackets.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Start</label>
+		<input class="node-settings" name="add_start"/>
+		<label>End</label>
+		<input class="node-settings" name="add_end"/>
+	</settingaction>
+</setting>
+
 

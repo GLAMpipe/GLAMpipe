@@ -1,11 +1,11 @@
 
 // outputs an array of metadata objects
 
-var uuid_value 		= context.doc[context.node.params.in_uuid_field];
-var update_value 	= context.doc[context.node.params.in_update_field];
-var language_value 	= context.doc[context.node.params.language_field];
-var original_value  = context.doc[context.node.params.in_original_value];
-var original_field 	= context.node.params.dspace_field; // field to be updated
+var uuid_value 		= context.doc[context.node.settings.in_uuid_field];
+var update_value 	= context.doc[context.node.settings.in_update_field];
+var language_value 	= context.doc[context.node.settings.dynamic_language_field];
+var original_value  = context.doc[context.node.settings.in_field];
+var original_field 	= context.node.params.in_field.replace(/_/g, "."); // field to be updated
 
 
 var update = [];

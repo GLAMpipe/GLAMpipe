@@ -1,0 +1,17 @@
+{
+    "nodeid": "export_web_dspace_policy",
+    "title": "DSpace 6: update bitstream policies",
+    "type": "export",
+    "subtype": "web",
+    "subsubtype": "dspace_policy",
+    "status": "usable",
+    "tags":["dspace"],
+    "description": "Export bitstream policies",
+
+    "scripts": {
+
+        "finish":"out.say('finish', context.success_count + ' items modified'); "
+    },
+    
+    "views": {}
+}

@@ -1,6 +1,6 @@
 {
     "nodeid": "process_field_compare",
-    "title": "Copy if",
+    "title": "Field: copy if",
     "type": "process",
     "subtype": "strings",
     "status": "usable",

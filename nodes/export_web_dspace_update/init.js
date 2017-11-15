@@ -1,8 +1,8 @@
 
 // check that required settings are set
-if(!context.node.params.in_update_field) {
+if(!context.node.settings.in_update_field) {
 	out.init_error = "You did not set field for new value!";
-} else if(!context.node.params.in_uuid_field) {
+} else if(!context.node.settings.in_uuid_field) {
 	out.init_error = "You did not set field for item UUID!";
 	
 } else {

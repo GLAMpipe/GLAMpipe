@@ -6,12 +6,14 @@ c.var = {};
 c.var.page = 1; 
 c.var.limit = 20; 
 c.var.total_count = 0;
+c.var.fields_str = ''; 
 
 /* list of returned fields */
 var fields = [
 	'buildings', 
 	'formats', 
 	'id', 
+	'fullRecord',
 	'images', 
 	'institutions', 
 	'nonPresenterAuthors', 
@@ -30,7 +32,7 @@ var fields = [
 	'physicalDescriptions'
 ];
  
-var fields_str = ''; 
+
 for (var i = 0; i< fields.length; i++) { 
    c.var.fields_str += '&field[]=' + fields[i]; 
 } 

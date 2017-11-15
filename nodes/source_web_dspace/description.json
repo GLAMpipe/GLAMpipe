@@ -2,17 +2,12 @@
     "nodeid": "source_web_dspace",
     "type": "source",
     "subtype": "web",
-    "title": "DSpace 6: import by collection(s)",
+    "title": "DSpace 6: query import",
     "status": "usable",
     "tags":["dspace"],
     "usage":"",
     "description": "Import metadata from DSpace.",
-    
-    "scripts": {
-        "hello": "out.say('news', 'You added a DSpace import node'); ",
-        "bye": "out.say('finish', 'Bye!'); ",
-        "finish":"out.say('finish', 'Fetched ' + context.vars.record_counter + ' records!'); "
-    },
+
     "views": {
         "default_keys": ["name", "dc_identifier_uri", "bitstream_original_name", "bitstream_original_file_url"]
     

@@ -14,7 +14,7 @@ function extract (val) {
        }
        
    // if not array, then assume string
-   } else {  
+   } else if(typeof val === "string") {  
 
 	   var regex = new RegExp(context.node.settings.regexp, "g");
 

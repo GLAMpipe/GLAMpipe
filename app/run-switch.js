@@ -1,11 +1,14 @@
-var mongojs		= require('mongojs');
+var mongojs		= require("mongojs");
 var async		= require("async");
-var colors		= require('ansicolors');
+var colors		= require("ansicolors");
 var path 		= require("path");
 var flatten 	= require("flat");
-const vm 		= require('vm');
-var validator 	= require('validator');
-var parser		= require('xml2json');
+const vm 		= require("vm");
+var validator 	= require("validator");
+var parser		= require("xml2json");
+var xpath		= require("xpath");
+var xmlParser	= require("xmldom").DOMParser;
+var xmlSerializer	= require("xmldom").XMLSerializer;
 
 var mongoquery	= require("../app/mongo-query.js");
 var nodeview 	= require("../app/nodeview.js");
@@ -103,7 +106,7 @@ exports.runNode = function (node, io) {
 						case "csv":
 							var csv = require("../app/node_runners/source-file-csv.js");
 							sandbox.pre_run.runInContext(sandbox); // ask url and user auth from node
-							var download = sandbox.out.urls[0]; // we have only one download
+							var download = sandbox.out.urls[0]; // we can have only one download
 							
 							web.downloadAndSave (node, download, false, function() {
 								var query = {}; 
@@ -122,14 +125,21 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","Plone login failed");
 								else {
 									console.log("WEB: Plone login ok");
-									asyncLoop.importLoop(node, sandbox, web.fetchJSON);
+									asyncLoop.importLoop(node, sandbox, web.requestJSON);
 								}
 							});
 						break;
 
 						default:
-							// query based APIs
-							sourceAPI.fetchData(node,sandbox, io);
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("progress","login failed");
+								else 
+									sandbox.out.say("progress","login OK");
+									
+								sourceAPI.fetchData(node,sandbox, io);
+								
+							});
 
 					}
 					
@@ -298,6 +308,18 @@ exports.runNode = function (node, io) {
 							});
 						break;
 
+						case "dspace_policy":
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","DSpace login failed");
+								else {
+									console.log("WEB: DSpace login ok");
+									asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
+								}
+							});
+						break;
+
+
 						case "dspace_addfile":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
@@ -447,9 +469,9 @@ exports.runNode = function (node, io) {
 									next();
 								});
 							} catch (e) {
-								console.log("ERROR:", e.stack);
+								console.log("ERROR:", e);
 								sandbox.finish.runInContext(sandbox);
-								sandbox.out.say("finish", "Error in node: 'run' script: " + e.name +" " + e.message);
+								sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
 							}
 							
 
@@ -518,7 +540,7 @@ exports.runNode = function (node, io) {
 
 						case "web":
 							var web = require("../app/node_runners/web.js");
-							asyncLoop.fieldLoop(node, sandbox, web.fetchJSON);
+							asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
 						break;
 
 						case "web_check":
@@ -599,6 +621,9 @@ exports.createSandbox = function (node, io) {
 			flat: flatten,
 			validator: validator,
 			parser: parser,
+			xpath: xpath,
+			xmlParser: xmlParser,
+			xmlSerializer: xmlSerializer,
 			config: global.config,
 			MP: MP
 		},

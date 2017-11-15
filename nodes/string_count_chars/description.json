@@ -1,6 +1,6 @@
 {
     "nodeid": "process_field_count_chars",
-    "title": "Count characters",
+    "title": "Field: count characters",
     "type": "process",
     "subtype": "strings",
     "status": "usable",

@@ -19,22 +19,23 @@
 <div id="export-data-dspace-addfile_status" class="status"></div>
 
 <div id="export-data-dspace-addfile_hidden" style="display:none">
-	
-	<label>Choose Dspace UUID field</label>
-	<select class="dynamic_field" name="in_uuid" />
 
-	<label>Choose file location field</label>
+	<label>File location</label>
 	<select class="dynamic_field" name="in_file" />
 
-	<label>Choose file title field</label>
+	<label>File title</label>
 	<select class="dynamic_field" name="in_file_title" />
+	
+	<label>Dspace UUID of item</label>
+	<select class="dynamic_field" name="in_uuid" />
 
 	<label>Give file path (if file field does not have full path)</label>
 	<input name="file_path" />
 
-	<label>Where to write result</label>
+	<label>Output fields</label>
 	<input name="out_field" value="dspace_upload_response" required />
 	<input name="out_link" value="dspace_upload_link" required />
+	<input name="out_uuid" value="dspace_upload_uuid" required />
 </div>
 
 <script>

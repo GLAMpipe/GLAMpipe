@@ -1,0 +1,22 @@
+{
+	"nodeid": "process_field_xml_xpath",
+	"title": "XML: XPath copy",
+	"type": "process",
+	"subtype": "strings",
+    "status": "usable",
+	"description": "Copy nodes from XML with XPath",
+	"scripts": {
+
+        "init":
+        [
+			"out.say('progress', 'Starting...');"
+		],
+		
+		"finish": "out.say('finish', 'Done!');"
+	},
+	
+	"views": {
+
+
+	}
+}

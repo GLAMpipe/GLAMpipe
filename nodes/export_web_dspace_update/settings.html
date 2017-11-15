@@ -1,15 +1,83 @@
 
-<h3 id="export-data-dspace-update_serverinfo">DSpace login for ...</h3>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace login
+		</settingtitle>
+		<settinginstructions>
+			DSpace login for server: <span id="export-data-dspace_serverinfo"></span>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
 
-<div class="box-noflex">
-	<label>username </label>
-	<input class="node-settings" type="text" name="username" id="username"/>
-	<label>password</label>
-	<input class="node-settings" type="password" name="password" id="password"/>
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Update value
+		</settingtitle>
+		<settinginstructions>
+			 <div id="export-data-dspace-update_targetinfo">New value of the field </div>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Value field</label>	
+		<select class="dynamic_field node-settings" name="in_update_field">
+			<option value="">choose</option>
+		</select>
+	</settingaction>
+</setting>
 
 
-<h3 id="export-data-dspace-update_targetinfo">Settings for updating "" field</h3>
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Language
+		</settingtitle>
+		<settinginstructions>
+			Optional language field
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Language field</label>	
+		<select class="dynamic_field node-settings" name="dynamic_language_field">
+			<option value="">choose</option>
+		</select>
+		
+		<label>Static language</label>
+		<input class="node-settings" name="static_language_field"></input>
+	</settingaction>
+</setting>
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Item ID
+		</settingtitle>
+		<settinginstructions>
+			UUID of the item 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>UUID field</label>	
+		<select class="dynamic_field node-settings" name="in_uuid_field">
+			<option value="">choose</option>
+		</select>
+	</settingaction>
+</setting>
 
-           
+<!--
+	<label>current value field (optional, updates only if new value differs from this)</label>
+	<input class="dynamic_field" name="in_original_value"/>
+-->
+

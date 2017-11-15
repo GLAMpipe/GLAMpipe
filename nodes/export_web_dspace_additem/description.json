@@ -1,6 +1,6 @@
 {
     "nodeid": "export_web_dspace_additem",
-    "title": "DSpace 6: create items",
+    "title": "DSpace 6: add items",
     "type": "export",
     "subtype": "web",
     "subsubtype": "dspace",

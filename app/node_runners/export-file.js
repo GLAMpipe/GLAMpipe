@@ -13,6 +13,13 @@ var exports = module.exports = {};
 
 exports.collectionToFile = function (node, sandbox, io) {
 
+	var start = "";
+	var end = "";
+	if(sandbox.context.node.settings.start)
+		start = sandbox.context.node.settings.start;
+	if(sandbox.context.node.settings.end)
+		end = sandbox.context.node.settings.end;
+
 	// make sure that we have an export filename
 	if(node.params.file == "") {
 		console.log("ERROR: filename missing!");
@@ -22,7 +29,7 @@ exports.collectionToFile = function (node, sandbox, io) {
 
 	// we stream directly to file
 	var fs = require('fs');
-	var filePath = path.join(node.dir, node.params.file);
+	var filePath = path.join(node.dir, node.params.required_file);
 	var wstream = fs.createWriteStream(filePath);
 
 	// find everything
@@ -30,8 +37,8 @@ exports.collectionToFile = function (node, sandbox, io) {
 		
 		// tell node how many records was found
 		sandbox.context.doc_count = doc.length;
-		nodescript.runNodeScriptInContext("init", node, sandbox, io);
-		wstream.write(sandbox.out.value);
+		//nodescript.runNodeScriptInContext("init", node, sandbox, io);
+		wstream.write(start + "\n");
 
 		async.eachSeries(doc, function iterator(doc, next) {
 			sandbox.context.doc = doc;
@@ -45,6 +52,7 @@ exports.collectionToFile = function (node, sandbox, io) {
 		}, function done() {
 			nodescript.runNodeScriptInContext("finish", node, sandbox, io);
 			wstream.write(sandbox.out.value);
+			wstream.write(end);
 			wstream.end();
 
 			//mongoquery.markNodeAsExecuted(node);

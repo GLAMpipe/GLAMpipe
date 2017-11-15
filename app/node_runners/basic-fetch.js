@@ -1,10 +1,10 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
-var path        = require('path');
-var mongoquery 	= require("../../app/mongo-query.js");
-var collection = require("../../app/collection.js");
-var nodescript = require("../../app/run-node-script.js");
-var schema 		= require("../../app/schema.js");
+var path		= require('path');
+var mongoquery	= require("../../app/mongo-query.js");
+var collection	= require("../../app/collection.js");
+var nodescript	= require("../../app/run-node-script.js");
+var schema		= require("../../app/schema.js");
 const MP 		= require("../../config/const.js");
 
 
@@ -19,12 +19,30 @@ exports.fetchData = function (node, sandbox, io, cb) {
 	// remove previous data inserted by node and start query loop
 	var query = {}; 
 	query[MP.source] = node._id;
-	mongoquery.empty(node.collection, query, function() {
-		// init will give us an initial url
-		nodescript.runNodeScriptInContext("init", node, sandbox, io);
-		console.log("URL:", sandbox.out.url)
-		requestLoop(node, sandbox, io, cb);
-	});
+	
+	// In update mode we compare some field of the existing records to same field of imported records.
+	// implementation is not optimal but works...
+	if(node.settings.mode === "update") {
+		if(node.settings.update_key) {
+			console.log("WEB: update mode")
+			mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
+				sandbox.context.records = records;
+				nodescript.runNodeScriptInContext("init", node, sandbox, io);
+				console.log("URL:", sandbox.out.url)
+				requestLoop(node, sandbox, io, cb);
+			})
+		} else {
+			sandbox.out.say("error", "You must set update field in update mode");
+			return;
+		}
+	} else {
+		mongoquery.empty(node.collection, query, function() {
+			// init will give us an initial url
+			nodescript.runNodeScriptInContext("init", node, sandbox, io);
+			console.log("URL:", sandbox.out.url)
+			requestLoop(node, sandbox, io, cb);
+		});
+	}
 }
 
 
@@ -80,7 +98,14 @@ function requestLoop(node, sandbox, io, cb) {
 			console.log(err);
 			return;
 		}
-			
+
+		// check if user asked for termination of the node run
+		if(!node.req.query.force && !global.register[node.req.originalUrl]) {
+			console.log("REGISTER: user terminated node run...");
+			sandbox.finish.runInContext(sandbox);
+			return;
+		}
+
 		// if node provides new url, then continue loop
 		if (sandbox.out.url != "") {
 			console.log("calling requestLoop from requestLoop");
@@ -98,7 +123,7 @@ function requestLoop(node, sandbox, io, cb) {
 )};
 
 function callAPI (url, callback) {
-	var request = require("request");
+	var request = require("requestretry");
 
 	if (typeof url === "undefined" || url == "")
 		return callback("URL not set", null, null);
@@ -113,7 +138,10 @@ function callAPI (url, callback) {
 		url: url,
 		method: 'GET',
 		headers: headers,
-		json: true
+		json: true,
+		jar: true,
+		maxAttempts: 5,
+		retryDelay: 1000
 	};
 
 	request(options, function (error, response, body) {

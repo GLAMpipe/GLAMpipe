@@ -1,14 +1,26 @@
 
+var search = context.node.settings.search;
+var exact = context.node.settings.exact;
+var case_sensitive = context.node.settings.case_sensitive;
 
-out.value = []; // we output array
 var match = false;
+out.value = []; // we output array
+
+var options = "";
+
+if(exact === "true")
+	search = "^" + search + "$";
+
+if(case_sensitive === "false")
+	options = "i";
 
 if(context.doc[context.node.params.in_field]) {
 	
 	// node input
     var value = context.doc[context.node.params.in_field]; 
     
-	var reg = new RegExp(context.node.settings.search); 
+
+	var reg = new RegExp(search, options); 
 	
 	if(value !== null) {
 		

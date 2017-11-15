@@ -3,7 +3,7 @@
     "type": "process",
     "subtype": "documents",
     "subsubtype": "select_delete",
-    "title": "Select&delete",
+    "title": "Document: select&delete",
     "status": "rubbish",
     "tags":["generic"],
     "usage":"",

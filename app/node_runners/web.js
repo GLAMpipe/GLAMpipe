@@ -43,24 +43,29 @@ exports.postJSON = function (doc, sandbox, next) {
 
 
 // get JSON response via GET or POST
-exports.fetchJSON = function (options, sandbox, next) {
-//return next()
+exports.requestJSON = function (options, sandbox, next) {
 
 	if(!options.url || sandbox.context.skip) {
+		sandbox.context.error = "no URL";
 		return next("skipping...");
 	}
-
-	//options.url =  "https://tools.wmflabs.org/openrefine-wikidata/en/api?query={%22query%22:%22Jyv%C3%A4skyl%C3%A4n%20yliopisto%22}";
-	console.log("REQUEST:", options.url);
+	
+	console.log("REQUEST:", options.method + " -> " + options.url);
 	//console.log("HEADERS:", options.headers);
+	
+	if(options.headers) 
+		options.headers.Accept = "application/json";
+	else
+		options.headers = {Accept: "application/json"};
 
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
 		console.log("RESPONSE: " + response.statusCode)
-		console.log("BODY:", body);
+		//console.log("BODY:", body);
 		if (error) {
 			console.log(error);
+			sandbox.context.error = error;
 			next();
 		} else if (response.statusCode == 200) {
 			try {
@@ -74,9 +79,13 @@ exports.fetchJSON = function (options, sandbox, next) {
 			next();
 		}
 	}
-
-	if(sandbox.out.method === "post")
+	
+	if(options.method === "DELETE") 
+		request.delete(options, responseCallback);
+	else if(options.method === "POST")
 		request.post(options, responseCallback);
+	else if(options.method === "PUT")
+		request.put(options, responseCallback);
 	else
 		request.get(options, responseCallback); // default method is GET
 }
@@ -197,7 +206,7 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 		if (err) {
 			return console.error('upload failed:', err);
 		} else if (response.statusCode === 200) {
-			console.log(response)
+			//console.log(response)
 			console.log('WEB: Upload successful!  Server responded with:', response.statusCode);
 			sandbox.context.data = JSON.parse(body);
 			next();
@@ -241,7 +250,7 @@ exports.downloadFile = function (download, sandbox, next ) {
 	sandbox.context.data = download;
 
 	// dry run
-	if(node.settings.dry_run) {
+	if(node.settings.dry_run === "true") {
 		checkUrl(download);
 		next();
 
@@ -286,7 +295,7 @@ exports.downloadAndSave = function (node, download, addext, next) {
 		url:download.url,
 		followRedirect:true
 	}
-console.log(options);
+	console.log(download)
 	// use basic authentication if node did set "auth"
 	if(download.auth)
 		options.auth = download.auth;
@@ -370,24 +379,30 @@ exports.cookieLogin = function (node, sandbox, cb) {
 		cb(e.message);
 		return;
 	}
+	
+	// we try to login only if there is "login" object set
+	if(sandbox.out.login) {
 
-	setUserAgent(sandbox.out.login);
-	console.log("WEB: login url:" , sandbox.out.login.url);
+		setUserAgent(sandbox.out.login);
+		console.log("WEB: login url:" , sandbox.out.login.url);
 
-	// send login information
-	request.post(sandbox.out.login, function(error, response, body) {
-		//console.log(response)
-		console.log(body)
-		if(error)
-			cb("Login error")
-		else if(response.statusCode === 200) {
-			sandbox.out.say("progress", "Login successful");
-			sandbox.context.login = body; // save result so this can be used also for token login
-			cb(null);
-		} else
-			cb("Authentication failed");
+		// send login information
+		request.post(sandbox.out.login, function(error, response, body) {
+			//console.log(response)
+			console.log(body)
+			if(error)
+				cb("Login error")
+			else if(response.statusCode === 200) {
+				sandbox.out.say("progress", "Login successful");
+				sandbox.context.login = body; // save result so this can be used also for token login
+				cb(null);
+			} else
+				cb("Authentication failed");
 
-	});
+		});
+	} else {
+		cb("no login")
+	}
 
 }
 

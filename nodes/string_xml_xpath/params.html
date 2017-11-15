@@ -1,0 +1,17 @@
+
+
+
+<label>Field</label>
+<select id="process-field-xml-xpath_in" class="dynamic_field" name="in_field">
+	<option value="">choose</option>
+</select>
+
+<label>Output field</label> 
+<input id="process-field-xml-xpath_out" name="out_field" value="_xpath"/>
+
+
+<script>
+	$("#process-field-xml-xpath_in").change(function() {
+		$("#process-field-xml-xpath_out").val($(this).val() + "_xpath");
+	})
+</script>

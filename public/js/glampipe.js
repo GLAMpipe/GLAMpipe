@@ -50,7 +50,7 @@ var glamPipe = function () {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
+			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -63,18 +63,15 @@ var glamPipe = function () {
 	this.getProjectsByUser = function (div, user) {
 		
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><tr><th>action</th><th>title</th><th>imports from</th><th>owner</th><th>exports to</th></tr></thead>";
+		html = "<table><thead><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			self.projects = data.data;
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
 				html += "<tr>";
-				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
 				
-				// delete link only for owners
-				if(projects[i].owner == self.user)
-					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
+
 				
 				html += "</td>";
 
@@ -112,15 +109,20 @@ var glamPipe = function () {
 				}
 				html += "</td>";
 				
+				// actions
+				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
+				// delete link only for owners
+				if(projects[i].owner == self.user)
+					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
+				html += "</td></tr>";
 				
 			}
-			$(div).append("</tr>" + html + "</table>");
+			$(div).append(html + "</table>");
 		})
 	}
 
 	this.genProjectRow = function(project) {
 			var html = "<tr>";
-			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";
 			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
 
 			html += "<td>";
@@ -154,6 +156,10 @@ var glamPipe = function () {
 				})
 			}
 			html += "</td>";
+			
+			// actions
+			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";
+
 			return html;
 			
 	}
@@ -521,7 +527,6 @@ var glamPipe = function () {
 
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
-		console.log(obj.text())
 		//obj.text("cancel");
 		var types = [];
 		
@@ -582,10 +587,10 @@ var glamPipe = function () {
 		if(self.currentCollection == null) 
 			alert("parent collection is missing");
 		else {data.collection = self.currentCollection.source.collection;
-			console.log("currentCollection on node create:", self.currentCollection.source.collection);
+			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
 			
 			$.put(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
-				console.log("node create:", returnedData);
+				//console.log("node create:", returnedData);
 				if(returnedData.error) {
 					alert(returnedData.error);
 					return;
@@ -609,7 +614,7 @@ var glamPipe = function () {
 	// check if any output field (starts with "out_") exists 
 	this.outputExists = function(params) {
 		for(var param in params) {
-			console.log(param);
+			//console.log(param);
 			if(/^out_/.test(param) && self.currentCollection.fields.sorted.includes(params[param])) {
 				alert("'" + params[param] + "' output field exists! Please rename field." );
 				return true;
@@ -654,7 +659,7 @@ var glamPipe = function () {
 
 	this.renderBreadCrumb = function () {
 		if(self.currentCollection)
-			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.title);
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.params.title);
 		else
 			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > ");
 	}
@@ -735,8 +740,8 @@ var glamPipe = function () {
 		console.log(self.collections.length);
 		for (var i = 0; i < self.collections.length; i++) {
 			var title = "no title";
-			if(self.collections[i].source.title !== "")
-				title = self.collections[i].source.title;
+			if(self.collections[i].source.params.title !== "")
+				title = self.collections[i].source.params.title;
 			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
 		}
 		//$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
@@ -930,7 +935,7 @@ var glamPipe = function () {
                 $( this ).dialog( "close" );
                 var params = {node:node_id, project:self.currentProject};
                 $.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
-                    console.log('node deleted');
+                    //console.log('node deleted');
                     if(retData.error)
                         alert(retData.error);
                     else {

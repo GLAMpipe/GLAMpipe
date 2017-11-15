@@ -1,28 +1,21 @@
 {
 	"nodeid": "process_field_extract",
-	"title": "Regexp extract",
+	"title": "Field: regexp extract",
 	"type": "process",
 	"subtype": "strings",
-    "status": "usable",
+	"status": "usable",
 	"description": "Extract string based on regular expression",
 	"scripts": {
-		"hello":
-		[ 
-			"out.say('news', 'You added a Extract node'); ",
-			"/* set output field */",
-			"context.node.out_field = context.node.params.out_field; "
-		],
-		
-        "bye": "out.say('news', 'Deleted extract node. Bye!'); ",
-        
-        "init":
-        [
+
+
+		"init":
+		[
 			"out.say('progress', 'Starting Extracting...');"
 		],
-		
+
 		"finish": "out.say('finish', 'Extract done!');"
 	},
-	
+
 	"views": {
 
 

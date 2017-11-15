@@ -1,4 +1,10 @@
 
+// original value
+var value_1 = context.doc[context.node.params.in_field]; 
+
+var trim = false;
+if(context.node.settings.trim === "true")
+	trim = true;
 
 var static_yes = null;
 var static_no = null;
@@ -12,13 +18,12 @@ if(context.node.settings.static_yes)
 	static_yes = context.node.settings.static_yes;
 if(context.node.settings.static_no)
 	static_no = context.node.settings.static_no
+	
 // dynamic overrides
 if(context.node.settings.dynamic_yes)
 	dynamic_yes = context.doc[context.node.settings.dynamic_yes];
 if(context.node.settings.dynamic_no)
 	dynamic_no = context.doc[context.node.settings.dynamic_no]
-
-var value_1 = context.doc[context.node.params.in_field]; 
 
 // check if users wants to compare to dynamic or string
 if(context.node.settings.comp_dynamic)
@@ -61,6 +66,14 @@ function compare (value_1, value_2) {
 }
 
 function match(val1, val2, index) {
+	
+	if(trim) {
+		if(typeof val1 === "string")
+			val1 = val1.trim();
+		if(typeof val2 === "string")
+			val2 = val2.trim();
+	}
+	
 	// if other field is empty(i.e. no match), and user has set reverse match for empties, then we copy other value to it
 	if(context.node.settings.mode === "empty-match") {
 		if(!val1)

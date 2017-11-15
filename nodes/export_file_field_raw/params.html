@@ -1,0 +1,17 @@
+
+<label>Field</label>
+<select name="in_field" class="dynamic_field" id="export-file-field-raw_field">
+	<option value="">choose</option>
+</select>
+
+<label>Output file</label>
+<input name="required_file" value="exported_field.txt" id="export-file-field-raw_output" />
+
+
+<script>
+
+$("#export-file-field-raw_field").change(function() {
+	$("#export-file-field-raw_output").val("export_" + $("#export-file-field-raw_field").val() + ".txt")
+})
+
+</script>

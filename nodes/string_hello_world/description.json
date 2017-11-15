@@ -1,20 +1,16 @@
 {
 	"nodeid": "process_field_hello_world",
-	"title": "Hello world",
+	"title": "Field: Hello world",
 	"type": "process",
 	"subtype": "strings",
-	"description": "My first node",
+	"description": "Simple example node",
 	"status": "works",
 	"scripts": {
-	
-		"hello": "out.say('news', 'You added a HELLO WORLD node'); ",
-		
-        "bye": "out.say('news', 'Deleted HELLO WORLD node. Bye!'); ",
-        
-        "init": "out.say('progress', 'Starting hello...'); "
-			
+
+		"init": "out.say('progress', 'Starting hello...'); "
+
 	},
-	
+
 	"views": {
 
 	}
