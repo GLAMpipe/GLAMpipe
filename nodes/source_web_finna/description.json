@@ -12,6 +12,7 @@
     },
     
     "views": {
+		"params":"",
         "default_keys": ["title", "year", "record_url", "thumbnail_html"]
     }
 }

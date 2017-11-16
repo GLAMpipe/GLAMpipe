@@ -376,9 +376,9 @@ var dataTable = function (node) {
 				if(typeof data == "string" && data.match("^AAAA_error"))
 					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
 				else if(index != null)
-					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data) + "</div>";
+					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data, key) + "</div>";
 				else 
-					html += "<div class='"+className+"'>" + self.nl2br(data) + "</div>";
+					html += "<div class='"+className+"'>" + self.nl2br(data, key) + "</div>";
 			}
 
 		// render objects
@@ -944,13 +944,15 @@ var dataTable = function (node) {
 
 
 
-	this.nl2br = function (str, is_xhtml) {   
-		str = str.replace(/</g, "&lt;"); 
-		str = str.replace(/>/g, "&gt;"); 
+	this.nl2br = function (str, keyname) {  
+		if(keyname !== "thumbnail_html") { 
+			str = str.replace(/</g, "&lt;"); 
+			str = str.replace(/>/g, "&gt;"); 
+		}
 		if(str.length > 1000)
 			str = str.substring(0,1000) + "...<br><a class='expand' href='#'>show (not implemented)</a>\n\n";
-		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';   
-		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+		var breakTag = "<br />";  
+		return (str + "").replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}
 
 }
