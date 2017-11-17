@@ -227,7 +227,7 @@ function refjyx (config) {
 	this.renderLinks = function(link, col) {
 		
 		var domain = "";
-		if(col.start) domain= col.domain;
+		if(col.domain) domain = col.domain;
 			
 		if(Array.isArray(link)) {
 			var arr = [];
