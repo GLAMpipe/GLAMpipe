@@ -1,0 +1,19 @@
+
+stack: artturimatias/glampipe
+version: 0.1
+descricption: GLAMpipe for Kontena
+
+services:
+  glampipe:
+    image: artturimatias/glampipe
+    links:
+     - mongo
+    ports:
+     - 80:3000
+    command: node glampipe.js
+    environment:
+     - DOCKER=1
+
+  mongo:
+    image: mongo:3.3.10
+
