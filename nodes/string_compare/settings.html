@@ -1,12 +1,35 @@
 
 
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Match mode
+		</settingtitle>
+		<settinginstructions>
+			<strong>Normal match</strong> means that if there is a match, copy selected value to output field.<br>
+			<strong>Copy non-empty</strong> means that if one of the match fields is empty, then the non-empty values is copied to output.
+			This useful when you want to make sure that there is always a value in ouput.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Match mode</label>
+		<select class="node-settings" name="mode">
+			<option value="empty-no-match">use normal match</option>
+			<option value="empty-match">copy non-empty</option>
+		</select>
+	</settingaction>
+</setting>
+
+
 <setting>
 	<settinginfo>
 		<settingtitle>
 			Compare 
 		</settingtitle>
 		<settinginstructions>
-
+		Choose a comparasion field.
 		</settinginstructions>
 	</settinginfo>
 	
@@ -74,27 +97,6 @@
 
 
 
-
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Match mode
-		</settingtitle>
-		<settinginstructions>
-			Normal match means that if there is a match, copy selected value to output field.<br>
-			Emtpy match means that if one of the match fields is empty, then it is considered as a match and select value is copied to output field. 
-			This useful when you want to make sure that there is always a value in copy field even if another field was empty.
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>Match mode</label>
-		<select class="node-settings" name="mode">
-			<option value="empty-no-match">use normal match</option>
-			<option value="empty-match">empty match</option>
-		</select>
-	</settingaction>
-</setting>
 
 
 <setting>

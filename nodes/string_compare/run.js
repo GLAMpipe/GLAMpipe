@@ -41,12 +41,11 @@ if(parseInt(context.count) % 1000 == 0)
 function compare (value_1, value_2) { 
 	
 	var result = []; 
-
 	// both are arrays
 	if(Array.isArray(value_1) && Array.isArray(value_2)) {
 		for (var i = 0; i < value_1.length; i++) { 
 			// try to find pair for other value
-			if(value_2[i]) {
+			if(typeof value_2[i] !== "undefined") {
 				result.push(match(value_1[i],value_2[i], i))
 			}
 		}
@@ -61,11 +60,11 @@ function compare (value_1, value_2) {
 	} else  if(typeof value_1 && typeof value_2 === "string") {
 		result = match(value_1, value_2);
 	}
-	
 	return result;
 }
 
 function match(val1, val2, index) {
+	
 	
 	if(trim) {
 		if(typeof val1 === "string")
@@ -77,9 +76,9 @@ function match(val1, val2, index) {
 	// if other field is empty(i.e. no match), and user has set reverse match for empties, then we copy other value to it
 	if(context.node.settings.mode === "empty-match") {
 		if(!val1)
-			val1 = val2;
+			return val2;
 		if(!val2)
-			val2 = val1;
+			return val1;
 	}
 		
 	if(val1 == val2) {
