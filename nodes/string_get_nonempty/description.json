@@ -1,0 +1,16 @@
+{
+    "nodeid": "process_field_get_nonempty",
+    "title": "Multiple fields: combine values",
+    "type": "process",
+    "subtype": "strings",
+    "status": "usable",
+    "description": "Get non-empty value or values from fields." ,
+    "scripts": {
+    
+        "finish": "out.say('finish', 'Done!');"
+    },
+    
+    "views": {
+
+    }
+}

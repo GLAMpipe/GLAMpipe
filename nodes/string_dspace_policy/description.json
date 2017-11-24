@@ -3,7 +3,7 @@
 	"title": "DSpace 6: Edit policy objects ",
 	"type": "process",
 	"subtype": "strings",
-    "status": "usable",
+    "status": "broken",
 	"description": "Edit bitstream policy objects.",
 	"scripts": {
 

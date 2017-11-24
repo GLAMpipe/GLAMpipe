@@ -120,14 +120,17 @@ function processValue (value) {
 
 function cleanFieldName (field) {
 
-	// clean up key names (remove -. and convert spaces to underscores)
+	// clean up key names (remove -.[] and convert spaces to underscores)
 	prop_trimmed = field.trim().toLowerCase();
-	prop_clean = prop_trimmed.replace(/[\s.]/g, '_');
+	prop_clean = prop_trimmed.replace(/[\[\]\s.]/g, '_');
 	
+	return prop_clean;
+	/*
 	if(context.node.settings.extract_language) {
 		prop_clean = prop_clean.replace(/\[(.|..|)\]$/, ''); // remove language code from field name ("[en]")
 		return  prop_clean.replace(/_..$/, ''); // remove language code from field name ("_en")
 	} else
 		return prop_clean;
+	*/
 
 }

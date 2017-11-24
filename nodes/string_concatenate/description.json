@@ -1,6 +1,6 @@
 {
 	"nodeid": "process_field_combine",
-	"title": "Field: concatenate fields",
+	"title": "Multiple fields: concatenate fields",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",

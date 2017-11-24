@@ -109,8 +109,10 @@ exports.edit = function (req, callback) {
 
 	var keys = [];
 	for(var key in req.body) {
-		if(key != "doc_id")
+		if(key != "doc_id") {
 			keys.push(key);
+			req.body.doc_id
+		}
 	}
 	
 	var setter = {};
@@ -120,6 +122,8 @@ exports.edit = function (req, callback) {
 	// mark edited fields as manual edits
 	if(req.query.manual)
 		setter["$addToSet"] = {"_mp_manual":{$each:keys}};
+	
+	console.log(setter)
 	
 	mongoquery.update(collection_id, {_id:mongojs.ObjectId(req.params.doc)}, setter, function(err, result) {
 		if(err) {

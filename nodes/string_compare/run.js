@@ -33,7 +33,7 @@ else
  
 out.value = compare(value_1, value_2);  
 
-if(parseInt(context.count) % 1000 == 0) 
+if(parseInt(context.count) % 100 == 0) 
 	out.say('progress', context.node.type.toUpperCase() + ': processed ' + context.count + '/' + context.doc_count);
 
 

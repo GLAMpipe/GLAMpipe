@@ -1,6 +1,6 @@
 {
 	"nodeid": "process_string_array2string",
-	"title": "Field: join rows",
+	"title": "Field: join rows of field",
 	"type": "process",
 	"subtype": "strings",
     "status": "usable",

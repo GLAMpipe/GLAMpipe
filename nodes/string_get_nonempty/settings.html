@@ -1,0 +1,77 @@
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Match mode
+		</settingtitle>
+		<settinginstructions>
+			<strong>Combine all non-empty values</strong> outputs all non-empty values of input fields to one array.<br>
+			<strong>Combine all values</strong> outputs all values of input fields to one array.<br>
+			<strong>Get first non-empty value</strong> outputs the first non-empty value as a string.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>Match mode</label>
+		<select class="node-settings" name="mode">
+			<option value="non-empty">combine all non-empty values</option>
+			<option value="all">combine all values</option>
+			<option value="first-non-empty">get first non-empty value</option>
+		</select>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Fields
+		</settingtitle>
+		<settinginstructions>
+		Choose fields.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+	<label>field 1</label>
+	<select class="node-settings dynamic_field" name="in_field_1" >
+		<option value="">choose</option>
+	</select>
+	
+	<select class="node-settings dynamic_field" name="in_field_2" >
+		<option value="">choose</option>
+	</select>
+	
+	<select class="node-settings dynamic_field" name="in_field_3" >
+		<option value="">choose</option>
+	</select>
+	
+	<select class="node-settings dynamic_field" name="in_field_4" >
+		<option value="">choose</option>
+	</select>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Output
+		</settingtitle>
+		<settinginstructions>
+			If you want output as a single string, then check this and define separator character or characters.
+
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>as string</label>
+		<input type="checkbox" class="node-settings" name="as_string"/>
+		
+		<label>separator</label>
+		<input class="node-settings" name="separator" />
+	</settingaction>
+</setting>
+
