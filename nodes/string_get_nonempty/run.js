@@ -22,6 +22,10 @@ join(input_4);
 if(mode === "first-non-empty" && result.length >= 1)
 	result = [result[0]];
 
+// check if default value is needed && defined
+if(!result.some(non_empty))
+	result = [context.node.settings.default]
+
 // output can be string or array
 if(context.node.settings.as_string === "true") {
 	out.value = result.join(context.node.settings.separator);
@@ -62,4 +66,7 @@ function non_empty(input) {
 		return false;
 }
 
+function empty_array(arr) {
+	
+}
 

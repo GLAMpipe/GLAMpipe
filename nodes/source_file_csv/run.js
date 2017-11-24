@@ -8,7 +8,7 @@ var record = context.data;
 var new_record = {};
 out.value = new_record;
 
-if(!(context.vars.count % 1000)) 
+if(!(context.vars.count % 100)) 
 	out.say("progress", context.vars.count + " imported");
 	
 context.vars.count++;
