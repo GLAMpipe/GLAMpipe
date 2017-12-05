@@ -50,7 +50,7 @@ var glamPipe = function () {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></tr></thead>";
+			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owners</th><th>exports to</th><th>action</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -60,10 +60,46 @@ var glamPipe = function () {
 		})
 	}
 
+
+	this.renderUsers = function(data_id, div) {
+		var html = "";
+		$.getJSON(self.baseAPI + "/users", function(data) {
+			if(Array.isArray(data)) {
+				html += "<select id='add_owner' data-id='"+data_id+"'><option>add owner</option>";
+				for(var i=0; i<data.length; i++) {
+					html += "<option>" + data[i].local.email + "</option>"
+				}
+				html += "</select>";
+			}
+			$(div).replaceWith(html);
+		})
+	}
+
+	this.renderProjectSettings = function(project) {
+		var html = "<div id='project_settings'><h2>"+project.title+"</h2>";
+
+		// owners
+		html += "<h3>owners</h3>";
+		if(Array.isArray(project.owner)) {
+			html += "<ul id='owners'>";
+			project.owner.forEach(function(owner) {
+				if(owner != self.user)
+					html += "<li>" + owner+ "<span> <a data-id='" + project._id + "' data-owner='"+owner+"' class='delete remove_owner' title='remove owner'>X</a></span></li>";
+				else
+					html += "<li>" + owner+ "</li>";
+			})
+			html += "</ul>";
+		} else {
+			html += project.owner;
+		}
+		html += "<div id='users'>users</div>";
+		return html + "</div>";
+	}
+
 	this.getProjectsByUser = function (div, user) {
 		
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><th>title</th><th>imports from</th><th>owner</th><th>exports to</th><th>action</th></thead>";
+		html = "<table><thead><th>title</th><th>imports from</th><th>owners</th><th>exports to</th><th>action</th></thead>";
 		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) { 
 			$(div).empty();
 			self.projects = data.data;
@@ -87,17 +123,18 @@ var glamPipe = function () {
 				}
 				html += "</td>";
 				
-				html += "<td><div>" + projects[i].owner + "</div></td>";
+				//html += "<td><div>" + projects[i].owner + "</div></td>";
 				
-				//html += "<td><div>";
-				//if(projects[i].nodes) {
+				html += "<td><div>";
+				if(Array.isArray(projects[i].owner)) {
 					
-					//projects[i].nodes.forEach(function(node) {
-						//if(node.type !== "collection")
-							//html += "<li>" + node.nodeid + "</li>";
-					//})
-				//}
-				//html += "</div></td>";
+					projects[i].owner.forEach(function(owner) {
+							html += "<li>" + owner+ "</li>";
+					})
+				} else {
+					html += projects[i].owner;
+				}
+				html += "</div></td>";
 				
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -111,14 +148,29 @@ var glamPipe = function () {
 				
 				// actions
 				html += "<td><a data-id='" + projects[i]._id + "' class='ibutton copy'>copy</a>";
+				
 				// delete link only for owners
-				if(projects[i].owner == self.user)
+				if(self.isOwner(projects[i].owner)) {
 					html += " | <a data-id='" + projects[i]._id + "' class='delete'>delete</a>";
-				html += "</td></tr>";
+					html += "| <span data-id='" + projects[i]._id + "'class='wikiglyph wikiglyph-gear icon settings' title='settings'></span>";
+				}
+				html += "</td>";
+				html += "</tr>";
 				
 			}
 			$(div).append(html + "</table>");
 		})
+	}
+
+	this.isOwner = function(owner) {
+		if(Array.isArray(owner))
+			if(owner.includes(self.user))
+				return true
+		else
+			if(owner == self.user)
+				return true;
+				
+		return false;
 	}
 
 	this.genProjectRow = function(project) {
@@ -165,14 +217,16 @@ var glamPipe = function () {
 	}
 
 	this.getUsers = function (div) {
-		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) { 
+		//$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) { 
+		$.getJSON(self.baseAPI + "/users", function(data) { 
 			$(div).empty();
-			var data = datal.count;
+			
+			//var data = datal.count;
 			for(var i = 0; i< data.length; i++) {
-				var listOption = "<div data-id=" + data[i]._id + " class='' aria-hidden='true'></div>";
-				listOption += "<a data-id='" + data[i]._id + "' href='#'>\n";
+				var listOption = "<div data-id=" + data[i].local.email + " class='' aria-hidden='true'></div>";
+				listOption += "<a data-id='" + data[i].local.email + "' href='#'>\n";
 				listOption += "<div class='listoption'>\n";
-				listOption += "<p class='listtitle'>" + data[i]._id + " <span>("+data[i].count+")</span></p>\n";
+				listOption += "<p class='listtitle'>" + data[i].local.email + " </p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
 				listOption += "</div></a>\n";
 				$(div).append(listOption);
@@ -293,6 +347,22 @@ var glamPipe = function () {
 			} else {
 				alert(data.error);
 			}
+		})
+	}
+
+	this.addOwner = function (project_id, owner, cb) {
+
+		var data = {"owner": owner};
+		$.put(self.baseAPI + "/projects/" + project_id + "/owners", data, function(data) {
+			cb();
+		})
+	}
+
+	this.removeOwner = function (project_id, owner, cb) {
+
+		var data = {"owner": owner};
+		$.delete(self.baseAPI + "/projects/" + project_id + "/owners", data, function(data) {
+			cb();
 		})
 	}
 

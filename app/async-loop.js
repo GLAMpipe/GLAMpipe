@@ -428,7 +428,7 @@ exports.mongoLoop = function (node, sandbox, onDoc) {
 	});
 }
 
-// source loop creates a new collection. Clears collection in the beginning
+// source loop copies documents from source collection to target collection. Clears collection in the beginning
 exports.sourceLoop = function (node, sandbox, onDoc) {
 
 	// find everything from source collection

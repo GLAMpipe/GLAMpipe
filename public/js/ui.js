@@ -81,13 +81,40 @@ $( document ).ready(function() {
 	})
 
 	// remove project
-	$(document).on('click', ".delete", function(e) {
+	$(document).on('click', "table .delete", function(e) {
 		gp.removeProject(e);
 		e.stopPropagation();
 		e.preventDefault();
 	})
 
+	// add project owner
+	$(document).on('change', "#add_owner", function(e) {
+		var a = $(this).val();
+		gp.addOwner($(this).data("id"), $(this).val(), function() {
+			$("#owners").append("<li>" + a + "</li>");
+			//gp.renderUsers(project._id, "#users");
+		});
+	})
+
+	// removeproject owner
+	$(document).on('click', ".remove_owner", function(e) {
+		var x = $(this);
+		gp.removeOwner($(this).data("id"), $(this).data("owner"), function() {
+			x.parent().parent().remove();
+		});
+	})
+
+	// open project settings
+	$(document).on('click', ".settings", function(e) {
+		var d = $(e.target);
+		var project = gp.getProject(d.data("id"));
+		var settings = gp.renderProjectSettings(project);
+		popUp(settings, "Project Settings");
+		gp.renderUsers(project._id, "#users");
+	})
+
 });
+
 
 function login(gp) {
 	var user = $("#username").val()
@@ -105,4 +132,23 @@ function addProject(gp) {
 		var title = $(".create_project #title").val().trim();
 		gp.addProject(title);
 	}
+}
+
+
+
+function popUp(div, title) {
+		$(div).dialog({
+			title:title,
+			modal:true,
+			resizable: false,
+			width:500,
+			dialogClass: "no-close",
+			buttons: {
+				"Done": function() {
+				  $( this ).empty();
+				  $( this ).dialog( "close" );
+				  location.reload();
+				}
+			}
+		});	
 }

@@ -65,6 +65,7 @@ out.console.log(mapped.score)
 out.console.log(parseFloat(context.node.settings.fuzzy_level))
 out.console.log(mapped.score >= parseFloat(context.node.settings.fuzzy_level));
 out.console.log(map.value)
+
 	if(mapped.score >= parseFloat(context.node.settings.fuzzy_level)) {
 		return mapped;
 	} 

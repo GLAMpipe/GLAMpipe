@@ -8,7 +8,7 @@ mapping();
 // we fetch target properties and then we fetch first document from GLAMpipe for mapping
 function mapping() {
 
-	var url = g_apipath + "/collections/"+node.collection+"/fields";
+	var url = g_apipath + "/collections/"+node.params.source_collection+"/fields";
 
 	$.getJSON(url, function (fields) {
 
@@ -24,7 +24,8 @@ function mapping() {
 		})
 		table += "</table>";
 		
-		$("#export-file-csv_fields").html(table);
+		$("#source-collection_fields").html(table);
 
 	})
 }
+

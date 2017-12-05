@@ -22,7 +22,7 @@ var row = [];
 
 out.console.log("GET FIELDS")
 for(var f in context.doc) {
-	out.console.log(f);
+	//out.console.log(f);
 	if(out.csvheaders.includes(f)) {
 		
        if (context.doc[f] !== null && Array.isArray(context.doc[f])) {
@@ -42,7 +42,6 @@ for(var f in context.doc) {
 
 context.count++;
 //out.console.log(context.node.settings.fields);
-//out.console.log("KOIRAAA")
 
 
 if(parseInt(context.count) % 100 == 0) 

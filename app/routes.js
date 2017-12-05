@@ -161,6 +161,11 @@ module.exports = function(express, glampipe, passport) {
 	}));
 
 
+	express.get('/api/v1/users', function (req, res) {
+		collection.getUsers(req, res);
+	});
+
+
 /***************************************************************************************************************
  *                                       API                                                              *
  * *************************************************************************************************************/
@@ -206,6 +211,14 @@ module.exports = function(express, glampipe, passport) {
 
 	express.put('/api/v1/copy/project/:id', function (req, res) {
 		project.copyProject(req, res);
+	});
+
+	express.put('/api/v1/projects/:id/owners', function (req, res) {
+		project.addOwner(req.params.id, req.body.owner, res);
+	});
+
+	express.delete('/api/v1/projects/:id/owners', function (req, res) {
+		project.removeOwner(req.params.id, req.body.owner, res);
 	});
 
 	express.get('/api/v1/projects/titles', function (req, res) {
@@ -279,8 +292,6 @@ module.exports = function(express, glampipe, passport) {
 	express.get('/api/v1/collections/:collection/nodes/:node', function (req, res) {
 		node.getNode(req.params.node, function(err, data) {res.send(data)});
 	});
-
-
 
 	express.post('/api/v1/options/:nodeid', function (req, res) {
 		node.setOptions(req, function(data) {res.send(data)});
@@ -436,6 +447,7 @@ module.exports = function(express, glampipe, passport) {
 		collection.deleteDocument(req, function(data) {res.send(data)});
 	});
 
+
 	// UPLOAD
 	express.post('/api/v1/upload', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
@@ -445,12 +457,14 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.core.deleteFile(req, res);
 	});
 
+
 	// FILES
 	express.get('/api/v1/upload/:id', function (req, res) {
 		res.setHeader('Content-type', 'application/pdf');
 		res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
 		res.sendFile(path.join(glampipe.dataPath, "tmp", req.params.id));
 	});
+
 
 	// PIPES
 	express.get('/api/v1/pipes/nodes/:node', function (req, res) {
@@ -461,11 +475,6 @@ module.exports = function(express, glampipe, passport) {
 		flow.getPipe(req, res);
 	});
 
-
-	// NODE EDITOR
-	//express.get('/node-viewer', function (req, res) {
-		//res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
-	//});
 
 	// PROXY
 	express.get('/api/v1/proxy/', function (req, res) {
@@ -514,39 +523,6 @@ module.exports = function(express, glampipe, passport) {
 			res.status(500).send('Server error!')
 		}
 	})
-	// express.route("/users").get(User.findAll);
-
-
-
-	//express.post('/download/nodes', function (req, res) {
-		//glampipe.core.downloadNodes(glampipe.io, function (error) {
-			//var dataPath = global.config.dataPath;
-		//// let's try to load nodes
-			//if(error) {
-				//glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
-				//res.json({"status": "error"});
-			//} else {
-				//glampipe.initError = null;
-				//res.json({"status": "ok","datapath": dataPath});
-			//}
-		//});
-	//});
-
-	//express.post('/read/nodes', function (req, res) {
-		//glampipe.core.initNodes(glampipe.io, function(error) {
-			//var dataPath = global.config.dataPath;
-		//// let's try to load nodes
-			//if(error) {
-				//glampipe.initError = {"status":"nodepath_error",",msg":"Nodes not found!", "datapath":dataPath};
-				//res.json({"status": "error"});
-			//} else {
-				//glampipe.initError = null;
-				//res.json({"status": "ok","datapath": dataPath});
-			//}
-		//});
-	//});
-
-
 
 }
 

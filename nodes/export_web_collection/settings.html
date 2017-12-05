@@ -1,0 +1,63 @@
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			GLAMpipe login
+		</settingtitle>
+		<settinginstructions>
+			GLAMpipe login for server: <span id="export-data-glampipe_serverinfo"></span>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Target collection
+		</settingtitle>
+		<settinginstructions>
+			Choose target collection
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>target collection </label>
+		<select class="dynamic_collection" name="required_target_collection" >
+			<option value="">choose collection</option> 
+		</select>
+
+	</settingaction>
+</setting>
+
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Fields
+		</settingtitle>
+		<settinginstructions>
+			Define here what fields are included in export.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<div id="export-collection_fields"></div>
+	</settingaction>
+</setting>
+
+
+
+
+

@@ -124,7 +124,7 @@ function cleanFieldName (field) {
 	prop_trimmed = field.trim().toLowerCase();
 	prop_clean = prop_trimmed.replace(/[\[\]\s.]/g, '_');
 	
-	return prop_clean;
+	return field;
 	/*
 	if(context.node.settings.extract_language) {
 		prop_clean = prop_clean.replace(/\[(.|..|)\]$/, ''); // remove language code from field name ("[en]")

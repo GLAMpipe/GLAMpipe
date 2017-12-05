@@ -192,7 +192,8 @@ exports.runNode = function (node, io) {
 								next();
 							});
 						break;	
-						
+
+
 						default:
 							io.sockets.emit("finish", {"node_uuid":node._id, "msg":"There is no run-switch for this node yet!"});
 							console.log("There is no run-switch for this node yet!");
@@ -356,6 +357,18 @@ exports.runNode = function (node, io) {
 
 						case "upload_file":
 							asyncLoop.fieldLoop(node, sandbox, web.uploadFile);
+						break;
+						
+						case "collection":
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","GLAMpipe login failed");
+								else {
+									console.log("WEB: GLAMpipe login ok");
+									asyncLoop.documentLoop(node, sandbox, web.postJSON);
+								}
+							});
+						
 						break;
 						
 						case "email":

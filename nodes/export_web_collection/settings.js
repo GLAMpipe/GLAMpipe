@@ -1,7 +1,5 @@
 
 
-
-
 mapping();
 
 // TODO: because this is async, this script must handle remembering settings itself
@@ -16,15 +14,14 @@ function mapping() {
 
 		fields.sorted.forEach(function(field) {
 
-			if(node.settings && node.settings.fields && node.settings.fields[field] === "true")
-				table += "<tr> <td> <input class='node-settings' type='checkbox' checked='checked' name='fields["+field+"]'/> " + field + "</td>";
-			else
-				table += "<tr> <td> <input class='node-settings' type='checkbox' name='fields["+field+"]'/> " + field + "</td>";
+
+			table += "<tr> <td> <input class='node-settings' type='checkbox' checked='checked' name='fields["+field+"]'/> " + field + "</td>";
 	
 		})
 		table += "</table>";
 		
-		$("#export-file-csv_fields").html(table);
+		$("#export-collection_fields").html(table);
 
 	})
 }
+

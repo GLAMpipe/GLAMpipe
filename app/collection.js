@@ -42,6 +42,33 @@ exports.search = function (req, res) {
 	
 }
 
+exports.getUsers = function(req, res) {
+	mongoquery.findWithResultFields(
+		{}
+		, {"local.email":1}
+		, "mp_users"
+		, function(err, result) {
+			if(!err)
+				res.json(result);	
+			else 
+				return res.json([]);
+	})
+}
+
+exports.getFields = function (query, collection, fields, cb) {
+
+	mongoquery.findWithResultFields(
+		query 
+		, fields
+		, collection
+		, function(err, result) {
+			if(!err)
+				cb(result);	
+			else 
+				return cb([]);
+	})
+}
+
 exports.getByField = function (req, res) {
 
 	var query = {};
@@ -196,8 +223,6 @@ exports.addDocument = function (req, callback) {
 
 exports.deleteDocument = function (req, callback) {
 
-
-		
 	mongoquery.remove(req.params.doc, req.params.collection, function(error, result) {
 		if(error) {
 			console.log("ERROR: could not remove document! " + req.params.doc);

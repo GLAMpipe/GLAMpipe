@@ -32,15 +32,15 @@ exports.createProject = function (req, res) {
 				"collection_count": 0,
 				"node_count":0,
 				"schemas": [],
-				"owner": "" 
+				"owner": [] 
 			};
 			
 			// mark the owner
 			if(global.config.authentication === "local") {
 				if(req.user && req.user.local && req.user.local.email)
-					project.owner = req.user.local.email;
+					project.owner.push(req.user.local.email);
 			} else if(global.config.authentication === "shibboleth") {
-				project.owner = req.headers[global.config.shibbolethHeaderId];
+				project.owner.push(req.headers[global.config.shibbolethHeaderId]);
 			}
 			
 			mongoquery.insertProject (project, function(err, data) {
@@ -232,6 +232,39 @@ exports.deleteProject = function (doc_id, res) {
 	});
 }
 
+
+exports.addOwner = function (project_id, new_owner, res) {
+
+	if(!new_owner)
+		return res.json({});
+		
+	mongoquery.findOneById(project_id, "mp_projects", function(project) {
+		if(!project)
+			return res.json({});
+			
+		mongoquery.update("mp_projects", {_id:mongojs.ObjectId(project_id)}, {$addToSet: { owner: new_owner} }, function(result) {
+			res.json({})
+		});
+	});
+}
+
+
+exports.removeOwner = function (project_id, owner, res) {
+
+	if(!owner)
+		return res.json({});
+		
+	mongoquery.findOneById(project_id, "mp_projects", function(project) {
+		if(!project)
+			return res.json({});
+			
+		mongoquery.update("mp_projects", {_id:mongojs.ObjectId(project_id)}, {$pull: { owner: owner} }, function(result) {
+			res.json({})
+		});
+	});
+}
+
+
 exports.getProjectTitles = function  (res) {
 	mongoquery.findFields({}, {title:true}, {title:1}, "mp_projects", function(err, data) { 
 		if (!err)
@@ -348,8 +381,8 @@ exports.authProject = function(req, res, next) {
 	
 	// check if user is the owner of the project
 	if(project_uuid) {
-		mongoquery.findOneById(project_uuid, "mp_projects", function(data) {
-			if(user && user == data.owner)
+		mongoquery.findOneById(project_uuid, "mp_projects", function(project) {
+			if(user && project.owner.includes(user))
 				next();
 			else
 				res.status(401).json({error:"Node run not authenticated!"});
@@ -373,7 +406,7 @@ exports.authNode = function(req, res, next) {
 
 	mongoquery.findOne({nodes:{$elemMatch:{_id:node_uuid}}}, "mp_projects", function(err, project) {
 		if(!err) {
-			if(project && user && project.owner == user )
+			if(project && user && project.owner.includes(user) )
 				next()
 			else
 				res.status(401).json({error:"Node run not authenticated!"});
@@ -397,8 +430,8 @@ exports.isAuthenticated = function (req, cb) {
 			var id = req.params.project;
 			//  we are authenticating for project operation (add/remove node)
 			if(id) {
-				mongoquery.findOneById(id, "mp_projects", function(data) {
-					if(req.user.local.email == data.owner)
+				mongoquery.findOneById(id, "mp_projects", function(project) {
+					if(project.owner.includes(req.user.local.email))
 						cb(true);
 					else
 						cb(false);
@@ -408,7 +441,7 @@ exports.isAuthenticated = function (req, cb) {
 				var nodeid = mongojs.ObjectId(req.params.id);
 				mongoquery.findOne({nodes:{$elemMatch:{_id:nodeid}}}, "mp_projects", function(err, project) {
 					if(!err) {
-						if(project && project.owner == req.user.local.email )
+						if(project && project.owner.includes(req.user.local.email) )
 							cb(true);
 						else
 							cb(false);
@@ -426,9 +459,9 @@ exports.isAuthenticated = function (req, cb) {
 			var id = req.params.project;
 			//  we are authenticating for project operation (add/remove node)
 			if(id) {
-				mongoquery.findOneById(id, "mp_projects", function(data) {
+				mongoquery.findOneById(id, "mp_projects", function(project) {
 					//console.log("PROJECT: owner = " + data.owner);
-					if(data.owner === req.headers[global.config.shibbolethHeaderId])
+					if(project.owner.includes(req.headers[global.config.shibbolethHeaderId]))
 						cb(true);
 					else
 						cb(false);
@@ -438,7 +471,7 @@ exports.isAuthenticated = function (req, cb) {
 				var nodeid = mongojs.ObjectId(req.params.id);
 				mongoquery.findOne({nodes:{$elemMatch:{_id:nodeid}}}, "mp_projects", function(err, project) {
 					if(!err) {
-						if(project && project.owner == req.headers[global.config.shibbolethHeaderId] )
+						if(project && project.owner.includes(req.headers[global.config.shibbolethHeaderId]))
 							cb(true);
 						else
 							cb(false);
