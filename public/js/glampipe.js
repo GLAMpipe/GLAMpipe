@@ -67,7 +67,7 @@ var glamPipe = function () {
 			if(Array.isArray(data)) {
 				html += "<select id='add_owner' data-id='"+data_id+"'><option>add owner</option>";
 				for(var i=0; i<data.length; i++) {
-					html += "<option>" + data[i].local.email + "</option>"
+					html += "<option>" + data[i] + "</option>"
 				}
 				html += "</select>";
 			}
@@ -105,6 +105,11 @@ var glamPipe = function () {
 			self.projects = data.data;
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
+				
+				// hide backend projects fron other than owners
+				if(!self.isOwner(projects[i].owner) && projects[i].hidden === true)
+					continue;
+					
 				html += "<tr>";
 				
 
@@ -163,13 +168,14 @@ var glamPipe = function () {
 	}
 
 	this.isOwner = function(owner) {
-		if(Array.isArray(owner))
+
+		if(Array.isArray(owner)) {
 			if(owner.includes(self.user))
 				return true
-		else
+		} else {
 			if(owner == self.user)
 				return true;
-				
+		}	
 		return false;
 	}
 
@@ -217,17 +223,19 @@ var glamPipe = function () {
 	}
 
 	this.getUsers = function (div) {
-		//$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) { 
-		$.getJSON(self.baseAPI + "/users", function(data) { 
+		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) { 
+		//$.getJSON(self.baseAPI + "/users", function(data) { 
 			$(div).empty();
 			
-			//var data = datal.count;
+			var data = datal.count;
 			for(var i = 0; i< data.length; i++) {
-				var listOption = "<div data-id=" + data[i].local.email + " class='' aria-hidden='true'></div>";
-				listOption += "<a data-id='" + data[i].local.email + "' href='#'>\n";
+				var listOption = "<div data-id=" + data[i]._id  + " class='' aria-hidden='true'></div>";
+				listOption += "<a data-id='" + data[i]._id  + "' href='#'>\n";
 				listOption += "<div class='listoption'>\n";
-				listOption += "<p class='listtitle'>" + data[i].local.email + " </p>\n";
-				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
+				if(data[i]._id === "")
+					listOption += "<p class='listtitle'>ANONYMOUS ("+data[i].count+")</p>\n";
+				else
+					listOption += "<p class='listtitle'>" + data[i]._id + " ("+data[i].count+")</p>\n";
 				listOption += "</div></a>\n";
 				$(div).append(listOption);
 			}

@@ -22,7 +22,11 @@ module.exports = function(express, glampipe, passport) {
 	// print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
 		console.log(req.method, req.url);
-		// req.headers.mail = "artturimatias"; // shibboleth test header
+		
+		// shibboleth test header
+		if(global.config.shibbolethTestUser) != ""
+			req.headers.mail = global.config.shibbolethTestUser; 
+			
 		next();
 	});
 

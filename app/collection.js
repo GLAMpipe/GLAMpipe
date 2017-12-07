@@ -51,9 +51,13 @@ exports.getUsers = function(req, res) {
 			, {"local.email":1}
 			, "mp_users"
 			, function(err, result) {
-				if(!err)
-					res.json(result);	
-				else 
+				if(!err) {
+					var arr = result.map(function(obj) {
+						return obj.local.email;
+					});
+					res.json(arr);	
+					
+				} else 
 					return res.json([]);
 		})
 	} else {
