@@ -944,15 +944,19 @@ var dataTable = function (node) {
 
 
 
-	this.nl2br = function (str, keyname) {  
-		if(keyname !== "thumbnail_html") { 
-			str = str.replace(/</g, "&lt;"); 
-			str = str.replace(/>/g, "&gt;"); 
+	this.nl2br = function (str, keyname) { 
+		if(typeof str === "string") { 
+			if(keyname !== "thumbnail_html") { 
+				str = str.replace(/</g, "&lt;"); 
+				str = str.replace(/>/g, "&gt;"); 
+			}
+			if(str.length > 1000)
+				str = str.substring(0,1000) + "...<br><a class='expand' href='#'>show (not implemented)</a>\n\n";
+			var breakTag = "<br />";  
+			return (str + "").replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
+		} else {
+			return "";
 		}
-		if(str.length > 1000)
-			str = str.substring(0,1000) + "...<br><a class='expand' href='#'>show (not implemented)</a>\n\n";
-		var breakTag = "<br />";  
-		return (str + "").replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}
 
 }

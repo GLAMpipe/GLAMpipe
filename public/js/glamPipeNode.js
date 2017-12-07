@@ -270,6 +270,8 @@ var glamPipeNode = function (node, gp) {
 			$("settingsblock").append(self.source.views.settings);
 			$("settingsblock .params").append(self.source.params);
 			$(".show-node-params").data("id", self.source._id);
+			// populate collection lists (for example settings of "collection lookup" node)
+			//$('.dynamic_collection').append(self.gp.collectionList());
 			
 			
 			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
@@ -340,8 +342,8 @@ var glamPipeNode = function (node, gp) {
 	this.setSettingValues = function () {
 		var data = self.source;
 		for(var prop in data.settings) {
-			//console.log(prop)
-			if(typeof data.settings[prop] == "boolean") {
+			// checkboxes
+			if(data.settings[prop] == "true") {
 				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
 				$("input[name='"+prop+"']").change();
 			} else {
@@ -350,6 +352,7 @@ var glamPipeNode = function (node, gp) {
 						var n = i+1;
 						$("input[name='"+prop+"["+n+"]']").val(data.settings[prop][i]);
 					}
+				// normal inputs
 				} else {
 					$("input[name='"+prop+"']").val(data.settings[prop]);
 					$("select[name='"+prop+"']").val(data.settings[prop]);

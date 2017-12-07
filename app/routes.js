@@ -24,7 +24,7 @@ module.exports = function(express, glampipe, passport) {
 		console.log(req.method, req.url);
 		
 		// shibboleth test header
-		if(global.config.shibbolethTestUser != "")
+		if(global.config.shibbolethTestUser && global.config.shibbolethTestUser != "")
 			req.headers.mail = global.config.shibbolethTestUser; 
 			
 		next();

@@ -537,11 +537,11 @@ exports.runNode = function (node, io) {
 					switch (node.subsubtype) {
 						
 						case "collection":
-							// read map data
+							// read map data (will not work with large datasets)
 							var fields = {};
-							fields[sandbox.context.node.params.key_field] = 1;
-							fields[sandbox.context.node.params.copy_field] = 1;
-							mongoquery.findFields({}, fields, {}, sandbox.context.node.params.source_collection, function(err, result) {
+							fields[sandbox.context.node.settings.lookup_key_field] = 1;
+							fields[sandbox.context.node.settings.lookup_copy_field] = 1;
+							mongoquery.findFields({}, fields, {}, sandbox.context.node.params.required_source_collection, function(err, result) {
 								sandbox.context.data = result;
 								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 									sandbox.run.runInContext(sandbox);

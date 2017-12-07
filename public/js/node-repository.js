@@ -187,7 +187,6 @@ var nodeRepository = function (gp) {
 			//paramsScript(node);
 		//}
 		$('.dynamic_collection').append(self.gp.collectionList()); 
-		//$('.dynamic_collection').replaceWith("<p>koira</p>");
 	}
 
 
