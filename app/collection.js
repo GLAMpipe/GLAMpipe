@@ -43,16 +43,22 @@ exports.search = function (req, res) {
 }
 
 exports.getUsers = function(req, res) {
-	mongoquery.findWithResultFields(
-		{}
-		, {"local.email":1}
-		, "mp_users"
-		, function(err, result) {
-			if(!err)
-				res.json(result);	
-			else 
-				return res.json([]);
-	})
+	if(global.config.authentication == "shibboleth") {
+		return res.json(global.config.shibbolethUsers)
+	} else if(global.config.authentication == "local") {
+		mongoquery.findWithResultFields(
+			{}
+			, {"local.email":1}
+			, "mp_users"
+			, function(err, result) {
+				if(!err)
+					res.json(result);	
+				else 
+					return res.json([]);
+		})
+	} else {
+		res.json([]);
+	}
 }
 
 exports.getFields = function (query, collection, fields, cb) {
