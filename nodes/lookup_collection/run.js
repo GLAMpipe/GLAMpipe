@@ -26,6 +26,10 @@ if(Array.isArray(local_key_value)) {
 }
 
 
+if(parseInt(context.count) % 100 == 0) 
+    out.say("progress", context.node.type.toUpperCase() + ": processed " + context.count + "/" + context.doc_count);
+
+
 // TODO: should take the best match
 
 // we expect that mapping data has string value or arrays with length 1 

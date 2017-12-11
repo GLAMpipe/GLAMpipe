@@ -1,8 +1,8 @@
 var filenames = context.doc[context.node.params.in_field];
 out.pre_value = null;
+var paths = [];
 
 if(Array.isArray(filenames)) {
-	var paths = [];
 	filenames.forEach(function(filename, index) {
 		if(filename)
 			paths.push(getPath(context.node.params.filepath, filename));
