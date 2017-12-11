@@ -19,10 +19,11 @@ module.exports = function(express, glampipe, passport) {
 	var upload 		= multer({ dest: p });
 	express.set('superSecret', global.config.secret); // secret variable
 
+
 	// print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
-		console.log(req.method, req.url);
 		
+		glampipe.logger.info("ACCESS", {method: req.method, url: req.url});
 		// shibboleth test header
 		if(global.config.shibbolethTestUser && global.config.shibbolethTestUser != "")
 			req.headers.mail = global.config.shibbolethTestUser; 
@@ -441,6 +442,10 @@ module.exports = function(express, glampipe, passport) {
 
 	express.put('/api/v1/collections/:collection/docs', function (req, res) {
 		collection.addDocument(req, function(data) {res.send(data)});
+	});
+
+	express.put('/api/v1/collections/:collection/schema', function (req, res) {
+		collection.createSchema(req, function(data) {res.send(data)});
 	});
 
 	//express.post('/edit/collection/addtoset/:id', function (req, res) {

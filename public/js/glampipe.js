@@ -106,17 +106,17 @@ var glamPipe = function () {
 			var projects = data.data;
 			for(var i = 0; i< projects.length; i++) {
 				
-				// hide backend projects fron other than owners
+				// hide hidden (backend) projects fron other than owners
 				if(!self.isOwner(projects[i].owner) && projects[i].hidden === true)
 					continue;
 					
 				html += "<tr>";
-				
-
-				
 				html += "</td>";
 
-				html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+				if(projects[i].hidden === true)
+					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a> (hidden)</div></td>";
+				else
+					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 				
 				html += "<td>";
 				if(projects[i].nodes) {

@@ -375,7 +375,10 @@ exports.getKeyTypes = function (collection_name, cb) {
 	})
 }
 
-
+exports.createSchema = function (req, cb) {
+	var node = {collection:req.params.collection};
+	schema.createCollectionSchema(node, cb);
+}
 
 exports.getSchema = function (collection_name, cb) {
 	schema.getCollectionSchema(collection_name, cb);

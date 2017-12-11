@@ -3,5 +3,6 @@ glampipe-data/*
 glampipe
 config/config.js
 node_modules
+logs
 public_external/*
 !/.gitignore

@@ -89,6 +89,31 @@ var GlamPipe = function() {
 			saveUninitialized: true
 		}));
 
+		// LOGGER
+		var winston = require('winston');
+		require('winston-daily-rotate-file');
+		
+		var info = new (winston.transports.DailyRotateFile)({
+			name:"info",
+			filename: './logs/log',
+			datePattern: 'access_yyyy-MM-dd.',
+			prepend: true,
+			level: 'info'
+		});
+
+		var error = new (winston.transports.DailyRotateFile)({
+			name:"error",
+			filename: './logs/log',
+			datePattern: 'error_yyyy-MM-dd.',
+			prepend: true,
+			level: 'error'
+		});
+
+		self.logger = new (winston.Logger)({
+			transports: [
+			  info, error
+			]
+		});
 
 
 		require('./config/passport')(passport); // pass passport for configuration
@@ -194,6 +219,7 @@ var GlamPipe = function() {
 		});
 
 	    process.on('uncaughtException', function(err) {
+			self.logger.error(err);
 			// handle the error safely
 		    console.log("MAJOR ERROR!")
 		    console.log(err)

@@ -39,12 +39,14 @@ exports.createCollectionSchema = function (node, cb) {
 				mongoquery.remove(doc._id, "mp_schemas", function (error, doc) {
 					console.log(error);
 					mongoquery.insert("mp_schemas", schema, function(err, result) {
-						//cb(result);
+						if(cb)
+							cb(result);
 					})		
 				})
 			} else {
 				mongoquery.insert("mp_schemas", schema, function(err, result) {
-					//cb(result);
+					if(cb)
+						cb(result);
 				})				
 			}
 		})
