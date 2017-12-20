@@ -95,7 +95,7 @@ var GlamPipe = function() {
 		
 		var info = new (winston.transports.DailyRotateFile)({
 			name:"info",
-			filename: './logs/log',
+			filename: self.dataPath + '/logs/log',
 			datePattern: 'access_yyyy-MM-dd.',
 			prepend: true,
 			level: 'info'
@@ -178,6 +178,7 @@ var GlamPipe = function() {
 				cb(error);
 			} else {
 			   
+				self.core.createDirIfNotExist(path.join(self.dataPath, "logs"), function(error, msg) {})
 				self.core.initDB(function (error) {
 
 					node.initNodes (self.nodePath, null, function() {
