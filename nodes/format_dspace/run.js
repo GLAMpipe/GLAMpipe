@@ -8,16 +8,16 @@ var is_static = /^_static_/;
 var is_dynamic = /^_dynamic_/;
 
 
-// handle static fields
+// handle static values
 for(var key in context.node.settings) {
 	if(is_static.test(key)) {
 		var plain_key = key.replace("_static_", "");
 		if(context.node.settings[key])
-			pushField(item, plain_key, "");
+			pushField(item, context.node.settings[key], plain_key);
 	}
 }
 
-// then override with dynamic fields if set
+// then override with dynamic values if set
 for(var key in context.node.settings) {
 	var value = context.doc[context.node.settings[key]];
 	// value might be undefined

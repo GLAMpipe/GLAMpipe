@@ -1,6 +1,9 @@
 
 var c = context;
 
+var importLimit = 0;
+if(parseInt(c.node.settings.limit))
+	importLimit = parseInt(c.node.settings.limit);
 
 
 // we must remove rest part from dspace_url (usually "/rest")
@@ -15,13 +18,18 @@ if (context.response && context.response.statusCode == 200 ) {
 	if (context.data.items && context.data.items.length > 0) {
 		
 		out.say("progress", "procesed so far " + context.vars.record_counter );
+		var imports = [];
 		var updates = [];
 		
 		for (var i = 0; i < context.data.items.length; i++) {
 
 			// count records 
 			context.vars.record_counter++;
-			makeRecord(context.data.items[i]); // this adds some fields to the original data
+			imports.push(makeRecord(context.data.items[i])); // this adds some fields to the original data
+			
+			// obey import limit
+			if(importLimit && context.vars.record_counter >= importLimit)
+				break;
 			
 			if(context.node.settings.mode === "update" && context.node.settings.update_key) {
 				if(!context.records.includes(context.data.items[i][context.node.settings.update_key])) { 
@@ -35,13 +43,17 @@ if (context.response && context.response.statusCode == 200 ) {
 		if(context.node.settings.mode === "update")
 			out.value = updates;
 		else
-			out.value = context.data.items;
+			out.value = imports;
 		
 		// URL for next round
 		var offset = c.vars.round_counter * c.vars.limit;
         if(context.data["unfiltered-item-count"] == context.vars.limit)  /* check if there is any data left on the server */
              out.url = context.node.params.required_dspace_url + "/filtered-items" + context.node.settings.query + '&limit=' + c.vars.limit + '&offset=' + c.vars.round_counter * c.vars.limit; 
-             
+        
+        // stop if import limit set by user is reached
+        if(importLimit && context.vars.record_counter >= importLimit)
+			out.url = "";
+			
         out.say("progress", "Items fetched: " + context.vars.record_counter); 
 
 	} else {

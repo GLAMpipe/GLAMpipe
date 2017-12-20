@@ -16,10 +16,10 @@ function mapping() {
 
 		fields.sorted.forEach(function(field) {
 
-			if(node.settings && node.settings.fields && node.settings.fields[field] === "true")
-				table += "<tr> <td> <input class='node-settings' type='checkbox' checked='checked' name='fields["+field+"]'/> " + field + "</td>";
-			else
+			if(node.settings && node.settings.fields && node.settings.fields[field] === "false")
 				table += "<tr> <td> <input class='node-settings' type='checkbox' name='fields["+field+"]'/> " + field + "</td>";
+			else
+				table += "<tr> <td> <input class='node-settings' type='checkbox' checked='checked' name='fields["+field+"]'/> " + field + "</td>";
 	
 		})
 		table += "</table>";

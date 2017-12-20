@@ -18,7 +18,7 @@ function mapping() {
 
 	$.getJSON(g_apipath + "/proxy?url=" + node.params.required_url + "/registries/schema", function (schemas) {
 		$.getJSON(url, function(data) {
-			var table = '<table><thead><tr><th>Dspace field</th><th>dynamic field</th><th>static field</th></tr></thead>';
+			var table = '<table><thead><tr><th>Dspace field</th><th>dynamic value</th><th>static value</th></tr></thead>';
 
 			schemas.forEach(function(schema) {
 				schema.fields.forEach(function(schema_field) {

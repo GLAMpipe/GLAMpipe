@@ -20,24 +20,27 @@ function quote (str) {
             
 var row = [];
 
-out.console.log("GET FIELDS")
-for(var f in context.doc) {
-	//out.console.log(f);
-	if(out.csvheaders.includes(f)) {
-		
-       if (context.doc[f] !== null && Array.isArray(context.doc[f])) {
-           var arr_row = []; 
-           for (var i = 0; i < context.doc[f].length; i++ ) { 
-               /* ignore objects in arrays */
-               if (typeof context.doc[f][i] !== 'object') 
-                   arr_row.push(getVal(context.doc[f][i])); 
-           }
-           var arr_str = arr_row.join(c.arr_sep); 
-           row.push(arr_str); 
-       } else {  
-           row.push(getVal(context.doc[f])); 
-       }
+for(var i=0; i<out.csvheaders.length; i++) {
+
+	var value = ""; // default value
+	var key = out.csvheaders[i];
+	if(context.doc[key]) {
+	
+		if (context.doc[key] !== null && Array.isArray(context.doc[key])) {
+			var arr_row = []; 
+			for (var j = 0; j < context.doc[key].length; j++ ) { 
+				/* ignore objects in arrays */
+				if (typeof context.doc[key][j] !== 'object') 
+					arr_row.push(getVal(context.doc[key][j])); 
+			}
+			
+			value = arr_row.join(c.arr_sep); 
+			
+		} else {  
+		   value = getVal(context.doc[key]); 
+		}
     }
+	row.push(value);
 };
 
 context.count++;
