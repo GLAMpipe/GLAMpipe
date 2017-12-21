@@ -53,7 +53,6 @@ exports.collectionToFile = function (node, sandbox, io) {
 			return;
 		});
 	});
-
 }
 
 

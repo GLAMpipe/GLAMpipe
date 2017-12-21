@@ -1,0 +1,54 @@
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Text template
+		</settingtitle>
+		<settinginstructions>
+			Write text with data placeholders. Placeholder is a document key name in double brackets lik [[dc_title]]<br>.
+			There is a special placeholder for data: {{date}}
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>template </label>
+		<textarea class="node-settings" name="template" ><Hello [[dc_title]]!</textarea>
+	</settingaction>
+</setting>
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			File extension
+		</settingtitle>
+		<settinginstructions>
+			Define extension for generated files.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>extension </label>
+		<input class="node-settings" name="extension" value=".txt"/>
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Array join
+		</settingtitle>
+		<settinginstructions>
+			Delimeter for array join.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>separator </label>
+		<input class="node-settings" name="sep" value=","/>
+	</settingaction>
+</setting>

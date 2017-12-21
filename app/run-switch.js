@@ -256,6 +256,11 @@ exports.runNode = function (node, io) {
 						case "csv":
 							require("../app/node_runners/export-file-csv.js").collectionToFile(node, sandbox, io);
 							break;
+
+						case "doc":
+							var fileExport = require("../app/node_runners/export-file.js");
+							asyncLoop.documentLoop(node, sandbox, fileExport.docToFile);
+							break;
 							
 						default:
 							require("../app/node_runners/export-file.js").collectionToFile(node, sandbox, io);

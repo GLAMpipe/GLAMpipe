@@ -3,6 +3,7 @@ var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
 var async 		= require("async");
+var fs 			= require('fs');
 var mongoquery 	= require("../../app/mongo-query.js");
 var collection = require("../../app/collection.js");
 var nodescript = require("../../app/run-node-script.js");
@@ -59,5 +60,18 @@ exports.collectionToFile = function (node, sandbox, io) {
 			return;
 		});
 	});
+}
+
+
+
+exports.docToFile = function (doc, sandbox, next) {
+
+	sandbox.run.runInContext(sandbox);
+
+	var filePath = path.join(sandbox.context.node.dir, sandbox.out.file);
+	var wstream = fs.createWriteStream(filePath);
+	wstream.write(sandbox.out.text);
+	wstream.end();
+	next();
 
 }

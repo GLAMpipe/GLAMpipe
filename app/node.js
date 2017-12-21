@@ -865,7 +865,7 @@ exports.getOptions = function (req, cb) {
 exports.getNodeFile = function (req, res) {
 	exports.getNodeKey("dir", req.params.nodeid, function(err, data) {
 		if(err)
-			res.json({"error": err});
+			res.status(404).json({error:"File not found!"});
 		else {
 			var file = path.join(data.value,req.params.file);
 			res.sendFile(file, function(err) {
@@ -882,7 +882,7 @@ exports.getNodeKey = function (key, nodeid, cb) {
 	mongoquery.findProjectNode(nodeid, function(err, project) {
 		if(err)
 			console.log(err);
-		if(project.nodes[0]) {
+		if(project && project.nodes[0]) {
 			cb(null, {key:"node." + key, value:project.nodes[0][key]});
 		} else {
 			cb({"error":"not found"});
