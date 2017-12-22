@@ -1,12 +1,12 @@
 {
-    "nodeid": "export_text_template",
+    "nodeid": "export_html_template",
     "type": "export",
     "subtype": "file",
     "subsubtype": "doc",
-    "title": "Text with data values",
+    "title": "Documents as html/text",
     "status": "works",
     "tags":["generic"],
-    "description": "Export text (plain text, html etc.) with data values.",
+    "description": "Export documents as html or plain text ",
 
 
     "scripts": {

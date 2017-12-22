@@ -395,6 +395,18 @@ exports.authProject = function(req, res, next) {
 
 // check if user can run node
 exports.authNode = function(req, res, next) {
+	
+	// first check if route should be open
+	var pass = false;
+	global.config.IP_passes.some(function(IP_pass) {
+		if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && (req.ip === IP_pass.ip || IP_pass.ip === "*")) {
+			pass = true;
+			console.log("INFO: " + req.method + " allowed by IP_pass: " + IP_pass.label)
+		}
+	})
+	if(pass)
+		return next();
+
 	var user = getUser(req)
 	var node_uuid = req.params.id;
 	

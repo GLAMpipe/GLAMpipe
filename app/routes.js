@@ -83,7 +83,7 @@ module.exports = function(express, glampipe, passport) {
 	// if authentication is used, then we must take care project privileges
 	if(global.config.authentication !== "none") {
 
-		// require valid user both local and shibboleth authentications
+		// require valid user both local and shibboleth authentications (can be overriden by IP_passes)
 		if(global.config.authentication === "local") {
 			var s = express.get('superSecret');
 			express.post('/api/v1/*', jwt2({secret: s}));
@@ -104,7 +104,7 @@ module.exports = function(express, glampipe, passport) {
 		express.put("/api/v1/projects/:project*", project.authProject);
 		express.delete("/api/v1/projects/:project*", project.authProject);
 		
-		// node run permissions
+		// node run permissions (can be overriden by IP_passes)
 		express.post("/api/v1/nodes/:id*", project.authNode);
 		express.put("/api/v1/nodes/:id*", project.authNode);
 		express.delete("/api/v1/nodes/:id*", project.authNode);
@@ -456,6 +456,9 @@ module.exports = function(express, glampipe, passport) {
 		collection.deleteDocument(req, function(data) {res.send(data)});
 	});
 
+	express.delete('/api/v1/collections/:collection/fields/:field', function (req, res) {
+		collection.removeKey(req, function(data) {res.send(data)});
+	});
 
 	// UPLOAD
 	express.post('/api/v1/upload', upload.single('file'), function (req, res) {

@@ -2,12 +2,27 @@ var c = context;
 var template = c.node.settings.template;
 var docid = c.doc._id.toString();
 
+function makeHtmlList(arr) {
+	if(arr.length == 1 && c.node.settings.single_not_list == "true")
+		return arr[0];
+		
+	html = "<ul>";
+	arr.forEach(function(item) {
+		html += "<li>" + item + "</li>";
+	})
+	return html + "</ul>";
+}
+
 // fill placeholders
 c.vars.keys.forEach(function(key) {
 	if(c.doc[key]) {
-		if(Array.isArray(c.doc[key]))
-			template = template.replace(new RegExp("\\[\\["+key+"\\]\\]", 'g'), c.doc[key].join(c.node.settings.sep));
-		else
+		if(Array.isArray(c.doc[key])) {
+			if(c.node.settings.mode === "join")
+				template = template.replace(new RegExp("\\[\\["+key+"\\]\\]", 'g'), c.doc[key].join(c.node.settings.sep));
+			else 
+				template = template.replace(new RegExp("\\[\\["+key+"\\]\\]", 'g'), makeHtmlList(c.doc[key]));
+				
+		} else
 			template = template.replace(new RegExp("\\[\\["+key+"\\]\\]", 'g'), c.doc[key]);
 	}
 })

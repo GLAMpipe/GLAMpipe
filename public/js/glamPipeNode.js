@@ -343,8 +343,14 @@ var glamPipeNode = function (node, gp) {
 		var data = self.source;
 		for(var prop in data.settings) {
 			// checkboxes
-			if(data.settings[prop] == "true") {
-				$("input[name='"+prop+"']").prop("checked", data.settings[prop]);
+			console.log(data.settings[prop] )
+			console.log(data.settings[prop] == "false")
+			if(data.settings[prop] == "true" || data.settings[prop] == "false" || typeof data.settings[prop] === "boolean") {
+				var checked = data.settings[prop];
+				if(typeof data.settings[prop] !== "boolean")
+					checked = (data.settings[prop] == 'true');
+					
+				$("input[name='"+prop+"']").prop("checked", checked);
 				$("input[name='"+prop+"']").change();
 			} else {
 				if(Array.isArray(data.settings[prop])) {

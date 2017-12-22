@@ -315,7 +315,13 @@ exports.getFacetTest = function (req, cb) {
 	});
 }
 
-
+exports.removeKey = function (req, cb) {
+	var collection_id = req.params.collection
+	console.log("COLLECTION: removing key", collection_id,":",req.params.field);
+	mongoquery.removeKey(collection_id, req.params.field, function(err, result) {
+		cb(result);
+	})
+}
 
 
 /**

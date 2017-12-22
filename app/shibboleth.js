@@ -8,7 +8,7 @@ exports.isValidUser = function(req, res, next) {
 	global.config.IP_passes.some(function(IP_pass) {
 		if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && (req.ip === IP_pass.ip || IP_pass.ip === "*")) {
 			pass = true;
-			console.log("INFO: allowed by IP_pass: " + IP_pass.label)
+			console.log("INFO: " + req.method + " allowed by IP_pass: " + IP_pass.label)
 		}
 	})
 	if(pass)
