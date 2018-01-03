@@ -79,7 +79,7 @@
 	function collectionsfromQuery() {
 		var collections = [];
 		if(node.settings && node.settings.query) {
-			var query = node.settings.query.replace("expand=parentCollection,metadata,bitstreams", "");
+			var query = node.settings.query.replace("&expand=parentCollection,metadata,bitstreams", "");
 			var collections = query.replace(/&/g, "").split("collSel[]=");
 			collections.shift();
 		}
@@ -123,7 +123,7 @@
 	function hierarchyList() {
 		$("#source_web_dspace_data").empty();
 		$("#source_web_dspace_data").css('visibility', 'visible');
-		$("#source_web_dspace_data").append(" Fetching collection hierarchy...");
+		$("#source_web_dspace_data").append("<div class='bar'></div>");
 		$.getJSON(g_apipath + "/proxy?url=" + params.required_dspace_url + "/hierarchy", function (data) {
 			if(data.error)
 				alert(data.error);

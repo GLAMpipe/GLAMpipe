@@ -178,7 +178,10 @@ var GlamPipe = function() {
 				cb(error);
 			} else {
 			   
-				self.core.createDirIfNotExist(path.join(self.dataPath, "logs"), function(error, msg) {}) // create logs dir
+				self.core.createDirIfNotExist(path.join(self.dataPath, "logs"), function(error, msg) {
+					if(error)
+						console.log(msg);
+				}) // create logs dir
 				self.core.initDB(function (error) {
 
 					node.initNodes (self.nodePath, null, function() {

@@ -30,21 +30,22 @@ for(var prop in record) {
 			new_record[prop_clean]  = values;
 		}
 
-		if(context.node.settings.extract_language) {
+		// NOT USED
+		//if(context.node.settings.extract_language) {
 
-			var code = getLanguageCode(prop);
-			if(code != null) {
-				// create languag array with empty strings if needed
-				if(!new_record[prop_clean + "__lang"]) {
-					new_record[prop_clean + "__lang"] = createLanguageArray(values.length, new_record[prop_clean].length);
-				} 
+			//var code = getLanguageCode(prop);
+			//if(code != null) {
+				//// create languag array with empty strings if needed
+				//if(!new_record[prop_clean + "__lang"]) {
+					//new_record[prop_clean + "__lang"] = createLanguageArray(values.length, new_record[prop_clean].length);
+				//} 
 				
-				// push language code for every new value (i.e. what is inside square brackets)
-				for(var i = 0; i < values.length; i++) {
-					new_record[prop_clean + "__lang"].push(code);
-				}
-			}
-		}
+				//// push language code for every new value (i.e. what is inside square brackets)
+				//for(var i = 0; i < values.length; i++) {
+					//new_record[prop_clean + "__lang"].push(code);
+				//}
+			//}
+		//}
 	}
 }
 
@@ -121,10 +122,11 @@ function processValue (value) {
 function cleanFieldName (field) {
 
 	// clean up key names (remove -.[] and convert spaces to underscores)
-	prop_trimmed = field.trim().toLowerCase();
-	prop_clean = prop_trimmed.replace(/[\[\]\s.]/g, '_');
+	var field_clean = field.trim().toLowerCase();
+	//field = field.replace(/[\[\]]/g, '');
+	field_clean = field_clean.replace(/\./g, '_');
 	
-	return field;
+	return field_clean;
 	/*
 	if(context.node.settings.extract_language) {
 		prop_clean = prop_clean.replace(/\[(.|..|)\]$/, ''); // remove language code from field name ("[en]")

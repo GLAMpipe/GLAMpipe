@@ -210,11 +210,11 @@ module.exports = function(express, glampipe, passport) {
 		//project.copyProject(req, res);
 	//});
 
-	express.put('/api/v1/projects', function (req, res) {
+	express.post('/api/v1/projects', function (req, res) {
 		project.createProject(req, res);
 	});
 
-	express.put('/api/v1/copy/project/:id', function (req, res) {
+	express.post('/api/v1/copy/project/:id', function (req, res) {
 		project.copyProject(req, res);
 	});
 
@@ -306,7 +306,7 @@ module.exports = function(express, glampipe, passport) {
 		node.setNodeDescription(req, function(data) {res.send(data)});
 	});
 
-	express.put('/api/v1/projects/:project/nodes/:nodeid', function (req, res) {
+	express.post('/api/v1/projects/:project/nodes/:nodeid', function (req, res) {
 		node.createNode(req, res, glampipe.io);
 	});
 
@@ -435,12 +435,12 @@ module.exports = function(express, glampipe, passport) {
 		collection.edit2(req, function(data) {res.send(data)});
 	});
 
-	express.put('/api/v1/collections/:collection/docs', function (req, res, next) {
+	express.post('/api/v1/collections/:collection/docs', function (req, res, next) {
 		shibboleth.addHeadersToData(req);
 		next();
 	});
 
-	express.put('/api/v1/collections/:collection/docs', function (req, res) {
+	express.post('/api/v1/collections/:collection/docs', function (req, res) {
 		collection.addDocument(req, function(data) {res.send(data)});
 	});
 
