@@ -5,7 +5,9 @@ var exports 	= module.exports = {};
 
 
 // simple white listed proxy
-exports.proxyJSON = function (url, query, res) {
+exports.proxyJSON = function (req, res) {
+	
+	var url = req.query.url;
     if (typeof url === "undefined" || url == "")
         return res.json({"error":"no url"});
 
@@ -18,7 +20,7 @@ exports.proxyJSON = function (url, query, res) {
 		})
 		
 		if(!allowed) {
-			console.log("PROXY:", "URL not allowed!");
+			console.log("PROXY:", "URL not allowed!", url);
 			res.json({"error":"URL not allowed!"});
 			return;
 		}
@@ -26,29 +28,30 @@ exports.proxyJSON = function (url, query, res) {
 	
 
 	var headers = {
-		'User-Agent': 'GLAMpipe/0.0.1',
+		'User-Agent': 'GLAMpipe/0.0.1'
 	}
 	
-	if(query)
-		url = url + query;
+	if(req.query.query)
+		url = url + req.query.query;
 
-    console.log("PROXY:", url);
+	console.log("PROXY:", req.method, ":", url);
 
 	 var options = {
 		url: url,
-		method: 'GET',
+		method: req.method,
 		headers: headers,
-		json: true
+		json:true,
+		jar: true		// TODO: remove since problematic on login cookies (ALL requests are then authenticated!)
 	};
 
 	request(options, function (error, response, body) {
+		console.log(body)
 		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
-			//console.log(body); 
-			res.json(body);
+			res.status(response.statusCode).json(body);
 
 		} else {
 			console.log("error", error);
-			res.json({"error":"could not get data via proxy!"});
+			res.status(response.statusCode).json({"error": error});
 			return;
 		}
 	});

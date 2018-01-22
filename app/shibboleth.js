@@ -30,11 +30,13 @@ exports.isValidUser = function(req, res, next) {
 exports.addHeadersToData = function(req) {
 	
 	if(global.config.authentication === "shibboleth" && Array.isArray(global.config.shibbolethHeadersToData)) {
+		var encoding = require("encoding");
 		global.config.shibbolethHeadersToData.forEach(function(header) {
-			var encoding = require("encoding");
-			req.body[header] = encoding.convert(req.headers[header], "Latin_1").toString(); 
+			if(global.config.shibbolethHeadersEncoding !== "UTF-8")
+				req.body[header] = encoding.convert(req.headers[header], global.config.shibbolethHeadersEncoding).toString(); 
+			else
+				req.body[header] = req.headers[header]; 
 		});
-		//console.log(req.body)
 	}
 
 }

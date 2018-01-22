@@ -685,6 +685,20 @@ var glamPipe = function () {
 				
 
 				//$("data-workspace settingscontainer .node-description").show();
+			}).fail(function(xhr, status) {
+				console.log(xhr.responseText)
+				var json = null;
+				try {
+					json = JSON.parse(xhr.responseText)
+				} catch(e) {
+					
+				}
+				
+				if(json && json.error) {
+					alert(json.error);
+				} else {
+					alert("Error in node creation")
+				}
 			});
 		}
 	}

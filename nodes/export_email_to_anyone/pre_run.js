@@ -2,12 +2,15 @@
 // send email only if this node has not been executed before for this document
 if(!context.doc[context.node.params.out_field]) {
 
-	var data_fields = context.node.settings.data_fields.split(",");
-	var data_str = dataVariables(data_fields); 
+	var data_str = '';
+	if(context.node.settings.data_fields) {
+		var data_fields = context.node.settings.data_fields.split(",");
+		data_str = dataVariables(data_fields); 
+	}
 	
 	var subject = matchVariables(context.node.settings.subject);
 	subject = subject.slice(0,80);
-	var text = matchVariables(context.node.settings.text); 
+	var text = matchVariables(context.node.settings.message); 
 	text = addVariables(text, "data_fields", data_str);
 	
 	var data = {

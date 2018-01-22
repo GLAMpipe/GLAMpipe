@@ -385,7 +385,7 @@ exports.authProject = function(req, res, next) {
 			if(user && project.owner.includes(user))
 				next();
 			else
-				res.status(401).json({error:"Node run not authenticated!"});
+				res.status(401).json({error:"You have no rights to add nodes to this project!"});
 		});
 	} else {
 		res.status(404).json({error:"Project not found!"});

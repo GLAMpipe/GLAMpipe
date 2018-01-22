@@ -1,0 +1,27 @@
+{
+    "nodeid": "export_html_contract",
+    "type": "export",
+    "subtype": "file",
+    "subsubtype": "doc",
+    "title": "BACKEND:  Documents as predefined html/text",
+    "status": "works",
+    "tags":["backend"],
+    "description": "'Contract' node",
+
+
+    "scripts": {
+
+        
+        "finish":
+        [
+            "out.say('finish','Export done to \"' + context.node.dir + '/' );"
+        ]
+
+    },
+    
+    "views": {
+
+        
+
+    }
+}

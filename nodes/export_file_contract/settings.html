@@ -1,0 +1,28 @@
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Array handling
+		</settingtitle>
+		<settinginstructions>
+			Arrays can be rendered as html lists or or joined strings.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>mode </label>
+		<select class="node-settings" name="mode">
+			<option value="concat">html list</option>
+			<option value="join">join</option>
+		</select>
+		<div id="">
+			<label>do not render single value arrays as list</label>
+			<input class="node-settings" name="single_not_list" type="checkbox" checked="checked"/>
+		</div>
+		<label>join separator</label>
+		<input class="node-settings" name="sep" value=","/>
+	</settingaction>
+</setting>

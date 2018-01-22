@@ -21,6 +21,8 @@ exports.run = function(req, io, res) {
 		if(err) {
 			console.log("node not found");
 			io.sockets.emit("error", "node not found");
+			if(res)
+				res.status(404).json({error:"node not found: " + req.params.id});
 			return;
 		}
 		
@@ -469,10 +471,6 @@ function initNode (req, io, project, callback) {
 			});
 
 
-			
-
-
-
 		} else {
 			console.log("ERROR: node not found");
 		}
@@ -567,7 +565,8 @@ exports.deleteNode = function (req, res, io) {
 			var node = project.nodes[index];
 			if(!node) {
 				console.log("ERROR: node not found");
-				return res.json({"error": "node not found (should not happen)"});
+				return res.status(404).json({error:"Node not found:" + req.params.node});
+				
 			}
 
 			// check if we need to remove anything else

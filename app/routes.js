@@ -26,7 +26,8 @@ module.exports = function(express, glampipe, passport) {
 		glampipe.logger.info("ACCESS", {method: req.method, url: req.url});
 		// shibboleth test header
 		if(global.config.shibbolethTestUser && global.config.shibbolethTestUser != "")
-			req.headers.mail = global.config.shibbolethTestUser; 
+			req.headers.mail = global.config.shibbolethTestUser.mail; 
+			req.headers.displayname = global.config.shibbolethTestUser.displayname; 
 			
 		next();
 	});
@@ -490,12 +491,29 @@ module.exports = function(express, glampipe, passport) {
 
 	// PROXY
 	express.get('/api/v1/proxy/', function (req, res) {
-		proxy.proxyJSON(req.query.url, req.query.query, res);
+		proxy.proxyJSON(req, res);
 	});
 
 	express.post('/api/v1/proxy/', function (req, res) {
-		proxy.proxyJSON(req.body.url, req.body.query, res);
+		proxy.proxyJSON(req, res);
 	});
+
+	express.put('/api/v1/proxy/', function (req, res) {
+		proxy.proxyJSON(req, res);
+	});
+
+
+
+	express.get('/api/v1/shibboleth',  function (req, res) {
+		var result = {};
+		if(global.config.authentication === "shibboleth") {
+			global.config.shibbolethHeadersToData.forEach(function(header) {
+				if(req.headers[header])
+					result[header] = req.headers[header];
+			})
+		}
+		res.json(result);
+	})
 
 	express.get('/api/v1/auth',  function (req, res) {
 
