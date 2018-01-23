@@ -14,7 +14,7 @@ module.exports = function(express, glampipe, passport) {
 
 	var multer 		= require("multer");
 	var path 		= require('path');
-	var p           = path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
+	var p			= path.join(glampipe.dataPath, 'tmp');  // dataPath is "fakedir" if not set settings.
 															// 		This allows us to start everything normally
 	var upload 		= multer({ dest: p });
 	express.set('superSecret', global.config.secret); // secret variable
@@ -22,13 +22,14 @@ module.exports = function(express, glampipe, passport) {
 
 	// print all request to console, could use morgan?
 	express.all("*", function (req, res, next) {
-		
+
 		glampipe.logger.info("ACCESS", {method: req.method, url: req.url});
 		// shibboleth test header
-		if(global.config.shibbolethTestUser && global.config.shibbolethTestUser != "")
-			req.headers.mail = global.config.shibbolethTestUser.mail; 
-			req.headers.displayname = global.config.shibbolethTestUser.displayname; 
-			
+		if(global.config.shibbolethTestUser && global.config.shibbolethTestUser != "") {
+			req.headers.mail = global.config.shibbolethTestUser.mail;
+			req.headers.displayname = global.config.shibbolethTestUser.displayname;
+		}
+
 		next();
 	});
 
@@ -90,21 +91,21 @@ module.exports = function(express, glampipe, passport) {
 			express.post('/api/v1/*', jwt2({secret: s}));
 			express.put('/api/v1/*', jwt2({secret: s}));
 			express.delete('/api/v1/*', jwt2({secret: s}));
-			
+
 		} else if(global.config.authentication === "shibboleth") {
-			express.post("/api/v1/*", shibboleth.isValidUser);	
-			express.put("/api/v1/*", shibboleth.isValidUser);	
-			express.delete("/api/v1/*", shibboleth.isValidUser);	
+			express.post("/api/v1/*", shibboleth.isValidUser);
+			express.put("/api/v1/*", shibboleth.isValidUser);
+			express.delete("/api/v1/*", shibboleth.isValidUser);
 		}
 
 		// are all GET requests open or not
 		express.get("/api/v1/*", project.isPublic);
-		
+
 		// project permissions
 		express.post("/api/v1/projects/:project*", project.authProject);
 		express.put("/api/v1/projects/:project*", project.authProject);
 		express.delete("/api/v1/projects/:project*", project.authProject);
-		
+
 		// node run permissions (can be overriden by IP_passes)
 		express.post("/api/v1/nodes/:id*", project.authNode);
 		express.put("/api/v1/nodes/:id*", project.authNode);
