@@ -365,6 +365,11 @@ module.exports = function(express, glampipe, passport) {
 		res.send("buu");
 	});
 
+
+	express.get('/api/v1/collections/:collection/duplicates/:field', function (req, res) {
+		collection.removeDuplicates(req, res);
+	});
+
 	express.get('/api/v1/collections/:collection/docs', function (req, res) {
 		collection.getTableData(req, res);
 	});
@@ -387,6 +392,12 @@ module.exports = function(express, glampipe, passport) {
 
 	express.get('/api/v1/collections/:collection/fields', function (req, res) {
 		collection.getKeys(req.params.collection, function(data) {res.send(data)});
+		//collection.getAllCollectionKeys(req.params.collection, function(data) {res.send(data)});
+	});
+
+	express.get('/api/v1/collections/:collection/schema/create', function (req, res) {
+		collection.createSchema(req, function(data) {res.send(data)});
+		//collection.getSchema(req.params.collection, function(data) {res.send(data)});
 		//collection.getAllCollectionKeys(req.params.collection, function(data) {res.send(data)});
 	});
 

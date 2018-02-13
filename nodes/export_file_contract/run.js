@@ -36,6 +36,6 @@ if(parseInt(context.count) % 100 == 0)
 
 // OUTPUT
 out.file = docid + c.node.params.extension;
-out.value = c.config.url + "/api/v1/nodes/" + c.node._id + "/files/" + out.file;
+out.value = "/api/v1/nodes/" + c.node._id + "/files/" + out.file;
 out.text = template;
 

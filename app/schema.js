@@ -3,6 +3,7 @@
 var mongojs 	= require('mongojs');
 const vm 		= require('vm');
 var path        = require('path');
+var parseSchema = require('mongodb-schema');
 var mongoquery 	= require("../app/mongo-query.js");
 const database 	= require('../config/database');
 var db 			= mongojs(database.initDBConnect());
@@ -16,6 +17,18 @@ var exports = module.exports = {};
  */
 
 exports.createCollectionSchema = function (node, cb) {
+
+  parseSchema(db.collection(node.collection).find(), {storeValues: false},function(err, schema) {
+    if (err) return console.error(err);
+ 
+    console.log(JSON.stringify(schema, null, 2));
+    cb(schema)
+    //db.close();
+  });
+	
+}
+
+exports.createCollectionSchema_old = function (node, cb) {
 	//var collection = db.collection(collectionName);
 	var key_list = {};
 	var keys = [];

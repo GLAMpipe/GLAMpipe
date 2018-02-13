@@ -8,14 +8,14 @@ const MP 		= require("../config/const.js");
 
 var exports = module.exports = {};
 
-
-
 // loop for synchronous nodes and export nodes (export is done once per document)
 exports.documentLoop = function (node, sandbox, onDoc) {
-
+	
 	sandbox.out.say("progress", "Processing started...");
 
 	var mode = "batch";
+	var counter = 0;
+	var doc_count = 0;
 	var query = {};
 	// ONE DOC (single run)
 	if(node.req && node.req.params.doc) {
@@ -24,74 +24,70 @@ exports.documentLoop = function (node, sandbox, onDoc) {
 		mode = "single";
 	}
 
-	// get documents (batch run) or document (single run)
-	mongoquery.find2(query, node.collection, function (err, docs) {
-
-		sandbox.context.doc_count = docs.length;
-		//console.log(node.settings);
-
-		// run node once per record
-		require("async").eachSeries(docs, function iterator (doc, next) {
-
-			// check if user asked for termination of the node run
-			if(!node.req.query.force && !global.register[node.req.originalUrl]) {
-				console.log("REGISTER: user terminated node run...");
-				sandbox.finish.runInContext(sandbox);
-				return;
-			}
-
-			sandbox.context.doc = doc;
-			sandbox.context.count++;
-			sandbox.context.skip = null;
-			sandbox.out.value = null;
-			sandbox.out.setter = null;
-			sandbox.out.error = null;
-
-			try {
-				sandbox.pre_run.runInContext(sandbox);
-			} catch(e) {
-				console.log(e);
-				sandbox.out.error = "error in pre_run.js:" + e.message;
-				sandbox.finish.runInContext(sandbox);
-				return;
-			}
-
-			// try to call document processing function
-			try {
-				onDoc(doc, sandbox, function processed () {
-
-					if(Array.isArray(sandbox.out.setter))
-						sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
-
-					if(sandbox.out.setter != null) {
-						var setter = sandbox.out.setter;
-					} else {
-						var setter = {};
-						setter[node.out_field] = sandbox.out.value;
-					}
-
-					updateDoc = createUpdateDoc(node, setter, doc, mode);
-
-					//console.log("updateDoc:", updateDoc);
-					if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
-						console.log("NODE: skipping")
-						next();
-					} else
-						mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, next);
-				});
-
-			} catch(e) {
-				if(e && e.name)
-					sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
-				else
-					sandbox.out.say("error", "Error in node: 'run' script");
-			}
-
-		}, function done () {
-			sandbox.finish.runInContext(sandbox);
-		});
-	});
+	var cursor = mongoquery.find2(query, node.collection);
+	processData(node, sandbox, onDoc, mode, cursor);
 }
+
+
+function processData (node, sandbox, onDoc, mode, cursor) {
+	
+	cursor.next(function(err, doc) {
+		if(!doc) {
+			sandbox.finish.runInContext(sandbox);
+			return;
+		}
+		sandbox.context.doc = doc;
+		sandbox.context.count++;
+		sandbox.context.skip = null;
+		sandbox.out.value = null;
+		sandbox.out.setter = null;
+		sandbox.out.error = null;
+
+		try {
+			sandbox.pre_run.runInContext(sandbox);
+		} catch(e) {
+			console.log(e);
+			sandbox.out.error = "error in pre_run.js:" + e.message;
+			sandbox.finish.runInContext(sandbox);
+			return;
+		}
+
+		// try to call document processing function
+		try {
+			onDoc(doc, sandbox, function processed () {
+
+				if(Array.isArray(sandbox.out.setter))
+					sandbox.out.setter = sandbox.out.setter[0];  // Document loop can have only one setter!!!!
+
+				if(sandbox.out.setter != null) {
+					var setter = sandbox.out.setter;
+				} else {
+					var setter = {};
+					setter[node.out_field] = sandbox.out.value;
+				}
+
+				updateDoc = createUpdateDoc(node, setter, doc, mode);
+
+				//console.log("updateDoc:", updateDoc);
+				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
+					console.log("NODE: skipping")
+					processData(node, sandbox, onDoc, mode, cursor);
+				} else
+					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, function() {
+						processData(node, sandbox, onDoc, mode, cursor);
+					});
+			});
+
+		} catch(e) {
+			if(e && e.name)
+				sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
+			else
+				sandbox.out.say("error", "Error in node: 'run' script");
+		}
+	})
+}
+
+
 
 // checks if there are manual edits in fields that are in setter object
 function createUpdateDoc(node, setter, doc, mode) {
