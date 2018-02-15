@@ -233,22 +233,22 @@ var GlamPipe = function() {
 		})
 
 		//  Start the app on the specific interface (and port).
-			var server = self.http.listen(self.port, self.ipaddress, function() {
-				var host = server.address().address;
-				var port = server.address().port;
-				console.log("\n********************* G L A M p i pe *************************");
-				console.log("* VERSION :        ", version.version);
-				if(process.env.DOCKER)
-					console.log("* ENVIRONMENT:      Docker");
-				else
-					console.log("* ENVIRONMENT:      native Nodejs (non-docker)");
-				console.log("* CONFIG FILE:     ", global.config.file);
-				console.log("* DATA PATH:       ", self.dataPath);
-				console.log("* NODE PATH:       ", self.nodePath);
-				console.log("* AUTHENTICATION   ", global.config.authentication);
-				console.log("* STATUS:           running on http://%s:%s", host, port);
-				console.log("********************* G L A M p i pe *************************");
-			});
+		var server = self.http.listen(self.port, self.ipaddress, function() {
+			var host = server.address().address;
+			var port = server.address().port;
+			console.log("\n********************* G L A M p i pe *************************");
+			console.log("* VERSION :        ", version.version);
+			if(process.env.DOCKER)
+				console.log("* ENVIRONMENT:      Docker");
+			else
+				console.log("* ENVIRONMENT:      native Nodejs (non-docker)");
+			console.log("* CONFIG FILE:     ", global.config.file);
+			console.log("* DATA PATH:       ", self.dataPath);
+			console.log("* NODE PATH:       ", self.nodePath);
+			console.log("* AUTHENTICATION   ", global.config.authentication);
+			console.log("* STATUS:           running on http://%s:%s", host, port);
+			console.log("********************* G L A M p i pe *************************");
+		});
 	};
 
 }
