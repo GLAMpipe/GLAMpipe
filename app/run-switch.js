@@ -657,12 +657,6 @@ exports.createSandbox = function (node, io) {
 			console:console,
 			schema: [],
 			key_type: [],
-			add_display_key: function (key, type) {
-				if(this.schema.indexOf(key) < 0) {
-					this.schema.push(key);
-					this.key_type.push(type);
-				}
-			},
 			say: function(ch, msg, options) {
 				console.log(ch.toUpperCase() + ":", msg);
 				io.sockets.emit(ch, {

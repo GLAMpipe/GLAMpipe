@@ -27,9 +27,6 @@ exports.createSandbox = function (node) {
 			console:console,
 			schema: [],
 			key_type: [],
-			add_display_key: function (key, type) {
-
-			},
 			say: function(ch, msg) {
 				console.log(ch.toUpperCase() + ":", msg);
 			}

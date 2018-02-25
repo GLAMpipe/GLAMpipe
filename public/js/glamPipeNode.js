@@ -31,6 +31,7 @@ var glamPipeNode = function (node, gp) {
 		
 		self.source.settings = self.getSettings(node);
 		console.log("RUNNING node with params: ", self.source.settings);
+		// TÄHÄN busy
 		
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
