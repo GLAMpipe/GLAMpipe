@@ -5,7 +5,6 @@ var mongoquery 	= require("../app/mongo-query.js");
 var schema 		= require("../app/schema.js");
 const database 	= require('../config/database');
 var buildquery 	= require("../app/query-builder.js");
-var db 			= mongojs(database.initDBConnect());
 
 var exports = module.exports = {};
 

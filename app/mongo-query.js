@@ -13,6 +13,9 @@ db.on("error", function(e) {
     
 var exports = module.exports = {};
 
+exports.getDB = function() {
+    return db;
+}
 
 exports.createBulk = function () {
 	return  db.items.initializeUnorderedBulkOp();

@@ -4,7 +4,9 @@ let mongojs = require('mongojs');
 var bcrypt   = require('bcrypt-nodejs');
 let database = require('../../config/database');
 //let config = require('../../config/config');
-let db = mongojs(database.initDBConnect());
+var mongoquery 	= require("../../app/mongo-query.js");
+
+var db = mongoquery.getDB();
 let collection = db.collection("mp_users");
 
 
