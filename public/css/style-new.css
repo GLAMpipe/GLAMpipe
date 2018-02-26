@@ -1137,3 +1137,7 @@ table.wikidata_export_conf tbody tr td {
     background-position: 28px 0;
   }
 }
+
+.busy {
+	background-color: #c4dec0;
+}

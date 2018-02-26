@@ -22,6 +22,22 @@ exports.createBulk = function () {
 // ******************************* FIND  *******************************
 // *********************************************************************
 
+exports.stats = function (collectionname, callback) {
+	var collection = db.collection(collectionname);
+	collection.stats(function (err, result) {
+		callback(err, result);
+	}); 
+}
+
+
+
+exports.loopOver = function (query, collectionname, callback) {
+	var collection = db.collection(collectionname);
+	collection.find(query).forEach(function (err, result) {
+		callback(err, result);
+	});  
+}
+
 exports.findAll = function (params, callback) {
 	var collection = db.collection(params.collection);
 	var sort = {};
@@ -36,9 +52,14 @@ exports.findAll = function (params, callback) {
 exports.find2 = function (query, collectionname, callback) {
 
 	var collection = db.collection(collectionname);
-	collection.find(query, function (err, result) {
-		callback(err, result);
-	});   
+	if(callback) {
+		collection.find(query, function (err, result) {
+			callback(err, result);
+		});   
+	// return cursor if no callback defined
+	} else {
+		return collection.find(query);
+	}
 }
 
 exports.findFields = function (query, fields, sort, collectionname, callback) {
@@ -658,7 +679,46 @@ exports.markNodeAsExecuted = function (node) {
 	
 }
 
+exports.removeDuplicates = function(collectionName, dupField, cb) {
 
+
+	var collection = db.collection(collectionName);
+
+/*
+.aggregate([{$group:{_id:"$dc_date_issued", dups:{$push:"$_id"}, count: {$sum: 1}}},
+{$match:{count: {$gt: 1}}}
+]).forEach(function(doc){
+  doc.dups.shift();
+  db.dups.remove({_id : {$in: doc.dups}});
+});
+*/
+	collection.aggregate([
+		{$group: {
+			_id: {mid:"$" + dupField},
+			uniqueIds: {$push: "$_id"},
+			count: {$sum: 1}
+			}
+		},
+		{$match: { 
+			count: {"$gt": 1}
+			}
+		},
+		{$sort: {
+			count: -1
+			}
+		}
+	],
+		function (err, data) {
+			if(err) {
+				cb({});
+			} else {
+			console.log(dupField)
+				cb(data);
+			}
+		}
+	);
+
+}
 
 // creates an object for mongoquery array update wiht positional operator ($)
 function createParamsObject(arrayName, params) {

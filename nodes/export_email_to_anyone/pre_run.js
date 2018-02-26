@@ -22,11 +22,18 @@ if(!context.doc[context.node.params.out_field]) {
 
 	out.pre_value = data;
 
+	// do not send empty messages
+	if(text == "" || subject == "")
+		out.pre_value = null;
+
 }
 
 // find all [[]] variables from text and replace with document values
 function matchVariables(str) {
 
+	if(typeof str !== "string") 
+		return "";
+		
 	var result = str.match(/\[\[(.*?)\]\]/g);
 	if(result) {
 		for(var i=0; i < result.length; i++) {
@@ -41,6 +48,9 @@ function matchVariables(str) {
 }
 
 function addVariables(str, variable, value) {
+	if(typeof str !== "string") 
+		return "";
+		
 	var regexp = new RegExp("\\[\\["+variable+"\\]\\]", "g");
 	return str.replace(regexp, value);
 }

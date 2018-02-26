@@ -23,6 +23,7 @@
     "form-data": "^2.1.2",
     "fs-sync": "^1.0.4",
     "jsonwebtoken": "^7.4.0",
+    "mongodb-schema": "^8.0.0",
     "mongojs": "^2.3.0",
     "multer": "^1.1.0",
     "node-pandoc": "^0.3.0",

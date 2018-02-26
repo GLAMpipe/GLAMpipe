@@ -389,3 +389,10 @@ exports.createSchema = function (req, cb) {
 exports.getSchema = function (collection_name, cb) {
 	schema.getCollectionSchema(collection_name, cb);
 }
+
+
+exports.removeDuplicates = function(req, res) {
+	mongoquery.removeDuplicates(req.params.collection, req.params.field, function(result) {
+		res.json({data:result});
+	});
+}
