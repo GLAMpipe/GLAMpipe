@@ -77,10 +77,6 @@ function makeRecord(item) {
 			item[key] = [];
 			item[key + "__lang"] = [];
 			
-			// write keys to schema so that they get rendered
-			// we also say that this is *always* an array
-			out.add_display_key(key, "array");
-			
 		}
 		
 		// push values to array
@@ -91,9 +87,7 @@ function makeRecord(item) {
 			item[key].push(item.metadata[j].value);
 			item[key + "__lang"].push(item.metadata[j].language);
 		}
-		
-		// we save all language codes but show only certain ones
-		out.add_display_key("dc_type__lang", "array");
+
 	}
 	
 	// BITSTREAMS

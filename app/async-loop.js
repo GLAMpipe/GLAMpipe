@@ -331,9 +331,9 @@ function processDataAsync(node, sandbox, onDoc, cursor) {
 			return;
 		}
 
+		resetSandbox(sandbox);
 		sandbox.context.doc = doc;
 		sandbox.context.count++;
-		resetSandbox(sandbox);
 
 		// execute pre_run.js
 		try {
@@ -366,9 +366,11 @@ function processDataAsync(node, sandbox, onDoc, cursor) {
 		} else {
 			// make asynchronous request for field value
 			onDoc(sandbox.out.pre_value, sandbox, function processed () {
-				if(sandbox.error)
+				if(sandbox.error || sandbox.context.error) {
 					console.log(sandbox.error);
+					console.log(sandbox.context.error);
 					console.log(sandbox.context.data)
+				}
 				sandbox.out.setter = null;
 				sandbox.run.runInContext(sandbox);
 				var setter = sandbox.out.setter;

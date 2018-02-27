@@ -45,7 +45,6 @@ exports.proxyJSON = function (req, res) {
 	};
 
 	request(options, function (error, response, body) {
-		console.log(body)
 		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
 			res.status(response.statusCode).json(body);
 

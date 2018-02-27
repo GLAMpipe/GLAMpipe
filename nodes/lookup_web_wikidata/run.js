@@ -6,14 +6,18 @@ var data = context.data;
 
 // check errors in request (for example 404)
 if(context.error) {
-	setter.error = context.error;
+	let error = out.error_marker + context.error;
+	if(context.error === "no URL")
+		error = out.error_marker + "no WID"
+	out.setter = {};
+	out.setter[context.node.params.out_field] = error;
+	out.setter[context.node.params.out_modified] = error;
 // check errors in query
 } else if(data && data.error) {
 	
 } else if(data) {
 
 	var mode = context.node.params.mode;
-	out.console.log(mode);
 	switch(mode) {
 		case "revision":
 			out.setter = getRevision();

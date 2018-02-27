@@ -5,16 +5,13 @@ var mongoquery 	= require("../app/mongo-query.js");
 var schema 		= require("../app/schema.js");
 const database 	= require('../config/database');
 var buildquery 	= require("../app/query-builder.js");
-var db 			= mongojs(database.initDBConnect());
 
 var exports = module.exports = {};
 
 
 exports.getCount = function (req, cb) {
 	
-	//var query = createSearchQuery(req);
 	var params = buildquery.search(req);
-	//console.log(query)
 	mongoquery.countDocs(req.params.collection, params.query, function (result) {
 		cb({count:result});
 	});
@@ -23,10 +20,7 @@ exports.getCount = function (req, cb) {
 
 exports.getDocumentById = function (req, res) {
 
-	//console.log(req.params.doc);
-	//console.log(req.params.collection);
 	mongoquery.findOneById(req.params.doc, req.params.collection, function(result) {
-		//console.log(result);
 		res.json({data:result});
 	})
 }
@@ -35,7 +29,6 @@ exports.getDocumentById = function (req, res) {
 exports.search = function (req, res) {
 
 	var params = buildquery.search(req);
-
 	mongoquery.findAll(params, function (result) {
 		res.send({data:result});
 	});

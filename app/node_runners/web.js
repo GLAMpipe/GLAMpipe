@@ -13,8 +13,11 @@ exports.postJSON = function (doc, sandbox, next) {
 	var options = sandbox.out.pre_value;
 	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
-	if(!options.url || sandbox.context.skip)
-		return next("skipping...")
+	if(!options || !options.url || sandbox.context.skip) {
+		if(sandbox.context.error == "")
+			sandbox.context.error = " no URL";
+		return next("skipping...");
+	}
 
 	setUserAgent(options);
 
@@ -45,8 +48,9 @@ exports.postJSON = function (doc, sandbox, next) {
 // get JSON response via GET or POST
 exports.requestJSON = function (options, sandbox, next) {
 
-	if(!options.url || sandbox.context.skip) {
-		sandbox.context.error = "no URL";
+	if(!options || !options.url || sandbox.context.skip) {
+		if(sandbox.context.error == "")
+			sandbox.context.error = " no URL";
 		return next("skipping...");
 	}
 	

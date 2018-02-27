@@ -21,7 +21,7 @@ if(splitted.length === 2) {
 
 metafield.description = getVal(context.doc[context.node.settings.description]);
 
-options.url = context.node.params.url + "/registries/schema/" + schema + "/metadata-fields";
+options.url = context.node.params.required_url + "/registries/schema/" + schema + "/metadata-fields";
 out.pre_value = options;
 
 

@@ -15,8 +15,7 @@
         
         "init": 
         [
-			"context.vars.success_counter = 0; ",
-			"out.add_display_key('checksum', 'array'); "
+			"context.vars.success_counter = 0; "
 		],
 		
 		"pre_run": "out.value = context.doc[context.node.params.in_field][0];" ,

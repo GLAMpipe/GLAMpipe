@@ -64,8 +64,6 @@ var GlamPipe = function() {
 	 */
 	self.initializeServer = function() {
 		
-		console.log("initializing server");
-
 		self.app = express();
 		self.app.use(global.config.uiPath, express.static('public'));
 		self.app.use("/publicview", express.static('app/views/datapublic'));

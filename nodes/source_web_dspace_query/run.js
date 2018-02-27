@@ -32,10 +32,6 @@ if (context.response && context.response.statusCode == 200 ) {
 					context.data.items[i][key] = [];
 					context.data.items[i][key + "__lang"] = [];
 					
-					// write keys to schema so that they get rendered
-					// we also say that this is *always* an array
-					out.add_display_key(key, "array");
-					
 				}
 				
 				// push values to array
@@ -47,8 +43,7 @@ if (context.response && context.response.statusCode == 200 ) {
 					context.data.items[i][key + "__lang"].push(context.data.items[i].metadata[j].language);
 				}
 				
-				// we save all language codes but show only certain ones
-				out.add_display_key("dc_type__lang", "array");
+
 			}
 			
 			// BITSTREAMS

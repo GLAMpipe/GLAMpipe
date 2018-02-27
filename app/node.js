@@ -943,7 +943,6 @@ exports.readNodes = function (io, nodePath, callback) {
 		
 	}, function onDone () {
 		console.log("INIT: " + nodeCount + " nodes loaded from " + nodePath);
-		console.log("******************************************");
 		callback(null);
 	});
 }
@@ -1071,7 +1070,7 @@ function readNodeDirectory (nodeDir, skip, cb) {
 	// read description.js from node directory
 	fs.readFile(path.join(nodeDir, "description.json"), 'utf-8', function(err, content) {
 		if (err) {
-			console.log("Skipping", nodeDir);
+			console.log("INIT: Skipping", nodeDir);
 			skip(); // we skip directory if there is no description.json
 			return;
 		} else {

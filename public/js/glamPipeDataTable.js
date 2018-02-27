@@ -371,11 +371,18 @@ var dataTable = function (node) {
 					html += "<div class='"+className+"'>["+index+"]<a target='_blank' href='"+data+"'>" + data + "</a></div>";
 				else
 					html += "<div class='"+className+"'><a target='_blank' href='"+data+"'>" + data + "</a></div>";
-				
-			} else {
-				if(typeof data == "string" && data.match("^AAAA_error"))
+					
+			// render errors	
+			} else if(typeof data == "string" && data.match("^AAAA_error")) {
+				data = data.replace("AAAA_error:","");
+				if(index != null)
 					html += "<div class='error'>["+index+"] " + self.nl2br(data) + "</div>";
-				else if(index != null)
+				else
+					html += "<div class='error'>" + self.nl2br(data) + "</div>";
+					
+			// render strings
+			} else  {
+				if(index != null)
 					html += "<div class='"+className+"'>["+index+"] " + self.nl2br(data, key) + "</div>";
 				else 
 					html += "<div class='"+className+"'>" + self.nl2br(data, key) + "</div>";

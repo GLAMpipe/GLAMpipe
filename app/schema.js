@@ -41,17 +41,17 @@ exports.getCollectionSchema = function (collectionName, cb) {
 
 
 
-function saveSchema(schema, node, cb) {
-	mongoquery.findOne({collection:node.collection}, "mp_schemas", function (error, schema) {
-		if(schema) {
-			mongoquery.remove(schema._id, "mp_schemas", function (error, doc) {
+function saveSchema(new_schema, node, cb) {
+	mongoquery.findOne({collection:node.collection}, "mp_schemas", function (error, old_schema) {
+		if(old_schema) {
+			mongoquery.remove(old_schema._id, "mp_schemas", function (error, doc) {
 				mongoquery.insert("mp_schemas", schema, function(err, result) {
 					if(cb)
 						cb(result);
 				})		
 			})
 		} else {
-			mongoquery.insert("mp_schemas", schema, function(err, result) {
+			mongoquery.insert("mp_schemas", new_schema, function(err, result) {
 				if(cb)
 					cb(result);
 			})				
@@ -64,8 +64,9 @@ function generateSchema(node, cursor, keys, cb) {
 	cursor.next(function(err, doc) {
 
 		for (key in doc) {
-			if(keys.indexOf(key) < 0)
+			if(keys.indexOf(key) < 0) {
 				keys.push(key);
+			}
 		}
 		// quit if there are no more documents
 		if(!doc) {
@@ -73,6 +74,7 @@ function generateSchema(node, cursor, keys, cb) {
 			// save schema
 			var schema = {collection: node.collection, keys:keys}
 			saveSchema(schema, node);
+			console.log("COLLECTION: schema created (" + keys.length + " keys)");
 			return;
 		}
 		

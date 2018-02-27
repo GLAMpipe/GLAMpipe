@@ -1,24 +1,47 @@
 
-<h3>DSpace login (<span id="server_url"></span>)</h3>
-<div class="box-noflex">
-	<label>username </label>
-	<input class="node-settings" type="text" name="username" id="username" required />
+<setting>
+	<settinginfo>
+		<settingtitle>
+			DSpace login
+		</settingtitle>
+		<settinginstructions>
+			DSpace login for server: <span id="export-web-dspace-addfield-server"></span>
+		</settinginstructions>
+	</settinginfo>
 	
-	<label>password</label>
-	<input class="node-settings" type="password" name="password" id="password"/>
+	<settingaction>
+		<label>username </label>
+		<input class="node-settings" type="text" name="username" id="username" required />
+		<label>password</label>
+		<input class="node-settings" type="password" name="password" id="password"/>
+	</settingaction>
+</setting>
 
-</div>
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Metadata fields
+		</settingtitle>
+		<settinginstructions>
+			Choose which fields hold field names and descriptions
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>field names</label>
+		<select class="node-settings dynamic_field" name="metadatafield" >
+			<option value="">choose</option>
+		</select>
+		
+		<label>descriptions</label>
+		<select class="node-settings dynamic_field" name="description" >
+			<option value="">choose</option>
+		</select>
+	</settingaction>
+</setting>
 
 
-<h3>Metadata fields</h3>
-<div class="box-noflex">
-	<label>choose field name field </label>
-	<input class="node-settings dynamic_field" name="metadatafield" />
-	<label>choose description field</label>
-	<input class="node-settings dynamic_field" name="description" />
-
-	<div id="export_web_dspace_schema_add_field_display"></div>
-</div>
 
 
 

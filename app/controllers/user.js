@@ -4,8 +4,7 @@ let mongojs = require('mongojs');
 var bcrypt   = require('bcrypt-nodejs');
 let database = require('../../config/database');
 //let config = require('../../config/config');
-let db = mongojs(database.initDBConnect());
-let collection = db.collection("mp_users");
+var mongoquery 	= require("../../app/mongo-query.js");
 
 
 class User {
@@ -82,7 +81,7 @@ class User {
 	}
 
 	static findById(id, cb) {
-		collection.findOne({"_id":mongojs.ObjectId(id)}, function (err, result) {
+		mongoquery.findOne({"_id":mongojs.ObjectId(id)}, "mp_users", function (err, result) {
 			if (err) {
 				cb(err)
 			} else if(result) {
