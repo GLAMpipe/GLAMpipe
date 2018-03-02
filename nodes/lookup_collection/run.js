@@ -1,9 +1,8 @@
 
-var mapping = context.data;
+var mapping = context.mapping;
 var local_key_value = context.doc[context.node.settings.in_key_field];
 out.setter = {};
 var fuzzy = 1.0;
-
 
 if(Array.isArray(local_key_value)) {
 	out.setter[context.node.params.out_field] = [];
@@ -34,7 +33,6 @@ if(parseInt(context.count) % 100 == 0)
 
 // we expect that mapping data has string value or arrays with length 1 
 function map(key_value) {
-	
 	var mapped = {};
 	mapped.value = "";
 	mapped.score = 0.0;
@@ -108,8 +106,7 @@ function map(key_value) {
   * changes by AH: transformed to a function
   * */
 function stringScore (word_o, word, fuzziness) {
-  'use strict';
-
+	'use strict';
 	word = word.replace("\n","");
 	word_o = word_o.replace("\n","");
 

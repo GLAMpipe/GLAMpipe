@@ -1,0 +1,31 @@
+{
+	"nodeid": "source_file_gp_nodes",
+	"type": "source",
+	"subtype": "file",
+	"subsubtype": "node",
+	"title": "Import nodes",
+    "status": "usable",
+    "tags":["generic"],
+	"description": "Import nodes from JSON",
+
+	"scripts": {
+		"hello": 
+		[
+			"out.say('news', 'You added a file import');",
+			"context.node.title = context.node.params.file; "
+		],
+		
+        "bye": "out.say('news', 'Deleted file import node. Data removed. Bye!'); ",
+        
+		"init":"out.say('progress', context.node.title); context.vars = {count:0};",
+
+		
+		"finish":"out.say('finish', 'Data imported '+context.vars.count+' items from file ' + context.node.params.file);"
+		
+	},
+	
+	"views": {
+
+	}
+
+}

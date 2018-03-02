@@ -203,8 +203,12 @@ exports.findProjectNode = function (node_id, callback) {
 	//})
 }
 
-
-
+exports.getCollections = function (callback) {
+	db.getCollectionNames(function(err, colNames) {
+	  if (err) console.log(err);
+	  callback(err, colNames);
+	});
+}
 // *********************************************************************
 // ******************************* INSERT ******************************
 // *********************************************************************

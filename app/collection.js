@@ -9,6 +9,17 @@ var buildquery 	= require("../app/query-builder.js");
 var exports = module.exports = {};
 
 
+exports.getNames = function (req, res) {
+	
+	var params = buildquery.search(req);
+	mongoquery.getCollections(function (err, result) {
+		if(err)
+			res.json({});
+		else
+			res.json({result});
+	});
+}
+
 exports.getCount = function (req, cb) {
 	
 	var params = buildquery.search(req);

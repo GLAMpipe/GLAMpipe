@@ -365,7 +365,6 @@ module.exports = function(express, glampipe, passport) {
 		res.send("buu");
 	});
 
-
 	express.get('/api/v1/collections/:collection/duplicates/:field', function (req, res) {
 		collection.removeDuplicates(req, res);
 	});
@@ -473,6 +472,10 @@ module.exports = function(express, glampipe, passport) {
 		collection.removeKey(req, function(data) {res.send(data)});
 	});
 
+	express.get('/api/v1/collections', function (req, res) {
+		collection.getNames(req, res);
+	});
+
 	// UPLOAD
 	express.post('/api/v1/upload', upload.single('file'), function (req, res) {
 		glampipe.core.uploadFile(req, res);
@@ -485,8 +488,8 @@ module.exports = function(express, glampipe, passport) {
 
 	// FILES
 	express.get('/api/v1/upload/:id', function (req, res) {
-		res.setHeader('Content-type', 'application/pdf');
-		res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
+		//res.setHeader('Content-type', 'application/pdf');
+		//res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
 		res.sendFile(path.join(glampipe.dataPath, "tmp", req.params.id));
 	});
 

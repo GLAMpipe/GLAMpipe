@@ -547,7 +547,7 @@ exports.runNode = function (node, io) {
 							fields[sandbox.context.node.settings.lookup_key_field] = 1;
 							fields[sandbox.context.node.settings.lookup_copy_field] = 1;
 							mongoquery.findFields({}, fields, {}, sandbox.context.node.params.required_source_collection, function(err, result) {
-								sandbox.context.data = result;
+								sandbox.context.mapping = result;
 								asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 									sandbox.run.runInContext(sandbox);
 									next();
