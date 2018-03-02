@@ -496,7 +496,7 @@ module.exports = function(express, glampipe, passport) {
 		flow.getReversePipe(req, res);
 	});
 
-	express.get('/api/v1/pipes/collections/:collection', function (req, res) {
+	express.get('/api/v1/collections/:collection/pipe', function (req, res) {
 		flow.getPipe(req, res);
 	});
 

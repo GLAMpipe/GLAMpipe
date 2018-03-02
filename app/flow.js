@@ -15,10 +15,46 @@ var exports = module.exports = {};
 
 exports.getPipe = function(req, res) {
 
-	res.json({msg: "pipe"});
-
+	var project = "5988b5ef54defe0f75040fb7";
+	var nodes = [];
+	mongoquery.findOneById(project, "mp_projects", function(project) {
+		project.nodes.forEach(function(node) {
+			console.log(node._id)
+			if(req.params.collection == node.collection && node.type !== "collection" && node.type !== "source") {
+				node.outputs = getNodeOutputs(node);
+				node.inputs = getNodeInputs(node);
+				
+				nodes.push(node);
+				
+			}
+		})
+		getRootNodes(nodes);
+		res.json({msg: "pipe"});
+	});
 }
 
+function getRootNodes(nodes) {
+	// nodes that has no inputs that are listed in outputs of other nodes
+	var rootNodes = [];
+	nodes.forEach(function(node) {
+		console.log("checking node " + node.title);
+		console.log(node.inputs)
+		var root = true;
+		for(var i=0; i < nodes.length; i++) {
+			node.inputs.forEach(function(input) {
+				if(node._id != nodes[i]._id && nodes[i].outputs.includes(input))
+					root = false;
+			})
+				
+		}
+		if(root)
+			rootNodes.push(node);
+
+	})
+	console.log("ROOT nodes:")
+	rootNodes.forEach(x=> console.log(x.settings))
+	return rootNodes;
+}
 
 exports.getReversePipe = function(req, res) {
 	var current_node = {};
@@ -101,6 +137,8 @@ function getNodeInputs(node) {
 	}
 	for(var key in node.settings) {
 		if(/^in_/.test(key))
+			inputs.push(node.settings[key]);
+		if(/_dynamic$/.test(key))
 			inputs.push(node.settings[key]);
 	}
 	return inputs;
