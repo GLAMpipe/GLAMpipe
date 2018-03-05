@@ -1,5 +1,5 @@
 var c = context;
-var template = c.node.params.template;
+var template = c.node.settings.template;
 var docid = c.doc._id.toString();
 
 function makeHtmlList(arr) {
@@ -36,6 +36,6 @@ if(parseInt(context.count) % 100 == 0)
 
 // OUTPUT
 out.file = docid + c.node.params.extension;
-out.value = "/api/v1/nodes/" + c.node._id + "/files/" + out.file;
+out.value = context.config.publicUrl + "/api/v1/nodes/" + c.node._id + "/files/" + out.file;
 out.text = template;
 

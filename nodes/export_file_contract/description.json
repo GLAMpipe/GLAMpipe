@@ -3,9 +3,9 @@
     "type": "export",
     "subtype": "file",
     "subsubtype": "doc",
-    "title": "BACKEND:  Documents as predefined html/text",
+    "title": "HTML: Documents as predefined html/text",
     "status": "works",
-    "tags":["backend"],
+    "tags":["generic"],
     "description": "'Contract' node",
 
 

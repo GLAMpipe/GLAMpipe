@@ -1,5 +1,5 @@
 
-var template = context.node.params.template;
+var template = context.node.settings.template;
 context.vars = {};
 
 var date = new Date();
