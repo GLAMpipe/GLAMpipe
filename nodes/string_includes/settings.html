@@ -1,0 +1,84 @@
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Comparasion strings 
+		</settingtitle>
+		<settinginstructions>
+		Set the list of strings to compare. A separator is used to split strings. Default separator is ",".
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+	<label>compare to these strings</label>
+	<input class="node-settings" name="comp" />
+	<label>separator</label> 
+	<input class="node-settings" name="comp_separator" value=","/>
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy this if there IS match
+		</settingtitle>
+		<settinginstructions>
+			Here you can set string that gets written to output field when there is a match.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>String</label>
+		<input class="node-settings" name="static_yes" value="match"/>
+
+	</settingaction>
+</setting>
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Copy this if there IS NO match
+		</settingtitle>
+		<settinginstructions>
+			Here you can set string that gets written to output field when there is no match.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>String</label>
+		<input class="node-settings" name="static_no" value="no match"/>
+
+	</settingaction>
+</setting>
+
+
+
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Trim
+		</settingtitle>
+		<settinginstructions>
+			Field values get trimmed before comparision if this is checked. Comparision strings are always trimmed.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+
+		<label>Trim</label>
+		<input type="checkbox" class="node-settings" name="trim" checked="checked"/>
+	</settingaction>
+</setting>
+

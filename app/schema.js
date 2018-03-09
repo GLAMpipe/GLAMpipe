@@ -45,7 +45,7 @@ function saveSchema(new_schema, node, cb) {
 	mongoquery.findOne({collection:node.collection}, "mp_schemas", function (error, old_schema) {
 		if(old_schema) {
 			mongoquery.remove(old_schema._id, "mp_schemas", function (error, doc) {
-				mongoquery.insert("mp_schemas", schema, function(err, result) {
+				mongoquery.insert("mp_schemas", new_schema, function(err, result) {
 					if(cb)
 						cb(result);
 				})		
