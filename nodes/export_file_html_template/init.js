@@ -9,15 +9,17 @@ var d =  date.getDate();
 context.vars.date = y + "-" + m + "-" + d;
 
 // find keys in template
-var keys = []
-var t = template.split("[[");
-t.forEach(function(bit) {
-	if(bit.includes("]]")) {
-		var l = bit.split("]]");
-		var key = l[0];
-		keys.push(key);
-	}
-})
+if(template) {
+	var keys = []
+	var t = template.split("[[");
+	t.forEach(function(bit) {
+		if(bit.includes("]]")) {
+			var l = bit.split("]]");
+			var key = l[0];
+			keys.push(key);
+		}
+	})
+} 
 
 out.console.log("NODE: template keys:");
 out.console.log(keys);

@@ -1,12 +1,12 @@
 {
-    "nodeid": "export_html_contract",
+    "nodeid": "export_html_template",
     "type": "export",
     "subtype": "file",
     "subsubtype": "doc",
-    "title": "HTML: Documents as predefined html/text",
+    "title": "HTML: Template with data placeholders",
     "status": "works",
     "tags":["generic"],
-    "description": "'Contract' node",
+    "description": "A fuser-defined html with data placeholders, aka 'contract' node",
 
 
     "scripts": {

@@ -68,10 +68,12 @@ exports.docToFile = function (doc, sandbox, next) {
 
 	sandbox.run.runInContext(sandbox);
 
-	var filePath = path.join(sandbox.context.node.dir, sandbox.out.file);
-	var wstream = fs.createWriteStream(filePath);
-	wstream.write(sandbox.out.text);
-	wstream.end();
+	if(sandbox.out.file) {
+		var filePath = path.join(sandbox.context.node.dir, sandbox.out.file);
+		var wstream = fs.createWriteStream(filePath);
+		wstream.write(sandbox.out.text);
+		wstream.end();
+	}
 	next();
 
 }
