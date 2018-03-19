@@ -4,6 +4,10 @@
 var nodeDevMode = false;
 
 // PATHS 
+var MP = "__mp"; // prefix 
+var url = "http://localhost";
+var publicUrl = "http://localhost:3000";
+
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""
 var dataPath = "";
@@ -39,6 +43,8 @@ var shibbolethUsers = [];
 var shibbolethHeaderId = "";
 // defines which shibboleth headers are added to the document submitted when data is added to a collection via REST api. 
 var shibbolethHeadersToData = [];
+// values "UTF-8" or "Latin_1"
+var shibbolethHeadersEncoding =  "UTF-8";
 
 var disableBatchDownloads = false;
 var secret = "Set something here";
@@ -63,9 +69,6 @@ var PROXY_passes = [
 
 var IP_passes = [];
 
-var MP = "__mp"; // prefix 
-var url = "http://localhost";
-
 var exports = module.exports = {};
 
 exports.source =  MP + "_source";
@@ -75,6 +78,7 @@ exports.nodePath = nodePath;
 exports.uiPath = uiPath;
 exports.staticPath = staticPath;
 exports.url = url;
+exports.publicUrl = publicUrl;
 exports.authentication = authentication;
 exports.public = public;
 exports.disableBatchDownloads = disableBatchDownloads;
@@ -88,6 +92,7 @@ exports.PROXY_passes = PROXY_passes;
 exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
 exports.shibbolethHeadersToData = shibbolethHeadersToData;
+exports.shibbolethHeadersEncoding = shibbolethHeadersEncoding;
 
 exports.smtp = smtp;
 exports.smtpSender = smtpSender;

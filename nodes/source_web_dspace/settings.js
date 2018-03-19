@@ -24,14 +24,13 @@
 		}
 	})
 
-	$("#source_web_dspace_selected").empty().append(collectionsfromQuery().join(""));
-	hierarchyList();
 
+
+	$("#source_web_dspace_selected").empty().append(collectionsfromQuery().join(""));
 	$("#source_web_dspace_url").text(params.required_dspace_url);
 
-
 	//$(document).on("click", "#source_web_dspace_fetch", function () {
-	$("#source_web_dspace_fetch").click(function (e) {
+	$(".source_web_dspace_fetch").click(function (e) {
 		hierarchyList();
 	})
 
@@ -39,7 +38,6 @@
 		$("input.collection[type='checkbox']").prop("checked", false);
 		createQuery();
 	})
-
 
 	// collection change handler
 	$("#source_web_dspace_data").on("change", "input.collection:checkbox", function (event) {
@@ -66,6 +64,10 @@
 	})
 
 	$("setting").on("change", "select[name='query_field[]']", function() {
+		createQuery()
+	})
+
+	$("setting").on("change", "select[name='query_op[]']", function() {
 		createQuery()
 	})
 
@@ -136,7 +138,7 @@
 			// update selected collections list
 			collectCollections();
 			//$("setting select[name='query_field[]']").prop('disabled', false);
-		})
+		}).error(function() { alert("error in DSpace request!"); })
 	}
 
 
