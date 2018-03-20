@@ -341,12 +341,12 @@ var glamPipe = function () {
 	this.addProject = function (title) {
 
 		var data = {"title": title};
-		$.post(self.baseAPI + "/projects", data, function(data) {
+		post(self.baseAPI + "/projects", data, function(data) {
 			if(!data.error) {
 				console.log('created project', data.project);
 				var project = data.project._id;
 				var params = {params:{title:"My collection"}}
-				$.post(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
+				post(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
 					if(!data.error)
 						window.location.href = self.uiPath + "project/" + project;
 					else
@@ -405,7 +405,7 @@ var glamPipe = function () {
 				
                 $( this ).dialog( "close" );
                 var params = {"title": title};
-                $.post(self.baseAPI + "/copy/project/" + project_id, params, function(retData) {
+                post(self.baseAPI + "/copy/project/" + project_id, params, function(retData) {
                     console.log('project copied');
                     if(retData.error)
                         alert(retData.error);
@@ -667,7 +667,7 @@ var glamPipe = function () {
 		else {data.collection = self.currentCollection.source.collection;
 			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
 			
-			$.post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+			post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
 				//console.log("node create:", returnedData);
 				if(returnedData.error) {
 					alert(returnedData.error);
@@ -727,7 +727,7 @@ var glamPipe = function () {
                 $( this ).dialog( "close" );
 				var title = $( "#dialog-confirm input").val();
 				var data = {"params":{"title":title}};
-				$.post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/collection_basic?type=collection", data, function(returnedData) {
+				post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/collection_basic?type=collection", data, function(returnedData) {
 					console.log('created node');
 					$(".holder.params").empty();
 					// point currentCollectionSet to last collection
@@ -1079,7 +1079,7 @@ var glamPipe = function () {
                     data.params.mimetype = data.mimetype;
                     data.project = self.currentProject;
                     data.collection = self.currentCollection.source.collection; 
-                    $.post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+                    post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
                         console.log('created upload node');
                         self.loadProject();
                     });
