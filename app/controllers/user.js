@@ -26,12 +26,12 @@ class User {
         if(global.config.canRegister) {
             var self = this;
             if(this.validate()) {
-                collection.update(this.local, this, {upsert:true} ,function (err, result) {
+                mongoquery.insert("mp_users", {local:this.local} ,function (err, result) {
                     if (err) {
                         console.log("err :" + err);
                         cb({error: err})
                     } else {
-                        self.id = result.upserted[0]._id; // set id for serializer
+                        self.id = result._id; // set id for serializer
                         cb(null);
                     }
                 }); 
@@ -54,7 +54,7 @@ class User {
 
 	// find all users
 	static findAll(req, res) {
-		collection.find({}, {"local.email":1}, function (err, result) {
+		mongoquery.find({}, {"local.email":1}, "mp_users",function (err, result) {
 			if (err) {
 				console.log(err);
 				res.json([])
@@ -67,7 +67,7 @@ class User {
 
 	// find user by email
 	static findOne(email, cb) {
-		collection.findOne({"local.email":email}, function (err, result) {
+		mongoquery.findOne({"local.email":email}, "mp_users", function (err, result) {
 			if (err) {
 				cb(err)
 			} else if(result) {
