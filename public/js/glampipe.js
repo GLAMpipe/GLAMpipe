@@ -769,9 +769,9 @@ var glamPipe = function () {
 				var collection = self.currentCollection;
 				
 				// render collection
-				var col_html =   "<div><span class='title pagetitle'>" + collection.source.title + "</span>";
-				col_html += "<a class='add-collection' href='#'> Add </a>";
-				col_html += "<a class='remove-collection' href='#' data-id='"+collection.source._id+"'> Remove</a></div>";
+				var col_html =   "<div><span class='title pagetitle'>" + collection.source.params.title + "</span>";
+				col_html += "<a class='add-collection' title='Add new collection' href='#'> Add </a>";
+				col_html += "<a class='remove-collection' href='#' title='Remove this collection' data-id='"+collection.source._id+"'> Remove</a></div>";
 				
 				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
 				$("pipe .collection").empty().append(col_html);
@@ -780,19 +780,19 @@ var glamPipe = function () {
 				html += "<collectionset>"
 
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Read data</span> <a class='add-node' data-type='source' href='#'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Read data</span> <a class='add-node' data-type='source' title='Add new import node' href='#'>Add</a></div>"
 				html += "  </div><div class='holder params'></div>"
 				 
 				html += self.renderNodes(collection,["source"]);
 				  
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Process the data</span> <a class='add-node' data-type='process' href='addnode.html'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Process the data</span> <a class='add-node' data-type='process' title='Add new processing node' href='addnode.html'>Add</a></div>"
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["process"]);
 				
 				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>Write the data</span> <a class='add-node' data-type='export' href='addnode.html'>Add</a></div>"
+				html += "	<div><span class='title sectiontitle'>Write the data</span> <a class='add-node' data-type='export' title='Add new export node' href='addnode.html'>Add</a></div>"
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["export"]);

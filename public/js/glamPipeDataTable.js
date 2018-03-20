@@ -723,7 +723,7 @@ var dataTable = function (node) {
 	this.showVisibleKeysSelector = function (event) {
 		var visible_keys = self.getVisibleFields();
 		var obj = $(event.target);
-		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div>";
+		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-read fields</a>";
 		html += "<hr/><div class='flex visible-keys'>";
 		for(var i = 0; i < self.keys.all_keys.sorted.length; i++) {
 			if(visible_keys.indexOf(self.keys.all_keys.sorted[i]) === -1)
@@ -782,14 +782,23 @@ var dataTable = function (node) {
 		self.collectVisibleFiels();	
 	}
 
+	// re-read fields (generate schema)
+	this.reReadFields = function () {
+		$("#field-selector .visible-keys").empty().append("generating schema...");
+		var data = {};
+		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollection.source.params.collection + "/schema", function(returnedData) {
+			$("#field-selector .visible-keys").empty().append("Schema generated!");
+			// TODO: reload keys (schema)
+		});
+	}
+
 	this.addFilter = function () {
 		var field = $("#data-search-field").val();
 		var value = $("#data-search-value").val();
 		self.params.search_value.keys.push(field);
 		self.params.search_value.values.push(value);
 		this.params.skip_value = 0; // reset offset
-		self.render();
-
+		self.render()
 	}
 
 	this.removeFilter = function (event) {
@@ -831,6 +840,11 @@ var dataTable = function (node) {
 		// unselect all visible fields
 		$("#field-selector").on('click','.unselect_all', function(e) {
 			self.unselectVisibleFields(e);
+		})
+
+		// re-read fields
+		$("#field-selector").on('click','#re-read-fields', function(e) {
+			self.reReadFields(e);
 		})
 
 		// next page of data

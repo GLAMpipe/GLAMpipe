@@ -22,7 +22,7 @@ exports.createCollectionSchema = function (node, cb) {
 	var keys = [];
 	
 	var cursor = mongoquery.find2({}, node.collection);
-	generateSchema(node, cursor, keys);
+	generateSchema(node, cursor, keys, cb);
 	
 
 }
@@ -75,10 +75,12 @@ function generateSchema(node, cursor, keys, cb) {
 			var schema = {collection: node.collection, keys:keys}
 			saveSchema(schema, node);
 			console.log("COLLECTION: schema created (" + keys.length + " keys)");
+			if(cb)
+				cb(schema);
 			return;
 		}
 		
-		generateSchema(node, cursor, keys);
+		generateSchema(node, cursor, keys, cb);
 	})
 }
 
