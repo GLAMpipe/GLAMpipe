@@ -1,17 +1,37 @@
 
 
 <label>Wikidata id field?</label>
-<select class="dynamic_field" name="in_field" />
+<select id="lookup_wikidata_in" class="dynamic_field" name="in_field" >
+	<option value="">choose</option>
+</select>
 
 
-<label>What to lookup?</label>
-<select name="mode">
+<label>What data is fetched?</label>
+<select id="lookup_wikidata_mode" name="mode">
+	<option value="labels">fetch labels</option>
+	<option value="sitelinks">fetch sitelinks</option>
 	<option value="revision">fetch latest revision number</option>
 </select>
 
 
 <label>Revision field name? </label>
-<input id="process_lookup_wikidata_out" name="out_field" value="wd_revision"/>
+<input id="process_lookup_wikidata_out" name="out_field" value="wd"/>
 
 <label>Modified field name? </label>
-<input id="process_lookup_wikidata_out" name="out_modified" value="wd_revision_date"/>
+<input id="process_lookup_wikidata_out_rev" name="out_modified" value="wd_revision_date"/>
+
+
+
+<script>
+	$("#process_lookup_wikidata_out").val($("#lookup_wikidata_in").val() + "_wd_" + $("#lookup_wikidata_mode").val());
+	$("#process_lookup_wikidata_out_rev").val($("#lookup_wikidata_in").val() + "_wd_modified");
+	
+	$("#lookup_wikidata_mode").change(function() {
+		$("#process_lookup_wikidata_out").val($("#lookup_wikidata_in").val() + "_wd_" + $("#lookup_wikidata_mode").val());
+		$("#process_lookup_wikidata_out_rev").val($("#lookup_wikidata_in").val() + "_wd_modified");
+	})
+	$("#lookup_wikidata_in").change(function() {
+		$("#process_lookup_wikidata_out").val($("#lookup_wikidata_in").val() + "_wd_" + $("#lookup_wikidata_mode").val());
+		$("#process_lookup_wikidata_out_rev").val($("#lookup_wikidata_in").val() + "_wd_modified");
+	})
+</script>
