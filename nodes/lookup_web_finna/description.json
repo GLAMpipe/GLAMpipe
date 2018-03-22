@@ -3,7 +3,7 @@
     "type": "process",
     "subtype": "lookups",
     "subsubtype": "web",
-    "title": "Finna lookup",
+    "title": "Finna: ISBN lookup",
     "status": "usable",
     "tags":["library", "finna"],
     "usage":"",

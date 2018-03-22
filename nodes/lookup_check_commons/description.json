@@ -3,11 +3,11 @@
     "type": "process",
     "subtype": "lookups",
     "subsubtype": "web",
-    "title": "Check if file is in Commons",
+    "title": "WM Commons: Check file existence",
     "status": "usable",
     "tags":["wikimedia"],
     "usage":"",
-    "description": "Checks if file is already in Wikimedia Commons (using SHA1-checksum). You must create checksums beforehand.",
+    "description": "Checks if file is already in Wikimedia Commons using SHA1-checksum. You must create checksums beforehand.",
     
     "scripts": {
         "hello": "out.say('news', 'You added a commons checker node'); ",

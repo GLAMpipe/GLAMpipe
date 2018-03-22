@@ -3,7 +3,7 @@
     "type": "process",
     "subtype": "lookups",
     "subsubtype": "web",
-    "title": "Annif lookup",
+    "title": "Annif: lookup",
     "status": "usable",
     "tags":["library", "finna"],
     "usage":"",
