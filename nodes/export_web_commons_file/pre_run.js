@@ -12,7 +12,12 @@ if(Array.isArray(context.doc[context.node.params.in_checksum_result]))
 	var file_check = context.doc[context.node.params.in_checksum_result][0];
 else
 	var file_check = context.doc[context.node.params.in_checksum_result];
-            
+
+/* if checksum test found a link, then skip that record */
+if(file_check.match(/^https:\/\//)) { 
+    out.say("progress", "skipping already uploaded file"); 
+    context.skip = true;          
+}            
 
 //there can be only one title per doc!
 var title = context.doc[context.node.params.in_title];
@@ -40,8 +45,7 @@ upload.wikitext = context.doc[context.node.params.in_wikitext];
 var url_val = context.get(context.doc, context.node.params.out_field);
 if(url_val.match(/^https:\/\//)) { 
     out.say("progress", "skipping already uploaded file"); 
-    context.skip = true; 
-            
+    context.skip = true;          
 } 
 
 // we skip upload if information is missing
