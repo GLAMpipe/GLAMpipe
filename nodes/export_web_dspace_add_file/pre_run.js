@@ -40,7 +40,7 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 	var url = context.node.params.required_url + "/items/" + uuid + "/bitstreams";
 	output.forEach(function(upload) {
 		upload.options = {
-			url: url + "?name=" + upload.title,
+			url: url + "?name=" + upload.title",
 			jar:true,		// cookie jar on so that authentication works
 			headers: {
 				"accept": "application/json",

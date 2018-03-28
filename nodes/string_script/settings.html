@@ -25,27 +25,6 @@
 </setting>
 
 
-
-<setting>
-	<settinginfo>
-		<settingtitle>
-			Example scripts
-		</settingtitle>
-		<settinginstructions>
-			Some sample scripts. Actually, just one for now.
-		</settinginstructions>
-	</settinginfo>
-	
-	<settingaction>
-		<label>example scripts</label>
-		<select id="script_node_examples">
-			<option value="">choose</option>
-			<option value="typed_hello">Hello world with type checking</option>
-		</select>
-
-	</settingaction>
-</setting>
-
 <setting>
 	<settinginfo>
 		<settingtitle>
@@ -86,8 +65,26 @@
 </setting>
 
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Example scripts
+		</settingtitle>
+		<settinginstructions>
+			Some sample scripts. 
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>example scripts</label>
+		<select id="script_node_examples">
+			<option value="">choose</option>
+			<option value="typed_hello">Hello world with type checking</option>
+			<option value="d6_bitstream_count">DSpace 6: bitstream count on certain bundle</option>
+		</select>
 
-
+	</settingaction>
+</setting>
 
 <setting>
 	<textarea id="script_node_editor" class="node-settings editor" name="js" >
@@ -107,7 +104,8 @@
 <script>
 	
 var examples = {
-	"typed_hello": `// this is the current document
+	
+"typed_hello": `// this is the current document
 var doc = context.doc;
 var rec_field = context.node.settings.in_field;
 var greeting = context.node.settings.greeting;
@@ -120,13 +118,29 @@ else if(typeof doc[rec_field] === "string")
 else
 	greeting = "Who knows or cares, " + greeting;
 	
-out.value = greeting;`
+out.value = greeting;`,
 
+"d6_bitstream_count": `
+const bundle = "ORIGINAL";
+
+var doc = context.doc;
+var counter = 0;
+
+
+var bits = doc["bitstreams"];
+bits.forEach(x=>{
+if(x["bundleName"] == "ORIGINAL") {
+   counter++;
+}
+}) 
+out.value = counter +"";
+`
 }
 
 
 $("#script_node_examples").on("change", function() {
 	$("#script_node_editor").val(examples[$(this).val()]);
 })
+
 
 </script>

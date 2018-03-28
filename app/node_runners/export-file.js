@@ -67,13 +67,16 @@ exports.collectionToFile = function (node, sandbox, io) {
 exports.docToFile = function (doc, sandbox, next) {
 
 	sandbox.run.runInContext(sandbox);
-
+	
 	if(sandbox.out.file) {
 		var filePath = path.join(sandbox.context.node.dir, sandbox.out.file);
-		var wstream = fs.createWriteStream(filePath);
-		wstream.write(sandbox.out.text);
-		wstream.end();
+		fs.writeFile(filePath, sandbox.out.text, function(err) {
+			if(err) {
+				console.log(err);
+			}
+			next();
+		}); 
+	} else {
+		next();
 	}
-	next();
-
 }
