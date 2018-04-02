@@ -1,0 +1,27 @@
+.header-dark {
+	background-color: #444;
+	font-family: 'Lora', serif; 
+	padding-bottom: 80px;
+}
+
+.header-dark .hero h1 {
+    color: #fff;
+    font-family: 'Bitter', serif;
+    font-size: 40px;
+    margin-top: 20px;
+    margin-bottom: 80px;
+}
+
+.intro h1 {
+	font-family: 'Lora', serif; 
+	font-size:30px;
+	margin:40px;
+}
+
+table {
+	font-family: 'Lora', serif; 
+}
+
+a.red {
+	color:red;
+}
