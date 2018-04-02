@@ -13,14 +13,22 @@ if(Array.isArray(input)) {
 		var download = {};
 		download.filename = generateFileName(input[i], i);	
 		out.console.log(download.filename);	
-		download.url = context.base_url + input[i];
+		if(context.base_url) {
+			download.url = context.base_url + input[i];
+		} else {
+			download.url = input[i];
+		}
 		previousFile(download, i);
 		out.pre_value.push(download); 
 	}
 } else {
 	var download = {};
 	download.filename = generateFileName(input, null);
-	download.url = context.base_url + input;
+	if(context.base_url) {
+		download.url = context.base_url + input;
+	} else {
+		download.url = input;
+	}
 	previousFile(download, null);
 	out.pre_value.push(download);
 }

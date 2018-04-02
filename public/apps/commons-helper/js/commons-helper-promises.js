@@ -16,10 +16,49 @@ function createCSVProject (project_title) {
 	return createProject(project_title)
 		.then(createCollection)
 		.then(createCSVImportNode)
-		.then(runNode)
 		.then(function(data){
+			config.nodes.csv.id = data.id;
+			return runNode(config.nodes.csv);
+		})
+		.then(function(data) {
+			return createNode(config.nodes.map)
+		})
+		.then(function(data2) {
+			console.log("data")
+			console.log(data2)
+			config.nodes.map.id = data2.id;
+			return runNode(config.nodes.map);
+		})
+		.then(function(data) {
 			console.log(data)
+			renderData()
 			$("#upload-status").empty().append("done")
+			return createPipeLine();
+		})
+		.catch(function(status) {
+			alert("Did not work! Computer says: " + status );
+			//throw("error!");
+		});
+}
+
+function mapData() {
+	return createNode(config.nodes.map)
+		.then(function(data) {
+			config.nodes.map.id = data.id;
+			runNode(config.nodes.map);
+		})
+}
+
+function createPipeLine() {
+	return createNode(config.nodes.download)
+		.then(function(data) {
+			return createNode(config.nodes.checksum)
+		})
+		.then(function(data) {
+			return createNode(config.nodes.check_if_commons)
+		})
+		.then(function(data) {
+			return createNode(config.nodes.commons_upload)
 		})
 		.catch(function(status) {
 			alert("Did not work! Computer says: " + status );
@@ -28,7 +67,17 @@ function createCSVProject (project_title) {
 }
 
 
-
+function renderData() {
+	var url =  apiurl + "/collections/" + globals.collection + "/docs";
+	var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
+	$.getJSON(url, function(docs) {
+		docs.data.forEach(function(doc, index) {
+			html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
+		})
+		html += "</tbody></table>";
+		$("#items").append(html);
+	})
+}
 
 function createURL(id, type1, type2) {
 	var projects = apiurl + "/projects";
@@ -178,23 +227,31 @@ function createLanguageDetectionNode(data) {
 }
 
 function createNode(node) {
-	var url = apiurl + "/projects/" + globals.project + "/nodes/" + node.id;
+	var url = apiurl + "/projects/" + globals.project + "/nodes/" + node.nodeid;
+	var d = {
+		collection: globals.collection, 
+		params: node.params
+	};
+	return post2(url, d).then(function(data) {
+		//console.log(data);
+		//if(data.error) throw(error_msg);
+		return data;
+	})
 }
 
 
 
-function runNode(data) {
-	var url = createURL(data.id, "run-node", data.node.title)
+function runNode(node) {
+	var url = createURL(node.id, "run-node", node.id)
 	var d = {
 		url: url,
 		type: "POST",
 		dataType: "json",
-		data: {separator:";"},
+		data: node.settings,
 		headers: globals.headers
 	}
 	return post(d).then(function(data) {
-		if(data.error) throw("Import ei onnistunut!");
-		globals.node.result = data.result;
+		if(data.error) throw("Failure in node run!");
 		return data;
 	})
 }
