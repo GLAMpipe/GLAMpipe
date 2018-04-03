@@ -30,7 +30,10 @@ var glamPipeNode = function (node, gp) {
 	this.run = function () {
 		
 		self.source.settings = self.getSettings(node);
-		console.log("RUNNING node with params: ", self.source.settings);
+		if(self.checkRequiredInput()) {
+			return;
+		}
+		console.log("RUNNING node with settings: ", self.source.settings);
 		// TÄHÄN busy
 		
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
@@ -51,10 +54,12 @@ var glamPipeNode = function (node, gp) {
 		});
 	}
 
-
 	this.runSingle = function (doc_id) {
 		
 		self.source.settings = self.getSettings(node);
+		if(self.checkRequiredInput()) {
+			return;
+		}
 		console.log("RUNNING node with settings: ", self.source.settings);
 		
 		post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
@@ -111,6 +116,23 @@ var glamPipeNode = function (node, gp) {
 	}
 	
 
+
+	this.checkRequiredInput = function() {
+		var hits = false;
+		$("settingscontainer").find(".required").each(function() {
+			if($(this).val() == "") {
+				hits = true;
+			}
+		})
+		
+		if(hits) {
+			alert("Please give all required fields!")
+			return true;
+		}
+		return false;
+		
+	}
+
 	this.getOutputFields = function () {
 
 		var keys = [];
@@ -146,7 +168,7 @@ var glamPipeNode = function (node, gp) {
 	// render data with node spesific settings and display node settings
 	this.open = function(config) {
 		// in nodedev mode we load node's view scripts directly from node directory
-		if(gp.config.nodedevmode) {
+		if(gp.config.nodedevmode) { // TODO: remove hardcoding of url
 			$.get("http://localhost:3000/api/v1/nodes/" + self.source._id + "/scripts",  function(data) {
 				if(data.view)
 					self.source.scripts.view = data.view;

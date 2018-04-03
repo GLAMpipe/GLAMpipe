@@ -1141,3 +1141,7 @@ table.wikidata_export_conf tbody tr td {
 .busy {
 	background-color: #c4dec0;
 }
+
+input.required, select.required {
+	border-left: 2px solid red;
+}

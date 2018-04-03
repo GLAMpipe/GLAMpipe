@@ -372,8 +372,6 @@ exports.downloadAndSave = function (node, download, addext, next) {
  */
 exports.cookieLogin = function (node, sandbox, cb) {
 
-
-	console.log("cookielogin");
 	// ask login details from node
 	try {
 		sandbox.login.runInContext(sandbox);
@@ -392,8 +390,6 @@ exports.cookieLogin = function (node, sandbox, cb) {
 
 		// send login information
 		request.post(sandbox.out.login, function(error, response, body) {
-			//console.log(response)
-			console.log(body)
 			if(error)
 				cb("Login error")
 			else if(response.statusCode === 200) {

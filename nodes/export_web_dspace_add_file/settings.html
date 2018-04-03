@@ -13,11 +13,75 @@
 	
 	<settingaction>
 		<label>username </label>
-		<input class="node-settings" type="text" name="username" id="username" required />
+		<input class="node-settings required" type="text" name="username" id="username" required />
 		<label>password</label>
-		<input class="node-settings" type="password" name="password" id="password"/>
+		<input class="node-settings required" type="password" name="password" id="password"/>
 	</settingaction>
 </setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			File settings
+		</settingtitle>
+		<settinginstructions>
+			Give a full file path to file in local computer and the file title. 
+			<ul>
+				<li><b>File:</b> local file path.</li>
+				<li><b>File title:</b> defines the name of the file in DSpace.</li>
+				<li><b>Additional file path:</b>  file path if file field does not have full path.</li>
+				<li><b>Bundlen name: </b>Optional bundlename for upload. <br>(NOTE: using this option requires modifications in DSpace code)</li>
+			</ul>
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>File</label>
+		<select class="node-settings dynamic_field required" name="in_file">
+			<option value="">choose</option>
+		</select>
+
+		<label>File title</label>
+		<select class="node-settings dynamic_field required" name="in_file_title" >
+			<option value="">choose</option>
+		</select>
+		
+		<label>Additional file path</label>
+		<input class="node-settings" name="file_path" />
+
+		<label>Bundle name (dynamic)</label>
+		<select class="node-settings dynamic_field" name="bundlename" >
+			<option value="">choose</option>
+		</select>
+		<label>Bundle name (static)</label>
+		<input class="node-settings" name="bundlename_static"/>
+
+	</settingaction>
+</setting>
+
+
+<setting>
+	<settinginfo>
+		<settingtitle>
+			UUID of the item
+		</settingtitle>
+		<settinginstructions>
+			UUID of the target item.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+		<label>UUID field</label>
+		<select class="node-settings dynamic_field required" type="text" name="in_uuid" >
+			<option value="">choose</option>
+		</select>
+
+	</settingaction>
+</setting>
+
+
+
 
 
 
