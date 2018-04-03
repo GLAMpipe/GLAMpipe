@@ -15,7 +15,7 @@
 			<tr>
 				<td><label>title</label></td>
 				<td><label>language</label></td>
-				<td><label>language (static) </label></td>
+				<td><label>static value </label></td>
 			</tr>
 			<tr>
 				<td><select class="node-settings dynamic_field middle_input" name="title_dynamic"><option value="">no value</option></select></td>
@@ -46,7 +46,7 @@
 			<tr>
 				<td><label>description</label></td>
 				<td><label>language</label></td>
-				<td><label>language (static) </label></td>
+				<td><label>static value </label></td>
 			</tr>
 			<tr>
 				<td><select class="node-settings dynamic_field middle_input" name="description_dynamic"><option value="">no value</option></select></td>
@@ -69,11 +69,12 @@
 	</settinginfo>
 	
 	<settingaction>
-		<label>static permission </label>
-		<textarea class="node-settings big" name="permission_static"></textarea>
-				
+
 		<label>permission field</label>
 		<select class="node-settings dynamic_field" name="permission_dynamic"><option value="">no value</option></select>
+
+		<label>static value</label>
+		<textarea class="node-settings big" name="permission_static"></textarea>
 
 	</settingaction>
 </setting>
@@ -84,14 +85,14 @@
 			Source
 		</settingtitle>
 		<settinginstructions>
-			This usually on web address where image was downloaded.
+			This is usually the web address where image was downloaded.
 		</settinginstructions>
 	</settinginfo>
 	
 	<settingaction>
-		<label>source</label>
+		<label>source field</label>
 		<select class="node-settings dynamic_field" name="source_dynamic"><option value="">no value</option></select>
-		<label>source (static)</label>
+		<label>static value</label>
 		<textarea class="node-settings big" name="source_static"></textarea>
 		
 	</settingaction>
@@ -108,13 +109,31 @@
 	</settinginfo>
 	
 	<settingaction>
-		<label>date</label>
+		<label>date field</label>
 		<select class="node-settings dynamic_field" name="date_dynamic"><option value="">no value</option></select>
 		
 	</settingaction>
 </setting>
 
+<setting>
+	<settinginfo>
+		<settingtitle>
+			Medium
+		</settingtitle>
+		<settinginstructions>
+			Medium (technique and materials) used to create artwork.
+		</settinginstructions>
+	</settinginfo>
+	
+	<settingaction>
+				
+		<label>medium field</label>
+		<select class="node-settings dynamic_field" name="medium_dynamic"><option value="">no value</option></select>
+		<label>static value </label>
+		<textarea class="node-settings big" name="medium_static"></textarea>
 
+	</settingaction>
+</setting>
 
 
 <setting>
@@ -128,9 +147,9 @@
 	</settinginfo>
 	
 	<settingaction>
-		<label>institution</label>
+		<label>institution field</label>
 		<select class="node-settings dynamic_field" name="institution_dynamic"><option value="">no value</option></select>
-		<label>institution (static)</label>
+		<label>static value</label>
 		<textarea class="node-settings" name="institution_static"></textarea>
 		
 	</settingaction>
@@ -149,7 +168,7 @@
 	
 	<settingaction>
 		<label>accession number</label>
-		<select class="node-settings dynamic_field middle_input" name="accnumber_dynamic"><option value="">no value</option></select>
+		<select class="node-settings dynamic_field middle_input" name="accession_number_dynamic"><option value="">no value</option></select>
 		
 	</settingaction>
 </setting>

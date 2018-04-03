@@ -133,6 +133,9 @@ function pushField (item, value, key, language) {
 	if(typeof value === "string")
 		value = value.trim();
 
+	// get space back to template key names
+	key = key.replace("_", " ");
+
 	// do not add key if there is no mapped key
 	if(value !== null && value !== "") { 
 		if(!item.metadata[key]) {
