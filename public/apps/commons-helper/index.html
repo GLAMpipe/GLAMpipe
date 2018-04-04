@@ -10,7 +10,9 @@
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700">
 		
-		<script src="js/jquery-2.1.1.min.js" type="text/javascript"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 		<script src="config.js" type="text/javascript"></script>
 		<script src="js/commons-helper-promises.js" type="text/javascript"></script>
 		<script src="js/commons-helper.js" type="text/javascript"></script>
@@ -49,33 +51,25 @@
 									</div>
 								</form>
 								<span class="navbar-text">
-									<a href="#" class="login">Log In</a>
+									<a href="#" class="login">Log In</a> 
 								</span>
-								<a class="btn btn-light action-button" role="button" href="#">Sign Up</a>
+								 <a class="btn btn-light action-button" role="button" href="#">Sign Up</a>
 							</div>
 						</div>
 					</nav>
 					
-					<div class="container hero">
+					<div class="container main">
 						<div class="row">
 							<div class="col-md-8 offset-md-2">
-								<h1 class="text-center">Commons uploads made easy. </h1>
-								<div class="input-group mb-3">
-								  <div class="input-group-prepend">
-									<span class="input-group-text" id="upload-csv">Upload</span>
-								  </div>
-								  <div class="custom-file">
-								    <form action="" method="post" id="uploadfile">
-										<input name="file" type="file" class="custom-file-input" id="fileupload">
-										<label class="custom-file-label" for="inputGroupFile01">Choose your CSV file</label>
-									</form>
-								  </div>
-								  
-								</div>
+								<h1 class="text-center">Commons uploads made <span style="text-decoration: line-through;">easy</span> easier. </h1>
+								
 								
 
+								<p>Commons helper drastically reduces clicks needed for your Commons uploads with GLAMpipe. <br>
+								It creates a GLAMpipe project and makes setup of nodes for you.</p>
+
 								
-								<div id="upload-status"></div>
+								
 							</div>
 
 						</div>
@@ -85,17 +79,47 @@
 			
 			<div class="article-dual-column">
 				<div class="container">
+					<div class="rounded-circle border border-primary" style="height:75px;width:75px">1.</div>
 
-<div class="col-md-12 ">
-  
+					<div class="col-md-12 ">
+	
+							<div class="input-group mb-3">
+								  <div class="input-group-prepend">
+									<span class="input-group-text" id="upload-csv">Upload</span>
+								  </div>
+								  <div class="custom-file">
+								    <form action="" method="post" id="uploadfile">
+										<input name="file" type="file" class="custom-file-input" id="fileupload">
+										<label class="custom-file-label" for="fileupload">Choose your CSV file</label>
+									</form>
+								  </div>
+								</div>
+	<div id="upload-status"></div>
+	
+  <div class="dropdown text-center">
+	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Photograph template
+	  </button>
+	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a class="dropdown-item" href="#">Artwork</a>
+		<a class="dropdown-item" href="#">Another action</a>
+		<a class="dropdown-item" href="#">Something else here</a>
+	  </div>
+	</div>
 <div class="intro">
-  <h1 class="text-center">Your metadata <a href="">&lt;</a> 10/120 <a href="">&gt;</a></h1>
+  <h1 class="text-center">Your metadata <a href="" id="meta-left">&lt;</a> <span id="meta-current">10</span>/<span id="meta-total">120</span><a href="" id="meta-right">&gt;</a></h1>
+
+  
+  
 </div>
 <div id="items"></div>
  
-  </div></div></div><div class="article-clean"></div>
+  </div></div></div>
   
-  <div>
+  
+  <div class="article-clean"></div>
+  
+  <div  style="display:none">
 					<div class="header-dark">
 						<div class="container hero"><div class="row"><div class="col-md-12 ">
 							<h1 class="text-center"> Your files (dummy data) <a href="">&lt;</a> 10/120 <a href="">&gt;</a></h1>

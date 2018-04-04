@@ -21,6 +21,12 @@ $( document ).ready(function() {
 			.catch(function() {alert("error")});	
 		});
 	})
+	
+$('.custom-file-input').on('change',function() {
+	console.log($(this).val());
+  $(this).next('.form-control-file').addClass("selected").html($(this).val());
+})
+	
 });
 
 

@@ -10,7 +10,9 @@ var config = {
 			settings: {
 				separator: ",",
 				encoding: "utf8",
-				columns: "true"
+				columns: "true",
+				split: ";",
+				trim: "true"
 			}
 		},
 		
@@ -23,7 +25,12 @@ var config = {
 			settings: {
 				title_dynamic: "title",
 				description_dynamic: "description",
-				institution_dynamic: "institution"
+				source_dynamic: "source",
+				date_dynamic: "date",
+				permission_dynamic: "permission",
+				accession_number_dynamic: "accession_number",
+				institution_dynamic: "institution",
+				categories_dynamic: "categories"
 			}
 		},
 		

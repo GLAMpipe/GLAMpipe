@@ -25,3 +25,8 @@ table {
 a.red {
 	color:red;
 }
+
+.main h1, .main p {
+	color:white;
+	margin-top:20px;
+}

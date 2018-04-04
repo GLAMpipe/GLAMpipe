@@ -68,11 +68,15 @@ function createPipeLine() {
 
 
 function renderData() {
-	var url =  apiurl + "/collections/" + globals.collection + "/docs";
+	var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:ExpandTemplates&wpInput=";
+	var url =  apiurl + "/collections/" + globals.collection + "/docs?limit=10";
 	var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
 	$.getJSON(url, function(docs) {
 		docs.data.forEach(function(doc, index) {
-			html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
+			var wikitext_url = encodeURIComponent(doc["wikitext"]);
+			html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td>";
+			html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td></tr>";
+			//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
 		})
 		html += "</tbody></table>";
 		$("#items").append(html);
