@@ -10,32 +10,32 @@ var glamPipeNode = function (node, gp) {
 	this.settings = {};
 	this.maxArrayLenghtDisplay = 5;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
-	
+
 	this.dataDisplayDiv = "data-workspace data data-display";
 	this.dataControlsDiv = "data-workspace data data-controls";
 	this.baseAPI = gp.baseAPI;
-	
+
 	this.display = new dataTable(this); // default data renderer
-		
+
 	//if(node.type == "collection")
 		//self.source.collection = node._id;
 
-		
+
 	// backend nodes does not have GUI
 	if(self.source.tags && self.source.tags.includes("backend")) {
 		self.backend = true;
 	}
 
-	// execute node 
+	// execute node
 	this.run = function () {
-		
+
 		self.source.settings = self.getSettings(node);
 		if(self.checkRequiredInput()) {
 			return;
 		}
 		console.log("RUNNING node with settings: ", self.source.settings);
 		// TÄHÄN busy
-		
+
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
@@ -44,7 +44,7 @@ var glamPipeNode = function (node, gp) {
 				if(!self.source.params.parent) {
 					var input = self.getInputFields();
 					var output = self.getOutputFields();
-					
+
 					self.open({input_keys:input, output_keys:output});
 				}
 				alert(data.error);
@@ -55,13 +55,13 @@ var glamPipeNode = function (node, gp) {
 	}
 
 	this.runSingle = function (doc_id) {
-		
+
 		self.source.settings = self.getSettings(node);
 		if(self.checkRequiredInput()) {
 			return;
 		}
 		console.log("RUNNING node with settings: ", self.source.settings);
-		
+
 		post(self.baseAPI + "/nodes/" + self.source._id + "/run/" + doc_id, self.source.settings, function(data) {
 			console.log(data);
 
@@ -71,14 +71,14 @@ var glamPipeNode = function (node, gp) {
 			if(!self.source.params.parent) {
 				var input = self.getInputFields();
 				var output = self.getOutputFields();
-				
+
 				self.open({input_keys:input, output_keys:output});
 			}
 		});
 	}
-	
+
 	this.stop = function () {
-		
+
 		post(self.baseAPI + "/nodes/" + self.source._id + "/stop", {} , function(data) {
 			console.log(data);
 			if(data.error) {
@@ -90,17 +90,17 @@ var glamPipeNode = function (node, gp) {
 		});
 	}
 
-	
+
 	this.runFinished = function () {
 		//$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
 		//$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
 		//$(".settings").hide();
-		
+
 		// we open node only if it is not a subnode of metanode
 		if(!self.source.params.parent) {
 			var input = self.getInputFields();
 			var output = self.getOutputFields();
-			
+
 			self.open({input_keys:input, output_keys:output});
 		}
 	}
@@ -114,7 +114,7 @@ var glamPipeNode = function (node, gp) {
 		} else
 			return null;
 	}
-	
+
 
 
 	this.checkRequiredInput = function() {
@@ -124,13 +124,13 @@ var glamPipeNode = function (node, gp) {
 				hits = true;
 			}
 		})
-		
+
 		if(hits) {
 			alert("Please give all required fields!")
 			return true;
 		}
 		return false;
-		
+
 	}
 
 	this.getOutputFields = function () {
@@ -180,10 +180,10 @@ var glamPipeNode = function (node, gp) {
 			self.openRender();
 		}
 	}
-	
-	
+
+
 	this.openRender = function() {
-				
+
 		$(".node").removeClass("current");
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
@@ -195,7 +195,7 @@ var glamPipeNode = function (node, gp) {
 			$("data-workspace settingscontainer").show();
 		}
 	}
-	
+
 	// render node to project view (left column)
 	this.renderNode = function () {
 		// huttua
@@ -207,19 +207,19 @@ var glamPipeNode = function (node, gp) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
 				node_in_keys.push(self.source.params[key]);
 		}
-		
+
 		for(var i = 0; i < node_in_keys.length; i++) {
-			
+
 			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
 				self.orphan = "orphan";
 				self.orphan_fields.push(node_in_keys[i]);
 			}
 		}
 		// huttua ends
-		
+
 		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
-		
+
 		// check if subnode of metanode
 		if(self.source.params.parent) {
 			var html = "<div class='box node " + self.source.type + " " + self.orphan + "' data-id='" + self.source._id + "'>"
@@ -229,33 +229,33 @@ var glamPipeNode = function (node, gp) {
 			return "";
 			//return html;
 		}
-		
+
 		var subsubtype = "";
 		if(self.source.subsubtype)
 			subsubtype = " > " + self.source.subsubtype;
 		if(self.source.params.in_field)
 			in_field = ': ' + self.source.params.in_field;
-			
+
 		//var html = "<div class='box node' data-id='" + self.source._id + "'>"
 		var html = "<div class='box node " + self.orphan + "' data-id='" + self.source._id + "'>"
 		html +=   "  <div class='boxleft'>";
-		
+
 		if(self.orphan_fields.length)
 			html +=    "<div>MISSING INPUT: " + self.orphan_fields.join(",") + "</div>";
-			
+
 		//html +=   "    <div class='boxtag'>" + self.source.type + " > " + self.source.subtype + subsubtype + "</div>"
-		
-		
-		
+
+
+
 		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description.trim()  != "") {
-			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
-			html +=   "    <div class='description'>" + self.source.settings.node_description+ "</div>"
-			
+			html +=   "    <div class='title boxtitle'>" + self.source.settings.node_description + "</div>"
+			html +=   "    <div class='description'>" + self.source.title + "</div>"
+
 		} else {
 			html +=   "    <div class='title boxtitle'>" + self.source.title + in_field + "</div>"
 			html +=   "    <div class='description'>" + self.source.description + "</div>";
 		}
-			
+
 		html +=   "  </div>"
 		html +=   "  <div class='wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>"
 		html +=   "</div>"
@@ -278,25 +278,25 @@ var glamPipeNode = function (node, gp) {
 			$("settingsblock").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
 			$("settingsblock").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
 			$("data-workspace submitblock").empty().append("<button class='run-node button error' >missing input field, cant'run!</button>");
-			
+
 		} else {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("settingsblock").empty();
-			
+
 			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
 			if(self.backend)
 				$("data-workspace submitblock").empty().append("<div class='info'>Backend nodes can't be batch run</div>");
 			else
 				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
-				
+
 			$("settingsblock").append(self.source.views.settings);
 			$("settingsblock .params").append(self.source.params);
 			$(".show-node-params").data("id", self.source._id);
 			// populate collection lists (for example settings of "collection lookup" node)
 			//$('.dynamic_collection').append(self.gp.collectionList());
-			
-			
+
+
 			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
 			debug += "<settinginstructions>Here you can write your own description of what this node does.";
 			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a></p>"
@@ -304,7 +304,7 @@ var glamPipeNode = function (node, gp) {
 			debug += "<settingaction>";
 			debug += "<label>description:</label>";
 			debug += "<textarea rows='3' name='node-description' class='node-description-value'></textarea>";
-			
+
 			debug += "<a href='#' id='node-description-save' class='ibutton'>Save description</a>";
 			debug += "</settingaction>";
 			debug += "</setting>";
@@ -319,14 +319,14 @@ var glamPipeNode = function (node, gp) {
 			var collection = gp.currentCollection.source.params.collection;
 
 			// fetch fields
-			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
+			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
 				if(data.error)
 					alert(data.error);
 				var options = [];
 				for(var i = 0; i < data.sorted.length; i++) {
 					options.push("<option>" + data.sorted[i] + "</option>");
 				}
-				
+
 
 
 				// execute node's settings.js if exists
@@ -339,7 +339,7 @@ var glamPipeNode = function (node, gp) {
 				$("settingsblock select.dynamic_field").each(function(i) {
 					$(this).append(options.join(""));
 				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
-				})	
+				})
 
 				self.setSettingValues();
 			})
@@ -348,7 +348,7 @@ var glamPipeNode = function (node, gp) {
 
 
 	this.renderDebug = function() {
-			
+
 		// render parameters
 		var params_table = "<table><tbody>";
 		for(key in self.source.params) {
@@ -359,7 +359,7 @@ var glamPipeNode = function (node, gp) {
 		params_table += "<tr><td>version</td><td>" + self.source.version + "</td></tr>";
 		params_table += "</tbody></table>";
 		return "<div class='debug right'>"+params_table+"</div>";
-	
+
 	}
 
 	this.setSettingValues = function () {
@@ -372,7 +372,7 @@ var glamPipeNode = function (node, gp) {
 				var checked = data.settings[prop];
 				if(typeof data.settings[prop] !== "boolean")
 					checked = (data.settings[prop] == 'true');
-					
+
 				$("input[name='"+prop+"']").prop("checked", checked);
 				$("input[name='"+prop+"']").change();
 			} else {
@@ -386,40 +386,38 @@ var glamPipeNode = function (node, gp) {
 					$("input[name='"+prop+"']").val(data.settings[prop]);
 					$("select[name='"+prop+"']").val(data.settings[prop]);
 					$("select[name='"+prop+"']").change();
-					
+
 					// textarea
 					$("textarea[name='"+prop+"']").val(data.settings[prop]);
 				}
 			}
 		}
 	}
-	
+
 
 
 
 
 	// create html table for data display
 	this.loadAndRenderData = function () {
-		
-		self.loadCollectionKeys(function() { 
+
+		self.loadCollectionKeys(function() {
 			self.loadCollectionData(function() {
 				self.display.render();
-			});	
-		})		
+			});
+		})
 	}
 
 	this.saveDescription = function(desc) {
 
-			
 		var d = {
-			url:self.baseAPI + "/nodes/" + self.source._id + "/settings/description", 
+			url:self.baseAPI + "/nodes/" + self.source._id + "/settings/description",
 			type:"POST",
 			data: {
 				description:desc
 			},
 			error:function() {console.log("description save failed!")},
 			success: function(data) {
-				console.log(data);
 				// settings does not exist if node hasn't been executed
 				if(!self.source.settings)
 					self.source.settings = {"node_description": desc};
@@ -431,11 +429,11 @@ var glamPipeNode = function (node, gp) {
 	}
 
 	this.getSettings = function (node) {
-		
+
 		var settings = {};
 		// read input from settings (only inputs with class "node-settings")
 		$("settingsblock input.node-settings:not([type='checkbox']), settingsblock  select.node-settings").each(function() {
-			
+
 			if($(this).attr("name")) {
 				var nameSplitted = $(this).attr("name").split("[");
 				// if input name has form "set[something1]", then we want to gather all of them to array
@@ -446,20 +444,20 @@ var glamPipeNode = function (node, gp) {
 					settings[$(this).attr("name")] = $(this).val();
 				}
 			}
-	   
+
 		});
-		
-		// handle checkboxes separately. 
+
+		// handle checkboxes separately.
 		$("settingsblock input.node-settings[type='checkbox']").each(function() {
 			//if($(this).is(':checked'))
 			settings[$(this).attr("name")] = $(this).is(':checked');
 		});
 
-		// handle textareas separately. 
+		// handle textareas separately.
 		$("settingsblock textarea.node-settings").each(function() {
 				settings[$(this).attr("name")] = $(this).val();
 		});
-		
+
 		// finally read the node description
 		var desc = $(".node-description-value").val();
 		if(desc) {
@@ -467,13 +465,13 @@ var glamPipeNode = function (node, gp) {
 			var id = node._id;
 			$(".node[data-id='"+id+"'] div.boxtext" ).text($(".node-description-value").val());
 		}
-		return settings;	
+		return settings;
 	}
-	
+
 
 
 	this.loadCollectionData = function (params, cb) {
-		
+
 		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/docs/" + params.skip() + params.sort() + params.fields_func() + "&" + params.search(), function (docs) {
 			self.data.docs = docs.data;
 			cb();
@@ -489,8 +487,8 @@ var glamPipeNode = function (node, gp) {
 
 
 
-	this.nl2br = function (str, is_xhtml) {   
-		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';    
+	this.nl2br = function (str, is_xhtml) {
+		var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br />' : '<br>';
 		return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ breakTag +'$2');
 	}
 

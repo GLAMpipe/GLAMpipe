@@ -152,13 +152,16 @@ $( document ).ready(function() {
 
 	// save node description 
 	$(document).on('click','#node-description-save', function(e) {
-		gp.saveNodeDescription($(".node-description-value").val());
+		var desc = $(".node-description-value").val().trim();
+		gp.saveNodeDescription(desc);
 		var node = gp.currentlyOpenNode.source;
 		var nodeid = node._id;
-		var desc = $(".node-description-value").val().trim();
+		
 		if(desc) {
-			$(".node[data-id='"+nodeid+"'] div.description" ).text($(".node-description-value").val());
+			$(".node[data-id='"+nodeid+"'] div.title" ).text(desc);
+			$(".node[data-id='"+nodeid+"'] div.description" ).text(node.title);
 		} else {
+			$(".node[data-id='"+nodeid+"'] div.title" ).text(node.title);
 			$(".node[data-id='"+nodeid+"'] div.description" ).text(node.description);
 		}
 		e.preventDefault();

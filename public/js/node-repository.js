@@ -7,9 +7,9 @@ var nodeRepository = function (gp) {
 	this.plainNodes = []
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];
-	
+
 	this.loadNodes = function () {
-		$.getJSON(self.baseAPI + "/repository/nodes", function(data) { 
+		$.getJSON(self.baseAPI + "/repository/nodes", function(data) {
 			for(var i = 0; i< data.length; i++) {
 				self.nodes.push(data[i]);
 			}
@@ -38,13 +38,13 @@ var nodeRepository = function (gp) {
 	}
 
 	this.renderNodeList = function (div, types) {
-		
+
 		// if node list is already open, then we "collapse" it
 		if(div.find(".listoption").length) {
 			div.empty();
 			return;
-		} 
-		
+		}
+
 		var html = "";
 		html += "<div class='fatbox'>";
 		html += "  <div class='inlinetitleblock'>";
@@ -54,11 +54,11 @@ var nodeRepository = function (gp) {
 		// render node types
 		//self.nodes.sort(sortNodeTypes)
 		for (var i = 0; i < self.nodes.length; i++) {
-			
+
 			var node = self.nodes[i]._id;
 			if(types.indexOf(node.type) != -1) {
 				html += "  <div class='optionlist'>"
-				
+
 				// add verbose text
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
@@ -67,7 +67,7 @@ var nodeRepository = function (gp) {
 				}
 				// and sort by verbose texts
 				self.nodes[i].subtypes.sort(sortByVerbose);
-				
+
 				// render subtypes
 				for (var j = 0; j < self.nodes[i].subtypes.length; j++) {
 					var sub = self.nodes[i].subtypes[j];
@@ -78,34 +78,34 @@ var nodeRepository = function (gp) {
 						html += "      <p class='listtitle'>" + self.verbose[node.type][sub.sub.subtype] + "</p>";
 					else
 						html += "      <p class='listtitle'>"+sub.sub.subtype+"</p>"
-						
+
 					html += "      <p class='listtext'></p>"
 					html += "    </button>"
 					html += "    <div class='panel'>"
-					
+
 					sub.nodes.sort(sortByTitle);
-					
+
 					// render nodes
 					for (var k = 0; k < sub.nodes.length; k++) {
 						// skip nodes with status "broken"
 						if(!self.showBrokenNodes && sub.nodes[k].status == "broken")
 							continue;
-							
+
 						self.plainNodes.push(sub.nodes[k]);
 						var index = self.plainNodes.length -1;
 						var s = sub.nodes[k].title.split(":");
-						if(s.length === 2) 
+						if(s.length === 2)
 							var title = "<span class='bold'>" + s[0] + "</span>:" + s[1];
 						else
 							var title = sub.nodes[k].title;
-						
+
 						html += "<a data-index='" + index + "' class='open-node' href='#'>"
 						html += "<div class='listoption " + node.type + " " + sub.nodes[k].status + "'>"
 						html += "  <p class='listtitle'>" + title + "</p>"
 						html += "  <p class='listtext'>" + sub.nodes[k].description + "</p>"
 						html += "</div>"
 						html += "</a>"
-						
+
 					}
 					html += "</div>"
 				}
@@ -115,7 +115,7 @@ var nodeRepository = function (gp) {
 		html += "    </div>";
 		html += "  </div>";
 		html += "</div>";
-		
+
 		$(div).empty().append(html);
 	}
 
@@ -128,12 +128,12 @@ var nodeRepository = function (gp) {
 		var index = "";
 		if(obj.data("index") == null)
 			index = obj.parents(".open-node").data("index");
-		else 
+		else
 			index = obj.data("index")
-			
+
 		var node = self.getNodeByIndex(index);
 		//console.log(node);
-		
+
 		var html = "";
 		html += "<div class='fatbox " + node.type + " " + node.status + "'>"
 		html += "  <fatboxtitle>" + node.title + "</fatboxtitle>";
@@ -142,9 +142,9 @@ var nodeRepository = function (gp) {
 		// we need to create form for file import (upload)
 		if(node.type == "source") {
 			if(node.subtype == "file") {
-				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";     
+				html += "<form id=\"uploadfile\" action=\"\" method=\"post\" enctype=\"multipart/form-data\">";
 				html += node.views.params;
-				html += "</form>";      
+				html += "</form>";
 			} else {
 				html += node.views.params;
 			}
@@ -157,7 +157,7 @@ var nodeRepository = function (gp) {
 		html += "    </a>";
 		html += "  <fatboxsubmitblock>";
 		html += "</div>"
-		
+
 		var params = $(html);
 		if( $(obj.parents(".holder.params")).length != 0)
 			$(obj.parents(".holder.params").empty()).append(params);
@@ -166,27 +166,27 @@ var nodeRepository = function (gp) {
 
 
 		// fetch fields
-		$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) { 
+		$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
 			if(data.error)
 				alert(data.error);
 			var options = [];
 			for(var i = 0; i < data.sorted.length; i++) {
 				options.push("<option>" + data.sorted[i] + "</option>");
 			}
-			
+
 			// populate field selects
 			$(".params select.dynamic_field").each(function(i) {
 				$(this).append(options.join(""));
 			//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
-			})	
+			})
 		})
-		// TODO: get node from /get/node/nodeid so that scripts are included    
+		// TODO: get node from /get/node/nodeid so that scripts are included
 		// execute params.js if exists
 		//if(node.scripts.params) {
 			//var paramsScript = new Function('node', node.scripts.params);
 			//paramsScript(node);
 		//}
-		$('.dynamic_collection').append(self.gp.collectionList()); 
+		$('.dynamic_collection').append(self.gp.collectionList());
 	}
 
 
@@ -202,7 +202,7 @@ function sortByTitle (a,b) {
 	return -1;
   if (a.title.toLowerCase() > b.title.toLowerCase())
 	return 1;
-  return 0; 
+  return 0;
 }
 
 function sortByVerbose (a,b) {
@@ -210,7 +210,7 @@ function sortByVerbose (a,b) {
 	return -1;
   if (a.text.toLowerCase() > b.text.toLowerCase())
 	return 1;
-  return 0; 
+  return 0;
 }
 
 function sortNodeTypes (a,b) {
@@ -219,5 +219,5 @@ function sortNodeTypes (a,b) {
 	return -1;
   if (a._id.type > b._id.type)
 	return 1;
-  return 0; 
+  return 0;
 }

@@ -332,7 +332,7 @@ exports.runNode = function (node, io) {
 									sandbox.out.say("error","DSpace login failed");
 								else {
 									console.log("WEB: DSpace login ok");
-									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2);
+									asyncLoop.fieldLoop(node, sandbox, web.uploadFile2RemoteServer);
 								}
 							});
 						break;

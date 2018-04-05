@@ -189,7 +189,7 @@ exports.uploadFile = function (upload, sandbox, next ) {
 }
 
 // this is meant to be called from asyncLoop.fieldLoop
-exports.uploadFile2 = function (upload, sandbox, next ) {
+exports.uploadFile2RemoteServer = function (upload, sandbox, next ) {
 
 	sandbox.context.response = null;
 	sandbox.context.data = null;
@@ -221,8 +221,12 @@ exports.uploadFile2 = function (upload, sandbox, next ) {
 		}
 	});
 
-
-	file_stream = fs.createReadStream(upload.file);
+	// if remote file, then stream that
+	if((/^http/).test(upload.file)) {
+		file_stream = request(upload.file);
+	} else {
+		file_stream = fs.createReadStream(upload.file);
+	}
 	file_stream.on('data', function(chunk) {
 		console.log("WEB: reading..." + chunk.length);
 		//size += chunk.length;

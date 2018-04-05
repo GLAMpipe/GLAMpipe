@@ -9,6 +9,7 @@ var uuid = context.doc[context.node.settings.in_uuid];
 var filepath = context.node.settings.file_path;
 var bundlename = context.node.settings.bundlename;
 var bundlename_static = context.node.settings.bundlename_static;
+var title_static = context.node.settings.file_title_static;
 
 var out_link = context.doc[context.node.params.out_link];
 
@@ -19,24 +20,35 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 	if(!filepath)
 		filepath = "";
 
-	// input can be array or string
-	// we must pair filepaths and file titles
-	if(Array.isArray(file) && Array.isArray(title)) {
-		file.forEach(function(f, i) {
-			var upload = createUpload(filepath, f, title[i], i);
-			checkOutLink(upload, out_link, file, i);
-			setBundleName(upload, bundlename, bundlename_static, i);
-			if(upload)
-				output.push(upload);
-		})
-	// file and title are strings
-	} else if(typeof file === "string" && typeof title === "string") {
-		var upload = createUpload(filepath, file, title);
+
+	// we must pair filepaths and file titles if there are severa bitstreams
+	if(Array.isArray(file)) {
+		if(Array.isArray(title)) {
+			file.forEach(function(f, i) {
+				var upload = createUpload(filepath, f, title[i], title_static, i);
+				checkOutLink(upload, out_link, file, i);
+				setBundleName(upload, bundlename, bundlename_static, i);
+				if(upload)
+					output.push(upload);
+			})
+		} else {
+			file.forEach(function(f, i) {
+				var upload = createUpload(filepath, f, title, title_static, i);
+				checkOutLink(upload, out_link, file, i);
+				setBundleName(upload, bundlename, bundlename_static, i);
+				if(upload)
+					output.push(upload);
+			})
+		}
+
+	// file is string
+	} else if(typeof file === "string") {
+		var upload = createUpload(filepath, file, title, title_static);
 		checkOutLink(upload, out_link, file);
 		setBundleName(upload, bundlename, bundlename_static, null);
 		if(upload)
 			output.push(upload);
-	// otherwise there 
+
 	} else {
 		out.console.log("ERROR: file path and file name must be arrays or strings!")
 		context.skip = true;
@@ -72,10 +84,9 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 
 
 function checkOutLink(upload, out_link, file, index) {
-	out.console.log("dddddddddddddddd")
+
 	var link = null;
-	out.console.log("out_link")
-	out.console.log(out_link)
+
 	// if file is string, then possible out_link is first row in "out_link" array
 	if(typeof file === "string" && Array.isArray(out_link)) {
 		link = out_link[0];
@@ -94,16 +105,26 @@ function checkOutLink(upload, out_link, file, index) {
 	}
 }
 
-function createUpload(filepath, file, title) {
+function createUpload(filepath, file, title, title_static) {
 	
+	if(!file) {
+		return null;
+	}
+
 	var link = "";
 	
 	var upload = {};
-	if(!file || !title)
-		return null;
-		
 	upload.file = filepath + file; // full file path
-	upload.title = title;
+
+	upload. title = title_static;  // static title is used if no title given
+	if(title && !Array.isArray(title)) {
+		upload.title = title;
+	}
+	// last resort for file name
+	if(!upload.title) {
+		var filename = file.split("/"); // file can be url, full path or just filename
+		upload.title = filename[filename.length-1];
+	}
 
 	return upload;
 }

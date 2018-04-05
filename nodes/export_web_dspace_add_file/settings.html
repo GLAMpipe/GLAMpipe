@@ -28,6 +28,7 @@
 		<settinginstructions>
 			Give a full file path to file in local computer and the file title. 
 			<ul>
+				<li><b>UUID:</b> UUID of the DSpace item</li>
 				<li><b>File:</b> local file path.</li>
 				<li><b>File title:</b> defines the name of the file in DSpace.</li>
 				<li><b>Additional file path:</b>  file path if file field does not have full path.</li>
@@ -37,25 +38,35 @@
 	</settinginfo>
 	
 	<settingaction>
+
+		<label>UUID field</label>
+		<select class="node-settings dynamic_field required" type="text" name="in_uuid" >
+			<option value="">choose</option>
+		</select>
+
 		<label>File</label>
 		<select class="node-settings dynamic_field required" name="in_file">
 			<option value="">choose</option>
 		</select>
 
 		<label>File title</label>
-		<select class="node-settings dynamic_field required" name="in_file_title" >
+		<select class="node-settings dynamic_field" name="in_file_title" >
 			<option value="">choose</option>
 		</select>
-		
-		<label>Additional file path</label>
-		<input class="node-settings" name="file_path" />
 
-		<label>Bundle name (dynamic)</label>
+		<label>Bundle name</label>
 		<select class="node-settings dynamic_field" name="bundlename" >
 			<option value="">choose</option>
 		</select>
+		
 		<label>Bundle name (static)</label>
 		<input class="node-settings" name="bundlename_static"/>
+		
+		<label>File title (static)</label>
+		<input class="node-settings" name="file_title_static"/>
+
+		<label>Additional file path</label>
+		<input class="node-settings" name="file_path" />
 
 	</settingaction>
 </setting>
@@ -72,10 +83,7 @@
 	</settinginfo>
 	
 	<settingaction>
-		<label>UUID field</label>
-		<select class="node-settings dynamic_field required" type="text" name="in_uuid" >
-			<option value="">choose</option>
-		</select>
+
 
 	</settingaction>
 </setting>
