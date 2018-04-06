@@ -54,7 +54,9 @@
 									<a href="#" class="login">Log In</a> 
 								</span>
 								 <a class="btn btn-light action-button" role="button" href="#">Sign Up</a>
+								 <span class="navbar-text"> ver. 0.0a</span>
 							</div>
+							
 						</div>
 					</nav>
 					
@@ -66,9 +68,31 @@
 								
 
 								<p>Commons helper drastically reduces clicks needed for your Commons uploads with GLAMpipe. <br>
-								It creates a GLAMpipe project and makes setup of nodes for you.</p>
+								Helper creates a GLAMpipe project for your data with all the bells and whistles needed. </p>
 
+								<div class="alert alert-info" role="alert">
+									This is a very early version!
+								</div>
 								
+							
+							</div>
+							<div class="col-md-8 offset-md-2 template-block">
+
+								<br><br>
+								<div class="dropdown text-center">
+									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									What template do you want to use?
+									</button>
+									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+										<a class="dropdown-item" href="#" id="artwork">Artwork</a>
+										<a class="dropdown-item" href="#">Map</a>
+										<a class="dropdown-item" href="#">Photograph</a>
+									</div>
+								</div>
+
+							</div>
+							
+							<div class="col-md-8 offset-md-2 project-block d-none">
 								
 							</div>
 
@@ -77,44 +101,51 @@
 				</div>
 			</div>
 			
-			<div class="article-dual-column">
+			<div class="article-dual-column ">
 				<div class="container">
-					<div class="rounded-circle border border-primary" style="height:75px;width:75px">1.</div>
+					<div class="col-md-8 offset-md-2 upload-block d-none">
 
-					<div class="col-md-12 ">
-	
-							<div class="input-group mb-3">
-								  <div class="input-group-prepend">
-									<span class="input-group-text" id="upload-csv">Upload</span>
-								  </div>
-								  <div class="custom-file">
-								    <form action="" method="post" id="uploadfile">
-										<input name="file" type="file" class="custom-file-input" id="fileupload">
-										<label class="custom-file-label" for="fileupload">Choose your CSV file</label>
-									</form>
-								  </div>
-								</div>
-	<div id="upload-status"></div>
-	
-  <div class="dropdown text-center">
-	  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-		Photograph template
-	  </button>
-	  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-		<a class="dropdown-item" href="#">Artwork</a>
-		<a class="dropdown-item" href="#">Another action</a>
-		<a class="dropdown-item" href="#">Something else here</a>
-	  </div>
-	</div>
-<div class="intro">
-  <h1 class="text-center">Your metadata <a href="" id="meta-left">&lt;</a> <span id="meta-current">10</span>/<span id="meta-total">120</span><a href="" id="meta-right">&gt;</a></h1>
+						<div class="intro ">
+							<h1 class="text-center">Now, upload Your metadata </h1>
+						</div>
 
-  
-  
-</div>
-<div id="items"></div>
+						<div class="input-group mb-3">
+							<div class="input-group-prepend">
+								<span class="input-group-text" id="upload-csv">Upload</span>
+							</div>
+							<div class="custom-file">
+								<form action="" method="post" id="uploadfile">
+									<input name="file" type="file" class="custom-file-input" id="fileupload">
+									<label class="custom-file-label" for="fileupload">Choose your CSV file</label>
+								</form>
+							</div>
+						</div>
+					</div>
+					
+					
+					<div class="col-md-12 logo-block d-none">
+						<div class="text-center" style="x">
+							<img src="images/GLAMpipe_piippu.png" height="220px" alt=""/>
+						</div>
+							
+						<div id="upload-status"></div>
+
+						<div id="items"></div>
  
-  </div></div></div>
+					</div>
+					
+					<div class="col-md-12 preview-block d-none">
+						<div class="intro">
+							<h1 class="text-center">Preview your data 
+								<a href="" id="meta-left">&lt;</a> 
+								<span id="meta-current">10</span>/<span id="meta-total">120</span>
+								<a href="" id="meta-right">&gt;</a>
+							</h1>
+						</div>
+					</div>
+					
+				</div>
+			</div>
   
   
   <div class="article-clean"></div>

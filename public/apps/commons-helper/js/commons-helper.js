@@ -8,6 +8,7 @@ var filename = "";
 $( document ).ready(function() {
 	
     //var gp = new glamPipe();
+    
 
 	$("#upload-csv").click(function() {
 		var date = new Date();
@@ -15,6 +16,8 @@ $( document ).ready(function() {
 		upload(function(data) {
 			filename = data.filename;
 			createCSVProject(project_title).then(function(data) {
+				$(".preview-block").removeClass("d-none"); // show block
+				$(".upload-block").addClass("d-none"); // hide block
 				//$("#csv-upload").hide();
 				//$("#result").append("<div>Projekti valmis!</div><a target='_blank' href='"+gpurl+"/project/" + globals.project + "'><button>avaa</button>");
 			})
@@ -22,10 +25,15 @@ $( document ).ready(function() {
 		});
 	})
 	
-$('.custom-file-input').on('change',function() {
-	console.log($(this).val());
-  $(this).next('.form-control-file').addClass("selected").html($(this).val());
-})
+	$('.dropdown-item').on('click',function() {
+		$(".upload-block").removeClass("d-none"); // show block
+		$(".template-block").addClass("d-none");
+	})
+	
+	$('.custom-file-input').on('change',function() {
+		console.log($(this).val());
+	  $(this).next('.form-control-file').addClass("selected").html($(this).val());
+	})
 	
 });
 
