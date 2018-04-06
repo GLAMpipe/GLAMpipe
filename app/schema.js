@@ -39,6 +39,19 @@ exports.getCollectionSchema = function (collectionName, cb) {
 	})
 }
 
+exports.removeKeysFromSchema = function(collectionName, keys, cb) {
+	// TODO: tee tämä
+	var query = {};
+	query["$unset"] = keys;
+	mongoquery.updateAll(collectionName, query, function (error) {
+		if(error)
+			console.log(error);
+		else
+			console.log("DB: keys removed", node.collection);
+		callback(error);
+	});
+
+}
 
 
 function saveSchema(new_schema, node, cb) {

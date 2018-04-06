@@ -20,10 +20,12 @@ exports.run = function(req, io, res) {
 
 	exports.getNode(req.params.id, function(err, node) {
 		if(err) {
-			console.log("node not found");
+			console.log("node not found: " + req.params.id);
 			io.sockets.emit("error", "node not found");
-			if(res)
+			delete global.register[req.originalUrl];
+			if(res) {
 				res.status(404).json({error:"node not found: " + req.params.id});
+			}
 			return;
 		}
 		
@@ -611,20 +613,23 @@ exports.deleteNode = function (req, res, io) {
 						// delete all output keys (starting with "out_") from all records
 						var del_keys = {};
 						for(var key in node.params) {
-							if(/^out_/.test(key) && node.params[key] && node.params[key] !== "")
+							if(/^out_/.test(key) && node.params[key] && node.params[key] !== "") {
 								del_keys[node.params[key]] = "";
+							}
 						}
 
 						if(Object.keys(del_keys).length) {
 							var query = {};
 							query["$unset"] = del_keys;
 							mongoquery.updateAll(node.collection, query, function (error) {
-								if(error)
+								if(error) {
 									console.log(error);
-								else
+								} else {
+									// TODO:  we need to remove keys from shcema too
 									console.log("DB: keys removed", node.collection);
+								}
 								callback(error);
-								});
+							});
 						} else {
 							callback(); // we did nothing
 						}
@@ -672,29 +677,6 @@ exports.deleteNode = function (req, res, io) {
 					}
 				},
 
-				// if node is an interactive, then remove its init_fields
-				function (callback) {
-					if((node.type == "view") && node.init_fields != null) {
-						console.log("REMOVING INIT FIELDS");
-						var field = {};
-						var query = {};
-						for (var i = 0; i < node.init_fields.length; i++) {
-							field[node.init_fields[i]] = 1;   
-						}
-						console.log(field);
-						query["$unset"] = field;
-						mongoquery.updateAll(node.collection, query, function (error) {
-							if(error)
-								console.log(error);
-							else
-								console.log("data removed", node.collection);
-							callback(error);
-							});
-					} else {
-						callback(); // we did nothing
-					}
-				},
-				
 				// remove node directory
 				function(callback) {
 					var rimraf = require("rimraf");	

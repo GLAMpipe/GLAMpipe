@@ -21,7 +21,7 @@ if(context.data && context.data.existing_link) {
 			out.setter[context.node.params.out_link] = link_root + context.data.retrieveLink;
 
 		if(context.data && context.data.uuid)
-			out.setter[context.node.params.out_uuid] = {"uuid": context.data.uuid};
+			out.setter[context.node.params.out_uuid] = {"uuid": context.data.uuid}; // this simulates how bitstream data is stored when retrieved by DSpace query
 
 			
 	} else if (context.error) {
