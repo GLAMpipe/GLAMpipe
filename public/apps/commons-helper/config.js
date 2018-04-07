@@ -30,7 +30,7 @@ var config = {
 				permission_dynamic: "permission",
 				accession_number_dynamic: "accession_number",
 				institution_dynamic: "institution",
-				categories_dynamic: "categories"
+				categories: "categories"
 			}
 		},
 		

@@ -260,7 +260,6 @@ function getWSPath() {
 	} else {
 		return "";
 	}
-
 }
 
 function websockPopup(div, title) {

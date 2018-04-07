@@ -23,16 +23,8 @@ function createCSVProject (project_title) {
 		.then(function(data) {
 			return createNode(config.nodes.map)
 		})
-		.then(function(data2) {
-			console.log("data")
-			console.log(data2)
-			config.nodes.map.id = data2.id;
-			return runNode(config.nodes.map);
-		})
 		.then(function(data) {
-			console.log(data)
-			renderData()
-			$("#upload-status").empty().append("done")
+			config.nodes.map.id = data.id;
 			return createPipeLine();
 		})
 		.catch(function(status) {
@@ -41,11 +33,11 @@ function createCSVProject (project_title) {
 		});
 }
 
-function mapData() {
-	return createNode(config.nodes.map)
+
+function createWikitext() {
+	return runNode(config.nodes.map)
 		.then(function(data) {
-			config.nodes.map.id = data.id;
-			runNode(config.nodes.map);
+			console.log("joo")
 		})
 }
 
@@ -237,7 +229,7 @@ function createNode(node) {
 		params: node.params
 	};
 	return post2(url, d).then(function(data) {
-		//console.log(data);
+		console.log(data);
 		//if(data.error) throw(error_msg);
 		return data;
 	})
