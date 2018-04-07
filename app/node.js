@@ -28,7 +28,10 @@ exports.run = function(req, io, res) {
 			}
 			return;
 		}
-		
+		// preserve user defined node description
+		if(!req.body["node_description"] && node.settings["node_description"]) {
+			req.body["node_description"] = node.settings["node_description"];
+		}
 		node.settings = req.body;
 		node.req = req;	
 		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
