@@ -62,7 +62,7 @@ if(typeof uuid == "string" && context.validator.isUUID(uuid)) {
 	output.forEach(function(upload) {
 		var bundle = "";
 		if(upload.bundlename) {
-			bundle = "&bundleName=" + upload.bundlename; 
+			bundle = "&bundleName=" + upload.bundlename; // this requieres DSpace patching
 		}
 		upload.options = {
 			url: url + "?name=" + upload.title + bundle,

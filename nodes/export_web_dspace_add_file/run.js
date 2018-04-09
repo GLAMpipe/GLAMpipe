@@ -20,8 +20,16 @@ if(context.data && context.data.existing_link) {
 		if(context.data && context.data.retrieveLink)
 			out.setter[context.node.params.out_link] = link_root + context.data.retrieveLink;
 
-		if(context.data && context.data.uuid)
+		if(context.data && context.data.uuid) {
 			out.setter[context.node.params.out_uuid] = {"uuid": context.data.uuid}; // this simulates how bitstream data is stored when retrieved by DSpace query
+			
+			// write also bundlename to output (note: bundlename_static value only)
+			if(context.node.settings.bundlename_static) {
+				out.setter[context.node.params.out_uuid]["bundleName"] = ontext.node.settings.bundlename_static;
+			} else {
+				out.setter[context.node.params.out_uuid]["bundleName"] = "ORIGINAL";
+			}
+		}
 
 			
 	} else if (context.error) {

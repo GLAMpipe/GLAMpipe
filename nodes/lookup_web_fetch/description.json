@@ -1,16 +1,15 @@
 {
-    "nodeid": "process_lookup_web_check",
+    "nodeid": "process_lookup_web_fetch",
     "type": "process",
     "subtype": "lookups",
     "subsubtype": "web_check",
-    "title": "WEB: Link checker",
+    "title": "WEB: Fecth content",
     "status": "usable",
     "tags":["generic"],
     "usage":"",
-    "description": "Makes HEAD requests to URLs given and saves response codes.",
+    "description": "Fetch content from URL.",
     
-    "scripts": {
-
+    "scripts": {      
         "init": 
         [
 			"context.vars.success_counter = 0; "

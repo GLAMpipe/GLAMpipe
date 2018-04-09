@@ -324,9 +324,11 @@ exports.getProjectAsText = function (doc_id, res) {
 								text += "\n  --------------------------------------";
 								text += "\n  " + node.settings.node_description;
 								text += "\n   - " + node.title;
+								text += "\n   - " + node._id;
 							} else {
 								text += "\n  ---------------------------------------";
 								text += "\n  " + node.title ;
+								text += "\n   - " + node._id;
 							}
 						}
 					})
@@ -339,9 +341,11 @@ exports.getProjectAsText = function (doc_id, res) {
 								text += "\n\n  ---------------------------------------";
 								text += "\n  " + node.settings.node_description;
 								text += "\n   - " + node.title;
+								text += "\n   - " + node._id;
 							} else {
 								text += "\n\n  ---------------------------------------";
 								text += "\n  " + node.title ;
+								text += "\n   - " + node._id;
 							}
 						}
 					})
