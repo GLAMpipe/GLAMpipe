@@ -12,7 +12,8 @@ var config = {
 				encoding: "utf8",
 				columns: "true",
 				split: ";",
-				trim: "true"
+				trim: "true",
+				node_description: "Read the data from CSV"
 			}
 		},
 		

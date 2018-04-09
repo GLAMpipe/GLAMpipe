@@ -1,6 +1,9 @@
-function GLAMpipe(url) {
+function GLAMpipe() {
 	var self = this;
-	self.api_url = url + "/api/v1";
+	self.api_url = "/api/v1";
+	
+	self.project = null;
+	self.collection = null;
 	self.token = "";
 
 	// token is saved in variable, so login is valid only for session
@@ -20,6 +23,87 @@ function GLAMpipe(url) {
 			self.token = "Bearer " + data.token;
 			return data;
 		});
+	}
+
+
+	self.createProject = function(title) {
+		console.log("GP: calling createProject");
+		var d = {
+			url: self.api_url + "/projects",
+			type: "POST",
+			data: {title: title},
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		};
+
+		return self.post(d).then(function(data) {
+			if(data.error) throw(data.error);
+			self.project = data.project._id; // global project id 
+			return data;
+		})
+	}
+
+
+	self.createCollection = function(title) {
+
+		var d = {
+			url: self.api_url + "/projects/" + self.project + "/nodes/collection_basic?type=collection",
+			type: "POST",
+			data: {params:{title: title}},
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		};
+		return self.post(d).then(function(data) {
+			if(data.error) throw(data.error);
+			console.log(data.collection)
+			self.collection = data.collection;
+			return data;
+		})
+	}
+
+
+	self.createNode = function(node) {
+		var url = self.api_url + "/projects/" + self.project + "/nodes/" + node.nodeid;
+		var d = {
+			url: url,
+			type: "POST",
+			data: {
+				collection: self.collection, 
+				params: node.params,
+			},
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		};
+		return self.post(d).then(function(data) {
+			console.log(data);
+			//if(data.error) throw(error_msg);
+			return data;
+		})
+	}
+
+
+
+	self.runNode = function(node) {
+		var d = {
+			url: self.api_url + "/nodes/" + node.id + "/run",
+			type: "POST",
+			dataType: "json",
+			data: node.settings,
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		}
+		return self.post(d).then(function(data) {
+			if(data.error) throw("Failure in node run!");
+			return data;
+		})
 	}
 
 

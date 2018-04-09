@@ -1,5 +1,33 @@
 
 
+function Helper() {
+	var self = this;
+	self.gp = new GLAMpipe();
+	
+	self.filename = null;
+
+	self.createCSVProject = function(title) {
+		return self.gp.createProject(title)
+			.then(function(data) {
+				return self.gp.createCollection("upload");
+			})
+			.then(function(data) {
+				config.nodes.csv.params.filename = filename;
+				config.nodes.csv.params.file = "filu";
+				return self.gp.createNode(config.nodes.csv);
+			})
+			.then(function(data) {
+				config.nodes.csv.id = data.id;
+				return self.gp.runNode(config.nodes.csv);
+			})
+			.catch(function(status) {
+				alert("Did not work! Computer says: " + status );
+				//throw("error!");
+			});
+	}
+	
+}
+
 // nasty globals set by ajax functions
 var globals = {
 	project: null,
@@ -12,8 +40,8 @@ var globals = {
 
 
 // CSV-project
-function createCSVProject (project_title) {
-	return createProject(project_title)
+function createCSVProject (gp, project_title) {
+	return gp.createProject(project_title)
 		.then(createCollection)
 		.then(createCSVImportNode)
 		.then(function(data){
@@ -156,18 +184,7 @@ function uploadFile(formData) {
 }
 
 
-function createProject(title) {
-	console.log("calling createProject");
-	var d = {title:title};
-	var url = createURL(null, "project");
-	console.log(url);
-	return post2(url, d).then(function(data) {
-		console.log(data);
-		if(data.error) throw(data.error);
-		globals.project = data.project._id; // global project id 
-		return data;
-	})
-}
+
 
 function createCollection(data) {
 	var url = createURL(data.project._id, "collection")
@@ -266,7 +283,7 @@ function getFormData() {
 
 
 
-
+/*
 // add put to JQuery
 $.put = function(url, data, headers, callback, type){
  
@@ -330,3 +347,4 @@ var post2 = function(url, data) {
 			.fail((xhr, status, err) => reject(status + err.message));
 	});
 } 
+*/

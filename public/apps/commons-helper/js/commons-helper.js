@@ -7,7 +7,7 @@ var filename = "";
 
 $( document ).ready(function() {
 	
-    var gp = new GLAMpipe();
+    var helper = new Helper();
     
 
 	$("#upload-csv").click(function() {
@@ -16,7 +16,7 @@ $( document ).ready(function() {
 		var project_title = "Commons Helper " + date.toISOString();
 		upload(function(data) {
 			filename = data.filename;
-			createCSVProject(project_title).then(function(data) {
+			helper.createCSVProject(project_title).then(function(data) {
 				//$(".preview-block").removeClass("d-none"); // show block
 				$(".upload-block").addClass("d-none"); // hide block
 				$(".template-block").removeClass("d-none"); // hide block
