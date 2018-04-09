@@ -105,6 +105,8 @@ exports.saveSettings = function (doc_id, settings, callback) {
 		if(settings.passwd) settings.passwd = null;
 		if(settings.password) settings.password = null;
 		if(settings.apikey) settings.apikey = null;
+		if(settings.key_credential) settings.key_credential = null;
+		if(settings.key_identity) settings.key_identity = null;
 	}
 
 	// we don't save empty setting values
