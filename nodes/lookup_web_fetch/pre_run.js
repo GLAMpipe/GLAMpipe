@@ -1,10 +1,13 @@
 
 var base = context.node.settings.base_url;
+if(!base) {
+	base = "";
+}
 
 // check if we have a static url (eg. backend call from external app)
 if(context.node.settings.url_static) {
 	var options = {
-		url:base + context.node.settings.url_static,
+		url: context.node.settings.url_static,
 		method: 'GET'
 	}
 	setAccept(options);

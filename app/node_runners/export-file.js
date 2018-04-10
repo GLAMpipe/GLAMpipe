@@ -70,7 +70,7 @@ exports.docToFile = function (doc, sandbox, next) {
 	
 	if(sandbox.out.file) {
 		var filePath = path.join(sandbox.context.node.dir, sandbox.out.file);
-		fs.writeFile(filePath, sandbox.out.text, function(err) {
+		fs.writeFile(filePath, sandbox.out.text, {encoding: "utf8"}, function(err) {
 			if(err) {
 				console.log(err);
 			}
