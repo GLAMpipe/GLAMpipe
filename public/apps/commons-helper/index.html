@@ -28,7 +28,7 @@
 			<div class="header-dark">
 				<nav class="navbar navbar-dark navbar-expand-md navigation-clean-search">
 					<div class="container">
-						<a href="#" class="navbar-brand">GLAMpipe Commons helper</a>
+						<a href="/" class="navbar-brand">GLAMpipe</a><span class="navbar-brand">| Commons helper</span>
 						<button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1">
 							<span class="sr-only">Toggle navigation</span>
 							<span class="navbar-toggler-icon"></span>
@@ -54,7 +54,7 @@
 									</div>
 								</form>
 								<span class="navbar-text">
-									<!-- <a href="#" class="login">Log In</a>  -->
+									<a href="#" class="login">Log In</a>  
 								</span>
 								 
 								 <span class="navbar-text"> ver. 0.0a</span>
@@ -74,7 +74,7 @@
 								Helper creates a GLAMpipe project for your data with all the bells and whistles needed. </p>
 
 								<div id="node-progress">
-									<div class="alert alert-info" role="alert">
+									<div class="alert alert-info position-fixed" role="alert">
 										This is a very early version!
 									</div>
 								</div>
@@ -85,7 +85,7 @@
 					<div class="col-md-8 offset-md-2 upload-block">
 
 						<div class="intro ">
-							<h1 class="text-center">Now, upload Your metadata </h1>
+							<h1 class="text-center">First, upload Your metadata </h1>
 						</div>
 
 						<div class="input-group mb-3">
@@ -95,7 +95,7 @@
 							<div class="custom-file">
 								<form action="" method="post" id="uploadfile">
 									<input name="file" type="file" class="custom-file-input" id="fileupload">
-									<label class="custom-file-label" for="fileupload">Choose your CSV file</label>
+									<label class="custom-file-label" for="fileupload">Choose your *comma separated* CSV file</label>
 								</form>
 							</div>
 						</div>
@@ -104,7 +104,9 @@
 							
 							<div class="col-md-8 offset-md-2 template-block d-none">
 
-								<br><br>
+						<div class="intro ">
+							<h1 class="text-center">Now, choose metadata template </h1>
+						</div>
 								<div class="dropdown text-center">
 									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									What template do you want to use?
@@ -150,10 +152,10 @@
 
   
 				<div  >
-					<div class="header-dark">
+					<div class="header-dark file-block d-none">
 						<div class="container hero">
 							<div class="row">
-								<div class="col-md-12 file-block d-none">
+								<div class="col-md-12 ">
 									<h1 class="text-center"> Your files (dummy data) <a href="">&lt;</a> 10/120 <a href="">&gt;</a></h1>
 
 									<table class="table table-dark">

@@ -6,9 +6,31 @@ function Helper() {
 	
 	self.filename = null;
 
+	self.getWSPath = function() {
+		var paths = window.location.pathname.split("/");
+		if(paths.length === 3)
+			return "";
+			
+		if(paths[paths.length-2] === "project") {
+
+			return "/" + paths.slice(1, paths.length-2).join("/");
+		} else {
+			return "";
+		}
+	}
+
+	// websocket stuff
+	self.gp_path = self.getWSPath();
+	self.socket = io.connect(window.location.origin, {path: self.gp_path + '/socket.io'});
+	self.progressDisplay = $("#node-progress");
+	self.finishDisplay = $("#node-finished");
+	self.genericDisplay = $("#generic-messages");
+
+
 	self.createCSVProject = function(title) {
 		return self.gp.createProject(title)
 			.then(function(data) {
+				self.project = self.gp.project;
 				return self.gp.createCollection("upload");
 			})
 			.then(function(data) {
@@ -20,12 +42,63 @@ function Helper() {
 				config.nodes.csv.id = data.id;
 				return self.gp.runNode(config.nodes.csv);
 			})
-			.catch(function(status) {
-				alert("Did not work! Computer says: " + status );
-				//throw("error!");
-			});
+
 	}
-	
+
+	self.createWikitext = function() {
+		return self.gp.createNode(config.nodes.map)
+			.then(function(data) {
+				config.nodes.map.id = data.id;
+				return self.gp.runNode(config.nodes.map);
+			})
+	}
+
+	self.createPipeLine = function() {
+		
+	}
+
+
+	self.renderData = function() {
+		var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:ExpandTemplates&wpInput=";
+		var url =  "/api/v1/collections/" + self.gp.collection + "/docs?limit=10";
+		var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
+		$.getJSON(url, function(docs) {
+			docs.data.forEach(function(doc, index) {
+				var wikitext_url = encodeURIComponent(doc["wikitext"]);
+				html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td>";
+				html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td></tr>";
+				//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
+			})
+			html += "</tbody></table>";
+			$("#items").append(html);
+		})
+	}
+
+
+	self.socket.on('progress', function (data) {
+		//if(data.project == gp.currentProject) {
+			//progressDisplay.append("<div class='alert alert-info'>" + data.msg + "</div>");
+		//}
+	});
+
+	self.socket.on('error', function (data) {
+		//if(data.project == gp.currentProject) {
+
+			self.progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
+
+		//}
+		//websockPopup(progressDisplay, "Node run error");
+	});
+
+	self.socket.on('finish', function (data) {
+		console.log(data)
+		//if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
+			self.progressDisplay.empty().append("<div class='alert alert-success'>" + data.msg + "</div>");
+		//}
+	});
+
+
+
 }
 
 // nasty globals set by ajax functions
@@ -62,12 +135,7 @@ function createCSVProject (gp, project_title) {
 }
 
 
-function createWikitext() {
-	return runNode(config.nodes.map)
-		.then(function(data) {
-			console.log("joo")
-		})
-}
+
 
 function createPipeLine() {
 	return createNode(config.nodes.download)
@@ -87,21 +155,7 @@ function createPipeLine() {
 }
 
 
-function renderData() {
-	var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:ExpandTemplates&wpInput=";
-	var url =  apiurl + "/collections/" + globals.collection + "/docs?limit=10";
-	var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
-	$.getJSON(url, function(docs) {
-		docs.data.forEach(function(doc, index) {
-			var wikitext_url = encodeURIComponent(doc["wikitext"]);
-			html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td>";
-			html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td></tr>";
-			//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
-		})
-		html += "</tbody></table>";
-		$("#items").append(html);
-	})
-}
+
 
 function createURL(id, type1, type2) {
 	var projects = apiurl + "/projects";

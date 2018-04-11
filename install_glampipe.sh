@@ -44,7 +44,7 @@ if docker ps|grep -wq 'glampipe_mongo'
 fi
 
 echo "Checking new version of GLAMpipe..."
-docker pull artturimatias/glampipe:dev
+docker pull glampipe/glampipe:dev
 
 
 if docker ps|grep -wq 'glampipe'
@@ -52,10 +52,10 @@ if docker ps|grep -wq 'glampipe'
 		echo "GLAMpipe is running... I'll re-create the container"
 		docker stop glampipe
 		docker rm glampipe
-		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 artturimatias/glampipe:dev bash -c 'node glampipe'
+		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 glampipe/glampipe:dev bash -c 'node glampipe'
 		docker logs -f glampipe
 	else
 		docker rm glampipe
-		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 artturimatias/glampipe:dev bash -c 'node glampipe'
+		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 glampipe/glampipe:dev bash -c 'node glampipe'
 		docker logs -f glampipe
 fi

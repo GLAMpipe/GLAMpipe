@@ -113,7 +113,7 @@ function GLAMpipe() {
 				.done(function(json) {
 					console.log("POST status:" + json.status)
 					if(json.status == "error") {
-						reject(json.status);
+						reject(json.error);
 					} else {
 						resolve(json);
 					}

@@ -18,20 +18,29 @@ $( document ).ready(function() {
 			filename = data.filename;
 			helper.createCSVProject(project_title).then(function(data) {
 				//$(".preview-block").removeClass("d-none"); // show block
-				$(".upload-block").addClass("d-none"); // hide block
-				$(".template-block").removeClass("d-none"); // hide block
-				$(".footer").append("<a class='btn btn-primary footer' target='_blank' href='"+gpurl+"/project/" + globals.project + "'>Go Pro! Your GLAMpipe project is here!</a>");
+				$(".upload-block").addClass("d-none");      // hide block
+				$(".template-block").removeClass("d-none"); // show block
+				$(".footer").append("<a class='btn btn-primary footer' target='_blank' href='/project/" + helper.project + "'>Go Pro! Your GLAMpipe project is here!</a>");
 				
 			})
-			.catch(function() {alert("error")});	
+			.catch(function(status) {
+				$(".upload-block").addClass("d-none"); 
+				if(status && status.includes("columns")) {
+					$("#node-progress").empty().append("<div class='alert alert-warning'>Could not import your data! <br>Are you sure that the separator of your csv is comma?</div>");
+				} else {
+					$("#node-progress").empty().append("<div class='alert alert-warning'>" + status + "</div>");
+				}
+				$("#node-progress").append("<br><br><br><br><a class='btn btn-primary footer' target='_blank' href='/project/" + helper.project + "'>You can try different import settings in GLAMpipe-project</a>");
+
+			});
 		});
 	})
 	
 	$('.dropdown-item').on('click',function() {
 		$(".template-block").addClass("d-none");
-		createWikitext().then(function(data) {
+		helper.createWikitext().then(function(data) {
 			$(".preview-block").removeClass("d-none");
-			renderData();
+			helper.renderData();
 		})
 	})
 	
@@ -40,53 +49,11 @@ $( document ).ready(function() {
 	  $(this).next('.form-control-file').addClass("selected").html($(this).val());
 	})
 
-	// websocket stuff
-	var gp_path = getWSPath();
-	var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
-	var progressDisplay = $("#node-progress");
-	var finishDisplay = $("#node-finished");
-	var genericDisplay = $("#generic-messages");
 
-	socket.on('progress', function (data) {
-		//if(data.project == gp.currentProject) {
-			//progressDisplay.append("<div class='alert alert-info'>" + data.msg + "</div>");
-		//}
-	});
-
-	socket.on('error', function (data) {
-		//if(data.project == gp.currentProject) {
-
-			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
-
-		//}
-		//websockPopup(progressDisplay, "Node run error");
-	});
-
-	socket.on('finish', function (data) {
-		//if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
-			console.log("FINISH: " + data.msg);
-			progressDisplay.append("<div class='alert alert-success'>" + data.msg + "</div>");
-		   // websockPopup(finishDisplay, "Node done!");
-			$(".settings").removeClass("busy");
-			progressDisplay.addClass("done");
-		//}
-	});
 });
 
 
 
-function getWSPath() {
-	var paths = window.location.pathname.split("/");
-	if(paths.length === 3)
-		return "";
-		
-	if(paths[paths.length-2] === "project") {
-
-		return "/" + paths.slice(1, paths.length-2).join("/");
-	} else {
-		return "";
-	}
-}
 
 
 
