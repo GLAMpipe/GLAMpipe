@@ -25,7 +25,7 @@ if(context.data && context.data.existing_link) {
 			
 			// write also bundlename to output (note: bundlename_static value only)
 			if(context.node.settings.bundlename_static) {
-				out.setter[context.node.params.out_uuid]["bundleName"] = ontext.node.settings.bundlename_static;
+				out.setter[context.node.params.out_uuid]["bundleName"] = context.node.settings.bundlename_static;
 			} else {
 				out.setter[context.node.params.out_uuid]["bundleName"] = "ORIGINAL";
 			}
