@@ -1,4 +1,0 @@
-
-out.say("progress", "Starting..."); 
-
-

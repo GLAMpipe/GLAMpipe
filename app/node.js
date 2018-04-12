@@ -201,7 +201,7 @@ function loadScriptsFromFile(node, cb) {
 	if(node.src_dir) {
 		console.log("DEV MODE: loading node source " + node.src_dir)
 		var skip = function() {cb("error in loading!", null)};
-		readNodeDirectory (path.join(global.config.nodePath, node.src_dir), skip, function(nodeFromDir) {
+		readNodeDirectory(node.src_dir, skip, function(nodeFromDir) {
 			node.scripts = nodeFromDir.scripts;
 			cb(null, node);	
 		})
@@ -901,40 +901,196 @@ exports.setNodeDescription = function (req, cb) {
 }
 
 
-
 exports.readNodes = function (io, nodePath, callback) {
 		
-	var nodeCount = 0;
-	readFiles(nodePath, function onNodeContent (filename, node, next) {
-		// save node.json to db
-		node.src_dir = filename; // save *real* source dir
-		mongoquery.insert("mp_nodes",node , function(err, result) {
-			if(err) {
-				console.log(err);
-			} else {
-				nodeCount++;
-				if(io)
-					io.sockets.emit("progress", "LOAD: " + filename + " loaded");
-				next();
-			}
-		})
+	var list = walkSync(nodePath, []);
 
-	}, function onError (error) {
-		if( error.code == "ENOENT") {
-			console.log("ERROR: No nodes present in " + nodePath);
-			//console.log("You must fetch them from here: \nhttps://github.com/artturimatias/metapipe-nodes/archive/master.zip"); 
+	mongoquery.insert("mp_nodes", list , function(err, result) {
+		if(err) {
+			console.log(err);
 		} else {
-			console.log(error);
+			console.log("INIT: " + list.length + " nodes loaded from " + nodePath);
+			callback(null);
 		}
-		return callback(error);
+	})
+}
 
-		
-	}, function onDone () {
-		console.log("INIT: " + nodeCount + " nodes loaded from " + nodePath);
-		callback(null);
+
+
+var walkSync = function(dir, nodeList) {
+	var fs = fs || require('fs'),
+	files = fs.readdirSync(dir);
+	nodeList = nodeList || [];
+	files.forEach(function(file) {
+		if (fs.statSync(dir + file).isDirectory()) {
+			nodeList = walkSync(dir + file + '/', nodeList);
+		}
+		else if(file == "description.json"){
+			//filelist.push(dir);
+			nodeList.push(readNodeDirectorySync(dir));
+		}
+	});
+	return nodeList;
+};
+
+
+
+function readNodeDirectorySync (nodeDir) {
+	console.log("READING directory: " + nodeDir);
+	
+	// read description.js from node directory
+	var content = fs.readFileSync(path.join(nodeDir, "description.json"), 'utf-8');
+	
+	if (!content) {
+		console.log("INIT: Skipping", nodeDir);
+		skip(); // we skip directory if there is no description.json
+		return;
+	} else {
+		var node = JSON.parse(content);
+		node.src_dir = nodeDir; // save *real* source dir
+		// make sure that we have "scripts" and "views"
+		if(!node.scripts) node.scripts = {};
+		if(!node.views) node.views = {};
+
+		// join "pretty" settings
+		if(node.views.settings instanceof Array)
+			node.views.settings = node.views.settings.join("");	
+			
+		// join "pretty" params
+		if(node.views.params instanceof Array)
+			node.views.params = node.views.params.join("");	
+
+		// join "pretty" data view
+		if(node.views.data_static instanceof Array)
+			node.views.data_static = node.views.data_static.join("");
+
+		// join "pretty" scripts
+		for (key in node.scripts) {
+			if(node.scripts[key] instanceof Array)
+				node.scripts[key] = node.scripts[key].join("");
+		}
+
+	}
+	
+	var files = fs.readdirSync(nodeDir);
+	files.forEach(function(fileName) {
+		if (!fs.statSync(path.join(nodeDir, fileName)).isDirectory()) {
+			 //var nodeFile = fs.readFileSync(path.join(nodeDir, fileName));
+			 js2ArraySync(nodeDir, fileName, node);
+		}
+	});
+	return node;
+}
+
+
+// transform js to array so that it can be placed inside JSON
+function js2ArraySync (dirName, fileName, node) {
+	
+	var f = fileName.split(".");
+	
+	var content = fs.readFileSync(path.join(dirName, fileName), 'utf-8')
+	if(!content) {
+		console.log(err);
+	}
+	var lines = content.split("\n");
+	for (var i = 0; i < lines.length; i++) {
+		lines[i] = lines[i].replace('"', '\"');
+		lines[i] = lines[i].replace('\t', '  ');
+	} 
+	
+	// add javascript files to "scripts" section
+	if(f[1] == "js")
+		node.scripts[f[0]] = lines.join("\n");
+	// add html files to "views" section
+	if(f[1] == "html")
+		node.views[f[0]] = lines.join("\n");
+
+	
+}
+
+function readNodeDirectory (nodeDir, skip, cb) {
+	
+	// read description.js from node directory
+	fs.readFile(path.join(nodeDir, "description.json"), 'utf-8', function(err, content) {
+		if (err) {
+			console.log("INIT: Skipping", nodeDir);
+			skip(); // we skip directory if there is no description.json
+			return;
+		} else {
+			var node = JSON.parse(content);
+			// make sure that we have "scripts" and "views"
+			if(!node.scripts) node.scripts = {};
+			if(!node.views) node.views = {};
+
+			// join "pretty" settings
+			if(node.views.settings instanceof Array)
+				node.views.settings = node.views.settings.join("");	
+				
+			// join "pretty" params
+			if(node.views.params instanceof Array)
+				node.views.params = node.views.params.join("");	
+
+			// join "pretty" data view
+			if(node.views.data_static instanceof Array)
+				node.views.data_static = node.views.data_static.join("");
+
+			// join "pretty" scripts
+			for (key in node.scripts) {
+				if(node.scripts[key] instanceof Array)
+					node.scripts[key] = node.scripts[key].join("");
+			}
+
+			// read each file in each node directory
+			fs.readdir(nodeDir, function(err, nodeFiles) {
+				if (err) {
+					skip(err);
+					return;
+				}
+				if(nodeFiles.length == 1) {
+					cb(node); return;
+				}
+				// read each file and add content to node
+				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
+					if(fs.statSync(path.join(nodeDir, nodeFile)).isDirectory()) {
+						next();
+					} else {js2Array(nodeDir, nodeFile, node, function() {
+							next();
+						})
+					}
+				// all files read. Return node object
+				}, function done() {
+					cb(node);
+				})
+			})
+		}
 	});
 }
 
+
+// transform js to array so that it can be placed inside JSON
+function js2Array (dirName, fileName, node, cb) {
+	
+	var f = fileName.split(".");
+	
+	fs.readFile(path.join(dirName, fileName), 'utf-8', function(err, content) {
+		if(err) {
+			console.log(err);
+		}
+		var lines = content.split("\n");
+		for (var i = 0; i < lines.length; i++) {
+			lines[i] = lines[i].replace('"', '\"');
+			lines[i] = lines[i].replace('\t', '  ');
+		} 
+		
+		// add javascript files to "scripts" section
+		if(f[1] == "js")
+			node.scripts[f[0]] = lines.join("\n");
+		// add html files to "views" section
+		if(f[1] == "html")
+			node.views[f[0]] = lines.join("\n");
+		cb();
+	})
+}
 
 
 exports.getNodes = function (res) {
@@ -1052,66 +1208,6 @@ exports.setVisibleFields = function (nodeid, params, res) {
 }
 
 
-function readNodeDirectory (nodeDir, skip, cb) {
-	//console.log("READING directory: " + nodeDir);
-	
-	// read description.js from node directory
-	fs.readFile(path.join(nodeDir, "description.json"), 'utf-8', function(err, content) {
-		if (err) {
-			console.log("INIT: Skipping", nodeDir);
-			skip(); // we skip directory if there is no description.json
-			return;
-		} else {
-			var node = JSON.parse(content);
-			// make sure that we have "scripts" and "views"
-			if(!node.scripts) node.scripts = {};
-			if(!node.views) node.views = {};
-
-			// join "pretty" settings
-			if(node.views.settings instanceof Array)
-				node.views.settings = node.views.settings.join("");	
-				
-			// join "pretty" params
-			if(node.views.params instanceof Array)
-				node.views.params = node.views.params.join("");	
-
-			// join "pretty" data view
-			if(node.views.data_static instanceof Array)
-				node.views.data_static = node.views.data_static.join("");
-
-			// join "pretty" scripts
-			for (key in node.scripts) {
-				if(node.scripts[key] instanceof Array)
-					node.scripts[key] = node.scripts[key].join("");
-			}
-
-			// read each file in each node directory
-			fs.readdir(nodeDir, function(err, nodeFiles) {
-				if (err) {
-					skip(err);
-					return;
-				}
-				if(nodeFiles.length == 1) {
-					cb(node); return;
-				}
-				// read each file and add content to node
-				async.eachSeries(nodeFiles, function iterator(nodeFile, next) {
-					if(fs.statSync(path.join(nodeDir, nodeFile)).isDirectory()) {
-						next();
-					} else {js2Array(nodeDir, nodeFile, node, function() {
-							next();
-						})
-					}
-				// all files read. Return node object
-				}, function done() {
-					cb(node);
-				})
-			})
-		}
-	});
-}
-
-
 // transform js to array so that it can be placed inside JSON
 function js2Array (dirName, fileName, node, cb) {
 	
@@ -1138,36 +1234,6 @@ function js2Array (dirName, fileName, node, cb) {
 }
 
 
-
-
-function readFiles(dirname, onNodeContent, onError, onDone) {
-	var fs = require("fs");
-	
-	// reas node directories
-	fs.readdir(dirname, function(err, nodedirs) {
-		if (err) {
-			onError(err);
-			return;
-		}
-		
-		async.eachSeries(nodedirs, function iterator(nodedir, next) {
-			fs.stat(dirname + nodedir, function(err, stat) {
-				// read each node directory but skip "config" directory
-				if ( nodedir == "config") {
-					next();
-				} else if (stat.isDirectory()) { 
-					readNodeDirectory(path.join(dirname, nodedir), next, function (node) {
-						onNodeContent(nodedir, node, next);
-					}) 
-				// skip files
-				} else next();
-			})
-		// we have read all node directories
-		}, function done() {
-			onDone();
-		});
-	});
-}
 
 
 /**

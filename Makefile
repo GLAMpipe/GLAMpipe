@@ -15,7 +15,7 @@ create_volume:
 	docker volume create glampipe-data
 
 build_mongo:
-	docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.5
+	docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.6
 
 start:
 	docker start glampipe_mongo

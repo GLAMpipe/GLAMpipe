@@ -8,6 +8,9 @@ RUN useradd -ms /bin/bash glampipe
 RUN mkdir -p /src/app && cp -a /tmp/node_modules /src/app/
 WORKDIR /src/app
 
+# get GLAMpipe nodes
+RUN git clone https://github.com/GLAMpipe/nodes.git
+
 # Bundle app source
 COPY . /src/app/
 

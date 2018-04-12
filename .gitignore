@@ -4,5 +4,6 @@ glampipe
 config/config.js
 node_modules
 logs
+nodes
 public_external/*
 !/.gitignore
