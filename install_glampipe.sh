@@ -44,7 +44,7 @@ if docker ps|grep -wq 'glampipe_mongo'
 fi
 
 echo "Checking new version of GLAMpipe..."
-docker pull artturimatias/glampipe:dev
+docker pull glampipe/glampipe:latest
 
 
 if docker ps|grep -wq 'glampipe'
