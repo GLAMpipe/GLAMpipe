@@ -38,7 +38,8 @@ $( document ).ready(function() {
 	
 	$('.dropdown-item').on('click',function() {
 		$(".template-block").addClass("d-none");
-		helper.createWikitext().then(function(data) {
+		var template = $(this).data("id");
+		helper.createWikitext(template).then(function(data) {
 			$(".preview-block").removeClass("d-none");
 			helper.renderData();
 		})

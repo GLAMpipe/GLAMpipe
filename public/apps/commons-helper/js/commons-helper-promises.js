@@ -45,7 +45,8 @@ function Helper() {
 
 	}
 
-	self.createWikitext = function() {
+	self.createWikitext = function(template) {
+		config.nodes.map.params.template = template;
 		return self.gp.createNode(config.nodes.map)
 			.then(function(data) {
 				config.nodes.map.id = data.id;
@@ -58,7 +59,7 @@ function Helper() {
 	}
 
 
-	self.renderData = function() {
+	self.renderData = function(cb) {
 		var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:ExpandTemplates&wpInput=";
 		var url =  "/api/v1/collections/" + self.gp.collection + "/docs?limit=10";
 		var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
@@ -71,6 +72,20 @@ function Helper() {
 			})
 			html += "</tbody></table>";
 			$("#items").append(html);
+			if(docs.data[0]["path"] && Array.isArray(docs.data[0]["path"])) {
+				if(docs.data[0]["path"][0].includes("http")) {
+					$(".file-block").removeClass("d-none");
+						html = "<table class='table table-dark'>";
+						html += "<thead><tr><th scope='col'>#</th><th>page title</th><th>File exists?</th></tr></thead><tbody>"
+
+					docs.data.forEach(function(doc, index) {
+						html += "<tr><th scope='row'>"+(index+1)+"</th><td><a target='_blank' href='"+doc["path"]+"'>"+doc["path"]+"</a></td>";
+						html += "<td></td></tr>";
+						//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
+					})
+					$("#files").append(html);
+				}
+			}
 		})
 	}
 

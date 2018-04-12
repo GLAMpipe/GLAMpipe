@@ -109,12 +109,12 @@
 						</div>
 								<div class="dropdown text-center">
 									<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									What template do you want to use?
+									Choose
 									</button>
 									<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-										<a class="dropdown-item" href="#" id="artwork">Artwork</a>
-										<a class="dropdown-item" href="#">Map</a>
-										<a class="dropdown-item" href="#">Photograph</a>
+										<a class="dropdown-item" href="#" data-id="2">Artwork</a>
+										<a class="dropdown-item" href="#" data-id="1">Map</a>
+										<a class="dropdown-item" href="#" data-id="0">Photograph</a>
 									</div>
 								</div>
 
@@ -151,44 +151,14 @@
   
 
   
-				<div  >
+				<div>
 					<div class="header-dark file-block d-none">
 						<div class="container hero">
 							<div class="row">
-								<div class="col-md-12 ">
-									<h1 class="text-center"> Your files (dummy data) <a href="">&lt;</a> 10/120 <a href="">&gt;</a></h1>
+								<div class="col-md-12">
+									<h1 class="text-center">Your files</h1>
 
-									<table class="table table-dark">
-									  <thead>
-										<tr>
-										  <th scope="col">#</th>
-										  <th scope="col">Page name</th>
-										  <th scope="col">File exists?</th>
-										  <th scope="col">Can I upload?</th>
-										</tr>
-									  </thead>
-									  <tbody>
-										<tr>
-										  <th scope="row">1</th>
-										  <td>Vista parcial do Vale do Anhangabaú. São Paulo/Sp.</td>
-
-										  <td>Nope</td>
-										  <td><button type="button" class="btn btn-primary">Yes, upload now!</button></td>
-										</tr>
-										<tr>
-										  <th scope="row">2</th>
-										  <td>Vista parcial do Estádio Municipal Paulo Machado de Carvalho (Pacaembú). São Paulo/Sp</td>
-										  <td>Nope</td>
-										  <td><button type="button" class="btn btn-primary">Yes, upload now!</button></td>
-										</tr>
-										<tr>
-										  <th scope="row">3</th>
-										  <td><a href="">Estádio Municipal do Pacaembú - Fotolabor S.Paulo 80</a></td>
-										  <td>Nope</td>
-										  <td><button type="button" class="btn btn-primary">No, you must change pagename</button></td>
-										</tr>
-									  </tbody>
-									</table>
+									<div id="files"></div>
 								</div>
 							</div>
 						</div>
