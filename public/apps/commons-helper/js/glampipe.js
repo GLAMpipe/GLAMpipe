@@ -106,6 +106,23 @@ function GLAMpipe() {
 		})
 	}
 
+	self.saveNodeDescription = function(node) {
+		var d = {
+			url: self.api_url + "/nodes/" + node.id + "/settings/description",
+			type: "POST",
+			dataType: "json",
+			data: {description:node.settings.node_description},
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		}
+		return self.post(d).then(function(data) {
+			if(data.error) throw("Failure in saving description");
+			return data;
+		})
+	}
+
 
 	self.post = function(data) {
 		return new Promise((resolve, reject) => {

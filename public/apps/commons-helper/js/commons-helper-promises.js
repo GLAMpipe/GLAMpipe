@@ -3,6 +3,7 @@
 function Helper() {
 	var self = this;
 	self.gp = new GLAMpipe();
+	self.fileField = "path";
 	
 	self.filename = null;
 
@@ -42,7 +43,6 @@ function Helper() {
 				config.nodes.csv.id = data.id;
 				return self.gp.runNode(config.nodes.csv);
 			})
-
 	}
 
 	self.createWikitext = function(template) {
@@ -55,39 +55,103 @@ function Helper() {
 	}
 
 	self.createPipeLine = function() {
-		
+		return self.gp.createNode(config.nodes.download)
+			.then(function(data) {
+				config.nodes.download.id = data.id;
+				return self.gp.createNode(config.nodes.checksum)
+			})
+			.then(function(data) {
+				config.nodes.checksum.id = data.id;
+				return self.gp.createNode(config.nodes.check_if_commons)
+			})
+			.then(function(data) {
+				config.nodes.check_if_commons.id = data.id;
+				return self.gp.createNode(config.nodes.commons_upload)
+			})
+			.then(function(data) {
+				config.nodes.commons_upload.id = data.id;
+				return self.gp.saveNodeDescription(config.nodes.download)
+			})
+			.then(function(data) {
+				return self.gp.saveNodeDescription(config.nodes.checksum);
+			})
+			.then(function(data) {
+				return self.gp.saveNodeDescription(config.nodes.check_if_commons);
+			})
+			.then(function(data) {
+				return self.gp.saveNodeDescription(config.nodes.commons_upload);
+			})
+			.catch(function(status) {
+				alert("Did not work! Computer says: " + status );
+				//throw("error!");
+			});
 	}
 
+	self.checkIfCommons = function(button) {
+		var doc = button.data("id");
+		return self.gp.runNodeSingle(config.nodes.download, doc)
+			.then(function(data) {
+				return self.gp.runNodeSingle(config.nodes.checksum, doc)
+			})
+			.then(function(data) {
+				return self.gp.runNodeSingle(config.nodes.check_if_commons, doc)
+			})
+			.then(function(data) {
+				if(data.result.value == "") {
+					button.replaceWith("No, good to go!");
+				} else {
+					button.replaceWith(data.result.value);
+				}
+			})
+	}
+
+	self.fieldsOk = function() {
+		var url =  "/api/v1/collections/" + self.gp.collection + "/fields";
+		$.getJSON(url, function(keys) {
+			console.log(keys.sorted)
+			if(!keys.sorted.includes("path") || !keys.sorted.includes("permission") || !keys.sorted.includes("title")) {
+				return false;
+			}
+		})
+		return true;
+	}
 
 	self.renderData = function(cb) {
 		var preview_url = "https://commons.wikimedia.org/w/index.php?title=Special:ExpandTemplates&wpInput=";
 		var url =  "/api/v1/collections/" + self.gp.collection + "/docs?limit=10";
-		var html = "<table class='table'><thead><tr><th scope='col'>#</th><th>title</th><th>How does it look like in Commons?</th></tr></thead><tbody>"
+		var html = "<table class='table'><thead><tr>"
+		html += "<th scope='col'>#</th>"
+		html += "<th>title</th>"
+		html += "<th>Commons preview</th>"
+		html += "<th>Pipe it!</th>"
+		html += "</tr></thead><tbody>"
 		$.getJSON(url, function(docs) {
 			docs.data.forEach(function(doc, index) {
 				var wikitext_url = encodeURIComponent(doc["wikitext"]);
-				html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td>";
-				html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td></tr>";
+				html += "<tr><th scope='row'>"+(index+1)+"</th>"
+				html += "<td>" + doc["title"] + "</td>";
+				html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td>"
+				html += "<td><button type='button' class='btn btn-primary upload' data-id='"+doc["_id"]+"'>Upload!</button></td></tr>";
 				//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
 			})
 			html += "</tbody></table>";
 			$("#items").append(html);
-			if(docs.data[0]["path"] && Array.isArray(docs.data[0]["path"])) {
-				if(docs.data[0]["path"][0].includes("http")) {
-					$(".file-block").removeClass("d-none");
-						html = "<table class='table table-dark'>";
-						html += "<thead><tr><th scope='col'>#</th><th>page title</th><th>File exists?</th></tr></thead><tbody>"
+			self.checkFilePath(docs);
 
-					docs.data.forEach(function(doc, index) {
-						html += "<tr><th scope='row'>"+(index+1)+"</th><td><a target='_blank' href='"+doc["path"]+"'>"+doc["path"]+"</a></td>";
-						html += "<td></td></tr>";
-						//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
-					})
-					$("#files").append(html);
-				}
-			}
 		})
 	}
+
+	self.checkFilePath = function(docs) {
+		if(docs.data[0][self.fileField] && Array.isArray(docs.data[0][self.fileField])) {
+			if(docs.data[0][self.fileField][0].includes("http")) {
+				
+				self.createPipeLine();
+			} else {
+				
+			}
+		}
+	}
+
 
 
 	self.socket.on('progress', function (data) {
@@ -172,44 +236,6 @@ function createPipeLine() {
 
 
 
-function createURL(id, type1, type2) {
-	var projects = apiurl + "/projects";
-	$("#upload-status").empty();
-	
-	switch (type1) {
-		case "project":
-			$("#upload-status").append("<div class='alert alert-info'>Luon projektia...</div>");
-			return projects;
-			
-		case "collection":
-			$("#upload-status").append("<div class='alert alert-success'>Projekti tehty!</div>");
-			$("#upload-status").append("<div class='alert alert-info'>Luon kokoelmaa...</div>");
-			return projects + "/" + id + "/nodes/collection_basic?type=collection";
-
-		case "upload":
-			$("#upload-status").append("<div class='alert alert-success'>Kokoelma tehty!</div>");
-			$("#upload-status").append("<div class='alert alert-info'>Lataan tiedostoa ...</div>");
-			return apiurl + "/upload";
-
-		case "delete":
-			$("#upload-status").append("<div class='alert alert-info'>Poistetaan tiedostoa ...</div>");
-			return apiurl + "/upload/" + id;
-		
-		case "node":
-			$("#upload-status").append("<div class='alert alert-success'>Tiedosto ladattu!</div>");
-			$("#upload-status").append("<div class='alert alert-info'>Luon nodea "+type2+"...</div>");
-			return projects + "/" + globals.project + "/nodes/" + type2;
-			
-		case "run-node":
-			$("#upload-status").append("<div class='alert alert-info'>Suoritan nodea <strong>" + type2 + "</strong>...</div>");
-			return apiurl + "/nodes/" + id + "/run";
-
-		case "data":
-			$("#upload-status").append("<div class='alert alert-success'>Node ajettu!</div>");
-			$("#upload-status").append("<div class='alert alert-info'>Haen dataa ...</div>");
-			return apiurl + "/collections/" + id + "/docs";
-	}
-}
 
 function upload(cb) {
 	var formData = getFormData();
@@ -229,117 +255,6 @@ function upload(cb) {
 }
 
 
-function uploadFile(formData) {
-	var formData = getFormData();
-	var url = createURL(null, "upload");
-	console.log(url)
-	var d = {
-		url: url,
-		type: "POST",
-		dataType: "json",
-		data:  formData,
-		contentType: false, 
-		cache: false,
-		processData:false,
-		headers: globals.headers
-	}
-	console.log(d)
-	return post(url, formData).then(function(data) {
-		//if(data.error) throw("Tiedostoa ei voitu ladata!");
-		//filename = data.filename;
-		//console.log(data)
-		return data;
-	})		
-}
-
-
-
-
-function createCollection(data) {
-	var url = createURL(data.project._id, "collection")
-	var d = {params:{title:"text"}};
-	return post2(url, d).then(function(data) {
-		console.log(data)
-		if(data.error) throw("Kokoelmaa ei voitu tehdä!");
-		globals.collection = data.collection;
-		return data;
-	})
-}
-
-
-function createCSVImportNode(data) {
-	var url = createURL(globals.project, "node", "source_file_csv")
-	var params = {
-		file: "filu",
-		filename:filename
-	}
-	var d = {
-		collection: globals.collection, 
-		params: params
-	};
-	console.log(d)
-	return post2(url, d).then(function(data) {
-		console.log(data);
-		if(data.error) throw(error_msg);
-		globals.node = data;
-		return data;
-	})
-}
-
-
-
-
-
-function createLanguageDetectionNode(data) {
-	var url = createURL(globals.project, "node", "process_field_detect_language")
-	var params = {
-		out_field: "detected_lang",
-		in_field:"text"
-	}
-	var d = {
-		collection: globals.collection, 
-		params: params
-	};
-	return put(url, d).then(function(data) {
-		console.log(data);
-		if(data.error) throw(error_msg);
-		globals.node = data;
-		return data;
-	})
-}
-
-function createNode(node) {
-	var url = apiurl + "/projects/" + globals.project + "/nodes/" + node.nodeid;
-	var d = {
-		collection: globals.collection, 
-		params: node.params
-	};
-	return post2(url, d).then(function(data) {
-		console.log(data);
-		//if(data.error) throw(error_msg);
-		return data;
-	})
-}
-
-
-
-function runNode(node) {
-	var url = createURL(node.id, "run-node", node.id)
-	var d = {
-		url: url,
-		type: "POST",
-		dataType: "json",
-		data: node.settings,
-		headers: globals.headers
-	}
-	return post(d).then(function(data) {
-		if(data.error) throw("Failure in node run!");
-		return data;
-	})
-}
-
-
-
 
 function getFormData() {
 	// read form for file upload
@@ -349,71 +264,3 @@ function getFormData() {
 }
 
 
-
-
-
-/*
-// add put to JQuery
-$.put = function(url, data, headers, callback, type){
- 
-	if ( $.isFunction(data) ){
-		type = type || callback,
-		callback = data,
-		data = {}
-	}
- 
-	return $.ajax({
-		url: url,
-		type: 'PUT',
-		success: callback,
-		data: data,
-		contentType: type,
-		headers: headers
-	});
-}
-
-
-var fetchJSON = function(url) {  
-	return new Promise((resolve, reject) => {
-		$.getJSON(url)
-		.done((json) => resolve(json))
-		.fail((xhr, status, err) => reject(status + err.message));
-	});
-} 
-
-var put = function(url, data) {  
-	return new Promise((resolve, reject) => {
-		$.put(url, data, globals.headers)
-			.done(function(json){console.log("PUT done");resolve(json)})
-			.fail((xhr, status, err) => reject(xhr + status + err.message));
-	});
-} 
-
-var post = function(data) {  
-	return new Promise((resolve, reject) => {
-		$.ajax(data)
-			.done(function(json) { 
-				console.log("POST status:" + json.status)
-				if(json.status == "error")
-					reject(json.status);
-				else
-					resolve(json)
-				})
-			.fail((xhr, status, err) => reject(status + err.message));
-	});
-} 
-
-var post2 = function(url, data) {  
-	return new Promise((resolve, reject) => {
-		$.post(url, data)
-			.done(function(json) { 
-				console.log("POST status:" + json.status)
-				if(json.status == "error")
-					reject(json.status);
-				else
-					resolve(json)
-				})
-			.fail((xhr, status, err) => reject(status + err.message));
-	});
-} 
-*/

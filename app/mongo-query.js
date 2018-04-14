@@ -295,7 +295,7 @@ exports.updateSingle = function (collectionname, query, doc, callback) {
 			console.log(err);
 			callback(err);
 		} else {
-			callback();
+			callback(null, result);
 		}
 	}); 
 }

@@ -5,10 +5,18 @@ var apiurl = gpurl + "/api/v1";
 var filename = "";
 
 
+/* TODO
+ * - GLAMpipe and commons logins
+ * - pipe: try to download, if no extension then raise error
+ * - pipe: download, checksum, check "check if file is in commons"
+ * - pipe: upload as separate  "upload"
+ * - There must be queue for uploads (when upload return, then start new one from the queue)
+ * 
+ * */
+
 $( document ).ready(function() {
 	
     var helper = new Helper();
-    
 
 	$("#upload-csv").click(function() {
 		$("#node-progress").empty();
@@ -18,8 +26,11 @@ $( document ).ready(function() {
 			filename = data.filename;
 			helper.createCSVProject(project_title).then(function(data) {
 				//$(".preview-block").removeClass("d-none"); // show block
-				$(".upload-block").addClass("d-none");      // hide block
-				$(".template-block").removeClass("d-none"); // show block
+				//helper.checkFields()
+					$(".upload-block").addClass("d-none");      // hide block
+					$(".template-block").removeClass("d-none"); // show block
+					//$("#node-progress").empty().append("<div class='alert alert-warning'>You data does not include all necessary fields!</div>");
+				
 				$(".footer").append("<a class='btn btn-primary footer' target='_blank' href='/project/" + helper.project + "'>Go Pro! Your GLAMpipe project is here!</a>");
 				
 			})
@@ -42,6 +53,7 @@ $( document ).ready(function() {
 		helper.createWikitext(template).then(function(data) {
 			$(".preview-block").removeClass("d-none");
 			helper.renderData();
+			
 		})
 	})
 	
@@ -50,6 +62,12 @@ $( document ).ready(function() {
 	  $(this).next('.form-control-file').addClass("selected").html($(this).val());
 	})
 
+
+	// upload -button
+	$('body').on('click','.upload', function() {
+		$(this).text("checking...");
+		helper.checkIfCommons($(this));
+	})
 
 });
 

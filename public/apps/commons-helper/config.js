@@ -13,7 +13,7 @@ var config = {
 				columns: "true",
 				split: ";",
 				trim: "true",
-				node_description: "Read the data from CSV"
+				node_description: "Read data from CSV"
 			}
 		},
 		
@@ -31,7 +31,8 @@ var config = {
 				permission_dynamic: "permission",
 				accession_number_dynamic: "accession_number",
 				institution_dynamic: "institution",
-				categories: "categories"
+				categories: "categories",
+				node_description: "Create wikitext"
 			}
 		},
 		
@@ -44,7 +45,7 @@ var config = {
 				path_mime: "path_mime"
 			},
 			settings: {
-				
+				node_description: "Download file for checksum calculation"
 			}
 		},
 		
@@ -55,7 +56,7 @@ var config = {
 				out_field: "checksum"
 			},
 			settings: {
-				
+				node_description: "Calculate checksum"
 			}
 		},
 
@@ -67,7 +68,7 @@ var config = {
 				out_field: "in_commons_beta"
 			},
 			settings: {
-				
+				node_description: "Use checksum in order to check if file is in Commons"
 			}
 		},
 		
@@ -84,7 +85,7 @@ var config = {
 				out_field: "commons_beta_url"
 			},
 			settings: {
-				
+				node_description: "Upload file and wikitext to Commons"
 			}
 		}
 	}

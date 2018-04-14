@@ -132,8 +132,8 @@ exports.edit = function (doc_id, doc, callback) {
 	var setter = {$set:{}};
 	setter.$set[key] =  doc[keys[0]];
 	var query = {"nodes._id": mongojs.ObjectId(doc_id)};
-	mongoquery.updateSingle("mp_projects", query, setter, function() {
-		callback();
+	mongoquery.updateSingle("mp_projects", query, setter, function(err, result) {
+		callback(err, result);
 	})
 }
 
@@ -887,11 +887,14 @@ exports.setNodeDescription = function (req, cb) {
 				node.settings = {"node_description": req.body.description};
 			}
 			
-			exports.edit(node._id, {"settings":node.settings}, function() {
-				cb();
+			exports.edit(node._id, {"settings":node.settings}, function(err, result) {
+				if(err)
+					cb(err);
+				else
+					cb(result);
 			})			
 		} else {
-			cb();
+			cb({});
 		}
 
 	})
