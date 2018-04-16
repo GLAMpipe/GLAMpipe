@@ -60,11 +60,11 @@ function generateFileName (url, index) {
 		return "";
 
     // use document id as filename
-    if (c.node.settings.filename_type == "id") { 
-        filename = c.doc._id.toString();
+    //if (c.node.settings.filename_type == "id") { 
+    filename = c.doc._id.toString(); // default
 
 	// use last part of URL as a filename 
-	} else if (c.node.settings.filename_type == "url") {  
+	if (c.node.settings.filename_type == "url") {  
 		var split = url.split("/"); 
 		filename = split[split.length-1]; 
 

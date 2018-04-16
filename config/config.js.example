@@ -29,7 +29,7 @@ var staticPath = "/static";
 // - "none" = do not use authentication, i.e. local install
 // - "local" = use local authentication
 // - "shibboleth" = use shibboleth headers
-var authentication = "none";
+var authentication = "local";
 
 // can anyone browse data? (defines if GET request are open or not)
 var public = true;

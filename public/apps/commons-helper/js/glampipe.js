@@ -4,7 +4,7 @@ function GLAMpipe() {
 	
 	self.project = null;
 	self.collection = null;
-	self.token = "";
+	self.token = "Bearer " + localStorage.getItem("token");
 
 	// token is saved in variable, so login is valid only for session
 	self.login = function(login) {
@@ -21,10 +21,51 @@ function GLAMpipe() {
 
 		return self.post(d).then(function(data) {
 			self.token = "Bearer " + data.token;
+			window.localStorage.setItem("token", data.token);
 			return data;
 		});
 	}
 
+	self.checkAuth = function(cb) {
+		var d = {
+			url: self.api_url + "/auth",
+			type: "GET",
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		};
+		$.ajax(d)
+			.done(function(json) {
+				console.log("POST status:" + json.status)
+				cb(true)
+
+			})
+			.fail(function() {
+				cb(false)
+			});
+	}
+
+
+	self.logout = function() {
+		var d = {
+			url: self.api_url + "/logout",
+			type: "GET",
+			headers: {
+				"Accept": 'application/json',
+				"Authorization":self.token
+			}
+		};
+		$.ajax(d)
+			.done(function(json) {
+				console.log("POST status:" + json.status)
+				cb(true)
+
+			})
+			.fail(function() {
+				cb(false)
+			});
+	}
 
 	self.createProject = function(title) {
 		console.log("GP: calling createProject");
@@ -173,4 +214,27 @@ function GLAMpipe() {
 
 		return self.post(d);
 	}
+	
+
+	self.upload = function(cb) {
+		var formData = getFormData();
+		$.ajax({
+		url: "http://localhost:3000/api/v1/upload", // Url to which the request is send
+		type: "POST",             // Type of request to be send, called as method
+		data: formData, // Data sent to server, a set of key/value pairs (i.e. form fields and values)
+		contentType: false,       // The content type used when sending data to the server.
+		cache: false,             
+		processData:false,    
+		headers: {
+			"Accept": 'application/json',
+			"Authorization":self.token
+		},    
+		success: function(data) {
+			cb(data);
+			$('#loading').hide();
+			$("#message").html(data);
+		}
+		});
+	}
+
 }

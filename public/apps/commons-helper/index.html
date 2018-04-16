@@ -81,8 +81,23 @@
 
 
 							</div>
-							
-					<div class="col-md-8 offset-md-2 upload-block">
+
+					<div class="container">
+						<div class="col-md-12 login-block ">
+							<div class="intro">
+								<h1 class="text-center">Please login first 
+									<!-- <a href="" id="meta-left">&lt;</a> 
+									<span id="meta-current">10</span>/<span id="meta-total">120</span>
+									<a href="" id="meta-right">&gt;</a> -->
+								</h1>
+								<p class="text-center">
+									In order to use this tool you need to login to GLAMpipe
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-md-8 offset-md-2 upload-block d-none">
 
 						<div class="intro ">
 							<h1 class="text-center">First, upload Your metadata </h1>
@@ -101,8 +116,10 @@
 						</div>
 					</div>
 							
-							
-							<div class="col-md-8 offset-md-2 template-block d-none">
+
+
+
+					<div class="col-md-8 offset-md-2 template-block d-none">
 
 						<div class="intro ">
 							<h1 class="text-center">Now, choose metadata template </h1>
@@ -120,9 +137,37 @@
 
 							</div>
 							
-							<div class="col-md-8 offset-md-2 project-block d-none">
-								
-							</div>
+					<div class="col-md-8 offset-md-2 project-block d-none">
+						<div class="intro ">
+							<h1 class="text-center">Ready to upload?</h1>
+						</div>
+						
+						<article class="card-body">
+							<form>
+							<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> <i class="fa fa-user"></i> </span>
+								 </div>
+								<input id="commons-username" class="form-control" placeholder="Commons BETA username" >
+							</div> <!-- input-group.// -->
+							</div> <!-- form-group// -->
+							<div class="form-group">
+							<div class="input-group">
+								<div class="input-group-prepend">
+									<span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+								 </div>
+								<input id="commons-password" class="form-control" placeholder="******" type="password">
+							</div> <!-- input-group.// -->
+							</div> <!-- form-group// -->
+							<div class="form-group">
+							<button type="submit" class="btn btn-primary btn-block upload-all"> Upload all! (not implemented)  </button>
+							</div> <!-- form-group// -->
+
+							</form>
+						</article>
+						
+					</div>
 
 						</div>
 					</div>
@@ -131,20 +176,17 @@
 			
 			
 			<div class="container">
-				
-
 				<div class="col-md-12 preview-block d-none">
 					<div class="intro">
-						<h1 class="text-center">Preview your metadata 
+						<h1 class="text-center">Preview and upload
 							<!-- <a href="" id="meta-left">&lt;</a> 
 							<span id="meta-current">10</span>/<span id="meta-total">120</span>
 							<a href="" id="meta-right">&gt;</a> -->
 						</h1>
+
 						<div id="items"></div>
 					</div>
 				</div>
-
-
 			</div>
 			
   

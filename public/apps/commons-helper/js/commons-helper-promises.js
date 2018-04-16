@@ -98,9 +98,13 @@ function Helper() {
 			})
 			.then(function(data) {
 				if(data.result.value == "") {
-					button.replaceWith("No, good to go!");
+					button.replaceWith("File is new!");
+					config.nodes.commons_upload.settings.username = $("#commons-username").val();
+					config.nodes.commons_upload.settings.password = $("#commons-password").val();
+					return self.gp.runNodeSingle(config.nodes.commons_upload, doc)
 				} else {
 					button.replaceWith(data.result.value);
+					throw("File is already in Commons!")
 				}
 			})
 	}
@@ -108,7 +112,15 @@ function Helper() {
 	self.fieldsOk = function() {
 		var url =  "/api/v1/collections/" + self.gp.collection + "/fields";
 		$.getJSON(url, function(keys) {
-			console.log(keys.sorted)
+			if(keys.sorted.includes("path")) {
+				self.progressDisplay.empty().append("<div class='alert alert-success'>'path' field found</div>");
+			}
+			if(keys.sorted.includes("permission")) {
+				self.progressDisplay.empty().append("<div class='alert alert-success'>'permission' field found</div>");
+			}
+			if(keys.sorted.includes("title")) {
+				self.progressDisplay.empty().append("<div class='alert alert-success'>'title' field found</div>");
+			}
 			if(!keys.sorted.includes("path") || !keys.sorted.includes("permission") || !keys.sorted.includes("title")) {
 				return false;
 			}
@@ -131,7 +143,7 @@ function Helper() {
 				html += "<tr><th scope='row'>"+(index+1)+"</th>"
 				html += "<td>" + doc["title"] + "</td>";
 				html += "<td><a target='_blank' href='" + preview_url + wikitext_url + "'>Preview</a></td>"
-				html += "<td><button type='button' class='btn btn-primary upload' data-id='"+doc["_id"]+"'>Upload!</button></td></tr>";
+				html += "<td><button type='button' class='btn btn-primary upload' data-id='"+doc["_id"]+"'>Upload this!</button></td></tr>";
 				//html += "<tr><th scope='row'>"+(index+1)+"</th><td>" + doc["title"] + "</td><td><a href=''>preview</a></td></tr>"
 			})
 			html += "</tbody></table>";
@@ -191,68 +203,8 @@ var globals = {
 }
 
 
-// CSV-project
-function createCSVProject (gp, project_title) {
-	return gp.createProject(project_title)
-		.then(createCollection)
-		.then(createCSVImportNode)
-		.then(function(data){
-			config.nodes.csv.id = data.id;
-			return runNode(config.nodes.csv);
-		})
-		.then(function(data) {
-			return createNode(config.nodes.map)
-		})
-		.then(function(data) {
-			config.nodes.map.id = data.id;
-			return createPipeLine();
-		})
-		.catch(function(status) {
-			alert("Did not work! Computer says: " + status );
-			//throw("error!");
-		});
-}
 
 
-
-
-function createPipeLine() {
-	return createNode(config.nodes.download)
-		.then(function(data) {
-			return createNode(config.nodes.checksum)
-		})
-		.then(function(data) {
-			return createNode(config.nodes.check_if_commons)
-		})
-		.then(function(data) {
-			return createNode(config.nodes.commons_upload)
-		})
-		.catch(function(status) {
-			alert("Did not work! Computer says: " + status );
-			//throw("error!");
-		});
-}
-
-
-
-
-
-function upload(cb) {
-	var formData = getFormData();
-	$.ajax({
-	url: "http://localhost:3000/api/v1/upload", // Url to which the request is send
-	type: "POST",             // Type of request to be send, called as method
-	data: formData, // Data sent to server, a set of key/value pairs (i.e. form fields and values)
-	contentType: false,       // The content type used when sending data to the server.
-	cache: false,             
-	processData:false,        
-	success: function(data) {
-		cb(data);
-		$('#loading').hide();
-		$("#message").html(data);
-	}
-	});
-}
 
 
 

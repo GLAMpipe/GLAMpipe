@@ -17,12 +17,20 @@ var filename = "";
 $( document ).ready(function() {
 	
     var helper = new Helper();
+    
+    helper.gp.checkAuth(function(loggedIn) {
+		if(loggedIn) {
+			$(".upload-block").removeClass("d-none");
+			$(".login-block").addClass("d-none");
+			$(".login").text("Log out");
+		} 
+	});
 
 	$("#upload-csv").click(function() {
 		$("#node-progress").empty();
 		var date = new Date();
 		var project_title = "Commons Helper " + date.toISOString();
-		upload(function(data) {
+		helper.gp.upload(function(data) {
 			filename = data.filename;
 			helper.createCSVProject(project_title).then(function(data) {
 				//$(".preview-block").removeClass("d-none"); // show block
@@ -52,6 +60,7 @@ $( document ).ready(function() {
 		var template = $(this).data("id");
 		helper.createWikitext(template).then(function(data) {
 			$(".preview-block").removeClass("d-none");
+			$(".project-block").removeClass("d-none");
 			helper.renderData();
 			
 		})
@@ -68,6 +77,22 @@ $( document ).ready(function() {
 		$(this).text("checking...");
 		helper.checkIfCommons($(this));
 	})
+
+
+	$('.login').on('click',function(e) {
+		$(this).parent().empty().append("<input id='username' placeholder='username'><input id='password' placeholder='password'><button id='login-btn' class='ll btn btn-primary'>Log in</button>")
+		e.preventDefault();
+	})
+
+	// login -button
+	$('body').on('click','#login-btn', function() {
+		console.log("f")
+		var login = {}
+		login.email = $("#username").val();
+		login.password = $("#password").val();
+		helper.gp.login(login);
+	})
+
 
 });
 
