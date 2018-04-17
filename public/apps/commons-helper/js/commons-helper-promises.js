@@ -43,6 +43,23 @@ function Helper() {
 				config.nodes.csv.id = data.id;
 				return self.gp.runNode(config.nodes.csv);
 			})
+			.then(function(data) {
+				return self.fieldsOk();
+			})
+			.then(function(keys) {
+				if(!keys.sorted.includes("path")) {
+					self.progressDisplay.append("<div class='alert alert-danger'>'path' field not found</div>");
+				}
+				if(!keys.sorted.includes("permission")) {
+					self.progressDisplay.append("<div class='alert alert-danger'>'permission' field not found</div>");
+				}
+				if(!keys.sorted.includes("title")) {
+					self.progressDisplay.append("<div class='alert alert-danger'>'title' field not found</div>");
+				}
+				if(!keys.sorted.includes("path") || !keys.sorted.includes("permission") || !keys.sorted.includes("title")) {
+					throw("missing fields");
+				} 
+			})
 	}
 
 	self.createWikitext = function(template) {
@@ -98,7 +115,7 @@ function Helper() {
 			})
 			.then(function(data) {
 				if(data.result.value == "") {
-					button.replaceWith("File is new!");
+					button.append("File is new!");
 					config.nodes.commons_upload.settings.username = $("#commons-username").val();
 					config.nodes.commons_upload.settings.password = $("#commons-password").val();
 					return self.gp.runNodeSingle(config.nodes.commons_upload, doc)
@@ -107,25 +124,18 @@ function Helper() {
 					throw("File is already in Commons!")
 				}
 			})
+			.then(function(data) {
+				button.replaceWith("ok");
+			})
+			.catch(function(status) {
+				button.replaceWith(status);
+			});
 	}
 
-	self.fieldsOk = function() {
+	self.fieldsOk = function(cb) {
+
 		var url =  "/api/v1/collections/" + self.gp.collection + "/fields";
-		$.getJSON(url, function(keys) {
-			if(keys.sorted.includes("path")) {
-				self.progressDisplay.empty().append("<div class='alert alert-success'>'path' field found</div>");
-			}
-			if(keys.sorted.includes("permission")) {
-				self.progressDisplay.empty().append("<div class='alert alert-success'>'permission' field found</div>");
-			}
-			if(keys.sorted.includes("title")) {
-				self.progressDisplay.empty().append("<div class='alert alert-success'>'title' field found</div>");
-			}
-			if(!keys.sorted.includes("path") || !keys.sorted.includes("permission") || !keys.sorted.includes("title")) {
-				return false;
-			}
-		})
-		return true;
+		return $.getJSON(url, function(keys) {})
 	}
 
 	self.renderData = function(cb) {

@@ -44,10 +44,11 @@ $( document ).ready(function() {
 			})
 			.catch(function(status) {
 				$(".upload-block").addClass("d-none"); 
+				
 				if(status && status.includes("columns")) {
-					$("#node-progress").empty().append("<div class='alert alert-warning'>Could not import your data! <br>Are you sure that the separator of your csv is comma?</div>");
+					$("#node-progress").append("<div class='alert alert-warning'>Could not import your data! <br>Are you sure that the separator of your csv is comma?</div>");
 				} else {
-					$("#node-progress").empty().append("<div class='alert alert-warning'>" + status + "</div>");
+					$("#node-progress").append("<div class='alert alert-warning'>" + status + "</div>");
 				}
 				$("#node-progress").append("<br><br><br><br><a class='btn btn-primary footer' target='_blank' href='/project/" + helper.project + "'>You can try different import settings in GLAMpipe-project</a>");
 
