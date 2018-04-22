@@ -22,7 +22,7 @@ $( document ).ready(function() {
 		if(loggedIn) {
 			$(".upload-block").removeClass("d-none");
 			$(".login-block").addClass("d-none");
-			$(".login").text("Log out");
+			$(".logout").text(loggedIn.local.email);
 		} 
 	});
 
@@ -79,19 +79,31 @@ $( document ).ready(function() {
 		helper.checkIfCommons($(this));
 	})
 
+	$('.logout').on('click',function(e) {
+		localStorage.removeItem("token");
+		$(".logout").text("");
+		e.preventDefault();
+	})
 
 	$('.login').on('click',function(e) {
-		$(this).parent().empty().append("<input id='username' placeholder='username'><input id='password' placeholder='password'><button id='login-btn' class='ll btn btn-primary'>Log in</button>")
+		$(this).parent().empty().append("<input id='username' placeholder='username'><input id='password' placeholder='password' type='password'><button id='login-btn' class='ll btn btn-primary'>Log in</button>")
 		e.preventDefault();
 	})
 
 	// login -button
-	$('body').on('click','#login-btn', function() {
-		console.log("f")
+	$('#gp-login').on('click', function() {
 		var login = {}
-		login.email = $("#username").val();
-		login.password = $("#password").val();
-		helper.gp.login(login);
+		login.email = $("#gp-username").val();
+		login.password = $("#gp-password").val();
+		helper.gp.login(login, function(data) {
+			if(data) {
+				$(".upload-block").removeClass("d-none");
+				$(".login-block").addClass("d-none");
+				$("#node-progress").empty();
+			} else {
+				$("#node-progress").append("<div class='alert alert-warning'>Login failed!</div>");
+			}
+		})
 	})
 
 

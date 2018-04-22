@@ -7,7 +7,7 @@ function GLAMpipe() {
 	self.token = "Bearer " + localStorage.getItem("token");
 
 	// token is saved in variable, so login is valid only for session
-	self.login = function(login) {
+	self.login = function(login, cb) {
 		var url = self.api_url + "/login";
 
 		var d = {
@@ -19,11 +19,17 @@ function GLAMpipe() {
 			}
 		}
 
-		return self.post(d).then(function(data) {
-			self.token = "Bearer " + data.token;
-			window.localStorage.setItem("token", data.token);
-			return data;
-		});
+		$.ajax(d)
+			.done(function(data) {
+				self.token = "Bearer " + data.token;
+				window.localStorage.setItem("token", data.token);
+				cb(data);
+
+			})
+			.fail(function() {
+				cb(false)
+			});
+
 	}
 
 	self.checkAuth = function(cb) {
@@ -38,7 +44,7 @@ function GLAMpipe() {
 		$.ajax(d)
 			.done(function(json) {
 				console.log("POST status:" + json.status)
-				cb(true)
+				cb(json)
 
 			})
 			.fail(function() {
@@ -50,7 +56,7 @@ function GLAMpipe() {
 	self.logout = function() {
 		var d = {
 			url: self.api_url + "/logout",
-			type: "GET",
+			type: "POST",
 			headers: {
 				"Accept": 'application/json',
 				"Authorization":self.token
@@ -219,7 +225,7 @@ function GLAMpipe() {
 	self.upload = function(cb) {
 		var formData = getFormData();
 		$.ajax({
-		url: "http://localhost:3000/api/v1/upload", // Url to which the request is send
+		url: self.api_url + "/upload", // Url to which the request is send
 		type: "POST",             // Type of request to be send, called as method
 		data: formData, // Data sent to server, a set of key/value pairs (i.e. form fields and values)
 		contentType: false,       // The content type used when sending data to the server.
