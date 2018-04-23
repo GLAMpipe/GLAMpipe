@@ -101,7 +101,7 @@ var GlamPipe = function() {
 
 		var error = new (winston.transports.DailyRotateFile)({
 			name:"error",
-			filename: self.dataPath + './logs/log',
+			filename: self.dataPath + '/logs/log',
 			datePattern: 'error_yyyy-MM-dd.',
 			prepend: true,
 			level: 'error'

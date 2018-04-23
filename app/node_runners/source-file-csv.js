@@ -102,6 +102,11 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 	var parse = require('csv-parse');
 	var transform = require('stream-transform');
 
+	if(sandbox.context.error) {
+		sandbox.out.say("error", sandbox.context.error)
+		return;
+	}
+
 	//var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var file = sandbox.out.filename;
 	var db = "mongodb://" + database.initDBConnect();
@@ -149,11 +154,23 @@ exports.importFile_stream = function  (node, sandbox, io, cb) {
 	var transformer = transform(function(record){
 		sandbox.context.data = record;
 		runNodeScriptInContext("run", node, sandbox, io);
-		sandbox.out.value[MP.source] = node._id;
+		if(sandbox.out.value) {
+			sandbox.out.value[MP.source] = node._id;
+		}
 		return sandbox.out.value;
 	})
 
-	input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+	if(node.settings.mode == "append") {
+		mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
+			console.log(records);
+			sandbox.context.records = records;
+			input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+		})
+	} else {
+		input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+	}
+
+	
 	
 }
 
