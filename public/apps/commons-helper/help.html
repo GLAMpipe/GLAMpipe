@@ -1,0 +1,136 @@
+<html>
+	<head> 
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Commons helper help</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/overrides.css">
+
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bitter:400,700">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,700">
+
+	</head>
+	<body>
+		<div>
+			<div class="header-dark">
+				<nav class="navbar navbar-dark navbar-expand-md navigation-clean-search">
+					<div class="container">
+						<a href="#" class="navbar-brand">GLAMpipe Commons helper</a>
+						<button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="navbar-toggler-icon"></span>
+						</button>
+						<div class="collapse navbar-collapse" id="navcol-1">
+							<ul class="nav navbar-nav">
+								<li class="nav-item" role="presentation">
+									<a class="nav-link" href="#">Help</a>
+								</li>
+								<li class="dropdown">
+									<a class="dropdown-toggle nav-link dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">English </a>
+									<div class="dropdown-menu" role="menu">
+										<a class="dropdown-item" role="presentation" href="#">First Item</a>
+										<a class="dropdown-item" role="presentation" href="#">Second Item</a>
+										<a class="dropdown-item" role="presentation" href="#">Third Ite</a>
+									</div>
+								</li>
+							</ul>
+							<form class="form-inline mr-auto" target="_self">
+								<div class="form-group">
+								
+								</div>
+							</form>
+							<span class="navbar-text">
+								<a href="#" class="login">Log In</a>
+							</span>
+							<a class="btn btn-light action-button" role="button" href="#">Sign Up</a>
+						</div>
+					</div>
+				</nav>
+					
+				<div class="container hero">
+					<div class="row">
+						<div class="col-md-8 offset-md-2">
+							<h1 class="text-center">Commons Helper: Help page</h1>
+													
+							
+						</div>
+
+					</div>
+				</div>
+			</div>
+			
+			<div class="article-dual-column">
+				<div class="container">
+
+					<div class="col-md-12 ">
+
+						<div class="intro">
+						  <h1 class="text-center">What is Commons Helper?</h1>
+						
+
+							<div>
+								Commons Helper is a tool that simplifies the Commons uploads with GLAMpipe. Helper creates the node structure needed for Commons uploads project for you. 
+							</div>
+							
+							<div class="alert alert-info position-fixed" role="alert">
+								This is a warning  - very , very beta!
+							</div>
+						  
+							<div class="intro">
+							  <h1 class="text-center">Prepare your metadata</h1>
+							  <p>GLAMpipe Commons helper requires CSV file. You can export CSV file from Excel and Libreoffice.</p>
+							 
+							</div>
+							<ol>
+								<li>Make sure that the <b>first row</b> in your spreadsheet contains field labels.</li>
+								<li>Make sure that labels match Commons template fields. (see <a target="_blank" href="https://commons.wikimedia.org/wiki/Commons:Templates">templates</a>)</li>
+								<li>Metadata file must include direct links to the files.</li>
+								<li>Use semicolon (;)) as a separator for multiple values (like multiple authors or categories)</li>
+								<li>You must have page names (URL of the page). Please note that page names must be unique!</li>
+							 </ol>
+							 
+							 <h1 class="text-center"> Required metadata fields</h1>
+							 <table class="table">
+								 <thead class="thead-dark">
+									 <tr>
+										<th>label</th>
+										<th>meaning</th>
+										<th>example</th>
+									 </tr>
+
+								 </thead>
+
+								<tr>
+									<td>title</td> 
+									<td class="table-warning">Title of the image. By default this will be the page name (URL). THIS MUST BE UNIQUE!</td>
+									<td>LinuxCon_Europe_Linus_Torvalds_03.jpg</td>
+								</tr>
+								<tr>
+									<td>path</td> 
+									<td>This is a *direct link* to your file. </td>
+									<td>http://opendimension.org/data/uploads/petajavesi_open.jpg</td>
+								</tr>
+								<tr>
+									<td>permission</td> 
+									<td>Licence for your files. </td>
+									<td>{{cc-by-4.0}} See <a target="_blank" href="https://commons.wikimedia.org/wiki/Commons:Copyright_tags">copyright tags</a></td>
+								</tr>
+								<tr>
+									<td>source</td> <td>Origin of the file</td>
+								</tr>
+
+							 </table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="article-clean"></div>
+
+		</div>
+	</div>
+
+
+
+
+</body></html>

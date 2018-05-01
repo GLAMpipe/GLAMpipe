@@ -541,12 +541,16 @@ module.exports = function(express, glampipe, passport) {
 		} else if(global.config.authentication === "shibboleth") {
 			if(req.headers[global.config.shibbolethHeaderId]) {
 				var shib_user = req.headers[global.config.shibbolethHeaderId];
-				if(global.config.shibbolethUsers.includes(shib_user))
-					res.json({shibboleth:{user:shib_user}});
-				else
-					res.json({shibboleth:{visitor:shib_user}});
-			} else
+				if(global.config.shibbolethUsers.includes(shib_user)) {
+					res.json({"shibboleth":{user:shib_user}});
+				} else {
+					res.json({"shibboleth":{visitor:shib_user}});
+				}
+			} else {
 				res.status(401).json({"error": "not authenticated"});
+			}
+		} else if(global.config.authentication === "none") {
+			res.status(200).json({"error": "no authentication required"});
 		} else {
 			res.status(401).json({"error": "not authenticated"});
 		}
