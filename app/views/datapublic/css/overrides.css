@@ -305,5 +305,10 @@
 }
 
 table td {
-	word-break:break-all;
+	/* word-break:break-all; */
 }
+
+.main table td, .main li  {
+	font-size: 14px;
+}
+

@@ -66,7 +66,8 @@ exports.getFacetIndexHTML = function (req, res) {
 function prepareHTML (html, node) {
 	var collection = node.collection.split("_");
 	collection = collection[collection.length-1];
-	html = html.replace("[PROJECT]", "<a href='/project/"+node.project+"'>" + node.project_title + "</a>");
+	html = html.replace("[GLAMPIPE]", global.config.publicUrl);
+	html = html.replace("[PROJECT]", "<a href='" + global.config.publicUrl + "project/"+node.project+"'>" + node.project_title + "</a>");
 	html = html.replace("[COLLECTION]", collection);
 	html = html.replace(/\[TITLE\]/g, node.settings.pagetitle);
 	return html;
