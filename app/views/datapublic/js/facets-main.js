@@ -14,7 +14,7 @@ function makeURNLink (arr, link) {
 
 $( document ).ready(function() {
 	
-	$("#pageinfo").html(config.pageinfo);
+	//$("#pageinfo").html(config.pageinfo);
 		
 	var admin = new refjyx(config);
 	admin.initFilters();
@@ -67,6 +67,17 @@ $( document ).ready(function() {
 	$("#data-next").on("click", function (e) {
 		admin.nextPage();
 	});
+
+	$(document).on("click", "th", function(e) {
+		if(admin.sort === $(this).data("key")) {
+			admin.sortReverse == 1 ? admin.sortReverse = 0: admin.sortReverse = 1;
+		} else {
+			admin.sort = $(this).data("key");
+			admin.sortReverse = 0;
+		}
+		$("#sort").text("sorted by: " + $(this).text());
+		admin.renderFilteredSet();
+	})
 
 });
 

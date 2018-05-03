@@ -9,6 +9,7 @@ function refjyx (config) {
 	this.dataRender				= null;
 	this.skip					= 0;
 	this.limit					= 50;
+	this.sort					= "";
 
 	this.collection_url 		= this.url + "/collections/" + this.collection
 	this.get_facet_url 			= this.collection_url + "/facet/";
@@ -61,24 +62,16 @@ function refjyx (config) {
 
 		var sort = "";
 		var item_count = 0;
-		var filters = "&" + self.getFilteredQuery();
-		if(filters == "?") {
-			//$("#" + facet.key).find("ul").empty();
-			//return;
-		}
-
 		var fields = self.getFacetFields();
-		console.log(fields);
+		var filters = "&" + self.getFilteredQuery();
 
-
-		var params = "&limit=200" + sort;
-		$.getJSON(self.get_facet_url + "?fields=" + fields + filters + params, function (response) {
+		$.getJSON(self.get_facet_url + "?fields=" + fields + filters, function (response) {
 			self.filters.forEach(function(filter) {
-
 				// render static filters
 				if(filter.mode == "static") {
 					var html = "<div class='filter-"+filter.op+"' id='"+filter.key+"'>";
 					html += "<h3>" + filter.title + "</h3><ul>";
+					
 					if(filter.render == "checkbox") {
 						filter.values.forEach(function(value) {
 							if(value.checked)
@@ -87,6 +80,7 @@ function refjyx (config) {
 								html += "<li><input type='checkbox'  value='"+value.value+"'/>"+value.title+"</li>"
 						})
 					}
+					
 					html += "</ul></div>";
 
 					// render static only once
@@ -207,24 +201,18 @@ function refjyx (config) {
 		var filters = "?" + self.getFilteredQuery();
 		//console.log(filters)
 		var params = "&skip="+self.skip+"&limit=" + self.limit;
-		if(self.config.item_table.sort) {
-			params += "&sort=" + self.config.item_table.sort;
-			if(self.config.item_table.reverse) {
-				params+= "&reverse=" + self.config.item_table.reverse;
+		if(self.sort) {
+			params += "&sort=" + self.sort;
+			if(self.sortReverse) {
+				params+= "&reverse=" + self.sortReverse;
 			}
 		}
 
 		var html = "<table><tr>";
-		self.item_table.headers.forEach(function(header) {
-			html += "<th>" + header + "</th>";
+		self.item_table.headers.forEach(function(header, index) {
+			html += "<th data-key='" + self.item_table.rows[index]["key"] + "'>" + header + "</th>";
 		})
 		html += "</tr>";
-
-		if(filters == "?") {
-			//html += "</table>";
-			//$(target).empty().append(html);
-			//return;
-		}
 
 		$.getJSON(this.get_filtered_items_url + filters + params, function (response) {
 			response.data.forEach(function(item) {
@@ -244,6 +232,7 @@ function refjyx (config) {
 			$(self.item_table.display).empty().append(html);
 		})
 	}
+
 
 	this.renderLinks = function(link, col) {
 

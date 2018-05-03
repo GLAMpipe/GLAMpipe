@@ -524,21 +524,17 @@ exports.facet = function (req, callback) {
 	const AS_ARRAY = true;
 	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
 
-	// skip empty strings
-	//var empty = {};
-	//empty[field] = {$ne:""};
-
 	// check if field is array
 	col.getKeyTypes(req.params.collection, function(fieldTypes) {
 		console.log("\nFACET QUERY:" + req.url);
-		var aggr = buildAggregate2(fields, fieldTypes, filters);
+		var aggr = buildAggregate(fields, fieldTypes, filters);
 		aggregate(collection, aggr, function(data) {
 			callback(data);
 		})
 	})
 }
 
-function buildAggregate2 (fields, fieldTypes, filters) {
+function buildAggregate (fields, fieldTypes, filters) {
 
 	var aggregate = [];
 	var facets =  { $facet: {}};
@@ -560,116 +556,10 @@ function buildAggregate2 (fields, fieldTypes, filters) {
 		facets["$facet"][field] = facet;
 	})
 
-     /*
-     facet["$facet"]["dc_type_coar"] = [
-        { $unwind: "$dc_type_coar" },
-        { $sortByCount: "$dc_type_coar" }
-      ]
-     
-      "dc types": [
-        { $unwind: "$dc_type" },
-        { $sortByCount: "$dc_type" }
-      ]
-  
-*/
-
-
-	
 	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
 	console.log("\n");
 	return aggregate;
 }
-
-function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array) {
-
-	var aggregate = [];
-	// build aggregate
-	if(filters.length)
-		aggregate.push({$match: {$and:filters}});
-	if(group_by)
-		aggregate.push(group_by);
-	if(is_array)
-		aggregate.push({$unwind: facet});
-	if(empty)
-		aggregate.push({$match: empty});
-	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
-	aggregate.push({$sort: sort});
-	aggregate.push({$limit:limit});
-	
-	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
-	console.log("\n");
-	return aggregate;
-}
-
-
-
-// facet counts (double grouped also)
-exports.facet_old = function (req, callback) {
-	var col = require("../app/collection.js");
-	var filters = [];
-	var collection = db.collection(req.params.collection);
-	var field = req.params.field;
-	var filters = [];
-	var group_by = null;
-	var sort = {};
-	var facet = "$facet";
-	const AS_ARRAY = true;
-	var skip = ["skip", "limit", "sort", "reverse", "op"]; 
-	
-	var operators = buildquery.operators(req);
-	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
-
-	var limit = parseInt(req.query.limit);
-	if (limit < 0 || isNaN(limit))
-		limit = 20;
-
-	if(typeof req.query.sort !== 'undefined')  // by default sort by _id 
-		sort[req.query.sort] = 1;
-	else
-		sort.count = -1;
-		
-	// algorithm for double grouped (match ,group, count)
-	// - first match reference facets (journal/monografia)
-	// - then match JYX-item facets (laitos, oppiaine, tyyppi, asiasana)
-	// - then group by original source (JYX-item)
-	
-	// GROUP:
-	if(req.params.groupby) {
-		group_by = {
-			$group: {
-				_id:{mid:"$" + req.params.groupby}, 
-				facet:{$first: "$" + field}
-			}
-		}
-	} 
-	
-	if(!group_by)
-		facet = "$" + field;
-
-	// skip empty strings
-	var empty = {};
-	//empty[field] = {$ne:""};
-		
-	// check if field is array
-	col.getKeyTypes(req.params.collection, function(res) {
-		console.log("\nFACET QUERY:" + req.url);
-		if(res[field] === "array") {
-			var aggr = buildAggregate(facet, filters, group_by, empty, limit, sort, true);
-			aggregate(collection, aggr, function(data) {
-				callback(data);
-			})
-		} else {
-			var aggr= buildAggregate(facet, filters, group_by, empty, limit, sort, false);
-			aggregate(collection, aggr, function(data) {
-				callback(data);
-			})
-		}
-	})
-}
-
-
-
-
 
 
 function aggregate (collection, aggregate, callback) {

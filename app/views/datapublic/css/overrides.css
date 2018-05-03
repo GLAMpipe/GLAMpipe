@@ -308,7 +308,10 @@ table td {
 	/* word-break:break-all; */
 }
 
-.main table td, .main li  {
+.main table td, .main li, .main p  {
 	font-size: 14px;
 }
 
+.main h1 {
+	color:#5a6979;
+}

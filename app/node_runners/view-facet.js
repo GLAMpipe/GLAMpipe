@@ -69,6 +69,9 @@ function prepareHTML (html, node) {
 	html = html.replace("[GLAMPIPE]", global.config.publicUrl);
 	html = html.replace("[PROJECT]", "<a href='" + global.config.publicUrl + "project/"+node.project+"'>" + node.project_title + "</a>");
 	html = html.replace("[COLLECTION]", collection);
+	if(node.settings.pageinfo) {
+		html = html.replace("[PAGEINFO]", node.settings.pageinfo);
+	}
 	html = html.replace(/\[TITLE\]/g, node.settings.pagetitle);
 	return html;
 }
