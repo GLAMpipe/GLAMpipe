@@ -298,7 +298,7 @@ exports.getFacet = function (req, cb) {
 	
 	//var query = createSearchQuery(req);
 	mongoquery.facet(req, function (result) {
-		cb({count:result});
+		cb({facets:result});
 	});
 }
 

@@ -421,7 +421,7 @@ module.exports = function(express, glampipe, passport) {
 		//glampipe.core.getCollectionFacetTest(req, function(data) {res.send(data)});
 	//});
 
-	express.get('/api/v1/collections/:collection/facet/:field', function (req, res) {
+	express.get('/api/v1/collections/:collection/facet', function (req, res) {
 		collection.getFacet(req, function(data) {res.send(data)});
 	});
 

@@ -6,7 +6,7 @@ var nodeDevMode = false;
 // PATHS 
 var MP = "__mp"; // prefix 
 var url = "http://localhost";
-var publicUrl = "http://localhost:3000";
+var publicUrl = "http://localhost:3000/";
 
 // - where GLAMpipe can strore project data on *non-docker* installation
 // default: ""

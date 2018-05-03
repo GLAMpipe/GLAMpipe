@@ -511,8 +511,100 @@ exports.group = function (node, array, callback) {
 }
 
 
-// facet counts (double grouped also)
 exports.facet = function (req, callback) {
+	var col = require("../app/collection.js");
+	var filters = [];
+	var collection = db.collection(req.params.collection);
+	var fields = req.query.fields.split(",").map(function(item) {
+		return item.trim();
+	});
+	var filters = [];
+	var skip = ["skip", "limit", "sort", "reverse", "op", "fields"]; 
+	var operators = buildquery.operators(req);
+	const AS_ARRAY = true;
+	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
+
+	// skip empty strings
+	//var empty = {};
+	//empty[field] = {$ne:""};
+
+	// check if field is array
+	col.getKeyTypes(req.params.collection, function(fieldTypes) {
+		console.log("\nFACET QUERY:" + req.url);
+		var aggr = buildAggregate2(fields, fieldTypes, filters);
+		aggregate(collection, aggr, function(data) {
+			callback(data);
+		})
+	})
+}
+
+function buildAggregate2 (fields, fieldTypes, filters) {
+
+	var aggregate = [];
+	var facets =  { $facet: {}};
+	// build aggregate
+	if(filters.length)
+		aggregate.push({$match: {$and:filters}});
+		aggregate.push(facets);
+
+	// generate facets
+	fields.forEach(function(field) {
+		var facet = [];
+		if(fieldTypes[field] === "array") {
+			facet.push({ $unwind: "$" + field });
+		}
+		facet.push({ $sortByCount: "$" + field });
+		//facet.push({ $sort: { dc_type_coar : -1 }});
+		
+		facet.push({ $limit: 100 }); // just in case
+		facets["$facet"][field] = facet;
+	})
+
+     /*
+     facet["$facet"]["dc_type_coar"] = [
+        { $unwind: "$dc_type_coar" },
+        { $sortByCount: "$dc_type_coar" }
+      ]
+     
+      "dc types": [
+        { $unwind: "$dc_type" },
+        { $sortByCount: "$dc_type" }
+      ]
+  
+*/
+
+
+	
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
+	console.log("\n");
+	return aggregate;
+}
+
+function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array) {
+
+	var aggregate = [];
+	// build aggregate
+	if(filters.length)
+		aggregate.push({$match: {$and:filters}});
+	if(group_by)
+		aggregate.push(group_by);
+	if(is_array)
+		aggregate.push({$unwind: facet});
+	if(empty)
+		aggregate.push({$match: empty});
+	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
+	aggregate.push({$sort: sort});
+	aggregate.push({$limit:limit});
+	
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
+	console.log("\n");
+	return aggregate;
+}
+
+
+
+// facet counts (double grouped also)
+exports.facet_old = function (req, callback) {
 	var col = require("../app/collection.js");
 	var filters = [];
 	var collection = db.collection(req.params.collection);
@@ -577,26 +669,6 @@ exports.facet = function (req, callback) {
 
 
 
-function buildAggregate (facet, filters, group_by, empty, limit, sort, is_array) {
-
-	var aggregate = [];
-	// build aggregate
-	if(filters.length)
-		aggregate.push({$match: {$and:filters}});
-	if(group_by)
-		aggregate.push(group_by);
-	if(is_array)
-		aggregate.push({$unwind: facet});
-	if(empty)
-		aggregate.push({$match: empty});
-	aggregate.push({$group : {_id: facet,count: { $sum: 1 }}});
-	aggregate.push({$sort: sort});
-	aggregate.push({$limit:limit});
-	
-	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
-	console.log("\n");
-	return aggregate;
-}
 
 
 
@@ -609,6 +681,7 @@ function aggregate (collection, aggregate, callback) {
 		function (err, data) {
 			if(err) {
 				console.log("field is NOT an array");
+				console.log(err);
 				callback(data);
 
 			} else {
