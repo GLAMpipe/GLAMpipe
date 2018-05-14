@@ -32,7 +32,7 @@ exports.isValidUser = function(req, res, next) {
 // add shibboleth headers to data (like displayname and email)
 exports.addHeadersToData = function(req) {
 	
-	if(global.config.authentication === "shibboleth" && Array.isArray(global.config.shibbolethHeadersToData)) {
+	if(global.config.authentication === "shibboleth" && Array.isArray(global.config.shibbolethHeadersToData) && global.config.shibbolethHeadersToData.length > 0) {
 		var encoding = require("encoding");
 		global.config.shibbolethHeadersToData.forEach(function(header) {
 			if(global.config.shibbolethHeadersEncoding !== "UTF-8") {

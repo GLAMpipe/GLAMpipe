@@ -549,8 +549,9 @@ function buildAggregate (fields, fieldTypes, filters) {
 		if(fieldTypes[field] === "array") {
 			facet.push({ $unwind: "$" + field });
 		}
-		facet.push({ $sortByCount: "$" + field });
-		//facet.push({ $sort: { dc_type_coar : -1 }});
+
+		facet.push({ $group: {_id: "$" + field, count: { $sum: 1}}});
+		facet.push({ $sort: { count : -1 }});
 		
 		facet.push({ $limit: 100 }); // just in case
 		facets["$facet"][field] = facet;
