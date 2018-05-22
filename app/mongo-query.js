@@ -11,8 +11,21 @@ db.on("error", function(e) {
     throw("dberror","ERROR: can not connect to database (mongodb).\nPlease note that just installing mongodb is not enough.\nYou must also have it *running*.")
 });
     
+db.on("connect", function() {
+    console.log("DB: connected!")
+});
+    
+
 var exports = module.exports = {};
 
+
+function sleep(time, callback) {
+    var stop = new Date().getTime();
+    while(new Date().getTime() < stop + time) {
+        ;
+    }
+    //callback();
+}
 
 exports.createBulk = function () {
 	return  db.items.initializeUnorderedBulkOp();
@@ -46,7 +59,12 @@ exports.findAll = function (params, callback) {
 		sort_order = -1;
 	sort[params.sort] = sort_order;
 	
-	collection.find(params.query).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
+	if(params.keys) {
+		collection.find(params.query, params.keys).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
+	} else {
+		collection.find(params.query).sort(sort).limit(params.limit).skip(params.skip, function(err, docs) { callback(docs); });
+		
+	}
 }
 
 exports.find2 = function (query, collectionname, callback) {

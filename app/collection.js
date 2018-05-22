@@ -100,7 +100,6 @@ exports.getTableData = function (req, res) {
 
 	// create search query
 	var query = buildquery.createSearchQuery(req);
-	
 
 	var limit = parseInt(req.query.limit);
 	if (limit < 0 || isNaN(limit))
@@ -114,6 +113,23 @@ exports.getTableData = function (req, res) {
 	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
 		sort = "_id";
 
+	// keys that are wanted
+	var keys = {};
+	if(typeof req.query.keys !== 'undefined') {
+		arrKeys = req.query.keys.split(",");
+		arrKeys.forEach((key) => {
+			keys[key.trim()] = 1;
+		})
+	}
+
+	// keys that are not wanted
+	if(typeof req.query.nokeys !== 'undefined') {
+		arrKeys = req.query.nokeys.split(",");
+		arrKeys.forEach((key) => {
+			keys[key.trim()] = 0;
+		})
+	}
+
 	var reverse = false
 	var r = parseInt(req.query.reverse);
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
@@ -122,6 +138,7 @@ exports.getTableData = function (req, res) {
 	var params = {
 		collection: req.params.collection,
 		query: query,
+		keys: keys,
 		limit: limit,
 		skip: skip,
 		sort: sort,
