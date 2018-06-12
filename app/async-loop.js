@@ -293,10 +293,8 @@ function processDataSync (node, sandbox, onDoc, mode, cursor) {
 				}
 
 				updateDoc = createUpdateDoc(node, setter, doc, mode);
-
 				//console.log("updateDoc:", updateDoc);
-				if(sandbox.context.skip || node.subtype === "meta")  {// metanodes do not save output
-					console.log("NODE: skipping")
+				if(node.subtype === "meta")  {// skip or metanodes do not save output
 					processDataSync(node, sandbox, onDoc, mode, cursor);
 				} else
 					mongoquery.update(node.collection, {_id:sandbox.context.doc._id}, updateDoc, function() {

@@ -292,11 +292,14 @@ function refjyx (config) {
 
 
 	this.checkSelection = function (facet, item, item_count) {
-		if(facet.selections.indexOf(item._id) !== -1)
-			return "<input type='checkbox' checked id='"+facet.key + item_count +"' data-value='"+item._id+"'/>";
-		else
-			return "<input type='checkbox' id='"+facet.key + item_count +"' data-value='"+item._id+"'/>";
-
+		if(item._id) {
+			if(facet.selections.indexOf(item._id) !== -1)
+				return '<input type="checkbox" checked id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+			else
+				return '<input type="checkbox" id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+		} else {
+			return ""
+		}
 	}
 
 	this.joinArray = function (arr) {

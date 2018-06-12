@@ -6,19 +6,19 @@ var exports = module.exports = {};
 
 exports.postJSON = function (doc, sandbox, next) {
 
-	console.log("WEB: POST JSON request");
-
 	// let node create an upload JSON
 	sandbox.pre_run.runInContext(sandbox);
 	var options = sandbox.out.pre_value;
-	console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 
 	if(!options || !options.url || sandbox.context.skip) {
 		if(sandbox.context.error == "")
 			sandbox.context.error = " no URL";
+		sandbox.run.runInContext(sandbox);
 		return next("skipping...");
 	}
 
+	console.log("WEB: POST JSON request");
+	//console.log(JSON.stringify(sandbox.out.pre_value, null, 4));
 	setUserAgent(options);
 
 	//require('request').debug = true;

@@ -936,7 +936,7 @@ var walkSync = function(dir, nodeList) {
 
 
 function readNodeDirectorySync (nodeDir) {
-	console.log("READING directory: " + nodeDir);
+	//console.log("READING directory: " + nodeDir);
 	
 	// read description.js from node directory
 	var content = fs.readFileSync(path.join(nodeDir, "description.json"), 'utf-8');

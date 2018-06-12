@@ -6,7 +6,6 @@ var path        = require('path');
 var parseSchema = require('mongodb-schema');
 var mongoquery 	= require("../app/mongo-query.js");
 const database 	= require('../config/database');
-var db 			= mongojs(database.initDBConnect());
 
 var exports = module.exports = {};
 
@@ -17,7 +16,6 @@ var exports = module.exports = {};
  */
 
 exports.createCollectionSchema = function (node, cb) {
-	//var collection = db.collection(collectionName);
 	var key_list = {};
 	var keys = [];
 	

@@ -16,6 +16,7 @@ module.exports.initDBConnect = function () {
 
 	}
 	
+	global.db_string = connection_string;
 	console.log("MongoDB connection: ", connection_string);
 
 	return connection_string;
