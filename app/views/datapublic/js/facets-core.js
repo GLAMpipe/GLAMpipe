@@ -171,6 +171,8 @@ function refjyx (config) {
 
 
 	this.setFacetSort = function (facet) {
+		alert("not implemented yet!")
+		return;
 		self.filters.forEach(function(filter) {
 			if(filter.key == facet.key) {
 				filter.sort = facet.value;
@@ -373,10 +375,10 @@ function refjyx (config) {
 
 		var sort = "<div data-facet='"+facet.key+"' class='btn-group sort-switch "+collapse+"' data-toggle='buttons'>";
 		sort += "   <label data-sort='' class='btn btn-primary active'>";
-		sort += "   	<input type='radio' name='"+facet.key+"_sort' checked autocomplete='off'> lukumäärä";
+		sort += "   	<input type='radio' name='"+facet.key+"_sort' checked autocomplete='off'> by count";
 		sort += "	</label>";
 		sort += "	<label data-sort='_id' class='btn btn-primary'>";
-		sort += "		<input type='radio' name='"+facet.key+"_sort' autocomplete='off'> aakkosjärjestys";
+		sort += "		<input type='radio' name='"+facet.key+"_sort' autocomplete='off'> by name";
 		sort += "	</label>";
 		sort += "</div>";
 		return sort;
