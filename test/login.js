@@ -5,13 +5,18 @@ let chai = require('chai');
 let chaiHttp = require('chai-http');
 let should = chai.should();
 
-var User = require("..//app/controllers/models/user.js");
+var User = require("..//app/controllers/user.js");
+var config = require("..//config/config.js");
 
-let url = "http://localhost:3000";
+let url = "http://localhost:3000/api/v1";
 
 
 chai.use(chaiHttp);
 
+if(config.authentication !== "local") {
+	console.log("Skipping authentication testing")
+	return;
+}
 
 describe('Users', () => {
     beforeEach((done) => {
@@ -21,7 +26,7 @@ describe('Users', () => {
     });
 
 	describe('/GET users', () => {
-	  it('it should GET all the books', (done) => {
+	  it('it should GET all the users', (done) => {
 		chai.request(url)
 			.get('/users')
 			.end((err, res) => {
@@ -37,16 +42,16 @@ describe('Users', () => {
 	describe('/POST user', () => {
 	  it('add user', (done) => {
 		let user = {
-			username: "arihayri",
+			email: "arihayri",
 			password: "salasana"
 		}
 		chai.request(url)
-			.post('/users')
+			.post('/signup')
 			.send(user)
 			.end((err, res) => {
 				res.should.have.status(200);
 				res.body.should.be.a('object');
-				res.body.should.have.property('upserted');
+				//res.body.should.have.property('upserted');
 			  done();
 			});
 	  });

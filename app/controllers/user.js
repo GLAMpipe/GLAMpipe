@@ -96,7 +96,7 @@ class User {
 
 	
 	static removeAll(cb) {
-		collection.remove({}, function (err, result) {
+		mongoquery.empty("mp__users", function (err, result) {
 			if (err) {
 				console.log(err);
 				cb(result)
