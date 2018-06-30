@@ -225,14 +225,14 @@ var GlamPipe = function() {
 			console.log(e);
 		});
 
-	    process.on('uncaughtException', function(err) {
+		process.on('uncaughtException', function(err) {
 			self.logger.error(err);
 			// handle the error safely
-		    console.log("MAJOR ERROR!")
-		    console.log(err)
-		    // let's clear node run register so that node can be run again
-		    // TODO: we should sent response to node execution request
-		    global.register = [];
+			console.log("MAJOR ERROR!")
+			console.log(err)
+			// let's clear node run register so that node can be run again
+			// TODO: we should sent response to node execution request
+			global.register = [];
 		})
 
 		//  Start the app on the specific interface (and port).
@@ -259,9 +259,9 @@ var GlamPipe = function() {
 
 // wait a little bit so that mongo gets ready
 async function init(){
-   console.log('waiting for mongo ' + config.start_delay + " milliseconds...")
-   await sleep(config.start_delay)
-   console.log('ok, go!')
+	console.log('waiting for mongo ' + config.start_delay + " milliseconds...")
+	await sleep(config.start_delay)
+	console.log('ok, go!')
 	var glampipe = new GlamPipe();
 
 
@@ -282,9 +282,9 @@ async function init(){
 }
 
 function sleep(ms){
-    return new Promise(resolve=>{
-        setTimeout(resolve,ms)
-    })
+	return new Promise(resolve=>{
+		setTimeout(resolve,ms)
+	})
 }
 
 init();
