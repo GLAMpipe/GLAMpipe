@@ -1,4 +1,4 @@
-FROM node:6.9.4
+FROM node:9.11.2-jessie
 RUN apt-get update && apt-get install -y vim build-essential imagemagick ghostscript poppler-utils 
 
 # Install app dependencies

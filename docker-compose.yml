@@ -16,7 +16,8 @@ services:
      - glampipe-data:/glampipe-data
 
   glampipe_mongo:
-    image: mongo:3.3.10
+    image: mongo:3.6
+    container_name: glampipe_mongo
     networks:
     - gp
 
