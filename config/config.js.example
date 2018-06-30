@@ -23,7 +23,8 @@ var nodePath = "nodes";
 // path for non-GLAMpipe html files (if there is a need to serve files from same container)
 var staticPath = "/static"; 
 
-
+// delay (in milliseconds) before GLAMpipe tries to make a mongo connection. Compose up might fail if this is 0
+var start_delay = 5000
 
 // AUTHENTICATION 
 // - "none" = do not use authentication, i.e. local install
@@ -85,6 +86,7 @@ exports.disableBatchDownloads = disableBatchDownloads;
 exports.canRegister = localCanRegister;
 exports.secret = secret;
 exports.tags = visible_tags;
+exports.start_delay = start_delay;
 
 exports.IP_passes = IP_passes;
 exports.PROXY_passes = PROXY_passes;
