@@ -466,6 +466,10 @@ module.exports = function(express, glampipe, passport) {
 		collection.removeKey(req, function(data) {res.send(data)});
 	});
 
+	express.delete('/api/v1/collections/:collection', function (req, res) {
+		collection.drop(req, function(data) {res.send(data)});
+	});
+
 	express.get('/api/v1/collections', function (req, res) {
 		collection.getNames(req, res);
 	});

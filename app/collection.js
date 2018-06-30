@@ -264,6 +264,16 @@ exports.deleteDocument = function (req, callback) {
 	});
 }
 
+exports.drop = function (collection, callback) {
+
+	mongoquery.drop(req.params.collection, function(error, result) {
+		if(error) {
+			console.log("ERROR: could not drop collection! " + req.params.collection);
+		}
+		callback(error, result);
+	});
+}
+
 
 /**
  * Get paged collection data

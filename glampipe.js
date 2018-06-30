@@ -23,7 +23,12 @@ try {
 
 global.config.version = version.version;
 
+
+
 var GlamPipe = function() {
+
+
+
 
 	//  Scope.
 	var self = this;
@@ -252,22 +257,37 @@ var GlamPipe = function() {
 
 }
 
+// wait a little bit so that mongo gets ready
+async function init(){
+   console.log('waiting for mongo ' + config.start_delay + " milliseconds...")
+   await sleep(config.start_delay)
+   console.log('ok, go!')
+	var glampipe = new GlamPipe();
 
+
+	try {
+		 
+		glampipe.initialize(function(error) {
+			if(error) {
+				console.log(colors.red("Could not start GLAMpipe!"));
+				console.log(error);
+				process.exit();
+			} else
+				glampipe.start();
+		});
+		
+	} catch (e) {
+			console.log(e);
+		}
+}
+
+function sleep(ms){
+    return new Promise(resolve=>{
+        setTimeout(resolve,ms)
+    })
+}
+
+init();
 	
-var glampipe = new GlamPipe();
 
-
-try {
-	 
-	glampipe.initialize(function(error) {
-		if(error) {
-			console.log(colors.red("Could not start GLAMpipe!"));
-			process.exit();
-		} else
-			glampipe.start();
-	});
-	
-} catch (e) {
-		console.log(e);
-	}
 
