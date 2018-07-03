@@ -24,6 +24,7 @@
     "fs-sync": "^1.0.4",
     "jsonwebtoken": "^7.4.0",
     "mongodb-schema": "^8.0.0",
+    "mongoist": "^1.7.4",
     "mongojs": "^2.3.0",
     "multer": "^1.1.0",
     "node-pandoc": "^0.3.0",
