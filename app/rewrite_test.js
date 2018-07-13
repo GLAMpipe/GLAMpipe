@@ -1,11 +1,9 @@
 var db 	= require('./db.js');
 var project 	= require('./new_project.js');
+var Node 	= require('./new_node.js');
 
+const mongoist = require('mongoist');
 
-var collectionname = "p141_great-rewrite_c1_rewrite"
-var collection = db.collection(collectionname);
-
-//var db = mongojs(database.initDBConnect());
 
 
 
@@ -16,21 +14,50 @@ async function data() {
 		//var stats = await collection.stats();
 		//console.log('*********************')
 		//console.log(stats);
-		for(var i = 0; i < 5 ; i++) {
-			console.log()
-			var insert = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen ' +i});
-		}
-		var insert1 = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen'});
+
+		
 		//var insert1 = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen'});
 		//var insert1 = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen'});
 		//var result2 = await collection.find({});
 		//console.log(result2)
 		
 		//var p = await project.create('uusi');
-		var p = await project.createRest({'body':{'title':'resti_uusi'}}, function(result) {console.log('done')});
-		console.log(p)
+		var p = await project.create('resti_uusi');
+		console.log(p);
 		
 
+		var collectionname = p.prefix + "_col";
+		await db.createCollection(collectionname);
+		var collection = db.collection(collectionname);
+		
+		await db.collection("mp_projects").update({_id:mongoist.ObjectId(p.uuid)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [collectionname] } });
+
+		for(var i = 0; i < 5 ; i++) {
+			//console.log()
+			var insert = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen ' +i});
+		}
+		
+		var insert1 = await collection.insert({'field1': 'testi2','author': 'Matti Kyllönen'});
+		
+		// collection node
+		var collectionNode = new Node();
+		await collectionNode.loadFromRepository("collection_basic");
+		await collectionNode.setParams({"title": "My collection", "collection": collectionname})
+		await collectionNode.add2Project(p._id, collectionname);
+		
+		// replace node
+		var replaceNode = new Node();
+		await replaceNode.loadFromRepository("process_field_replace");
+		
+		//replaceNode.setCollection(collectionname);
+		await replaceNode.setParams({"title": "Replace", "collection": collectionname})
+		await replaceNode.add2Project(p._id, collectionname);
+		//replaceNode.setParams();
+		//console.log(replaceNode.getParams());
+		//replaceNode.setSettings();
+		
+		//await project.remove(p._id)
+		
 }
 
 function promise_test() {

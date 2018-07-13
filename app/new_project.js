@@ -2,6 +2,8 @@ var async 		= require("async");
 var path 		= require("path");
 
 var db 			= require('./db.js');
+const mongoist = require('mongoist');
+
 
 try {
 	global.config 		= require("../config/config.js");
@@ -22,7 +24,7 @@ exports.createRest = function(req, res) {
 	var title = req.body.title;
 	exports.create(title)
 	.then(function(result) {
-		res(result);
+		if(res) res(result);
 	})
 	.catch(function(e){console.log(e)})
 	
@@ -52,6 +54,7 @@ exports.create = async function(title) {
 			"title": title,
 			"dir": title_dir,
 			"prefix":  prefix,
+			"nodes": [],
 			"collection_count": 0,
 			"node_count":0,
 			"schemas": [],
@@ -73,6 +76,45 @@ exports.create = async function(title) {
 }
 
 
+
+
+
+exports.remove = async function (doc_id) {
+	
+	var project = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	if(!project) {
+		console.log("Project " + doc_id + " not found")
+		return;
+	}
+			
+	console.log("PROJECT: deleting project", project.title);
+	
+	try {
+	
+		// if project has collections then remove those first
+		if(project.collections) {
+			for(var i=0; i < project.collections.length; i++) {
+				console.log("PROJECT: deleting collection", project.collections[i]);
+				await db.collection(project.collections[i]).drop();
+			}
+		}
+
+		await db.collection('mp_projects').remove({_id: mongoist.ObjectId(doc_id)});
+				
+		// remove project directory
+		var rmrf = require("rmrf");	
+		var project_path = path.join(projectsPath, project.dir);
+		if(project_path && project_path.includes(global.config.dataPath)) {
+			console.log("PROJECT: removing " + project_path);
+			await rmrf(project_path);
+			console.log("PROJECT: " + project_path + " dir deleted!");
+		} 
+		return Promise.resolve()
+	} catch(e) {
+		console.log("PROJECT: could not delete directory!" + project_path);
+		return Promise.reject();
+	}
+}
 
 
 
