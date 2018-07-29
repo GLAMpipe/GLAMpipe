@@ -27,37 +27,51 @@ async function data() {
 		
 
 		var collectionname = p.prefix + "_col";
-		await db.createCollection(collectionname);
-		var collection = db.collection(collectionname);
+		//await db.createCollection(collectionname);
+		//var collection = db.collection(collectionname);
 		
-		await db.collection("mp_projects").update({_id:mongoist.ObjectId(p.uuid)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [collectionname] } });
+		//await db.collection("mp_projects").update({_id:mongoist.ObjectId(p.uuid)}, {$inc: { collection_count: 1, node_count: 1}, $addToSet: {collections: [collectionname] } });
 
-		for(var i = 0; i < 5 ; i++) {
+		//for(var i = 0; i < 5 ; i++) {
 			//console.log()
-			var insert = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen ' +i});
-		}
+			//var insert = await collection.insert({'field1': 'testi','author': 'Ari Häyrinen ' +i});
+		//}
 		
-		var insert1 = await collection.insert({'field1': 'testi2','author': 'Matti Kyllönen'});
+		//var insert1 = await collection.insert({'field1': 'testi2','author': 'Matti Kyllönen'});
 		
 		// collection node
-		var collectionNode = new Node();
-		await collectionNode.loadFromRepository("collection_basic");
-		await collectionNode.setParams({"title": "My collection", "collection": collectionname})
-		await collectionNode.add2Project(p._id, collectionname);
+		try {
+			var collectionNode = new Node();
+			await collectionNode.loadFromRepository("collection_basic");
+			await collectionNode.setParams({"title": "My collection"})
+			await collectionNode.add2Project(p._id, collectionname);
+			
+			var collection = db.collection(collectionname);
+			await collection.insert({'field1': 'testi1','author': 'Matti Kyllönen'});
+			await collection.insert({'field1': 'testi2','author': 'Kari Kyllönen'});
+				
 		
-		// replace node
-		var replaceNode = new Node();
-		await replaceNode.loadFromRepository("process_field_replace");
-		
-		//replaceNode.setCollection(collectionname);
-		await replaceNode.setParams({"title": "Replace", "collection": collectionname})
-		await replaceNode.add2Project(p._id, collectionname);
-		//replaceNode.setParams();
-		//console.log(replaceNode.getParams());
-		//replaceNode.setSettings();
-		
-		//await project.remove(p._id)
-		
+			// replace node
+			var replaceNode = new Node();
+			await replaceNode.loadFromRepository("process_field_replace");
+			
+			//replaceNode.setCollection(collectionname);
+			await replaceNode.setParams({"in_field": "author", "out_field": "replaced"})
+			await replaceNode.add2Project(p._id, collectionname);
+			
+			var settings = {"search": ['0'], "replace": ["koira"]}
+			await replaceNode.run(settings);
+			
+			//replaceNode.setParams();
+			//console.log(replaceNode.getParams());
+			//replaceNode.setSettings();
+			
+			//await project.remove(p._id)
+
+		} catch(e) {
+			console.log(e)
+		}
+	
 }
 
 function promise_test() {
