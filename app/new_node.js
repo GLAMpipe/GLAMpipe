@@ -1,17 +1,30 @@
 
 
-var async 		= require("async");
 var colors 		= require('ansicolors');
 var path 		= require("path");
-var flatten 	= require("flat");
 const vm 		= require('vm');
-const mongoist = require('mongoist');
+const mongoist 	= require('mongoist');
 
 var db 			= require('./db.js');
+var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
-
-var dataImport 		= require("../app/import.js");
+var dataImport 	= require("../app/import.js");
 const MP 		= require("../config/const.js");
+
+
+/*
+ * - params {}
+ * - settings {}
+ * - source {}
+ * - sandbox {}
+ 
+ * - out
+ 
+ * - project
+ * - collection
+ * - _id
+ * 
+ */
 
 
 class Node {
@@ -23,8 +36,11 @@ class Node {
 
 	async loadFromRepository(nodeid) {
 		this.source = await db.collection("mp_nodes").findOne({"nodeid": nodeid});
-		this.source.params = {};
-		this.source.settings = {};
+		this.params = {};
+		this.settings = {};
+		if(!this.source) {
+			throw("Loading node '" + nodeid + "' failed");
+		}
 		//console.log(this.source);
 	}
 
@@ -41,9 +57,9 @@ class Node {
 		// check if collection exists
 		var collections = await db.getCollectionNames();
 		if(!collections.includes(collection_name)) {
-			// create collection if node is collection node
+			// create collection if node type is collection node
 			if(this.source.nodeid == 'collection_basic') {
-				await db.createCollection(collection_name);
+				await project.addCollection(collection_name);
 			} else {
 				throw("Collection does not exist");
 			}
@@ -51,29 +67,28 @@ class Node {
 
 		this.source.project = project_id;
 		this.source.collection = collection_name;
-		this.source.params.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
 		var o = await db.collection("mp_projects").update({_id:mongoist.ObjectId(project_id)}, {$push:{nodes: this.source}});	
-		console.log("project_id: " + project_id)
+		
+		// these are just shorthands
+		this.collection = collection_name;
+		this.project = project_id;
 	}
 	
 	
 	
 	setParams(params) {
 		if(this.source) {
-			if(!params.collection && this.source.params && this.source.params.collection) { 
-				params.collection = this.source.params.collection;
-			}
-			this.source.params = params;
+			this.source.params = params; 
 		} else {
-				throw("Cannot set params!")
+			throw("Cannot set params!")
 		}
 		
 	}
 
 
 
-	async saveSettings(node_id, settings) {
+	async saveSettings(settings) {
 		
 		// we do not save passwords, user names and api keys
 		if(settings) {
@@ -96,56 +111,87 @@ class Node {
 			
 		var setter = {};
 		setter.$set = {"nodes.$.settings": settings};
-		var query = {"nodes._id": mongoist.ObjectId(node_id)};
+		var query = {"nodes._id": mongoist.ObjectId(this.source._id)};
 		await db.collection("mp_projects").update(query, setter);
+		
+		this.source.settings = settings;
+		//console.log(setter)
 
 	}
 	
 	
 	
 	async run(settings, docid) {
-		
-		//dataImport.web.get.JSON();
+	
+		var core = this.source.core.split(".");
+		await this.saveSettings(settings);
 	
 		// create context for GP node
 		var sandbox = createSandbox(this.source);
+		sandbox.context = {};
+		sandbox.context.node = this.source;
+		this.sandbox = sandbox;
+		this.scripts = {};
+		
 		// init node scripts
-		var init 		= CreateScriptVM(this.source, sandbox, "init");
-		sandbox.pre_run = CreateScriptVM(this.source, sandbox, "pre_run");
-		sandbox.run 	= CreateScriptVM(this.source, sandbox, "run");
-		sandbox.finish 	= CreateScriptVM(this.source, sandbox, "finish");
+		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
+		this.scripts.pre_run 	= CreateScriptVM(this.source, sandbox, "pre_run");
+		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
+		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 
-		init.runInContext(sandbox);
+		this.scripts.init.runInContext(sandbox);
 
-		// we quit in init_error
-	//	if(sandbox.out.init_error) {
-	//		sandbox.out.say("error", sandbox.out.init_error);
-	//		return;
-	//	}
+		//console.log(this.source.type);
+		switch(this.source.type) {
 
-		console.log(this.source.type);
-		console.log(this.source.params.collection);
-		
-		
-		const cursor = db.collection(this.source.params.collection).find({});
-		console.log(typeof cursor);
-		var doc = await cursor.next();
-		while(doc) {
-		  doc = await cursor.next();
-		  console.log(doc)
-		  // process doc here
-		}
-		// node run "router"
-		if (this.source.type == 'process') {
+			case "source":
+				await dataImport[ core[0] ][ core[1] ][ core[2] ](this);
+				await schema.createSchema(this.collection);
+				break;
+				
+			case "process":
+				await dataLoop(this);
+				break;
+				
+			case "export":
 			
-		} else {
-			
+				break;
 		}
+
+		
+		console.log("done")
 
 	}
 }
 
 module.exports = Node ;
+
+
+
+
+
+async function dataLoop(node) {
+
+	var bulk = db[node.collection].initializeOrderedBulkOp();
+    const cursor = db[node.collection].findAsCursor({});	
+    
+	while(await cursor.hasNext()) {
+		var doc = await cursor.next();
+	  
+		node.sandbox.context.doc = doc;
+		node.scripts.run.runInContext(node.sandbox);
+	  
+		bulk.find({ '_id': doc._id }).updateOne({
+			'$set': { 'replaced': node.sandbox.out.value}
+		});
+	}	
+	
+	// make changes to database
+	await bulk.execute();
+}
+
+
+
 
 function CreateScriptVM(node, sandbox, scriptName) {
 		
@@ -161,6 +207,8 @@ function CreateScriptVM(node, sandbox, scriptName) {
 	return scriptVM;
 	
 }
+
+
 
 
 
@@ -183,13 +231,12 @@ function createSandbox(node) {
 		},
 		out: {
 			self:this,
+			options: {},
 			error_marker: "AAAA_error:",
-			pre_value:"",
 			value:"",
-			file:"",
 			setter:null,
 			error: null,
-			say: function(msg) {console.log('say: ' + msg)},
+			say: function(ch, msg) {console.log('say: ' + msg)},
 			console:console
 		}
 

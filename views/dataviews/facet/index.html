@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fi" xml:lang="fi">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+
+    <!--[if lt IE 7]></base><![endif]-->
+
+	<link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+
+
+	<link href="../../../publicview/css/bootstrap.css" rel="stylesheet">
+	<link rel="stylesheet" href="../../../publicview/css/bootstrap_jyu.css" />
+	<link rel="stylesheet" href="../../../publicview/css/font-awesome.css" />
+	<link href="../../../publicview/css/overrides.css" rel="stylesheet">
+	
+	<script src="../../../publicview/js/jquery-2.2.4.min.js"></script>  
+	<script src="../../../publicview/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../../publicview/js/facets-core.js" ></script>
+	<script type="text/javascript" src="../../../publicview/js/facets-main.js" ></script>
+
+	<!-- this config overrides config above when viewing inside GLAMpipe -->
+	<!-- [CONFIG] -->
+    <title>[TITLE]</title>
+
+</head>
+
+<body class="flex ">
+	
+
+<header class="site-header container-fluid hidden-print">
+  <div class="site-brand-container container">
+    <div class="row">
+      <div class="col-2 col-sm-2 col-md-10 col-xl-7 site-logo-container">
+        <a class="site-logo"></a>
+        <p class="hidden-sm-down site-name">
+          <a href="[GLAMPIPE]">GLAMpipe</a>
+          
+            <span class="separator">|</span>
+            [PROJECT] 
+
+            <span class="separator">|</span>
+            [COLLECTION]
+          
+        </p>
+      </div>
+      
+      <div class="col-7 col-sm-8 hidden-md-up site-name-container no-gutters site-name-animate">
+        <p class="site-name site-name-sm">
+          <a target="_blank" href="http://glampipe.org">GLAMpipe</a>
+        </p>
+        <p class="site-name site-name-sm">
+          <a href="">facet</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</header>	
+  
+
+    
+
+<div class="container">
+	
+	<div class="row hidden-print">
+      <div class="col-md-12 hidden-sm-down">
+        <div class="breadcrumbs">
+          
+        </div>
+      </div>
+    </div>
+	
+	<div class="row">
+		
+		<!-- MAIN -->
+		<div class="col-md-12 col-lg-8 col-xl-8 main">
+			<h1>[TITLE]</h1>
+			<p id="pageinfo">[PAGEINFO]</p>
+            
+            <!-- paging -->
+            <div class="flexbox"> 
+                <div id="data-prev" class="glyphicon glyphicon-chevron-left icon" aria-hidden="true"></div>
+                <div id="data-switch">0 / 0</div>
+                <div id="data-next" class="glyphicon glyphicon-chevron-right icon" aria-hidden="true"></div>
+                <div id="sort" style="margin-left:10px;"></div>
+            </div>
+
+			<div id="items"></div>
+		</div>
+	
+			
+		<!-- LEFT -->
+		<div class="col-md-12 col-lg-2 col-xl-2 sidebar flex-first sidebar-left hidden-print">
+			<div class="info"></div>
+			<div class="filters"></div>
+		
+		</div>
+	
+	
+	
+		<!-- RIGHT -->
+		<div class="col-md-12 col-lg-2 col-xl-2 sidebar sidebar-right hidden-print">
+			
+			<div class="info"></div>
+			<div class="filters"></div>
+			
+		</div>
+	</div>	
+</div>
+
+
+
+<footer class="site-footer hidden-print">
+  <div class="container-fluid">
+    <div class="row site-brand-container">
+      <a class="site-name" href="http://glampipe.org">GLAMpipe</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+	
+</html>

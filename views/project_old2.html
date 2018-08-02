@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>GLAMpipe project</title>
+
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,700,700i" rel="stylesheet">
+
+<script type="text/javascript" src="../js/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="../js/glampipe.js"></script>
+<script type="text/javascript" src="../js/node-repository.js"></script>
+<script type="text/javascript" src="../js/glamPipeDataTable.js"></script>
+<script type="text/javascript" src="../js/glamPipeNode.js"></script>
+<script type="text/javascript" src="../js/ui_project.js"></script>
+
+<script src="http://cdn.socket.io/socket.io-1.2.0.js"></script>
+ 
+<link rel="stylesheet" type="text/css" href="../css/wikiglyphs.css">
+<link rel="stylesheet" type="text/css" href="../css/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="../css/style.css" />
+</head>
+
+<body class="vbox">
+<header><a href="../"><span class="title sitetitle">GLAMpipe</span></a>
+	<span id="version">version</span>
+	<div id="login"></div>
+	<div id="node-progress"></div> <!-- out.say('progress') in node script prints here.-->
+</header>
+
+
+<content class="main hbox space-between">
+  <node-pipe>
+    <div class="pageheader">
+      <div id="page-title" class="title pagetitle"></div>
+    </div>
+    
+    <div class="sectiontitleblock">
+      <div id="collectionList"><span class="title sectiontitle">Collections</span> <a class="add-node" data-type="collection" href="#">Add collection</a></div>
+      <div class="boxright"> 
+        <div id="collection-chooser" class="wikiglyph wikiglyph-stripe-menu icon" aria-hidden="true"></div>
+        <div id="collection-prev" class="wikiglyph wikiglyph-caret-left icon" aria-hidden="true"></div>
+        <div id="collection-node-switch">0 / 0</div>
+        <div id="collection-next" class="wikiglyph wikiglyph-caret-right icon" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="holder params"></div> <!-- node parameters for collection are rendered here -->
+    <div class="nodeset"></div>
+    <div class="generic-messages"></div>
+  </node-pipe>
+  
+  <data-workspace>
+	  
+	  <div class="settingscontainer">
+		<div class="settingsheader">
+		  <div class="title settingstitle">Settings for ...</div>
+		  <div class="wikiglyph wikiglyph-caret-down icon boxicon" aria-hidden="true"></div>
+		</div>
+		
+		<div id="node-finished"></div> <!-- out.say('finish') in node script prints here. Usually when node is ready -->
+		<div class="settings"></div>  <!-- settings for running node are rendered here -->
+	  </div>
+	  
+	  <data>
+		<div id="data-header"></div>
+		<data-controls></data-controls> <!-- paging controls, visible keys etc. -->
+		<data-display></data-display> <!-- data display (currentlly on table form).-->
+	  </data>
+	  
+  </data-workspace>
+  
+</content>
+<div id="dynamic-fields"></div>
+<div id="cell-display"></div>
+<div id="dialog-confirm" style="display:none">Are you sure?</div>
+</body>
+</html>

@@ -476,7 +476,7 @@ var glamPipe = function () {
 		self.collections = [];
 		self.nodes = [];
 
-		$.getJSON(self.baseAPI + "/projects/" + self.currentProject + "/nodes", function(project) {
+		$.getJSON(self.baseAPI + "/projects/" + self.currentProject, function(project) {
 
 			if(typeof project !== "undefined") {
 				var nodes = project.nodes;

@@ -105,25 +105,25 @@ exports.operators = function (req) {
 	return operators;
 }
 
-exports.createSearchQuery = function(req) {
+exports.createSearchQuery = function(params) {
 	
 	var query = {};
-	if(req.query.query_fields) {
+	if(params.query_fields) {
 		// create an AND query if there are several query fields
-		if(req.query.query_fields.length > 1) {
+		if(params.query_fields.length > 1) {
 			var ands = [];
-			for(var i = 0; i < req.query.query_fields.length; i++) {
+			for(var i = 0; i < params.query_fields.length; i++) {
 				var search = {};
-				search[req.query.query_fields[i]] = {$regex:req.query.query_values[i], $options: 'i'};
+				search[params.query_fields[i]] = {$regex:params.query_values[i], $options: 'i'};
 				ands.push(search);
 			}
 			query.$and = ands;
 		// otherwise create query for one field
 		} else {
-			if(req.query.query_values[0] === "")
-				query[req.query.query_fields[0]] =  "";
+			if(params.query_values[0] === "")
+				query[params.query_fields[0]] =  "";
 			else
-				query[req.query.query_fields[0]] =  {$regex:req.query.query_values[0], $options: 'i'};
+				query[params.query_fields[0]] =  {$regex:params.query_values[0], $options: 'i'};
 		}
 	}
 	return query;

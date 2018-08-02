@@ -202,7 +202,7 @@ $( document ).ready(function() {
 			$(".holder.collection-params").empty();
 		}
 	});
-
+/*
 	// websocket stuff
 	var gp_path = getWSPath();
 	var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
@@ -243,7 +243,7 @@ $( document ).ready(function() {
 			gp.nodeRunFinished(data); 
 		}
 
-	});
+	}); */
 
 });
 

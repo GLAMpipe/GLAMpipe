@@ -5,36 +5,14 @@ var db 			= require('./db.js');
 const mongoist = require('mongoist');
 
 
-try {
-	global.config 		= require("../config/config.js");
-	global.config.file = "config.js (your local settings)";
-} catch(e) {
-	console.log("config.js not found or is malformed!");
-	global.config 		= require("../config/config.js.example");
-	global.config.file = "config.js.example (default settings)";
-}
-
-let dataPath = path.join(global.config.dataPath, "glampipe-data");
-let projectsPath = path.join(dataPath, "projects");
 
 
-exports.createRest = function(req, res) {
-	
-	
-	var title = req.body.title;
-	exports.create(title)
-	.then(function(result) {
-		if(res) res(result);
-	})
-	.catch(function(e){console.log(e)})
-	
 
-	
-	
-	
-}
-
+// create project
 exports.create = async function(title) {
+
+	let dataPath = path.join(global.config.dataPath, "glampipe-data");
+	let projectsPath = path.join(dataPath, "projects");
 	
 	console.log("PROJECT: creating project", title);
 	var title_dir = cleanDirName(title);
@@ -68,7 +46,7 @@ exports.create = async function(title) {
 		await createProjectDir(projectPath);
 		await createProjectSubDirs(projectPath);
 		
-		return Promise.resolve(result)
+		return result;
 
 	} catch(e) {
 		console.log(e);
@@ -80,6 +58,9 @@ exports.create = async function(title) {
 
 
 exports.remove = async function (doc_id) {
+
+	let dataPath = path.join(global.config.dataPath, "glampipe-data");
+	let projectsPath = path.join(dataPath, "projects");
 	
 	var project = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 	if(!project) {
@@ -117,8 +98,30 @@ exports.remove = async function (doc_id) {
 }
 
 
+exports.getProjects = async function() {
+
+	return await db.collection('mp_projects').findAsCursor({}, {
+		'title': 1, 
+		'collections': 1, 
+		'nodes.nodeid': 1,
+		'owner': 1
+	  }).sort({'_id': -1}).toArray();
+
+}
 
 
+exports.getProject = async function(doc_id) {
+
+	return await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+
+}
+
+
+exports.addCollection = async function(collection_name) {
+
+	await db.createCollection(collection_name);
+
+}
 
 //*******************************
 /* INTERNAL FUNCTIONS */

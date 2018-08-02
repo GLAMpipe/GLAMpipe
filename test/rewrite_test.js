@@ -31,7 +31,9 @@ async function FINNAImport() {
 		]
 	}
 	
-	await GP.createProject(FinnaProject);
+	var project = await GP.createProject(FinnaProject);
+	
+	GP.closeDB();
 
 
 }
