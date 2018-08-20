@@ -25,10 +25,6 @@ function refjyx (config) {
 	this.initFilters = function () {
 		// add "selections" and "values" arrays to filters
 		self.filters.forEach(function(filter) {
-			if(!filter.sort) {
-				filter.sort = "count";
-				filter.sortReverse = false;
-			}
 			filter.selections = [];
 			// we default for collapsed facet
 			if(!filter.collapse)
@@ -69,10 +65,9 @@ function refjyx (config) {
 		var fields = self.getFacetFields();
 		var filters = "&" + self.getFilteredQuery();
 
-		// fetch facet values
 		$.getJSON(self.get_facet_url + "?fields=" + fields + filters, function (response) {
-			self.facetResponse = response;
 			self.filters.forEach(function(filter) {
+				$(".bucket").remove();
 				// render static filters
 				if(filter.mode == "static") {
 					var html = "<div class='filter-"+filter.op+"' id='"+filter.key+"'>";
@@ -95,11 +90,59 @@ function refjyx (config) {
 
 				// render facet filters
 				} else if(filter.mode == "facet") {
-					self.renderFacet(filter);
+					self.renderFacet(filter, response);
+					
+					// if we have more than 99 entries, then re-fetch them as groupde by first character
+					if(response.facets[0][filter.key].length > 99) {
+						//self.renderBucket(filter, response);
+						$.getJSON(self.get_facet_url + "?fields=" + filter.key + filters + "&bucket=" + filter.key, function (data) {
+							self.renderBucket(filter, filter.key, data);
+						})
+					}
 				}
 
 			})
 		})
+	}
+
+	this.renderBucket = function(facet, facet_field, response) {
+		facet.buckets = [];
+		var items = "<div id='bucket_holder_" + facet_field + "' class='bucket'>"
+		response.facets[0][facet_field].forEach(function(item) {
+			items += "<a href='' class='bucket_link'>" + item._id + "</a> ";
+			facet.buckets.push({id: item._id, entries: item.entries});
+		})
+		items += "</div>";
+		
+		$("#bucket_holder_" + facet_field).remove();
+		$(items).insertBefore("#person");
+	}
+
+	this.showBucket = function(holder_id, id) {
+		var item_count = 0;
+		var splitted = holder_id.split("_");
+		var key = splitted[splitted.length -1];
+		$("#" + key).empty();
+		self.filters.forEach(function(filter) { 
+			if(filter.key == "person") {
+				filter.buckets.forEach(function(bucket) {
+					if(bucket.id == id) {
+						var items = "";
+						bucket.entries.forEach(function(entry) {
+							item_count++;
+							items += "<div class='list-group-item checkbox checkbox-circle'>";
+							//items += self.checkSelection(facet, item, item_count);
+							items += '<input type="checkbox" id="' + key + item_count +'" data-value="' + entry.id.replace(/'/, "\'")+'"/>';
+							//items += "<label >"+entry.id+" <span class='badge'>"+entry.count+"</span></label>";
+							items += "<label for='"+key + item_count +"'>" + entry.id + " <span class='badge'>" + entry.count + "</span></label>";
+							items += "</div>"
+						})
+						$("#" + key).append(items)
+					}
+				})
+			}
+		})
+		
 	}
 
 	this.setCheckboxOnOff = function (key, value, checked) {
@@ -170,14 +213,11 @@ function refjyx (config) {
 
 
 	this.setFacetSort = function (facet) {
+		alert("not implemented yet!")
+		return;
 		self.filters.forEach(function(filter) {
 			if(filter.key == facet.key) {
-				if(filter.sort == facet.value) {
-					filter.sortReverse = !filter.sortReverse;
-				} else {
-					filter.sort = facet.value;
-					filter.sortReverse = false;
-				}
+				filter.sort = facet.value;
 				self.renderFacet(filter);
 			}
 		})
@@ -192,8 +232,12 @@ function refjyx (config) {
 			})
 
 			// filter specific operator
-			if(filter.op)
+			if(filter.op) {
 				query.push(operator = "op[]=" + filter.key + ":" + filter.op);
+			}
+			if(filter.bucket) {
+				query.push(operator = "bucket=" + filter.key);
+			}
 		})
 		return query.join("&");
 	}
@@ -203,6 +247,7 @@ function refjyx (config) {
 	this.renderFilteredSet = function () {
 
 		var filters = "?" + self.getFilteredQuery();
+		//console.log(filters)
 		var params = "&skip="+self.skip+"&limit=" + self.limit;
 		if(self.sort) {
 			params += "&sort=" + self.sort;
@@ -220,13 +265,12 @@ function refjyx (config) {
 		$.getJSON(this.get_filtered_items_url + filters + params, function (response) {
 			response.data.forEach(function(item) {
 				self.item_table.rows.forEach(function(row) {
-					var edit = self.createEditLink(item, row);
 					if(row.render)
 						html += "  <td><div class='strong'>" + row.render(item) + "</div></td>";
 					else if(row.link)
 						html += "  <td><div class='strong'>" + self.renderLinks(item[row.key], row) + "</div></td>";
 					else if(row.key)
-						html += "  <td><div class='strong'>" + self.joinArray(item[row.key]) + "</div>"+edit+"</td>";
+						html += "  <td><div class='strong'>" + self.joinArray(item[row.key]) + "</div></td>";
 					else
 						html += "  <td><div class='strong'></div></td>";
 				})
@@ -259,27 +303,29 @@ function refjyx (config) {
 		return "";
 	}
 
-	this.renderFacet = function (facet) {
+	this.renderFacet = function (facet, response) {
 
 		var item_count = 0;
-		var holder = "<div id='"+facet.key + "_holder' class='panel panel-default'>";
-		var sortHTML = self.getFacetSortHTML(facet);
-		var items = "<div id='" + facet.key + "' class='panel-collapse "+facet.collapse+"'>";
-		holder += self.getFacetHeadingHTML(facet);
-		
-		var sortedData = self.sortFacetData(self.facetResponse, facet);
-		sortedData.forEach(function(item) {
-			if(item._id) {
-				item_count++;
-				if(facet.render == "list") {
-					items.push($("<li></li>").text(item._id + " (" + item.count + ")"));
 
-				} else {
-					items +="<div class='list-group-item checkbox checkbox-circle'>";
-					items += self.checkSelection(facet, item, item_count);
-					items += "<label for='"+facet.key + item_count +"'>"+item._id+" <span class='badge'>"+item.count+"</span></label>";
-					items += "</div>"
-				}
+		var holder = "<div id='"+facet.key + "_holder' class='panel panel-default'>";
+		var sort = self.getFacetSortHTML(facet);
+		var items = "<div id='" + facet.key + "' class='panel-collapse "+facet.collapse+"'>";
+
+		holder += self.getFacetHeadingHTML(facet);
+
+		response.facets[0][facet.key].forEach(function(item) {
+			item_count++;
+			if(facet.render == "list") {
+				//items.push($("<li></li>").text(item._id + " (" + item.count + ")"));
+
+			} else if(facet.bucket) {
+				items += "<a href='' class='bucket_link'>" + item._id + "</a> ";
+				sort = "";
+			} else {
+				items +="<div class='list-group-item checkbox checkbox-circle'>";
+				items += self.checkSelection(facet, item, item_count);
+				items += "<label for='"+facet.key + item_count +"'>"+item._id+" <span class='badge'>"+item.count+"</span></label>";
+				items += "</div>"
 			}
 
 		})
@@ -290,45 +336,24 @@ function refjyx (config) {
 			$("#" + facet.key + "_holder").find("#" + facet.key).replaceWith(items);
 		// otherwise render all (i.e. first render when page is opened)
 		} else {
-			$(facet.display).append(holder + sortHTML + items + "</div>");
+			$(facet.display).append(holder + sort + items + "</div>");
 		}
 	}
 
-	this.sortFacetData = function(response, facet) {
-		// we start from data that is sorted by count
-		// note that this assumes that the facet data size is less than 100
-		switch (facet.sort) {
-			case "_id":
-				if(facet.sortReverse) {
-					return _.sortBy(response.facets[0][facet.key], "_id").reverse();
-				} else {
-					return _.sortBy(response.facets[0][facet.key], "_id");
-				}
-				break;
-			case "count": 
-				if(facet.sortReverse) {
-					return response.facets[0][facet.key].slice().reverse();
-				} else {
-					return response.facets[0][facet.key];
-				}
-				break;
-			default:
-				return response.facets[0][facet.key];
-		}
-		
-		
-	}
+
 
 	this.checkSelection = function (facet, item, item_count) {
-		if(facet.selections.indexOf(item._id) !== -1)
-			return "<input type='checkbox' checked id='"+facet.key + item_count +"' data-value='"+item._id+"'/>";
-		else
-			return "<input type='checkbox' id='"+facet.key + item_count +"' data-value='"+item._id+"'/>";
-
+		if(item._id) {
+			if(facet.selections.indexOf(item._id) !== -1)
+				return '<input type="checkbox" checked id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+			else
+				return '<input type="checkbox" id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+		} else {
+			return ""
+		}
 	}
 
 	this.joinArray = function (arr) {
-		if(!arr || typeof arr === "undefined") return "";
 		if(Array.isArray(arr))
 			return arr.filter(Boolean).join(",");
 		else
@@ -398,118 +423,14 @@ function refjyx (config) {
 			collapse = "hidden";
 
 		var sort = "<div data-facet='"+facet.key+"' class='btn-group sort-switch "+collapse+"' data-toggle='buttons'>";
-		sort += "   <label data-sort='count' class='btn btn-primary active'>";
-		sort += "   	<input type='radio' name='"+facet.key+"_sort' checked autocomplete='off'> lukumäärä";
+		sort += "   <label data-sort='' class='btn btn-primary active'>";
+		sort += "   	<input type='radio' name='"+facet.key+"_sort' checked autocomplete='off'> by count";
 		sort += "	</label>";
 		sort += "	<label data-sort='_id' class='btn btn-primary'>";
-		sort += "		<input type='radio' name='"+facet.key+"_sort' autocomplete='off'> aakkosjärjestys";
+		sort += "		<input type='radio' name='"+facet.key+"_sort' autocomplete='off'> by name";
 		sort += "	</label>";
 		sort += "</div>";
 		return sort;
-	}
-
-
-	this.createEditLink = function(item, row) {
-		if(row.editable)
-			if(row.options) {
-				return "<a title='edit' href='' class='edit-options' data-id='"+item._id+"' data-key='"+row.key+"' data-options='"+row.options.join('|')+"'><span class='glyphicon glyphicon-pencil'></span></a>";
-			} else {
-				return "<a title='edit' href='' class='edit-key' data-id='"+item._id+"' data-key='"+row.key+"'><span class='glyphicon glyphicon-pencil'></span></a>";
-			}
-		else
-			return "";
-	}
-
-	this.renderDropdown = function(e) {
-		var d = $(e.target).parent();
-		var holder = d.parent();
-		var text = d.parents("td").text();
-		d.hide();
-		d.parent().find("div").hide();
-		
-		var options = d.data("options").split("|");
-		var key = d.data("key");
-		var id = d.data("id");
-		if(options) { 
-			var html = "<select class='edit-dropdown' data-id='"+id+"' data-key='"+key+"'><option value=''>valitse</option>"
-			options.forEach(function(option) {
-				if(text && typeof text === "string" && text.split(":")[0] == option) {
-					html += "<option selected>" + option + "</option>"
-				} else {
-					html += "<option>" + option + "</option>"
-				}
-			})
-			html += "</select><button class='cancel-key'>peru</button>";
-			holder.append(html);
-		} 
-	}
-
-
-	this.saveStatusDropdown = function(d) {
-
-		var url = config.gp_url + "/collections/" + config.collection + "/docs/" + d.data("id");
-		var options = {};
-		var user = getUserShort();
-		if(!d.val()) {
-			options[d.data("key")] = "";
-		} else {
-			if(user) {
-				options[d.data("key")] = d.val() + ": " + user;
-			} else {
-				options[d.data("key")] = d.val();
-			}
-		}
-		$.post(url, options, function (response) {
-			if(response.error) {
-				alert(response.error);
-			} else {
-				self.renderFilters();
-				self.renderFilteredSet(); 
-			}
-		}).fail(function() {
-				alert("Virhe talletuksessa!");
-			})
-	}
-
-	this.saveEdit = function(d) {
-
-		var text = d.parent().find("textarea").val();
-		var url = config.gp_url + "/collections/" + config.collection + "/docs/" + d.data("id");
-		var options = {};
-		options[d.data("key")] = text;
-		$.post(url, options, function (response) {
-			if(response.error)
-				alert(response.error);
-			else {
-				d.parent().find("div").text(text);
-				d.parent().find("div").show();
-				d.parent().find(".edit-key").show();
-				d.parent().find("textarea").remove();
-				d.parent().find("button").remove();
-			}
-		}).fail(function() {
-			alert("Virhe talletuksessa!");
-		})
-	}
-
-	this.cancelEdit = function(d) {
-
-		$("table div").show();
-		$("table .edit-key").show();
-		$("table .edit-options").show();
-		$("table textarea").remove();
-		$("table select").remove();
-		$("table button").remove();
-
-	}
-
-	this.doPoll = function() {
-		$.get(config.gp_url + "/status" , function(data) {
-			setTimeout(self.doPoll,30000);
-		}).fail(function(jqXHR) {
-			alert("Istuntosi vanheni! Lataa sivu uudestaan." )
-			//window.location.reload(true);
-		})
 	}
 
 }

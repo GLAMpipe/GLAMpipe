@@ -8,7 +8,7 @@ $( document ).ready(function() {
 	if(config.fetch_date) $("#fetch-date").text(config.fetch_date);
 		
 	var admin = new refjyx(config);
-	admin.doPoll();
+	//admin.doPoll();
 	admin.initFilters();
 	admin.render();
 	admin.renderFilteredCount("#item-count");
@@ -68,6 +68,13 @@ $( document ).ready(function() {
 	$(document).on('show.bs.collapse', '.panel-collapse', function (e) {
 		admin.setFacetCollapse(e.currentTarget.id, false);
 		$(e.currentTarget).parents(".panel").find(".sort-switch").removeClass("hidden");
+	})
+
+	// click handler for bucket characters
+	$(document).on("click", ".bucket_link", function(e) {
+		var holder_id = $(e.target).parent().attr("id");
+		admin.showBucket(holder_id, $(this).text());
+		e.preventDefault();
 	})
 
     // paging handler

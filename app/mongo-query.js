@@ -537,29 +537,30 @@ exports.facet = function (req, callback) {
 		return item.trim();
 	});
 	var filters = [];
-	var skip = ["skip", "limit", "sort", "reverse", "op", "fields"]; 
+	var skip = ["skip", "limit", "sort", "reverse", "op", "fields", "bucket"]; 
+	var bucket = [req.query.bucket];
 	var operators = buildquery.operators(req);
 	const AS_ARRAY = true;
 	var filters = buildquery.filters(req, operators, skip, AS_ARRAY);
 
-	// check if field is array
 	col.getKeyTypes(req.params.collection, function(fieldTypes) {
 		console.log("\nFACET QUERY:" + req.url);
-		var aggr = buildAggregate(fields, fieldTypes, filters);
+		var aggr = buildAggregate(fields, fieldTypes, filters, bucket);
 		aggregate(collection, aggr, function(data) {
 			callback(data);
 		})
 	})
 }
 
-function buildAggregate (fields, fieldTypes, filters) {
+function buildAggregate (fields, fieldTypes, filters, bucket) {
 
 	var aggregate = [];
 	var facets =  { $facet: {}};
 	// build aggregate
-	if(filters.length)
+	if(filters.length) {
 		aggregate.push({$match: {$and:filters}});
-		aggregate.push(facets);
+	}
+	aggregate.push(facets);
 
 	// generate facets
 	fields.forEach(function(field) {
@@ -567,9 +568,21 @@ function buildAggregate (fields, fieldTypes, filters) {
 		if(fieldTypes[field] === "array") {
 			facet.push({ $unwind: "$" + field });
 		}
-
-		facet.push({ $group: {_id: "$" + field, count: { $sum: 1}}});
-		facet.push({ $sort: { count : -1 }});
+		
+		// facet by first character + all entries
+		if(bucket.includes(field)) {
+			// group by field & sort by count
+			facet.push({ $group: {_id: "$" + field, grouped: {$first: "$" + field}, count: {$sum: 1}}});
+			facet.push({ $sort: { count : -1 }});
+			// group by first character & sort alphabetically
+			facet.push({ $group: {_id: {$substr: ["$grouped", 0, 1]}, count: {$sum: 1}, entries: {$push: {id:"$grouped", count: "$count"} } }});
+			facet.push({ $sort: { _id : 1 }});
+			
+		// facet by count
+		} else {
+			facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
+			facet.push({ $sort: { count : -1 }});
+		}
 		
 		facet.push({ $limit: 100 }); // just in case
 		facets["$facet"][field] = facet;
