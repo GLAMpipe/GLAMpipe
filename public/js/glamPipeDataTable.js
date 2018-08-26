@@ -192,7 +192,7 @@ var dataTable = function (node) {
 				return self.keys.visible_keys;
 			}
 		}
-
+console.log(self.keys);
 		// otherwise let the user decide what to see
 		if(self.keys.visible_keys == null) {
 
@@ -202,8 +202,8 @@ var dataTable = function (node) {
 
 			// if there are no default keys, then visible keys are first 5 keys
 			} else {
-				var keys = self.keys.all_keys.sorted.slice(0,5);
-				var c = self.keys.all_keys.sorted.filter(function(item) {
+				var keys = self.keys.all_keys.slice(0,5);
+				var c = self.keys.all_keys.filter(function(item) {
 					return self.hiddenKeys.indexOf(item) === -1;
 				});
 				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);

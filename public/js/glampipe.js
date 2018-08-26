@@ -763,7 +763,7 @@ var glamPipe = function () {
 			return "";
 
 		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-			self.currentCollection.fields = data;
+			//self.currentCollection.fields = data.keys;
 
 			if(self.currentCollection) {
 				var collection = self.currentCollection;
@@ -1029,7 +1029,7 @@ var glamPipe = function () {
 				$.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
 					// update fields
 					$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-						self.currentCollection.fields = data;
+						//self.currentCollection.fields = data.keys;
 					})
 					if(retData.error)
 						alert(retData.error);

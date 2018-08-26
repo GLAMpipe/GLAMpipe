@@ -479,8 +479,8 @@ var glamPipeNode = function (node, gp) {
 	}
 
 	this.loadCollectionKeys = function (cb) {
-		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/fields", function(keys) {
-			self.data.keys = keys;
+		$.getJSON(self.baseAPI + "/collections/" + self.source.collection + "/fields", function(data) {
+			self.data.keys = data.keys;
 			cb();
 		})
 	}

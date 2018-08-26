@@ -38,6 +38,10 @@ module.exports = function(express, GP) {
 	});
 
 
+	express.get('/api/v1/status', function (req, res) {
+		res.json({"status":"ok"});
+	});
+
 
 /* ***********************************************************************
  * 							PROJECTS
@@ -54,7 +58,12 @@ module.exports = function(express, GP) {
 		res.json(project);
 	});
 
-
+	express.post('/api/v1/projects', async function (req, res) {
+		console.log(req.title);
+		console.log(req);
+		var project = await GP.createProject({'project_title': req.body.title, 'collection_title': 'lll'});
+		res.json(project);
+	});
 
 
 /* ***********************************************************************
@@ -69,9 +78,9 @@ module.exports = function(express, GP) {
  * ***********************************************************************
 */
 
-	express.get('/api/v1/collections/:collection/docs', function (req, res) {
+	express.get('/api/v1/collections/:collection/docs', async function (req, res) {
 		var docs = await GP.getDocs(req.params.collection, req.query);
-		res.json(docs);
+		res.json({"data": docs});
 	});
 
 	express.get('/api/v1/collections/:collection/fields', async function (req, res) {

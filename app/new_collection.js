@@ -77,6 +77,8 @@ exports.getDocs = async function(collection_name, params) {
 	}
 	console.log(params);
 
+
+
 	return await db[collection_name].findAsCursor(
 		{}, 
 		keys
