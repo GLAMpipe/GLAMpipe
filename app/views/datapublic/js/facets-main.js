@@ -4,11 +4,11 @@ var g_user = "";
 
 $( document ).ready(function() {
 	
-	//$("#pageinfo").html(config.pageinfo);
+	$("#pageinfo").html(config.pageinfo);
 	if(config.fetch_date) $("#fetch-date").text(config.fetch_date);
 		
 	var admin = new refjyx(config);
-	//admin.doPoll();
+	admin.doPoll();
 	admin.initFilters();
 	admin.render();
 	admin.renderFilteredCount("#item-count");

@@ -433,6 +433,16 @@ function refjyx (config) {
 		return sort;
 	}
 
+
+	this.doPoll = function() {
+		$.get(config.gp_url + "/status" , function(data) {
+			setTimeout(self.doPoll,30000);
+		}).fail(function(jqXHR) {
+			alert("Istuntosi vanheni! Lataa sivu uudestaan." )
+			//window.location.reload(true);
+		})
+	}
+	
 }
 
 function getDate (str) {
