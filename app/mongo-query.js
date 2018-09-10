@@ -573,18 +573,18 @@ function buildAggregate (fields, fieldTypes, filters, bucket) {
 		if(bucket.includes(field)) {
 			// group by field & sort by count
 			facet.push({ $group: {_id: "$" + field, grouped: {$first: "$" + field}, count: {$sum: 1}}});
-			facet.push({ $sort: { count : -1 }});
-			// group by first character & sort alphabetically
-			facet.push({ $group: {_id: {$substr: ["$grouped", 0, 1]}, count: {$sum: 1}, entries: {$push: {id:"$grouped", count: "$count"} } }});
 			facet.push({ $sort: { _id : 1 }});
-			
+			// group by first character & sort alphabetically
+			facet.push({ $group: {_id: {$substrCP: ["$grouped", 0, 1]}, count: {$sum: 1}, entries: {$push: {id:"$grouped", count: "$count"} } }});
+			facet.push({ $sort: { _id : 1 }});
+
 		// facet by count
 		} else {
 			facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
 			facet.push({ $sort: { count : -1 }});
+			facet.push({ $limit: 100 }); // just in case
 		}
 		
-		facet.push({ $limit: 100 }); // just in case
 		facets["$facet"][field] = facet;
 	})
 
