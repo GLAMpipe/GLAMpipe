@@ -123,8 +123,18 @@ var GlamPipe = function() {
 		self.app.use(passport.initialize()); 		
 		self.app.use(passport.session()); // persistent login sessions
 
-		self.http 		= require('http').Server(self.app);
-		self.io 		= require('socket.io')(self.http);
+		self.http = require('http').Server(self.app);
+		
+		// web sockets
+		self.io = require('socket.io')(self.http);
+		self.io.on('connection', function(socket) {
+			// allow sending messages from clients
+			socket.on('generic', function(msg){
+				console.log('message: ' + msg);
+				self.io.emit('generic', msg);
+			});
+		});
+
 		require('./app/routes.js')(self.app, self, passport);
 
 	};
