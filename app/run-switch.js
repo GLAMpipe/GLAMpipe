@@ -307,6 +307,10 @@ exports.runNode = function (node, io) {
 							asyncLoop.documentLoop(node, sandbox, web.postJSON);
 						break;
 
+						case "token":
+							asyncLoop.documentLoop(node, sandbox, web.postJSON);
+						break;
+
 						case "dspace":
 							web.cookieLogin(node, sandbox, function(error) {
 								if(error)
