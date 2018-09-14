@@ -574,6 +574,19 @@ exports.runNode = function (node, io) {
 							asyncLoop.fieldLoop(node, sandbox, web.headRequest);
 						break;
 
+						case "web_cookie":
+							sandbox.login = CreateScriptVM(node, sandbox, "login");
+							var web = require("../app/node_runners/web.js");
+							web.cookieLogin(node, sandbox, function(error) {
+								if(error)
+									sandbox.out.say("error","Cookie login failed");
+								else {
+									console.log("WEB: Cookie login ok");
+									asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
+								}
+							});
+
+
 						default:
 							asyncLoop.documentLoop(node, sandbox, function ondoc (doc, sandbox, next) {
 								sandbox.run.runInContext(sandbox);

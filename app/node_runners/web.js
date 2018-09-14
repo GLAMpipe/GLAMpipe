@@ -65,8 +65,6 @@ exports.requestJSON = function (options, sandbox, next) {
 	// make actual HTTP request
 	function responseCallback (error, response, body) {
 		sandbox.context.response = response;
-		console.log("RESPONSE: " + response.statusCode)
-		//console.log("BODY:", body);
 		if (error) {
 			console.log(error);
 			sandbox.context.error = error;
