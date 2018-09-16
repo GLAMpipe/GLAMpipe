@@ -26,7 +26,7 @@ exports.createSchema = async function (collection_name) {
 
 	keys = keys.sort();
 	var schema = {collection: collection_name, keys:keys}
-	save(collection_name, schema);
+	await save(collection_name, schema);
 	console.log("COLLECTION: schema saved (" + keys.length + " keys)");
 	
 }

@@ -29,7 +29,7 @@ const MP 		= require("../config/const.js");
 
 class Node {
 	constructor() {
-		console.log("new node")
+		
 	}
 
 
@@ -41,7 +41,6 @@ class Node {
 		if(!this.source) {
 			throw("Loading node '" + nodeid + "' failed");
 		}
-		//console.log(this.source);
 	}
 
 
@@ -90,7 +89,7 @@ class Node {
 
 	async saveSettings(settings) {
 		
-		// we do not save passwords, user names and api keys
+		// we do not save passwords, user names or api keys
 		if(settings) {
 			if(settings.username) settings.username = null;
 			if(settings.passwd) settings.passwd = null;
@@ -123,6 +122,7 @@ class Node {
 	
 	async run(settings, docid) {
 	
+		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
 		var core = this.source.core.split(".");
 		await this.saveSettings(settings);
 	
@@ -141,12 +141,13 @@ class Node {
 
 		this.scripts.init.runInContext(sandbox);
 
-		//console.log(this.source.type);
 		switch(this.source.type) {
 
 			case "source":
-				await dataImport[ core[0] ][ core[1] ][ core[2] ](this);
+			
+				var p = await dataImport[ core[0] ][ core[1] ][ core[2] ](this);
 				await schema.createSchema(this.collection);
+				return p;
 				break;
 				
 			case "process":

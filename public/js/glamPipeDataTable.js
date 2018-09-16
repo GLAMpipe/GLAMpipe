@@ -707,7 +707,7 @@ console.log(self.keys);
 
 	this.renderCollectionCount = function () {
 		// filtered count
-		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count/regexp/?" + self.params.search(), function(data) {
+		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count" + self.params.search(), function(data) {
 			self.docCount = parseInt(data.count);
 			var skip = self.params.skip_value  + 15;
 			if(skip > self.docCount)

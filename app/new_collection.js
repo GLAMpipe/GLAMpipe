@@ -87,3 +87,7 @@ exports.getDocs = async function(collection_name, params) {
 	//return await db[collection_name].find({}).limit(2);
 	
 }
+
+exports.getCount = async function(collection_name, params) {
+	return await db[collection_name].count({});
+}

@@ -28,11 +28,12 @@ exports.web = {
 				
 				options.url = "";
 				node.scripts.run.runInContext(node.sandbox);
-				await db[node.collection].insert(node.sandbox.out.value);
+				if(node.sandbox.out.value) {
+					await db[node.collection].insert(node.sandbox.out.value);
+				}
 			}
 		}
 	}
-
 }
 
 

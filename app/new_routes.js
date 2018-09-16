@@ -88,4 +88,9 @@ module.exports = function(express, GP) {
 		res.json(schema);
 	});
 
+	express.get('/api/v1/collections/:collection/count', async function (req, res) {
+		const count = await GP.getDocCount(req.params.collection);
+		res.json({"count": count});
+	});
+
 }

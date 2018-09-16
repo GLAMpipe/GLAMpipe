@@ -5,8 +5,6 @@ var bodyParser		= require("body-parser");
 
 var GLAMpipe 		= require('./app/glampipe.js');
 
-
-
 var GP = new GLAMpipe();
 var app = express();
 app.use(global.config.uiPath, express.static('public'));
@@ -21,6 +19,6 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 require('./app/new_routes.js')(app, GP);
 
 var server = app.listen(3000, '127.0.0.1', () => {
-	console.log("\n********************* G L A M p i pe RW *************************");
-	console.log('Example app listening on port 3000!' + server.address().address)
+	console.log("\n********************* G L A M p i p e RW *************************");
+	console.log('listening on port 3000!' + server.address().address)
 })

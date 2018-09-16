@@ -91,16 +91,18 @@ class GLAMpipe {
 
 
 	async createCollection(title, project) {
-
+		
 		try {
 			var collection_name = await collection.create(title, project);
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": title})
 			await collectionNode.add2Project(project._id, collection_name);
+			console.log("COllection created")
 			return collectionNode;
 		} catch(e) {
-			console.log("Collection creation failed!", e)
+			console.log("Collection creation failed!", e);
+			throw(e);
 		}
 	}
 
@@ -127,8 +129,11 @@ class GLAMpipe {
 		return await collection.getDocs(collection_name, query);
 	}
 
+	async getDocCount(collection_name, query) {
+		return await collection.getCount(collection_name, query);
+	}
 
-	closeDB() { db.close(); }
+	//closeDB() { db.close(); }
 }
 
 
