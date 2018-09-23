@@ -52,13 +52,13 @@ class GLAMpipe {
 */
 
 	
-	async createEmptyProject(title) {
+	async createProject(title) {
 		return await project.create(title);
 	}
 
 
 
-	async createProject(data) {
+	async createProjectFromFile(data) {
 		var new_project = await project.create(data.project_title);
 		var collection = await this.createCollection(data.collection_title, new_project);
 		for(const node in data.nodes) {
@@ -80,6 +80,11 @@ class GLAMpipe {
 	async getProject(project_id) {
 		console.log("Getting project: " + project_id)
 		return await project.getProject(project_id);
+	}
+
+	async deleteProject(project_id) {
+		console.log("Deleting project: " + project_id)
+		return await project.remove(project_id);
 	}
 
 
