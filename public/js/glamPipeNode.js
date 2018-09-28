@@ -273,77 +273,79 @@ var glamPipeNode = function (node, gp) {
 		if(self.source.type === "export")
 			run_button_text = "Export data";
 
-		if(self.orphan) {
-			$("settingsblock").empty().append("<div class='bad'><h2>Input field of this node is missing!</h2></div>");
-			$("settingsblock").append("<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>");
-			$("settingsblock").append("<div><h3>missing field(s)</h3>" + self.orphan_fields.join(',') + "</div>");
-			$("data-workspace submitblock").empty().append("<button class='run-node button error' >missing input field, cant'run!</button>");
-
-		} else {
 
 			$("data-workspace .settingstitle").text("Settings for " + self.source.title);
 			$("settingsblock").empty();
 
-			//$("data-workspace settingsblock").append("<textarea>description</textarea>");
-			if(self.backend)
-				$("data-workspace submitblock").empty().append("<div class='info'>Backend nodes can't be batch run</div>");
-			else
-				$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 
-			$("settingsblock").append(self.source.views.settings);
-			$("settingsblock .params").append(self.source.params);
-			$(".show-node-params").data("id", self.source._id);
-			// populate collection lists (for example settings of "collection lookup" node)
-			//$('.dynamic_collection').append(self.gp.collectionList());
+		if(self.orphan) {
+			var warning = "<setting style='background-color:#fb8c8c'><b>Input field of this node is missing!</b>";
+			warning += "<p>You have probably deleted node that created the missing field or fields. You can fix this by creating that node again with same field names.</p>";
+			warning += "<div>missing field(s)" + self.orphan_fields.join(',') + "</div></setting>";
+			$("settingsblock").append(warning);
 
+		} 
 
-			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
-			debug += "<settinginstructions>Here you can write your own description of what this node does.";
-			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a></p>"
-			debug += "</settinginstructions></settinginfo>"
-			debug += "<settingaction>";
-			debug += "<label>description:</label>";
-			debug += "<textarea rows='3' name='node-description' class='node-description-value'></textarea>";
+		//$("data-workspace settingsblock").append("<textarea>description</textarea>");
+		if(self.backend)
+			$("data-workspace submitblock").empty().append("<div class='info'>Backend nodes can't be batch run</div>");
+		else
+			$("data-workspace submitblock").empty().append("<button class='run-node button' data-id='" + self.source._id + "'>"+run_button_text+"</button>");
 
-			debug += "<a href='#' id='node-description-save' class='ibutton'>Save description</a>";
-			debug += "</settingaction>";
-			debug += "</setting>";
-			$("settingsblock").append(debug);
-
-			// node description
-			if(self.source.settings)
-				$(".node-description-value").val(self.source.settings.node_description);
-			else
-				$(".node-description-value").val("");
-
-			var collection = gp.currentCollection.source.params.collection;
-
-			// fetch fields
-			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
-				if(data.error)
-					alert(data.error);
-				var options = [];
-				for(var i = 0; i < data.sorted.length; i++) {
-					options.push("<option>" + data.sorted[i] + "</option>");
-				}
+		$("settingsblock").append(self.source.views.settings);
+		$("settingsblock .params").append(self.source.params);
+		$(".show-node-params").data("id", self.source._id);
+		// populate collection lists (for example settings of "collection lookup" node)
+		//$('.dynamic_collection').append(self.gp.collectionList());
 
 
+		var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
+		debug += "<settinginstructions>Here you can write your own description of what this node does.";
+		debug += "<p><a class='show-node-params' href='#'>Show node parameters</a></p>"
+		debug += "</settinginstructions></settinginfo>"
+		debug += "<settingaction>";
+		debug += "<label>description:</label>";
+		debug += "<textarea rows='3' name='node-description' class='node-description-value'></textarea>";
 
-				// execute node's settings.js if exists
-				if(self.source.scripts.settings) {
-					var settingsScript = new Function('node', self.source.scripts.settings);
-					settingsScript(self.source);
-				}
+		debug += "<a href='#' id='node-description-save' class='ibutton'>Save description</a>";
+		debug += "</settingaction>";
+		debug += "</setting>";
+		$("settingsblock").append(debug);
 
-				// populate field selects
-				$("settingsblock select.dynamic_field").each(function(i) {
-					$(this).append(options.join(""));
-				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
-				})
+		// node description
+		if(self.source.settings)
+			$(".node-description-value").val(self.source.settings.node_description);
+		else
+			$(".node-description-value").val("");
 
-				self.setSettingValues();
+		var collection = gp.currentCollection.source.params.collection;
+
+		// fetch fields
+		$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
+			if(data.error)
+				alert(data.error);
+			var options = [];
+			for(var i = 0; i < data.sorted.length; i++) {
+				options.push("<option>" + data.sorted[i] + "</option>");
+			}
+
+
+
+			// execute node's settings.js if exists
+			if(self.source.scripts.settings) {
+				var settingsScript = new Function('node', self.source.scripts.settings);
+				settingsScript(self.source);
+			}
+
+			// populate field selects
+			$("settingsblock select.dynamic_field").each(function(i) {
+				$(this).append(options.join(""));
+			//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
 			})
-		}
+
+			self.setSettingValues();
+		})
+		
 	}
 
 
