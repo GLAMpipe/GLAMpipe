@@ -28,7 +28,7 @@ exports.collectionToFile = function (node, sandbox, io) {
 
 	// we stream directly to file
 	var fs = require('fs');
-	var filePath = path.join(node.dir, node.params.required_file);
+	var filePath = path.join(node.dir, sandbox.out.filename);
 	var writer = csvWriter({separator:node.settings.sep, headers: sandbox.out.csvheaders});
 	writer.pipe(fs.createWriteStream(filePath));
 
