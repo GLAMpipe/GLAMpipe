@@ -699,6 +699,8 @@ exports.createSandbox = function (node, io) {
 				if(ch === "finish" || ch === "error") {
 					console.log("REGISTER: deleting " + node.req.originalUrl)
 					delete global.register[node.req.originalUrl];
+					log.node_uuid = node._id.toString();
+					mongoquery.runLog(log);
 				}
 				
 				// send http response if needed (i.e. node was executed by "run" instead of "start")

@@ -110,10 +110,10 @@ exports.saveSettings = function (doc_id, settings, callback) {
 	}
 
 	// we don't save empty setting values
-	for(var key in settings) {
-		if(!settings[key])
-			delete settings[key];
-	}
+	//for(var key in settings) {
+		//if(!settings[key])
+			//delete settings[key];
+	//}
 
 	if(!settings)
 		return callback();
@@ -784,13 +784,11 @@ exports.nodeFileView = function  (req, cb) {
 
 
 exports.getNodeLog = function (node_id, cb) {
-	
 	mongoquery.find({"node_uuid": node_id}, "mp_runlog", function(err, result) {
 		if(err)
 			return cb();
 			
 		result.forEach(function(row, i) {
-			delete row.settings.password; // be sure to not expose passwords...
 			if(row.ts) {
 				var date = new Date(row.ts);
 				var y =  date.getUTCFullYear();

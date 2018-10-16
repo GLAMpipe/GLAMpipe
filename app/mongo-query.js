@@ -261,10 +261,10 @@ exports.insert = function (collectionname, doc, callback) {
 	collection.insert(doc ,function (err, result) {
 		if (err) {
 			console.log(err);
-			callback(err, result)
+			if(callback) callback(err, result)
 		} else {
 			// console.log('MONGO: inserted to', collectionname);
-			callback(null, result);
+			if(callback) callback(null, result);
 		}
 	}); 
 }
