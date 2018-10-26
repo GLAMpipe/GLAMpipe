@@ -82,12 +82,22 @@ class GLAMpipe {
 		return await project.getProject(project_id);
 	}
 
+	async deleteProject(project_id) {
+		console.log("Deleting project: " + project_id)
+		return await project.remove(project_id);
+	}
 
 
 /* ***********************************************************************
  * 							NODES
  * ***********************************************************************
 */
+
+	async getFacet() {
+		
+		return await db.collection("mp_nodes").find({}, {"nodeid":1, "title":1, "description":1, "type":1, "subtype":1});
+
+	}
 
 
 	async createCollection(title, project) {
@@ -98,7 +108,7 @@ class GLAMpipe {
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": title})
 			await collectionNode.add2Project(project._id, collection_name);
-			console.log("COllection created")
+			console.log("Collection created")
 			return collectionNode;
 		} catch(e) {
 			console.log("Collection creation failed!", e);
@@ -132,6 +142,7 @@ class GLAMpipe {
 	async getDocCount(collection_name, query) {
 		return await collection.getCount(collection_name, query);
 	}
+
 
 	//closeDB() { db.close(); }
 }

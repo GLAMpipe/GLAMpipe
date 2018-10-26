@@ -1,4 +1,5 @@
 const path			= require('path');
+var collection 	= require('./new_collection.js');
 
 module.exports = function(express, GP) {
 
@@ -59,17 +60,24 @@ module.exports = function(express, GP) {
 	});
 
 	express.post('/api/v1/projects', async function (req, res) {
-		console.log(req.title);
-		console.log(req);
-		var project = await GP.createProject({'project_title': req.body.title, 'collection_title': 'lll'});
+		var project = await GP.createProject({'project_title': req.body.title, 'collection_title': 'My Collection'});
 		res.json(project);
 	});
 
+	express.delete('/api/v1/projects/:id', async function (req, res) {
+		const project = await GP.deleteProject(req.params.id);
+		res.json(project);
+	});
 
 /* ***********************************************************************
  * 							NODES
  * ***********************************************************************
 */
+
+	express.get('/api/v1/repository/nodes', async function (req, res) {
+		const nodes = await GP.repository();
+		res.json(nodes);
+	});
 
 
 
@@ -79,7 +87,7 @@ module.exports = function(express, GP) {
 */
 
 	express.get('/api/v1/collections/:collection/docs', async function (req, res) {
-		var docs = await GP.getDocs(req.params.collection, req.query);
+		var docs = await collection.getDocs(req.params.collection, req.query);
 		res.json({"data": docs});
 	});
 
@@ -91,6 +99,11 @@ module.exports = function(express, GP) {
 	express.get('/api/v1/collections/:collection/count', async function (req, res) {
 		const count = await GP.getDocCount(req.params.collection);
 		res.json({"count": count});
+	});
+
+	express.get('/api/v1/collections/:collection/facet', async function (req, res) {
+		const facet = await collection.facet(req);
+		res.json(facet);
 	});
 
 }

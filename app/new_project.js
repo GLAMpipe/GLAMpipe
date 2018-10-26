@@ -75,6 +75,7 @@ exports.remove = async function (doc_id) {
 		// if project has collections then remove those first
 		if(project.collections) {
 			for(var i=0; i < project.collections.length; i++) {
+				console.log(project.collections)
 				console.log("PROJECT: deleting collection", project.collections[i]);
 				await db.collection(project.collections[i]).drop();
 			}
@@ -85,6 +86,7 @@ exports.remove = async function (doc_id) {
 		// remove project directory
 		var rmrf = require("rmrf");	
 		var project_path = path.join(projectsPath, project.dir);
+		console.log("PATH" + project_path)
 		if(project_path && project_path.includes(global.config.dataPath)) {
 			console.log("PROJECT: removing " + project_path);
 			await rmrf(project_path);
@@ -92,7 +94,8 @@ exports.remove = async function (doc_id) {
 		} 
 		return Promise.resolve()
 	} catch(e) {
-		console.log("PROJECT: could not delete directory!" + project_path);
+		//console.log("PROJECT: could not delete directory!" + project_path);
+		console.log(e);
 		return Promise.reject();
 	}
 }
