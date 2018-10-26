@@ -40,9 +40,9 @@ exports.getDocs = async function(collection_name, params) {
 	if (skip <= 0 || isNaN(skip))
 		skip = 0;
 
-	var sort = params.sort
-	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
-		sort = "_id";
+	var sort_key = params.sort
+	if(typeof sort_key === 'undefined')  // by default sort by _id (mongoid)
+		sort_key = "_id";
 
 	// keys that are wanted
 	var keys = {};
@@ -61,10 +61,13 @@ exports.getDocs = async function(collection_name, params) {
 		})
 	}
 
-	var reverse = false
+	var reverse = 1
 	var r = parseInt(params.reverse);
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
-		reverse = true;
+		reverse = -1;
+
+	sort = {};
+	sort[sort_key] = reverse;
 
 	var params = {
 		collection: collection_name,
@@ -82,7 +85,7 @@ exports.getDocs = async function(collection_name, params) {
 	return await db[collection_name].findAsCursor(
 		query, 
 		keys
-	  ).sort({'_id': -1}).limit(limit).toArray();
+	  ).sort(sort).skip(skip).limit(limit).toArray();
 	
 	//return await db[collection_name].find({}).limit(2);
 	
