@@ -4,7 +4,6 @@
 $( document ).ready(function() {
 	
 	var gp = new glamPipe();
-	gp.loadNodes();
 	gp.getLoginStatus("#login");
 	gp.loadProject("#projectList");
 

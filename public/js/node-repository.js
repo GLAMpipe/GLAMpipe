@@ -8,8 +8,8 @@ var nodeRepository = function (gp) {
 	this.baseAPI = "/api/v1";
 	this.visible_tags = ["wmf"];
 
-	this.loadNodes = function () {
-		$.getJSON(self.baseAPI + "/repository/nodes", function(data) {
+	this.loadNodes = async function () {
+		var data = await $.getJSON(self.baseAPI + "/repository/nodes", function(data) {
 			for(var i = 0; i< data.length; i++) {
 				self.nodes.push(data[i]);
 			}
@@ -37,13 +37,17 @@ var nodeRepository = function (gp) {
 		}
 	}
 
-	this.renderNodeList = function (div, types) {
+	this.renderNodeList = async function (div, types) {
 
 		// if node list is already open, then we "collapse" it
 		if(div.find(".listoption").length) {
 			div.empty();
 			return;
 		}
+
+		var data = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/?limit=50");
+		console.log(data)
+		
 
 		var html = "";
 		html += "<div class='fatbox'>";

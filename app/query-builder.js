@@ -2,41 +2,64 @@ const util 		= require('util');
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
-exports.search = function (req, res) {
+exports.search = function (params) {
 
-	var limit = parseInt(req.query.limit);
+	//var skipped = ["skip", "limit", "sort", "reverse", "op"]; 	// skip search options
+	//var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
+	//var query = exports.filters(req, operators, skipped);
+	var query = exports.createSearchQuery(params);
+
+
+	var limit = parseInt(params.limit);
 	if (limit < 0 || isNaN(limit))
 		limit = 15;
 
-	var skip = parseInt(req.query.skip);
+	var skip = parseInt(params.skip);
 	if (skip <= 0 || isNaN(skip))
 		skip = 0;
 
-	var sort = req.query.sort
-	if(typeof sort === 'undefined')  // by default sort by _id (mongoid)
-		sort = "_id";
+	// keys that are wanted
+	var keys = {};
+	if(typeof params.keys !== 'undefined') {
+		arrKeys = params.keys.split(",");
+		arrKeys.forEach((key) => {
+			keys[key.trim()] = 1;
+		})
+	}
 
-	var reverse = false
-	var r = parseInt(req.query.reverse);
+	// keys that are not wanted
+	if(typeof params.nokeys !== 'undefined') {
+		arrKeys = params.nokeys.split(",");
+		arrKeys.forEach((key) => {
+			keys[key.trim()] = 0;
+		})
+	}
+
+	var reverse = 1
+	var r = parseInt(params.reverse);
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
-		reverse = true;
+		reverse = -1;
 
-	var skipped = ["skip", "limit", "sort", "reverse", "op"]; 	// skip search options
-	var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
-	var query = exports.filters(req, operators, skipped);
+	var sort_key = params.sort
+	if(typeof sort_key === 'undefined')  // by default sort by _id (mongoid)
+		sort_key = "_id";
 
-	var params = {
-		collection: req.params.collection,
+	sort = {};
+	sort[sort_key] = reverse;
+
+
+	var search = {
 		query: query,
 		limit: limit,
 		skip: skip,
 		sort: sort,
+		keys: keys,
 		reverse: reverse
 	}
 
-	console.log("SEARCH:\n" + util.inspect(params, false, 4, true));
+	console.log("SEARCH:\n" + util.inspect(search, false, 4, true));
 	
-	return params;
+	return search;
 }
 
 
@@ -108,23 +131,26 @@ exports.operators = function (req) {
 exports.createSearchQuery = function(params) {
 	
 	var query = {};
-	if(params.query_fields) {
-		// create an AND query if there are several query fields
-		if(params.query_fields.length > 1) {
-			var ands = [];
-			for(var i = 0; i < params.query_fields.length; i++) {
-				var search = {};
-				search[params.query_fields[i]] = {$regex:params.query_values[i], $options: 'i'};
-				ands.push(search);
+	var query_fields = [];
+	var query_values = [];
+	
+	// all arrays are search terms
+	for(var param in params) {
+		if(Array.isArray(params[param])) {
+			if(params[param].length > 1) {
+				var ands = [];
+				for(var i = 0; i < params[param].length; i++) {
+					var search = {};
+					search[param] = {$regex:params[param][i], $options: 'i'};
+					ands.push(search);
+				}
+				query.$and = ands;			
+			} else {
+				query[param] =  {$regex:params[param][0], $options: 'i'};
 			}
-			query.$and = ands;
-		// otherwise create query for one field
-		} else {
-			if(params.query_values[0] === "")
-				query[params.query_fields[0]] =  "";
-			else
-				query[params.query_fields[0]] =  {$regex:params.query_values[0], $options: 'i'};
 		}
+
 	}
+
 	return query;
 }

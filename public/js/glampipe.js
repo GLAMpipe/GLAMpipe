@@ -23,6 +23,8 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
+	this.nodeRepository = new nodeRepository(this);
+	this.nodeRepository.baseAPI = this.baseAPI;
 
 	// MAIN PAGE (projects)
 	this.getProjectTitles = function (div) {
@@ -465,7 +467,7 @@ var glamPipe = function () {
 	this.loadNodes = function() {
 		this.nodeRepository = new nodeRepository(this);
 		this.nodeRepository.baseAPI = this.baseAPI;
-		this.nodeRepository.loadNodes();
+		//this.nodeRepository.loadNodes();
 	}
 
 	this.loadProject = function () {

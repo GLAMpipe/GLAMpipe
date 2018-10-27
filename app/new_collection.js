@@ -27,73 +27,24 @@ exports.getFields = async function(collection_name) {
 }
 
 
-exports.getDocs = async function(collection_name, params) {
+exports.getDocs = async function(collection_name, query) {
 	
 	// create search query
-	var query = buildquery.createSearchQuery(params);
-
-	var limit = parseInt(params.limit);
-	if (limit < 0 || isNaN(limit))
-		limit = 15;
-
-	var skip = parseInt(params.skip);
-	if (skip <= 0 || isNaN(skip))
-		skip = 0;
-
-	var sort_key = params.sort
-	if(typeof sort_key === 'undefined')  // by default sort by _id (mongoid)
-		sort_key = "_id";
-
-	// keys that are wanted
-	var keys = {};
-	if(typeof params.keys !== 'undefined') {
-		arrKeys = params.keys.split(",");
-		arrKeys.forEach((key) => {
-			keys[key.trim()] = 1;
-		})
-	}
-
-	// keys that are not wanted
-	if(typeof params.nokeys !== 'undefined') {
-		arrKeys = params.nokeys.split(",");
-		arrKeys.forEach((key) => {
-			keys[key.trim()] = 0;
-		})
-	}
-
-	var reverse = 1
-	var r = parseInt(params.reverse);
-	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
-		reverse = -1;
-
-	sort = {};
-	sort[sort_key] = reverse;
-
-	var params = {
-		collection: collection_name,
-		query: query,
-		keys: keys,
-		limit: limit,
-		skip: skip,
-		sort: sort,
-		reverse: reverse
-	}
-	console.log(params);
-
-
+	var search = buildquery.search(query);
 
 	return await db[collection_name].findAsCursor(
-		query, 
-		keys
-	  ).sort(sort).skip(skip).limit(limit).toArray();
-	
-	//return await db[collection_name].find({}).limit(2);
+		search.query, 
+		search.keys
+	  ).sort(search.sort).skip(search.skip).limit(search.limit).toArray();
 	
 }
+
+
 
 exports.getCount = async function(collection_name, params) {
 	return await db[collection_name].count({});
 }
+
 
 
 exports.getKeyTypes = async function (collection_name, cb) {

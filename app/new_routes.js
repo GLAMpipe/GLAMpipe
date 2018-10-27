@@ -93,7 +93,7 @@ module.exports = function(express, GP) {
 
 	express.get('/api/v1/collections/:collection/fields', async function (req, res) {
 		const schema = await GP.getSchema(req.params.collection);
-		res.json(schema);
+		if(schema) res.json(schema); else res.json({}); 
 	});
 
 	express.get('/api/v1/collections/:collection/count', async function (req, res) {
