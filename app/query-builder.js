@@ -40,13 +40,16 @@ exports.search = function (params) {
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
 		reverse = -1;
 
-	var sort_key = params.sort
-	if(typeof sort_key === 'undefined')  // by default sort by _id (mongoid)
-		sort_key = "_id";
-
+	
 	sort = {};
-	sort[sort_key] = reverse;
-
+	if(typeof params.sort === 'undefined' || params.sort == "") { // by default sort by _id (mongoid)
+		sort._id = reverse;
+	} else {
+		var sort_keys = params.sort.split(",")
+		for(const sort_key of sort_keys) {
+			sort[sort_key.trim()] = reverse;
+		}
+	}
 
 	var search = {
 		query: query,
