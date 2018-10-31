@@ -548,7 +548,8 @@ settingtitle {
 }
 
 settinginfo {
-   flex: 1 0 300px;
+   flex: 0 0 400px;
+   margin-right:20px;
 }
 
 settingaction {
@@ -920,7 +921,7 @@ table.documents thead td div {
 }
 
 table thead {
-    background-color: #efefef;
+    background-color: #c3c3c3;
 }
 
 table.documents tbody td {
