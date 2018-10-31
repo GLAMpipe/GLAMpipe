@@ -329,7 +329,7 @@ var glamPipeNode = function (node, gp) {
 				options.push("<option>" + data.sorted[i] + "</option>");
 			}
 
-
+			$("settingsblock").off(); //remove any previous event handlers
 
 			// execute node's settings.js if exists
 			if(self.source.scripts.settings) {
@@ -359,6 +359,7 @@ var glamPipeNode = function (node, gp) {
 		params_table += "<tr><td>nodeid:</td><td>" + self.source.nodeid + "</td></tr>";
 		params_table += "<tr><td>_id:</td><td>" + self.source._id + "</td></tr>";
 		params_table += "<tr><td>version</td><td>" + self.source.version + "</td></tr>";
+		params_table += "<tr><td>settings</td><td><a class='get-node-settings' href=''>get settings (see console)</a></td></tr>";
 		params_table += "</tbody></table>";
 		return "<div class='debug right'>"+params_table+"</div>";
 
@@ -368,8 +369,6 @@ var glamPipeNode = function (node, gp) {
 		var data = self.source;
 		for(var prop in data.settings) {
 			// checkboxes
-			console.log(data.settings[prop] )
-			console.log(data.settings[prop] == "false")
 			if(data.settings[prop] == "true" || data.settings[prop] == "false" || typeof data.settings[prop] === "boolean") {
 				var checked = data.settings[prop];
 				if(typeof data.settings[prop] !== "boolean")

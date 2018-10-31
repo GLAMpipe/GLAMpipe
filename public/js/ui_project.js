@@ -169,6 +169,14 @@ $( document ).ready(function() {
 
 
 
+	// show node settings
+	$(document).on('click','.get-node-settings', async function(e) {
+		e.preventDefault();
+		var settings = await gp.getSettings();
+		console.log(settings);
+	});
+
+
 	// pick field
 	$(document).on('click','.pick_field', function(e) {
 		gp.pickField(e)

@@ -243,6 +243,11 @@ var glamPipe = function () {
 		})
 	}
 
+	this.getSettings = async function() {
+		var data = await $.getJSON(self.baseAPI + "/nodes/" + self.currentlyOpenNode.source._id + "/settings");
+		return data;
+	}
+
 	this.getStatus = function(div) {
 		var d = {
 			url: self.baseAPI + "/status",
