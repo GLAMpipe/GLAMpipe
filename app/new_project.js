@@ -2,6 +2,8 @@ var async 		= require("async");
 var path 		= require("path");
 
 var db 			= require('./db.js');
+var Collection 	= require('./new_collection.js');
+var Node 		= require('./new_node.js');
 const mongoist = require('mongoist');
 
 
@@ -52,7 +54,6 @@ exports.create = async function(title) {
 		console.log(e);
 	}
 }
-
 
 
 
@@ -130,8 +131,8 @@ exports.addCollection = async function(collection_name) {
 /* INTERNAL FUNCTIONS */
 //*******************************
 
-function cleanDirName(dir, project_count) {
-	var clean_dir = dir.toLowerCase();
+function cleanDirName(title, project_count) {
+	var clean_dir = title.toLowerCase();
 	clean_dir = clean_dir.replace(/[^a-z0-9- ]/g,"");
 	clean_dir = clean_dir.replace(/[ ]/g,"_");	
 	return clean_dir;

@@ -1,5 +1,6 @@
 const path			= require('path');
 var collection 	= require('./new_collection.js');
+var Project 	= require('./new_project.js');
 
 module.exports = function(express, GP) {
 
@@ -18,7 +19,7 @@ module.exports = function(express, GP) {
 
 	// main page
 	express.get(global.config.uiPath, function (req, res) {
-		res.sendFile(path.join(__dirname, 'views', 'index.html'));
+		res.sendFile(path.join(__dirname, '../views', 'index.html'));
 	});
 
 	// project page
@@ -33,8 +34,8 @@ module.exports = function(express, GP) {
 			version:global.config.version,
 			uiPath:global.config.uiPath,
 			public:global.config.public,
-			nodedevmode:global.config.nodeDevMode
-			//dataPath:global.config.dataPath
+			nodedevmode:global.config.nodeDevMode,
+			dataPath:global.config.dataPath
 		});
 	});
 

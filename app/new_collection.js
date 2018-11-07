@@ -1,5 +1,6 @@
 
 const mongoist 	= require('mongoist');
+const util 		= require('util');
 
 var db 			= require('./db.js');
 var buildquery 	= require('../app/query-builder.js');
@@ -120,7 +121,7 @@ function buildAggregate (fields, fieldTypes, filters, bucket) {
 		facets["$facet"][field] = facet;
 	})
 
-	//console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
+	console.log("AGGREGATE:\n" + util.inspect(aggregate, false, null, true));
 	//console.log("\n");
 	return aggregate;
 }

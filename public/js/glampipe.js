@@ -607,31 +607,7 @@ var glamPipe = function () {
 
 	this.showNodeList = function (e) {
 		var obj = $(e.target);
-		//obj.text("cancel");
-		var types = [];
-
-		if (obj.data("type") == "collection")
-			types = ["collection"]
-
-		if (obj.data("type") == "source")
-			types = ["source"]
-
-		if (obj.data("type") == "export")
-			types = ["export"]
-
-		if (obj.data("type") == "process")
-			types = ["process"]
-
-		if (obj.data("type") == "download")
-			types = ["download"]
-
-		if (obj.data("type") == "view")
-			types = ["view"]
-
-		if (obj.data("type") == "meta")
-			types = ["meta"]
-
-		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), types)
+		self.nodeRepository.renderNodeList(obj.parents(".sectiontitleblock").next(".holder"), obj.data("type"))
 	}
 
 

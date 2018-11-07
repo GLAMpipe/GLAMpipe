@@ -3,6 +3,7 @@ var project 	= require('./new_project.js');
 var collection 	= require('./new_collection.js');
 var Node 		= require('./new_node.js');
 var schema 		= require('./new_schema.js');
+const version 	= require("../config/version.js");
 
 const mongoist 	= require('mongoist');
 const path		= require('path');
@@ -24,6 +25,7 @@ class GLAMpipe {
 			this.dataPath = path.join(config.dataPath, "glampipe-data");
 			this.projectsPath = path.join(this.dataPath, "projects");
 		} else if(global.config) {
+			global.config.version = version.version;
 			this.config = global.config;
 			this.dataPath = path.join(global.config.dataPath, "glampipe-data");
 			this.projectsPath = path.join(this.dataPath, "projects");
@@ -52,13 +54,13 @@ class GLAMpipe {
 */
 
 	
-	async createProject(title) {
+	async createEmptyProject(title) {
 		return await project.create(title);
 	}
 
 
 
-	async createProjectFromFile(data) {
+	async createProject(data) {
 		var new_project = await project.create(data.project_title);
 		var collection = await this.createCollection(data.collection_title, new_project);
 		for(const node in data.nodes) {

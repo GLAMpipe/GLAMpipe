@@ -32,8 +32,6 @@ class Node {
 		
 	}
 
-
-
 	async loadFromRepository(nodeid) {
 		this.source = await db.collection("mp_nodes").findOne({"nodeid": nodeid});
 		this.params = {};
