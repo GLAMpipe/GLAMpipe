@@ -86,11 +86,17 @@ $( document ).ready(function() {
 	})
 
 	// open node parameters for new node
-	$(document).on('click','.listoption', function(e) {
-		gp.pickedCollectionId = null;
-		console.log(gp.currentCollection.source.params.collection);
-		gp.nodeRepository.openNodeParameters(e, gp.currentCollection.source.params.collection);
+	//$(document).on('click','.listoption', function(e) {
+		//gp.pickedCollectionId = null;
+		//console.log(gp.currentCollection.source.params.collection);
+		//gp.nodeRepository.openNodeParameters(e, gp.currentCollection.source.params.collection);
+		//e.preventDefault();
+	//})
+
+	$(document).on('click','.open-node', function(e) {
 		e.preventDefault();
+		gp.nodeRepository.openNodeParameters($(this), gp.currentCollection.source.params.collection);
+		
 	})
 
 	// create collection

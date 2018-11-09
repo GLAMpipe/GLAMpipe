@@ -747,7 +747,7 @@ var glamPipe = function () {
 				var collection = self.currentCollection;
 
 				// render collection
-				var col_html =   "<div><span class='title pagetitle'>" + collection.source.params.title + "</span>";
+				var col_html =   "<div><a href=''><span class='title pagetitle'>" + collection.source.params.title + "</span></a>";
 				col_html += "<a class='add-collection' title='Add new collection' href='#'> Add </a>";
 				col_html += "<a class='remove-collection' href='#' title='Remove this collection' data-id='"+collection.source._id+"'> Remove</a></div>";
 
