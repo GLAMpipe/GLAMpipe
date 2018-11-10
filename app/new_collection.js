@@ -27,6 +27,15 @@ exports.getFields = async function(collection_name) {
 	
 }
 
+exports.getDoc = async function(collection_name, id) {
+	
+	try {
+		return await db[collection_name].findOne({_id:mongoist.ObjectId(id)});
+	} catch(e) {
+		return {};
+	}
+	
+}
 
 exports.getDocs = async function(collection_name, query) {
 	

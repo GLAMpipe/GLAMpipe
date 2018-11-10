@@ -18,7 +18,7 @@ var nodeRepository = function (gp) {
 
 	this.verbose = {
 		"source": {
-			"collection": "Read data from GLAMpipe collection",
+			"collection": "Read data from collection",
 			"web": "Read data from web",
 			"file": "Read data from files"
 		},
@@ -88,6 +88,10 @@ var nodeRepository = function (gp) {
 			if(node.subtype == subtype) {
 				html += "<a  class='open-node' href='"+node._id+"'>"
 				html += "<div class='listoption " + node.type + " " + node.status + "'>"
+				var split = node.title.split(":");
+				if(split.length > 1)
+				html += "  <p class='listtitle'><span class='bold'>" + split[0] + "</span>" + split[1] +"</p>"
+				else
 				html += "  <p class='listtitle'>" + node.title + "</p>"
 				html += "  <p class='listtext'>" + node.description + "</p>"
 				html += "</div>"
@@ -101,7 +105,7 @@ var nodeRepository = function (gp) {
 		 return self.plainNodes[parseInt(index)];
 	}
 
-	this.openNodeParameters = function (click, collection) {
+	this.openNodeParameters = async function (click, collection) {
 		//var obj = $(e.target);
 		//var index = "";
 		//if(obj.data("index") == null)
@@ -112,7 +116,8 @@ var nodeRepository = function (gp) {
 		////var node = self.getNodeByIndex(index);
 		////console.log(node);
 		//console.log(obj.prop("tagName"))
-		var node = $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
+		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
+		console.log(node)
 
 		var html = "";
 		html += "<div class='fatbox " + node.type + " " + node.status + "'>"
@@ -133,20 +138,20 @@ var nodeRepository = function (gp) {
 		}
 		html += "  <fatboxsubmitblock>";
 		html += "    <a href='#'>"
-		html += "      <div data-index='" + index + "'  class='button create-node'>Create node</div>"
+		html += "      <div   class='button create-node'>Create node</div>"
 		html += "    </a>";
 		html += "  <fatboxsubmitblock>";
 		html += "</div>"
 
 		var params = $(html);
-		if( $(obj.parents(".holder.params")).length != 0)
-			$(obj.parents(".holder.params").empty()).append(params);
+		if( $(click.parents(".holder.params")).length != 0)
+			$(click.parents(".holder.params").empty()).append(params);
 		else
 			$(".holder.collection-params").empty().append(params);
 
 
 		// fetch fields
-		$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
+		$.getJSON(self.baseAPI + "/collections/" + gp.currentCollection + "/fields", function(data) {
 			if(data.error)
 				alert(data.error);
 			var options = [];

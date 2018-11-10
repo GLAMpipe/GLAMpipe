@@ -138,6 +138,10 @@ class GLAMpipe {
  * ***********************************************************************
 */
 
+	async getDoc(collection_name, id) {
+		return await collection.getDoc(collection_name, id);
+	}
+
 	async getDocs(collection_name, query) {
 		return await collection.getDocs(collection_name, query);
 	}

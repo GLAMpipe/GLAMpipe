@@ -92,6 +92,11 @@ module.exports = function(express, GP) {
 		res.json({"data": docs});
 	});
 
+	express.get('/api/v1/collections/:collection/docs/:id', async function (req, res) {
+		var doc = await GP.getDoc(req.params.collection, req.params.id);
+		res.json(doc);
+	});
+
 	express.get('/api/v1/collections/:collection/fields', async function (req, res) {
 		const schema = await GP.getSchema(req.params.collection);
 		if(schema) res.json(schema); else res.json({}); 
