@@ -120,13 +120,13 @@ class GLAMpipe {
 	}
 
 
-	async createNode(nodeid, params, collection, project) {
+	async createNode(nodeid, params, collection_name, project_id) {
 
 		try {
 			var node = new Node();
 			await node.loadFromRepository(nodeid);
-			await node.setParams(params)
-			await node.add2Project(project._id, collection);
+			await node.setParams(params);
+			await node.add2Project(project_id, collection_name);
 			return node;
 		} catch(e) {
 			console.log("Node creation failed!", e)

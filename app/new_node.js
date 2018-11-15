@@ -77,6 +77,7 @@ class Node {
 	setParams(params) {
 		if(this.source) {
 			this.source.params = params; 
+			if(!params) this.source.params = {};
 		} else {
 			throw("Cannot set params!")
 		}

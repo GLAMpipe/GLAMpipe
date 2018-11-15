@@ -613,12 +613,10 @@ var glamPipe = function () {
 
 
 
-	this.createNode = function (e) {
+	this.createNode = async function (e) {
 		var data = {params:{}};
-		var obj = $(e.target);
-		// node array index
-		var index = obj.data("index")
-		var node = self.nodeRepository.getNodeByIndex(index);
+		var click = $(e.target);
+		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.data("id"));
 
 		// check if are importing file
 		if(node.type == "source" && node.subtype == "file" && node.nodeid != "source_directory_scan") {
@@ -627,7 +625,7 @@ var glamPipe = function () {
 		}
 
 		// read params
-		obj.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
+		click.parents(".holder").find("input,textarea, select").not("input[type=button]").each(function(){
 			if($(this).attr("type") == "checkbox") {
 				if($(this).is(':checked'))
 					data.params[$(this).attr("name")] = "on";
@@ -640,9 +638,10 @@ var glamPipe = function () {
 			return;
 
 		// set parent collection
-		if(self.currentCollection == null)
+		if(self.currentCollection == null) {
 			alert("parent collection is missing");
-		else {data.collection = self.currentCollection.source.collection;
+		} else {
+			data.collection = self.currentCollection.source.collection;
 			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
 
 			post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
@@ -680,6 +679,8 @@ var glamPipe = function () {
 			});
 		}
 	}
+
+
 
 	// check if any output field (starts with "out_") exists
 	this.outputExists = function(params) {
@@ -736,9 +737,10 @@ var glamPipe = function () {
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function (cb) {
-
-		if(!self.currentCollection)
+		if(!self.currentCollection) {
+			console.log("no current collection")
 			return "";
+		}
 
 		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
 			//self.currentCollection.fields = data.keys;
@@ -795,8 +797,9 @@ var glamPipe = function () {
 		for (var i = 0; i < self.nodes.length; i++) {
 			var node = self.nodes[i];
 			if (node.source.collection == collection.source.collection) {
-				if(types.indexOf(node.source.type) != -1)
+				if(types.indexOf(node.source.type) != -1) {
 					html += node.renderNode();
+				}
 			}
 		}
 		return html;

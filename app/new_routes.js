@@ -80,6 +80,10 @@ module.exports = function(express, GP) {
 		res.json(nodes);
 	});
 
+	express.post('/api/v1/projects/:project/nodes/:node', async function (req, res) {
+		var node = await GP.createNode("source_web_dspace", req.body.params, req.body.collection, req.params.project,);
+		res.json(node);
+	});
 
 
 /* ***********************************************************************

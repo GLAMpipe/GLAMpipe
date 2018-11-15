@@ -138,7 +138,7 @@ var nodeRepository = function (gp) {
 		}
 		html += "  <fatboxsubmitblock>";
 		html += "    <a href='#'>"
-		html += "      <div   class='button create-node'>Create node</div>"
+		html += "      <div data-id='"+node._id+"' class='button create-node'>Create node</div>"
 		html += "    </a>";
 		html += "  <fatboxsubmitblock>";
 		html += "</div>"
@@ -151,12 +151,11 @@ var nodeRepository = function (gp) {
 
 
 		// fetch fields
-		$.getJSON(self.baseAPI + "/collections/" + gp.currentCollection + "/fields", function(data) {
-			if(data.error)
-				alert(data.error);
+		var fields = await $.getJSON(self.baseAPI + "/collections/" + gp.currentCollection + "/fields");
+		if(fields && fields.sorted) {
 			var options = [];
-			for(var i = 0; i < data.sorted.length; i++) {
-				options.push("<option>" + data.sorted[i] + "</option>");
+			for(var i = 0; i < fields.sorted.length; i++) {
+				options.push("<option>" + fields.sorted[i] + "</option>");
 			}
 
 			// populate field selects
@@ -164,14 +163,14 @@ var nodeRepository = function (gp) {
 				$(this).append(options.join(""));
 			//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
 			})
-		})
+		}
 		// TODO: get node from /get/node/nodeid so that scripts are included
 		// execute params.js if exists
 		//if(node.scripts.params) {
 			//var paramsScript = new Function('node', node.scripts.params);
 			//paramsScript(node);
 		//}
-		$('.dynamic_collection').append(self.gp.collectionList());
+		//$('.dynamic_collection').append(self.gp.collectionList());
 	}
 
 
