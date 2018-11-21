@@ -127,13 +127,6 @@ var GlamPipe = function() {
 		
 		// web sockets
 		self.io = require('socket.io')(self.http);
-		self.io.on('connection', function(socket) {
-			// allow sending messages from clients
-			socket.on('generic', function(msg){
-				console.log('message: ' + msg);
-				self.io.emit('generic', msg);
-			});
-		});
 
 		require('./app/routes.js')(self.app, self, passport);
 
