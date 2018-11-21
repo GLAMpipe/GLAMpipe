@@ -28,7 +28,8 @@ exports.proxyJSON = function (req, res) {
 	
 
 	var headers = {
-		'User-Agent': 'GLAMpipe/0.0.1'
+		'User-Agent': 'GLAMpipe/0.0.1',
+		'Content-Type': 'application/json'
 	}
 	
 	if(req.query.query)
@@ -43,6 +44,11 @@ exports.proxyJSON = function (req, res) {
 		json:true,
 		jar: true		// TODO: remove since problematic on login cookies (ALL requests are then authenticated!)
 	};
+	
+	// for adding CollectiveAccess list items
+	if(options.method == "PUT") {
+		options.body = req.body;
+	}
 
 	request(options, function (error, response, body) {
 		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
