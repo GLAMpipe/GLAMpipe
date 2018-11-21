@@ -548,8 +548,8 @@ settingtitle {
 }
 
 settinginfo {
-   flex: 0 0 400px;
-   margin-right:20px;
+   flex: 1 0 260px;
+   margin-right:40px;
 }
 
 settingaction {
@@ -842,16 +842,18 @@ b {
 /*  added by AH */
 
 .good {
- background-color: #efefef;
+ background-color: #aec5ba;
+}
+
+.bad {
+	background-color: #c7abb3;
 }
 
 .selected-match {
    background-color: #cfcfcf;
 }
 
-.bad {
- color:red;
-}
+
 
 .object-cell {
 	background-color:#E7EAEA;
@@ -920,8 +922,8 @@ table.documents thead td div {
 	font-weight:bold;
 }
 
-table thead {
-    background-color: #c3c3c3;
+settingsblock table  thead {
+    background-color: #dcdcdc;
 }
 
 table.documents tbody td {
