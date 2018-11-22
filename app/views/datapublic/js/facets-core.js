@@ -262,13 +262,14 @@ function refjyx (config) {
 
 
 	this.setFacetOnOff = function (facet) {
+		console.log(facet)
 		self.filters.forEach(function(filter) {
 			if(filter.key == facet.key) {
 
-				var index = filter.selections.indexOf(facet.value);
+				var index = filter.selections.indexOf(decodeURI(facet.value));
 				if(index === -1) {
 					if(facet.checked)
-						filter.selections.push(facet.value);
+						filter.selections.push(decodeURI(facet.value));
 
 				} else {
 					if(!facet.checked)
@@ -400,9 +401,9 @@ function refjyx (config) {
 	this.checkSelection = function (facet, item, item_count) {
 		if(item._id) {
 			if(facet.selections.indexOf(item._id) !== -1)
-				return '<input type="checkbox" checked id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+				return '<input type="checkbox" checked id="'+facet.key + item_count +'" data-value="'+encodeURI(item._id)+'"/>';
 			else
-				return '<input type="checkbox" id="'+facet.key + item_count +'" data-value="'+item._id.replace(/'/, "\'")+'"/>';
+				return '<input type="checkbox" id="'+facet.key + item_count +'" data-value="'+encodeURI(item._id)+'"/>';
 		} else {
 			return ""
 		}
