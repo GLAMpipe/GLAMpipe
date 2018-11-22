@@ -486,8 +486,10 @@ module.exports = function(express, glampipe, passport) {
 
 	// FILES
 	express.get('/api/v1/upload/:id', function (req, res) {
-		//res.setHeader('Content-type', 'application/pdf');
-		//res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
+		if(req.query.type && req.query.type == 'application/pdf') {
+			res.setHeader('Content-type', 'application/pdf');
+			res.setHeader('Content-disposition', 'inline; filename="' + req.params.id + '"');
+		}
 		res.sendFile(path.join(glampipe.dataPath, "tmp", req.params.id));
 	});
 
