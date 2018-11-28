@@ -133,6 +133,10 @@ module.exports = function(express, glampipe, passport) {
 		res.sendFile(path.join(__dirname, 'views', 'project_new_ui.html'));
 	});
 
+	// editor page
+	express.get(global.config.uiPath + 'editor', function (req, res) {
+		res.sendFile(path.join(__dirname, 'views', 'node-editor.html'));
+	});
 	// facet view
 	express.get(global.config.uiPath + 'views/data/facets/:nodeid', function (req, res) {
 		var facet = require("../app/node_runners/view-facet.js");

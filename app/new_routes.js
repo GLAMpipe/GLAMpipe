@@ -17,6 +17,11 @@ module.exports = function(express, GP) {
 		next();
 	});
 
+/***************************************************************************************************************
+ *                                       VIEWS                                                               *
+ * *************************************************************************************************************/
+
+
 	// main page
 	express.get(global.config.uiPath, function (req, res) {
 		res.sendFile(path.join(__dirname, '../views', 'index.html'));
@@ -26,6 +31,13 @@ module.exports = function(express, GP) {
 	express.get(global.config.uiPath + 'project/:id', function (req, res) {
 		res.sendFile(path.join(__dirname, '../views', 'project.html'));
 	});
+
+	// editor page
+	express.get(global.config.uiPath + 'editor', function (req, res) {
+		res.sendFile(path.join(__dirname, '../views', 'node-editor.html'));
+	});
+	
+	
 	
 	express.get('/api/v1/config', function (req, res) {
 		res.json({
