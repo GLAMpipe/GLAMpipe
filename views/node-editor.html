@@ -9,12 +9,13 @@
 		<link rel="stylesheet" type="text/css" href="../css/style-new.css" />
 		<link rel="stylesheet" type="text/css" href="../css/js-syntax.css" />
 		
-		<script type="text/javascript" src="../js/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 
-		<script type="text/javascript" src="../js/ui-config.js"></script>
-
-		<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+		<script type="text/javascript" src="js/ui-config.js"></script>
+		<script type="text/javascript" src="js/glamPipeNode-repository.js"></script>
+		<script src="js/socket.io.js"></script>
+		
   <style type="text/css" media="screen">
 
 
@@ -28,7 +29,7 @@
 
 	<body class="vbox">
 		<header>
-			<a href="../"><span class="title sitetitle">GLAMpipe editor</span></a>
+			<a href="../"><span class="title sitetitle">GLAMpipe Node Editor</span></a>
 			<span id="version">version</span>
 			<div id="node-progress">GLAMpipe is ready...</div> <!-- out.say('progress') in node script prints here.-->
 			<div id="login"></div>
@@ -42,7 +43,33 @@
 				</div>
 
 				<!-- project nodes -->
-				<div class="nodeset"></div>
+				<div class="nodeset">
+				
+					<div class="sectiontitleblock">	
+						<div>
+							<span class="title sectiontitle">Read data nodes</span> 
+							<a class="list-node" data-type="source" title="List source nodes" href="#">List</a>
+						</div>  
+					</div>
+					<div class="holder"></div>
+
+					<div class="sectiontitleblock">	
+						<div>
+							<span class="title sectiontitle">Process data nodes</span> 
+							<a class="list-node" data-type="process" title="List process nodes" href="#">List</a>
+						</div>  
+					</div>
+					<div class="holder"></div>
+
+					<div class="sectiontitleblock">	
+						<div>
+							<span class="title sectiontitle">Export data nodes</span> 
+							<a class="list-node" data-type="export" title="List export nodes" href="#">List</a>
+						</div>  
+					</div>
+					<div class="holder"></div>
+				
+				</div>
 			</pipe>
 			
 			<data-workspace>
@@ -60,12 +87,16 @@
 				</settingscontainer>
 				<data-container>
 				
-<pre id="editor">function foo(items) {
-	var i;
-	for (i = 0; i &lt; items.length; i++) {
-		alert("Ace Rocks " + items[i]);
-	}
-}</pre>
+<pre id="editor">
+   _____ _               __  __       _            
+  / ____| |        /\   |  \/  |     (_)           
+ | |  __| |       /  \  | \  / |_ __  _ _ __   ___ 
+ | | |_ | |      / /\ \ | |\/| | '_ \| | '_ \ / _ \
+ | |__| | |____ / ____ \| |  | | |_) | | |_) |  __/
+  \_____|______/_/    \_\_|  |_| .__/|_| .__/ \___|
+                               | |     | |         
+                               |_|     |_|        
+</pre>
 
 </data-container>
 		  </data-workspace>
@@ -76,9 +107,41 @@
 		
 		<script src="js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 		<script>
-			var editor = ace.edit("editor");
-			editor.setTheme("ace/theme/twilight");
-			editor.session.setMode("ace/mode/javascript");
+			var editor = ace.edit('editor');
+			editor.setTheme('ace/theme/twilight');
+			editor.session.setMode('ace/mode/javascript');
+
+			var NodeEditor = function () {
+				var self = this;
+				this.uiPath = g_uipath;
+				this.config = {};
+				this.nodeRepository = new nodeRepository(this);
+			}
+
+			var node_editor = new NodeEditor();
+			$('.list-node').click(function(e) {
+				var obj = $(e.target);
+				node_editor.nodeRepository.renderNodeList(obj.parents('.sectiontitleblock').next('.holder'), obj.data('type'))
+				e.preventDefault();
+			})			
+	
+			$(document).on('click','.accordion', function(e) {
+				this.classList.toggle('active');
+				this.nextElementSibling.classList.toggle('show');
+				e.preventDefault();
+			})		
+
+
+			$(document).on('click','.open-node', async function(e) {
+				e.preventDefault();
+				var node = await node_editor.nodeRepository.getNodeContent($(this));
+				editor.getSession().setValue(node.scripts.run);
+				editor.renderer.updateFull();
+				
+			})			
+
+			// http://jsfiddle.net/igos/qLAvN/
+
 		</script>
 		
 	</body>

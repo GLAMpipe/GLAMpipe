@@ -105,17 +105,12 @@ var nodeRepository = function (gp) {
 		 return self.plainNodes[parseInt(index)];
 	}
 
-	this.openNodeParameters = async function (click, collection) {
-		//var obj = $(e.target);
-		//var index = "";
-		//if(obj.data("index") == null)
-			//index = obj.parents(".open-node").data("index");
-		//else
-			//index = obj.data("index")
+	this.getNodeContent = async function (click, div) {
+		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
+		return node;
+	}
 
-		////var node = self.getNodeByIndex(index);
-		////console.log(node);
-		//console.log(obj.prop("tagName"))
+	this.openNodeParameters = async function (click, collection) {
 		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
 		console.log(node)
 
