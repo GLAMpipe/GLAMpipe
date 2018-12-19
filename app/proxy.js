@@ -51,12 +51,13 @@ exports.proxyJSON = function (req, res) {
 	}
 
 	request(options, function (error, response, body) {
-		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
+		if (response && !error && (response.statusCode == 200 || response.statusCode == 401)) {
 			res.status(response.statusCode).json(body);
 
 		} else {
 			console.log("error", error);
-			res.status(response.statusCode).json({"error": error});
+			if(response) res.status(response.statusCode).json({"error": error});
+			else res.status(503).json({"error": error});
 			return;
 		}
 	});

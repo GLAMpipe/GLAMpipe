@@ -13,7 +13,7 @@ const MP 		= require("../../config/const.js");
 var exports = module.exports = {};
 
 exports.collectionToFile = function (node, sandbox, io) {
-
+console.log("Collectiontofile")
 	var start = "";
 	var end = "";
 	if(sandbox.context.node.settings.start)
@@ -30,7 +30,8 @@ exports.collectionToFile = function (node, sandbox, io) {
 
 	// we stream directly to file
 	var fs = require('fs');
-	var filePath = path.join(node.dir, node.params.required_file);
+	console.log(node.settings.required_file)
+	var filePath = path.join(node.dir, node.settings.required_file);
 	var wstream = fs.createWriteStream(filePath);
 
 	// find everything
@@ -55,8 +56,6 @@ exports.collectionToFile = function (node, sandbox, io) {
 			wstream.write(sandbox.out.value);
 			wstream.write(end);
 			wstream.end();
-
-			//mongoquery.markNodeAsExecuted(node);
 			return;
 		});
 	});
