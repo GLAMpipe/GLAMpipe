@@ -103,9 +103,10 @@ class GLAMpipe {
 	}
 
 
-	async createCollection(title, project) {
+	async createCollection(title, project_id) {
 		
 		try {
+			var project = await this.getProject(project_id)
 			var collection_name = await collection.create(title, project);
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
@@ -129,8 +130,22 @@ class GLAMpipe {
 			await node.add2Project(project_id, collection_name);
 			return node;
 		} catch(e) {
-			console.log("Node creation failed!", e)
+			console.log("Node creation failed!", e);
+			throw(e);
 		}	
+	}
+
+	async removeNode(project_id, node_id) {
+		
+		try {
+			//var project = await this.getProject(project_id);
+			var node = new Node();
+			await node.loadFromProject(node_id);
+			project.removeNode(project_id, node_id);
+		} catch(e) {
+			console.log("Node removal failed!", e);
+		}
+		
 	}
 
 /* ***********************************************************************

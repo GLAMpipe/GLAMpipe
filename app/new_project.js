@@ -127,6 +127,13 @@ exports.addCollection = async function(collection_name) {
 
 }
 
+
+exports.removeNode = async function(project_id, node_id) {
+	await db.collection("mp_projects").update(
+		{_id:mongoist.ObjectId(project_id)},
+		{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}})
+
+}
 //*******************************
 /* INTERNAL FUNCTIONS */
 //*******************************

@@ -346,14 +346,8 @@ var glamPipe = function () {
 		post(self.baseAPI + "/projects", data, function(data) {
 			if(!data.error) {
 				console.log('created project', data.project);
-				var project = data.project._id;
-				var params = {params:{title:"My collection"}}
-				post(self.baseAPI + "/projects/" + project + "/nodes/collection_basic?type=collection", params, function(data) {
-					if(!data.error)
-						window.location.href = self.uiPath + "project/" + project;
-					else
-						alert(data.error);
-				})
+				window.location.href = self.uiPath + "project/" + data._id;
+
 			} else {
 				alert(data.error);
 			}
@@ -705,8 +699,8 @@ var glamPipe = function () {
 			"Add": function() {
 				$( this ).dialog( "close" );
 				var title = $( "#dialog-confirm input").val();
-				var data = {"params":{"title":title}};
-				post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/collection_basic?type=collection", data, function(returnedData) {
+				var data = {"title":title};
+				post(self.baseAPI + "/collections/?project=" + self.currentProject, data, function(returnedData) {
 					console.log('created node');
 					$(".holder.params").empty();
 					// point currentCollectionSet to last collection

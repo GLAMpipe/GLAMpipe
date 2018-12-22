@@ -93,11 +93,14 @@ module.exports = function(express, GP) {
 	});
 
 	express.post('/api/v1/projects/:project/nodes/:node', async function (req, res) {
-		var node = await GP.createNode("source_web_dspace", req.body.params, req.body.collection, req.params.project,);
+		var node = await GP.createNode(req.params.node, req.body.params, req.body.collection, req.params.project,);
 		res.json(node);
 	});
 
-
+	express.delete('/api/v1/projects/:project/nodes/:node', async function (req, res) {
+		var result = await GP.removeNode(req.params.project, req.params.node);
+		res.json(result);
+	});
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************
@@ -127,5 +130,11 @@ module.exports = function(express, GP) {
 		const facet = await collection.facet(req);
 		res.json(facet);
 	});
+
+	express.post('/api/v1/collections', async function (req, res) {
+		console.log(req.query.project)
+		var collection 	= await GP.createCollection(req.body.title, req.query.project);
+		res.json(collection);
+	})
 
 }

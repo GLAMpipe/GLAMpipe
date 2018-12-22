@@ -44,7 +44,7 @@ class Node {
 
 
 	async loadFromProject(id) {
-		var node = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});	
+		var node = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(id)});	
 	}
 	
 	
@@ -162,6 +162,9 @@ class Node {
 		console.log("done")
 
 	}
+	
+
+	
 }
 
 module.exports = Node ;
