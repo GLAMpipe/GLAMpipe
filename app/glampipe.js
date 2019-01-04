@@ -36,6 +36,10 @@ class GLAMpipe {
 		console.log("new GLAMpipe");
 	}
 
+	async init(cb) {
+		await this.loadNodes();
+	}
+
 	test() {console.log("hey");}
 
 
@@ -95,6 +99,39 @@ class GLAMpipe {
  * 							NODES
  * ***********************************************************************
 */
+
+	async loadNodes() {
+		var nodePath = path.join(global.config.nodePath, "/");
+		console.log("INIT: Loading nodes from " + path.join(global.config.nodePath, "/") );    
+		try {
+			await db.collection("gp_nodes").drop();
+		} catch(e) {
+			console.log(e.message);
+		}
+		var fs = fs || require('fs'),
+		dirs = fs.readdirSync(nodePath);
+		for(var dir of dirs) {
+			var dirPath = path.join(nodePath, dir);
+			if (fs.statSync(dirPath).isDirectory()) {
+				//var content = fs.readFileSync(path.join(nodeDir, "description.json"), 'utf-8');
+				var nodeDirs = fs.readdirSync(dirPath);
+				for(var nodeDir of nodeDirs) {
+					var nodeDirPath = path.join(dirPath, nodeDir);
+					if (fs.statSync(nodeDirPath).isDirectory()) {
+						var nodeFiles = fs.readdirSync(nodeDirPath);
+						if(nodeFiles.includes('description.json')) {
+							console.log(nodeDir)
+							for(var nodeFile of nodeFiles) {
+								//console.log(nodeFile)
+							}						
+						}
+					}
+
+				}				
+			}
+
+		}
+	}		
 
 	async getFacet() {
 		
