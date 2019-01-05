@@ -46,7 +46,7 @@ var nodeRepository = function (gp) {
 		}
 
 	
-		var nodes = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/?keys=type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type[]=" + type);
+		var nodes = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/?keys=core,type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type[]=" + type);
 		console.log(nodes);
 
 		var html = "";
@@ -85,7 +85,7 @@ var nodeRepository = function (gp) {
 	function renderNodes(nodes, subtype) {
 		var html = "";
 		for(var node of nodes.data) {
-			if(node.subtype == subtype) {
+			if(node.subtype == subtype && node.core) {
 				html += "<a  class='open-node' href='"+node._id+"'>"
 				html += "<div class='listoption " + node.type + " " + node.status + "'>"
 				var split = node.title.split(":");
@@ -106,12 +106,12 @@ var nodeRepository = function (gp) {
 	}
 
 	this.getNodeContent = async function (click, div) {
-		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.attr("href"));
 		return node;
 	}
 
 	this.openNodeParameters = async function (click, collection) {
-		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.attr("href"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.attr("href"));
 		console.log(node)
 
 		var html = "";

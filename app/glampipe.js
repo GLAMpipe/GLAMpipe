@@ -36,10 +36,16 @@ class GLAMpipe {
 		console.log("new GLAMpipe");
 	}
 
-	async init(cb) {
+	async init() {
 		await this.loadNodes();
 	}
 
+	static async create() {
+		const o = new GLAMpipe();
+		await o.init();
+		return o;
+	}
+	
 	test() {console.log("hey");}
 
 
@@ -113,23 +119,25 @@ class GLAMpipe {
 		for(var dir of dirs) {
 			var dirPath = path.join(nodePath, dir);
 			if (fs.statSync(dirPath).isDirectory()) {
-				//var content = fs.readFileSync(path.join(nodeDir, "description.json"), 'utf-8');
 				var nodeDirs = fs.readdirSync(dirPath);
 				for(var nodeDir of nodeDirs) {
 					var nodeDirPath = path.join(dirPath, nodeDir);
 					if (fs.statSync(nodeDirPath).isDirectory()) {
 						var nodeFiles = fs.readdirSync(nodeDirPath);
 						if(nodeFiles.includes('description.json')) {
-							console.log(nodeDir)
-							for(var nodeFile of nodeFiles) {
-								//console.log(nodeFile)
-							}						
+							var content = fs.readFileSync(path.join(nodeDirPath, "description.json"), 'utf-8');
+							var node = JSON.parse(content);
+							if(node.core) {
+								console.log(nodeDir)
+								for(var nodeFile of nodeFiles) {
+									readNodeFile (nodeDirPath, nodeFile, node);
+								}	
+								await db["gp_nodes"].insert(node);
+							}		
 						}
 					}
-
 				}				
 			}
-
 		}
 	}		
 
@@ -206,5 +214,30 @@ class GLAMpipe {
 	//closeDB() { db.close(); }
 }
 
+
+function readNodeFile (dirName, fileName, node) {
+	
+	var fs = fs || require('fs');
+	var f = fileName.split(".");
+	
+	if (fs.statSync(path.join(dirName, fileName)).isDirectory()) return;
+	 
+	var content = fs.readFileSync(path.join(dirName, fileName), 'utf-8')
+	var lines = content.split("\n");
+	for (var i = 0; i < lines.length; i++) {
+		lines[i] = lines[i].replace('"', '\"');
+		lines[i] = lines[i].replace('\t', '  ');
+	} 
+	
+	node.scripts = node.scripts || {};
+	node.params = node.params || {};
+	node.views = node.views || {};
+	// add javascript files to "scripts" section
+	if(f[1] == "js") node.scripts[f[0]] = lines.join("\n");
+	// add html files to "views" section
+	if(f[1] == "html") node.views[f[0]] = lines.join("\n");
+
+	
+}
 
 module.exports = GLAMpipe ;

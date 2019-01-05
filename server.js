@@ -2,7 +2,6 @@
 var express			= require('express');
 const path			= require('path');
 var bodyParser		= require("body-parser");
-
 var GLAMpipe 		= require('./app/glampipe.js');
 
 var GP = new GLAMpipe();
@@ -15,10 +14,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 	limit: '10mb'
 })); 
 
-
 require('./app/new_routes.js')(app, GP);
 
-var server = app.listen(3000, '127.0.0.1', () => {
+var server = app.listen(3000, '127.0.0.1', async () => {
+	await GP.loadNodes();
 	console.log("\n********************* G L A M p i p e RW *************************");
 	console.log('listening on port 3000!' + server.address().address)
 })
