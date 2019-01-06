@@ -35,7 +35,7 @@ exports.createSchema = async function (collection_name) {
 
 exports.getSchema = async function (collection_name) {
 
-	return await db["mp_schemas"].findOne({'collection':collection_name});
+	return await db["gp_schemas"].findOne({'collection':collection_name});
 }
 
 
@@ -58,8 +58,8 @@ exports.removeKeysFromSchema = function(collectionName, keys, cb) {
 
 async function save(collection_name, schema) {
 	
-	await db["mp_schemas"].remove({'collection': collection_name});
-	await db["mp_schemas"].insert(schema);
+	await db["gp_schemas"].remove({'collection': collection_name});
+	await db["gp_schemas"].insert(schema);
 
 }
 

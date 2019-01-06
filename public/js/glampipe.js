@@ -102,7 +102,7 @@ var glamPipe = function () {
 
 		$(".settingstitle").text("Projects by " + user);
 		html = "<table><thead><th>title</th><th>imports from</th><th>owners</th><th>exports to</th><th>action</th></thead>";
-		$.getJSON(self.baseAPI +  "/collections/mp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) {
+		$.getJSON(self.baseAPI +  "/collections/gp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) {
 			$(div).empty();
 			self.projects = data.data;
 			var projects = data.data;
@@ -225,7 +225,7 @@ var glamPipe = function () {
 	}
 
 	this.getUsers = function (div) {
-		$.getJSON(self.baseAPI + "/collections/mp_projects/facet/owner?sort=_id", function(datal) {
+		$.getJSON(self.baseAPI + "/collections/gp_projects/facet/owner?sort=_id", function(datal) {
 		//$.getJSON(self.baseAPI + "/users", function(data) {
 			$(div).empty();
 
@@ -610,7 +610,7 @@ var glamPipe = function () {
 	this.createNode = async function (e) {
 		var data = {params:{}};
 		var click = $(e.target);
-		var node = await $.getJSON(self.baseAPI + "/collections/mp_nodes/docs/" + click.data("id"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.data("id"));
 
 		// check if are importing file
 		if(node.type == "source" && node.subtype == "file" && node.nodeid != "source_directory_scan") {

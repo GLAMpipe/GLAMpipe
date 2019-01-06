@@ -33,7 +33,7 @@ class Node {
 	}
 
 	async loadFromRepository(nodeid) {
-		this.source = await db.collection("mp_nodes").findOne({"nodeid": nodeid});
+		this.source = await db.collection("gp_nodes").findOne({"nodeid": nodeid});
 		this.params = {};
 		this.settings = {};
 		if(!this.source) {
@@ -44,7 +44,13 @@ class Node {
 
 
 	async loadFromProject(id) {
-		var node = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(id)});	
+		var project = await db.collection('gp_projects').findOne({"nodes._id": mongoist.ObjectId(id)});	
+		var index = indexByKeyValue(project.nodes, "_id", id);
+		this.source = project.nodes[index];
+
+		this.project = project._id;
+		this.project_title = project.title;
+		this.project_dir = project.dir;
 	}
 	
 	
@@ -65,7 +71,7 @@ class Node {
 		this.source.project = project_id;
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
-		var o = await db.collection("mp_projects").update({_id:mongoist.ObjectId(project_id)}, {$push:{nodes: this.source}});	
+		var o = await db.collection("gp_projects").update({_id:mongoist.ObjectId(project_id)}, {$push:{nodes: this.source}});	
 		
 		// these are just shorthands
 		this.collection = collection_name;
@@ -110,7 +116,7 @@ class Node {
 		var setter = {};
 		setter.$set = {"nodes.$.settings": settings};
 		var query = {"nodes._id": mongoist.ObjectId(this.source._id)};
-		await db.collection("mp_projects").update(query, setter);
+		await db.collection("gp_projects").update(query, setter);
 		
 		this.source.settings = settings;
 		//console.log(setter)
@@ -119,12 +125,12 @@ class Node {
 	
 	
 	
-	async run(settings, docid) {
+	async run(settings) {
 	
 		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
 		var core = this.source.core.split(".");
 		await this.saveSettings(settings);
-	
+		
 		// create context for GP node
 		var sandbox = createSandbox(this.source);
 		sandbox.context = {};
@@ -138,6 +144,7 @@ class Node {
 		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 
+// TÄSSÄ ON ONGELMA!!
 		this.scripts.init.runInContext(sandbox);
 
 		switch(this.source.type) {
@@ -247,4 +254,15 @@ function createSandbox(node) {
 	return vm.createContext(sandbox);
 
 	
+}
+
+
+function indexByKeyValue(arraytosearch, key, value) {
+
+	for (var i = 0; i < arraytosearch.length; i++) {
+		if (arraytosearch[i][key] == value) {
+			return i;
+		}
+	}
+	return null;
 }

@@ -7,16 +7,17 @@ const version 	= require("../config/version.js");
 
 const mongoist 	= require('mongoist');
 const path		= require('path');
+const fs 		= require('fs');
 
 class GLAMpipe {
 	constructor(config) {
 
 		try {
-			global.config 		= require("../config/config.js");
+			global.config = require("../config/config.js");
 			global.config.file = "config.js (your local settings)";
 		} catch(e) {
 			console.log("config.js not found or is malformed!");
-			global.config 		= require("../config/config.js.example");
+			global.config = require("../config/config.js.example");
 			global.config.file = "config.js.example (default settings)";
 		}
 		
@@ -32,22 +33,20 @@ class GLAMpipe {
 		} else {
 			throw("No config present!")
 		}
-		
-		console.log("new GLAMpipe");
 	}
 
 	async init() {
+		// load nodes from files
 		await this.loadNodes();
+		// create data directory structure
+		if(!fs.existsSync("glampipe-data")) fs.mkdirSync("glampipe-data");
+		if(!fs.existsSync("glampipe-data/projects")) fs.mkdirSync("glampipe-data/projects");
+		if(!fs.existsSync("glampipe-data/logs")) fs.mkdirSync("glampipe-data/logs");
+		if(!fs.existsSync("glampipe-data/tmp")) fs.mkdirSync("glampipe-data/tmp");
+		// make sure that gp_settings collection exists
+		var settings = await db.collection("gp_settings").findOne({});
+		if(!settings) await db.collection("gp_settings").insert({"project_count":0, "data_path":""});
 	}
-
-	static async create() {
-		const o = new GLAMpipe();
-		await o.init();
-		return o;
-	}
-	
-	test() {console.log("hey");}
-
 
 	async createSchema(collection_name) {
 		return await schema.createSchema(collection_name);
@@ -69,12 +68,12 @@ class GLAMpipe {
 	}
 
 
-
+	// create project from project data and execute nodes
 	async createProject(data) {
 		var new_project = await project.create(data.project_title);
-		var collection = await this.createCollection(data.collection_title, new_project);
+		var collection = await this.createCollection(data.collection_title, new_project._id);
 		for(const node in data.nodes) {
-			var new_node = await this.createNode(data.nodes[node].nodeid, data.nodes[node].params, collection.collection, new_project);
+			var new_node = await this.createNode(data.nodes[node].nodeid, data.nodes[node].params, collection.collection, new_project._id);
 			await new_node.run(data.nodes[node].settings);
 		}
 		
@@ -106,7 +105,18 @@ class GLAMpipe {
  * ***********************************************************************
 */
 
+	async startNode(id, settings) {
+		try {
+			var node = new Node();
+			await node.loadFromProject(id);
+			node.run(settings);
+		} catch(e) {
+			console.log("Node start failed!");
+		}
+	}
+
 	async loadNodes() {
+		var count = 0;
 		var nodePath = path.join(global.config.nodePath, "/");
 		console.log("INIT: Loading nodes from " + path.join(global.config.nodePath, "/") );    
 		try {
@@ -114,8 +124,8 @@ class GLAMpipe {
 		} catch(e) {
 			console.log(e.message);
 		}
-		var fs = fs || require('fs'),
-		dirs = fs.readdirSync(nodePath);
+		
+		var dirs = fs.readdirSync(nodePath);
 		for(var dir of dirs) {
 			var dirPath = path.join(nodePath, dir);
 			if (fs.statSync(dirPath).isDirectory()) {
@@ -124,11 +134,12 @@ class GLAMpipe {
 					var nodeDirPath = path.join(dirPath, nodeDir);
 					if (fs.statSync(nodeDirPath).isDirectory()) {
 						var nodeFiles = fs.readdirSync(nodeDirPath);
+						// read only if description.json exists
 						if(nodeFiles.includes('description.json')) {
 							var content = fs.readFileSync(path.join(nodeDirPath, "description.json"), 'utf-8');
 							var node = JSON.parse(content);
-							if(node.core) {
-								console.log(nodeDir)
+							if(node.core) { // require new GP-node format
+								count++;
 								for(var nodeFile of nodeFiles) {
 									readNodeFile (nodeDirPath, nodeFile, node);
 								}	
@@ -139,19 +150,20 @@ class GLAMpipe {
 				}				
 			}
 		}
+		console.log("Loaded " + count + " nodes");
 	}		
 
-	async getFacet() {
-		
-		return await db.collection("mp_nodes").find({}, {"nodeid":1, "title":1, "description":1, "type":1, "subtype":1});
 
+	async getFacet() {		
+		return await db.collection("gp_nodes").find({}, {"nodeid":1, "title":1, "description":1, "type":1, "subtype":1});
 	}
 
 
 	async createCollection(title, project_id) {
 		
 		try {
-			var project = await this.getProject(project_id)
+			var project = await this.getProject(project_id);
+			console.log(project)
 			var collection_name = await collection.create(title, project);
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");

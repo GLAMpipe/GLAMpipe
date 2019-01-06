@@ -323,8 +323,9 @@ var glamPipeNode = function (node, gp) {
 				if(data.error)
 					alert(data.error);
 				var options = [];
-				for(var i = 0; i < data.sorted.length; i++) {
-					options.push("<option>" + data.sorted[i] + "</option>");
+				
+				for(var i = 0; i < data.length; i++) {
+					options.push("<option>" + data[i] + "</option>");
 				}
 
 
@@ -366,8 +367,6 @@ var glamPipeNode = function (node, gp) {
 		var data = self.source;
 		for(var prop in data.settings) {
 			// checkboxes
-			console.log(data.settings[prop] )
-			console.log(data.settings[prop] == "false")
 			if(data.settings[prop] == "true" || data.settings[prop] == "false" || typeof data.settings[prop] === "boolean") {
 				var checked = data.settings[prop];
 				if(typeof data.settings[prop] !== "boolean")

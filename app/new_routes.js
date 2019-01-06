@@ -1,6 +1,7 @@
-const path			= require('path');
+const path		= require('path');
 var collection 	= require('./new_collection.js');
 var Project 	= require('./new_project.js');
+var proxy 		= require("./proxy.js");
 
 module.exports = function(express, GP) {
 
@@ -73,7 +74,8 @@ module.exports = function(express, GP) {
 	});
 
 	express.post('/api/v1/projects', async function (req, res) {
-		var project = await GP.createProject({'project_title': req.body.title, 'collection_title': 'My Collection'});
+		var project = await GP.createEmptyProject(req.body.title);
+		var collection = await GP.createCollection("test", project._id);
 		res.json(project);
 	});
 
@@ -101,6 +103,12 @@ module.exports = function(express, GP) {
 		var result = await GP.removeNode(req.params.project, req.params.node);
 		res.json(result);
 	});
+	
+	express.post('/api/v1/nodes/:id/start', function (req, res) {
+		GP.startNode(req.params.id);
+		res.json({status:"started", ts:  new Date()});
+	});
+
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************
@@ -136,5 +144,22 @@ module.exports = function(express, GP) {
 		var collection 	= await GP.createCollection(req.body.title, req.query.project);
 		res.json(collection);
 	})
+
+/* ***********************************************************************
+ * 							PROXY
+ * ***********************************************************************
+*/
+	express.get('/api/v1/proxy/', function (req, res) {
+		proxy.proxyJSON(req, res);
+	});
+
+	express.post('/api/v1/proxy/', function (req, res) {
+		proxy.proxyJSON(req, res);
+	});
+
+	express.put('/api/v1/proxy/', function (req, res) {
+		proxy.proxyJSON(req, res);
+	});
+
 
 }

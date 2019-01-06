@@ -22,8 +22,8 @@ exports.create = async function(title) {
 	
 	try {
 		// update project count and create project. Project count is *permanent* counter
-		var incr = await db.collection('mp_settings').update({}, {$inc: { project_count: 1} });
-		var meta = await db.collection('mp_settings').findOne({});
+		var incr = await db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
+		var meta = await db.collection('gp_settings').findOne({});
 		
 		var prefix = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
 		prefix = prefix.replace(/ /g,"_");
@@ -41,7 +41,7 @@ exports.create = async function(title) {
 			"owner": [] 
 		};
 		
-		var result = await db.collection('mp_projects').insert(project);
+		var result = await db.collection('gp_projects').insert(project);
 		
 		// create project directories
 		var projectPath = path.join(projectsPath, title_dir)
@@ -63,7 +63,7 @@ exports.remove = async function (doc_id) {
 	let dataPath = path.join(global.config.dataPath, "glampipe-data");
 	let projectsPath = path.join(dataPath, "projects");
 	
-	var project = await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	var project = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 	if(!project) {
 		console.log("Project " + doc_id + " not found")
 		return;
@@ -82,7 +82,7 @@ exports.remove = async function (doc_id) {
 			}
 		}
 
-		await db.collection('mp_projects').remove({_id: mongoist.ObjectId(doc_id)});
+		await db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
 				
 		// remove project directory
 		var rmrf = require("rmrf");	
@@ -104,7 +104,7 @@ exports.remove = async function (doc_id) {
 
 exports.getProjects = async function() {
 
-	return await db.collection('mp_projects').findAsCursor({}, {
+	return await db.collection('gp_projects').findAsCursor({}, {
 		'title': 1, 
 		'collections': 1, 
 		'nodes.nodeid': 1,
@@ -116,7 +116,7 @@ exports.getProjects = async function() {
 
 exports.getProject = async function(doc_id) {
 
-	return await db.collection('mp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	return await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 
 }
 
@@ -129,7 +129,7 @@ exports.addCollection = async function(collection_name) {
 
 
 exports.removeNode = async function(project_id, node_id) {
-	await db.collection("mp_projects").update(
+	await db.collection("gp_projects").update(
 		{_id:mongoist.ObjectId(project_id)},
 		{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}})
 
