@@ -46,7 +46,7 @@ exports.proxyJSON = function (req, res) {
 	};
 	
 	// for adding CollectiveAccess list items
-	if(options.method == "PUT") {
+	if(options.method == "PUT" || options.method == "POST") {
 		options.body = req.body;
 	}
 

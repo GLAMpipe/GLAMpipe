@@ -564,6 +564,12 @@ exports.runNode = function (node, io) {
 
 						break;	
 
+						case "mongo":
+							var mongo = require("../app/node_runners/mongo.js");
+							asyncLoop.documentLoop(node, sandbox, mongo.query);
+
+						break;	
+
 						case "web":
 							var web = require("../app/node_runners/web.js");
 							asyncLoop.fieldLoop(node, sandbox, web.requestJSON);
