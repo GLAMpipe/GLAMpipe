@@ -561,7 +561,7 @@ function buildAggregate (fields, fieldTypes, filters, bucket) {
 		aggregate.push({$match: {$and:filters}});
 	}
 	aggregate.push(facets);
-
+console.log("Aggregate");
 	// generate facets
 	fields.forEach(function(field) {
 		var facet = [];
@@ -572,7 +572,11 @@ function buildAggregate (fields, fieldTypes, filters, bucket) {
 		// facet by first character + all entries
 		if(bucket.includes(field)) {
 			// group by field & sort by count
-			facet.push({ $group: {_id: "$" + field, grouped: {$first: "$" + field}, count: {$sum: 1}}});
+			if(fieldTypes[field] === "array") {
+				facet.push({ $group: {_id: "$" + field, grouped: {$first: "$" + field}, count: {$sum: 1}}});
+			} else {
+ 				facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
+			}
 			facet.push({ $sort: { _id : 1 }});
 			// group by first character & sort alphabetically
 			facet.push({ $group: {_id: {$substrCP: ["$grouped", 0, 1]}, count: {$sum: 1}, entries: {$push: {id:"$grouped", count: "$count"} } }});
