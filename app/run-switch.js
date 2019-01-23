@@ -420,6 +420,11 @@ exports.runNode = function (node, io) {
 		
 			switch (node.subtype) {
 				
+				case "index":
+							var mongo = require("../app/node_runners/mongo.js");
+							mongo.createIndex(sandbox);				
+					break;
+				
 				case "files":
 				
 					switch (node.subsubtype) {

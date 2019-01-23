@@ -23,8 +23,9 @@ var nodeRepository = function (gp) {
 			"file": "Read data from files"
 		},
 		"process": {
+			"index": "Modify collection",
 			"strings": "Modify data",
-			"documents": "Modify whole records",
+			"documents": "Delete data",
 			"format": "Map data",
 			"files": "File operations",
 			"lookups": "Look up data",

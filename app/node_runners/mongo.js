@@ -4,6 +4,15 @@ var mongoquery	= require("../../app/mongo-query.js");
 var exports = module.exports = {};
 
 
+exports.createIndex = function (sandbox) {
+	var collection = sandbox.context.node.params.collection;
+	var field = {};
+	field[sandbox.context.node.params.in_field] = 1;
+	mongoquery.createIndex(collection, field, function(err, result) {
+		sandbox.finish.runInContext(sandbox);
+	})
+}
+
 exports.query = function (doc, sandbox, next) {
 
 	// let node create a query

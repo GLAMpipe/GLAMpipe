@@ -31,6 +31,11 @@ exports.createBulk = function () {
 	return  db.items.initializeUnorderedBulkOp();
 }
 
+exports.createIndex = function(collectionname, keys, cb) {
+	var collection = db.collection(collectionname);
+	collection.createIndex(keys,{},cb);
+}
+
 // *********************************************************************
 // ******************************* FIND  *******************************
 // *********************************************************************
@@ -561,22 +566,22 @@ function buildAggregate (fields, fieldTypes, filters, bucket) {
 		aggregate.push({$match: {$and:filters}});
 	}
 	aggregate.push(facets);
-console.log("Aggregate");
+
 	// generate facets
 	fields.forEach(function(field) {
 		var facet = [];
-		if(fieldTypes[field] === "array") {
+		//if(fieldTypes[field] === "array") {
 			facet.push({ $unwind: "$" + field });
-		}
+		//}
 		
 		// facet by first character + all entries
 		if(bucket.includes(field)) {
 			// group by field & sort by count
-			if(fieldTypes[field] === "array") {
+			//if(fieldTypes[field] === "array") {
 				facet.push({ $group: {_id: "$" + field, grouped: {$first: "$" + field}, count: {$sum: 1}}});
-			} else {
- 				facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
-			}
+			//} else {
+ 				//facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
+			//}
 			facet.push({ $sort: { _id : 1 }});
 			// group by first character & sort alphabetically
 			facet.push({ $group: {_id: {$substrCP: ["$grouped", 0, 1]}, count: {$sum: 1}, entries: {$push: {id:"$grouped", count: "$count"} } }});
@@ -586,7 +591,7 @@ console.log("Aggregate");
 		} else {
 			facet.push({ $group: {_id: "$" + field, count: {$sum: 1}}});
 			facet.push({ $sort: { count : -1 }});
-			facet.push({ $limit: 100 }); // just in case
+			facet.push({ $limit: 1000 }); // just in case
 		}
 		
 		facets["$facet"][field] = facet;
