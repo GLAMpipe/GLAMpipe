@@ -394,7 +394,7 @@ var glamPipeNode = function (node, gp) {
 			}
 		}
 		// script node is a special case with its editor
-		if(self.source.nodeid == "process_script" && editor && data.settings['js']) editor.setValue(data.settings['js']);		
+		if(self.source.nodeid == "process_script" && typeof(editor) !== 'undefined' && data.settings['js']) editor.setValue(data.settings['js']);		
 	}
 
 
