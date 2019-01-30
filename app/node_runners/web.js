@@ -70,6 +70,7 @@ exports.requestJSON = function (options, sandbox, next) {
 			sandbox.context.error = error;
 			next();
 		} else if (response.statusCode == 200) {
+			
 			try {
 				sandbox.context.data = JSON.parse(body);
 			} catch(e) {
@@ -78,6 +79,7 @@ exports.requestJSON = function (options, sandbox, next) {
 			}
 			next();
 		} else {
+			sandbox.context.error = 'response code: ' + response.statusCode;
 			next();
 		}
 	}

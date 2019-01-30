@@ -367,10 +367,18 @@ function processDataAsync(node, sandbox, onDoc, cursor) {
 				if(sandbox.error || sandbox.context.error) {
 					console.log(sandbox.error);
 					console.log(sandbox.context.error);
-					console.log(sandbox.context.data)
 				}
 				sandbox.out.setter = null;
-				sandbox.run.runInContext(sandbox);
+
+				try {
+					sandbox.run.runInContext(sandbox);
+				} catch(e) {
+					console.log(e);
+					sandbox.out.error = "errorin in run.js:" + e.message;
+					sandbox.finish.runInContext(sandbox);
+					return;
+				}
+				
 				var setter = sandbox.out.setter;
 				if(!setter) {
 					setter = {};
