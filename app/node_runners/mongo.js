@@ -16,16 +16,23 @@ exports.createIndex = function (sandbox) {
 exports.query = function (doc, sandbox, next) {
 
 	// let node create a query
-	sandbox.pre_run.runInContext(sandbox);
-	var query = sandbox.out.pre_value.query;
+	//sandbox.pre_run.runInContext(sandbox);
+	console.log('doc:' + doc)
+	var query = doc.query;
 	if(!query) {
 		return next("skipping because of empty query");
 	}
-	var fields = sandbox.out.pre_value.fields;
+	
+	if(Array.isArray(query)) {
+		console.log("***ARRAY***")
+	}
+	
+	//var fields = sandbox.out.pre_value.fields;
 
-	mongoquery.findFields(query, fields, {}, sandbox.context.node.params.required_source_collection, function(err, result) {
+	mongoquery.findFields(query, doc.fields, {}, sandbox.context.node.params.required_source_collection, function(err, result) {
+		console.log(result)
 		sandbox.context.data = result;
-		sandbox.run.runInContext(sandbox);
+		//sandbox.run.runInContext(sandbox);
 		next();
 	})
 
