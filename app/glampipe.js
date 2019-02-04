@@ -109,6 +109,7 @@ class GLAMpipe {
 		try {
 			var node = new Node();
 			await node.loadFromProject(id);
+			console.log(settings)
 			node.run(settings);
 		} catch(e) {
 			console.log("Node start failed!");

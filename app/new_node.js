@@ -48,6 +48,7 @@ class Node {
 		var index = indexByKeyValue(project.nodes, "_id", id);
 		this.source = project.nodes[index];
 
+		this.collection = this.source.collection;
 		this.project = project._id;
 		this.project_title = project.title;
 		this.project_dir = project.dir;
@@ -93,48 +94,50 @@ class Node {
 
 
 	async saveSettings(settings) {
-		
+
+		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
+		// from it without affecting settings that are used by node
+        var settings_copy = Object.assign({}, settings); 	
+
 		// we do not save passwords, user names or api keys
-		if(settings) {
-			if(settings.username) settings.username = null;
-			if(settings.passwd) settings.passwd = null;
-			if(settings.password) settings.password = null;
-			if(settings.apikey) settings.apikey = null;
-			if(settings.key_credential) settings.key_credential = null;
-			if(settings.key_identity) settings.key_identity = null;
+		if(settings_copy) {
+			if(settings_copy.username) settings_copy.username = null;
+			if(settings_copy.passwd) settings_copy.passwd = null;
+			if(settings_copy.password) settings_copy.password = null;
+			if(settings_copy.apikey) settings_copy.apikey = null;
+			if(settings_copy.key_credential) settings_copy.key_credential = null;
+			if(settings_copy.key_identity) settings_copy.key_identity = null;
 		}
 
 		// we don't save empty setting values
-		for(var key in settings) {
-			if(!settings[key])
-				delete settings[key];
+		for(var key in settings_copy) {
+			if(!settings_copy[key])
+				delete settings_copy[key];
 		}
 
-		if(!settings)
+		if(!settings_copy)
 			return;
 			
 		var setter = {};
-		setter.$set = {"nodes.$.settings": settings};
+		setter.$set = {"nodes.$.settings_copy": settings_copy};
 		var query = {"nodes._id": mongoist.ObjectId(this.source._id)};
 		await db.collection("gp_projects").update(query, setter);
-		
-		this.source.settings = settings;
-		//console.log(setter)
 
 	}
 	
 	
 	
 	async run(settings) {
-	
 		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
-		var core = this.source.core.split(".");
+		this.settings = settings;	
+		
 		await this.saveSettings(settings);
 		
 		// create context for GP node
 		var sandbox = createSandbox(this.source);
 		sandbox.context = {};
 		sandbox.context.node = this.source;
+		sandbox.context.node.settings = settings;
 		this.sandbox = sandbox;
 		this.scripts = {};
 		
@@ -144,9 +147,13 @@ class Node {
 		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 
-// TÄSSÄ ON ONGELMA!!
-		this.scripts.init.runInContext(sandbox);
-
+		try {
+			this.scripts.init.runInContext(sandbox);
+		} catch(e) {
+			console.log(e)
+		}
+		
+		var core = this.source.core.split(".");
 		switch(this.source.type) {
 
 			case "source":
@@ -232,16 +239,17 @@ function createSandbox(node) {
 			doc: null,
 			data: null,
 			vars: {},
-			myvar: {},
 			node: node,
 			doc_count: 0,
 			count: 0,
 			success_count: 0,
 			config: global.config
 		},
+		core: {
+			options: null 
+		},
 		out: {
 			self:this,
-			options: {},
 			error_marker: "AAAA_error:",
 			value:"",
 			setter:null,

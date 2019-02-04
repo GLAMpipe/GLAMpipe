@@ -105,7 +105,7 @@ module.exports = function(express, GP) {
 	});
 	
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
-		GP.startNode(req.params.id);
+		GP.startNode(req.params.id, req.body);
 		res.json({status:"started", ts:  new Date()});
 	});
 
