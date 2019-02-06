@@ -116,7 +116,7 @@ exports.getProjects = async function() {
 
 exports.getProject = async function(doc_id) {
 
-	return await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	return db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 
 }
 
@@ -129,9 +129,10 @@ exports.addCollection = async function(collection_name) {
 
 
 exports.removeNode = async function(project_id, node_id) {
-	await db.collection("gp_projects").update(
+	var res = await db.collection("gp_projects").update(
 		{_id:mongoist.ObjectId(project_id)},
-		{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}})
+		{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}});
+	return res;
 
 }
 //*******************************

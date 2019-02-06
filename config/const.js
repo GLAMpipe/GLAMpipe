@@ -1,8 +1,9 @@
-var MP = "__mp";
+var GP = "__gp";
 
 
 module.exports = {
-	source : MP + "_source"
+	source : GP + "_source",
+	error: "AAAA_error:"
 };
 
 

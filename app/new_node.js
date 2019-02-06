@@ -9,7 +9,7 @@ var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
 var dataImport 	= require("../app/import.js");
-const MP 		= require("../config/const.js");
+const GP 		= require("../config/const.js");
 
 
 /*
@@ -245,12 +245,12 @@ function createSandbox(node) {
 			success_count: 0,
 			config: global.config
 		},
+		GP: GP,
 		core: {
-			options: null 
+			options: null
 		},
 		out: {
 			self:this,
-			error_marker: "AAAA_error:",
 			value:"",
 			setter:null,
 			error: null,

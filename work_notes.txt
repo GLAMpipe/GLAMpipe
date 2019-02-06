@@ -1,0 +1,39 @@
+
+
+Nodes and cores
+
+Nodes are synchronous code. No file writing or web requests. In order to write file or make a web request the node can use core modules.
+
+Node gives options to core module and the result is given back to node.
+
+Currently available core modules:
+- web
+- (pdf)
+- (csv)
+
+
+Core communication
+
+
+* things that are set in GP-node
+core.options
+- options object for core module (core request)
+- the format depends on core module (for example, options object for web-core options is the options of request module)
+
+core.skip
+- tell core to skip this request
+- if skip is non-empty, it is passed to a next round as core.error
+core.skip = "no file present"
+if(core.error)
+ out.value = GP.error + core.error
+
+
+* Things that are set by core
+core.data
+- data that is coming from core module (core response)
+
+core.error
+- is set when core can not fulfill the request (file is missing, network error etc.)
+  OR
+  if core.skip is non-empty
+
