@@ -37,3 +37,14 @@ core.error
   OR
   if core.skip is non-empty
 
+
+
+SCHEMA
+Every collection has their own schema in gp__schemas. Schema keeps track of fields in the collection. 
+source:
+- when a source node is run, the createSchema is run after every import
+- this results the "original fields" list
+
+process and export:
+- if node uses out.setter, then fields in the setter are added to schema in every round.
+- if node has setings.out_value, then this is added to the the schema when node is created

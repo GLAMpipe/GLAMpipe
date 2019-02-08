@@ -5,7 +5,7 @@ var dataTable = function (node) {
 	this.keys = {"all_keys": [], "visible_keys": null};
 	this.docCount = 0;
 
-	this.hiddenKeys = ["__mp_source", "_id"];
+	this.hiddenKeys = ["__gp_source", "_id"];
 	this.maxArrayLenghtDisplay = 2;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
 	this.maxInputLength = 30; // limit whether input rendered as input or textarea on cell edit

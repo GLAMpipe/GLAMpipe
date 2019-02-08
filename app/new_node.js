@@ -4,6 +4,8 @@ var colors 		= require('ansicolors');
 var path 		= require("path");
 const vm 		= require('vm');
 const mongoist 	= require('mongoist');
+var debug 		= require('debug')('GLAMpipe:node');
+var error 		= require('debug')('GLAMpipe:error');
 
 var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
@@ -79,7 +81,19 @@ class Node {
 		this.project = project_id;
 	}
 	
-	
+
+	async remove() {
+		// remove records that were created by this node
+		var query = {};
+		query[GP.source] = node_id;
+		await db.collection(self.collection).remove(query);
+		
+		// remove node from project
+		var res = await db.collection("gp_projects").update(
+			{_id:mongoist.ObjectId(project_id)},
+			{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}});
+		return res;
+	}
 	
 	setParams(params) {
 		if(this.source) {
@@ -150,7 +164,7 @@ class Node {
 		try {
 			this.scripts.init.runInContext(sandbox);
 		} catch(e) {
-			console.log(e)
+			error(e)
 		}
 		
 		var core = this.source.core.split(".");
@@ -173,7 +187,7 @@ class Node {
 		}
 
 		
-		console.log("done")
+		debug("done")
 
 	}
 	
@@ -216,8 +230,8 @@ function CreateScriptVM(node, sandbox, scriptName) {
 	try {
 		var scriptVM = new vm.createScript(node.scripts[scriptName]);
 	} catch (e) {
-		console.log("ERROR:", e.stack);
-		console.log(node.scripts[scriptName]);
+		error("ERROR:", node.scripts[scriptName]);
+		error(e.stack);
 		//sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
 		//sandbox.out.say("error", "Slap the node writer!");
 	}
@@ -254,7 +268,7 @@ function createSandbox(node) {
 			value:"",
 			setter:null,
 			error: null,
-			say: function(ch, msg) {console.log('say: ' + msg)},
+			say: function(ch, msg) {debug('say: ' + msg)},
 			console:console
 		}
 

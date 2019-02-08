@@ -1,4 +1,5 @@
 const path		= require('path');
+var debug 		= require('debug')('GLAMpipe:router');
 var collection 	= require('./new_collection.js');
 var Project 	= require('./new_project.js');
 var proxy 		= require("./proxy.js");
@@ -9,12 +10,20 @@ module.exports = function(express, GP) {
 	var path 		= require('path');
 	var p			= path.join(GP.dataPath, 'tmp');  
 	var upload 		= multer({ dest: p });
-	express.set('superSecret', global.config.secret); // secret variable
+	
+	// try/catch catcher
+	function wrapAsync(fn) {
+	  return function(req, res, next) {
+		fn(req, res, next).catch(next);
+	  };
+	}
 
+
+	express.set('superSecret', global.config.secret); // secret variable
 
 	express.all("*", function (req, res, next) {
 
-		console.log(req.method + req.url);
+		debug(req.method + ' ' + req.url);
 		next();
 	});
 
@@ -99,10 +108,12 @@ module.exports = function(express, GP) {
 		res.json(node);
 	});
 
-	express.delete('/api/v1/projects/:project/nodes/:node', async function (req, res) {
+
+
+	express.delete('/api/v1/projects/:project/nodes/:node', wrapAsync(async function (req, res) {
 		var result = await GP.removeNode(req.params.project, req.params.node);
-		res.json(result);
-	});
+		//res.json(result);
+	}));
 	
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
 		GP.startNode(req.params.id, req.body);
@@ -140,7 +151,6 @@ module.exports = function(express, GP) {
 	});
 
 	express.post('/api/v1/collections', async function (req, res) {
-		console.log(req.query.project)
 		var collection 	= await GP.createCollection(req.body.title, req.query.project);
 		res.json(collection);
 	})
@@ -161,5 +171,21 @@ module.exports = function(express, GP) {
 		proxy.proxyJSON(req, res);
 	});
 
+
+/* ***********************************************************************
+ * 							ERROR HANDLING
+ * ***********************************************************************
+*/
+
+	express.use(function(error, req, res, next) {
+	  // called because of 'wrapAsync()'
+		debug(error.name)
+		if(error.name === 'not_found') {
+			res.status(404).json({ message: error.message });
+		} else { 
+			res.status(500).json({ message: error.message });
+		}
+	});
+	
 
 }

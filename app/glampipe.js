@@ -5,6 +5,8 @@ var Node 		= require('./new_node.js');
 var schema 		= require('./new_schema.js');
 const version 	= require("../config/version.js");
 
+var debug 		= require('debug')('GLAMpipe');
+var error 		= require('debug')('ERROR');
 const mongoist 	= require('mongoist');
 const path		= require('path');
 const fs 		= require('fs');
@@ -16,7 +18,7 @@ class GLAMpipe {
 			global.config = require("../config/config.js");
 			global.config.file = "config.js (your local settings)";
 		} catch(e) {
-			console.log("config.js not found or is malformed!");
+			debug("config.js not found or is malformed!");
 			global.config = require("../config/config.js.example");
 			global.config.file = "config.js.example (default settings)";
 		}
@@ -31,7 +33,8 @@ class GLAMpipe {
 			this.dataPath = path.join(global.config.dataPath, "glampipe-data");
 			this.projectsPath = path.join(this.dataPath, "projects");
 		} else {
-			throw("No config present!")
+			error("No config present!");
+			throw("No config present!");
 		}
 	}
 
@@ -89,12 +92,10 @@ class GLAMpipe {
 
 
 	async getProject(project_id) {
-		console.log("Getting project: " + project_id)
 		return await project.getProject(project_id);
 	}
 
 	async deleteProject(project_id) {
-		console.log("Deleting project: " + project_id)
 		return await project.remove(project_id);
 	}
 
@@ -109,21 +110,22 @@ class GLAMpipe {
 		try {
 			var node = new Node();
 			await node.loadFromProject(id);
-			console.log(settings)
 			node.run(settings);
 		} catch(e) {
-			console.log("Node start failed!");
+			error("Node start failed! " + e.message);
+			throw(e);
 		}
 	}
 
 	async loadNodes() {
 		var count = 0;
 		var nodePath = path.join(global.config.nodePath, "/");
-		console.log("INIT: Loading nodes from " + path.join(global.config.nodePath, "/") );    
+		debug("Loading nodes from " + path.join(global.config.nodePath, "/") );    
 		try {
 			await db.collection("gp_nodes").drop();
 		} catch(e) {
-			console.log(e.message);
+			error(e.message);
+			throw(e);
 		}
 		
 		var dirs = fs.readdirSync(nodePath);
@@ -151,7 +153,7 @@ class GLAMpipe {
 				}				
 			}
 		}
-		console.log("Loaded " + count + " nodes");
+		debug("Loaded " + count + " nodes");
 	}		
 
 
@@ -164,16 +166,15 @@ class GLAMpipe {
 		
 		try {
 			var project = await this.getProject(project_id);
-			console.log(project)
 			var collection_name = await collection.create(title, project);
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": title})
 			await collectionNode.add2Project(project._id, collection_name);
-			console.log("Collection created")
+			debug("Collection created")
 			return collectionNode;
 		} catch(e) {
-			console.log("Collection creation failed!", e);
+			error("Collection creation failed!", e);
 			throw(e);
 		}
 	}
@@ -188,17 +189,20 @@ class GLAMpipe {
 			await node.add2Project(project_id, collection_name);
 			return node;
 		} catch(e) {
-			console.log("Node creation failed!", e);
+			error("Node creation failed!", e);
 			throw(e);
 		}	
 	}
 
 	async removeNode(project_id, node_id) {
-		
+	
 		try {
-			return project.removeNode(project_id, node_id);
+			var node = new Node();
+			await node.loadFromProject(projt_id);
+			await node.remove();
+			//return project.removeNode(project_id, node_id);
 		} catch(e) {
-			console.log("Node removal failed!", e);
+			error("Node removal failed!", e);
 			throw(e);
 		}
 		

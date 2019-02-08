@@ -1,4 +1,5 @@
 const util 		= require('util');
+var debug 		= require('debug')('QUERY');
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
@@ -60,7 +61,7 @@ exports.search = function (params) {
 		reverse: reverse
 	}
 
-	console.log("SEARCH:\n" + util.inspect(search, false, 4, true));
+	debug(util.inspect(search, false, 4, true));
 	
 	return search;
 }
