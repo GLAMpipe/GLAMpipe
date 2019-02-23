@@ -195,11 +195,11 @@ class GLAMpipe {
 	}
 
 	async removeNode(project_id, node_id) {
-	
+	console.log('removing node')
 		try {
 			var node = new Node();
-			await node.loadFromProject(projt_id);
-			await node.remove();
+			await node.loadFromProject(node_id);
+			await node.removeFromProject(project_id);
 			//return project.removeNode(project_id, node_id);
 		} catch(e) {
 			error("Node removal failed!", e);

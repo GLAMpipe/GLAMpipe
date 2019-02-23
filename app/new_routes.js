@@ -108,12 +108,10 @@ module.exports = function(express, GP) {
 		res.json(node);
 	});
 
-
-
-	express.delete('/api/v1/projects/:project/nodes/:node', wrapAsync(async function (req, res) {
+	express.delete('/api/v1/projects/:project/nodes/:node', async function (req, res) {
 		var result = await GP.removeNode(req.params.project, req.params.node);
 		//res.json(result);
-	}));
+	});
 	
 	express.post('/api/v1/nodes/:id/start', function (req, res) {
 		GP.startNode(req.params.id, req.body);

@@ -10,22 +10,24 @@ exports.web = {
 	"get": {
 		"JSON": async function(node) {
 			console.log("web.get.JSON");
-			var options = node.sandbox.core.options;		
-			console.log("REQUEST:", options.method + " -> " + options.url);
+			console.log("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
 			
-			if(options.headers) 
-				options.headers.Accept = "application/json";
+			if(node.sandbox.core.options.headers) 
+				node.sandbox.core.options.headers.Accept = "application/json";
 			else
-				options.headers = {Accept: "application/json"};
-				
+				node.sandbox.core.options.headers = {Accept: "application/json"};
+											
 			// we want statuscode	
-			options.resolveWithFullResponse = true;
+			node.sandbox.core.options.resolveWithFullResponse = true;
 				
-			while(options.url) {
-				var result = await rp(options);
+			while(node.sandbox.core.options.url) {
+
+				var result = await rp(node.sandbox.core.options);
 				node.sandbox.core.response = result;
 				node.sandbox.core.data = JSON.parse(result.body);
 
+				node.sandbox.core.options.url = null; // reset url
+				
 				// handle data and get new options
 				try {
 					node.scripts.run.runInContext(node.sandbox);
@@ -34,12 +36,8 @@ exports.web = {
 				}
 
 				if(node.sandbox.out.value) {
-					console.log("tallennan..." + node.collection)
 					await db[node.collection].insert(node.sandbox.out.value);
 				}
-				console.log(node.sandbox.core.options.url)
-				console.log(options.url)
-
 			}
 		}
 	}

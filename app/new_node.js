@@ -82,16 +82,16 @@ class Node {
 	}
 	
 
-	async remove() {
+	async removeFromProject(project_id) {
 		// remove records that were created by this node
 		var query = {};
-		query[GP.source] = node_id;
-		await db.collection(self.collection).remove(query);
+		query[GP.source] = this.source._id;
+		await db.collection(this.collection).remove(query);
 		
 		// remove node from project
 		var res = await db.collection("gp_projects").update(
 			{_id:mongoist.ObjectId(project_id)},
-			{$pull:{nodes: {_id:mongoist.ObjectId(node_id)}}});
+			{$pull:{nodes: {_id:mongoist.ObjectId(this.source._id)}}});
 		return res;
 	}
 	
@@ -268,7 +268,7 @@ function createSandbox(node) {
 			value:"",
 			setter:null,
 			error: null,
-			say: function(ch, msg) {debug('say: ' + msg)},
+			say: function(ch, msg) {console.log('say: ' + msg)},
 			console:console
 		}
 
