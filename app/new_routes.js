@@ -103,14 +103,19 @@ module.exports = function(express, GP) {
 		res.json(nodes);
 	});
 
-	express.post('/api/v1/projects/:project/nodes/:node', async function (req, res) {
-		var node = await GP.createNode(req.params.node, req.body.params, req.body.collection, req.params.project,);
+	express.get('/api/v1/nodes/:id/options', async function (req, res) {
+		//var options = await GP.getOptions(req.params.id);
+		res.json({});
+	});
+
+	express.post('/api/v1/nodes/:id', async function (req, res) {
+		var node = await GP.createNode(req.params.id, req.body.params, req.body.collection, req.body.project);
 		res.json(node);
 	});
 
-	express.delete('/api/v1/projects/:project/nodes/:node', async function (req, res) {
-		var result = await GP.removeNode(req.params.project, req.params.node);
-		//res.json(result);
+	express.delete('/api/v1/nodes/:id', async function (req, res) {
+		var result = await GP.removeNode(req.params.id);
+		res.json(result);
 	});
 	
 	express.post('/api/v1/nodes/:id/start', function (req, res) {

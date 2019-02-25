@@ -609,6 +609,7 @@ var glamPipe = function () {
 
 	this.createNode = async function (e) {
 		var data = {params:{}};
+		data.project = self.currentProject;
 		var click = $(e.target);
 		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.data("id"));
 
@@ -638,13 +639,13 @@ var glamPipe = function () {
 			data.collection = self.currentCollection.source.collection;
 			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
 
-			post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+			post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
 				//console.log("node create:", returnedData);
 				if(returnedData.error) {
 					alert(returnedData.error);
 					return;
 				}
-				var node = new glamPipeNode(returnedData.node, self);
+				var node = new glamPipeNode(returnedData, self);
 				self.addProjectNode(node);
 				self.currentNodes[self.currentCollection.source.collection] = node;
 				self.currentlyOpenNode = node;
@@ -1000,8 +1001,7 @@ var glamPipe = function () {
 		  buttons: {
 			"Delete node": function() {
 				$( this ).dialog( "close" );
-				var params = {node:node_id, project:self.currentProject};
-				$.delete(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node_id, params, function(retData) {
+				$.delete(self.baseAPI + "/nodes/" + node_id, {}, function(retData) {
 					// update fields
 					$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
 						//self.currentCollection.fields = data.keys;

@@ -194,13 +194,11 @@ class GLAMpipe {
 		}	
 	}
 
-	async removeNode(project_id, node_id) {
-	console.log('removing node')
+	async removeNode(node_id) {
 		try {
 			var node = new Node();
 			await node.loadFromProject(node_id);
-			await node.removeFromProject(project_id);
-			//return project.removeNode(project_id, node_id);
+			return node.removeFromProject(node.project);
 		} catch(e) {
 			error("Node removal failed!", e);
 			throw(e);
@@ -226,7 +224,8 @@ class GLAMpipe {
 	}
 
 
-	//closeDB() { db.close(); }
+	// needed if GLAMpipe is run from separate script
+	closeDB() { db.close(); }
 }
 
 
@@ -254,5 +253,6 @@ function readNodeFile (dirName, fileName, node) {
 
 	
 }
+
 
 module.exports = GLAMpipe ;

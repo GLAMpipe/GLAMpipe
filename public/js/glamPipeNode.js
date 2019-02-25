@@ -4,7 +4,8 @@ var glamPipeNode = function (node, gp) {
 	this.gp = gp;
 	this.debug = true;
 	this.backend = false;
-	this.source = node;
+	if(node.source) this.source = node.source;
+	else this.source = node;
 	this.orphan = "";
 	this.data = {"keys": [], "docs": [], "visible_keys": []};
 	this.settings = {};
@@ -22,9 +23,9 @@ var glamPipeNode = function (node, gp) {
 
 
 	// backend nodes does not have GUI
-	if(self.source.tags && self.source.tags.includes("backend")) {
-		self.backend = true;
-	}
+	//if(self.source.tags && self.source.tags.includes("backend")) {
+		//self.backend = true;
+	//}
 
 	// execute node
 	this.run = function () {
@@ -332,7 +333,9 @@ var glamPipeNode = function (node, gp) {
 
 				// execute node's settings.js if exists
 				if(self.source.scripts.settings) {
+					if(!self.source.settings) self.source.settings = {};
 					var settingsScript = new Function('node', self.source.scripts.settings);
+					console.log(self.source)
 					settingsScript(self.source);
 				}
 
