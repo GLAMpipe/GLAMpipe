@@ -963,7 +963,7 @@ table.documents tbody td div.edit:hover {
 
 #collection-list-container { 
 	position:absolute;
-	margin-top:70px;
+	top:80px;
 	padding:10px;
 	display:none;
 	background-color:white;
