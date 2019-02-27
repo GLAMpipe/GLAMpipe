@@ -343,17 +343,23 @@ function processDataAsync(node, sandbox, onDoc, cursor) {
 			return;
 		}
 
-		console.log("sandbox.out.pre_value")
-		console.log(sandbox.out.pre_value)
+		//console.log("sandbox.out.pre_value")
+		//console.log(sandbox.out.pre_value)
 
 		if(Array.isArray(sandbox.out.pre_value)) {
 			// make asynchronous request for each row in field
 			arrayLoop(sandbox, sandbox.out.pre_value, onDoc, function done(result, setters) {
-				var setter = combineSetters(setters);
+				if(node.settings.mode == 'single_id') {
+					setter = setters[0];
+				} else {
+					var setter = combineSetters(setters);
+				}
+				
 				if(!setter || Object.keys(setter).length === 0) {
 					var setter = {};
 					setter[node.out_field] = result;
 				}
+				
 
 				mongoquery.update(node.collection, {_id:sandbox.context.doc._id},{$set:setter}, function() {
 						processDataAsync(node, sandbox, onDoc, cursor);
