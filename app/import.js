@@ -1,6 +1,6 @@
 
 
-var rp = require('request-promise-native');
+var requestPromise = require('request-promise-native');
 var db = require('./db.js');
 
 var exports 	= module.exports = {};
@@ -22,7 +22,7 @@ exports.web = {
 				
 			while(node.sandbox.core.options.url) {
 
-				var result = await rp(node.sandbox.core.options);
+				var result = await requestPromise(node.sandbox.core.options);
 				node.sandbox.core.response = result;
 				node.sandbox.core.data = JSON.parse(result.body);
 
@@ -35,6 +35,7 @@ exports.web = {
 					console.log(e)
 				}
 
+				// write data
 				if(node.sandbox.out.value) {
 					await db[node.collection].insert(node.sandbox.out.value);
 				}

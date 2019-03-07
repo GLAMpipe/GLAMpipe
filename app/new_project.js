@@ -1,6 +1,7 @@
 var async 		= require('async');
 var path 		= require('path');
 var debug 		= require('debug')('GLAMpipe:project');
+var error 		= require('debug')('ERROR');
 
 var db 			= require('./db.js');
 var Collection 	= require('./new_collection.js');

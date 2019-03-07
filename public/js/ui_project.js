@@ -207,7 +207,7 @@ $( document ).ready(function() {
 			$(".holder.collection-params").empty();
 		}
 	});
-/*
+
 	// websocket stuff
 	var gp_path = getWSPath();
 	var socket = io.connect(window.location.origin, {path: gp_path + '/socket.io'});
@@ -216,6 +216,7 @@ $( document ).ready(function() {
 	var genericDisplay = $("#generic-messages");
 
 	socket.on('progress', function (data) {
+		console.log("PROGRESS: " + data.msg);
 		if(data.project == gp.currentProject) {
 			progressDisplay.show();
 			progressDisplay.empty();
@@ -238,8 +239,9 @@ $( document ).ready(function() {
 	});
 
 	socket.on('finish', function (data) {
+		console.log("FINISH: " + data.msg);
 		if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
-			console.log("FINISH: " + data.msg);
+			
 			progressDisplay.empty().append("<div>" + data.msg + "</div>");
 		   // websockPopup(finishDisplay, "Node done!");
 			$(".settings").removeClass("busy");
@@ -248,7 +250,7 @@ $( document ).ready(function() {
 			gp.nodeRunFinished(data); 
 		}
 
-	}); */
+	}); 
 
 });
 

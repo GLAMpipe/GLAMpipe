@@ -7,9 +7,11 @@ const version 	= require("../config/version.js");
 
 var debug 		= require('debug')('GLAMpipe');
 var error 		= require('debug')('ERROR');
+
 const mongoist 	= require('mongoist');
 const path		= require('path');
 const fs 		= require('fs');
+
 
 class GLAMpipe {
 	constructor(config) {
@@ -38,22 +40,32 @@ class GLAMpipe {
 		}
 	}
 
-	async init() {
+	async init(server) {
+		console.log("GLAMpipe init started...")
 		// load nodes from files
 		await this.loadNodes();
+		
 		// create data directory structure
 		if(!fs.existsSync("glampipe-data")) fs.mkdirSync("glampipe-data");
 		if(!fs.existsSync("glampipe-data/projects")) fs.mkdirSync("glampipe-data/projects");
 		if(!fs.existsSync("glampipe-data/logs")) fs.mkdirSync("glampipe-data/logs");
 		if(!fs.existsSync("glampipe-data/tmp")) fs.mkdirSync("glampipe-data/tmp");
+		
 		// make sure that gp_settings collection exists
 		var settings = await db.collection("gp_settings").findOne({});
 		if(!settings) await db.collection("gp_settings").insert({"project_count":0, "data_path":""});
+		
+		if(server) {
+			console.log("SOCKET");
+			this.io	= require('socket.io')(server);
+		}
 	}
+
 
 	async createSchema(collection_name) {
 		return await schema.createSchema(collection_name);
 	}
+
 
 	async getSchema(collection_name) {
 		return await schema.getSchema(collection_name);
@@ -108,9 +120,11 @@ class GLAMpipe {
 
 	async startNode(id, settings) {
 		try {
+			this.io.sockets.emit("progress", "NODE: running node ");
 			var node = new Node();
 			await node.loadFromProject(id);
-			node.run(settings);
+			node.run(settings, this.io);
+			
 		} catch(e) {
 			error("Node start failed! " + e.message);
 			throw(e);
@@ -125,7 +139,6 @@ class GLAMpipe {
 			await db.collection("gp_nodes").drop();
 		} catch(e) {
 			error(e.message);
-			throw(e);
 		}
 		
 		var dirs = fs.readdirSync(nodePath);
@@ -153,6 +166,9 @@ class GLAMpipe {
 				}				
 			}
 		}
+		
+		if(count === 0) console.log("** WARNING: No nodes loaded! Did you fetch the nodes? **")
+		else console.log("* OK: Loaded " + count + " nodes from " + nodePath)
 		debug("Loaded " + count + " nodes");
 	}		
 

@@ -141,7 +141,7 @@ class Node {
 	
 	
 	
-	async run(settings) {
+	async run(settings, ws) {
 		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
 		this.settings = settings;	
 		
@@ -154,6 +154,9 @@ class Node {
 		sandbox.context.node.settings = settings;
 		this.sandbox = sandbox;
 		this.scripts = {};
+		
+		// socket.io
+		if(ws) sandbox.out.say = function(ch, msg) {ws(ch, msg)};
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
@@ -172,6 +175,7 @@ class Node {
 
 			case "source":
 			
+				// example core: web.get.JSON 
 				var p = await dataImport[ core[0] ][ core[1] ][ core[2] ](this);
 				await schema.createSchema(this.collection);
 				return p;
