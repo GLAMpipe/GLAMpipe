@@ -237,7 +237,7 @@ var GlamPipe = function() {
 			// TODO: we should sent response to node execution request
 			global.register = [];
 		})
-
+		self.http.setTimeout(10*60*1000);
 		//  Start the app on the specific interface (and port).
 		var server = self.http.listen(self.port, self.ipaddress, function() {
 			var host = server.address().address;
