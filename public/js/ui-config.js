@@ -3,5 +3,5 @@
 // in a non-root location
 // example: tools.ourorganisation.org/glampipe
 
-const g_apipath = "/api/v1" 	// global api path for UI
+const g_apipath = "/api/v2" 	// global api path for UI
 const g_uipath = "/" 			// global path for UI

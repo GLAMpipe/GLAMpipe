@@ -139,6 +139,11 @@ class Node {
 
 	}
 	
+	getOptions(req) {
+	
+		return db.collection("gp_node_options").findOne({"nodeid": req.params.nodeid});
+
+	}
 	
 	
 	async run(settings, ws) {

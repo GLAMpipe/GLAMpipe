@@ -57,21 +57,23 @@ var nodeRepository = function (gp) {
 		
 		var types = [];
 		for(var node of nodes.data) {
-			if(!types.includes(node.subtype)) {
-				html += "  <div class='optionlist'>"
-				html += "    <button class='accordion " + node.subtype + "'>";
-				// add some verbosity
-				if(self.verbose[node.type] && self.verbose[node.type][node.subtype])
-					html += "      <p class='listtitle'>" + self.verbose[node.type][node.subtype] + "</p>";
-				else
-					html += "      <p class='listtitle'>"+node.subtype+"</p>"
-				html += "</button>"
-				html += "    <div class='panel'>"
-				html += renderNodes(nodes, node.subtype);
-				html += "</div>"
-				types.push(node.subtype);
-			} else {
-				
+			if(node.type == type) {
+				if(!types.includes(node.subtype)) {
+					html += "  <div class='optionlist'>"
+					html += "    <button class='accordion " + node.subtype + "'>";
+					// add some verbosity
+					if(self.verbose[node.type] && self.verbose[node.type][node.subtype])
+						html += "      <p class='listtitle'>" + self.verbose[node.type][node.subtype] + "</p>";
+					else
+						html += "      <p class='listtitle'>"+node.subtype+"</p>"
+					html += "</button>"
+					html += "    <div class='panel'>"
+					html += renderNodes(nodes, node.subtype);
+					html += "</div>"
+					types.push(node.subtype);
+				} else {
+					
+				}
 			}
 		}
 		html += "</div>"

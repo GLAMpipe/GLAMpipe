@@ -1,4 +1,8 @@
 
+New API is version 2
+/api/v2
+
+api/v2/repository/source_web_dspace/options
 
 Nodes and cores
 
@@ -38,6 +42,8 @@ core.error
   if core.skip is non-empty
 
 
+OPTIONS
+Options are node type specific values stored in the database. These are used mostly for URLs for nodes (like DSpace nodes)
 
 SCHEMA
 Every collection has their own schema in gp__schemas. Schema keeps track of fields in the collection. 
