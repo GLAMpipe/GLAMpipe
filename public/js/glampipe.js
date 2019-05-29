@@ -23,8 +23,7 @@ var glamPipe = function () {
 	this.collections = [];
 	this.nodes = [];
 
-	this.nodeRepository = new nodeRepository(this);
-	this.nodeRepository.baseAPI = this.baseAPI;
+	this.nodeRepository = new nodeRepository(self);
 
 	// MAIN PAGE (projects)
 	this.getProjectTitles = function (div) {
@@ -35,7 +34,7 @@ var glamPipe = function () {
 
 			for(var i = 0; i< data.length; i++) {
 				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
-				listOption += "<a href='" + self.uiPath + "project/" + data[i]._id + "'>\n";
+				listOption += "<a href='" + self.uiPath + "projects/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
@@ -116,9 +115,9 @@ var glamPipe = function () {
 				html += "</td>";
 
 				if(projects[i].hidden === true)
-					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a> (hidden)</div></td>";
+					html += "<td><div><a href='projects/" + projects[i]._id + "'> "+ projects[i].title + "</a> (hidden)</div></td>";
 				else
-					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+					html += "<td><div><a href='projects/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -183,7 +182,7 @@ var glamPipe = function () {
 
 	this.genProjectRow = function(project) {
 			var html = "<tr>";
-			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
+			html += "<td><div><a href='projects/" + project._id + "'> "+ project.title + "</a></div></td>";
 
 			html += "<td>";
 			if(project.nodes) {
@@ -346,7 +345,7 @@ var glamPipe = function () {
 		post(self.baseAPI + "/projects", data, function(data) {
 			if(!data.error) {
 				console.log('created project', data.project);
-				window.location.href = self.uiPath + "project/" + data._id;
+				window.location.href = self.uiPath + "projects/" + data._id;
 
 			} else {
 				alert(data.error);
@@ -460,8 +459,6 @@ var glamPipe = function () {
 	// loads node repository
 	this.loadNodes = function() {
 		this.nodeRepository = new nodeRepository(this);
-		this.nodeRepository.baseAPI = this.baseAPI;
-		//this.nodeRepository.loadNodes();
 	}
 
 	this.loadProject = function () {
@@ -485,19 +482,21 @@ var glamPipe = function () {
 				self.setPageTitle(project.title);
 				self.project = project;
 
-				// set first collection as current collection
+				// set first collection as current collection NOTE: collections are nodes
 				if(self.collections.length) {
-					self.currentCollection = self.collections[self.currentCollectionSet];
-					self.pickedCollectionId = self.currentCollection.source.collection; // default collection for dynamic field picker
-					self.currentCollection.open();
+					console.log('self.collections')
+					console.log(self.collections[0].source.collection)
+					self.currentCollectionNode = self.collections[self.currentCollectionSet];
+					self.pickedCollectionId = self.currentCollectionNode.source.collection; // default collection for dynamic field picker
+					self.currentCollectionNode.open();
 				}
 
 				self.setCollectionCounter();
 				self.renderBreadCrumb();
 
 				// render current collection set and its nodes
-				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-					//self.currentCollection.fields = data;
+				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
+					//self.currentCollectionNode.fields = data;
 					self.renderCollectionSet();
 				//})
 
@@ -527,7 +526,7 @@ var glamPipe = function () {
 
 		var node = self.getNode(e);
 		self.currentlyOpenNode = node;
-		self.currentNodes[self.currentCollection.source.collection] = node;
+		self.currentNodes[self.currentCollectionNode.source.collection] = node;
 		if(node)
 			node.open();
 		else
@@ -536,7 +535,7 @@ var glamPipe = function () {
 
 
 	this.openCurrentNode = function () {
-		self.currentNodes[self.currentCollection.source.collection].open();
+		self.currentNodes[self.currentCollectionNode.source.collection].open();
 	}
 
 	this.runNode = function (e) {
@@ -629,15 +628,18 @@ var glamPipe = function () {
 			}
 		});
 
-		if(self.outputExists(data.params))
+		var output_check = await self.outputExists(data.params);
+		if(output_check) {
+			alert("'" + output_check + "' output field exists! Please rename field." );
 			return;
+		}
 
 		// set parent collection
-		if(self.currentCollection == null) {
+		if(self.currentCollectionNode == null) {
 			alert("parent collection is missing");
 		} else {
-			data.collection = self.currentCollection.source.collection;
-			//console.log("currentCollection on node create:", self.currentCollection.source.collection);
+			data.collection = self.currentCollectionNode.source.collection;
+			//console.log("currentCollection on node create:", self.currentCollectionNode.source.collection);
 
 			post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
 				//console.log("node create:", returnedData);
@@ -647,7 +649,7 @@ var glamPipe = function () {
 				}
 				var node = new glamPipeNode(returnedData, self);
 				self.addProjectNode(node);
-				self.currentNodes[self.currentCollection.source.collection] = node;
+				self.currentNodes[self.currentCollectionNode.source.collection] = node;
 				self.currentlyOpenNode = node;
 				self.renderCollectionSet(function() {
 					node.open();
@@ -678,12 +680,12 @@ var glamPipe = function () {
 
 
 	// check if any output field (starts with "out_") exists
-	this.outputExists = function(params) {
+	this.outputExists = async function(params) {
+		var result = await $.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields");
 		for(var param in params) {
 			//console.log(param);
-			if(/^out_/.test(param) && self.currentCollection.fields.sorted.includes(params[param])) {
-				alert("'" + params[param] + "' output field exists! Please rename field." );
-				return true;
+			if(/^out_/.test(param) && result.keys.includes(params[param])) {
+				return param;
 			}
 		}
 		return false;
@@ -720,28 +722,28 @@ var glamPipe = function () {
 
 
 	this.renderDataHeader = function () {
-		$("#data-header").empty().append(self.currentCollection.source.title);
+		$("#data-header").empty().append(self.currentCollectionNode.source.title);
 	}
 
 	this.renderBreadCrumb = function () {
-		if(self.currentCollection)
-			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.source.params.title);
+		if(self.currentCollectionNode)
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollectionNode.source.params.title);
 		else
 			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > ");
 	}
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function (cb) {
-		if(!self.currentCollection) {
+		if(!self.currentCollectionNode) {
 			console.log("no current collection")
 			return "";
 		}
 
-		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-			//self.currentCollection.fields = data.keys;
+		$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
+			//self.currentCollectionNode.fields = data.keys;
 
-			if(self.currentCollection) {
-				var collection = self.currentCollection;
+			if(self.currentCollectionNode) {
+				var collection = self.currentCollectionNode;
 
 				// render collection
 				var col_html =   "<div><a href=''><span class='title pagetitle'>" + collection.source.params.title + "</span></a>";
@@ -826,16 +828,16 @@ var glamPipe = function () {
 			self.currentCollectionSet--;
 
 			self.setCollectionCounter();
-			self.currentCollection = self.collections[self.currentCollectionSet];
-			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.currentCollectionNode = self.collections[self.currentCollectionSet];
+			self.pickedCollectionId = self.currentCollectionNode.source.collection;
 			self.renderBreadCrumb();
 			self.renderCollectionSet();
-			if(self.currentNodes[self.currentCollection.source.collection])
-				self.currentNodes[self.currentCollection.source.collection].open();
+			if(self.currentNodes[self.currentCollectionNode.source.collection])
+				self.currentNodes[self.currentCollectionNode.source.collection].open();
 			else
-				self.currentCollection.open();
+				self.currentCollectionNode.open();
 
-			console.log("currentCollection = ", self.currentCollection.source.collection);
+			console.log("currentCollection = ", self.currentCollectionNode.source.collection);
 		}
 	}
 
@@ -845,15 +847,15 @@ var glamPipe = function () {
 
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
-			self.pickedCollectionId = self.currentCollection.source.collection;
+			self.pickedCollectionId = self.currentCollectionNode.source.collection;
 			self.renderBreadCrumb();
 			self.renderCollectionSet();
-			if(self.currentNodes[self.currentCollection.source.collection])
-				self.currentNodes[self.currentCollection.source.collection].open();
+			if(self.currentNodes[self.currentCollectionNode.source.collection])
+				self.currentNodes[self.currentCollectionNode.source.collection].open();
 			else
-				self.currentCollection.open();
+				self.currentCollectionNode.open();
 
-			console.log("currentCollection = ", self.currentCollection.source.collection);
+			console.log("currentCollection = ", self.currentCollectionNode.source.collection);
 		}
 	}
 
@@ -861,19 +863,19 @@ var glamPipe = function () {
 		self.currentCollectionSet = parseInt(index)
 		self.setCollectionCounter();
 		self.currentCollection = self.collections[self.currentCollectionSet];
-		self.pickedCollectionId = self.currentCollection.source.collection;
+		self.pickedCollectionId = self.currentCollectionNode.source.collection;
 		self.renderBreadCrumb();
 		self.renderCollectionSet();
-		if(self.currentNodes[self.currentCollection.source.collection])
-			self.currentNodes[self.currentCollection.source.collection].open();
+		if(self.currentNodes[self.currentCollectionNode.source.collection])
+			self.currentNodes[self.currentCollectionNode.source.collection].open();
 		else
-			self.currentCollection.open();
+			self.currentCollectionNode.open();
 
-		console.log("currentCollection = ", self.currentCollection.source.collection);
+		console.log("currentCollection = ", self.currentCollectionNode.source.collection);
 	}
 
 	this.updateDocument = function (data, cb) {
-		post(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
+		post(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
 			console.log(response);
 			cb();
 		})
@@ -881,7 +883,7 @@ var glamPipe = function () {
 
 	this.deleteDocument = function(event) {
 		var doc_id = $(event.target).data("id");
-		console.log(self.currentCollection.source);
+		console.log(self.currentCollectionNode.source);
 		$( "#dialog-confirm" ).empty().append("<div>Are you sure?</div>");
 		$( "#dialog-confirm" ).dialog({
 		  resizable: false,
@@ -892,7 +894,7 @@ var glamPipe = function () {
 			"Delete document": function() {
 				$( this ).dialog( "close" );
 				var params = {};
-				$.delete(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/docs/" + doc_id, params, function(retData) {
+				$.delete(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + doc_id, params, function(retData) {
 					console.log('document deleted');
 					if(retData.error)
 						alert(retData.error);
@@ -943,7 +945,7 @@ var glamPipe = function () {
 		var html = "";
 		for(var i = 0; i < self.collections.length; i++) {
 			var node = self.collections[i];
-			if(node.source._id != self.currentCollection.source._id) {
+			if(node.source._id != self.currentCollectionNode.source._id) {
 				var parts = node.source.collection.split("_");
 				if(parts[parts.length - 1] != "")
 					var cName = parts[parts.length - 1];
@@ -1003,8 +1005,8 @@ var glamPipe = function () {
 				$( this ).dialog( "close" );
 				$.delete(self.baseAPI + "/nodes/" + node_id, {}, function(retData) {
 					// update fields
-					$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.source.collection + "/fields", function(data) {
-						//self.currentCollection.fields = data.keys;
+					$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
+						//self.currentCollectionNode.fields = data.keys;
 					})
 					if(retData.error)
 						alert(retData.error);
@@ -1056,7 +1058,7 @@ var glamPipe = function () {
 					data.params.filename = data.filename;
 					data.params.mimetype = data.mimetype;
 					data.project = self.currentProject;
-					data.collection = self.currentCollection.source.collection;
+					data.collection = self.currentCollectionNode.source.collection;
 					post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
 						console.log('created upload node');
 						self.loadProject();

@@ -10,7 +10,7 @@ var error 		= require('debug')('GLAMpipe:error');
 var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
-var dataImport 	= require("../app/import.js");
+var importLoop 	= require("../app/import.js");
 const GP 		= require("../config/const.js");
 
 
@@ -161,7 +161,7 @@ class Node {
 		this.scripts = {};
 		
 		// socket.io
-		if(ws) sandbox.out.say = function(ch, msg) {ws(ch, msg)};
+		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {'msg':msg})};
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
@@ -181,13 +181,13 @@ class Node {
 			case "source":
 			
 				// example core: web.get.JSON 
-				var p = await dataImport[ core[0] ][ core[1] ][ core[2] ](this);
+				var p = await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				await schema.createSchema(this.collection);
 				return p;
 				break;
 				
 			case "process":
-				await dataLoop(this);
+				await processLoop(this); // no core needed
 				break;
 				
 			case "export":
@@ -208,26 +208,31 @@ module.exports = Node ;
 
 
 
-
-
-async function dataLoop(node) {
+async function processLoop(node) {
 
 	var bulk = db[node.collection].initializeOrderedBulkOp();
     const cursor = db[node.collection].findAsCursor({});	
-    
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 	  
 		node.sandbox.context.doc = doc;
 		node.scripts.run.runInContext(node.sandbox);
+		var update = {}
+		// if out.value is set, then we write field defined in settings.out_field
+		if(node.sandbox.out.value) {
+			update[node.source.params.out_field] = node.sandbox.out.value;
+		}
 	  
 		bulk.find({ '_id': doc._id }).updateOne({
-			'$set': { 'replaced': node.sandbox.out.value}
+			'$set': update
 		});
 	}	
 	
 	// make changes to database
 	await bulk.execute();
+	
+	// notify that we are finished
+	node.sandbox.out.say('finish', 'Done');
 }
 
 
@@ -272,6 +277,7 @@ function createSandbox(node) {
 		core: {
 			options: null
 		},
+		
 		out: {
 			self:this,
 			value:"",

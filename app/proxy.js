@@ -1,13 +1,13 @@
-var request     = require("request");
+var requestPromise = require('request-promise-native');
 const MP 		= require("../config/const.js");
 var exports 	= module.exports = {};
 
 
 
 // simple white listed proxy
-exports.proxyJSON = function (req, res) {
+exports.proxyJSON = async function (ctx) {
 	
-	var url = req.query.url;
+	var url = ctx.query.url;
     if (typeof url === "undefined" || url == "")
         return res.json({"error":"no url"});
 
@@ -21,8 +21,7 @@ exports.proxyJSON = function (req, res) {
 		
 		if(!allowed) {
 			console.log("PROXY:", "URL not allowed!", url);
-			res.json({"error":"URL not allowed!"});
-			return;
+			return {"error":"URL not allowed!"};
 		}
 	}
 	
@@ -31,27 +30,19 @@ exports.proxyJSON = function (req, res) {
 		'User-Agent': 'GLAMpipe/0.0.1'
 	}
 	
-	if(req.query.query)
-		url = url + req.query.query;
+	if(ctx.query.query)
+		url = url + ctx.query.query;
 
-	console.log("PROXY:", req.method, ":", url);
+	console.log("PROXY:", ctx.method, ":", url);
 
 	 var options = {
 		url: url,
-		method: req.method,
+		method: ctx.method,
 		headers: headers,
 		json:true,
 		jar: true		// TODO: remove since problematic on login cookies (ALL requests are then authenticated!)
 	};
 
-	request(options, function (error, response, body) {
-		if (!error && (response.statusCode == 200 || response.statusCode == 401)) {
-			res.status(response.statusCode).json(body);
+	return requestPromise(options);
 
-		} else {
-			console.log("error", error);
-			res.status(response.statusCode).json({"error": error});
-			return;
-		}
-	});
 }

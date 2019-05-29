@@ -5,7 +5,7 @@ var nodeRepository = function (gp) {
 	this.gp = gp;
 	this.showBrokenNodes = false;
 	this.plainNodes = []
-	this.baseAPI = "/api/v1";
+	this.baseAPI = g_apipath;
 	this.visible_tags = ["wmf"];
 
 	this.loadNodes = async function () {
@@ -113,6 +113,7 @@ var nodeRepository = function (gp) {
 	}
 
 	this.openNodeParameters = async function (click, collection) {
+		var collection = self.gp.currentCollectionNode.source.collection;
 		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.attr("href"));
 		console.log(node)
 
@@ -148,11 +149,11 @@ var nodeRepository = function (gp) {
 
 
 		// fetch fields
-		var fields = await $.getJSON(self.baseAPI + "/collections/" + gp.currentCollection + "/fields");
-		if(fields && fields.sorted) {
+		var result = await $.getJSON(self.baseAPI + "/collections/" + collection + "/fields");
+		if(result && result.keys) {
 			var options = [];
-			for(var i = 0; i < fields.sorted.length; i++) {
-				options.push("<option>" + fields.sorted[i] + "</option>");
+			for(var i = 0; i < result.keys.length; i++) {
+				options.push("<option>" + result.keys[i] + "</option>");
 			}
 
 			// populate field selects

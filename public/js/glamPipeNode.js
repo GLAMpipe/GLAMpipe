@@ -208,14 +208,15 @@ var glamPipeNode = function (node, gp) {
 			if(/^in_/.test(key) && self.source.params[key] && self.source.params[key] !== "")
 				node_in_keys.push(self.source.params[key]);
 		}
-
+/*
 		for(var i = 0; i < node_in_keys.length; i++) {
 
-			if(!self.gp.currentCollection.fields.sorted.includes(node_in_keys[i])) {
+			if(!self.gp.currentCollectionNode.fields.sorted.includes(node_in_keys[i])) {
 				self.orphan = "orphan";
 				self.orphan_fields.push(node_in_keys[i]);
 			}
 		}
+		* */
 		// huttua ends
 
 		//self.gp.pickedCollectionId = null; // reset collection chooser
@@ -317,7 +318,7 @@ var glamPipeNode = function (node, gp) {
 			else
 				$(".node-description-value").val("");
 
-			var collection = gp.currentCollection.source.collection;
+			var collection = gp.currentCollectionNode.source.collection;
 
 			// fetch fields
 			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {

@@ -1,8 +1,19 @@
 
-New API is version 2
-/api/v2
+TODO:
+- finalize socket.io communication (messages must include project and node uuids)
+- csv core
+- PDF core
+- custom node functionality
+- forked node functionality
+- allow labeling of nodes and collections
+- add "views" section to UI
 
-api/v2/repository/source_web_dspace/options
+
+
+API:
+/api/v2/collections/[COLLECTION_ID]/fields
+- returns all fields of the collection
+- 
 
 Nodes and cores
 
@@ -15,6 +26,19 @@ Currently available core modules:
 - (pdf)
 - (csv)
 
+
+CHANGES:
+- nodes can be labeled -> /nodes/labels/dspace_thesesis_query/run
+- custom nodes can be made -> every file in node must be editable
+- custom node can be saved as user node -> where to store?
+- schema checker is run after every process node -> if there are new fields, then attach them to latest node run. This way we can get fields set by "out.setter"
+- possibly option to disable schem checker
+- nodes and config can be loaded on the fly (no need to restart container)
+- up-to-date check for data -> for example, rerun of source node invalidates all flollowing processing and export nodes.
+- automatic node ordening -> if node is dependent of the output of the other node, then the second node is show earlien in the node list.
+- python export
+- view nodes are now separated from export nodes
+- master-data collection -> immutable collection that can be used in project like it was a normal collection
 
 Core communication
 

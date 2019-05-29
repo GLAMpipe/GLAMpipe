@@ -1,6 +1,7 @@
 
 
 var requestPromise = require('request-promise-native');
+const fetch = require('node-fetch');
 var db = require('./db.js');
 
 var exports 	= module.exports = {};
@@ -22,12 +23,23 @@ exports.web = {
 				
 			while(node.sandbox.core.options.url) {
 
-				var result = await requestPromise(node.sandbox.core.options);
-				node.sandbox.core.response = result;
-				node.sandbox.core.data = JSON.parse(result.body);
+				console.log(node.sandbox.core.options.url)
+				try {
+					var result = await requestPromise(node.sandbox.core.options);
+					node.sandbox.core.response = result;
+					node.sandbox.core.data = JSON.parse(result.body);
 
-				node.sandbox.core.options.url = null; // reset url
-				
+					node.sandbox.core.options.url = null; // reset url
+					node.sandbox.core.error = null; // reset error
+					
+
+				// if request failes, then we pass error to node script so that it can decide what to do
+				} catch(e) {
+					node.sandbox.core.response = result;
+					node.sandbox.core.error = e.message;
+					console.log('ERROR: ' + e.message);
+				}
+
 				// handle data and get new options
 				try {
 					node.scripts.run.runInContext(node.sandbox);
@@ -39,6 +51,7 @@ exports.web = {
 				if(node.sandbox.out.value) {
 					await db[node.collection].insert(node.sandbox.out.value);
 				}
+
 			}
 		}
 	}

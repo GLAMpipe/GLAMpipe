@@ -15,7 +15,6 @@ const fs 		= require('fs');
 
 class GLAMpipe {
 	constructor(config) {
-
 		try {
 			global.config = require("../config/config.js");
 			global.config.file = "config.js (your local settings)";
@@ -56,7 +55,6 @@ class GLAMpipe {
 		if(!settings) await db.collection("gp_settings").insert({"project_count":0, "data_path":""});
 		
 		if(server) {
-			console.log("SOCKET");
 			this.io	= require('socket.io')(server);
 		}
 	}
@@ -70,8 +68,26 @@ class GLAMpipe {
 	async getSchema(collection_name) {
 		return await schema.getSchema(collection_name);
 	}
-	
-	
+
+/* ***********************************************************************
+ * 							OPTIONS
+ * ***********************************************************************
+*/
+
+	async getOptions(label) {
+		return db.collection("gp_node_options").findOne({'id': label});
+	}
+
+	async addOption(label, data) {
+		var doc = await db.collection("gp_node_options").findOne({'label': label});
+		if(doc) {
+			await db['gp_node_options'].update({_id:mongoist.ObjectId(doc._id)}, {$addToSet: {data: data } })
+		} else {
+			return db.collection("gp_node_options").insert({"label":label, "data": [data]});
+		}
+		
+	}
+
 /* ***********************************************************************
  * 							PROJECTS
  * ***********************************************************************
@@ -123,7 +139,7 @@ class GLAMpipe {
 			this.io.sockets.emit("progress", "NODE: running node ");
 			var node = new Node();
 			await node.loadFromProject(id);
-			node.run(settings, this.io);
+			node.run(settings, this.io.sockets);
 			
 		} catch(e) {
 			error("Node start failed! " + e.message);
@@ -227,21 +243,36 @@ class GLAMpipe {
  * ***********************************************************************
 */
 
+	
+	async getDocByQuery(collection_name, query) {
+		var doc = await db.collection(collection_name).findOne(query);
+		if(doc) return doc;
+		else return {};
+	}
+
+	async getDocs(collection_name, query) {
+		var docs = await collection.getDocs(collection_name, query);
+		if(docs) return docs;
+		else return [];
+	}
+
 	async getDoc(collection_name, id) {
 		return await collection.getDoc(collection_name, id);
 	}
 
-	async getDocs(collection_name, query) {
-		return await collection.getDocs(collection_name, query);
-	}
 
 	async getDocCount(collection_name, query) {
 		return await collection.getCount(collection_name, query);
 	}
 
+	async insertDoc(collection_name, doc) {
+		return await collection.insertDoc(collection_name, doc);
+	}
+
 
 	// needed if GLAMpipe is run from separate script
 	closeDB() { db.close(); }
+
 }
 
 

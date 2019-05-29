@@ -95,7 +95,7 @@ $( document ).ready(function() {
 
 	$(document).on('click','.open-node', function(e) {
 		e.preventDefault();
-		gp.nodeRepository.openNodeParameters($(this), gp.currentCollection.source.params.collection);
+		gp.nodeRepository.openNodeParameters($(this));
 		
 	})
 

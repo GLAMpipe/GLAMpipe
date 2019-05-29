@@ -6,6 +6,7 @@ const json 			= require('koa-json')
 const path			= require('path');
 var GLAMpipe 		= require('./app/glampipe.js');
 var collection 		= require('./app/new_collection.js');
+var proxy 			= require('./app/proxy.js');
  
 var app 			= new Koa();
 var router 			= new Router();
@@ -44,18 +45,16 @@ app.use(async (ctx, next) => {
   else await next();
 })
 
-
-router.get('/project/:id', function (ctx) {
+router.get('/projects/:id', function(ctx) {
 	return serve(ctx, 'project.html', { root: __dirname + '/views' });
-});
+})
 
+/* ***********************************************************************
+ * 							STATUS & CONFIG
+ * ***********************************************************************
+*/
 
-router.get('/api/v2', async function (ctx) {
-	ctx.body = 'API'
-});
-
-
-router.get('/api/v2/config', function (ctx) {
+router.get('/api/v2/config', function (ctx, next) {
 	ctx.body = {
 		url:global.config.url,
 		authentication:global.config.authentication,
@@ -112,11 +111,18 @@ router.get('/api/v2/repository/nodes', async function (ctx) {
 });
 
 
-router.get('/api/v2/options/:id/', async function (ctx) {
-	var options = await GP.getOptions(ctx.params.id);
-	ctx.body = options;
+router.get('/api/v2/options', async function (ctx) {
+	ctx.body = await GP.getDocs('gp_node_options', {});
 });
 
+router.get('/api/v2/options/:label', async function (ctx) {
+	ctx.body  = await GP.getDocByQuery('gp_node_options', {'label': ctx.params.label});
+});
+
+router.post('/api/v2/options/:label', async function (ctx) {
+	var options = await GP.addOption(ctx.params.label, ctx.request.body);
+	ctx.body = options;
+});
 
 /* ***********************************************************************
  * 							NODES
@@ -179,8 +185,22 @@ router.post('/api/v2/collections', async function (ctx) {
 })
 
 
+router.get('/api/v2/proxy/', async function (ctx) {
+	ctx.body = await proxy.proxyJSON(ctx);
+});
+
+router.post('/api/v2/proxy/', function (ctx) {
+	proxy.proxyJSON(req, res);
+});
+
+router.put('/api/v2/proxy/', function (ctx) {
+	proxy.proxyJSON(req, res);
+});
+
+
 var server = require('http').createServer(app.callback())
-var io = require('socket.io')(server)
+GP.init(server);
+//var io = require('socket.io')(server)
  
 app
 	.use(router.routes())

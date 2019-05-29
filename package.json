@@ -34,6 +34,7 @@
     "mongoist": "^1.7.4",
     "mongojs": "^2.6.0",
     "multer": "^1.1.0",
+    "node-fetch": "^2.6.0",
     "node-pandoc": "^0.3.0",
     "node-stream-csv": "0.0.2",
     "nodemailer": "^4.1.1",
