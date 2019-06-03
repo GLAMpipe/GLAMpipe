@@ -49,6 +49,15 @@ exports.getDocs = async function(collection_name, query) {
 	
 }
 
+exports.insertDoc = async function(collection_name, doc) {
+	console.log(doc)
+	try {
+		return db[collection_name].insert(doc);
+	} catch(e) {
+		console.log(e)
+		return {};
+	}
+}
 
 
 exports.getCount = async function(collection_name, params) {

@@ -580,11 +580,11 @@ console.log(self.keys);
 
 		html = "<div class='search-dialog'>";
 		html = "  <select id='data-search-field'>";
-		for(var i = 0; i < self.node.data.keys.sorted.length; i++) {
+		for(var i = 0; i < self.node.data.keys.length; i++) {
 			if(self.node.data.keys.sorted[i] == self.currentField)
-				html += "  <option selected='selected'>" + self.node.data.keys.sorted[i] + "</option>";
+				html += "  <option selected='selected'>" + self.node.data.keys[i] + "</option>";
 			else
-				html += "  <option>" + self.node.data.keys.sorted[i] + "</option>";
+				html += "  <option>" + self.node.data.keys[i] + "</option>";
 		}
 		html += "  </select>";
 		html += "  includes <input id='data-search-value' value='"+text+"'/>";
@@ -720,19 +720,10 @@ console.log(self.keys);
 		})
 	}
 
-	this.showVisibleKeysSelector = function (event) {
-		var visible_keys = self.getVisibleFields();
-		var obj = $(event.target);
-		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-read fields</a>";
-		html += "<hr/><div class='flex visible-keys'>";
-		for(var i = 0; i < self.keys.all_keys.sorted.length; i++) {
-			if(visible_keys.indexOf(self.keys.all_keys.sorted[i]) === -1)
-				html += "<div data-name='"+self.keys.all_keys.sorted[i]+"'>" + self.keys.all_keys.sorted[i]  + "</div>";
-			else
-				html += "<div class='good' data-name='"+self.keys.all_keys.sorted[i]+"'>" + self.keys.all_keys.sorted[i]  + "</div>";
+	this.showVisibleKeysSelector = async function (event) {
 
-		}
-		html += "</div>";
+		var obj = $(event.target);
+		var html = await self.getKeysHTML();
 
 		$("#field-selector").empty().append(html);
 		$("#field-selector").dialog({
@@ -748,6 +739,22 @@ console.log(self.keys);
 		});
 	}
 
+	this.getKeysHTML = async function (event) {
+		var result = await $.getJSON(self.baseAPI + "/collections/" + self.node.gp.currentCollectionNode.source.collection + "/fields");
+		var visible_keys = self.getVisibleFields();
+		
+		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-generate schema</a>";
+		html += "<hr/><div class='flex visible-keys'>";
+		for(var i = 0; i < result.keys.length; i++) {
+			if(visible_keys.indexOf(result.keys[i]) === -1)
+				html += "<div data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
+			else
+				html += "<div class='good' data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
+
+		}
+		html += "</div>";
+		return html;
+	}
 
 	// add or remove field and re-render table
 	this.toggleVisibleField = function (event) {
@@ -786,9 +793,10 @@ console.log(self.keys);
 	this.reReadFields = function () {
 		$("#field-selector .visible-keys").empty().append("generating schema...");
 		var data = {};
-		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollection.source.params.collection + "/schema", function(returnedData) {
+		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollectionNode.source.collection + "/schema", function(returnedData) {
 			$("#field-selector .visible-keys").empty().append("Schema generated!");
-			// TODO: reload keys (schema)
+			var html = self.getKeysHTML();
+			$("#field-selector").empty().append(html);
 		});
 	}
 

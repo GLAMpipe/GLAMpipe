@@ -49,6 +49,7 @@ class GLAMpipe {
 		if(!fs.existsSync("glampipe-data/projects")) fs.mkdirSync("glampipe-data/projects");
 		if(!fs.existsSync("glampipe-data/logs")) fs.mkdirSync("glampipe-data/logs");
 		if(!fs.existsSync("glampipe-data/tmp")) fs.mkdirSync("glampipe-data/tmp");
+		if(!fs.existsSync("glampipe-data/uploads")) fs.mkdirSync("glampipe-data/uploads");
 		
 		// make sure that gp_settings collection exists
 		var settings = await db.collection("gp_settings").findOne({});
@@ -150,40 +151,45 @@ class GLAMpipe {
 	async loadNodes() {
 		var count = 0;
 		var nodePath = path.join(global.config.nodePath, "/");
-		debug("Loading nodes from " + path.join(global.config.nodePath, "/") );    
+		debug("Loading nodes from " + path.join(global.config.nodePath, "/") );   
+		// try to drop nodes collection (it does not exist in first run) 
 		try {
 			await db.collection("gp_nodes").drop();
 		} catch(e) {
-			error(e.message);
+			console.log('no gp_nodes collection')
 		}
-		
-		var dirs = fs.readdirSync(nodePath);
-		for(var dir of dirs) {
-			var dirPath = path.join(nodePath, dir);
-			if (fs.statSync(dirPath).isDirectory()) {
-				var nodeDirs = fs.readdirSync(dirPath);
-				for(var nodeDir of nodeDirs) {
-					var nodeDirPath = path.join(dirPath, nodeDir);
-					if (fs.statSync(nodeDirPath).isDirectory()) {
-						var nodeFiles = fs.readdirSync(nodeDirPath);
-						// read only if description.json exists
-						if(nodeFiles.includes('description.json')) {
-							var content = fs.readFileSync(path.join(nodeDirPath, "description.json"), 'utf-8');
-							var node = JSON.parse(content);
-							if(node.core) { // require new GP-node format
-								count++;
-								for(var nodeFile of nodeFiles) {
-									readNodeFile (nodeDirPath, nodeFile, node);
-								}	
-								await db["gp_nodes"].insert(node);
-							}		
+		try {
+			
+			var dirs = fs.readdirSync(nodePath);
+			for(var dir of dirs) {
+				var dirPath = path.join(nodePath, dir);
+				if (fs.statSync(dirPath).isDirectory()) {
+					var nodeDirs = fs.readdirSync(dirPath);
+					for(var nodeDir of nodeDirs) {
+						var nodeDirPath = path.join(dirPath, nodeDir);
+						if (fs.statSync(nodeDirPath).isDirectory()) {
+							var nodeFiles = fs.readdirSync(nodeDirPath);
+							// read only if description.json exists
+							if(nodeFiles.includes('description.json')) {
+								var content = fs.readFileSync(path.join(nodeDirPath, "description.json"), 'utf-8');
+								var node = JSON.parse(content);
+								if(node.core) { // require new GP-node format
+									count++;
+									for(var nodeFile of nodeFiles) {
+										readNodeFile (nodeDirPath, nodeFile, node);
+									}	
+									await db["gp_nodes"].insert(node);
+								}		
+							}
 						}
-					}
-				}				
+					}				
+				}
 			}
+		} catch(e) {
+			console.log(e.message)
 		}
 		
-		if(count === 0) console.log("** WARNING: No nodes loaded! Did you fetch the nodes? **")
+		if(count === 0) console.log("** ERROR: No nodes loaded! Did you fetch the nodes? **")
 		else console.log("* OK: Loaded " + count + " nodes from " + nodePath)
 		debug("Loaded " + count + " nodes");
 	}		
@@ -238,6 +244,29 @@ class GLAMpipe {
 		
 	}
 
+
+	async getNode(node_id) {
+		var node = new Node();
+		await node.loadFromProject(node_id);
+		return node;
+	}
+
+	async getNodeScript(node_id, script) {
+		try {
+			var node = new Node();
+			await node.loadFromProject(node_id);
+			if(script)
+				return node.source.scripts[script];
+			else 
+				return node.source.scripts;
+			
+		} catch(e) {
+			error("Node removal failed!", e);
+			throw(e);
+		}
+	}
+
+
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************
@@ -266,14 +295,44 @@ class GLAMpipe {
 	}
 
 	async insertDoc(collection_name, doc) {
-		return await collection.insertDoc(collection_name, doc);
+		return collection.insertDoc(collection_name, doc);
 	}
 
 
+/* ***********************************************************************
+ * 							FILES
+ * ***********************************************************************
+*/
+
+	async uploadFile(file) {
+
+		var size = formatBytes(file.size);
+		var upload = {
+			'filename': file.path, 
+			'mimetype': file.type,
+			'original_filename': file.name,
+			'size': size
+			};
+		var doc = await this.insertDoc('gp_uploads', upload);
+		return doc;
+
+	}
+
+
+/* ***********************************************************************
+ * 							MISC
+ * ***********************************************************************
+*/
+
+
 	// needed if GLAMpipe is run from separate script
-	closeDB() { db.close(); }
+	closeDB() { 
+		db.close(); 
+	}
 
 }
+
+
 
 
 function readNodeFile (dirName, fileName, node) {
@@ -299,6 +358,19 @@ function readNodeFile (dirName, fileName, node) {
 	if(f[1] == "html") node.views[f[0]] = lines.join("\n");
 
 	
+}
+
+
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
 

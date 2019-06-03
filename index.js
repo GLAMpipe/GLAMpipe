@@ -16,7 +16,7 @@ global.register = {};
 
 //Set up body parsing middleware
 app.use(bodyParser({
-   formidable:{uploadDir: './uploads'},    //This is where the files would come
+   formidable:{uploadDir: './glampipe-data/uploads'},    //This is where the files would come
    multipart: true,
    urlencoded: true
 }));
@@ -97,7 +97,18 @@ router.delete('/api/v2/projects/:id', async function (ctx) {
 	const project = await GP.deleteProject(ctx.params.id);
 	ctx.body = project;
 });
-	
+
+
+/* ***********************************************************************
+ * 							FILES
+ * ***********************************************************************
+*/
+
+router.post('/api/v2/uploads', async function (ctx) {
+	var upload = await GP.uploadFile(ctx.request.files.file)
+	ctx.body = upload;
+
+});
 
 /* ***********************************************************************
  * 							NODE REPOSITORY
@@ -130,6 +141,13 @@ router.post('/api/v2/options/:label', async function (ctx) {
 */
 
 
+router.get('/api/v2/nodes/:id', async function (ctx) {
+	console.log(ctx.params.id);
+	var node = await GP.getNode(ctx.params.id);
+	if(node) ctx.body = node;
+
+});
+
 // create
 router.post('/api/v2/nodes/:id', async function (ctx) {
 	var node = await GP.createNode(ctx.params.id, ctx.request.body.params, ctx.request.body.collection, ctx.request.body.project);
@@ -148,6 +166,26 @@ router.post('/api/v2/nodes/:id/start', function (ctx) {
 	ctx.body = {status:"started", ts:  new Date()};
 });
 
+
+/* ***********************************************************************
+ * 							NODE EDITING
+ * ***********************************************************************
+*/
+
+router.get('/api/v2/nodes/:id/scripts/:script', async function (ctx) {
+	var script = await GP.getNodeScript(ctx.params.id, ctx.params.script);
+	ctx.body = script;
+});
+
+router.get('/api/v2/nodes/:id/scripts', async function (ctx) {
+	var script = await GP.getNodeScript(ctx.params.id);
+	ctx.body = script;
+});
+
+router.put('/api/v2/nodes/:id/scripts/:script', async function (ctx) {
+	var result = await GP.editNodeScript(ctx.params.id, ctx.params.script, ctx.request.body);
+	ctx.body = result;
+});
 
 /* ***********************************************************************
  * 							DATA
@@ -169,6 +207,11 @@ router.get('/api/v2/collections/:collection/fields', async function (ctx) {
 	if(schema) ctx.body = schema; else ctx.body = {}; 
 });
 
+router.get('/api/v2/collections/:collection/schema', async function (ctx) {
+	const schema = await GP.getSchema(ctx.params.collection);
+	if(schema) ctx.body = schema; else ctx.body = {}; 
+});
+
 router.get('/api/v2/collections/:collection/count', async function (ctx) {
 	const count = await GP.getDocCount(ctx.params.collection);
 	ctx.body = {"count": count};
@@ -184,6 +227,15 @@ router.post('/api/v2/collections', async function (ctx) {
 	ctx.body = collection;
 })
 
+router.put('/api/v2/collections/:collection/schema', async function (ctx) {
+	const schema = await GP.createSchema(ctx.params.collection);
+	if(schema) ctx.body = schema; else ctx.body = {}; 
+});
+
+/* ***********************************************************************
+ * 							PROXY
+ * ***********************************************************************
+*/
 
 router.get('/api/v2/proxy/', async function (ctx) {
 	ctx.body = await proxy.proxyJSON(ctx);
@@ -196,6 +248,8 @@ router.post('/api/v2/proxy/', function (ctx) {
 router.put('/api/v2/proxy/', function (ctx) {
 	proxy.proxyJSON(req, res);
 });
+
+
 
 
 var server = require('http').createServer(app.callback())

@@ -4,7 +4,7 @@ var glamPipe = function () {
 	var self = this;
 	this.currentProject = "";
 	this.currentCollectionSet = 0;
-	this.currentCollection = null;
+	this.currentCollectionNode = null;
 	this.currentNodes = {}; // active node per collection
 	this.currentlyOpenNode = null; // currently open node
 
@@ -608,6 +608,7 @@ var glamPipe = function () {
 
 	this.createNode = async function (e) {
 		var data = {params:{}};
+		var obj = $(e.target);
 		data.project = self.currentProject;
 		var click = $(e.target);
 		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.data("id"));
@@ -846,7 +847,7 @@ var glamPipe = function () {
 			self.currentCollectionSet++;
 
 			self.setCollectionCounter();
-			self.currentCollection = self.collections[self.currentCollectionSet];
+			self.currentCollectionNode = self.collections[self.currentCollectionSet];
 			self.pickedCollectionId = self.currentCollectionNode.source.collection;
 			self.renderBreadCrumb();
 			self.renderCollectionSet();
@@ -862,7 +863,7 @@ var glamPipe = function () {
 	this.chooseCollection = function(index) {
 		self.currentCollectionSet = parseInt(index)
 		self.setCollectionCounter();
-		self.currentCollection = self.collections[self.currentCollectionSet];
+		self.currentCollectionNode = self.collections[self.currentCollectionSet];
 		self.pickedCollectionId = self.currentCollectionNode.source.collection;
 		self.renderBreadCrumb();
 		self.renderCollectionSet();
@@ -1039,7 +1040,7 @@ var glamPipe = function () {
 
 		// upload file
 		$.ajax({
-			url: self.baseAPI + "/upload",
+			url: self.baseAPI + "/uploads",
 			type: "POST",
 			dataType: "json",
 			data:  fd,
@@ -1059,7 +1060,7 @@ var glamPipe = function () {
 					data.params.mimetype = data.mimetype;
 					data.project = self.currentProject;
 					data.collection = self.currentCollectionNode.source.collection;
-					post(self.baseAPI + "/projects/" + self.currentProject + "/nodes/" + node.nodeid, data, function(returnedData) {
+					post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
 						console.log('created upload node');
 						self.loadProject();
 					});

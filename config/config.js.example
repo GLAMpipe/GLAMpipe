@@ -72,7 +72,7 @@ var IP_passes = [];
 
 var exports = module.exports = {};
 
-exports.source =  MP + "_source";
+exports.source =  GP + "_source";
 exports.loadNodesFromGithub = false;
 exports.dataPath = dataPath;
 exports.nodePath = nodePath;

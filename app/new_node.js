@@ -50,6 +50,7 @@ class Node {
 		var index = indexByKeyValue(project.nodes, "_id", id);
 		this.source = project.nodes[index];
 
+		this.uuid = id;
 		this.collection = this.source.collection;
 		this.project = project._id;
 		this.project_title = project.title;
@@ -85,8 +86,11 @@ class Node {
 	async removeFromProject(project_id) {
 		// remove records that were created by this node
 		var query = {};
-		query[GP.source] = this.source._id;
+		query[GP.source] = this.uuid;
 		await db.collection(this.collection).remove(query);
+		
+		// update schema
+		await schema.createSchema(this.collection);
 		
 		// remove node from project
 		var res = await db.collection("gp_projects").update(
@@ -161,7 +165,7 @@ class Node {
 		this.scripts = {};
 		
 		// socket.io
-		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {'msg':msg})};
+		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {'msg':msg, 'project': this.project})};
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
