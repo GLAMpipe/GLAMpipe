@@ -161,11 +161,16 @@ class Node {
 		sandbox.context = {};
 		sandbox.context.node = this.source;
 		sandbox.context.node.settings = settings;
+		sandbox.context.node.uuid = this.uuid;
 		this.sandbox = sandbox;
 		this.scripts = {};
 		
 		// socket.io
-		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {'msg':msg, 'project': this.project})};
+		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {
+			'msg':msg, 
+			'project': this.project,
+			'node_uuid': this.uuid,
+			})};
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");

@@ -55,13 +55,17 @@ exports.web = {
 
 				// write data
 				if(node.sandbox.out.value) {
+					markSourceNode(node.sandbox.out.value, node);
 					await db[node.collection].insert(node.sandbox.out.value);
 				}
 
 			}
+			node.scripts.finish.runInContext(node.sandbox);
 		}
 	}
 }
+
+
 
 exports.file = {
 
@@ -126,11 +130,17 @@ exports.file = {
 				node.sandbox.out.say("error", e.message);
 			})
 
-			streamToMongo.on('finish', async function(){
-				console.log("IMPORTING DONE! Imported " + count);
-				node.scripts.finish.runInContext(node.sandbox)
-				await schema.createSchema(node.collection);
-			})
+			// promise	
+			var end = new Promise(function(resolve, reject) {
+				streamToMongo.on('finish', () => resolve());
+				parser.on('error', reject); 
+			});
+			
+			//streamToMongo.on('finish', async function(){
+			//	console.log("IMPORTING DONE! Imported " + count);
+			//	node.scripts.finish.runInContext(node.sandbox)
+			//	await schema.createSchema(node.collection);
+			//})
 
 			var transformer = transform(function(record){
 				node.sandbox.context.data = record;
@@ -150,8 +160,17 @@ exports.file = {
 			} else {
 				input.pipe(parser).pipe(transformer).pipe(streamToMongo);
 			}
+			return end;
 		}
 	}
 }
 
-
+function  markSourceNode(data, node) {
+	if(Array.isArray(data)) {
+		for(var d of data) {
+			d[GP.source] = node.uuid;
+		}
+	} else {
+		data[GP.source] = node.uuid
+	}
+}
