@@ -16,7 +16,6 @@ exports.web = {
 
 	"get": {
 		"JSON": async function(node) {
-			console.log("web.get.JSON");
 			console.log("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
 			
 			if(node.sandbox.core.options.headers) 
@@ -58,7 +57,6 @@ exports.web = {
 					markSourceNode(node.sandbox.out.value, node);
 					await db[node.collection].insert(node.sandbox.out.value);
 				}
-
 			}
 			node.scripts.finish.runInContext(node.sandbox);
 		}

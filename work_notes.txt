@@ -2,18 +2,24 @@
 TEE csv import ensin, jotta voit testata noden skriptien editointia
 
 TODO:
-- finalize socket.io communication (messages must include project and node uuids)
-- csv core
+- node dirs
+- facet view
 - PDF core
+- WEB export core
 - custom node functionality
 - forked node functionality
 - allow labeling of nodes and collections
 - add "views" section to UI
 
-
+DONE:
+- finalize socket.io communication (messages must include project and node uuids) OK
+- csv core OK
 
 TO BE FIXED:
 - re-generate schema should refresh keys
+
+FIXED:
+- OK node settings are not remembered 
 
 API:
 /api/v2/collections/[COLLECTION_ID]/fields

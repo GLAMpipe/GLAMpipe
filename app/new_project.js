@@ -16,9 +16,6 @@ const mongoist  = require('mongoist');
 // create project
 exports.create = async function(title) {
 
-	let dataPath = path.join(global.config.dataPath, "glampipe-data");
-	let projectsPath = path.join(dataPath, "projects");
-	
 	debug("creating project", title);
 	var title_dir = cleanDirName(title);
 	if(!title_dir) return Promise.reject("Empty project name!")
@@ -47,13 +44,14 @@ exports.create = async function(title) {
 		var result = await db.collection('gp_projects').insert(project);
 		
 		// create project directories
-		var projectPath = path.join(projectsPath, title_dir)
+		var projectPath = path.join(global.config.projectsPath, title_dir)
 		await createProjectDir(projectPath);
 		await createProjectSubDirs(projectPath);
 		
 		return result;
 
 	} catch(e) {
+		console.log(e)
 		error(e);
 	}
 }

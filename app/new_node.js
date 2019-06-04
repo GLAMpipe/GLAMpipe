@@ -10,7 +10,8 @@ var error 		= require('debug')('GLAMpipe:error');
 var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
-var importLoop 	= require("../app/import.js");
+var importLoop 	= require("../app/core-source.js");
+var viewLoop 	= require("../app/core-view.js");
 const GP 		= require("../config/const.js");
 
 
@@ -75,23 +76,60 @@ class Node {
 		this.source.project = project_id;
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
-		var o = await db.collection("gp_projects").update({_id:mongoist.ObjectId(project_id)}, {$push:{nodes: this.source}});	
-		
+		await db.collection("gp_projects").update(
+			{_id:mongoist.ObjectId(project_id)}, 
+			{
+				$push:{nodes: this.source},
+				$inc: {'node_count':1}
+			});	
+
 		// these are just shorthands
 		this.collection = collection_name;
 		this.project = project_id;
 	}
 	
 
+	async writeDir(project_id) {
+		if(this.source.type == 'view') {
+			const fs = require('fs');
+			var project = await db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
+			if(project.dir) {
+				var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
+				fs.mkdirSync(dir);
+				await this.updateSourceKey('dir', dir);
+			}
+		}
+	}
+
 	async removeFromProject(project_id) {
-		// remove records that were created by this node
-		var query = {};
-		query[GP.source] = this.uuid;
-		await db.collection(this.collection).remove(query);
+		
+		// remove records that were created by source node
+		if(this.source.type == 'source') {
+			var query = {};
+			query[GP.source] = this.uuid;
+			await db.collection(this.collection).remove(query);
+		}
+		
+		// remove out_ fields created by node
+		if(this.source.type != 'source') {
+			var del_keys = {};
+			for(var key in this.source.params) {
+				console.log(key)
+				if(/^out_/.test(key) && this.source.params[key] && this.source.params[key] !== "") {
+					del_keys[this.source.params[key]] = "";
+				}
+			}
+			if(Object.keys(del_keys).length !== 0) {
+				var query = {};
+				query["$unset"] = del_keys;
+				console.log(query)
+				await db.collection(this.collection).update({}, query, {'multi': true});
+			}
+		}
 		
 		// update schema
 		await schema.createSchema(this.collection);
-		
+
 		// remove node from project
 		var res = await db.collection("gp_projects").update(
 			{_id:mongoist.ObjectId(project_id)},
@@ -109,10 +147,25 @@ class Node {
 		
 	}
 
+	async saveNodeDescription(body) {
+		var setter = {};
+		setter.$set = {"nodes.$.node_description": body.description};
+		var query = {"nodes._id": mongoist.ObjectId(this.uuid)};
+		await db.collection("gp_projects").update(query, setter);
+		this.source.node_description = body.description;
+	}
 
+	async updateSourceKey(key, value) {
+		var setter = {};
+		var key_str = "nodes.$." + key;
+		setter.$set = {key_str: value};
+		var query = {"nodes._id": mongoist.ObjectId(this.uuid)};
+		await db.collection("gp_projects").update(query, setter);
+		this.source[key] = value;
+	}
 
 	async saveSettings(settings) {
-
+		
 		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
 		// from it without affecting settings that are used by node
         var settings_copy = Object.assign({}, settings); 	
@@ -137,7 +190,7 @@ class Node {
 			return;
 			
 		var setter = {};
-		setter.$set = {"nodes.$.settings_copy": settings_copy};
+		setter.$set = {"nodes.$.settings": settings_copy};
 		var query = {"nodes._id": mongoist.ObjectId(this.source._id)};
 		await db.collection("gp_projects").update(query, setter);
 
@@ -166,11 +219,13 @@ class Node {
 		this.scripts = {};
 		
 		// socket.io
-		if(ws) sandbox.out.say = function(ch, msg) {ws.emit(ch, {
+		if(ws) {
+			sandbox.out.say = function(ch, msg) {ws.emit(ch, {
 			'msg':msg, 
-			'project': this.project,
-			'node_uuid': this.uuid,
+			'project': sandbox.context.node.project,
+			'node_uuid': sandbox.context.node.uuid,
 			})};
+		} 
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
@@ -190,9 +245,8 @@ class Node {
 			case "source":
 			
 				// example core: web.get.JSON 
-				var p = await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				await schema.createSchema(this.collection);
-				return p;
 				break;
 				
 			case "process":
@@ -202,15 +256,15 @@ class Node {
 			case "export":
 			
 				break;
+				
+			case "view":
+				await viewLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				break;
 		}
 
-		
+		this.scripts.finish.runInContext(sandbox);
 		debug("done")
-
 	}
-	
-
-	
 }
 
 module.exports = Node ;
@@ -241,7 +295,7 @@ async function processLoop(node) {
 	await bulk.execute();
 	
 	// notify that we are finished
-	node.sandbox.out.say('finish', 'Done');
+	//node.sandbox.out.say('finish', 'Done');
 }
 
 

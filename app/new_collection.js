@@ -20,6 +20,26 @@ exports.create = async function(collection_name, project) {
 
 }
 
+exports.removeFromProject = async function(collection_name, project_id) {
+	// when collection is dropped, we must also remove all nodes attached to it
+	var project = await db['gp_projects'].findOne({_id:mongoist.ObjectId(project_id)});
+	await db['gp_projects'].update({_id:mongoist.ObjectId(project_id)}, {'$unset': {'nodes':''}});
+	
+	// drop collection
+	await db[collection_name].drop();
+	
+	// remove collection from project data
+	await db['gp_projects'].update(
+		{_id:mongoist.ObjectId(project_id)}, 
+		{'$pull': 
+			{'collections': {'$in':[collection_name]}}
+		}
+	);
+	
+	// remove collection from schema data
+	await db["gp_schemas"].remove({'collection':collection_name});
+	
+}
 
 exports.getFields = async function(collection_name) {
 	

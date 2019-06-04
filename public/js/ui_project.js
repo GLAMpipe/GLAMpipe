@@ -144,7 +144,7 @@ $( document ).ready(function() {
 
 	$(document).on('click','.remove-collection', function(e) {
 		var nodeid = $(e.target).data("id");
-		gp.removeNode(e, nodeid);
+		gp.removeCollection(e, nodeid);
 		e.stopPropagation();
 		e.preventDefault();
 		gp.loadProject();
@@ -239,14 +239,11 @@ $( document ).ready(function() {
 	});
 
 	socket.on('finish', function (data) {
-		console.log("FINISH: " + data.msg);
 		if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
 			
 			progressDisplay.empty().append("<div>" + data.msg + "</div>");
-		   // websockPopup(finishDisplay, "Node done!");
 			$(".settings").removeClass("busy");
 			progressDisplay.addClass("done");
-			//progressDisplay.hide();
 			gp.nodeRunFinished(data); 
 		}
 

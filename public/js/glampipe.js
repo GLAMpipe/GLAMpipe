@@ -737,6 +737,7 @@ var glamPipe = function () {
 	this.renderCollectionSet = function (cb) {
 		if(!self.currentCollectionNode) {
 			console.log("no current collection")
+			$("pipe .collection").empty().append("<a class='add-collection' title='Add new collection' href='#'> Add Collection</a>");
 			return "";
 		}
 
@@ -774,6 +775,13 @@ var glamPipe = function () {
 				html += "  </div><div class='holder params'></div>"
 
 				html += self.renderNodes(collection, ["export"]);
+
+
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>View the data</span> <a class='add-node' data-type='view' title='Add new view node' href='addnode.html'>Add</a></div>"
+				html += "  </div><div class='holder params'></div>"
+
+				html += self.renderNodes(collection, ["view"]);
 
 			}
 			html += "</collectionset>"
@@ -1005,10 +1013,39 @@ var glamPipe = function () {
 			"Delete node": function() {
 				$( this ).dialog( "close" );
 				$.delete(self.baseAPI + "/nodes/" + node_id, {}, function(retData) {
-					// update fields
-					$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
-						//self.currentCollectionNode.fields = data.keys;
-					})
+					if(retData.error)
+						alert(retData.error);
+					else {
+						self.loadProject();
+					}
+				});
+			},
+			Cancel: function() {
+			  $( this ).dialog( "close" );
+			}
+		  }
+		});
+	}
+
+
+	this.removeCollection = function (event, nodeid) {
+		var obj = $(event.target);
+		if(typeof nodeid === "undefined")
+			var node_id = obj.closest(".node").data("id");
+		else
+			var node_id = nodeid;
+
+		$( "#dialog-confirm" ).empty().append("<div class='bad'>Do you REALLY want to remove this collection with its nodes and data?</div>");
+		$( "#dialog-confirm" ).dialog({
+		  resizable: false,
+		  height:160,
+		  width:360,
+		  title:"Deleting node",
+		  modal: true,
+		  buttons: {
+			"Yes, delete nodes and collection": function() {
+				$( this ).dialog( "close" );
+				$.delete(self.baseAPI + "/nodes/" + node_id, {}, function(retData) {
 					if(retData.error)
 						alert(retData.error);
 					else {

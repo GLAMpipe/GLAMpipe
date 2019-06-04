@@ -19,20 +19,19 @@ class GLAMpipe {
 			global.config = require("../config/config.js");
 			global.config.file = "config.js (your local settings)";
 		} catch(e) {
-			debug("config.js not found or is malformed!");
+			debug("config.js not found or is malformed! Using defaults...");
 			global.config = require("../config/config.js.example");
 			global.config.file = "config.js.example (default settings)";
 		}
 		
 		if(config) {
-			this.config = config;
-			this.dataPath = path.join(config.dataPath, "glampipe-data");
-			this.projectsPath = path.join(this.dataPath, "projects");
+			global.config = config;
+			global.config.dataPath = path.join(config.dataPath, "glampipe-data");
+			global.config.projectsPath = path.join(global.config.dataPath, "projects");
 		} else if(global.config) {
 			global.config.version = version.version;
-			this.config = global.config;
-			this.dataPath = path.join(global.config.dataPath, "glampipe-data");
-			this.projectsPath = path.join(this.dataPath, "projects");
+			global.config.dataPath = path.join(global.config.dataPath, "glampipe-data");
+			global.config.projectsPath = path.join(global.config.dataPath, "projects");
 		} else {
 			error("No config present!");
 			throw("No config present!");
@@ -225,6 +224,7 @@ class GLAMpipe {
 			await node.loadFromRepository(nodeid);
 			await node.setParams(params);
 			await node.add2Project(project_id, collection_name);
+			await node.writeDir(project_id);
 			return node;
 		} catch(e) {
 			error("Node creation failed!", e);
@@ -236,7 +236,12 @@ class GLAMpipe {
 		try {
 			var node = new Node();
 			await node.loadFromProject(node_id);
-			return node.removeFromProject(node.project);
+			if(node.source.type == 'collection') {
+				await collection.removeFromProject(node.collection, node.project);
+			} else {
+				await node.removeFromProject(node.project);
+			}
+			return {'status': 'ok'}
 		} catch(e) {
 			error("Node removal failed!", e);
 			throw(e);
@@ -250,6 +255,7 @@ class GLAMpipe {
 		await node.loadFromProject(node_id);
 		return node;
 	}
+
 
 	async getNodeScript(node_id, script) {
 		try {
@@ -331,8 +337,6 @@ class GLAMpipe {
 	}
 
 }
-
-
 
 
 function readNodeFile (dirName, fileName, node) {

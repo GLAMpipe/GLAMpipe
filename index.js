@@ -117,8 +117,7 @@ router.post('/api/v2/uploads', async function (ctx) {
 
 // list of nodes available
 router.get('/api/v2/repository/nodes', async function (ctx) {
-	const nodes = await GP.repository();
-	ctx.body = nodes;
+	ctx.body = await GP.getDocs('gp_nodes', {});
 });
 
 
@@ -142,9 +141,8 @@ router.post('/api/v2/options/:label', async function (ctx) {
 
 
 router.get('/api/v2/nodes/:id', async function (ctx) {
-	console.log(ctx.params.id);
 	var node = await GP.getNode(ctx.params.id);
-	if(node) ctx.body = node;
+	if(node) ctx.body = node.source;
 
 });
 
@@ -164,6 +162,27 @@ router.delete('/api/v2/nodes/:id', async function (ctx) {
 router.post('/api/v2/nodes/:id/start', function (ctx) {
 	GP.startNode(ctx.params.id, ctx.request.body);
 	ctx.body = {status:"started", ts:  new Date()};
+});
+
+// get settings
+router.get('/api/v2/nodes/:id/settings', async function (ctx) {
+	var node = await GP.getNode(ctx.params.id);
+	if(node) ctx.body = node.source.settings;
+});
+
+// set node description
+router.post('/api/v2/nodes/:id/settings/description', async function (ctx) {
+	var node = await GP.getNode(ctx.params.id);
+	console.log(ctx.request.body.description)
+	await node.saveNodeDescription(ctx.request.body);
+	if(node) ctx.body = node.source.node_description;
+});
+
+// set settings
+router.post('/api/v2/nodes/:id/settings', async function (ctx) {
+	var node = await GP.getNode(ctx.params.id);
+	await node.saveSettings(ctx.request.body);
+	if(node) ctx.body = node.source.settings;
 });
 
 

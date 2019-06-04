@@ -32,8 +32,10 @@ var nodeRepository = function (gp) {
 		},
 		"export": {
 			"file": "Export data to file",
-			"web": "Export data to web",
-			"view": "Export data to view",
+			"web": "Export data to web"
+		},
+		"view": {
+			"data": "View data"
 		}
 	}
 

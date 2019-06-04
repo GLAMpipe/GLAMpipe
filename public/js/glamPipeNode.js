@@ -170,7 +170,7 @@ var glamPipeNode = function (node, gp) {
 	this.open = function(config) {
 		// in nodedev mode we load node's view scripts directly from node directory
 		if(gp.config.nodedevmode) { // TODO: remove hardcoding of url
-			$.get("http://localhost:3000/api/v1/nodes/" + self.source._id + "/scripts",  function(data) {
+			$.get("http://localhost:3000/api/v2/nodes/" + self.source._id + "/scripts",  function(data) {
 				if(data.view)
 					self.source.scripts.view = data.view;
 				if(data.action_view)
@@ -222,16 +222,6 @@ var glamPipeNode = function (node, gp) {
 		//self.gp.pickedCollectionId = null; // reset collection chooser
 		var in_field = '';
 
-		// check if subnode of metanode
-		if(self.source.params.parent) {
-			var html = "<div class='box node " + self.source.type + " " + self.orphan + "' data-id='" + self.source._id + "'>"
-			html +=   "  <div class='boxleft'>"
-			html += "<div class='metanode'>TASK "+self.source.title+"</div>";
-			html += "</div></div>"
-			return "";
-			//return html;
-		}
-
 		var subsubtype = "";
 		if(self.source.subsubtype)
 			subsubtype = " > " + self.source.subsubtype;
@@ -249,8 +239,8 @@ var glamPipeNode = function (node, gp) {
 
 
 
-		if(self.source.settings && self.source.settings.node_description && self.source.settings.node_description.trim()  != "") {
-			html +=   "    <div class='title boxtitle'>" + self.source.settings.node_description + "</div>"
+		if(self.source.settings && self.source.node_description && self.source.node_description.trim()  != "") {
+			html +=   "    <div class='title boxtitle'>" + self.source.node_description + "</div>"
 			html +=   "    <div class='description'>" + self.source.title + "</div>"
 
 		} else {
@@ -314,7 +304,7 @@ var glamPipeNode = function (node, gp) {
 
 			// node description
 			if(self.source.settings)
-				$(".node-description-value").val(self.source.settings.node_description);
+				$(".node-description-value").val(self.source.node_description);
 			else
 				$(".node-description-value").val("");
 
@@ -419,13 +409,9 @@ var glamPipeNode = function (node, gp) {
 			data: {
 				description:desc
 			},
-			error:function() {console.log("description save failed!")},
+			error:function() {alert("description save failed!")},
 			success: function(data) {
-				// settings does not exist if node hasn't been executed
-				if(!self.source.settings)
-					self.source.settings = {"node_description": desc};
-				else
-					self.source.settings.node_description = desc;
+				self.source.node_description = desc;
 			}
 		}
 		$.ajax(d);
