@@ -48,7 +48,7 @@ var nodeRepository = function (gp) {
 		}
 
 	
-		var nodes = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/?keys=core,type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type[]=" + type);
+		var nodes = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/?keys=core,type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type=" + type);
 		console.log(nodes);
 
 		var html = "";

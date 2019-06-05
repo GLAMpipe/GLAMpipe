@@ -356,6 +356,7 @@ function readNodeFile (dirName, fileName, node) {
 	node.scripts = node.scripts || {};
 	node.params = node.params || {};
 	node.views = node.views || {};
+	node.source_dir = dirName;
 	// add javascript files to "scripts" section
 	if(f[1] == "js") node.scripts[f[0]] = lines.join("\n");
 	// add html files to "views" section

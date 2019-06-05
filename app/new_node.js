@@ -86,6 +86,7 @@ class Node {
 		// these are just shorthands
 		this.collection = collection_name;
 		this.project = project_id;
+		this.uuid = this.source._id;
 	}
 	
 
@@ -96,7 +97,7 @@ class Node {
 			if(project.dir) {
 				var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
 				fs.mkdirSync(dir);
-				await this.updateSourceKey('dir', dir);
+				await this.updateSourceKey('project_dir', dir);
 			}
 		}
 	}
@@ -156,12 +157,39 @@ class Node {
 	}
 
 	async updateSourceKey(key, value) {
-		var setter = {};
-		var key_str = "nodes.$." + key;
-		setter.$set = {key_str: value};
+		var setter = {'$set':''};
+		var a = {}
+		a["nodes.$." + key] = value;
+		setter.$set = a;
 		var query = {"nodes._id": mongoist.ObjectId(this.uuid)};
 		await db.collection("gp_projects").update(query, setter);
 		this.source[key] = value;
+	}
+
+	getFilesIndex(ctx) {
+		var source = path.join(this.source.project_dir, 'files', 'index.html')
+		const fs = require('fs-extra');
+		const src = fs.createReadStream(source);
+		ctx.response.set("content-type", "text/html");
+		ctx.body = src;
+	}
+
+	getFile(ctx) {
+		const fs = require('fs-extra');
+		var source = path.join(this.source.project_dir, 'files')
+		if(ctx.params.dir === 'js') {
+			source = path.join(source, 'js', ctx.params.file);
+			ctx.response.set("content-type", "application/x-javascript");
+		} else if(ctx.params.dir === 'css') {
+			source = path.join(source, 'css', ctx.params.file);
+			ctx.response.set("content-type", "text/css");
+		} else if(ctx.params.dir === 'fonts') {
+			source = path.join(source, 'fonts', ctx.params.file);
+			ctx.response.set("content-type", "application/octet-stream");
+		}
+
+		const src = fs.createReadStream(source);
+		ctx.body = src;
 	}
 
 	async saveSettings(settings) {

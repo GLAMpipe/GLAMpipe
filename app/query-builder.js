@@ -5,10 +5,20 @@ var exports 	= module.exports = {};
 
 exports.search = function (params) {
 
-	//var skipped = ["skip", "limit", "sort", "reverse", "op"]; 	// skip search options
+	var skipped = ["mongoquery", "_keys", "_nokeys", "skip", "limit", "sort", "reverse", "op"]; 	// skip search options
 	//var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
 	//var query = exports.filters(req, operators, skipped);
-	var query = exports.createSearchQuery(params);
+	//var query = exports.createSearchQuery(params, skipped);
+	var query = {}
+	if(params.mongoquery) {
+		try {
+			query = JSON.parse(params.mongoquery);
+		} catch(e) {
+			throw(new Error('Query is invalid. It must be a JSON'))
+		}
+	} else {
+		query = exports.createSearchQuery(params, skipped);
+	}
 
 
 	var limit = parseInt(params.limit);
@@ -21,16 +31,16 @@ exports.search = function (params) {
 
 	// keys that are wanted
 	var keys = {};
-	if(typeof params.keys !== 'undefined') {
-		arrKeys = params.keys.split(",");
+	if(typeof params._keys !== 'undefined') {
+		arrKeys = params._keys.split(",");
 		arrKeys.forEach((key) => {
 			keys[key.trim()] = 1;
 		})
 	}
 
 	// keys that are not wanted
-	if(typeof params.nokeys !== 'undefined') {
-		arrKeys = params.nokeys.split(",");
+	if(typeof params._nokeys !== 'undefined') {
+		arrKeys = params._nokeys.split(",");
 		arrKeys.forEach((key) => {
 			keys[key.trim()] = 0;
 		})
@@ -132,7 +142,7 @@ exports.operators = function (req) {
 	return operators;
 }
 
-exports.createSearchQuery = function(params) {
+exports.createSearchQuery = function(params, skip) {
 	
 	var query = {};
 	var query_fields = [];
@@ -140,20 +150,27 @@ exports.createSearchQuery = function(params) {
 	
 	// all arrays are search terms
 	for(var param in params) {
-		if(Array.isArray(params[param])) {
-			if(params[param].length > 1) {
+		if(!skip.includes(param)) {
+			console.log(param)
+			var splitted = params[param].split(',')
+			if(splitted.length > 1) {
 				var ands = [];
-				for(var i = 0; i < params[param].length; i++) {
+				for(var i = 0; i < splitted.length; i++) {
 					var search = {};
-					search[param] = {$regex:params[param][i], $options: 'i'};
-					ands.push(search);
+					//search[param] = {$regex:splitted[i], $options: 'i'};
+					search[param] = splitted[i];
+					if(splitted[i]) {
+						ands.push(search);
+					}
 				}
 				query.$and = ands;			
 			} else {
-				query[param] =  {$regex:params[param][0], $options: 'i'};
+				if(splitted[0]) {
+					//query[param] =  {$regex:splitted[0], $options: 'i'};
+					query[param] =  splitted[0];
+				}
 			}
 		}
-
 	}
 
 	return query;

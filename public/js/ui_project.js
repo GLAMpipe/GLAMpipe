@@ -151,7 +151,7 @@ $( document ).ready(function() {
 	});
 
 	// open dynamic field picker
-	//$(document).on('click','.dynamic_field', function(e) {
+	//$(document).on('click','.dynamic-field', function(e) {
 		//gp.openDynamicFieldSelector(e);
 	//});
 
@@ -181,7 +181,7 @@ $( document ).ready(function() {
 
 	// fetch fields when non-current collection is chosen
 	$(document).on('change','.dynamic_collection', function(e) {
-		gp.renderDynamicCollectionFieldList($('.source_dynamic_field'), e);
+		gp.renderDynamicCollectionFieldList($('.source-dynamic-field'), e);
 	})
 
 	// pick collection

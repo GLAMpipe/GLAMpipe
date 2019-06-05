@@ -2,7 +2,7 @@
 TEE csv import ensin, jotta voit testata noden skriptien editointia
 
 TODO:
-- node dirs
+- facet and search queries
 - facet view
 - PDF core
 - WEB export core
@@ -14,6 +14,7 @@ TODO:
 DONE:
 - finalize socket.io communication (messages must include project and node uuids) OK
 - csv core OK
+- node dirs
 
 TO BE FIXED:
 - re-generate schema should refresh keys

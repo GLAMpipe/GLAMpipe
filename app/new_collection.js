@@ -61,6 +61,7 @@ exports.getDocs = async function(collection_name, query) {
 	
 	// create search query
 	var search = buildquery.search(query);
+	console.log(JSON.stringify(search))
 
 	return await db[collection_name].findAsCursor(
 		search.query, 
@@ -80,8 +81,9 @@ exports.insertDoc = async function(collection_name, doc) {
 }
 
 
-exports.getCount = async function(collection_name, params) {
-	return await db[collection_name].count({});
+exports.getCount = async function(collection_name, query) {
+	var search = buildquery.search(query);
+	return await db[collection_name].count(search.query);
 }
 
 

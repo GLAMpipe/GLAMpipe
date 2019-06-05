@@ -22,6 +22,7 @@
     "file-type": "^5.2.0",
     "flat": "^2.0.0",
     "form-data": "^2.1.2",
+    "fs-extra": "^8.0.1",
     "fs-sync": "^1.0.4",
     "jsonwebtoken": "^7.4.0",
     "koa": "^2.7.0",

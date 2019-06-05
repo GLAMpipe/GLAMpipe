@@ -316,8 +316,8 @@ var glamPipeNode = function (node, gp) {
 					alert(data.error);
 				var options = [];
 				
-				for(var i = 0; i < data.length; i++) {
-					options.push("<option>" + data[i] + "</option>");
+				for(var i = 0; i < data.keys.length; i++) {
+					options.push("<option>" + data.keys[i] + "</option>");
 				}
 
 
@@ -331,9 +331,9 @@ var glamPipeNode = function (node, gp) {
 				}
 
 				// populate field selects
-				$("settingsblock select.dynamic_field").each(function(i) {
+				$("settingsblock select.dynamic-field").each(function(i) {
 					$(this).append(options.join(""));
-				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
+				//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic-field'><option value=''>choose field</option>"+options.join("")+"</select>");
 				})
 
 				self.setSettingValues();

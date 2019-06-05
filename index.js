@@ -25,13 +25,14 @@ app.use(bodyParser({
 app.use(json({ pretty: true, param: 'pretty' }))
 
 app.use(async function handleError(context, next) {
-  try {
-    await next();
-  } catch (error) {
-	  console.log(error);
-    context.status = 500;
-    context.body = error;
-  }
+	try {
+		await next();
+	} catch (error) {
+		console.log('ERROR: ' + error.message);
+		console.log(error.stack);
+		context.status = 500;
+		context.body = {'error':error.message};
+	}
 });
 
 /***************************************************************************************************************
@@ -41,12 +42,12 @@ app.use(async function handleError(context, next) {
 app.use(require('koa-static')('public'));
 
 app.use(async (ctx, next) => {
-  if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/views' });
+  if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/public' });
   else await next();
 })
 
 router.get('/projects/:id', function(ctx) {
-	return serve(ctx, 'project.html', { root: __dirname + '/views' });
+	return serve(ctx, 'project.html', { root: __dirname + '/public' });
 })
 
 /* ***********************************************************************
@@ -115,11 +116,14 @@ router.post('/api/v2/uploads', async function (ctx) {
  * ***********************************************************************
 */
 
+router.get('/api/v2/repository/nodes/:nodeid', async function (ctx) {
+	ctx.body = await GP.getDocByQuery('gp_nodes', {'nodeid': ctx.params.nodeid});
+});
+
 // list of nodes available
 router.get('/api/v2/repository/nodes', async function (ctx) {
 	ctx.body = await GP.getDocs('gp_nodes', {});
 });
-
 
 router.get('/api/v2/options', async function (ctx) {
 	ctx.body = await GP.getDocs('gp_node_options', {});
@@ -212,7 +216,7 @@ router.put('/api/v2/nodes/:id/scripts/:script', async function (ctx) {
 */
 
 router.get('/api/v2/collections/:collection/docs', async function (ctx) {
-	var docs = await collection.getDocs(ctx.params.collection, ctx.query);
+	var docs = await collection.getDocs(ctx.params.collection, ctx.request.query);
 	ctx.body = {"data": docs};
 });
 
@@ -232,7 +236,7 @@ router.get('/api/v2/collections/:collection/schema', async function (ctx) {
 });
 
 router.get('/api/v2/collections/:collection/count', async function (ctx) {
-	const count = await GP.getDocCount(ctx.params.collection);
+	const count = await GP.getDocCount(ctx.params.collection, ctx.request.query);
 	ctx.body = {"count": count};
 });
 
@@ -268,8 +272,20 @@ router.put('/api/v2/proxy/', function (ctx) {
 	proxy.proxyJSON(req, res);
 });
 
+/* ***********************************************************************
+ * 							VIEWS
+ * ***********************************************************************
+*/
 
+router.get('/views/:node/:dir/:file', async function (ctx) {
+	var node = await GP.getNode(ctx.params.node);
+	node.getFile(ctx);
+});
 
+router.get('/views/:node', async function (ctx) {
+	var node = await GP.getNode(ctx.params.node);
+	node.getFilesIndex(ctx);
+});
 
 var server = require('http').createServer(app.callback())
 GP.init(server);
