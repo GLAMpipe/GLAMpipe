@@ -51,7 +51,7 @@ var glamPipe = function () {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>title</th><th>imports from</th><th>owners</th><th>exports to</th><th>action</th></tr></thead>";
+			html = "<table><thead><tr><th>title</th><th>imports from</th><th>collections</th><th>owners</th><th>exports to</th><th>action</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -100,7 +100,7 @@ var glamPipe = function () {
 	this.getProjectsByUser = function (div, user) {
 
 		$(".settingstitle").text("Projects by " + user);
-		html = "<table><thead><th>title</th><th>imports from</th><th>owners</th><th>exports to</th><th>action</th></thead>";
+		html = "<table><thead><th>title</th><th>imports from</th><th>collections</th><th>owners</th><th>exports to</th><th>action</th></thead>";
 		$.getJSON(self.baseAPI +  "/collections/gp_projects/search?sort=_id&reverse=1&owner=" + user, function(data) {
 			$(div).empty();
 			self.projects = data.data;
@@ -186,15 +186,22 @@ var glamPipe = function () {
 
 			html += "<td>";
 			if(project.nodes) {
-
 				project.nodes.forEach(function(node) {
 					if(node.type === "source")
 						html += "<div>" + node.title + "</div>";
 				})
 			}
-			html += "</td>";
+			html += "</td><td>";
 
-			html += "<td><div>" + project.owner + "</div></td>";
+			// COLLECTIONS
+			if(project.nodes) {
+				project.nodes.forEach(function(node) {
+					if(node.type === "collection")
+						html += "<div>" + node.params.title + "</div>";
+				})
+			}
+
+			html += "</td><td><div>" + project.owner + "</div></td>";
 
 			//html += "<td><div>";
 			//if(project.nodes) {

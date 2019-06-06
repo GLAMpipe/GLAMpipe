@@ -38,21 +38,20 @@ async function fileLoop(node, core) {
 		// PRE_RUN - give input to core
 		node.scripts.pre_run.runInContext(node.sandbox);
 		
-		// CALL CORE - if several files, then call core + run.js once for every row
+		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
 			var result = await core(node);
-			node.sandbox.core.data = result;
-			node.scripts.run.runInContext(node.sandbox);
-			if(node.sandbox.out.setter)
-				setters.push(node.sandbox.out.setter)
-			else
-				result.push(node.sandbox.out.value);
+			node.sandbox.core.data.push(result);
 		} else {
 			var result = await core(node);
 			node.sandbox.core.data = result;
-			node.scripts.run.runInContext(node.sandbox);
 		}
+		node.scripts.run.runInContext(node.sandbox);
 		
+		if(node.sandbox.out.setter)
+			setters.push(node.sandbox.out.setter)
+		else
+			result.push(node.sandbox.out.value);
 
 		var update = {}
 		// if out.value is set, then we write field defined in settings.out_field

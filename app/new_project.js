@@ -107,6 +107,9 @@ exports.getProjects = async function() {
 		'title': 1, 
 		'collections': 1, 
 		'nodes.nodeid': 1,
+		'nodes.params': 1,
+		'nodes.type': 1,
+		'nodes.title': 1,
 		'owner': 1
 	  }).sort({'_id': -1}).toArray();
 
