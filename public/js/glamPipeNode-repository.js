@@ -159,7 +159,7 @@ var nodeRepository = function (gp) {
 			}
 
 			// populate field selects
-			$(".params select.dynamic_field").each(function(i) {
+			$(".params select.dynamic-field").each(function(i) {
 				$(this).append(options.join(""));
 			//    $(this).replaceWith("<select id='" + $(this).attr("id") + "' name='" + $(this).attr("name") + "' class='dynamic_field'><option value=''>choose field</option>"+options.join("")+"</select>");
 			})

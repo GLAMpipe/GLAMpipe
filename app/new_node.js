@@ -12,6 +12,7 @@ var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
 var importLoop 	= require("../app/core-source.js");
 var viewLoop 	= require("../app/core-view.js");
+var processLoop = require("../app/core-process.js");
 const GP 		= require("../config/const.js");
 
 
@@ -45,10 +46,14 @@ class Node {
 	}
 
 
-
 	async loadFromProject(id) {
-		var project = await db.collection('gp_projects').findOne({"nodes._id": mongoist.ObjectId(id)});	
-		var index = indexByKeyValue(project.nodes, "_id", id);
+		var project = null;
+		try {
+			project = await this.getProjectByNode(id);
+		} catch(e) {
+			throw(new Error('GLAMpipe node not found: ' + id))
+		}
+		var index = indexByKeyValue(project.nodes, project._nodeindex, id);
 		this.source = project.nodes[index];
 
 		this.uuid = id;
@@ -59,6 +64,18 @@ class Node {
 	}
 	
 	
+	// get project by node id or label
+	async getProjectByNode(id) {
+		var project = await db.collection('gp_projects').findOne({"nodes.label": id});	
+		if(!project){
+			project = await db.collection('gp_projects').findOne({"nodes._id": mongoist.ObjectId(id)});
+			project._nodeindex = '_id'
+		} else {
+			project._nodeindex = 'label'
+		}
+		return project;	
+	}
+
 	
 	async add2Project(project_id, collection_name) {
 		
@@ -148,12 +165,12 @@ class Node {
 		
 	}
 
-	async saveNodeDescription(body) {
-		var setter = {};
-		setter.$set = {"nodes.$.node_description": body.description};
-		var query = {"nodes._id": mongoist.ObjectId(this.uuid)};
-		await db.collection("gp_projects").update(query, setter);
-		this.source.node_description = body.description;
+	async setDescription(body) {
+		await this.updateSourceKey('node_description', body.description);
+	}
+
+	async setLabel(label) {
+		await this.updateSourceKey('label', label);
 	}
 
 	async updateSourceKey(key, value) {
@@ -278,7 +295,7 @@ class Node {
 				break;
 				
 			case "process":
-				await processLoop(this); // no core needed
+				await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				break;
 				
 			case "export":
@@ -296,35 +313,6 @@ class Node {
 }
 
 module.exports = Node ;
-
-
-
-async function processLoop(node) {
-
-	var bulk = db[node.collection].initializeOrderedBulkOp();
-    const cursor = db[node.collection].findAsCursor({});	
-	while(await cursor.hasNext()) {
-		var doc = await cursor.next();
-	  
-		node.sandbox.context.doc = doc;
-		node.scripts.run.runInContext(node.sandbox);
-		var update = {}
-		// if out.value is set, then we write field defined in settings.out_field
-		if(node.sandbox.out.value) {
-			update[node.source.params.out_field] = node.sandbox.out.value;
-		}
-	  
-		bulk.find({ '_id': doc._id }).updateOne({
-			'$set': update
-		});
-	}	
-	
-	// make changes to database
-	await bulk.execute();
-	
-	// notify that we are finished
-	//node.sandbox.out.say('finish', 'Done');
-}
 
 
 

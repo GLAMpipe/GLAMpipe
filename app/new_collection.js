@@ -108,7 +108,7 @@ exports.facet = async function (req) {
 
 	var filters = [];
 	var collection = db.collection(req.params.collection);
-	var fields = req.query.fields.split(",").map(function(item) {
+	var fields = req.query.fields.split("|").map(function(item) {
 		return item.trim();
 	});
 	var filters = [];

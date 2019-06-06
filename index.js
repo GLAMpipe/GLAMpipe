@@ -144,10 +144,17 @@ router.post('/api/v2/options/:label', async function (ctx) {
 */
 
 
+// set label
+router.post('/api/v2/nodes/:id/label', async function (ctx) {
+	var node = await GP.getNode(ctx.params.id);
+	await node.setLabel(ctx.query.label);
+	if(node) ctx.body = node.source.label;
+});
+
+// get by label or UUID
 router.get('/api/v2/nodes/:id', async function (ctx) {
 	var node = await GP.getNode(ctx.params.id);
 	if(node) ctx.body = node.source;
-
 });
 
 // create
@@ -177,8 +184,7 @@ router.get('/api/v2/nodes/:id/settings', async function (ctx) {
 // set node description
 router.post('/api/v2/nodes/:id/settings/description', async function (ctx) {
 	var node = await GP.getNode(ctx.params.id);
-	console.log(ctx.request.body.description)
-	await node.saveNodeDescription(ctx.request.body);
+	await node.setDescription(ctx.request.body);
 	if(node) ctx.body = node.source.node_description;
 });
 

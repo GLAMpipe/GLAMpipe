@@ -5,7 +5,7 @@ var exports 	= module.exports = {};
 
 exports.search = function (params) {
 
-	var skipped = ["mongoquery", "_keys", "_nokeys", "skip", "limit", "sort", "reverse", "op"]; 	// skip search options
+	var skipped = ["mongoquery", "keys", "nokeys", "skip", "limit", "sort", "reverse", "op"]; 	// skip search options
 	//var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
 	//var query = exports.filters(req, operators, skipped);
 	//var query = exports.createSearchQuery(params, skipped);
@@ -31,16 +31,16 @@ exports.search = function (params) {
 
 	// keys that are wanted
 	var keys = {};
-	if(typeof params._keys !== 'undefined') {
-		arrKeys = params._keys.split(",");
+	if(typeof params.keys !== 'undefined') {
+		arrKeys = params.keys.split(",");
 		arrKeys.forEach((key) => {
 			keys[key.trim()] = 1;
 		})
 	}
 
 	// keys that are not wanted
-	if(typeof params._nokeys !== 'undefined') {
-		arrKeys = params._nokeys.split(",");
+	if(typeof params.nokeys !== 'undefined') {
+		arrKeys = params.nokeys.split(",");
 		arrKeys.forEach((key) => {
 			keys[key.trim()] = 0;
 		})
@@ -152,7 +152,7 @@ exports.createSearchQuery = function(params, skip) {
 	for(var param in params) {
 		if(!skip.includes(param)) {
 			console.log(param)
-			var splitted = params[param].split(',')
+			var splitted = params[param].split('|')
 			if(splitted.length > 1) {
 				var ands = [];
 				for(var i = 0; i < splitted.length; i++) {

@@ -316,11 +316,11 @@ var glamPipeNode = function (node, gp) {
 					alert(data.error);
 				var options = [];
 				
-				for(var i = 0; i < data.keys.length; i++) {
-					options.push("<option>" + data.keys[i] + "</option>");
+				if(data.keys) {
+					for(var i = 0; i < data.keys.length; i++) {
+						options.push("<option>" + data.keys[i] + "</option>");
+					}
 				}
-
-
 
 				// execute node's settings.js if exists
 				if(self.source.scripts.settings) {

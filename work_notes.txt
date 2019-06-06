@@ -2,22 +2,29 @@
 TEE csv import ensin, jotta voit testata noden skriptien editointia
 
 TODO:
-- facet and search queries
-- facet view
+
 - PDF core
 - WEB export core
 - custom node functionality
 - forked node functionality
-- allow labeling of nodes and collections
-- add "views" section to UI
+- allow labeling of collections
+- user auth
+- shibboleth
+- devmode
+- File downloads
 
 DONE:
+- allow labeling of nodes
+- facet and search queries
+- facet view
+- add "views" section to UI
 - finalize socket.io communication (messages must include project and node uuids) OK
 - csv core OK
 - node dirs
 
 TO BE FIXED:
 - re-generate schema should refresh keys
+- facet UI should warn about '|' in data values
 
 FIXED:
 - OK node settings are not remembered 
@@ -26,6 +33,17 @@ API:
 /api/v2/collections/[COLLECTION_ID]/fields
 - returns all fields of the collection
 - 
+
+search
+/api/v2/collections/[COLLECTION_ID]/docs
+parameters:
+- limit 
+- skip
+- keys -> keys included
+- nokeys -> keys not included
+- mongoquery -> query object that is passed to mongo "mongoquery={'title': 'My document'}"
+- "title=kissa|koira"
+
 
 Nodes and cores
 
