@@ -30,44 +30,36 @@ async function fileLoop(node, core) {
 		var doc = await cursor.next();
 	  
 		node.sandbox.context.doc = doc;
-		node.sandbox.core.data = null;
-		var setters = [];
+		node.sandbox.core.data = [];
 
-		// WIP: pitäisko noden saada kerralla kaikki tulokset? vai kutsutaanko node kerran jokaisen rivin kohdalla?
 		// run.js: pitää asettaa setter!!!
-
-		
 		// PRE_RUN - give input to core (core.files)
 		node.scripts.pre_run.runInContext(node.sandbox);
 		
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
 			for(var file of node.sandbox.core.files) {
-				var core_result = await core(node);
-				node.sandbox.core.data = core_result;	
-				node.scripts.run.runInContext(node.sandbox);
-				setters.push(node.sandbox.out.setter)			
+				// check that file exists or download
+				try {
+					console.log('Processing PDF...')
+					var core_result = await core(node, file);
+					console.log('Processing DONE!')
+					console.log(core_result)
+					node.sandbox.core.data.push(core_result);	
+				} catch(e) {
+					console.log('ERROR in PDF processing')
+					node.sandbox.core.data.push({'error': e.message});	
+				}
 			}
-
 		} else {
 			var core_result = await core(node);
 			node.sandbox.core.data = core_result;
-			node.scripts.run.runInContext(node.sandbox);
-			setters.push(node.sandbox.out.setter)
 		}	
-		
-		node.sandbox.out.setter = combineSetters(setters);
-		var update = {'pdf_text':'koira', 'pdf_info': 'dd'}
 
-		//var update = {}
-		// if out.value is set, then we write field defined in settings.out_field
-		//if(node.sandbox.out.value) {
-			update[node.source.params.out_field] = node.sandbox.out.value;
-		//}
-	  
-		bulk.find({ '_id': doc._id }).updateOne({
-			'$set': update
-		});
+		//node.scripts.run.runInContext(node.sandbox);
+		//bulk.find({ '_id': doc._id }).updateOne({
+			//'$set': node.sandbox.out.setter
+		//});
 	}	
 	
 	// make changes to database

@@ -277,10 +277,11 @@ class Node {
 		this.scripts.pre_run 	= CreateScriptVM(this.source, sandbox, "pre_run");
 		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
-
+			
 		try {
 			this.scripts.init.runInContext(sandbox);
 		} catch(e) {
+			throw(new Error('Node script error'))
 			error(e)
 		}
 		
@@ -295,7 +296,11 @@ class Node {
 				break;
 				
 			case "process":
-				await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				try {
+					await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				} catch(e) {
+					console.log(e.message)
+				}
 				break;
 				
 			case "export":
