@@ -291,7 +291,7 @@ var glamPipeNode = function (node, gp) {
 
 			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
 			debug += "<settinginstructions>Here you can write your own description of what this node does.";
-			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a></p>"
+			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a><br><a href=''>Edit this node</a></p>"
 			debug += "</settinginstructions></settinginfo>"
 			debug += "<settingaction>";
 			debug += "<label>description:</label>";
@@ -385,6 +385,8 @@ var glamPipeNode = function (node, gp) {
 				}
 			}
 		}
+		// script node is a special case with its editor
+		if(self.source.nodeid == "process_script" && typeof(editor) !== 'undefined' && data.settings['js']) editor.setValue(data.settings['js']);		
 	}
 
 
@@ -446,6 +448,9 @@ var glamPipeNode = function (node, gp) {
 		$("settingsblock textarea.node-settings").each(function() {
 				settings[$(this).attr("name")] = $(this).val();
 		});
+
+		// script node requires sepcial handling
+		if(self.source.nodeid == "process_script" && editor) settings['js'] = editor.getValue();
 
 		// finally read the node description
 		var desc = $(".node-description-value").val();

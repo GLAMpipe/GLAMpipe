@@ -1,5 +1,6 @@
 
-var db = require('./db.js');
+const vm 		= require("vm");
+var db 			= require('./db.js');
 var pdf 		= require('./cores/file-pdf.js');
 const GP 		= require("../config/const.js");
 
@@ -16,7 +17,6 @@ exports.process = {
 		'script': async function(node) {
 			await syncLoop(node);
 		}
-		
 	}
 }
 
@@ -30,35 +30,40 @@ async function fileLoop(node, core) {
 		var doc = await cursor.next();
 	  
 		node.sandbox.context.doc = doc;
-		node.sandbox.core.data = [];
+		node.sandbox.core.data = null;
+		var setters = [];
 
 		// WIP: pitäisko noden saada kerralla kaikki tulokset? vai kutsutaanko node kerran jokaisen rivin kohdalla?
+		// run.js: pitää asettaa setter!!!
 
 		
-		// PRE_RUN - give input to core
+		// PRE_RUN - give input to core (core.files)
 		node.scripts.pre_run.runInContext(node.sandbox);
 		
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
-			var result = await core(node);
-			node.sandbox.core.data.push(result);
+			for(var file of node.sandbox.core.files) {
+				var core_result = await core(node);
+				node.sandbox.core.data = core_result;	
+				node.scripts.run.runInContext(node.sandbox);
+				setters.push(node.sandbox.out.setter)			
+			}
+
 		} else {
-			var result = await core(node);
-			node.sandbox.core.data = result;
-		}
-		node.scripts.run.runInContext(node.sandbox);
-		
-		if(node.sandbox.out.setter)
+			var core_result = await core(node);
+			node.sandbox.core.data = core_result;
+			node.scripts.run.runInContext(node.sandbox);
 			setters.push(node.sandbox.out.setter)
-		else
-			result.push(node.sandbox.out.value);
+		}	
+		
+		node.sandbox.out.setter = combineSetters(setters);
+		var update = {'pdf_text':'koira', 'pdf_info': 'dd'}
 
-		var update = {}
+		//var update = {}
 		// if out.value is set, then we write field defined in settings.out_field
-		if(node.sandbox.out.value) {
+		//if(node.sandbox.out.value) {
 			update[node.source.params.out_field] = node.sandbox.out.value;
-		}
-
+		//}
 	  
 		bulk.find({ '_id': doc._id }).updateOne({
 			'$set': update
@@ -75,27 +80,38 @@ async function fileLoop(node, core) {
 
 async function syncLoop(node) {
 
-	var bulk = db[node.collection].initializeOrderedBulkOp();
-    const cursor = db[node.collection].findAsCursor({});	
-	while(await cursor.hasNext()) {
-		var doc = await cursor.next();
-	  
-		node.sandbox.context.doc = doc;
-		node.scripts.run.runInContext(node.sandbox);
-		var update = {}
-		// if out.value is set, then we write field defined in settings.out_field
-		if(node.sandbox.out.value) {
-			update[node.source.params.out_field] = node.sandbox.out.value;
+	try {
+		// check if run.js is provided in settings
+		if(node.settings.js) {
+			var run = new vm.createScript(node.settings.js);
+			node.scripts.run = run;
 		}
-	  
-		bulk.find({ '_id': doc._id }).updateOne({
-			'$set': update
-		});
+
+		var bulk = db[node.collection].initializeOrderedBulkOp();
+		const cursor = db[node.collection].findAsCursor({});	
+		while(await cursor.hasNext()) {
+			var doc = await cursor.next();
+		  
+			node.sandbox.context.doc = doc;
+			node.scripts.run.runInContext(node.sandbox);
+			var update = {}
+			// if out.value is set, then we write field defined in settings.out_field
+			if(node.sandbox.out.value) {
+				update[node.source.params.out_field] = node.sandbox.out.value;
+			}
+		  
+			bulk.find({ '_id': doc._id }).updateOne({
+				'$set': update
+			});
+		}	
+		
+		// make changes to database
+		await bulk.execute();
+	} catch (e) {
+		node.sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
+		throw(new Error("Error in Script node: 'run' script: " + e.name +" " + e.message))
+		
 	}	
-	
-	// make changes to database
-	await bulk.execute();
-	
 	// notify that we are finished
 	//node.sandbox.out.say('finish', 'Done');
 }

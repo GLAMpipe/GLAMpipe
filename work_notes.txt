@@ -2,7 +2,9 @@
 TEE csv import ensin, jotta voit testata noden skriptien editointia
 
 TODO:
-
+- node run register /stop functionality / force
+- mark fields that node produces, also out.setter
+- remove node dir on node remove
 - PDF core
 - WEB export core
 - custom node functionality
@@ -14,6 +16,7 @@ TODO:
 - File downloads
 
 DONE:
+- script node
 - allow labeling of nodes
 - facet and search queries
 - facet view
