@@ -1,7 +1,7 @@
 
 const vm 		= require("vm");
 var db 			= require('./db.js');
-var pdf 		= require('./cores/file-pdf.js');
+var pdf 		= require('./cores/pdf.js');
 const GP 		= require("../config/const.js");
 
 var exports 	= module.exports = {};
@@ -40,7 +40,7 @@ async function fileLoop(node, core) {
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
 			for(var file of node.sandbox.core.files) {
-				// check that file exists or download
+				// check that file exists
 				console.log('FILE:' + file)
 
 					try {
@@ -118,6 +118,7 @@ async function syncLoop(node) {
 	// notify that we are finished
 	//node.sandbox.out.say('finish', 'Done');
 }
+
 
 
 // create one setter object for Mongo based on individual setter objects

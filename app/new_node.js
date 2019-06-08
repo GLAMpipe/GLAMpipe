@@ -10,9 +10,12 @@ var error 		= require('debug')('GLAMpipe:error');
 var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
+
 var importLoop 	= require("../app/core-source.js");
 var viewLoop 	= require("../app/core-view.js");
 var processLoop = require("../app/core-process.js");
+var exportLoop = require("../app/core-export.js");
+
 const GP 		= require("../config/const.js");
 
 
@@ -277,6 +280,7 @@ class Node {
 		this.scripts.pre_run 	= CreateScriptVM(this.source, sandbox, "pre_run");
 		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
+		this.scripts.login 		= CreateScriptVM(this.source, sandbox, "login");
 			
 		try {
 			this.scripts.init.runInContext(sandbox);
@@ -284,6 +288,7 @@ class Node {
 			throw(new Error('Node script error'))
 			error(e)
 		}
+
 		
 		var core = this.source.core.split(".");
 		switch(this.source.type) {
@@ -304,7 +309,7 @@ class Node {
 				break;
 				
 			case "export":
-			
+				await exportLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				break;
 				
 			case "view":

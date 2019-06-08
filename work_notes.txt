@@ -5,17 +5,22 @@ TODO:
 - node run register /stop functionality / force
 - mark fields that node produces, also out.setter
 - remove node dir on node remove
-- PDF core
+
 - WEB export core
+- File downloads
+- CLD core
+- user auth
+
 - custom node functionality
 - forked node functionality
 - allow labeling of collections
-- user auth
+
 - shibboleth
 - devmode
-- File downloads
+
 
 DONE:
+- PDF core
 - script node
 - allow labeling of nodes
 - facet and search queries

@@ -23,7 +23,7 @@ var nodeRepository = function (gp) {
 			"file": "Read data from files"
 		},
 		"process": {
-			"strings": "Modify data",
+			"strings": "String operations",
 			"documents": "Modify whole records",
 			"format": "Map data",
 			"files": "File operations",

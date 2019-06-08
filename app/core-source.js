@@ -12,9 +12,9 @@ const GP 		= require("../config/const.js");
 
 var exports 	= module.exports = {};
 
-exports.web = {
+exports.source = {
 
-	"get": {
+	"web": {
 		"JSON": async function(node) {
 			console.log("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
 			
@@ -59,6 +59,11 @@ exports.web = {
 				}
 			}
 			node.scripts.finish.runInContext(node.sandbox);
+		}
+	},
+	"get": {
+		"file": async function(node) {
+			
 		}
 	}
 }
