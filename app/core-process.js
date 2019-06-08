@@ -10,7 +10,7 @@ exports.process = {
 
 	'PDF': {
 		'totext': async function(node) {
-			await fileLoop(node, pdf.toText);
+			await fileLoop(node, pdf.toText_test);
 		}
 	},
 	'sync': {
@@ -23,6 +23,7 @@ exports.process = {
 
 // loop through documents
 async function fileLoop(node, core) {
+	const fs = require("fs-extra");
 
 	var bulk = db[node.collection].initializeOrderedBulkOp();
     const cursor = db[node.collection].findAsCursor({});	
@@ -40,26 +41,36 @@ async function fileLoop(node, core) {
 		if(Array.isArray(node.sandbox.core.files)) {
 			for(var file of node.sandbox.core.files) {
 				// check that file exists or download
-				try {
-					console.log('Processing PDF...')
-					var core_result = await core(node, file);
-					console.log('Processing DONE!')
-					console.log(core_result)
-					node.sandbox.core.data.push(core_result);	
-				} catch(e) {
-					console.log('ERROR in PDF processing')
-					node.sandbox.core.data.push({'error': e.message});	
-				}
+				console.log('FILE:' + file)
+
+					try {
+						await fs.access(file);
+						console.log('Processing PDF..')
+						var core_result = await core(node, file);
+						console.log('Processing DONE!')
+						console.log('core_result: ' +core_result)
+						node.sandbox.core.data.push(core_result);
+							
+					} catch(e) {
+						//console.log('ERROR in PDF processing')
+						console.log(e.message)
+						if(e.message)
+							node.sandbox.core.data.push({'error': e.message});	
+						else
+							node.sandbox.core.data.push({'error': e});	
+						
+					}
+
 			}
 		} else {
 			var core_result = await core(node);
 			node.sandbox.core.data = core_result;
 		}	
 
-		//node.scripts.run.runInContext(node.sandbox);
-		//bulk.find({ '_id': doc._id }).updateOne({
-			//'$set': node.sandbox.out.setter
-		//});
+		node.scripts.run.runInContext(node.sandbox);
+		bulk.find({ '_id': doc._id }).updateOne({
+			'$set': node.sandbox.out.setter
+		});
 	}	
 	
 	// make changes to database
