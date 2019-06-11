@@ -47,9 +47,11 @@ async function webLoop(node, core) {
 
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.options)) {
+			node.sandbox.core.data = [];
 			for(var options of node.sandbox.core.options) {
 				//console.log(options)
-				var result = await requestPromise(options);
+				var core_result = await requestPromise(options);
+				node.sandbox.core.data.push(core_result)
 			}
 		} else {
 			node.sandbox.core.options.resolveWithFullResponse = true

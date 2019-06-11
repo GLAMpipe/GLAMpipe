@@ -324,6 +324,27 @@ class GLAMpipe {
 
 	}
 
+/* ***********************************************************************
+ * 							CORES
+ * ***********************************************************************
+*/
+
+	async getCores() {
+
+		var source = require("../app/core-source.js");
+		var process = require("../app/core-process.js");
+		var exp = require("../app/core-export.js");
+		var view = require("../app/core-view.js");
+		var cores = [];
+		cores = cores.concat(getDeepKeys(source));
+		cores = cores.concat(getDeepKeys(process));
+		cores = cores.concat(getDeepKeys(exp));
+		cores = cores.concat(getDeepKeys(view));
+		return cores;
+
+
+	}
+
 
 /* ***********************************************************************
  * 							MISC
@@ -378,5 +399,20 @@ function formatBytes(bytes, decimals = 2) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
+function getDeepKeys(obj) {
+    var keys = [];
+    for(var key in obj) {
+        if(typeof obj[key] === "object") {
+			for(var key2 in obj[key]) {
+				if(typeof obj[key][key2] === "object") {
+					for(var key3 in obj[key][key2]) {
+						keys.push(key + "." + key2 + "." + key3)
+					}
+				}
+			}
+        }
+    }
+    return keys;
+}
 
 module.exports = GLAMpipe ;

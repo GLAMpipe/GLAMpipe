@@ -199,6 +199,13 @@ $( document ).ready(function() {
 		websockPopup(gp.debugInfo(e), "node parameters and id");
 	});
 
+	// edit node (custom node)
+	$(document).on("click", ".edit-node", function(e) {
+		e.preventDefault();
+		gp.editNode(e)
+	});
+
+
 	// esc closes some dialogs
 	$(document).keyup(function(e) {
 		 if (e.keyCode == 27) { 

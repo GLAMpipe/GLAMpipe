@@ -293,12 +293,32 @@ router.get('/views/:node', async function (ctx) {
 	node.getFilesIndex(ctx);
 });
 
+
+/* ***********************************************************************
+ * 							CORE
+ * ***********************************************************************
+*/
+
+router.get('/api/v2/cores', async function (ctx) {
+	var cores = await GP.getCores(ctx.params.node);
+	ctx.body = cores;
+});
+
+router.get('/api/v2/cores/core', async function (ctx) {
+	var cores = await GP.getCores(ctx.params.node);
+	ctx.body = cores;
+});
+
+
+
+
+
 var server = require('http').createServer(app.callback())
 GP.init(server);
 //var io = require('socket.io')(server)
- 
+
 app
 	.use(router.routes())
 	.use(router.allowedMethods());
 
-server.listen(3000);
+server.listen(global.config.port);

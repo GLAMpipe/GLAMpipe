@@ -291,7 +291,7 @@ var glamPipeNode = function (node, gp) {
 
 			var debug = "<setting><settinginfo><settingtitle>Node description</settingtitle>";
 			debug += "<settinginstructions>Here you can write your own description of what this node does.";
-			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a><br><a href=''>Edit this node</a></p>"
+			debug += "<p><a class='show-node-params' href='#'>Show node parameters</a><br><a class='edit-node' href=''>Edit this node</a></p>"
 			debug += "</settinginstructions></settinginfo>"
 			debug += "<settingaction>";
 			debug += "<label>description:</label>";
@@ -341,6 +341,10 @@ var glamPipeNode = function (node, gp) {
 		}
 	}
 
+	this.editNode = function() {
+		// setup script editor
+		$('settingsblock').append('<div>editor</div>');
+	}
 
 	this.renderDebug = function() {
 

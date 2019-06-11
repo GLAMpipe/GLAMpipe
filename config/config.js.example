@@ -38,6 +38,8 @@ var public = true;
 // local
 var localCanRegister = true;
 
+// port
+var port = 3000
 
 // SHIBBOLETH
 var shibbolethUsers = [];
@@ -87,6 +89,7 @@ exports.canRegister = localCanRegister;
 exports.secret = secret;
 exports.tags = visible_tags;
 exports.start_delay = start_delay;
+exports.port = port;
 
 exports.IP_passes = IP_passes;
 exports.PROXY_passes = PROXY_passes;

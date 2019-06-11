@@ -37,6 +37,9 @@ TO BE FIXED:
 FIXED:
 - OK node settings are not remembered 
 
+
+
+
 API:
 /api/v2/collections/[COLLECTION_ID]/fields
 - returns all fields of the collection

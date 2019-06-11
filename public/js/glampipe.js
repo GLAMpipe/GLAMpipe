@@ -570,6 +570,13 @@ var glamPipe = function () {
 
 	}
 
+	this.editNode = function (e) {
+		if(self.currentlyOpenNode)
+			return self.currentlyOpenNode.editNode();
+
+	}
+
+
 	// called by "finished" websocket message
 	this.nodeRunFinished = function (data) {
 		var node = self.getRegularNode(data.node_uuid);
