@@ -50,6 +50,10 @@ router.get('/projects/:id', function(ctx) {
 	return serve(ctx, 'project.html', { root: __dirname + '/public' });
 })
 
+router.get('/node-editor/:node', function(ctx) {
+	return serve(ctx, 'node-editor.html', { root: __dirname + '/public' });
+})
+
 /* ***********************************************************************
  * 							STATUS & CONFIG
  * ***********************************************************************
@@ -89,6 +93,7 @@ router.get('/api/v2/projects/:id', async function (ctx) {
 });
 
 router.post('/api/v2/projects', async function (ctx) {
+	console.log(ctx.request.body)
 	var project = await GP.createEmptyProject(ctx.request.body.title);
 	var collection = await GP.createCollection("test", project._id);
 	ctx.body = project;
