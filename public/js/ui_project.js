@@ -180,7 +180,7 @@ $( document ).ready(function() {
 	});
 
 	// fetch fields when non-current collection is chosen
-	$(document).on('change','.dynamic_collection', function(e) {
+	$(document).on('change','.dynamic-collection', function(e) {
 		gp.renderDynamicCollectionFieldList($('.source-dynamic-field'), e);
 	})
 

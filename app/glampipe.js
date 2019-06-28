@@ -304,6 +304,15 @@ class GLAMpipe {
 		return collection.insertDoc(collection_name, doc);
 	}
 
+	async deleteDoc(collection_name, doc) {
+		return collection.removeDoc(collection_name, doc);
+	}
+
+	async getCollections() {
+		var collections = await db.getCollectionNames();
+		return collections;
+		// TODO: remove gp__ -collections
+	}
 
 /* ***********************************************************************
  * 							FILES

@@ -13,12 +13,14 @@ exports.process = {
 			await fileLoop(node, pdf.toText_test);
 		}
 	},
+	
 	'sync': {
 		'script': async function(node) {
 			await syncLoop(node);
 		}
 	}
 }
+
 
 
 // loop through documents
@@ -84,7 +86,7 @@ async function fileLoop(node, core) {
 async function syncLoop(node) {
 
 	try {
-		// check if run.js is provided in settings
+		// check if run.js code is provided in settings
 		if(node.settings.js) {
 			var run = new vm.createScript(node.settings.js);
 			node.scripts.run = run;
@@ -98,7 +100,7 @@ async function syncLoop(node) {
 			node.sandbox.context.doc = doc;
 			node.scripts.run.runInContext(node.sandbox);
 			var update = {}
-			// if out.value is set, then we write field defined in settings.out_field
+			// if out.value is set, then we write to the field defined in settings.out_field
 			if(node.sandbox.out.value) {
 				update[node.source.params.out_field] = node.sandbox.out.value;
 			}

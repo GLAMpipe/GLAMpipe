@@ -54,8 +54,9 @@ exports.getDoc = async function(collection_name, id) {
 	} catch(e) {
 		return {};
 	}
-	
 }
+
+
 
 exports.getDocs = async function(collection_name, query) {
 	
@@ -80,6 +81,15 @@ exports.insertDoc = async function(collection_name, doc) {
 	}
 }
 
+exports.removeDoc = async function(collection_name, id) {
+	
+	try {
+		return db[collection_name].remove({_id:mongoist.ObjectId(id)});
+	} catch(e) {
+		console.log(e)
+		return {};
+	}
+}
 
 exports.getCount = async function(collection_name, query) {
 	var search = buildquery.search(query);

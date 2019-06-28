@@ -2,6 +2,7 @@
 
 var requestPromise = require('request-promise-native');
 const fetch 	= require('node-fetch');
+var debug 		= require('debug')('GLAMpipe:node');
 var csv 		= require('./cores/csv.js');
 
 const constants = require("../config/const.js");
@@ -55,13 +56,27 @@ exports.source = {
 				}
 			}
 			node.scripts.finish.runInContext(node.sandbox);
+		},
+
+
+		"CSV": async function(node) {
+			// init.js 
+			console.log(node.sandbox.core.options)
+			console.log(node.sandbox.core.filename)
+			// download file
+			var result = await requestPromise(node.sandbox.core.options);
+			// save to node directory
+			const fs = require("fs");
+			fs.writeFileSync(node.sandbox.core.filename, result, 'utf-8')
+			// parse csv
+			node.source.params.filename = node.sandbox.core.filename;
+			debug("entering csv.read");
+			csv.read(node);
+			debug("Done csv.read");
 		}
 	},
-	"get": {
-		"file": async function(node) {
-			
-		}
-	},
+
+
 	"file": {
 		"CSV": async function(node) {
 			csv.read(node)

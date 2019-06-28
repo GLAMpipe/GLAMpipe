@@ -14,6 +14,7 @@ var buildquery 	= require("../app/query-builder.js");
 var importLoop 	= require("../app/core-source.js");
 var viewLoop 	= require("../app/core-view.js");
 var processLoop = require("../app/core-process.js");
+var lookupLoop = require("../app/core-lookup.js");
 var exportLoop = require("../app/core-export.js");
 
 const GP 		= require("../config/const.js");
@@ -62,8 +63,9 @@ class Node {
 		this.uuid = id;
 		this.collection = this.source.collection;
 		this.project = project._id;
-		this.project_title = project.title;
-		this.project_dir = project.dir;
+		this.project_obj = project;
+		//this.project_dir = project.dir;
+
 	}
 	
 	
@@ -111,7 +113,7 @@ class Node {
 	
 
 	async writeDir(project_id) {
-		if(this.source.type == 'view') {
+		if(this.source.type == 'view' || this.source.type == 'source') {
 			const fs = require('fs');
 			var project = await db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
 			if(project.dir) {
@@ -263,6 +265,7 @@ class Node {
 		sandbox.context.node = this.source;
 		sandbox.context.node.settings = settings;
 		sandbox.context.node.uuid = this.uuid;
+
 		this.sandbox = sandbox;
 		this.scripts = {};
 		
@@ -282,11 +285,13 @@ class Node {
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 		this.scripts.login 		= CreateScriptVM(this.source, sandbox, "login");
 			
-		try {
-			this.scripts.init.runInContext(sandbox);
-		} catch(e) {
-			throw(new Error('Node script error'))
-			error(e)
+		if(this.scripts.init) {
+			try {
+				this.scripts.init.runInContext(sandbox);
+			} catch(e) {
+				error(e)
+				throw(new Error('Node script error'))
+			}
 		}
 
 		
@@ -297,17 +302,29 @@ class Node {
 			
 				// example core: web.get.JSON 
 				await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
-				await schema.createSchema(this.collection);
+				//await schema.createSchema(this.collection);
 				break;
 				
 			case "process":
-				try {
-					await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
-				} catch(e) {
-					console.log(e.message)
+				switch(this.source.subtype) {
+					case "lookups":
+						try {
+							await lookupLoop[ core[0] ][ core[1] ][ core[2] ](this);
+						} catch(e) {
+							console.log(e.message)
+						}
+						break;
+						
+					default:
+						try {
+							await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
+						} catch(e) {
+							console.log(e.message)
+						}
+					break;
 				}
 				break;
-				
+
 			case "export":
 				await exportLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				break;
@@ -366,7 +383,9 @@ function createSandbox(node) {
 		core: {
 			options: null
 		},
-		
+		funcs: {
+			path: path
+		},
 		out: {
 			self:this,
 			value:"",

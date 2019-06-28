@@ -190,7 +190,7 @@ var nodeRepository = function (gp) {
 			//var paramsScript = new Function('node', node.scripts.params);
 			//paramsScript(node);
 		//}
-		$('.dynamic_collection').append(self.gp.collectionList());
+		$('.dynamic-collection').append(self.gp.collectionList());
 	}
 
 

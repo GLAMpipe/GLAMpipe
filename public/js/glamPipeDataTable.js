@@ -193,6 +193,7 @@ var dataTable = function (node) {
 			}
 		}
 console.log(self.keys);
+		if(!self.keys.visible_keys && !self.keys.all_keys) return [];
 		// otherwise let the user decide what to see
 		if(self.keys.visible_keys == null) {
 
@@ -745,12 +746,14 @@ console.log(self.keys);
 		
 		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-generate schema</a>";
 		html += "<hr/><div class='flex visible-keys'>";
-		for(var i = 0; i < result.keys.length; i++) {
-			if(visible_keys.indexOf(result.keys[i]) === -1)
-				html += "<div data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
-			else
-				html += "<div class='good' data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
+		if(result.keys) {
+			for(var i = 0; i < result.keys.length; i++) {
+				if(visible_keys.indexOf(result.keys[i]) === -1)
+					html += "<div data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
+				else
+					html += "<div class='good' data-name='"+result.keys[i]+"'>" + result.keys[i]  + "</div>";
 
+			}
 		}
 		html += "</div>";
 		return html;

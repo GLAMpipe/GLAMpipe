@@ -231,8 +231,18 @@ router.get('/api/v2/collections/:collection/docs', async function (ctx) {
 	ctx.body = {"data": docs};
 });
 
+router.post('/api/v2/collections/:collection/docs', async function (ctx) {
+	var docs = await collection.insertDoc(ctx.params.collection, ctx.request.body);
+	ctx.body = {"data": docs};
+});
+
 router.get('/api/v2/collections/:collection/docs/:id', async function (ctx) {
 	var doc = await GP.getDoc(ctx.params.collection, ctx.params.id);
+	ctx.body = doc;
+});
+
+router.delete('/api/v2/collections/:collection/docs/:id', async function (ctx) {
+	var doc = await GP.deleteDoc(ctx.params.collection, ctx.params.id);
 	ctx.body = doc;
 });
 
@@ -256,10 +266,17 @@ router.get('/api/v2/collections/:collection/facet', async function (ctx) {
 	ctx.body = facet;
 });
 
+router.get('/api/v2/collections', async function (ctx) {
+	var collections = await GP.getCollections();
+	ctx.body = collections;
+})
+
 router.post('/api/v2/collections', async function (ctx) {
 	var collection 	= await GP.createCollection(ctx.request.body.title, ctx.request.query.project);
 	ctx.body = collection;
 })
+
+
 
 router.put('/api/v2/collections/:collection/schema', async function (ctx) {
 	const schema = await GP.createSchema(ctx.params.collection);

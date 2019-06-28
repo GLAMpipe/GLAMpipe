@@ -951,9 +951,8 @@ var glamPipe = function () {
 			// add select
 			html = "";
 
-				for (var i = 0; i < data.sorted.length; i++) {
-					var key = data.keys[data.sorted[i]];
-					html += "<option class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + data.sorted[i] + "'>" + data.sorted[i] + "</option>";
+				for (var key of data.keys) {
+					html += "<option class='pick_field' data-field='"+ obj.attr("name") +"' data-val='" + key + "'>" + key + "</option>";
 
 				}
 			html += "";
