@@ -102,6 +102,7 @@ class GLAMpipe {
 	// create project from project data and execute nodes
 	async createProject(data) {
 		var new_project = await project.create(data.project_title);
+		console.log(new_project)
 		var collection = await this.createCollection(data.collection_title, new_project._id);
 		for(const node in data.nodes) {
 			var new_node = await this.createNode(data.nodes[node].nodeid, data.nodes[node].params, collection.collection, new_project._id);

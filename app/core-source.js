@@ -1,13 +1,13 @@
 
 
-var requestPromise = require('request-promise-native');
-const fetch 	= require('node-fetch');
-var debug 		= require('debug')('GLAMpipe:node');
-var csv 		= require('./cores/csv.js');
+var requestPromise 	= require('request-promise-native');
+var db 				= require('./db.js');
+var debug 			= require('debug')('GLAMpipe:node');
+var csv 			= require('./cores/csv.js');
 
-const constants = require("../config/const.js");
+const constants 	= require("../config/const.js");
 
-var exports 	= module.exports = {};
+var exports 		= module.exports = {};
 
 exports.source = {
 
@@ -40,6 +40,7 @@ exports.source = {
 					node.sandbox.core.response = result;
 					node.sandbox.core.error = e.message;
 					console.log('ERROR: ' + e.message);
+					node.sandbox.core.options.url = null;
 				}
 
 				// handle data and get new options
