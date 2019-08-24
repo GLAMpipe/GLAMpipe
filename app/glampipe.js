@@ -1,16 +1,20 @@
-var db 			= require('./db.js');
-var project 	= require('./new_project.js');
-var collection 	= require('./new_collection.js');
-var Node 		= require('./new_node.js');
-var schema 		= require('./new_schema.js');
-const version 	= require("../config/version.js");
+const db 			= require('./db.js');
+const project 		= require('./new_project.js');
+const collection 	= require('./new_collection.js');
+const Node 			= require('./new_node.js');
+const schema 		= require('./new_schema.js');
+const version 		= require("../config/version.js");
 
-var debug 		= require('debug')('GLAMpipe');
-var error 		= require('debug')('ERROR');
+var debug 			= require('debug')('GLAMpipe');
+var error 			= require('debug')('ERROR');
 
-const mongoist 	= require('mongoist');
-const path		= require('path');
-const fs 		= require('fs');
+const mongoist 		= require('mongoist');
+const path			= require('path');
+const fs 			= require('fs');
+const os			= require('os')
+
+var workerFarm 		= require('worker-farm');
+var workers 		= null;
 
 
 class GLAMpipe {
@@ -42,6 +46,7 @@ class GLAMpipe {
 		console.log("GLAMpipe init started...")
 		// load nodes from files
 		await this.loadNodes();
+		global.register = {};
 		
 		// create data directory structure
 		if(!fs.existsSync("glampipe-data")) fs.mkdirSync("glampipe-data");
@@ -55,8 +60,23 @@ class GLAMpipe {
 		if(!settings) await db.collection("gp_settings").insert({"project_count":0, "data_path":""});
 		
 		if(server) {
-			this.io	= require('socket.io')(server);
+			var io = require('socket.io')(server);
+			this.io	= io;
 		}
+		
+		var p = function(p) {
+			p.on('message', (m) => {
+				if(!m.owner) {
+					if(global.register[m.node_uuid]) {
+						global.register[m.node_uuid]['processed'] = global.register[m.node_uuid]['processed'] + m.counter;
+					}
+					m.msg = global.register[m.node_uuid]['processed'];
+					io.sockets.emit("progress", m);
+				}
+			});
+		}
+		workers = workerFarm({onChild:p}, require.resolve('./new_node-farm.js'))
+
 	}
 
 
@@ -140,12 +160,65 @@ class GLAMpipe {
 			this.io.sockets.emit("progress", "NODE: running node ");
 			var node = new Node();
 			await node.loadFromProject(id);
-			node.run(settings, this.io.sockets);
+			
+			if(global.register[id]) 
+				throw("Node is running");
+			else 
+				global.register[id] = {node: node, settings: settings, processed: 0}; 
+			
+			// we run 'process' nodes in worker farm if enabled
+			if(node.source.type === 'process' && global.config.enableWorkers)
+				await this.startNodeFarm(id, settings, node)
+			else
+				await node.run({settings:settings, ws:this.io.sockets});
 			
 		} catch(e) {
 			error("Node start failed! " + e.message);
 			throw(e);
 		}
+	}
+
+	async startNodeFarm(id, settings, node) {
+		let workerCount = os.cpus().length;
+		if(Number.isInteger(global.config.workerCount)) workerCount =  global.config.workerCount;
+		
+		let docCount = await collection.getCount(node.collection, {});
+		var batchSize = Math.floor(docCount/workerCount);
+		var leftOver = docCount - workerCount * batchSize;
+		
+		console.log("Number of workers: " + workerCount)
+		console.log("Number of documents: " + docCount)
+		console.log("batch: " + batchSize)
+		console.log("leftover: "  + leftOver)
+	
+		if(docCount > global.config.workerMinDocCount) {
+			for(var i = 0; i < workerCount; i++) {
+				var options = {
+					id: id,
+					settings: settings,
+					offset: i*batchSize,
+					limit:batchSize
+				}
+				// last worker should process all the rest documents
+				if(i === workerCount-1) options.limit = 0;
+				console.log(options)
+				workers(options, function (err, outp) {
+					console.log(outp)
+				})
+			} 
+		} else {
+			var options = {
+				id: id,
+				settings: settings
+			}
+			console.log(options)
+			workers(options, function (err, outp) {
+				console.log(outp)
+			})
+		}
+		
+		this.io.sockets.emit("progress", "NODE: running node in worker-farm ");
+
 	}
 
 	async loadNodes() {
@@ -192,6 +265,7 @@ class GLAMpipe {
 		if(count === 0) console.log("** ERROR: No nodes loaded! Did you fetch the nodes? **")
 		else console.log("* OK: Loaded " + count + " nodes from " + nodePath)
 		debug("Loaded " + count + " nodes");
+		return {loaded:count, path:global.config.nodePath};
 	}		
 
 

@@ -253,25 +253,27 @@ class Node {
 	}
 	
 	
-	async run(settings, ws) {
+	async run(options) {
 		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
-		this.settings = settings;	
+		this.settings = options.settings;	
+		this.options = options;
 		
-		await this.saveSettings(settings);
+		await this.saveSettings(options.settings);
 		
 		// create context for GP node
 		var sandbox = createSandbox(this.source);
 		sandbox.context = {};
 		sandbox.context.node = this.source;
-		sandbox.context.node.settings = settings;
+		sandbox.context.node.settings = options.settings;
 		sandbox.context.node.uuid = this.uuid;
+		sandbox.context.vars = {counter:0};
 
 		this.sandbox = sandbox;
 		this.scripts = {};
 		
 		// socket.io
-		if(ws) {
-			sandbox.out.say = function(ch, msg) {ws.emit(ch, {
+		if(options.ws) {
+			sandbox.out.say = function(ch, msg) {options.ws.emit(ch, {
 			'msg':msg, 
 			'project': sandbox.context.node.project,
 			'node_uuid': sandbox.context.node.uuid,
@@ -365,8 +367,8 @@ function CreateScriptVM(node, sandbox, scriptName) {
 
 function createSandbox(node) {
 
-
-	var urljoin = require('url-join');
+	var xmlparser = require('fast-xml-parser');
+	
 	// context for node scripts
 	var sandbox = {
 		context: {
@@ -384,7 +386,7 @@ function createSandbox(node) {
 			options: null
 		},
 		funcs: {
-			path: path
+			xmlparser: {'xml2json': function(p) {return xmlparser.parse(p)}},
 		},
 		out: {
 			self:this,

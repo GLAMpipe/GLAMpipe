@@ -28,6 +28,7 @@ async function fileLoop(node, core) {
 	const fs = require("fs-extra");
 
 	var bulk = db[node.collection].initializeOrderedBulkOp();
+
     const cursor = db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
@@ -85,6 +86,7 @@ async function fileLoop(node, core) {
 
 async function syncLoop(node) {
 
+
 	try {
 		// check if run.js code is provided in settings
 		if(node.settings.js) {
@@ -92,28 +94,45 @@ async function syncLoop(node) {
 			node.scripts.run = run;
 		}
 
+		var offset = node.options.offset || 0; 
+		var limit = node.options.limit || 0; 
+	
 		var bulk = db[node.collection].initializeOrderedBulkOp();
-		const cursor = db[node.collection].findAsCursor({});	
+		const cursor = db[node.collection].findAsCursor({}).skip(offset).limit(limit);	
+		var counter = 0;
 		while(await cursor.hasNext()) {
+	
+			
 			var doc = await cursor.next();
-		  
+			counter++;
 			node.sandbox.context.doc = doc;
+			node.sandbox.context.vars.count = counter;
+			
 			node.scripts.run.runInContext(node.sandbox);
-			var update = {}
+
 			// if out.value is set, then we write to the field defined in settings.out_field
+			var update = {}
 			if(node.sandbox.out.value) {
 				update[node.source.params.out_field] = node.sandbox.out.value;
 			}
-		  
+			
 			bulk.find({ '_id': doc._id }).updateOne({
 				'$set': update
 			});
+			
+			if (counter % 1000 == 0 ) {
+				var w = await bulk.execute();
+				//console.log(w)
+				bulk = db[node.collection].initializeOrderedBulkOp();
+				process.send({node_uuid:node.uuid, project:node.project,counter:1000});
+			}
 		}	
 		
 		// make changes to database
 		await bulk.execute();
 	} catch (e) {
 		node.sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
+		console.log(e.stack);
 		throw(new Error("Error in Script node: 'run' script: " + e.name +" " + e.message))
 		
 	}	
@@ -121,6 +140,30 @@ async function syncLoop(node) {
 	//node.sandbox.out.say('finish', 'Done');
 }
 
+
+
+
+function runNodeScriptInContext (script, node, sandbox) {
+	try {
+		vm.runInNewContext(node.scripts[script], sandbox);
+		
+	} catch (e) {
+		if (e instanceof SyntaxError) {
+			console.log("Syntax error in node.scripts."+script+"!", e);
+			//io.sockets.emit("error", "Syntax error in node.scripts."+script+"!</br>" + e);
+			throw new NodeScriptError("syntax error:" + e.message);
+		} else {
+			console.log("Error in node.scripts."+script+"!",e);
+			//io.sockets.emit("error", "Error in node.scripts."+script+"!</br>" + e);
+			throw new NodeScriptError(e.message);
+		}
+	}
+}
+
+function NodeScriptError (message) {
+	this.message = message;
+	this.name = "NodeScriptError";
+}
 
 
 // create one setter object for Mongo based on individual setter objects

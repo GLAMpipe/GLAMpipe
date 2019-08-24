@@ -1,5 +1,12 @@
 
-TEE csv import ensin, jotta voit testata noden skriptien editointia
+What is GLAMpipe?
+High Level Data Processing and Storage API - with a GUI
+
+
+TESTING
+worker-farm -> huge performance boost!
+- makes communication a little bit more complex. -> Generic process counter is needed, child processes are aware only on they part
+
 
 TODO:
 - node run register /stop functionality / force

@@ -52,6 +52,11 @@ var shibbolethHeadersEncoding =  "UTF-8";
 var disableBatchDownloads = false;
 var secret = "Set something here";
 
+// WORKERS
+var enableWorkers = true; // speed up things for processing nodes
+var workerMinDocCount = 10000; // use workers only if there are certain amount of docs
+var workerCount = 'auto'; // integer or 'auto': 'auto' = number of CPUs
+
 // SMTP for email nodes (for backend use)
 var smtp = "";
 var smtpSender = "";
@@ -98,6 +103,10 @@ exports.shibbolethUsers = shibbolethUsers;
 exports.shibbolethHeaderId = shibbolethHeaderId;
 exports.shibbolethHeadersToData = shibbolethHeadersToData;
 exports.shibbolethHeadersEncoding = shibbolethHeadersEncoding;
+
+exports.enableWorkers = enableWorkers;
+exports.workerMinDocCount = workerMinDocCount;
+exports.workerCount = workerCount;
 
 exports.smtp = smtp;
 exports.smtpSender = smtpSender;

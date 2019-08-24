@@ -16,7 +16,7 @@ global.register = {};
 
 //Set up body parsing middleware
 app.use(bodyParser({
-   formidable:{uploadDir: './glampipe-data/uploads'},    //This is where the files would come
+   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},    //This is where the files would come
    multipart: true,
    urlencoded: true
 }));
@@ -140,6 +140,11 @@ router.get('/api/v2/options/:label', async function (ctx) {
 
 router.post('/api/v2/options/:label', async function (ctx) {
 	var options = await GP.addOption(ctx.params.label, ctx.request.body);
+	ctx.body = options;
+});
+
+router.get('/api/v2/repository/reload', async function (ctx) {
+	var options = await GP.loadNodes();
 	ctx.body = options;
 });
 
