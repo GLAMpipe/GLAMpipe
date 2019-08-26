@@ -354,19 +354,11 @@ class GLAMpipe {
 		let template = {};
 
 		var l = xml2json.parse(node.views.settings, {ignoreAttributes:false});
-		//console.log(l.setting)
+		console.log(l.setting)
 		for(const setting of l.setting) {
-			if(Array.isArray(setting.settingaction.input)) {
-				for(const input of setting.settingaction.input) {
-					if(input["@_class"].includes("node-settings") && input["@_name"]) {
-						template[input["@_name"]] = createSettingsTemplate(setting, input)
-					}
-				}				
-			} else if(setting.settingaction.input) {
-				if(setting.settingaction.input["@_class"].includes("node-settings") && setting.settingaction.input["@_name"]) {
-					template[setting.settingaction.input["@_name"]] = createSettingsTemplate(setting, setting.settingaction.input)
-				}	
-			}
+			createSettingsTemplate(setting, "input", template)
+			createSettingsTemplate(setting, "select", template)
+			createSettingsTemplate(setting, "textarea", template)
 		}
 		return template;
 	}
@@ -467,13 +459,35 @@ class GLAMpipe {
 }
 
 
-function createSettingsTemplate(setting, input) {
-	var info = {}
-	info["element"] = input["@_type"] || 'unknown';
-	info["value"] = input["@_checked"] || input["@_value"] || '';
-	info["title"] = setting.settinginfo.settingtitle || '';
-	info["help"] = setting.settinginfo.settinginstructions || '';
-	return info;
+function createSettingsTemplate(setting, type, template) {
+
+	if(Array.isArray(setting.settingaction[type])) {
+		for(const input of setting.settingaction[type]) {
+			createSettingsInfo(setting, input, template, type);
+		}		
+	} else if(setting.settingaction[type]) {
+		createSettingsInfo(setting, setting.settingaction[type], template, type);
+	}
+}
+
+function createSettingsInfo(setting, input, template, type) {
+
+	var info = {};
+	if(input["@_class"] == "node-settings" && input["@_name"]) {
+		info["element"] = input["@_type"] || 'unknown';
+		info["value"] = input["@_checked"] || input["@_value"] || '';
+		info["title"] = setting.settinginfo.settingtitle || '';
+		info["help"] = setting.settinginfo.settinginstructions || '';
+		
+		if(type == "select") {
+			info["element"] = "select";
+			info["options"] = input.option;
+		}
+		if(type == "textarea") {
+			info["element"] = "textarea";
+		}  
+		template[input["@_name"]] = info;
+	}	
 }
 
 function readNodeFile (dirName, fileName, node) {
