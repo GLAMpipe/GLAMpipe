@@ -386,7 +386,7 @@ function createSandbox(node) {
 			options: null
 		},
 		funcs: {
-			xmlparser: {'xml2json': function(p) {return xmlparser.parse(p)}},
+			xmlparser: {'xml2json': function(p, options) {return xmlparser.parse(p, options)}},
 		},
 		out: {
 			self:this,

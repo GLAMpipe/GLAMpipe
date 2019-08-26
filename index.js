@@ -28,7 +28,10 @@ app.use(async function handleError(context, next) {
 	try {
 		await next();
 	} catch (error) {
-		console.log('ERROR: ' + error.message);
+		if(error.message)
+			console.log('ERROR: ' + error.message);
+		else
+			console.log('ERROR: ' + error);
 		console.log(error.stack);
 		context.status = 500;
 		context.body = {'error':error.message};
@@ -158,6 +161,11 @@ router.get('/api/v2/repository/reload', async function (ctx) {
 */
 
 
+// get by label or UUID
+router.get('/api/v2/register', async function (ctx) {
+	ctx.body = global.register;
+});
+
 // set label
 router.post('/api/v2/nodes/:id/label', async function (ctx) {
 	var node = await GP.getNode(ctx.params.id);
@@ -187,6 +195,13 @@ router.delete('/api/v2/nodes/:id', async function (ctx) {
 router.post('/api/v2/nodes/:id/start', function (ctx) {
 	GP.startNode(ctx.params.id, ctx.request.body);
 	ctx.body = {status:"started", ts:  new Date()};
+});
+
+// run for single doc
+router.post('/api/v2/nodes/:id/run/:doc', async function (ctx) {
+	ctx.body = {status:"started", ts:  new Date()};
+	var res = await GP.startNode(ctx.params.id, ctx.request.body, ctx.params.doc);
+	ctx.body = {data:res, ts:  new Date()};
 });
 
 // get settings

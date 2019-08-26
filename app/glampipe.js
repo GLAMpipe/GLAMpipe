@@ -155,25 +155,28 @@ class GLAMpipe {
  * ***********************************************************************
 */
 
-	async startNode(id, settings) {
+	async startNode(node_id, settings, doc_id) {
 		try {
 			this.io.sockets.emit("progress", "NODE: running node ");
 			var node = new Node();
-			await node.loadFromProject(id);
+			await node.loadFromProject(node_id);
 			
-			if(global.register[id]) 
+			if(global.register[node_id]) 
 				throw("Node is running");
 			else 
-				global.register[id] = {node: node, settings: settings, processed: 0}; 
+				global.register[node_id] = {params: node.params, settings: settings, processed: 0}; 
 			
 			// we run 'process' nodes in worker farm if enabled
-			if(node.source.type === 'process' && global.config.enableWorkers)
-				await this.startNodeFarm(id, settings, node)
-			else
+			if(node.source.type === 'process' && global.config.enableWorkers && !doc_id)
+				await this.startNodeFarm(node_id, settings, node)
+			else {
+				if(doc_id) settings["doc_id"] = doc_id; 
 				await node.run({settings:settings, ws:this.io.sockets});
+			}
 			
 		} catch(e) {
-			error("Node start failed! " + e.message);
+			console.log(e)
+			error("Node start failed! " + e);
 			throw(e);
 		}
 	}

@@ -1,5 +1,6 @@
 
 const vm 		= require("vm");
+var mongoist 	= require("mongoist")
 var db 			= require('./db.js');
 var pdf 		= require('./cores/pdf.js');
 const GP 		= require("../config/const.js");
@@ -94,11 +95,14 @@ async function syncLoop(node) {
 			node.scripts.run = run;
 		}
 
+		var query = {};
 		var offset = node.options.offset || 0; 
 		var limit = node.options.limit || 0; 
-	
+		var doc_id = node.settings.doc_id || ''; 
+		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)};
+		
 		var bulk = db[node.collection].initializeOrderedBulkOp();
-		const cursor = db[node.collection].findAsCursor({}).skip(offset).limit(limit);	
+		const cursor = db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
 		var counter = 0;
 		while(await cursor.hasNext()) {
 	
@@ -124,11 +128,12 @@ async function syncLoop(node) {
 				var w = await bulk.execute();
 				//console.log(w)
 				bulk = db[node.collection].initializeOrderedBulkOp();
-				process.send({node_uuid:node.uuid, project:node.project,counter:1000});
+				if(process.send)
+					process.send({node_uuid:node.uuid, project:node.project,counter:1000});
 			}
 		}	
 		
-		// make changes to database
+		// execute remainig changes to database
 		await bulk.execute();
 	} catch (e) {
 		node.sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
