@@ -121,6 +121,10 @@ router.post('/api/v2/uploads', async function (ctx) {
  * ***********************************************************************
 */
 
+router.get('/api/v2/repository/nodes/:nodeid/settings', async function (ctx) {
+	ctx.body = await GP.getNodeSettingsTemplate(ctx.params.nodeid);
+});
+
 router.get('/api/v2/repository/nodes/:nodeid', async function (ctx) {
 	ctx.body = await GP.getDocByQuery('gp_nodes', {'nodeid': ctx.params.nodeid});
 });

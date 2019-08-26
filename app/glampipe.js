@@ -348,6 +348,29 @@ class GLAMpipe {
 	}
 
 
+	async getNodeSettingsTemplate(nodeid) {
+		var xml2json = require("fast-xml-parser")
+		var node = await this.getDocByQuery('gp_nodes', {'nodeid': nodeid});
+		let template = {};
+
+		var l = xml2json.parse(node.views.settings, {ignoreAttributes:false});
+		//console.log(l.setting)
+		for(const setting of l.setting) {
+			if(Array.isArray(setting.settingaction.input)) {
+				for(const input of setting.settingaction.input) {
+					if(input["@_class"].includes("node-settings") && input["@_name"]) {
+						template[input["@_name"]] = createSettingsTemplate(setting, input)
+					}
+				}				
+			} else if(setting.settingaction.input) {
+				if(setting.settingaction.input["@_class"].includes("node-settings") && setting.settingaction.input["@_name"]) {
+					template[setting.settingaction.input["@_name"]] = createSettingsTemplate(setting, setting.settingaction.input)
+				}	
+			}
+		}
+		return template;
+	}
+
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************
@@ -443,6 +466,15 @@ class GLAMpipe {
 
 }
 
+
+function createSettingsTemplate(setting, input) {
+	var info = {}
+	info["element"] = input["@_type"] || 'unknown';
+	info["value"] = input["@_checked"] || input["@_value"] || '';
+	info["title"] = setting.settinginfo.settingtitle || '';
+	info["help"] = setting.settinginfo.settinginstructions || '';
+	return info;
+}
 
 function readNodeFile (dirName, fileName, node) {
 	
