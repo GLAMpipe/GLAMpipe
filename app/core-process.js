@@ -101,6 +101,7 @@ async function syncLoop(node) {
 		var doc_id = node.settings.doc_id || ''; 
 		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)};
 		
+		node.sandbox.context.total = await db[node.collection].count({});
 		var bulk = db[node.collection].initializeOrderedBulkOp();
 		const cursor = db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
 		var counter = 0;
@@ -129,7 +130,7 @@ async function syncLoop(node) {
 				//console.log(w)
 				bulk = db[node.collection].initializeOrderedBulkOp();
 				if(process.send)
-					process.send({node_uuid:node.uuid, project:node.project,counter:1000});
+					process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
 			}
 		}	
 		

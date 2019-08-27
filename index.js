@@ -16,7 +16,7 @@ global.register = {};
 
 //Set up body parsing middleware
 app.use(bodyParser({
-   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},    //This is where the files would come
+   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},   
    multipart: true,
    urlencoded: true
 }));
@@ -197,11 +197,16 @@ router.post('/api/v2/nodes/:id/start', function (ctx) {
 	ctx.body = {status:"started", ts:  new Date()};
 });
 
+// run
+router.post('/api/v2/nodes/:id/run', async function (ctx) {
+	var res = await GP.startNode(ctx.params.id, ctx.request.body);
+	ctx.body = res;
+});
+
 // run for single doc
 router.post('/api/v2/nodes/:id/run/:doc', async function (ctx) {
-	ctx.body = {status:"started", ts:  new Date()};
 	var res = await GP.startNode(ctx.params.id, ctx.request.body, ctx.params.doc);
-	ctx.body = {data:res, ts:  new Date()};
+	ctx.body = res;
 });
 
 // get settings
@@ -346,16 +351,14 @@ router.get('/views/:node', async function (ctx) {
 */
 
 router.get('/api/v2/cores', async function (ctx) {
-	var cores = await GP.getCores(ctx.params.node);
-	ctx.body = cores;
-});
-
-router.get('/api/v2/cores/core', async function (ctx) {
-	var cores = await GP.getCores(ctx.params.node);
+	var cores = await GP.getCores();
 	ctx.body = cores;
 });
 
 
+router.get('/api/v2', function (ctx) {
+	ctx.body = router.stack.map(i => i.methods[i.methods.length-1] +": "+ i.path);
+});
 
 
 

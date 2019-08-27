@@ -62,8 +62,10 @@ class GLAMpipe {
 		if(server) {
 			var io = require('socket.io')(server);
 			this.io	= io;
+			global.io = io;
 		}
 		
+		// this function is called when out.say() is called from child process
 		var p = function(p) {
 			p.on('message', (m) => {
 				if(!m.owner) {
@@ -71,6 +73,7 @@ class GLAMpipe {
 						global.register[m.node_uuid]['processed'] = global.register[m.node_uuid]['processed'] + m.counter;
 					}
 					m.msg = global.register[m.node_uuid]['processed'];
+					m.processed = global.register[m.node_uuid]['processed'];
 					io.sockets.emit("progress", m);
 				}
 			});
@@ -155,16 +158,28 @@ class GLAMpipe {
  * ***********************************************************************
 */
 
+	isRunning(node_id) {
+		if(global.register[node_id]) {
+			// clean up register
+			if(global.register[node_id].workers === 0) {
+				delete global.register[node_id];
+				return false;
+			} else {
+				return true;
+			}
+		} 
+	}
+
 	async startNode(node_id, settings, doc_id) {
 		try {
 			this.io.sockets.emit("progress", "NODE: running node ");
 			var node = new Node();
 			await node.loadFromProject(node_id);
 			
-			if(global.register[node_id]) 
+			if(this.isRunning(node_id)) 
 				throw("Node is running");
 			else 
-				global.register[node_id] = {params: node.params, settings: settings, processed: 0}; 
+				global.register[node_id] = {settings: settings, processed: 0, workers:-1}; 
 			
 			// we run 'process' nodes in worker farm if enabled
 			if(node.source.type === 'process' && global.config.enableWorkers && !doc_id)
@@ -200,13 +215,28 @@ class GLAMpipe {
 					id: id,
 					settings: settings,
 					offset: i*batchSize,
-					limit:batchSize
+					limit:batchSize,
+					total: docCount
 				}
 				// last worker should process all the rest documents
 				if(i === workerCount-1) options.limit = 0;
-				console.log(options)
+				if(global.register[id].workers === -1) global.register[id].workers = 0;
+				global.register[id].workers++;
 				workers(options, function (err, outp) {
-					console.log(outp)
+					global.register[id].workers--;  // this worker is done, decrease worker count
+					
+					// if we are the last worker, then wrap things up
+					if(global.register[id].workers === 0) {
+						var msg = 'All done! Processed ' + global.register[id].processed;
+						console.log(msg);
+						var say = {
+							'msg':msg, 
+							'project': outp.project,
+							'node_uuid': outp.uuid,
+						}
+						global.io.sockets.emit("finish", say);
+						delete global.register[id];
+					}
 				})
 			} 
 		} else {

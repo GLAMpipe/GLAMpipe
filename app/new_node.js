@@ -273,11 +273,19 @@ class Node {
 		
 		// socket.io
 		if(options.ws) {
-			sandbox.out.say = function(ch, msg) {options.ws.emit(ch, {
-			'msg':msg, 
-			'project': sandbox.context.node.project,
-			'node_uuid': sandbox.context.node.uuid,
-			})};
+			sandbox.out.say = function(ch, msg) {
+				options.ws.emit(ch, {
+					'msg':msg, 
+					'project': sandbox.context.node.project,
+					'node_uuid': sandbox.context.node.uuid,
+				})
+				
+				// if we are ready, then remove node from register
+				if(ch === 'finish') {
+					if(global.register[sandbox.context.node.uuid])
+						delete global.register[sandbox.context.node.uuid];
+				}
+			};
 		} 
 		
 		// init node scripts
