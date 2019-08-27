@@ -14,8 +14,9 @@ var buildquery 	= require("../app/query-builder.js");
 var importLoop 	= require("../app/core-source.js");
 var viewLoop 	= require("../app/core-view.js");
 var processLoop = require("../app/core-process.js");
-var lookupLoop = require("../app/core-lookup.js");
-var exportLoop = require("../app/core-export.js");
+var lookupLoop 	= require("../app/core-lookup.js");
+var exportLoop 	= require("../app/core-export.js");
+var dbcore 		= require("../app/core-db.js");
 
 const GP 		= require("../config/const.js");
 
@@ -325,6 +326,14 @@ class Node {
 						}
 						break;
 						
+					case "collection":
+						try {
+							await dbcore[ core[0] ][ core[1] ][ core[2] ](this);
+						} catch(e) {
+							console.log(e.message)
+						}
+						break;
+
 					default:
 						try {
 							await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
@@ -342,6 +351,7 @@ class Node {
 			case "view":
 				await viewLoop[ core[0] ][ core[1] ][ core[2] ](this);
 				break;
+
 		}
 
 		this.scripts.finish.runInContext(sandbox);
