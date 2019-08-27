@@ -1020,6 +1020,11 @@ img.centered {
 	position:absolute;
 }
 
+#node-progress-bar {
+	margin-left: 100px;
+	width:80%;
+}
+
 .manual-edit {
 	background-color: yellow;
 }

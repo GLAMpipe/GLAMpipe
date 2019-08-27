@@ -95,7 +95,7 @@ var glamPipeNode = function (node, gp) {
 	this.runFinished = function () {
 		//$("settingscontainer .wikiglyph-caret-up").addClass("wikiglyph-caret-down");
 		//$("settingscontainer .wikiglyph-caret-up").removeClass("wikiglyph-caret-up");
-		//$(".settings").hide();
+		$(".settings").hide();
 
 		// we open node only if it is not a subnode of metanode
 		if(!self.source.params.parent) {
@@ -184,7 +184,6 @@ var glamPipeNode = function (node, gp) {
 
 
 	this.openRender = function() {
-
 		$(".node").removeClass("current");
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
@@ -258,7 +257,7 @@ var glamPipeNode = function (node, gp) {
 	// render node settings and execute its settings.js
 	this.renderSettings = function () {
 
-		var run_button_text = "Batch run";
+		var run_button_text = "Run for all documents";
 
 		if(self.source.type === "source")
 			run_button_text = "Import data";
@@ -326,7 +325,6 @@ var glamPipeNode = function (node, gp) {
 				if(self.source.scripts.settings) {
 					if(!self.source.settings) self.source.settings = {};
 					var settingsScript = new Function('node', self.source.scripts.settings);
-					console.log(self.source)
 					settingsScript(self.source);
 				}
 

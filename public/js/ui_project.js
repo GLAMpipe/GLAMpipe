@@ -114,11 +114,12 @@ $( document ).ready(function() {
 
 	// run node
 	$(document).on('click','.run-node', function(e) {
-		var run_button_texts = ["Batch run", "Import data", "Export data"];
+		var run_button_texts = ["Run for all documents", "Import data", "Export data"];
 		var button = $(e.target);
 		if(run_button_texts.includes(button.text())) {
 			button.attr("text", button.text());
 			button.text("Stop");
+			$("data-workspace submitblock").append('<progress id="node-progress-bar" max="100" value="0"> 0% </progress>');
 			gp.runNode(e);
 		} else if(button.text() == "Stop") {
 			button.text("Stopping node...");
@@ -223,15 +224,20 @@ $( document ).ready(function() {
 	var genericDisplay = $("#generic-messages");
 
 	socket.on('progress', function (data) {
-		console.log("PROGRESS: " + data.msg);
+		
 		if(data.project == gp.currentProject) {
 			progressDisplay.show();
 			progressDisplay.empty();
 			progressDisplay.append("<div>" + data.msg + "</div>");
+			if(parseInt(data.total) && parseInt(data.processed)) {
+				var p = parseInt(data.processed)/parseInt(data.total)*100;
+				$("#node-progress-bar").val(p.toString());
+			}
 		}
 	});
 
 	socket.on('error', function (data) {
+		console.log("ERROR: " + data.msg);
 		if(data.project == gp.currentProject) {
 
 			progressDisplay.empty().append("<div class='bad'>" + data.msg + "</div>");
@@ -246,7 +252,8 @@ $( document ).ready(function() {
 	});
 
 	socket.on('finish', function (data) {
-		if(data.project == gp.currentProject && data.node_uuid == gp.currentlyOpenNode.source._id) {
+		console.log("FINISH: " + data.msg);
+		if(data.project == gp.currentProject) {
 			
 			progressDisplay.empty().append("<div>" + data.msg + "</div>");
 			$(".settings").removeClass("busy");
