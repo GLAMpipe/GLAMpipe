@@ -80,7 +80,11 @@ exports.source = {
 
 	"file": {
 		"CSV": async function(node) {
-			csv.read(node)
+			try {
+				await csv.read(node)
+			} catch(e) {
+				console.log(e);
+			}
 		}
 	}
 }
