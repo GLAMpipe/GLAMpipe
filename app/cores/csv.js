@@ -49,16 +49,25 @@ exports.read = async function (node) {
 
 	parser.on('data', function(c){
 		count++;
-		//if(!(count % 100)) console.log(count)
+		if(!(count % 1000)) console.log("CSV PARSER: " + count)
 	});
 
 	parser.on('finish', function(){
-		console.log("PARSING DONE");
+		console.log("CSV PARSER: " + count + " items parsed!");
 	})
 
 	parser.on('error', function(e){
 		console.log(e.message);
 		node.sandbox.out.say("error", e.message);
+	})
+
+	var transformer = transform(function(record){
+		node.sandbox.context.data = record;
+		node.scripts.run.runInContext(node.sandbox)
+		if(node.sandbox.out.value) {
+			node.sandbox.out.value[constants.source] = node.uuid;
+		}
+		return node.sandbox.out.value;
 	})
 
 	// promise	
@@ -70,31 +79,9 @@ exports.read = async function (node) {
 		})
 		parser.on('error', reject); 
 	});
-	
-	//streamToMongo.on('finish', async function(){
-	//	console.log("IMPORTING DONE! Imported " + count);
-	//	node.scripts.finish.runInContext(node.sandbox)
-	//	await schema.createSchema(node.collection);
-	//})
 
-	var transformer = transform(function(record){
-		node.sandbox.context.data = record;
-		node.scripts.run.runInContext(node.sandbox)
-		if(node.sandbox.out.value) {
-			node.sandbox.out.value[constants.source] = node.uuid;
-		}
-		return node.sandbox.out.value;
-	})
+	input.pipe(parser).pipe(transformer).pipe(streamToMongo);
 
-	if(node.settings.mode == "append") {
-		mongoquery.findDistinct({}, node.collection, node.settings.update_key, function(err, records) {
-			console.log(records);
-			sandbox.context.records = records;
-			input.pipe(parser).pipe(transformer).pipe(streamToMongo);
-		})
-	} else {
-		input.pipe(parser).pipe(transformer).pipe(streamToMongo);
-	}
 	return end;
 	
 }
