@@ -1,5 +1,6 @@
 
 var db 			= require('./db.js');
+var project 	= require('./new_project.js');
 
 
 var exports = module.exports = {};
@@ -35,7 +36,20 @@ exports.createSchema = async function (collection_name) {
 
 exports.getSchema = async function (collection_name) {
 
-	return await db["gp_schemas"].findOne({'collection':collection_name});
+	var schema = await db["gp_schemas"].findOne({'collection':collection_name});
+	// add keys that are set via "out.setter" dynamically to the schema
+	if(schema && schema.keys) {
+		var proj = await project.getProjectByCollection(collection_name);
+		for(var node of proj.nodes) {
+			if(node.schema) {
+				for(var key in node.schema) {
+
+					schema.keys.push(key);
+				}
+			}
+		}
+	}
+	return schema;
 }
 
 

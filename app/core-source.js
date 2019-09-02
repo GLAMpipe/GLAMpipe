@@ -86,6 +86,20 @@ exports.source = {
 				console.log(e);
 			}
 		}
+	},
+
+	"collection": {
+		"select": async function(node) {
+			try {
+				await collection.copyToCollection();
+			} catch(e) {
+				console.log(e)
+			}
+			console.log(node.settings)
+			console.log(node.source.params.source_collection)
+			//var r = await db[node.source.params.source_collection].find();
+			//console.log(r)
+		}
 	}
 }
 

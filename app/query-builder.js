@@ -157,8 +157,9 @@ exports.createSearchQuery = function(params, skip) {
 				var ands = [];
 				for(var i = 0; i < splitted.length; i++) {
 					var search = {};
+					search[param] = {$regex:splitted[i]};
 					//search[param] = {$regex:splitted[i], $options: 'i'};
-					search[param] = splitted[i];
+					//search[param] = splitted[i];
 					if(splitted[i]) {
 						ands.push(search);
 					}
@@ -166,8 +167,9 @@ exports.createSearchQuery = function(params, skip) {
 				query.$and = ands;			
 			} else {
 				if(splitted[0]) {
+					query[param] =  {$regex:splitted[0]};
 					//query[param] =  {$regex:splitted[0], $options: 'i'};
-					query[param] =  splitted[0];
+					//query[param] =  splitted[0];
 				}
 			}
 		}

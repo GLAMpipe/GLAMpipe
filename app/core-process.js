@@ -107,19 +107,23 @@ async function syncLoop(node) {
 		var counter = 0;
 		while(await cursor.hasNext()) {
 	
-			
 			var doc = await cursor.next();
 			counter++;
 			node.sandbox.context.doc = doc;
 			node.sandbox.context.vars.count = counter;
 			
 			node.scripts.run.runInContext(node.sandbox);
+			if(counter === 1) await node.updateSourceKey("schema", node.sandbox.out.setter);
 
 			// if out.value is set, then we write to the field defined in settings.out_field
 			var update = {}
-			if(node.sandbox.out.value) {
+			if(node.sandbox.out.setter) {
+				update = node.sandbox.out.setter;
+			} else if(node.sandbox.out.value) {
 				update[node.source.params.out_field] = node.sandbox.out.value;
-			}
+			} 
+			
+			// TODO: decide what should be saved if out is not set?
 			
 			bulk.find({ '_id': doc._id }).updateOne({
 				'$set': update

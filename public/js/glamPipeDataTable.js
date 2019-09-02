@@ -50,8 +50,7 @@ var dataTable = function (node) {
 		search: function () {
 			var str = "";
 			for(var i = 0; i < this.search_value.keys.length; i++) {
-				str += "&query_fields[]=" + this.search_value.keys[i];
-				str += "&query_values[]=" + this.search_value.values[i];
+				str += "&"+this.search_value.keys[i]+"=" + this.search_value.values[i];
 			}
 			return str;
 		},
@@ -582,7 +581,7 @@ console.log(self.keys);
 		html = "<div class='search-dialog'>";
 		html = "  <select id='data-search-field'>";
 		for(var i = 0; i < self.node.data.keys.length; i++) {
-			if(self.node.data.keys.sorted[i] == self.currentField)
+			if(self.node.data.keys[i] == self.currentField)
 				html += "  <option selected='selected'>" + self.node.data.keys[i] + "</option>";
 			else
 				html += "  <option>" + self.node.data.keys[i] + "</option>";

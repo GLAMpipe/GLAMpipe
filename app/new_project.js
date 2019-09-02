@@ -122,6 +122,11 @@ exports.getProject = async function(doc_id) {
 
 }
 
+exports.getProjectByCollection = async function(collection) {
+
+	return db.collection('gp_projects').findOne({"collections":collection});
+
+}
 
 exports.addCollection = async function(collection_name) {
 

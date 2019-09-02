@@ -152,7 +152,7 @@ class Node {
 		}
 		
 		// update schema
-		await schema.createSchema(this.collection);
+		//await schema.createSchema(this.collection);
 
 		// remove node from project
 		var res = await db.collection("gp_projects").update(

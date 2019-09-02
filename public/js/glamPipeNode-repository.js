@@ -26,6 +26,7 @@ var nodeRepository = function (gp) {
 			"strings": "String operations",
 			"documents": "Modify whole records",
 			"format": "Format/Map data",
+			"collection": "Manage collection",
 			"files": "File operations",
 			"lookups": "Look up data",
 			"meta": "Series of operations",
