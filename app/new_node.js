@@ -114,7 +114,7 @@ class Node {
 	
 
 	async writeDir(project_id) {
-		if(this.source.type == 'view' || this.source.type == 'source') {
+		if(this.source.type != 'process') {
 			const fs = require('fs');
 			var project = await db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
 			if(project.dir) {
@@ -372,6 +372,7 @@ function CreateScriptVM(node, sandbox, scriptName) {
 	} catch (e) {
 		error("ERROR:", node.scripts[scriptName]);
 		error(e.stack);
+		console.log(e.stack)
 		//sandbox.out.say("error", "Error in node: 'run' script: " + e.name +" " + e.message);
 		//sandbox.out.say("error", "Slap the node writer!");
 	}
@@ -412,7 +413,8 @@ function createSandbox(node) {
 			setter:null,
 			error: null,
 			say: function(ch, msg) {console.log('say: ' + msg)},
-			console:console
+			console:console,
+			error_marker: 'AAAA_error:'
 		}
 
 	}

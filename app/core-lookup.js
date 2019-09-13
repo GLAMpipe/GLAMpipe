@@ -30,7 +30,6 @@ async function queryLoop(node, core) {
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;
-		console.log(doc.julkaisunnimi)
 
 		// PRE_RUN - give input to core (core.options)
 		if(core) {
@@ -40,6 +39,7 @@ async function queryLoop(node, core) {
 		}
 
 		// run.js: must set setter!!!
+		console.log(node.scripts)
 		node.scripts.run.runInContext(node.sandbox);
 		console.log("setter")
 		console.log(node.sandbox.out.setter)
