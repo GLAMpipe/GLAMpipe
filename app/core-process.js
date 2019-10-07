@@ -11,13 +11,13 @@ exports.process = {
 
 	'PDF': {
 		'totext': async function(node) {
-			await fileLoop(node, pdf.toText_test);
+			await coreLoop(node, pdf.toText_test);
 		}
 	},
 	
 	'sync': {
 		'script': async function(node) {
-			await syncLoop(node);
+			await scriptLoop(node);
 		}
 	}
 }
@@ -25,7 +25,7 @@ exports.process = {
 
 
 // loop through documents
-async function fileLoop(node, core) {
+async function coreLoop(node, core) {
 	const fs = require("fs-extra");
 
 	var bulk = db[node.collection].initializeOrderedBulkOp();
@@ -85,7 +85,7 @@ async function fileLoop(node, core) {
 }
 
 
-async function syncLoop(node) {
+async function scriptLoop(node) {
 
 
 	try {
@@ -147,7 +147,7 @@ async function syncLoop(node) {
 		
 	}	
 	// notify that we are finished
-	//node.sandbox.out.say('finish', 'Done');
+	node.sandbox.out.say('finish', 'Done');
 }
 
 

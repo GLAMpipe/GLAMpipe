@@ -141,8 +141,6 @@ class GLAMpipe {
 		return await project.getProjects();
 	}
 
-
-
 	async getProject(project_id) {
 		return await project.getProject(project_id);
 	}
@@ -151,7 +149,9 @@ class GLAMpipe {
 		return await project.remove(project_id);
 	}
 
-
+	getProjectLink(project_id) {
+		return 'http://localhost:' + global.config.port + '/projects/' + project_id;
+	}
 
 /* ***********************************************************************
  * 							NODES
