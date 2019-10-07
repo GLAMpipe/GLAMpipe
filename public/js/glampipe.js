@@ -468,7 +468,7 @@ var glamPipe = function () {
 		this.nodeRepository = new nodeRepository(this);
 	}
 
-	this.loadProject = function () {
+	this.loadProject = function (cb) {
 
 		var path = window.location.pathname.split("/");
 		self.currentProject = path[path.length - 1];
@@ -504,9 +504,9 @@ var glamPipe = function () {
 				// render current collection set and its nodes
 				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
 					//self.currentCollectionNode.fields = data;
-					self.renderCollectionSet();
+					self.renderCollectionSet(cb);
 				//})
-
+				
 			}
 		})
 	}
@@ -692,7 +692,15 @@ var glamPipe = function () {
 		}
 	}
 
-
+	this.getRunningNodes = function() {
+		$.getJSON(self.baseAPI + "/register", function(result) {
+			for(var key in result) {
+				console.log(key)
+				$("[data-id='" + key + "']").addClass("busy");
+			}
+		})
+		//return result;
+	}
 
 	// check if any output field (starts with "out_") exists
 	this.outputExists = async function(params) {

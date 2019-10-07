@@ -36,11 +36,12 @@ var glamPipeNode = function (node, gp) {
 		}
 		console.log("RUNNING node with settings: ", self.source.settings);
 		// TÄHÄN busy
-
+		$("[data-id='"+self.source._id+"']").addClass("busy");
+	
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
-				$("setting").removeClass("busy");
+				$("[data-id='"+self.source._id+"']").removeClass("busy");
 				// reset run button
 				if(!self.source.params.parent) {
 					var input = self.getInputFields();
@@ -51,7 +52,8 @@ var glamPipeNode = function (node, gp) {
 				alert(data.error);
 			}
 		}).fail(function() {
-			//alert("GLAMpipe server did not respond!")
+			$("[data-id='"+self.source._id+"']").removeClass("busy");
+			alert("GLAMpipe server did not respond!")
 		});
 	}
 

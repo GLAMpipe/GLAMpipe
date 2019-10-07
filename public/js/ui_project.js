@@ -5,9 +5,11 @@ $( document ).ready(function() {
 	
 	var gp = new glamPipe();
 	gp.getLoginStatus("#login");
-	gp.loadProject("#projectList");
+	gp.loadProject(function() {console.log('haa');gp.getRunningNodes()});
 
-
+	// check running nodes 
+	//gp.getRunningNodes();
+	
 	$(document).on("click", "#login-pop", function(e) {
 		$("#login").empty();
 		$("#login").append("<div id='login-popup'>username: <input id='username'/>password:<input id='password' type='password'/><div class='button' id='login-submit'>login</div> <a id='login-cancel' href='#'>cancel</a> </div>");
@@ -256,7 +258,7 @@ $( document ).ready(function() {
 		if(data.project == gp.currentProject) {
 			
 			progressDisplay.empty().append("<div>" + data.msg + "</div>");
-			$(".settings").removeClass("busy");
+			$("[data-id='"+data.node_uuid+"']").removeClass("busy");
 			progressDisplay.addClass("done");
 			gp.nodeRunFinished(data); 
 		}

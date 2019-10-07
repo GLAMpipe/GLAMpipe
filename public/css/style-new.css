@@ -1144,9 +1144,14 @@ table.wikidata_export_conf tbody tr td {
 }
 
 .busy {
-	background-color: #c4dec0;
+	animation: colorchange 2s infinite alternate;
 }
 
+@keyframes colorchange
+{
+  0%   {background: white;}
+  100% {background: #347BFF;}
+}
 input.required, select.required {
 	border-left: 2px solid red;
 }
