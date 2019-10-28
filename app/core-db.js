@@ -14,6 +14,27 @@ exports.process = {
 			field[node.source.params.in_field] = 1;
 			var r = await db[node.collection].createIndex(field);
 			node.scripts.finish.runInContext(node.sandbox);
-		}
+		},
+		
+		'remove': async function(node) {
+			await deleteLoop(node);
+		},
 	}
+}
+
+
+
+// loop through documents
+async function deleteLoop(node) {
+
+    const cursor = db[node.collection].findAsCursor({});	
+	while(await cursor.hasNext()) {
+		var doc = await cursor.next();
+		node.sandbox.context.doc = doc;
+		node.scripts.run.runInContext(node.sandbox);
+		if(node.sandbox.out.value == 'remove') {
+			console.log("removing "+ doc._id);
+			await db[node.collection].remove({ '_id': doc._id });
+		}
+	}	
 }
