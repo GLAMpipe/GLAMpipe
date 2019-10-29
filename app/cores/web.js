@@ -1,19 +1,44 @@
 
-var requestPromise = require('request-promise-native');
+var requestPromise 	= require('request-promise-native');
 var debug 			= require('debug')('GLAMpipe:node');
+var db 				= require('../db.js');
+const constants 	= require("../../config/const.js");
 
-exports.postJSON= async function (options) {
+exports.postJSON = async function (options) {
 	
 	//node.sandbox.core.options.resolveWithFullResponse = true;
 	var result = await requestPromise(options);
 	return result;
-
 }
 
-exports.getJSON= async function (options) {
+
+
+exports.getAndSaveFile = async function(node) {
+	// download file
+	console.log(node.sandbox.core.options)
+	try {
+		var result = await requestPromise(node.sandbox.core.options);
+		console.log(result.statusCode)
+	} catch(e) {
+		console.log(e.message)
+		throw("Fetch failed")
+	}
+	// save to node directory
+	const fs = require("fs");
+	fs.writeFileSync(node.sandbox.core.filename, result, 'utf-8')
+}
+
+
+
+exports.getJSON = async function (node) {
 	
 	debug("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
-	
+
+	// remove previous entries by this node
+	var query = {}; 
+	query[constants.source] = node.uuid;
+	await db[node.collection].remove(query);
+
 	if(node.sandbox.core.options.headers) 
 		node.sandbox.core.options.headers.Accept = "application/json";
 	else
@@ -24,7 +49,7 @@ exports.getJSON= async function (options) {
 		
 	while(node.sandbox.core.options.url) {
 
-		console.log(node.sandbox.core.options.url)
+		console.log(node.sandbox.core.options)
 		try {
 			var result = await requestPromise(node.sandbox.core.options);
 			node.sandbox.core.response = result;
@@ -57,4 +82,14 @@ exports.getJSON= async function (options) {
 	}
 	node.scripts.finish.runInContext(node.sandbox);
 
+}
+
+function  markSourceNode(data, node) {
+	if(Array.isArray(data)) {
+		for(var d of data) {
+			d[constants.source] = node.uuid;
+		}
+	} else {
+		data[constants.source] = node.uuid
+	}
 }

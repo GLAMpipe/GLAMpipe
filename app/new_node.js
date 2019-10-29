@@ -301,7 +301,7 @@ class Node {
 				this.scripts.init.runInContext(sandbox);
 			} catch(e) {
 				error(e)
-				throw(new Error('Node script error'))
+				throw(new Error('Node script error (init) ' + e ))
 			}
 		}
 
@@ -406,6 +406,7 @@ function createSandbox(node) {
 		},
 		funcs: {
 			xmlparser: {'xml2json': function(p, options) {return xmlparser.parse(p, options)}},
+			path: path
 		},
 		out: {
 			self:this,

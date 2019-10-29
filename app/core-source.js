@@ -1,7 +1,5 @@
 
 
-var requestPromise 	= require('request-promise-native');
-var db 				= require('./db.js');
 var debug 			= require('debug')('GLAMpipe:node');
 var csv 			= require('./cores/csv.js');
 var web 			= require('./cores/web.js');
@@ -26,16 +24,16 @@ exports.source = {
 			// init.js 
 			console.log(node.sandbox.core.options)
 			console.log(node.sandbox.core.filename)
-			// download file
-			var result = await requestPromise(node.sandbox.core.options);
-			// save to node directory
-			const fs = require("fs");
-			fs.writeFileSync(node.sandbox.core.filename, result, 'utf-8')
-			// parse csv
-			node.source.params.filename = node.sandbox.core.filename;
-			debug("entering csv.read");
-			csv.read(node);
-			debug("Done csv.read");
+			try {
+				await web.getAndSaveFile(node)
+				// parse csv
+				node.source.params.filename = node.sandbox.core.filename;
+				debug("entering csv.read");
+				await csv.read(node);
+				debug("Done csv.read");
+			} catch(e) {
+				console.log("web csv failed")
+			}
 		}
 	},
 
@@ -68,12 +66,4 @@ exports.source = {
 
 
 
-function  markSourceNode(data, node) {
-	if(Array.isArray(data)) {
-		for(var d of data) {
-			d[constants.source] = node.uuid;
-		}
-	} else {
-		data[constants.source] = node.uuid
-	}
-}
+

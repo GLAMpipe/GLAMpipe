@@ -65,7 +65,7 @@ exports.read = async function (node) {
 		node.sandbox.context.data = record;
 		node.scripts.run.runInContext(node.sandbox)
 		if(node.sandbox.out.value) {
-			node.sandbox.out.value[constants.source] = node.uuid;
+			node.sandbox.out.value[constants.source] = node.uuid; // mark source node uuid to records
 		}
 		return node.sandbox.out.value;
 	})
@@ -74,7 +74,7 @@ exports.read = async function (node) {
 	var end = new Promise(function(resolve, reject) {
 		streamToMongo.on('finish', () => {
 			node.scripts.finish.runInContext(node.sandbox);
-			//schema.createSchema(node.collection);  // we don't wait schema creation
+			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
 		})
 		parser.on('error', reject); 
