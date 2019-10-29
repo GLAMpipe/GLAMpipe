@@ -12,7 +12,7 @@
     "cld": "^2.4.6",
     "cors": "^2.8.1",
     "crypto": "0.0.3",
-    "csv-parse": "1.1.7",
+    "csv-parse": "4.4.6",
     "csv-write-stream": "^2.0.0",
     "encoding": "^0.1.12",
     "express": "^4.13.4",
