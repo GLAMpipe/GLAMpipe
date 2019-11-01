@@ -380,6 +380,13 @@ console.log(self.keys);
 				else
 					html += "<div class='error'>" + self.nl2br(data) + "</div>";
 
+			} else if(typeof data == "number") {
+				if(index != null)
+					html += "<div class='error'>["+index+"] " + data + "</div>";
+				else
+					html += "<div class='error'>" + data + "</div>";
+			
+
 			// render strings
 			} else  {
 				if(index != null)
@@ -537,6 +544,8 @@ console.log(self.keys);
 		} else if(typeof value === "object") {
 			if(typeof index !== "undefined")
 				html += "<li><span class='bold'>[" + index + "]</span><ul>" ;
+			else if(key)
+				html += "<li><span class='bold'></span><b>"+key+"</b><ul>" ;
 			else
 				html += "<li><span class='bold'></span>object<ul>" ;
 			for(key in value) {

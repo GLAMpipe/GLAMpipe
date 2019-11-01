@@ -3,6 +3,7 @@
 var debug 			= require('debug')('GLAMpipe:node');
 var csv 			= require('./cores/csv.js');
 var web 			= require('./cores/web.js');
+var marc 			= require('./cores/marc.js');
 
 const constants 	= require("../config/const.js");
 
@@ -42,6 +43,13 @@ exports.source = {
 		"CSV": async function(node) {
 			try {
 				await csv.read(node)
+			} catch(e) {
+				console.log(e);
+			}
+		},
+		"MARC": async function(node) {
+			try {
+				await marc.read(node)
 			} catch(e) {
 				console.log(e);
 			}
