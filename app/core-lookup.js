@@ -1,6 +1,7 @@
 const vm 		= require("vm");
 var db 			= require('./db.js');
 var mongo 		= require('./cores/mongo.js');
+var web 		= require('./cores/web.js');
 const GP 		= require("../config/const.js");
 
 var exports 	= module.exports = {};
@@ -17,6 +18,15 @@ exports.lookup = {
 			var collection = node.sandbox.context.node.params.required_source_collection;
 			node.sandbox.core.data = await db[collection].find(node.sandbox.core.options.query, node.sandbox.core.options.options);
 			await queryLoop(node)
+		}
+	},
+	'web': {
+		'JSON': async function(node) {			
+			try {
+				await web.lookupJSON(node)
+			} catch(e) {
+				console.log(e);
+			}
 		}
 	}
 }

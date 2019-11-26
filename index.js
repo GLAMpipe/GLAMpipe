@@ -5,6 +5,7 @@ const serve 		= require('koa-send');
 const json 			= require('koa-json')
 const path			= require('path');
 var GLAMpipe 		= require('./app/glampipe.js');
+var shibboleth 		= require('./app/shibboleth.js');
 var collection 		= require('./app/new_collection.js');
 var proxy 			= require('./app/proxy.js');
  
@@ -47,6 +48,31 @@ app.use(require('koa-static')('public'));
 app.use(async (ctx, next) => {
   if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/public' });
   else await next();
+})
+
+// auth
+app.use(async (ctx, next) => {
+	if(global.config.authentication === "shibboleth") {
+		if(shibboleth.isValidUser(ctx)) {
+			await next();
+		} else {
+			ctx.status = 401;
+			ctx.body = {'error': ''};
+		}
+		
+	} else if(global.config.authentication === "shibboleth") {
+			if(ctx.get(global.config.shibbolethHeaderId)) {
+				var shib_user = ctx.get(global.config.shibbolethHeaderId);
+				if(global.config.shibbolethUsers.includes(shib_user)) {
+					res.json({"shibboleth":{user:shib_user}});
+				} else {
+					res.json({"shibboleth":{visitor:shib_user}});
+				}
+			}
+	} else if(global.config.authentication === "none") {
+		await next()
+	}
+
 })
 
 router.get('/projects/:id', function(ctx) {

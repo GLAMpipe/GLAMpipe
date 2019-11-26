@@ -1,30 +1,30 @@
 
 
 // checks that we have valid shibboleth user
-exports.isValidUser = function(req, res, next) {
+exports.isValidUser = function(ctx) {
 
 	// first check if route should be open
 	var pass = false;
-	global.config.IP_passes.some(function(IP_pass) {
-		if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && (req.ip === IP_pass.ip || IP_pass.ip === "*")) {
-			pass = true;
-			console.log("INFO: " + req.method + " allowed by IP_pass: " + IP_pass.label)
-		}
-	});
+	//global.config.IP_passes.some(function(IP_pass) {
+		//if(req.path.includes(IP_pass.path) && req.method === IP_pass.method && (req.ip === IP_pass.ip || IP_pass.ip === "*")) {
+			//pass = true;
+			//console.log("INFO: " + req.method + " allowed by IP_pass: " + IP_pass.label)
+		//}
+	//});
 	
 	if(pass) {
 		return next();
 	}
 
-	var user = getUser(req);
+	var user = ctx.get(global.config.shibbolethHeaderId);
 	if(user) {
-		if(global.config.shibbolethUsers.includes(user)) {
-			next();
+		if(global.config.shibbolethUsers.includes(user)) {  // user OK
+			return true;
 		} else {
-			res.status(401).json({error:"Not authenticated!"});
+			return false;
 		}
 	} else {
-			res.status(401).json({error:"Not authenticated!"});
+			return false;
 	}
 }
 
@@ -44,15 +44,3 @@ exports.addHeadersToData = function(req) {
 	}
 }
 
-
-
-function getUser(req) {
-	if(global.config.authentication === "shibboleth" && req.headers[global.config.shibbolethHeaderId]) {
-		return req.headers[global.config.shibbolethHeaderId];
-	} else if(global.config.authentication === "local") {
-		if(req.user && req.user.local && req.user.local.email && req.user.local.email) {
-			return req.user.local.email;
-		}
-	}
-	return "";
-}

@@ -1,7 +1,6 @@
 
 
 var colors 		= require('ansicolors');
-var path 		= require("path");
 const vm 		= require('vm');
 const mongoist 	= require('mongoist');
 var debug 		= require('debug')('GLAMpipe:node');
@@ -17,6 +16,9 @@ var processLoop = require("../app/core-process.js");
 var lookupLoop 	= require("../app/core-lookup.js");
 var exportLoop 	= require("../app/core-export.js");
 var dbcore 		= require("../app/core-db.js");
+
+var path 					= require("path");
+var stringSimilarity 		= require("string-similarity");
 
 const GP 		= require("../config/const.js");
 
@@ -406,7 +408,8 @@ function createSandbox(node) {
 		},
 		funcs: {
 			xmlparser: {'xml2json': function(p, options) {return xmlparser.parse(p, options)}},
-			path: path
+			path: path,
+			stringSimilarity: stringSimilarity
 		},
 		out: {
 			self:this,

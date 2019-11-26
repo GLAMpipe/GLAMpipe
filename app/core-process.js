@@ -102,7 +102,7 @@ async function scriptLoop(node) {
 		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)};
 		
 		node.sandbox.context.total = await db[node.collection].count({});
-		var bulk = db[node.collection].initializeOrderedBulkOp();
+		var bulk = db[node.collection].initializeUnorderedBulkOp();
 		const cursor = db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
 		var counter = 0;
 		while(await cursor.hasNext()) {
@@ -119,27 +119,28 @@ async function scriptLoop(node) {
 			var update = {}
 			if(node.sandbox.out.setter) {
 				update = node.sandbox.out.setter;
-			} else if(node.sandbox.out.value) {
+			} else if(typeof node.sandbox.out.value !== "undefined") {
 				update[node.source.params.out_field] = node.sandbox.out.value;
 			} 
 			
 			// TODO: decide what should be saved if out is not set?
 			
-			bulk.find({ '_id': doc._id }).updateOne({
+			await bulk.find({ '_id': doc._id }).updateOne({
 				'$set': update
 			});
 			
 			if (counter % 1000 == 0 ) {
 				var w = await bulk.execute();
-				//console.log(w)
-				bulk = db[node.collection].initializeOrderedBulkOp();
+				console.log(w)
+				bulk = db[node.collection].initializeUnorderedBulkOp();
 				if(process.send)
 					process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
 			}
 		}	
 		
 		// execute remainig changes to database
-		await bulk.execute();
+		var b = await bulk.execute();
+		console.log(b)
 	} catch (e) {
 		node.sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
 		console.log(e.stack);

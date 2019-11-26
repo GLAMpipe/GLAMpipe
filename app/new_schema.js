@@ -41,7 +41,7 @@ exports.getSchema = async function (collection_name) {
 	if(schema && schema.keys) {
 		var proj = await project.getProjectByCollection(collection_name);
 		for(var node of proj.nodes) {
-			if(node.schema) {
+			if(node.schema && node.collection === collection_name) {
 				for(var key in node.schema) {
 
 					schema.keys.push(key);
