@@ -124,8 +124,11 @@ class GLAMpipe {
 
 	// create project from project data and execute nodes
 	async createProject(data) {
+		console.log("*******************")
 		var new_project = await project.create(data.project_title);
+		console.log("*******************")
 		console.log(new_project)
+		console.log("*******************")
 		var collection = await this.createCollection(data.collection_title, new_project._id);
 		for(const node in data.nodes) {
 			var new_node = await this.createNode(data.nodes[node].nodeid, data.nodes[node].params, collection.collection, new_project._id);
@@ -260,9 +263,9 @@ class GLAMpipe {
 		debug("Loading nodes from " + path.join(global.config.nodePath, "/") );   
 		// try to drop nodes collection (it does not exist in first run) 
 		try {
-			await db.collection("gp_nodes").drop();
+			await db.collection("gp_repository").drop();
 		} catch(e) {
-			console.log('no gp_nodes collection')
+			console.log('no gp_repository collection')
 		}
 		try {
 			
@@ -284,7 +287,7 @@ class GLAMpipe {
 									for(var nodeFile of nodeFiles) {
 										readNodeFile (nodeDirPath, nodeFile, node);
 									}	
-									await db["gp_nodes"].insert(node);
+									await db["gp_repository"].insert(node);
 								}		
 							}
 						}
@@ -303,7 +306,7 @@ class GLAMpipe {
 
 
 	async getFacet() {		
-		return await db.collection("gp_nodes").find({}, {"nodeid":1, "title":1, "description":1, "type":1, "subtype":1});
+		return await db.collection("gp_repository").find({}, {"nodeid":1, "title":1, "description":1, "type":1, "subtype":1});
 	}
 
 
@@ -311,7 +314,9 @@ class GLAMpipe {
 		
 		try {
 			var project = await this.getProject(project_id);
+			console.log(project, title)
 			var collection_name = await collection.create(title, project);
+			console.log("*********************")
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": title})
@@ -383,7 +388,7 @@ class GLAMpipe {
 
 	async getNodeSettingsTemplate(nodeid) {
 		var xml2json = require("fast-xml-parser")
-		var node = await this.getDocByQuery('gp_nodes', {'nodeid': nodeid});
+		var node = await this.getDocByQuery('gp_repository', {'nodeid': nodeid});
 		let template = {};
 
 		var l = xml2json.parse(node.views.settings, {ignoreAttributes:false});

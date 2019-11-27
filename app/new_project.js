@@ -24,6 +24,7 @@ exports.create = async function(title) {
 		// update project count and create project. Project count is *permanent* counter
 		var incr = await db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
 		var meta = await db.collection('gp_settings').findOne({});
+		console.log(meta)
 		
 		var prefix = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
 		prefix = prefix.replace(/ /g,"_");
@@ -34,7 +35,6 @@ exports.create = async function(title) {
 			"title": title,
 			"dir": title_dir,
 			"prefix":  prefix,
-			"nodes": [],
 			"collection_count": 0,
 			"node_count":0,
 			"schemas": [],
@@ -113,18 +113,41 @@ exports.getProjects = async function() {
 		'owner': 1
 	  }).sort({'_id': -1}).toArray();
 
+/*
+     { $match: {
+		_id: mongoist.ObjectId(doc_id)
+		}
+	},
+	{	$lookup:
+        {
+           from: "gp_nodes",
+           localField: "_id",
+           foreignField: "project",
+           as: "nodes"
+        }
+    }
+ * */
 }
 
 
 exports.getProject = async function(doc_id) {
 
-	return db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	try {
+		var p = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+		var nodes = await db.collection('gp_nodes').find({project: p._id});
+		p.nodes = nodes;
+		return p;
+	} catch(e) {
+		throw("Could not load project "+ doc_id)
+	}
+
+
 
 }
 
-exports.getProjectByCollection = async function(collection) {
+exports.getProjectByCollection = async function(collection_name) {
 
-	return db.collection('gp_projects').findOne({"collections":collection});
+	return db.collection('gp_projects').findOne({collections: {$in: [collection_name]}});
 
 }
 

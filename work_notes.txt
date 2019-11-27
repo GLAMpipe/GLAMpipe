@@ -2,6 +2,8 @@
 What is GLAMpipe?
 High Level Data Processing and Storage API - with a GUI
 
+Rest aliases (nicknames)
+
 
 TESTING
 worker-farm -> huge performance boost!

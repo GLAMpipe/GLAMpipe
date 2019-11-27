@@ -13,6 +13,7 @@ exports.create = async function(collection_name, project) {
 	// cleanup and generate collection name
 	collection_name = collection_name.replace(/[^a-z0-9-]/g,"");
 	collection_name = project.prefix + "_c" + project.collection_count + "_" + collection_name;  // unique name for collection
+	console.log(collection_name)
 	await db['gp_projects'].update({_id:mongoist.ObjectId(project._id)}, {$inc: { 'collection_count': 1, 'node_count': 1}, $addToSet: {collections: collection_name } })
 
 	await db.createCollection(collection_name);
