@@ -98,7 +98,7 @@ router.get('/api/v2/projects/:id', async function (ctx) {
 router.post('/api/v2/projects', async function (ctx) {
 	console.log(ctx.request.body)
 	var project = await GP.createEmptyProject(ctx.request.body.title);
-	var collection = await GP.createCollection("test", project._id);
+	var collection = await GP.createCollection("mydata", project._id);
 	ctx.body = project;
 });
 
@@ -129,12 +129,12 @@ router.get('/api/v2/repository/nodes/:nodeid/settings', async function (ctx) {
 });
 
 router.get('/api/v2/repository/nodes/:nodeid', async function (ctx) {
-	ctx.body = await GP.getDocByQuery('gp_nodes', {'nodeid': ctx.params.nodeid});
+	ctx.body = await GP.getDocByQuery('gp_repository', {'nodeid': ctx.params.nodeid});
 });
 
 // list of nodes available
 router.get('/api/v2/repository/nodes', async function (ctx) {
-	ctx.body = await GP.getDocs('gp_nodes', {});
+	ctx.body = await GP.getDocs('gp_repository', {});
 });
 
 router.get('/api/v2/options', async function (ctx) {
@@ -287,6 +287,11 @@ router.get('/api/v2/collections/:collection/schema', async function (ctx) {
 
 router.get('/api/v2/collections/:collection/count', async function (ctx) {
 	const count = await GP.getDocCount(ctx.params.collection, ctx.request.query);
+	ctx.body = {"count": count};
+});
+
+router.get('/api/v2/collections/:collection/nodes', async function (ctx) {
+	const count = await GP.getCollectionNodes(ctx.params.collection, ctx.request.query);
 	ctx.body = {"count": count};
 });
 

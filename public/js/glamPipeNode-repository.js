@@ -29,7 +29,7 @@ var nodeRepository = function (gp) {
 			"collection": "Manage collection",
 			"files": "File operations",
 			"lookups": "Look up data",
-			"meta": "Series of operations",
+			"pipe": "Series of operations",
 		},
 		"export": {
 			"file": "Export data to file",
@@ -49,7 +49,7 @@ var nodeRepository = function (gp) {
 		}
 
 	
-		var nodes = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/?keys=core,type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type=" + type);
+		var nodes = await $.getJSON(self.baseAPI + "/collections/gp_repository/docs/?keys=core,type,subtype,title,description,status&limit=100&sort=type,subtype,title&reverse=0&type=" + type);
 		console.log(nodes);
 
 		var html = "";
@@ -111,13 +111,13 @@ var nodeRepository = function (gp) {
 	}
 
 	this.getNodeContent = async function (click, div) {
-		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.attr("href"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_repository/docs/" + click.attr("href"));
 		return node;
 	}
 
 	this.openNodeParameters = async function (click, collection) {
 		var collection = self.gp.currentCollectionNode.source.collection;
-		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.attr("href"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_repository/docs/" + click.attr("href"));
 		console.log(node)
 
 		var html = "";

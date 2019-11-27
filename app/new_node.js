@@ -42,7 +42,7 @@ class Node {
 	}
 
 	async loadFromRepository(nodeid) {
-		this.source = await db.collection("gp_nodes").findOne({"nodeid": nodeid});
+		this.source = await db.collection("gp_repository").findOne({"nodeid": nodeid});
 		this.params = {};
 		this.settings = {};
 		if(!this.source) {
@@ -84,7 +84,6 @@ class Node {
 
 	
 	async add2Project(project_id, collection_name) {
-		
 		// check if collection exists
 		var collections = await db.getCollectionNames();
 		if(!collections.includes(collection_name)) {
@@ -99,12 +98,14 @@ class Node {
 		this.source.project = project_id;
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
-		await db.collection("gp_projects").update(
-			{_id:mongoist.ObjectId(project_id)}, 
-			{
-				$push:{nodes: this.source},
-				$inc: {'node_count':1}
-			});	
+		var result = await db.collection('gp_nodes').insert(this.source);
+		console.log(result)
+		//await db.collection("gp_projects").update(
+			//{_id:mongoist.ObjectId(project_id)}, 
+			//{
+				//$push:{nodes: this.source},
+				//$inc: {'node_count':1}
+			//});	
 
 		// these are just shorthands
 		this.collection = collection_name;
@@ -217,18 +218,15 @@ class Node {
 
 	async saveSettings(settings) {
 		
-		// we make copy of settings that is saved to db so that we can remove certain fields (passwds etc.)
+		// we make copy of settings that is saved to db so that we can remove fields starting with underscore (passwds etc.)
 		// from it without affecting settings that are used by node
         var settings_copy = Object.assign({}, settings); 	
 
 		// we do not save passwords, user names or api keys
 		if(settings_copy) {
-			if(settings_copy.username) settings_copy.username = null;
-			if(settings_copy.passwd) settings_copy.passwd = null;
-			if(settings_copy.password) settings_copy.password = null;
-			if(settings_copy.apikey) settings_copy.apikey = null;
-			if(settings_copy.key_credential) settings_copy.key_credential = null;
-			if(settings_copy.key_identity) settings_copy.key_identity = null;
+			for(var setting in settings) {
+				if(setting.startsWith("_")) settings_copy[setting] = null;
+			}
 		}
 
 		// we don't save empty setting values
