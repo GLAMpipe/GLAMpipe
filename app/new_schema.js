@@ -39,11 +39,10 @@ exports.getSchema = async function (collection_name) {
 	var schema = await db["gp_schemas"].findOne({'collection':collection_name});
 	// add keys that are set via "out.setter" dynamically to the schema
 	if(schema && schema.keys) {
-		var proj = await project.getProjectByCollection(collection_name);
-		for(var node of proj.nodes) {
+		var nodes = await db["gp_nodes"].find({"collection": collection_name});
+		for(var node of nodes) {
 			if(node.schema && node.collection === collection_name) {
 				for(var key in node.schema) {
-
 					schema.keys.push(key);
 				}
 			}

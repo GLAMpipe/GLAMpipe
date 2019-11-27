@@ -73,7 +73,7 @@ exports.getDocs = async function(collection_name, query) {
 }
 
 exports.insertDoc = async function(collection_name, doc) {
-	console.log(doc)
+	debug(doc)
 	try {
 		return db[collection_name].insert(doc);
 	} catch(e) {
@@ -81,6 +81,16 @@ exports.insertDoc = async function(collection_name, doc) {
 		return {};
 	}
 }
+
+exports.updateDoc = async function(collection_name, doc_id, data) {
+	try {
+		return db[collection_name].update({"_id": mongoist.ObjectId(doc_id)},{$set: data});
+	} catch(e) {
+		console.log(e)
+		return {};
+	}
+}
+
 
 exports.removeDoc = async function(collection_name, id) {
 	

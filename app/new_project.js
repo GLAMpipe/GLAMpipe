@@ -130,11 +130,11 @@ exports.getProjects = async function() {
 }
 
 
-exports.getProject = async function(doc_id) {
+exports.getProject = async function(project_id) {
 
 	try {
-		var p = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
-		var nodes = await db.collection('gp_nodes').find({project: p._id});
+		var p = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(project_id)});
+		var nodes = await db.collection('gp_nodes').find({project: project_id});
 		p.nodes = nodes;
 		return p;
 	} catch(e) {

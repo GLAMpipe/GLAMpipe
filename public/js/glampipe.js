@@ -625,7 +625,7 @@ var glamPipe = function () {
 		var obj = $(e.target);
 		data.project = self.currentProject;
 		var click = $(e.target);
-		var node = await $.getJSON(self.baseAPI + "/collections/gp_nodes/docs/" + click.data("id"));
+		var node = await $.getJSON(self.baseAPI + "/collections/gp_repository/docs/" + click.data("id"));
 
 		// check if are importing file
 		if(node.type == "source" && node.subtype == "file" && node.nodeid != "source_directory_scan") {
@@ -906,7 +906,7 @@ var glamPipe = function () {
 	}
 
 	this.updateDocument = function (data, cb) {
-		post(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
+		$.put(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
 			console.log(response);
 			cb();
 		})

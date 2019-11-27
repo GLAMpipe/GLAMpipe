@@ -296,6 +296,11 @@ router.get('/api/v2/collections/:collection/docs/:id', async function (ctx) {
 	ctx.body = doc;
 });
 
+router.put('/api/v2/collections/:collection/docs/:id', async function (ctx) {
+	var doc = await GP.updateDoc(ctx.params.collection, ctx.params.id, ctx.request.body);
+	ctx.body = doc;
+});
+
 router.delete('/api/v2/collections/:collection/docs/:id', async function (ctx) {
 	var doc = await GP.deleteDoc(ctx.params.collection, ctx.params.id);
 	ctx.body = doc;

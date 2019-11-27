@@ -313,6 +313,10 @@ class GLAMpipe {
 	async createCollection(title, project_id) {
 		
 		try {
+			if(typeof project_id != "string") {
+				project_id = project_id.toString()
+			}
+				
 			var project = await this.getProject(project_id);
 			console.log(project, title)
 			var collection_name = await collection.create(title, project);
@@ -320,7 +324,7 @@ class GLAMpipe {
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": title})
-			await collectionNode.add2Project(project._id, collection_name);
+			await collectionNode.add2Project(project_id, collection_name);
 			debug("Collection created")
 			return collectionNode;
 		} catch(e) {
@@ -333,6 +337,9 @@ class GLAMpipe {
 	async createNode(nodeid, params, collection_name, project_id) {
 
 		try {
+			if(typeof project_id != "string") {
+				project_id = project_id.toString()
+			}
 			var node = new Node();
 			await node.loadFromRepository(nodeid);
 			await node.setParams(params);
@@ -432,8 +439,12 @@ class GLAMpipe {
 		return collection.insertDoc(collection_name, doc);
 	}
 
-	async deleteDoc(collection_name, doc) {
-		return collection.removeDoc(collection_name, doc);
+	async updateDoc(collection_name, doc_id, data) {
+		return collection.updateDoc(collection_name, doc_id, data);
+	}
+
+	async deleteDoc(collection_name, doc_id) {
+		return collection.removeDoc(collection_name, doc_id);
 	}
 
 	async getCollections() {

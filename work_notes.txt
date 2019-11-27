@@ -4,6 +4,12 @@ High Level Data Processing and Storage API - with a GUI
 
 Rest aliases (nicknames)
 
+LAS-WS
+
+docker pull jiemakel/las-ws:1.1
+docker run -d -p 9000:9000 --name las_ws jiemakel/las-ws:1.1
+
+
 
 TESTING
 worker-farm -> huge performance boost!

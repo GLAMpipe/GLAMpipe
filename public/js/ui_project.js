@@ -110,8 +110,8 @@ $( document ).ready(function() {
 
 	// create node
 	$(document).on('click','.create-node', function(e) {
-		gp.createNode(e);
 		e.preventDefault();
+		gp.createNode(e);
 	})
 
 	// run node

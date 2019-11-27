@@ -54,34 +54,20 @@ class Node {
 
 
 	async loadFromProject(id) {
-		var project = null;
+		
 		try {
-			project = await this.getProjectByNode(id);
+			var node = await db.collection("gp_nodes").findOne({"_id": mongoist.ObjectId(id)});
 		} catch(e) {
 			throw(new Error('GLAMpipe node not found: ' + id))
 		}
-		var index = indexByKeyValue(project.nodes, project._nodeindex, id);
-		this.source = project.nodes[index];
-
+		
+		this.source = node;
 		this.uuid = id;
-		this.collection = this.source.collection;
-		this.project = project._id;
-		this.project_obj = project;
+		this.collection = node.collection;
+		this.project = node.project;
+		//this.project_obj = project;
 		//this.project_dir = project.dir;
 
-	}
-	
-	
-	// get project by node id or label
-	async getProjectByNode(id) {
-		var project = await db.collection('gp_projects').findOne({"nodes.label": id});	
-		if(!project){
-			project = await db.collection('gp_projects').findOne({"nodes._id": mongoist.ObjectId(id)});
-			project._nodeindex = '_id'
-		} else {
-			project._nodeindex = 'label'
-		}
-		return project;	
 	}
 
 	
@@ -128,7 +114,9 @@ class Node {
 		}
 	}
 
-	async removeFromProject(project_id) {
+
+
+	async removeFromProject() {
 		
 		// remove records that were created by source node
 		if(this.source.type == 'source') {
@@ -158,12 +146,12 @@ class Node {
 		//await schema.createSchema(this.collection);
 
 		// remove node from project
-		var res = await db.collection("gp_projects").update(
-			{_id:mongoist.ObjectId(project_id)},
-			{$pull:{nodes: {_id:mongoist.ObjectId(this.source._id)}}});
+		var res = await db.collection("gp_nodes").remove({_id:mongoist.ObjectId(this.source._id)});
 		return res;
 	}
-	
+
+
+
 	setParams(params) {
 		if(this.source) {
 			this.source.params = params; 
@@ -185,10 +173,10 @@ class Node {
 	async updateSourceKey(key, value) {
 		var setter = {'$set':''};
 		var a = {}
-		a["nodes.$." + key] = value;
+		a[key] = value;
 		setter.$set = a;
-		var query = {"nodes._id": mongoist.ObjectId(this.uuid)};
-		await db.collection("gp_projects").update(query, setter);
+		var query = {"_id": mongoist.ObjectId(this.uuid)};
+		await db.collection("gp_nodes").update(query, setter);
 		this.source[key] = value;
 	}
 
@@ -239,11 +227,8 @@ class Node {
 
 		if(!settings_copy)
 			return;
-			
-		var setter = {};
-		setter.$set = {"nodes.$.settings": settings_copy};
-		var query = {"nodes._id": mongoist.ObjectId(this.source._id)};
-		await db.collection("gp_projects").update(query, setter);
+		
+		await this.updateSourceKey('settings', settings_copy);
 
 	}
 	
