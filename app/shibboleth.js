@@ -16,9 +16,12 @@ exports.isValidUser = function(ctx) {
 		return next();
 	}
 
-	var user = ctx.get(global.config.shibbolethHeaderId);
+	var user = ctx.get(global.config.shibboleth.headerId);
+	if(global.config.shibboleth.dummyUser) user = global.config.shibboleth.dummyUser  // DUMMY USERS
+	
 	if(user) {
-		if(global.config.shibbolethUsers.includes(user)) {  // user OK
+		if(global.config.shibboleth.users.includes(user)) {  // user OK
+			ctx.user = user;
 			return true;
 		} else {
 			return false;

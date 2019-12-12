@@ -10,7 +10,7 @@ var error 			= require('debug')('ERROR');
 
 const mongoist 		= require('mongoist');
 const path			= require('path');
-const fs 			= require('fs');
+const fs 			= require('fs').promises;
 const os			= require('os')
 
 var workerFarm 		= require('worker-farm');
@@ -18,43 +18,51 @@ var workers 		= null;
 
 
 class GLAMpipe {
-	constructor(config) {
+	constructor(config) {}
+
+
+	async loadConfig(config) {
+		debug("Loading config...")
 		try {
-			global.config = require("../config/config.js");
+			var content = await fs.readFile("config/config.json", 'utf-8');
+			var json = JSON.parse(content);
+			global.config = json;
+			global.config.dataPath = path.join(json.dataPath, "glampipe-data");
+			global.config.projectsPath = path.join(json.dataPath, "projects");
 			global.config.file = "config.js (your local settings)";
 		} catch(e) {
-			debug("config.js not found or is malformed! Using defaults...");
-			global.config = require("../config/config.js.example");
-			global.config.file = "config.js.example (default settings)";
-		}
-		
-		if(config) {
-			global.config = config;
-			global.config.dataPath = path.join(config.dataPath, "glampipe-data");
-			global.config.projectsPath = path.join(global.config.dataPath, "projects");
-		} else if(global.config) {
-			global.config.version = version.version;
-			global.config.dataPath = path.join(global.config.dataPath, "glampipe-data");
-			global.config.projectsPath = path.join(global.config.dataPath, "projects");
-		} else {
-			error("No config present!");
-			throw("No config present!");
+			try {
+				var content = await fs.readFile("config/config.json.example", 'utf-8');
+				var json = JSON.parse(content);
+				global.config = json;
+				global.config.dataPath = path.join(json.dataPath, "glampipe-data");
+				global.config.projectsPath = path.join(json.dataPath, "projects");
+				global.config.file = "config.js.example (default settings)";
+			} catch(e) {
+				error("Could not find config file!")
+				throw("Could not find config file!")
+			}
 		}
 	}
 
+
 	async init(server) {
 		console.log("GLAMpipe init started...")
+		
+		await this.loadConfig();
+		debug(global.config)
+		
+		// create data directory structure
+		try{ await fs.mkdir("glampipe-data") } catch(e) { debug("glampipe-data exists" ) }
+		try{ await fs.mkdir("glampipe-data/projects") } catch(e) { debug("glampipe-data exists/projects" ) }
+		try{ await fs.mkdir("glampipe-data/logs") } catch(e) { debug("glampipe-data exists/logs" ) }
+		try{ await fs.mkdir("glampipe-data/tmp") } catch(e) { debug("glampipe-data exists/tmp" ) }
+		try{ await fs.mkdir("glampipe-data/uploads") } catch(e) { debug("glampipe-data exists/uploads" ) }
+
 		// load nodes from files
 		await this.loadNodes();
 		global.register = {};
-		
-		// create data directory structure
-		if(!fs.existsSync("glampipe-data")) fs.mkdirSync("glampipe-data");
-		if(!fs.existsSync("glampipe-data/projects")) fs.mkdirSync("glampipe-data/projects");
-		if(!fs.existsSync("glampipe-data/logs")) fs.mkdirSync("glampipe-data/logs");
-		if(!fs.existsSync("glampipe-data/tmp")) fs.mkdirSync("glampipe-data/tmp");
-		if(!fs.existsSync("glampipe-data/uploads")) fs.mkdirSync("glampipe-data/uploads");
-		
+
 		// make sure that gp_settings collection exists
 		var settings = await db.collection("gp_settings").findOne({});
 		if(!settings) await db.collection("gp_settings").insert({"project_count":0, "data_path":""});
@@ -269,18 +277,20 @@ class GLAMpipe {
 		}
 		try {
 			
-			var dirs = fs.readdirSync(nodePath);
+			var dirs = await fs.readdir(nodePath);
 			for(var dir of dirs) {
 				var dirPath = path.join(nodePath, dir);
-				if (fs.statSync(dirPath).isDirectory()) {
-					var nodeDirs = fs.readdirSync(dirPath);
+				var stats = await fs.stat(dirPath)
+				if (await stats.isDirectory(dirPath)) {
+					var nodeDirs = await fs.readdir(dirPath);
 					for(var nodeDir of nodeDirs) {
 						var nodeDirPath = path.join(dirPath, nodeDir);
-						if (fs.statSync(nodeDirPath).isDirectory()) {
-							var nodeFiles = fs.readdirSync(nodeDirPath);
+						var nodeStats = await fs.stat(nodeDirPath);
+						if (await nodeStats.isDirectory()) {
+							var nodeFiles = await fs.readdir(nodeDirPath);
 							// read only if description.json exists
 							if(nodeFiles.includes('description.json')) {
-								var content = fs.readFileSync(path.join(nodeDirPath, "description.json"), 'utf-8');
+								var content = await fs.readFile(path.join(nodeDirPath, "description.json"), 'utf-8');
 								var node = JSON.parse(content);
 								if(node.core) { // require new GP-node format
 									count++;

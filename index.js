@@ -1,16 +1,17 @@
-const Koa 			= require('koa');
-const Router 		= require('koa-router');
-const bodyParser 	= require('koa-body');
-const serve 		= require('koa-send');
-const json 			= require('koa-json')
+const Koa			= require('koa');
+const Router		= require('koa-router');
+const bodyParser	= require('koa-body');
+const serve			= require('koa-send');
+const json			= require('koa-json')
+const cors			= require('koa-cors')
 const path			= require('path');
-var GLAMpipe 		= require('./app/glampipe.js');
-var shibboleth 		= require('./app/shibboleth.js');
-var collection 		= require('./app/new_collection.js');
-var proxy 			= require('./app/proxy.js');
+var GLAMpipe		= require('./app/glampipe.js');
+var shibboleth		= require('./app/shibboleth.js');
+var collection		= require('./app/new_collection.js');
+var proxy			= require('./app/proxy.js');
  
-var app 			= new Koa();
-var router 			= new Router();
+var app				= new Koa();
+var router			= new Router();
 var GP 				= new GLAMpipe();
 
 global.register = {};
@@ -24,6 +25,7 @@ app.use(bodyParser({
 
 
 app.use(json({ pretty: true, param: 'pretty' }))
+app.use(cors());
 
 app.use(async function handleError(context, next) {
 	try {
@@ -61,9 +63,10 @@ app.use(async (ctx, next) => {
 		}
 		
 	} else if(global.config.authentication === "shibboleth") {
-			if(ctx.get(global.config.shibbolethHeaderId)) {
-				var shib_user = ctx.get(global.config.shibbolethHeaderId);
-				if(global.config.shibbolethUsers.includes(shib_user)) {
+			if(ctx.get(global.config.shibboleth.headerId)) {
+				var shib_user = ctx.get(global.config.shibboleth.headerId);
+				if(global.config.shibboleth.dummyUser) shib_user = global.config.shibboleth.dummyUser  // DUMMY USERS
+				if(global.config.shibboleth.users.includes(shib_user)) {
 					res.json({"shibboleth":{user:shib_user}});
 				} else {
 					res.json({"shibboleth":{visitor:shib_user}});
@@ -90,6 +93,7 @@ router.get('/node-editor/:node', function(ctx) {
 
 router.get('/api/v2/config', function (ctx, next) {
 	ctx.body = {
+		file: global.config.file,
 		url:global.config.url,
 		authentication:global.config.authentication,
 		version:global.config.version,
@@ -100,6 +104,10 @@ router.get('/api/v2/config', function (ctx, next) {
 	};
 });
 
+router.get('/api/v2/config/reload', async function (ctx, next) {
+	await GP.loadConfig();
+	ctx.body = {"status":"ok"};
+});
 
 router.get('/api/v2/status', function (ctx) {
 	ctx.body = {"status":"ok"};
@@ -399,11 +407,16 @@ router.get('/api/v2', function (ctx) {
 
 
 var server = require('http').createServer(app.callback())
-GP.init(server);
-//var io = require('socket.io')(server)
 
-app
+GP.init(server).then(function() {
+	app
 	.use(router.routes())
 	.use(router.allowedMethods());
 
-server.listen(global.config.port);
+	server.listen(global.config.port);
+	
+}).catch(function(e) {
+	console.log(e)
+});
+
+
