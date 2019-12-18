@@ -31,13 +31,17 @@ app.use(async function handleError(context, next) {
 	try {
 		await next();
 	} catch (error) {
-		if(error.message)
-			console.log('ERROR: ' + error.message);
-		else
-			console.log('ERROR: ' + error);
-		console.log(error.stack);
 		context.status = 500;
-		context.body = {'error':error.message};
+		if(error.message) {
+			console.log('ERROR: ' + error.message);
+			context.body = {'error':error.message};
+		} else {
+			console.log('ERROR: ' + error);
+			context.body = {'error':error};
+		}
+		console.log(error.stack);
+		
+		
 	}
 });
 
@@ -355,6 +359,27 @@ router.put('/api/v2/collections/:collection/schema', async function (ctx) {
 	const schema = await GP.createSchema(ctx.params.collection);
 	if(schema) ctx.body = schema; else ctx.body = {}; 
 });
+
+/* ***********************************************************************
+ * 							CRON
+ * ***********************************************************************
+*/
+
+router.get('/api/v2/cron', async function (ctx) {
+	var jobs = await GP.getJobs();
+	ctx.body = jobs;
+})
+
+router.get('/api/v2/cron/node/:id', async function (ctx) {
+	var job = await GP.getCronJob(ctx.params.id);
+	ctx.body = job;
+})
+
+router.post('/api/v2/cron/node/:id', async function (ctx) {
+	var job = await GP.createCronJob(ctx.params.id, ctx.request.body);
+	ctx.body = job;
+})
+
 
 /* ***********************************************************************
  * 							PROXY

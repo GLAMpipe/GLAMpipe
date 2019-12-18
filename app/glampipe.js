@@ -3,6 +3,7 @@ const project 		= require('./new_project.js');
 const collection 	= require('./new_collection.js');
 const Node 			= require('./new_node.js');
 const schema 		= require('./new_schema.js');
+const cron	 		= require('./cron.js');
 const version 		= require("../config/version.js");
 
 var debug 			= require('debug')('GLAMpipe');
@@ -16,6 +17,8 @@ const os			= require('os')
 var workerFarm 		= require('worker-farm');
 var workers 		= null;
 
+
+cron.init();
 
 class GLAMpipe {
 	constructor(config) {}
@@ -503,6 +506,26 @@ class GLAMpipe {
 
 	}
 
+
+/* ***********************************************************************
+ * 							CRON
+ * ***********************************************************************
+*/
+
+	async createCronJob(node_uuid, body) {
+		var settings = body.settings;
+		var crontime = body.crontime;
+		var job = await cron.createNodeJob(node_uuid, crontime, settings)
+		return job;
+	}
+
+	async getCronJob(node_uuid) {
+		return cron.getNodeJob(node_uuid);
+	}
+
+	async getJobs() {
+		return cron.getJobs();
+	}
 
 /* ***********************************************************************
  * 							MISC
