@@ -225,7 +225,7 @@ router.delete('/api/v2/nodes/:id', async function (ctx) {
 	ctx.body = result;
 });
 
-// start
+// start and return immediately
 router.post('/api/v2/nodes/:id/start', function (ctx) {
 	GP.startNode(ctx.params.id, ctx.request.body);
 	ctx.body = {status:"started", ts:  new Date()};

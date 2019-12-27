@@ -2,11 +2,22 @@ var requestPromise 	= require('request-promise-native');
 var debug 			= require('debug')('GLAMpipe:node');
 const constants 	= require("../../config/const.js");
 
-exports.postJSON = async function (options) {
+exports.sendJSON = async function (node) {
 	
-	//node.sandbox.core.options.resolveWithFullResponse = true;
-	var result = await requestPromise(options);
-	return result;
+	console.log("calling core")
+
+	// OPTIONS.JS - give input to core (core.options)
+	node.scripts.options.runInContext(node.sandbox);
+	node.sandbox.core.options.resolveWithFullResponse = true;
+	setAcceptHeaders(node, "application/json")
+	
+	// attach jar if there is one from login.js
+	if(node.sandbox.core.login && node.sandbox.core.login.jar) {
+		node.sandbox.core.options.jar = node.sandbox.core.login.jar;
+	}
+	
+	var result = await requestPromise(node.sandbox.core.options);
+	node.sandbox.core.data = result;
 }
 
 
@@ -25,6 +36,8 @@ exports.getAndSaveFile = async function(node) {
 	const fs = require("fs");
 	fs.writeFileSync(node.sandbox.core.filename, result, 'utf-8')
 }
+
+
 
 exports.getJSON = async function (node) {
 
@@ -71,7 +84,7 @@ exports.getJSON = async function (node) {
 
 		// handle data and get new options
 		try {
-			node.scripts.run.runInContext(node.sandbox);
+			node.scripts.process.runInContext(node.sandbox);
 		} catch(e) {
 			console.log(e)
 		}
@@ -107,8 +120,8 @@ exports.lookupJSON = async function (node) {
 		node.sandbox.core.response = [];
 		node.sandbox.out.value = '';
 
-		// PRE_RUN - create options for web request
-		node.scripts.pre_run.runInContext(node.sandbox);
+		// OPTIONS.JS - create options for web request
+		node.scripts.options.runInContext(node.sandbox);
 		
 		// CALL CORE - if there are several options, then make request for every row
 		if(Array.isArray(node.sandbox.core.options)) {
@@ -129,7 +142,7 @@ exports.lookupJSON = async function (node) {
 		}	
 
 		// process results
-		node.scripts.run.runInContext(node.sandbox);
+		node.scripts.process.runInContext(node.sandbox);
 		
 		// write outcome
 		var setter = {}
@@ -147,7 +160,13 @@ exports.lookupJSON = async function (node) {
 }
 
 
+function setAcceptHeaders(node, header) {
 
+	if(node.sandbox.core.options.headers) 
+		node.sandbox.core.options.headers.Accept = header;
+	else
+		node.sandbox.core.options.headers = {Accept: header};
+}
 
 function  markSourceNode(data, node) {
 	if(Array.isArray(data)) {

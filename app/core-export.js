@@ -1,13 +1,20 @@
-//var web 		= require('./cores/web.js');
-var requestPromise = require('request-promise-native');
-const GP 		= require("../config/const.js");
+var debug 			= require('debug')('GLAMpipe');
+var error 			= require('debug')('ERROR');
+var requestPromise 	= require('request-promise-native');
+var web 			= require('./cores/web.js');
+const GP 			= require("../config/const.js");
 
 var exports 	= module.exports = {};
 
 exports.export = {
 	'web': {
 		'JSON': async function(node) {
-			await webLoop(node);
+			try {
+				await jarLogin(node);
+				await exportLoop(web.sendJSON, node);
+			} catch(e) {
+				error(e)
+			}
 		}
 	},
 	'file': {
@@ -16,6 +23,57 @@ exports.export = {
 		}
 	}
 }
+
+
+
+async function exportLoop(core, node) {
+
+	// if there is a doc already, then this is single run
+	if(node.sandbox.context.doc) {
+		await doCore(core, node)
+
+	// otherwise loop through all documents
+	} else {
+		const cursor = global.db[node.collection].findAsCursor({});	
+		while(await cursor.hasNext()) {
+			node.sandbox.context.doc = await cursor.next();
+			await doCore(core, node);
+		}
+	}
+}
+
+
+
+async function doCore(core, node) {
+	console.log("docore")
+	await core(node);
+	console.log("core done")
+	console.log(node.sandbox.core.data.statusCode)
+	node.scripts.process.runInContext(node.sandbox);
+	console.log(node.sandbox.out.setter)
+	await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
+		'$set': node.sandbox.out.setter
+	});
+}
+
+
+
+async function jarLogin(node) {
+	if(node.scripts.login) {
+		node.scripts.login.runInContext(node.sandbox);
+		debug("Logging in: " + node.sandbox.core.login.url)
+		node.sandbox.core.login.resolveWithFullResponse = true;
+		try {
+			node.sandbox.core.login.jar = requestPromise.jar();
+			var result = await requestPromise(node.sandbox.core.login);
+		} catch(e) {
+			debug("ERROR: " + e.message)
+			throw("Login error")
+		}
+	}
+}
+
+
 
 async function fileLoop(node, core) {
 	var fs = require('fs');
@@ -26,66 +84,15 @@ async function fileLoop(node, core) {
 	writer.pipe(fs.createWriteStream(filePath));
 	const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
-		var doc = await cursor.next();
-	  
+		var doc = await cursor.next(); 
 		node.sandbox.context.doc = doc;
-		node.scripts.run.runInContext(node.sandbox);
+		node.scripts.process.runInContext(node.sandbox);
 		writer.write(node.sandbox.out.value);
 	}	
 	writer.end();
 }
 
-async function webLoop(node, core) {
 
-	//var bulk = global.db[node.collection].initializeOrderedBulkOp();
-	const cursor = global.db[node.collection].findAsCursor({});	
-	while(await cursor.hasNext()) {
-		var doc = await cursor.next();
-	  
-		node.sandbox.context.doc = doc;
-		// PRE_RUN - give input to core (core.options)
-		node.scripts.pre_run.runInContext(node.sandbox);
-		
-		node.sandbox.core.options.resolveWithFullResponse = true;
 
-		// make sure that content type header is set
-		if(node.sandbox.core.options.headers) 
-			node.sandbox.core.options.headers['Content-Type'] = 'application/json';
-		else
-			node.sandbox.core.options.headers = {'Content-Type': 'application/json'};
 
-		console.log("REQUEST: ", node.sandbox.core.options.url);
 
-		// CALL CORE - if there are several files, then call core once for every row
-		if(Array.isArray(node.sandbox.core.options)) {
-			node.sandbox.core.data = [];
-			for(var options of node.sandbox.core.options) {
-				//console.log(options)
-				//var core_result = await requestPromise(options);
-				//node.sandbox.core.data.push(core_result)
-			}
-		} else {
-			var result = null;
-			try {
-				result = await requestPromise(node.sandbox.core.options);
-				node.sandbox.core.data = result;
-			} catch(e) {
-				console.log("ERROR: " + e.message)
-				node.sandbox.core.error = e;
-			}
-		}
-
-		// let GP node script to process data
-		node.scripts.run.runInContext(node.sandbox);
-		
-		await global.db[node.collection].update({ '_id': doc._id },{
-			'$set': node.sandbox.out.setter
-		});
-	}	
-	
-	// make changes to database
-	//await bulk.execute();
-
-	// notify that we are finished
-	//node.sandbox.out.say('finish', 'Done');
-}

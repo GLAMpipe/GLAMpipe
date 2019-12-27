@@ -749,7 +749,7 @@ console.log(self.keys);
 	}
 
 	this.getKeysHTML = async function (event) {
-		var result = await $.getJSON(self.baseAPI + "/collections/" + self.node.gp.currentCollectionNode.source.collection + "/fields");
+		var result = await $.getJSON(self.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/fields");
 		var visible_keys = self.getVisibleFields();
 		
 		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-generate schema</a>";
@@ -804,7 +804,7 @@ console.log(self.keys);
 	this.reReadFields = function () {
 		$("#field-selector .visible-keys").empty().append("generating schema...");
 		var data = {};
-		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollectionNode.source.collection + "/schema", function(returnedData) {
+		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/schema", function(returnedData) {
 			$("#field-selector .visible-keys").empty().append("Schema generated!");
 			var html = self.getKeysHTML();
 			$("#field-selector").empty().append(html);

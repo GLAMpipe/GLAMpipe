@@ -37,8 +37,8 @@ async function coreLoop(node, core) {
 		node.sandbox.core.data = [];
 
 		// run.js: pitää asettaa setter!!!
-		// PRE_RUN - give input to core (core.files)
-		node.scripts.pre_run.runInContext(node.sandbox);
+		// OPTIONS - give input to core (core.files)
+		node.scripts.options.runInContext(node.sandbox);
 		
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
@@ -70,7 +70,7 @@ async function coreLoop(node, core) {
 			node.sandbox.core.data = core_result;
 		}	
 
-		node.scripts.run.runInContext(node.sandbox);
+		node.scripts.process.runInContext(node.sandbox);
 		bulk.find({ '_id': doc._id }).updateOne({
 			'$set': node.sandbox.out.setter
 		});
@@ -90,8 +90,8 @@ async function scriptLoop(node) {
 	try {
 		// check if run.js code is provided in settings
 		if(node.settings.js) {
-			var run = new vm.createScript(node.settings.js);
-			node.scripts.run = run;
+			var process = new vm.createScript(node.settings.js);
+			node.scripts.process = process;
 		}
 
 		var query = {};
@@ -111,7 +111,7 @@ async function scriptLoop(node) {
 			node.sandbox.context.doc = doc;
 			node.sandbox.context.vars.count = counter;
 			
-			node.scripts.run.runInContext(node.sandbox);
+			node.scripts.process.runInContext(node.sandbox);
 			if(counter === 1) await node.updateSourceKey("schema", node.sandbox.out.setter);
 
 			// if out.value is set, then we write to the field defined in settings.out_field

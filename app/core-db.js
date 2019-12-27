@@ -30,7 +30,7 @@ async function deleteLoop(node) {
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;
-		node.scripts.run.runInContext(node.sandbox);
+		node.scripts.process.runInContext(node.sandbox);
 		if(node.sandbox.out.value) {
 			console.log("removing "+ doc._id);
 			await global.db[node.collection].remove({ '_id': doc._id });

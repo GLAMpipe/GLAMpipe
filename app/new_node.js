@@ -318,20 +318,29 @@ class Node {
 		
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
-		this.scripts.pre_run 	= CreateScriptVM(this.source, sandbox, "pre_run");
-		this.scripts.run 		= CreateScriptVM(this.source, sandbox, "run");
-		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 		this.scripts.login 		= CreateScriptVM(this.source, sandbox, "login");
+		this.scripts.options 	= CreateScriptVM(this.source, sandbox, "options");
+		this.scripts.process 	= CreateScriptVM(this.source, sandbox, "process");
+		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
 			
 		if(this.scripts.init) {
 			try {
 				this.scripts.init.runInContext(sandbox);
 			} catch(e) {
 				error(e)
-				throw(new Error('Node script error (init) ' + e ))
+				throw(new Error('Init script error ' + e ))
 			}
 		}
-
+		
+		// if there is a doc_id in settings, then fetch that document and attach to node
+		if(this.settings.doc_id) {
+			var doc = await global.db[this.collection].findOne({_id:mongoist.ObjectId(this.settings.doc_id)});
+			if(doc) {
+				this.sandbox.context.doc = doc;
+			} else {
+				throw("Document not found: " + this.settings.doc_id)
+			}
+		}
 		
 		var core = this.source.core.split(".");
 		switch(this.source.type) {

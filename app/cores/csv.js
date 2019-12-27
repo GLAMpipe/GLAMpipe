@@ -63,7 +63,7 @@ exports.read = async function (node) {
 
 	var transformer = transform(function(record){
 		node.sandbox.context.data = record;
-		node.scripts.run.runInContext(node.sandbox)
+		node.scripts.process.runInContext(node.sandbox)
 		if(node.sandbox.out.value) {
 			node.sandbox.out.value[constants.source] = node.uuid; // mark source node uuid to records
 		}

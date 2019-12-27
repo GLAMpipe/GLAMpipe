@@ -40,16 +40,16 @@ async function queryLoop(node, core) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;
 
-		// PRE_RUN - give input to core (core.options)
+		// OPTIONS - give input to core (core.options)
 		if(core) {
 			node.sandbox.core.data = null;
-			node.scripts.pre_run.runInContext(node.sandbox);
+			node.scripts.options.runInContext(node.sandbox);
 			node.sandbox.core.data = await core(node);
 		}
 
 		// run.js: must set setter!!!
 		console.log(node.scripts)
-		node.scripts.run.runInContext(node.sandbox);
+		node.scripts.process.runInContext(node.sandbox);
 		console.log("setter")
 		console.log(node.sandbox.out.setter)
 		
