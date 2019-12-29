@@ -1,0 +1,33 @@
+
+{
+	"authentication": "none",
+	"port": 3333,
+	"database": "glampipe_rw2",
+	"nodePath": "nodes",
+	"dataPath": "",
+	"public": true,
+	"GP":"__gp",
+
+	"proxy": {
+		"passes": [
+			"http://localhost/",
+			"https://jyx.jyu.fi/",
+			"https://demo.dspace.org/",
+			"http://demoprints.eprints.org/"
+		]
+	},
+
+	"local": {
+		"canRegister": false
+	},
+
+
+	"shibboleth": {
+		"headerId": "mail",
+		"users": [
+			"ari.hayrinen@jyu.fi"
+		],
+		"dummyUser": "ari.hayrinen@jyu.fi"
+	}
+
+}

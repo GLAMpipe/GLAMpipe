@@ -1,5 +1,4 @@
 const vm 		= require("vm");
-var db 			= require('./db.js');
 var mongo 		= require('./cores/mongo.js');
 var web 		= require('./cores/web.js');
 const GP 		= require("../config/const.js");
@@ -16,7 +15,7 @@ exports.lookup = {
 		'field_array': async function(node) {
 			// get all lookup keys and values to be copied based on query created by init.js
 			var collection = node.sandbox.context.node.params.required_source_collection;
-			node.sandbox.core.data = await db[collection].find(node.sandbox.core.options.query, node.sandbox.core.options.options);
+			node.sandbox.core.data = await global.db[collection].find(node.sandbox.core.options.query, node.sandbox.core.options.options);
 			await queryLoop(node)
 		}
 	},
@@ -35,8 +34,8 @@ exports.lookup = {
 // loop through documents
 async function queryLoop(node, core) {
 
-	//var bulk = db[node.collection].initializeOrderedBulkOp();
-    const cursor = db[node.collection].findAsCursor({});	
+	//var bulk = global.db[node.collection].initializeOrderedBulkOp();
+    const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;
@@ -55,7 +54,7 @@ async function queryLoop(node, core) {
 		console.log(node.sandbox.out.setter)
 		
 		if(node.sandbox.out.setter) {
-			await db[node.collection].update({ '_id': doc._id }, {
+			await global.db[node.collection].update({ '_id': doc._id }, {
 				'$set': node.sandbox.out.setter
 			});
 		}

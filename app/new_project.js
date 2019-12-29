@@ -3,7 +3,6 @@ var path 		= require('path');
 var debug 		= require('debug')('GLAMpipe:project');
 var error 		= require('debug')('ERROR');
 
-var db 			= require('./db.js');
 var Collection 	= require('./new_collection.js');
 var Node 		= require('./new_node.js');
 const GP 		= require("../config/const.js");
@@ -22,31 +21,28 @@ exports.create = async function(title) {
 	
 	try {
 		// update project count and create project. Project count is *permanent* counter
-		var incr = await db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
-		var meta = await db.collection('gp_settings').findOne({});
+		var incr = await global.db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
+		var meta = await global.db.collection('gp_settings').findOne({});
 		console.log(meta)
 		
-		var prefix = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
-		prefix = prefix.replace(/ /g,"_");
-		prefix = "p" + meta.project_count + "_" + prefix;
-		title_dir = title_dir + "_p" + meta.project_count;
+		var dir = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
+		dir = dir.replace(/ /g,"_");
+		dir = "p" + meta.project_count + "_" + dir;
 		
 		var project = {
 			"title": title,
-			"dir": title_dir,
-			"prefix":  prefix,
+			"dir": dir,
 			"collection_count": 0,
 			"node_count":0,
 			"schemas": [],
 			"owner": [] 
 		};
 		
-		var result = await db.collection('gp_projects').insert(project);
+		var result = await global.db.collection('gp_projects').insert(project);
 		
 		// create project directories
-		var projectPath = path.join(global.config.projectsPath, title_dir)
+		var projectPath = path.join(global.config.projectsPath, dir)
 		await createProjectDir(projectPath);
-		await createProjectSubDirs(projectPath);
 		
 		return result;
 
@@ -64,7 +60,7 @@ exports.remove = async function (doc_id) {
 	let dataPath = path.join(global.config.dataPath, "glampipe-data");
 	let projectsPath = path.join(dataPath, "projects");
 	
-	var project = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	var project = await global.db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 	if(!project) {
 		error("Project " + doc_id + " not found")
 		return;
@@ -78,11 +74,11 @@ exports.remove = async function (doc_id) {
 		if(project.collections) {
 			for(var i=0; i < project.collections.length; i++) {
 				debug("deleting collection", project.collections[i]);
-				await db.collection(project.collections[i]).drop();
+				await global.db.collection(project.collections[i]).drop();
 			}
 		}
 
-		await db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
+		await global.db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
 				
 		// remove project directory
 		var rmrf = require("rmrf");	
@@ -103,7 +99,7 @@ exports.remove = async function (doc_id) {
 
 exports.getProjects = async function() {
 
-	return await db.collection('gp_projects').findAsCursor({}, {
+	return await global.db.collection('gp_projects').findAsCursor({}, {
 		'title': 1, 
 		'collections': 1, 
 		'nodes.nodeid': 1,
@@ -133,8 +129,8 @@ exports.getProjects = async function() {
 exports.getProject = async function(project_id) {
 
 	try {
-		var p = await db.collection('gp_projects').findOne({_id: mongoist.ObjectId(project_id)});
-		var nodes = await db.collection('gp_nodes').find({project: project_id});
+		var p = await global.db.collection('gp_projects').findOne({_id: mongoist.ObjectId(project_id)});
+		var nodes = await global.db.collection('gp_nodes').find({project: project_id});
 		p.nodes = nodes;
 		return p;
 	} catch(e) {
@@ -147,13 +143,13 @@ exports.getProject = async function(project_id) {
 
 exports.getProjectByCollection = async function(collection_name) {
 
-	return db.collection('gp_projects').findOne({collections: {$in: [collection_name]}});
+	return global.db.collection('gp_projects').findOne({collections: {$in: [collection_name]}});
 
 }
 
 exports.addCollection = async function(collection_name) {
 
-	await db.createCollection(collection_name);
+	await global.db.createCollection(collection_name);
 
 }
 

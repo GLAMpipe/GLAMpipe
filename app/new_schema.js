@@ -1,5 +1,4 @@
 
-var db 			= require('./db.js');
 var project 	= require('./new_project.js');
 
 
@@ -14,7 +13,7 @@ var exports = module.exports = {};
 exports.createSchema = async function (collection_name) {
 
 	var keys = [];
-    const cursor = db[collection_name].findAsCursor({});	
+    const cursor = global.db[collection_name].findAsCursor({});	
     
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
@@ -36,10 +35,10 @@ exports.createSchema = async function (collection_name) {
 
 exports.getSchema = async function (collection_name) {
 
-	var schema = await db["gp_schemas"].findOne({'collection':collection_name});
+	var schema = await global.db["gp_schemas"].findOne({'collection':collection_name});
 	// add keys that are set via "out.setter" dynamically to the schema
 	if(schema && schema.keys) {
-		var nodes = await db["gp_nodes"].find({"collection": collection_name});
+		var nodes = await global.db["gp_nodes"].find({"collection": collection_name});
 		for(var node of nodes) {
 			if(node.schema && node.collection === collection_name) {
 				for(var key in node.schema) {
@@ -71,8 +70,8 @@ exports.removeKeysFromSchema = function(collectionName, keys, cb) {
 
 async function save(collection_name, schema) {
 	
-	await db["gp_schemas"].remove({'collection': collection_name});
-	await db["gp_schemas"].insert(schema);
+	await global.db["gp_schemas"].remove({'collection': collection_name});
+	await global.db["gp_schemas"].insert(schema);
 
 }
 

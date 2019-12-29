@@ -101,6 +101,7 @@ router.get('/api/v2/config', function (ctx, next) {
 		url:global.config.url,
 		authentication:global.config.authentication,
 		version:global.config.version,
+		database: global.config.database,
 		uiPath:global.config.uiPath,
 		public:global.config.public,
 		nodedevmode:global.config.nodeDevMode,
@@ -151,11 +152,6 @@ router.delete('/api/v2/projects/:id', async function (ctx) {
  * ***********************************************************************
 */
 
-router.post('/api/v2/uploads', async function (ctx) {
-	var upload = await GP.uploadFile(ctx.request.files.file)
-	ctx.body = upload;
-
-});
 
 /* ***********************************************************************
  * 							NODE REPOSITORY
@@ -266,6 +262,22 @@ router.post('/api/v2/nodes/:id/settings', async function (ctx) {
 	await node.saveSettings(ctx.request.body);
 	if(node) ctx.body = node.source.settings;
 });
+
+
+// upload file
+router.post('/api/v2/nodes/:id/upload', async function(ctx, next) {
+
+	var fs = require("fs")
+	var node = await GP.getNode(ctx.params.id);
+	var upload = await node.upload(ctx)
+	ctx.body = upload;
+});
+
+//router.post('/api/v2/nodes/:id/upload', async function (ctx) {
+	//var node = await GP.getNode(ctx.params.id);
+	//await node.upload(ctx.request.body);
+	//if(node) ctx.body = "uploading"
+//});
 
 
 /* ***********************************************************************

@@ -1,4 +1,6 @@
-const db 			= require('./db.js');
+const {database} 	= require("../config/config.json");
+const mongo			= require('./db.js');
+
 const project 		= require('./new_project.js');
 const collection 	= require('./new_collection.js');
 const Node 			= require('./new_node.js');
@@ -18,7 +20,6 @@ var workerFarm 		= require('worker-farm');
 var workers 		= null;
 
 
-cron.init();
 
 class GLAMpipe {
 	constructor(config) {}
@@ -33,6 +34,8 @@ class GLAMpipe {
 			global.config.dataPath = path.join(json.dataPath, "glampipe-data");
 			global.config.projectsPath = path.join(json.dataPath, "projects");
 			global.config.file = "config.js (your local settings)";
+			console.log(global.config.database)
+			
 		} catch(e) {
 			try {
 				var content = await fs.readFile("config/config.json.example", 'utf-8');
@@ -41,6 +44,7 @@ class GLAMpipe {
 				global.config.dataPath = path.join(json.dataPath, "glampipe-data");
 				global.config.projectsPath = path.join(json.dataPath, "projects");
 				global.config.file = "config.js.example (default settings)";
+				
 			} catch(e) {
 				error("Could not find config file!")
 				throw("Could not find config file!")
@@ -54,6 +58,7 @@ class GLAMpipe {
 		
 		await this.loadConfig();
 		debug(global.config)
+		global.db = mongo.init(global.config.database);
 		
 		// create data directory structure
 		try{ await fs.mkdir("glampipe-data") } catch(e) { debug("glampipe-data exists" ) }
@@ -90,6 +95,8 @@ class GLAMpipe {
 			});
 		}
 		workers = workerFarm({onChild:p}, require.resolve('./new_node-farm.js'))
+		cron.init();
+		console.log("GLAMpipe init ready!")
 
 	}
 
@@ -332,14 +339,16 @@ class GLAMpipe {
 				
 			var project = await this.getProject(project_id);
 			console.log(project, title)
+			 // create Mongo collection
 			var collection_name = await collection.create(title, project);
-			console.log("*********************")
-			var collectionNode = new Node();
-			await collectionNode.loadFromRepository("collection_basic");
-			await collectionNode.setParams({"title": title})
-			await collectionNode.add2Project(project_id, collection_name);
+			// create collection node
+			//var collectionNode = new Node();
+			//await collectionNode.loadFromRepository("collection_basic");
+			//await collectionNode.setParams({"title": title})
+			//await collectionNode.add2Project(project_id, collection_name);
 			debug("Collection created")
-			return collectionNode;
+			//return collectionNode;
+			return {}
 		} catch(e) {
 			error("Collection creation failed!", e);
 			throw(e);

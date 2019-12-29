@@ -2,35 +2,46 @@
 const mongoist 	= require('mongoist');
 const util 		= require('util');
 
-var db 			= require('./db.js');
 var buildquery 	= require('../app/query-builder.js');
 const MP 		= require('../config/const.js');
+var debug 		= require('debug')('GLAMpipe');
+var path 		= require('path');
 
 
 
 exports.create = async function(collection_name, project) {
+	
+	const fs 			= require('fs').promises;
 
 	// cleanup and generate collection name
-	collection_name = collection_name.replace(/[^a-z0-9-]/g,"");
-	collection_name = project.prefix + "_c" + project.collection_count + "_" + collection_name;  // unique name for collection
-	console.log(collection_name)
-	await db['gp_projects'].update({_id:mongoist.ObjectId(project._id)}, {$inc: { 'collection_count': 1, 'node_count': 1}, $addToSet: {collections: collection_name } })
+	var mongo_name = collection_name.replace(/[^a-z0-9-]/g,"");
+	mongo_name = project.dir + "_c" + project.collection_count + "_" + collection_name;  // unique name for collection
+	await global.db['gp_projects'].update({_id:mongoist.ObjectId(project._id)}, {$inc: { 'collection_count': 1}, $addToSet: {collections: {name:mongo_name, title:collection_name }} })
 
-	await db.createCollection(collection_name);
+	await global.db.createCollection(mongo_name);
+	// write collection directory under project directory
+	var collection_dir = path.join(config.dataPath, 'projects', project.dir, mongo_name);
+	try{ await fs.mkdir(collection_dir) } catch(e) { debug("Collection directory exists", e) }
+	try{ await fs.mkdir(path.join(collection_dir, 'source')) } catch(e) { debug("Collection directory exists", e) }
+	try{ await fs.mkdir(path.join(collection_dir, 'process')) } catch(e) { debug("Collection directory exists", e) }
+	try{ await fs.mkdir(path.join(collection_dir, 'export')) } catch(e) { debug("Collection directory exists", e) }
+	try{ await fs.mkdir(path.join(collection_dir, 'view')) } catch(e) { debug("Collection directory exists", e) }
+	try{ await fs.mkdir(path.join(collection_dir, 'tmp')) } catch(e) { debug("Collection directory exists", e) }
+	
 	return collection_name;
 
 }
 
 exports.removeFromProject = async function(collection_name, project_id) {
 	// when collection is dropped, we must also remove all nodes attached to it
-	var project = await db['gp_projects'].findOne({_id:mongoist.ObjectId(project_id)});
-	await db['gp_projects'].update({_id:mongoist.ObjectId(project_id)}, {'$unset': {'nodes':''}});
+	var project = await global.db['gp_projects'].findOne({_id:mongoist.ObjectId(project_id)});
+	await global.db['gp_projects'].update({_id:mongoist.ObjectId(project_id)}, {'$unset': {'nodes':''}});
 	
 	// drop collection
-	await db[collection_name].drop();
+	await global.db[collection_name].drop();
 	
 	// remove collection from project data
-	await db['gp_projects'].update(
+	await global.db['gp_projects'].update(
 		{_id:mongoist.ObjectId(project_id)}, 
 		{'$pull': 
 			{'collections': {'$in':[collection_name]}}
@@ -38,7 +49,7 @@ exports.removeFromProject = async function(collection_name, project_id) {
 	);
 	
 	// remove collection from schema data
-	await db["gp_schemas"].remove({'collection':collection_name});
+	await global.db["gp_schemas"].remove({'collection':collection_name});
 	
 }
 
@@ -51,7 +62,7 @@ exports.getFields = async function(collection_name) {
 exports.getDoc = async function(collection_name, id) {
 	
 	try {
-		return await db[collection_name].findOne({_id:mongoist.ObjectId(id)});
+		return await global.db[collection_name].findOne({_id:mongoist.ObjectId(id)});
 	} catch(e) {
 		return {};
 	}
@@ -65,7 +76,7 @@ exports.getDocs = async function(collection_name, query) {
 	var search = buildquery.search(query);
 	console.log(JSON.stringify(search))
 
-	return await db[collection_name].findAsCursor(
+	return await global.db[collection_name].findAsCursor(
 		search.query, 
 		search.keys
 	  ).sort(search.sort).skip(search.skip).limit(search.limit).toArray();
@@ -73,9 +84,9 @@ exports.getDocs = async function(collection_name, query) {
 }
 
 exports.insertDoc = async function(collection_name, doc) {
-	debug(doc)
+
 	try {
-		return db[collection_name].insert(doc);
+		return global.db[collection_name].insert(doc);
 	} catch(e) {
 		console.log(e)
 		return {};
@@ -84,7 +95,7 @@ exports.insertDoc = async function(collection_name, doc) {
 
 exports.updateDoc = async function(collection_name, doc_id, data) {
 	try {
-		return db[collection_name].update({"_id": mongoist.ObjectId(doc_id)},{$set: data});
+		return global.db[collection_name].update({"_id": mongoist.ObjectId(doc_id)},{$set: data});
 	} catch(e) {
 		console.log(e)
 		return {};
@@ -95,7 +106,7 @@ exports.updateDoc = async function(collection_name, doc_id, data) {
 exports.removeDoc = async function(collection_name, id) {
 	
 	try {
-		return db[collection_name].remove({_id:mongoist.ObjectId(id)});
+		return global.db[collection_name].remove({_id:mongoist.ObjectId(id)});
 	} catch(e) {
 		console.log(e)
 		return {};
@@ -104,7 +115,7 @@ exports.removeDoc = async function(collection_name, id) {
 
 exports.getCount = async function(collection_name, query) {
 	var search = buildquery.search(query);
-	return await db[collection_name].count(search.query);
+	return await global.db[collection_name].count(search.query);
 }
 
 
@@ -114,7 +125,7 @@ exports.getKeyTypes = async function (collection_name, cb) {
 	var key_list = {};
 	
 	// first we take the first record and extract key names from that
-	var doc = await db.collection(collection_name).findOne({});
+	var doc = await global.db.collection(collection_name).findOne({});
 	for (key in doc) {
 		if(Array.isArray(doc[key]))
 			key_list[key]= "array";
@@ -128,7 +139,7 @@ exports.getKeyTypes = async function (collection_name, cb) {
 exports.facet = async function (req) {
 
 	var filters = [];
-	var collection = db.collection(req.params.collection);
+	var collection = global.db.collection(req.params.collection);
 	var fields = req.query.fields.split("|").map(function(item) {
 		return item.trim();
 	});

@@ -1,5 +1,4 @@
 
-var db 			= require('./db.js');
 var Node 		= require('./new_node.js');
 
 

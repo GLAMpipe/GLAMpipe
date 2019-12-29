@@ -1,11 +1,9 @@
 var cron		= require('node-cron');
-var db 			= require('./db.js');
 
 var exports = module.exports = {};
 
-
 exports.init = async function() {
-	var result = await db.collection("gp_cron").find();
+	var result = await global.db.collection("gp_cron").find();
 	cron.schedule('* * * * *', () => {
 	  console.log("Hi, I'm GLAMpipe cron " + new Date());
 	});

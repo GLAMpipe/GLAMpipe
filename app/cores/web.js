@@ -1,6 +1,5 @@
 var requestPromise 	= require('request-promise-native');
 var debug 			= require('debug')('GLAMpipe:node');
-var db 				= require('../db.js');
 const constants 	= require("../../config/const.js");
 
 exports.postJSON = async function (options) {
@@ -39,7 +38,7 @@ exports.getJSON = async function (node) {
 	// remove previous entries by this node
 	var query = {}; 
 	query[constants.source] = node.uuid;
-	await db[node.collection].remove(query);
+	await global.db[node.collection].remove(query);
 
 	if(node.sandbox.core.options.headers) 
 		node.sandbox.core.options.headers.Accept = "application/json";
@@ -80,7 +79,7 @@ exports.getJSON = async function (node) {
 		// write data
 		if(node.sandbox.out.value) {
 			markSourceNode(node.sandbox.out.value, node);
-			await db[node.collection].insert(node.sandbox.out.value);
+			await global.db[node.collection].insert(node.sandbox.out.value);
 		}
 	}
 	node.scripts.finish.runInContext(node.sandbox);
@@ -97,9 +96,9 @@ exports.lookupJSON = async function (node) {
 		await requestPromise(node.sandbox.core.login);
 	}
 
-	var bulk = db[node.collection].initializeUnorderedBulkOp();
+	var bulk = global.db[node.collection].initializeUnorderedBulkOp();
 
-    const cursor = db[node.collection].findAsCursor({});	
+    const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 	  

@@ -13,7 +13,7 @@ exports.proxyJSON = async function (ctx) {
 
 	// if server installation then we restrict the proxy to white list
 	if(global.config.authentication !== "none") {
-		var allowed = global.config.PROXY_passes.some(function(pass) {
+		var allowed = global.config.proxy.passes.some(function(pass) {
 			pass = pass.replace("/", "\/");
 			var re = new RegExp("^" + pass);
 			return url.match(re);

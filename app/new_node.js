@@ -6,7 +6,6 @@ const mongoist 	= require('mongoist');
 var debug 		= require('debug')('GLAMpipe:node');
 var error 		= require('debug')('GLAMpipe:error');
 
-var db 			= require('./db.js');
 var schema 		= require('./new_schema.js');
 var buildquery 	= require("../app/query-builder.js");
 
@@ -44,7 +43,7 @@ class Node {
 	}
 
 	async loadFromRepository(nodeid) {
-		this.source = await db.collection("gp_repository").findOne({"nodeid": nodeid});
+		this.source = await global.db.collection("gp_repository").findOne({"nodeid": nodeid});
 		this.params = {};
 		this.settings = {};
 		if(!this.source) {
@@ -56,7 +55,7 @@ class Node {
 	async loadFromProject(id) {
 		
 		try {
-			var node = await db.collection("gp_nodes").findOne({"_id": mongoist.ObjectId(id)});
+			var node = await global.db.collection("gp_nodes").findOne({"_id": mongoist.ObjectId(id)});
 		} catch(e) {
 			throw(new Error('GLAMpipe node not found: ' + id))
 		}
@@ -72,8 +71,12 @@ class Node {
 
 	
 	async add2Project(project_id, collection_name) {
+		// check that project exists
+		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
+		if(!project) throw("Project does not exist!")
+		
 		// check if collection exists
-		var collections = await db.getCollectionNames();
+		var collections = await global.db.getCollectionNames();
 		if(!collections.includes(collection_name)) {
 			// create collection if node type is collection node
 			if(this.source.nodeid == 'collection_basic') {
@@ -86,14 +89,15 @@ class Node {
 		this.source.project = project_id;
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
-		var result = await db.collection('gp_nodes').insert(this.source);
-		console.log(result)
-		//await db.collection("gp_projects").update(
-			//{_id:mongoist.ObjectId(project_id)}, 
-			//{
-				//$push:{nodes: this.source},
-				//$inc: {'node_count':1}
-			//});	
+		this.source.project_dir = path.join(global.config.projectsPath, project.dir, collection_name, this.source.type,  this.source.nodeid + "_" + project.node_count + 1 );
+		console.log(this.source)
+		var result = await global.db.collection('gp_nodes').insert(this.source);
+		
+		// increase node counter for node directory naming
+		await global.db.collection("gp_projects").update(
+			{_id:mongoist.ObjectId(project_id)}, 
+			{$inc: {'node_count':1}
+		});	
 
 		// these are just shorthands
 		this.collection = collection_name;
@@ -103,14 +107,13 @@ class Node {
 	
 
 	async writeDir(project_id) {
-		if(this.source.type != 'process') {
-			const fs = require('fs');
-			var project = await db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
-			if(project.dir) {
-				var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
-				fs.mkdirSync(dir);
-				await this.updateSourceKey('project_dir', dir);
-			}
+
+		const fs = require('fs');
+		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
+		if(project.dir) {
+			//var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
+			fs.mkdirSync(this.source.project_dir);
+			//await this.updateSourceKey('project_dir', dir);
 		}
 	}
 
@@ -122,7 +125,7 @@ class Node {
 		if(this.source.type == 'source') {
 			var query = {};
 			query[GP.source] = this.uuid;
-			await db.collection(this.collection).remove(query);
+			await global.db.collection(this.collection).remove(query);
 		}
 		
 		// remove out_ fields created by node
@@ -138,7 +141,7 @@ class Node {
 				var query = {};
 				query["$unset"] = del_keys;
 				console.log(query)
-				await db.collection(this.collection).update({}, query, {'multi': true});
+				await global.db.collection(this.collection).update({}, query, {'multi': true});
 			}
 		}
 		
@@ -146,11 +149,50 @@ class Node {
 		//await schema.createSchema(this.collection);
 
 		// remove node from project
-		var res = await db.collection("gp_nodes").remove({_id:mongoist.ObjectId(this.source._id)});
+		var res = await global.db.collection("gp_nodes").remove({_id:mongoist.ObjectId(this.source._id)});
 		return res;
 	}
 
 
+	async upload(ctx) {
+		
+		var fs = require('fs');
+		var fsp = require('fs').promises;
+		var self = this;
+		
+		try { await fsp.mkdir(path.join(this.source.project_dir, "uploads")) } catch(e) { debug("upload dir exists" ) }
+		var filename = Math.random().toString()
+		var filepath = path.join(this.source.project_dir, 'uploads', filename)
+
+		const file = ctx.request.files.file;
+		const reader = fs.createReadStream(file.path);
+		const stream = fs.createWriteStream(filepath);
+		reader.pipe(stream);
+		console.log('uploading %s -> %s', file.name, stream.path);
+
+		reader.on('error', function(e){
+			console.log(e.message);
+		})
+
+		// promise	
+		var end = new Promise(function(resolve, reject) {
+			stream.on('finish', async () => {
+				console.log(self.source.params.file)
+				//await self.setParams({'testi':'joo', file: self.source.params.file})
+				self.source.params.filename = filename;
+				await self.updateSourceKey('params', self.source.params);
+				resolve();
+			})
+			stream.on('error', reject); 
+		});
+
+
+		return end;
+	
+
+		//try { await fs.mkdir(path.join("uploads")) } catch(e) { debug("upload dir exists" ) }
+		//console.log(this.source.project_dir)
+	} 
 
 	setParams(params) {
 		if(this.source) {
@@ -176,7 +218,7 @@ class Node {
 		a[key] = value;
 		setter.$set = a;
 		var query = {"_id": mongoist.ObjectId(this.uuid)};
-		await db.collection("gp_nodes").update(query, setter);
+		await global.db.collection("gp_nodes").update(query, setter);
 		this.source[key] = value;
 	}
 
@@ -234,7 +276,7 @@ class Node {
 	
 	getOptions(req) {
 	
-		return db.collection("gp_node_options").findOne({"nodeid": req.params.nodeid});
+		return global.db.collection("gp_node_options").findOne({"nodeid": req.params.nodeid});
 
 	}
 	

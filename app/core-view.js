@@ -1,7 +1,6 @@
 
 
 
-var db = require('./db.js');
 var facet 		= require('./cores/view-facet.js');
 const GP 		= require("../config/const.js");
 

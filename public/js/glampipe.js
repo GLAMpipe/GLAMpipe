@@ -4,7 +4,6 @@ var glamPipe = function () {
 	var self = this;
 	this.currentProject = "";
 	this.currentCollectionSet = 0;
-	this.currentCollectionNode = null;
 	this.currentNodes = {}; // active node per collection
 	this.currentlyOpenNode = null; // currently open node
 
@@ -480,6 +479,8 @@ var glamPipe = function () {
 
 			if(typeof project !== "undefined") {
 				var nodes = project.nodes;
+				self.collections = project.collections;
+				self.currentCollection = self.collections[0];
 
 				if(nodes) {
 					for(var i = 0; i< nodes.length; i++) {
@@ -488,15 +489,6 @@ var glamPipe = function () {
 				}
 				self.setPageTitle(project.title);
 				self.project = project;
-
-				// set first collection as current collection NOTE: collections are nodes
-				if(self.collections.length) {
-					console.log('self.collections')
-					console.log(self.collections[0].source.collection)
-					self.currentCollectionNode = self.collections[self.currentCollectionSet];
-					self.pickedCollectionId = self.currentCollectionNode.source.collection; // default collection for dynamic field picker
-					self.currentCollectionNode.open();
-				}
 
 				self.setCollectionCounter();
 				self.renderBreadCrumb();
@@ -533,7 +525,7 @@ var glamPipe = function () {
 
 		var node = self.getNode(e);
 		self.currentlyOpenNode = node;
-		self.currentNodes[self.currentCollectionNode.source.collection] = node;
+		//self.currentNodes[self.currentCollectionNode.source.collection] = node;
 		if(node)
 			node.open();
 		else
@@ -650,10 +642,10 @@ var glamPipe = function () {
 		}
 
 		// set parent collection
-		if(self.currentCollectionNode == null) {
+		if(self.currentCollection == null) {
 			alert("parent collection is missing");
 		} else {
-			data.collection = self.currentCollectionNode.source.collection;
+			data.collection = self.currentCollection.name;
 			//console.log("currentCollection on node create:", self.currentCollectionNode.source.collection);
 
 			post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
@@ -664,7 +656,7 @@ var glamPipe = function () {
 				}
 				var node = new glamPipeNode(returnedData, self);
 				self.addProjectNode(node);
-				self.currentNodes[self.currentCollectionNode.source.collection] = node;
+				self.currentNodes[self.currentCollection.name] = node;
 				self.currentlyOpenNode = node;
 				self.renderCollectionSet(function() {
 					node.open();
@@ -704,7 +696,7 @@ var glamPipe = function () {
 
 	// check if any output field (starts with "out_") exists
 	this.outputExists = async function(params) {
-		var result = await $.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields");
+		var result = await $.getJSON(self.baseAPI + "/collections/" + self.currentCollection.name + "/fields");
 		for(var param in params) {
 			//console.log(param);
 			if(/^out_/.test(param) && result.keys.includes(params[param])) {
@@ -757,22 +749,22 @@ var glamPipe = function () {
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function (cb) {
-		if(!self.currentCollectionNode) {
+		if(!self.currentCollection) {
 			console.log("no current collection")
 			$("pipe .collection").empty().append("<a class='add-collection' title='Add new collection' href='#'> Add Collection</a>");
 			return "";
 		}
 
-		$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
+		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection + "/fields", function(data) {
 			//self.currentCollectionNode.fields = data.keys;
 
-			if(self.currentCollectionNode) {
-				var collection = self.currentCollectionNode;
+			if(self.currentCollection) {
+				var collection = self.currentCollection;
 
 				// render collection
-				var col_html =   "<div><a href=''><span class='title pagetitle'>" + collection.source.params.title + "</span></a>";
+				var col_html =   "<div><a href=''><span class='title pagetitle'>" + collection.title + "</span></a>";
 				col_html += "<a class='add-collection' title='Add new collection' href='#'> Add </a>";
-				col_html += "<a class='remove-collection' href='#' title='Remove this collection' data-id='"+collection.source._id+"'> Remove</a></div>";
+				col_html += "<a class='remove-collection' href='#' title='Remove this collection' data-id='"+collection.name+"'> Remove</a></div>";
 
 				//col_html += "<div class='boxtext'>This is the description of the dataset</div>";
 				$("pipe .collection").empty().append(col_html);
@@ -824,7 +816,7 @@ var glamPipe = function () {
 		var html = "";
 		for (var i = 0; i < self.nodes.length; i++) {
 			var node = self.nodes[i];
-			if (node.source.collection == collection.source.collection) {
+			if (node.source.collection == collection.name) {
 				if(types.indexOf(node.source.type) != -1) {
 					html += node.renderNode();
 				}
@@ -841,8 +833,8 @@ var glamPipe = function () {
 		console.log(self.collections.length);
 		for (var i = 0; i < self.collections.length; i++) {
 			var title = "no title";
-			if(self.collections[i].source.params.title !== "")
-				title = self.collections[i].source.params.title;
+			if(self.collections[i].title !== "")
+				title = self.collections[i].title;
 			$(self.collectionListDiv).append("<div class='collection-item' data-index='"+i+"'>" + title + "</div");
 		}
 		//$(self.collectionListDiv).append("<div class='add-collection'><a href='#'>add collection</a></div");
@@ -894,7 +886,7 @@ var glamPipe = function () {
 		self.currentCollectionSet = parseInt(index)
 		self.setCollectionCounter();
 		self.currentCollectionNode = self.collections[self.currentCollectionSet];
-		self.pickedCollectionId = self.currentCollectionNode.source.collection;
+		self.pickedCollectionId = self.currentCollection;
 		self.renderBreadCrumb();
 		self.renderCollectionSet();
 		if(self.currentNodes[self.currentCollectionNode.source.collection])
@@ -906,7 +898,7 @@ var glamPipe = function () {
 	}
 
 	this.updateDocument = function (data, cb) {
-		$.put(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
+		$.put(self.baseAPI + "/collections/" + self.currentCollection.name + "/docs/" + data.doc_id + "/?manual=true", data, function( response ) {
 			console.log(response);
 			cb();
 		})
@@ -914,7 +906,7 @@ var glamPipe = function () {
 
 	this.deleteDocument = function(event) {
 		var doc_id = $(event.target).data("id");
-		console.log(self.currentCollectionNode.source);
+		//console.log(self.currentCollectionNode.source);
 		$( "#dialog-confirm" ).empty().append("<div>Are you sure?</div>");
 		$( "#dialog-confirm" ).dialog({
 		  resizable: false,
@@ -925,7 +917,7 @@ var glamPipe = function () {
 			"Delete document": function() {
 				$( this ).dialog( "close" );
 				var params = {};
-				$.delete(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/docs/" + doc_id, params, function(retData) {
+				$.delete(self.baseAPI + "/collections/" + self.currentCollection.name + "/docs/" + doc_id, params, function(retData) {
 					console.log('document deleted');
 					if(retData.error)
 						alert(retData.error);
@@ -974,14 +966,9 @@ var glamPipe = function () {
 
 		var html = "";
 		for(var i = 0; i < self.collections.length; i++) {
-			var node = self.collections[i];
-			if(node.source._id != self.currentCollectionNode.source._id) {
-				var parts = node.source.collection.split("_");
-				if(parts[parts.length - 1] != "")
-					var cName = parts[parts.length - 1];
-				else
-					var cName = node.source.collection;
-				html += '<option class="pick_collection" value="'+node.source.collection+'">' + cName + '</option>';
+			var collection = self.collections[i];
+			if(collection.name != self.currentCollection.name) {
+				html += '<option class="pick_collection" value="'+collection.name+'">' + collectioin.title + '</option>';
 			}
 		}
 		return html;
@@ -1097,34 +1084,58 @@ var glamPipe = function () {
 		fd.append("project",self.currentProject);
 
 		// upload file
-		$.ajax({
-			url: self.baseAPI + "/uploads",
-			type: "POST",
-			dataType: "json",
-			data:  fd,
-			contentType: false,
-			cache: false,
-			processData:false,
-			headers: {"Authorization": "Bearer " + localStorage.getItem("token")},
-			success: function(data)
-			{
-				if (data.error) {
-					alert(data.error);
-					$('#loading').hide();
-				} else {
-					// create actual node
-					data.params = params;
-					data.params.filename = data.filename;
-					data.params.mimetype = data.mimetype;
-					data.project = self.currentProject;
-					data.collection = self.currentCollectionNode.source.collection;
-					post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
-						console.log('created upload node');
-						self.loadProject();
-					});
-				}
-			}
-	   });
+		//$.ajax({
+			//url: self.baseAPI + "/uploads",
+			//type: "POST",
+			//dataType: "json",
+			//data:  fd,
+			//contentType: false,
+			//cache: false,
+			//processData:false,
+			//headers: {"Authorization": "Bearer " + localStorage.getItem("token")},
+			//success: function(data)
+			//{
+				//if (data.error) {
+					//alert(data.error);
+					//$('#loading').hide();
+				//} else {
+					//// create actual node
+					//data.params = params;
+					//data.params.filename = data.filename;
+					//data.params.mimetype = data.mimetype;
+					//data.project = self.currentProject;
+					//data.collection = self.currentCollection.name;
+					//post(self.baseAPI + "/nodes/" + node.nodeid, data, function(returnedData) {
+						//console.log('created upload node');
+						//self.loadProject();
+					//});
+				//}
+			//}
+	   //});
+		
+		var data= {}
+		data.params = params;
+		data.params.filename = data.filename;
+		data.params.mimetype = data.mimetype;
+		data.project = self.currentProject;
+		data.collection = self.currentCollection.name;
+					
+		post(self.baseAPI + "/nodes/" + node.nodeid, data, function(nodedata) {
+			console.log('created upload node');
+			$.ajax({
+				url: self.baseAPI + "/nodes/" + nodedata.source._id + "/upload",
+				type: "POST",
+				dataType: "json",
+				data:  fd,
+				contentType: false,
+				cache: false,
+				processData:false,
+				headers: {"Authorization": "Bearer " + localStorage.getItem("token")},
+				success: function(nodedata) {self.loadProject();}
+			})
+			
+		});
+
 	}
 
 }

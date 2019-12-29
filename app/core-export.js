@@ -1,6 +1,5 @@
 //var web 		= require('./cores/web.js');
 var requestPromise = require('request-promise-native');
-var db 			= require('./db.js');
 const GP 		= require("../config/const.js");
 
 var exports 	= module.exports = {};
@@ -25,7 +24,7 @@ async function fileLoop(node, core) {
 	var filePath = path.join(node.source.project_dir, node.source.params.required_file);
 	var writer = csvWriter({separator:node.settings.sep, headers: node.sandbox.core.options.csvheaders});
 	writer.pipe(fs.createWriteStream(filePath));
-	const cursor = db[node.collection].findAsCursor({});	
+	const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 	  
@@ -38,8 +37,8 @@ async function fileLoop(node, core) {
 
 async function webLoop(node, core) {
 
-	//var bulk = db[node.collection].initializeOrderedBulkOp();
-	const cursor = db[node.collection].findAsCursor({});	
+	//var bulk = global.db[node.collection].initializeOrderedBulkOp();
+	const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 	  
@@ -79,7 +78,7 @@ async function webLoop(node, core) {
 		// let GP node script to process data
 		node.scripts.run.runInContext(node.sandbox);
 		
-		await db[node.collection].update({ '_id': doc._id },{
+		await global.db[node.collection].update({ '_id': doc._id },{
 			'$set': node.sandbox.out.setter
 		});
 	}	

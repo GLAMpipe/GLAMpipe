@@ -309,7 +309,7 @@ var glamPipeNode = function (node, gp) {
 			else
 				$(".node-description-value").val("");
 
-			var collection = gp.currentCollectionNode.source.collection;
+			var collection = gp.currentCollection.name;
 
 			// fetch fields
 			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {

@@ -116,7 +116,7 @@ var nodeRepository = function (gp) {
 	}
 
 	this.openNodeParameters = async function (click, collection) {
-		var collection = self.gp.currentCollectionNode.source.collection;
+		var collection = self.gp.currentCollection;
 		var node = await $.getJSON(self.baseAPI + "/collections/gp_repository/docs/" + click.attr("href"));
 		console.log(node)
 

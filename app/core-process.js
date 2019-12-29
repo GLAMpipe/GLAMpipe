@@ -1,7 +1,6 @@
 
 const vm 		= require("vm");
 var mongoist 	= require("mongoist")
-var db 			= require('./db.js');
 var pdf 		= require('./cores/pdf.js');
 const GP 		= require("../config/const.js");
 
@@ -28,9 +27,9 @@ exports.process = {
 async function coreLoop(node, core) {
 	const fs = require("fs-extra");
 
-	var bulk = db[node.collection].initializeOrderedBulkOp();
+	var bulk = global.db[node.collection].initializeOrderedBulkOp();
 
-    const cursor = db[node.collection].findAsCursor({});	
+    const cursor = global.db[node.collection].findAsCursor({});	
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 	  
@@ -101,9 +100,9 @@ async function scriptLoop(node) {
 		var doc_id = node.settings.doc_id || ''; 
 		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)};
 		
-		node.sandbox.context.total = await db[node.collection].count({});
-		var bulk = db[node.collection].initializeUnorderedBulkOp();
-		const cursor = db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
+		node.sandbox.context.total = await global.db[node.collection].count({});
+		var bulk = global.db[node.collection].initializeUnorderedBulkOp();
+		const cursor = global.db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
 		var counter = 0;
 		while(await cursor.hasNext()) {
 	
@@ -132,7 +131,7 @@ async function scriptLoop(node) {
 			if (counter % 1000 == 0 ) {
 				var w = await bulk.execute();
 				console.log(w)
-				bulk = db[node.collection].initializeUnorderedBulkOp();
+				bulk = global.db[node.collection].initializeUnorderedBulkOp();
 				if(process.send)
 					process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
 			}
