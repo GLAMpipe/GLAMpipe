@@ -755,7 +755,7 @@ var glamPipe = function () {
 			return "";
 		}
 
-		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection + "/fields", function(data) {
+		$.getJSON(self.baseAPI + "/collections/" + self.currentCollection.name + "/fields", function(data) {
 			//self.currentCollectionNode.fields = data.keys;
 
 			if(self.currentCollection) {

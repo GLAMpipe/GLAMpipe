@@ -1,0 +1,17 @@
+- config:
+        - testset: "koetesti"
+
+- test:
+        - name: "Test config"
+        - group: "config"
+        - url: "/api/v2/config"
+        - validators:
+                - compare: {jsonpath_mini: "dataPath", comparator: "eq", expected: 'glampipe-data'}
+
+- test:
+        - name: "Project creation"
+        - group: "Project"
+        - url: "/api/v2/projects"
+        - method: "POST"
+        - body:"{\"title\": \"TEST project\"}"
+        - headers: {'Content-Type': 'application/json'}

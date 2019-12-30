@@ -136,23 +136,19 @@ class GLAMpipe {
 
 	
 	async createEmptyProject(title) {
-		return await project.create(title);
+		var proj = await project.create(title);
+		return proj;
 	}
 
 
 	// create project from project data and execute nodes
 	async createProject(data) {
-		console.log("*******************")
 		var new_project = await project.create(data.project_title);
-		console.log("*******************")
-		console.log(new_project)
-		console.log("*******************")
 		var collection = await this.createCollection(data.collection_title, new_project._id);
 		for(const node in data.nodes) {
 			var new_node = await this.createNode(data.nodes[node].nodeid, data.nodes[node].params, collection.collection, new_project._id);
 			await new_node.run(data.nodes[node].settings);
 		}
-		
 		return await this.getProject(new_project._id);
 	}
 
@@ -332,22 +328,15 @@ class GLAMpipe {
 
 	async createCollection(title, project_id) {
 		
+		debug("Creating collection ", title)
 		try {
 			if(typeof project_id != "string") {
 				project_id = project_id.toString()
 			}
 				
 			var project = await this.getProject(project_id);
-			console.log(project, title)
-			 // create Mongo collection
 			var collection_name = await collection.create(title, project);
-			// create collection node
-			//var collectionNode = new Node();
-			//await collectionNode.loadFromRepository("collection_basic");
-			//await collectionNode.setParams({"title": title})
-			//await collectionNode.add2Project(project_id, collection_name);
 			debug("Collection created")
-			//return collectionNode;
 			return {}
 		} catch(e) {
 			error("Collection creation failed!", e);
@@ -421,7 +410,6 @@ class GLAMpipe {
 		let template = {};
 
 		var l = xml2json.parse(node.views.settings, {ignoreAttributes:false});
-		console.log(l.setting)
 		for(const setting of l.setting) {
 			createSettingsTemplate(setting, "input", template)
 			createSettingsTemplate(setting, "select", template)

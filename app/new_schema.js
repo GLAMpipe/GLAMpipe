@@ -5,6 +5,17 @@ var project 	= require('./new_project.js');
 var exports = module.exports = {};
 
 
+
+exports.init = async function (collection_name) {
+
+	var schema = {collection: collection_name, keys:[]}
+	await global.db["gp_schemas"].insert(schema);
+	console.log("SCHEMA: schema created for "+collection_name);
+	
+}
+
+
+
 /**
  * Iterate over all docs in collection
  * - required for API imports
@@ -31,7 +42,18 @@ exports.createSchema = async function (collection_name) {
 	
 }
 
+/**
+ * Add new keys to schema
+ */
 
+exports.update = async function(collection_name, doc) {
+	
+	var keys = [];
+	for (key in doc) {
+		keys.push(key);
+	} 
+	await global.db["gp_schemas"].update({collection: collection_name}, {$addToSet: {keys: {$each: keys}}});
+}
 
 exports.getSchema = async function (collection_name) {
 

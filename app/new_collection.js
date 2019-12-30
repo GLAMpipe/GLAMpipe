@@ -4,14 +4,16 @@ const util 		= require('util');
 
 var buildquery 	= require('../app/query-builder.js');
 const MP 		= require('../config/const.js');
+const schema 	= require('./new_schema.js');
 var debug 		= require('debug')('GLAMpipe');
+var error 		= require('debug')('error');
 var path 		= require('path');
 
 
 
 exports.create = async function(collection_name, project) {
 	
-	const fs 			= require('fs').promises;
+	const fs = require('fs').promises;
 
 	// cleanup and generate collection name
 	var mongo_name = collection_name.replace(/[^a-z0-9-]/g,"");
@@ -27,6 +29,8 @@ exports.create = async function(collection_name, project) {
 	try{ await fs.mkdir(path.join(collection_dir, 'export')) } catch(e) { debug("Collection directory exists", e) }
 	try{ await fs.mkdir(path.join(collection_dir, 'view')) } catch(e) { debug("Collection directory exists", e) }
 	try{ await fs.mkdir(path.join(collection_dir, 'tmp')) } catch(e) { debug("Collection directory exists", e) }
+	
+	await schema.init(mongo_name);
 	
 	return collection_name;
 
@@ -74,7 +78,7 @@ exports.getDocs = async function(collection_name, query) {
 	
 	// create search query
 	var search = buildquery.search(query);
-	console.log(JSON.stringify(search))
+	debug(JSON.stringify(search))
 
 	return await global.db[collection_name].findAsCursor(
 		search.query, 
@@ -86,19 +90,21 @@ exports.getDocs = async function(collection_name, query) {
 exports.insertDoc = async function(collection_name, doc) {
 
 	try {
-		return global.db[collection_name].insert(doc);
+		var d = await global.db[collection_name].insert(doc);
+		await schema.update(collection_name,doc)
+		return d;
 	} catch(e) {
-		console.log(e)
-		return {};
+		error(e)
+		throw("Document insert failed: ", e)
 	}
 }
 
 exports.updateDoc = async function(collection_name, doc_id, data) {
 	try {
-		return global.db[collection_name].update({"_id": mongoist.ObjectId(doc_id)},{$set: data});
+		await global.db[collection_name].update({"_id": mongoist.ObjectId(doc_id)},{$set: data});
 	} catch(e) {
-		console.log(e)
-		return {};
+		error(e)
+		throw("Document update failed: ", e)
 	}
 }
 
@@ -106,10 +112,10 @@ exports.updateDoc = async function(collection_name, doc_id, data) {
 exports.removeDoc = async function(collection_name, id) {
 	
 	try {
-		return global.db[collection_name].remove({_id:mongoist.ObjectId(id)});
+		await global.db[collection_name].remove({_id:mongoist.ObjectId(id)});
 	} catch(e) {
-		console.log(e)
-		return {};
+		error(e)
+		throw("Could not delete document ", id)
 	}
 }
 

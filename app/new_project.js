@@ -1,6 +1,6 @@
 var async 		= require('async');
 var path 		= require('path');
-var debug 		= require('debug')('GLAMpipe:project');
+var debug 		= require('debug')('GLAMpipe');
 var error 		= require('debug')('ERROR');
 
 var Collection 	= require('./new_collection.js');
@@ -23,7 +23,6 @@ exports.create = async function(title) {
 		// update project count and create project. Project count is *permanent* counter
 		var incr = await global.db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
 		var meta = await global.db.collection('gp_settings').findOne({});
-		console.log(meta)
 		
 		var dir = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
 		dir = dir.replace(/ /g,"_");
@@ -57,42 +56,40 @@ exports.create = async function(title) {
 
 exports.remove = async function (doc_id) {
 
-	let dataPath = path.join(global.config.dataPath, "glampipe-data");
-	let projectsPath = path.join(dataPath, "projects");
-	
+	debug("deleting project ", doc_id);
+
 	var project = await global.db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
 	if(!project) {
 		error("Project " + doc_id + " not found")
-		return;
+		throw("Project not found!")
 	}
-			
-	debug("deleting project ", project.title);
-	
-	try {
-	
-		// if project has collections then remove those first
-		if(project.collections) {
-			for(var i=0; i < project.collections.length; i++) {
-				debug("deleting collection", project.collections[i]);
+
+	// if project has collections then remove those first
+	if(project.collections) {
+		for(var i=0; i < project.collections.length; i++) {
+			debug("deleting collection", project.collections[i]);
+			try {
 				await global.db.collection(project.collections[i]).drop();
+			} catch(e) {
+				error(e)
 			}
 		}
+	}
 
-		await global.db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
-				
-		// remove project directory
-		var rmrf = require("rmrf");	
-		var project_path = path.join(projectsPath, project.dir);
-		if(project_path && project_path.includes(global.config.dataPath)) {
-			debug("removing " + project_path);
-			await rmrf(project_path);
-			debug(project_path + " dir deleted!");
-		} 
-		return Promise.resolve()
+	// remove project directory
+	try {		
+		await deleteProjectDir(project);
 	} catch(e) {
-		error("could not delete directory!" + project_path);
+		error("could not delete project directory!" + project.dir);
 		error(e);
-		return Promise.reject();
+		throw("Could not delete project directory")
+	}
+
+	try {
+		await global.db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
+	} catch(e) {
+		error(e)
+		throw("Could not delete project " + doc_id)
 	}
 }
 
@@ -158,12 +155,16 @@ exports.addCollection = async function(collection_name) {
 /* INTERNAL FUNCTIONS */
 //*******************************
 
+
+
 function cleanDirName(title, project_count) {
 	var clean_dir = title.toLowerCase();
 	clean_dir = clean_dir.replace(/[^a-z0-9- ]/g,"");
 	clean_dir = clean_dir.replace(/[ ]/g,"_");	
 	return clean_dir;
 }
+
+
 
 function createProjectDir(dir) {
 	var fs = require("fs");
@@ -176,6 +177,19 @@ function createProjectDir(dir) {
 			else resolve()
 		})
 	})	
+}
+
+
+
+async function deleteProjectDir(project) {
+
+	var rmrf = require("rmrf");	
+	let project_path = path.join(global.config.dataPath, "projects", project.dir);
+	if(project_path && project_path.includes(global.config.dataPath)) {
+		debug("removing " + project_path);
+		await rmrf(project_path);
+		debug(project_path + " deleted!");
+	}
 }
 
 

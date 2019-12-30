@@ -5,6 +5,7 @@ const serve			= require('koa-send');
 const json			= require('koa-json')
 const cors			= require('koa-cors')
 const path			= require('path');
+var debugRouter		= require('debug')('ROUTER');
 var GLAMpipe		= require('./app/glampipe.js');
 var shibboleth		= require('./app/shibboleth.js');
 var collection		= require('./app/new_collection.js');
@@ -28,6 +29,7 @@ app.use(json({ pretty: true, param: 'pretty' }))
 app.use(cors());
 
 app.use(async function handleError(context, next) {
+
 	try {
 		await next();
 	} catch (error) {
@@ -52,10 +54,15 @@ app.use(async function handleError(context, next) {
 app.use(require('koa-static')('public'));
 
 app.use(async (ctx, next) => {
-  if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/public' });
-  else await next();
+	debugRouter(ctx.path)
+	await next();
 })
 
+app.use(async (ctx, next) => {
+	if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/public' });
+	else await next();
+})
+	
 // auth
 app.use(async (ctx, next) => {
 	if(global.config.authentication === "shibboleth") {
@@ -135,7 +142,6 @@ router.get('/api/v2/projects/:id', async function (ctx) {
 });
 
 router.post('/api/v2/projects', async function (ctx) {
-	console.log(ctx.request.body)
 	var project = await GP.createEmptyProject(ctx.request.body.title);
 	var collection = await GP.createCollection("mydata", project._id);
 	ctx.body = project;

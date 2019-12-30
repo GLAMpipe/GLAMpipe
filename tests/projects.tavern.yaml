@@ -1,0 +1,39 @@
+
+test_name: Project handling
+
+stages:
+  - name: Create project
+    request:
+      url: http://localhost:3333/api/v2/projects
+      json:
+        title: "TAVERN-test"
+      method: POST
+      headers:
+        content-type: application/json
+    response:
+      status_code: 200
+      save:
+        body:
+          project_id: _id
+
+
+  - name: Get project by uuid
+    request:
+      url: http://localhost:3333/api/v2/projects/{project_id}
+      method: GET
+      headers:
+        content-type: application/json
+    response:
+      status_code: 200
+      body:
+        title: "TAVERN-test"
+
+
+  - name: Delete project by uuid
+    request:
+      url: http://localhost:3333/api/v2/projects/{project_id}
+      method: DELETE
+      headers:
+        content-type: application/json
+    response:
+      status_code: 204
