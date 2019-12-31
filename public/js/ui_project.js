@@ -5,7 +5,7 @@ $( document ).ready(function() {
 	
 	var gp = new glamPipe();
 	gp.getLoginStatus("#login");
-	gp.loadProject(function() {console.log('haa');gp.getRunningNodes()});
+	gp.loadProject(function() {gp.getRunningNodes()});
 
 	// check running nodes 
 	//gp.getRunningNodes();

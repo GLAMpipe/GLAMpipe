@@ -4,6 +4,7 @@ var debug 			= require('debug')('GLAMpipe:node');
 var csv 			= require('./cores/csv.js');
 var web 			= require('./cores/web.js');
 var marc 			= require('./cores/marc.js');
+var form 			= require('./cores/form.js');
 
 const constants 	= require("../config/const.js");
 
@@ -23,8 +24,7 @@ exports.source = {
 
 		"CSV": async function(node) {
 			// init.js 
-			console.log(node.sandbox.core.options)
-			console.log(node.sandbox.core.filename)
+			debug(node.sandbox.core.options)
 			try {
 				await web.getAndSaveFile(node)
 				// parse csv
@@ -35,7 +35,17 @@ exports.source = {
 			} catch(e) {
 				console.log("web csv failed")
 			}
-		}
+		},
+		"form": async function(node) {
+			// init.js 
+			debug(node.sandbox.core.options)
+			try {
+				await form.create(node);
+			} catch(e) {
+				console.log("form creation failed")
+				console.log(e)
+			}
+		},
 	},
 
 // FILE

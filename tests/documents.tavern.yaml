@@ -1,5 +1,5 @@
 
-test_name: Project handling
+test_name: Document handling
 
 stages:
   - name: Create project

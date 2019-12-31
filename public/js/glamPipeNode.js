@@ -1,5 +1,5 @@
 
-var glamPipeNode = function (node, gp) {
+var glamPipeNode = function (node, gp, display) {
 	var self = this;
 	this.gp = gp;
 	this.debug = true;
@@ -7,7 +7,7 @@ var glamPipeNode = function (node, gp) {
 	if(node.source) this.source = node.source;
 	else this.source = node;
 	this.orphan = "";
-	this.data = {"keys": [], "docs": [], "visible_keys": []};
+	this.data = {"keys": [], "docs": [], "visible_keys": null};
 	this.settings = {};
 	this.maxArrayLenghtDisplay = 5;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
@@ -16,16 +16,8 @@ var glamPipeNode = function (node, gp) {
 	this.dataControlsDiv = "data-workspace data data-controls";
 	this.baseAPI = gp.baseAPI;
 
-	this.display = new dataTable(this); // default data renderer
+	this.display = display;
 
-	//if(node.type == "collection")
-		//self.source.collection = node._id;
-
-
-	// backend nodes does not have GUI
-	//if(self.source.tags && self.source.tags.includes("backend")) {
-		//self.backend = true;
-	//}
 
 	// execute node
 	this.run = function () {
@@ -190,10 +182,10 @@ var glamPipeNode = function (node, gp) {
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {
 			$("data-workspace settingscontainer").hide();
-			self.display.render();
+			self.display.render(self);
 		} else {
 			self.renderSettings();
-			self.display.render();
+			self.display.render(self);
 			$("data-workspace settingscontainer").show();
 		}
 	}

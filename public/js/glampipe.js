@@ -479,12 +479,17 @@ var glamPipe = function () {
 
 			if(typeof project !== "undefined") {
 				var nodes = project.nodes;
+				
+				var display = new dataTable(); // default data renderer
 				self.collections = project.collections;
-				self.currentCollection = self.collections[0];
+				var col = new GLAMPipeCollection(self, project.collections[0], display);
+				self.currentCollection = col;
+				self.currentCollection.display.render(col);
+
 
 				if(nodes) {
 					for(var i = 0; i< nodes.length; i++) {
-						self.addProjectNode(new glamPipeNode(nodes[i], self));
+						self.nodes.push(new glamPipeNode(nodes[i], self, display));
 					}
 				}
 				self.setPageTitle(project.title);
@@ -492,25 +497,14 @@ var glamPipe = function () {
 
 				self.setCollectionCounter();
 				self.renderBreadCrumb();
-
-				// render current collection set and its nodes
-				 //$.getJSON(self.baseAPI + "/collections/" + self.currentCollectionNode.source.collection + "/fields", function(data) {
-					//self.currentCollectionNode.fields = data;
-					self.renderCollectionSet(cb);
-				//})
+				self.renderCollectionSet(cb);
 				
 			}
 		})
 	}
 
 
-	this.addProjectNode = function (node) {
-		// create separate array of collections so that we can group nodes
-		if(node.source.type == "collection")
-			self.collections.push(node);
-		else
-			self.nodes.push(node);
-	}
+
 
 	this.setPageTitle = function (title) {
 		$(self.pageTitleDiv).text(title);
@@ -737,12 +731,12 @@ var glamPipe = function () {
 
 
 	this.renderDataHeader = function () {
-		$("#data-header").empty().append(self.currentCollectionNode.source.title);
+		$("#data-header").empty().append(self.currentCollection.name);
 	}
 
 	this.renderBreadCrumb = function () {
-		if(self.currentCollectionNode)
-			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollectionNode.source.params.title);
+		if(self.currentCollection)
+			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > " + self.currentCollection.title);
 		else
 			$("pipe .breadcrumbblock .boxtag").empty().append(self.project.title + " > ");
 	}

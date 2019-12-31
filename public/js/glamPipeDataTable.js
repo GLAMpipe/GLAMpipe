@@ -1,11 +1,12 @@
 
-var dataTable = function (node) {
+var dataTable = function () {
 	var self = this;
-	this.node = node;
-	this.keys = {"all_keys": [], "visible_keys": null};
+	//this.node = node;
+	this.keys = {"all_keys": [], "visible_keys": []};
 	this.docCount = 0;
 
 	this.hiddenKeys = ["__gp_source", "_id"];
+	this.suggestionKeys = ["title", "author", "year", "issue", "isbn", "doi", "publisher"];
 	this.maxArrayLenghtDisplay = 2;
 	this.initialVisibleKeysLength = 5; // by default how many fields are shown
 	this.maxInputLength = 30; // limit whether input rendered as input or textarea on cell edit
@@ -13,7 +14,7 @@ var dataTable = function (node) {
 	this.dataDisplayDiv 	= "data-workspace datablock";
 	this.dataControlsDiv 	= "data-workspace dataheader data-controls";
 	this.keySelectorDiv 	= "#field-selector";
-	this.baseAPI = node.baseAPI;
+	//this.baseAPI = node.baseAPI;
 
 	this.editMode = false;
 	this.expandCells = false;
@@ -59,12 +60,13 @@ var dataTable = function (node) {
 
 
 	// asks data from node and then renders table
-	this.render = function () {
+	this.render = function (node) {
 
-		self.node.loadCollectionKeys(function() {
+		self.node = node;
+		node.loadCollectionKeys(function() {
 			self.keys.all_keys = self.node.data.keys;
 
-			self.node.loadCollectionData(self.params, function() {
+			node.loadCollectionData(self.params, function() {
 				self.renderTablePage();
 				self.renderControls();
 				self.renderCollectionCount();
@@ -169,46 +171,83 @@ var dataTable = function (node) {
 		return html;
 	}
 
-	this.getVisibleFields = function (config) {
-
-		// if node has input/output field, then use them as visible fields
-		if(config) {
-			var keys = config.input_keys.concat(config.output_keys);
-			keys.unshift("action","row");
-
-			if(self.keys.visible_keys == null) {
-				self.keys.visible_keys = keys;
-				return keys;
-			} else {
-				// if visible fields are set by the user, make sure that in/out keys
-				// are included as first items in array
-
-				var c = self.keys.visible_keys.filter(function(item) {
-					return keys.indexOf(item) === -1;
-				});
-
-				self.keys.visible_keys = keys.concat(c);
-				return self.keys.visible_keys;
-			}
+	this.checkSuggestionFields = function(fields) {
+		var f = [];
+		for(var field of fields) {
+			for(var s of self.suggestionKeys) {
+				if(field.includes(s) && !field.includes("_lang")) {
+					f.push(field)
+				}
+			} 
 		}
-console.log(self.keys);
-		if(!self.keys.visible_keys && !self.keys.all_keys) return [];
-		// otherwise let the user decide what to see
+		return f;
+	}
+
+	this.getVisibleFields = function (config) {
+		
+		self.keys.visible_keys = self.node.data.visible_keys;
+
 		if(self.keys.visible_keys == null) {
 
 			// if there are no visible keys, then try default keys
-			if(self.node.source.views.default_keys) {
+			if(self.node.source && self.node.source.views.default_keys) {
 				self.keys.visible_keys = self.node.source.views.default_keys;
-
 			// if there are no default keys, then visible keys are first 5 keys
 			} else {
-				var keys = self.keys.all_keys.slice(0,5);
-				var c = self.keys.all_keys.filter(function(item) {
-					return self.hiddenKeys.indexOf(item) === -1;
-				});
-				self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
+				var suggestions = self.checkSuggestionFields(self.keys.all_keys);
+				self.keys.visible_keys = suggestions;
+				
+				if(suggestions.length === 0) {
+					var keys = self.keys.all_keys.slice(0,5);
+					var c = self.keys.all_keys.filter(function(item) {
+						return self.hiddenKeys.indexOf(item) === -1;
+					});
+					self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
+				}
+
 			}
+				
 		}
+		return self.keys.visible_keys;
+		
+		//// if node has input/output field, then use them as visible fields
+		//if(config) {
+			//var keys = config.input_keys.concat(config.output_keys);
+			//keys.unshift("action","row");
+
+			//if(self.keys.visible_keys == null) {
+				//self.keys.visible_keys = keys;
+				//return keys;
+			//} else {
+				//// if visible fields are set by the user, make sure that in/out keys
+				//// are included as first items in array
+
+				//var c = self.keys.visible_keys.filter(function(item) {
+					//return keys.indexOf(item) === -1;
+				//});
+
+				//self.keys.visible_keys = keys.concat(c);
+				//return self.keys.visible_keys;
+			//}
+		//}
+
+		//if(!self.keys.visible_keys && !self.keys.all_keys) return [];
+		//// otherwise let the user decide what to see
+		//if(self.keys.visible_keys == null) {
+
+			//// if there are no visible keys, then try default keys
+			//if(self.node.source && self.node.source.views.default_keys) {
+				//self.keys.visible_keys = self.node.source.views.default_keys;
+
+			//// if there are no default keys, then visible keys are first 5 keys
+			//} else {
+				//var keys = self.keys.all_keys.slice(0,5);
+				//var c = self.keys.all_keys.filter(function(item) {
+					//return self.hiddenKeys.indexOf(item) === -1;
+				//});
+				//self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
+			//}
+		//}
 
 
 
@@ -242,7 +281,7 @@ console.log(self.keys);
 		var visible_keys = self.getVisibleFields(config);
 
 		// check if node wants to render data itself
-		if(self.node.source.scripts.view) {
+		if(self.node.source && self.node.source.scripts.view) {
 			render = new Function('node', 'self', self.node.source.scripts.view);
 			html = render(self.node, self);
 
@@ -716,7 +755,7 @@ console.log(self.keys);
 
 	this.renderCollectionCount = function () {
 		// filtered count
-		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count" + self.params.search(), function(data) {
+		$.getJSON(self.node.baseAPI + "/collections/" + self.node.source.collection + "/count" + self.params.search(), function(data) {
 			self.docCount = parseInt(data.count);
 			var skip = self.params.skip_value  + 15;
 			if(skip > self.docCount)
@@ -724,7 +763,7 @@ console.log(self.keys);
 			$("data-workspace #data-switch").text( self.params.skip_value + " - " + skip + " of " + self.docCount );
 		})
 		// total count
-		$.getJSON(self.baseAPI + "/collections/" + self.node.source.collection + "/count/", function(data) {
+		$.getJSON(self.node.baseAPI + "/collections/" + self.node.source.collection + "/count/", function(data) {
 			$(".nodeset .node.collection .boxtext").text( data.count + " documents" );
 		})
 	}
@@ -738,7 +777,7 @@ console.log(self.keys);
 		$("#field-selector").dialog({
 			height:"500",
 			width: "600",
-			close:self.render,
+			close:self.updateRender,
 			position: {
 				my: 'left top',
 				at: 'right top',
@@ -748,8 +787,18 @@ console.log(self.keys);
 		});
 	}
 
+	this.setVisibleFields = function (fields) {
+		self.node.data.visible_keys = fields;
+	}
+
+
+	this.updateRender = function() {
+		self.setVisibleFields(self.keys.visible_keys)
+		self.render(self.node)
+	}
+
 	this.getKeysHTML = async function (event) {
-		var result = await $.getJSON(self.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/fields");
+		var result = await $.getJSON(self.node.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/fields");
 		var visible_keys = self.getVisibleFields();
 		
 		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-generate schema</a>";
@@ -804,7 +853,7 @@ console.log(self.keys);
 	this.reReadFields = function () {
 		$("#field-selector .visible-keys").empty().append("generating schema...");
 		var data = {};
-		$.put(self.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/schema", function(returnedData) {
+		$.put(self.node.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/schema", function(returnedData) {
 			$("#field-selector .visible-keys").empty().append("Schema generated!");
 			var html = self.getKeysHTML();
 			$("#field-selector").empty().append(html);
@@ -827,6 +876,7 @@ console.log(self.keys);
 		this.params.skip_value = 0; // reset offset
 		self.render();
 	}
+
 
 	this.setEventListeners = function () {
 		// unset dynamic bindings for workspace
