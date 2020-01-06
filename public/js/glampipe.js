@@ -481,6 +481,7 @@ var glamPipe = function () {
 				var nodes = project.nodes;
 				
 				var display = new dataTable(); // default data renderer
+				self.display = display;
 				self.collections = project.collections;
 				var col = new GLAMPipeCollection(self, project.collections[0], display);
 				self.currentCollection = col;
@@ -648,8 +649,8 @@ var glamPipe = function () {
 					alert(returnedData.error);
 					return;
 				}
-				var node = new glamPipeNode(returnedData, self);
-				self.addProjectNode(node);
+				var node = new glamPipeNode(returnedData, self, self.display);
+				self.nodes.push(node);
 				self.currentNodes[self.currentCollection.name] = node;
 				self.currentlyOpenNode = node;
 				self.renderCollectionSet(function() {
