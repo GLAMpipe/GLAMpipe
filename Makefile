@@ -35,14 +35,14 @@ build_glampipe:
 start_glampipe:
 	docker run -it --rm --network=glampipe_net --name glampipe \
 		-v $(VOLUME):/glampipe-data \
-		-p 3000:3000 \
+		-p 3333:3333 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe bash
 
 start_glampipe_dev:
 	docker run -it --rm --network=glampipe_net --name glampipe \
 		-v $(DVOLUME):/glampipe-data \
-		-p 3000:3000 \
+		-p 3333:3333 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe:dev bash
 

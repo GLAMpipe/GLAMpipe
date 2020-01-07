@@ -1,4 +1,4 @@
-FROM node:9.11.2-jessie
+FROM node:10.18-buster
 RUN apt-get update && apt-get install -y vim build-essential imagemagick ghostscript poppler-utils 
 
 # Install app dependencies
@@ -22,5 +22,5 @@ RUN chown -R glampipe:glampipe /src/app && \
 # change user
 USER glampipe
 
-EXPOSE 3000
+EXPOSE 3333
 CMD [ "node", "glampipe.js" ]

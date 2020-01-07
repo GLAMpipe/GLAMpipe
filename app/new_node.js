@@ -107,7 +107,7 @@ class Node {
 	
 
 	async writeDir(project_id) {
-
+console.log(__dirname)
 		const fs = require('fs');
 		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
 		if(project.dir) {

@@ -14,7 +14,7 @@ exports.create = async function (node) {
 	await fs.writeFile(path.join(target, 'index.html'), html)
 	
 	// create config.js and write it to node's project directory
-	node.scripts.run.runInContext(node.sandbox);
+	node.scripts.process.runInContext(node.sandbox);
 	await fs.writeFile(path.join(target, 'js', 'config.js'), 'var config = ' + JSON.stringify(node.sandbox.out.value, null, 4))
 	
 }
