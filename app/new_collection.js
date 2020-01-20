@@ -36,25 +36,28 @@ exports.create = async function(collection_name, project) {
 
 }
 
-exports.removeFromProject = async function(collection_name, project_id) {
+exports.removeFromProject = async function(collection_name) {
+	
+	var project = await exports.getProject(collection_name);
+	// remove collection from project data
+	await global.db['gp_projects'].update(
+		{_id:mongoist.ObjectId(project._id)}, 
+		{'$pull': 
+			{'collections': {'name':collection_name}}
+		}
+	);
+
 	// when collection is dropped, we must also remove all nodes attached to it
-	var project = await global.db['gp_projects'].findOne({_id:mongoist.ObjectId(project_id)});
-	await global.db['gp_projects'].update({_id:mongoist.ObjectId(project_id)}, {'$unset': {'nodes':''}});
+	await global.db['gp_nodes'].remove({'collection': collection_name});
 	
 	// drop collection
 	await global.db[collection_name].drop();
 	
-	// remove collection from project data
-	await global.db['gp_projects'].update(
-		{_id:mongoist.ObjectId(project_id)}, 
-		{'$pull': 
-			{'collections': {'$in':[collection_name]}}
-		}
-	);
-	
 	// remove collection from schema data
 	await global.db["gp_schemas"].remove({'collection':collection_name});
 	
+	// remove collection directories from data dir
+	//rimraf(node.dir, callback);
 }
 
 exports.getFields = async function(collection_name) {
@@ -124,7 +127,11 @@ exports.getCount = async function(collection_name, query) {
 	return await global.db[collection_name].count(search.query);
 }
 
-
+exports.getProject = async function(collection_name) {
+	var query = {'collections.name': collection_name}
+	var project = await global.db.collection('gp_projects').findOne(query);
+	return project;
+}
 
 exports.getKeyTypes = async function (collection_name, cb) {
 	var self = this;

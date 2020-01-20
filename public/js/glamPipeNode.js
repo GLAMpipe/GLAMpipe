@@ -304,7 +304,7 @@ var glamPipeNode = function (node, gp, display) {
 			var collection = gp.currentCollection.name;
 
 			// fetch fields
-			$.getJSON(self.baseAPI + "/collections/" + collection + "/fields", function(data) {
+			$.getJSON(self.baseAPI + "/collections/" + collection.name + "/fields", function(data) {
 				if(data.error)
 					alert(data.error);
 				var options = [];

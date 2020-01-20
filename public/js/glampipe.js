@@ -496,6 +496,7 @@ var glamPipe = function () {
 				self.setPageTitle(project.title);
 				self.project = project;
 
+				self.getCollectionFromURL();
 				self.setCollectionCounter();
 				self.renderBreadCrumb();
 				self.renderCollectionSet(cb);
@@ -505,7 +506,18 @@ var glamPipe = function () {
 	}
 
 
-
+	this.getCollectionFromURL = function() {
+		const urlParams = new URLSearchParams(window.location.search);
+		var c = urlParams.get('collection'); 
+		var index = 0;
+		for(var col of self.collections) {
+			if(col.name === c) {
+				self.currentCollection = col;
+				self.currentCollectionSet = index;
+			}
+			index++;
+		}
+	}
 
 	this.setPageTitle = function (title) {
 		$(self.pageTitleDiv).text(title);
@@ -744,6 +756,7 @@ var glamPipe = function () {
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function (cb) {
+		
 		if(!self.currentCollection) {
 			console.log("no current collection")
 			$("pipe .collection").empty().append("<a class='add-collection' title='Add new collection' href='#'> Add Collection</a>");
@@ -848,50 +861,67 @@ var glamPipe = function () {
 			self.currentCollectionSet--;
 
 			self.setCollectionCounter();
-			self.currentCollectionNode = self.collections[self.currentCollectionSet];
-			self.pickedCollectionId = self.currentCollectionNode.source.collection;
+			self.currentCollection = self.collections[self.currentCollectionSet];
+			self.pickedCollectionId = self.currentCollection.name;
 			self.renderBreadCrumb();
+			self.updateURL();
 			self.renderCollectionSet();
-			if(self.currentNodes[self.currentCollectionNode.source.collection])
-				self.currentNodes[self.currentCollectionNode.source.collection].open();
-			else
-				self.currentCollectionNode.open();
+			//if(self.currentNodes[self.currentCollectionNode.source.collection])
+				//self.currentNodes[self.currentCollectionNode.source.collection].open();
+			//else
+				//self.currentCollectionNode.open();
 
-			console.log("currentCollection = ", self.currentCollectionNode.source.collection);
+			console.log("currentCollection = ", self.currentCollection.name);
 		}
 	}
 
 	this.nextCollection = function () {
+
 		if (self.currentCollectionSet != self.collections.length -1) {
 			self.currentCollectionSet++;
+			console.log(self.currentCollectionSet)
 
 			self.setCollectionCounter();
-			self.currentCollectionNode = self.collections[self.currentCollectionSet];
-			self.pickedCollectionId = self.currentCollectionNode.source.collection;
+			self.currentCollection = self.collections[self.currentCollectionSet];
+			self.pickedCollectionId = self.currentCollection.name;
 			self.renderBreadCrumb();
+			self.updateURL();
 			self.renderCollectionSet();
-			if(self.currentNodes[self.currentCollectionNode.source.collection])
-				self.currentNodes[self.currentCollectionNode.source.collection].open();
-			else
-				self.currentCollectionNode.open();
+			//if(self.currentNodes[self.currentCollectionNode.source.collection])
+				//self.currentNodes[self.currentCollectionNode.source.collection].open();
+			//else
+				//self.currentCollectionNode.open();
 
-			console.log("currentCollection = ", self.currentCollectionNode.source.collection);
+			console.log("currentCollection = ", self.currentCollection.name);
 		}
 	}
+
+
+
+	this.updateURL = function() {
+		const urlParams = new URLSearchParams(window.location.search);
+
+		urlParams.set('collection', self.currentCollection.name);
+		window.history.pushState('data', 'Title', location.protocol + '//' + location.host + location.pathname + '?' + urlParams);
+		document.title = self.currentCollection.title
+
+	}
+
 
 	this.chooseCollection = function(index) {
 		self.currentCollectionSet = parseInt(index)
 		self.setCollectionCounter();
-		self.currentCollectionNode = self.collections[self.currentCollectionSet];
-		self.pickedCollectionId = self.currentCollection;
+		self.currentCollection = self.collections[self.currentCollectionSet];
+		self.pickedCollectionId = self.currentCollection.name;
 		self.renderBreadCrumb();
+		self.updateURL();
 		self.renderCollectionSet();
-		if(self.currentNodes[self.currentCollectionNode.source.collection])
-			self.currentNodes[self.currentCollectionNode.source.collection].open();
-		else
-			self.currentCollectionNode.open();
+		//if(self.currentNodes[self.currentCollectionNode.source.collection])
+			//self.currentNodes[self.currentCollectionNode.source.collection].open();
+		//else
+			//self.currentCollectionNode.open();
 
-		console.log("currentCollection = ", self.currentCollectionNode.source.collection);
+		console.log("currentCollection = ", self.currentCollection.name);
 	}
 
 	this.updateDocument = function (data, cb) {
@@ -965,7 +995,7 @@ var glamPipe = function () {
 		for(var i = 0; i < self.collections.length; i++) {
 			var collection = self.collections[i];
 			if(collection.name != self.currentCollection.name) {
-				html += '<option class="pick_collection" value="'+collection.name+'">' + collectioin.title + '</option>';
+				html += '<option class="pick_collection" value="'+collection.name+'">' + collection.title + '</option>';
 			}
 		}
 		return html;
@@ -1050,7 +1080,7 @@ var glamPipe = function () {
 		  buttons: {
 			"Yes, delete nodes and collection": function() {
 				$( this ).dialog( "close" );
-				$.delete(self.baseAPI + "/nodes/" + node_id, {}, function(retData) {
+				$.delete(self.baseAPI + "/collections/" + self.currentCollection.name, {}, function(retData) {
 					if(retData.error)
 						alert(retData.error);
 					else {

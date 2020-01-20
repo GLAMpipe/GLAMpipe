@@ -345,6 +345,19 @@ class GLAMpipe {
 	}
 
 
+	async deleteCollection(collection_name) {
+		
+		debug("Deleting collection ", collection_name)
+		
+		try {
+			var result = await collection.removeFromProject(collection_name);
+			return result;
+		} catch(e) {
+			error("Collection deletion failed!", e);
+			throw(e);
+		}
+	}
+
 	async createNode(nodeid, params, collection_name, project_id) {
 
 		try {
@@ -461,6 +474,11 @@ class GLAMpipe {
 		var collections = await db.getCollectionNames();
 		return collections;
 		// TODO: remove gp__ -collections
+	}
+
+	async getCollectionNodes(collection_name) {
+		var nodes = await db.collection("gp_nodes").find({'collection': collection_name});
+		return nodes;
 	}
 
 /* ***********************************************************************

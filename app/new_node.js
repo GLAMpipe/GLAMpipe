@@ -161,10 +161,19 @@ console.log(__dirname)
 		var self = this;
 		
 		try { await fsp.mkdir(path.join(this.source.project_dir, "uploads")) } catch(e) { debug("upload dir exists" ) }
-		var filename = Math.random().toString()
-		var filepath = path.join(this.source.project_dir, 'uploads', filename)
 
 		const file = ctx.request.files.file;
+
+		var today = new Date(Date.now());
+		var mm = String(today.getMonth() + 1).padStart(2, '0'); 
+		var d = String(today.getDate()).padStart(2, '0'); 
+		var h = String(today.getHours()); 
+		var m = String(today.getMinutes()).padStart(2, '0'); 
+		var s = String(today.getSeconds()).padStart(2, '0'); 
+		var ms = String(today.getMilliseconds()); 
+		var filename = today.getUTCFullYear() + '-' + mm + '-' + d + '-' + h + ':' + m + ':' + s  +'_' + ms + path.extname(file.name)
+		var filepath = path.join(this.source.project_dir, 'uploads', filename)
+		
 		const reader = fs.createReadStream(file.path);
 		const stream = fs.createWriteStream(filepath);
 		reader.pipe(stream);

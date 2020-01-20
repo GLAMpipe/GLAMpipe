@@ -152,7 +152,8 @@ var nodeRepository = function (gp) {
 
 
 		// fetch fields
-		var result = await $.getJSON(self.baseAPI + "/collections/" + collection + "/fields");
+		var result = await $.getJSON(self.baseAPI + "/collections/" + collection.name + "/fields");
+		console.log(result)
 		if(result && result.keys) {
 			var options = [];
 			for(var i = 0; i < result.keys.length; i++) {

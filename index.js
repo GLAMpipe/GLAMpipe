@@ -352,8 +352,8 @@ router.get('/api/v2/collections/:collection/count', async function (ctx) {
 });
 
 router.get('/api/v2/collections/:collection/nodes', async function (ctx) {
-	const count = await GP.getCollectionNodes(ctx.params.collection, ctx.request.query);
-	ctx.body = {"count": count};
+	const nodes = await GP.getCollectionNodes(ctx.params.collection);
+	ctx.body = {"nodes": nodes};
 });
 
 router.get('/api/v2/collections/:collection/facet', async function (ctx) {
@@ -371,7 +371,10 @@ router.post('/api/v2/collections', async function (ctx) {
 	ctx.body = collection;
 })
 
-
+router.delete('/api/v2/collections/:collection', async function (ctx) {
+	var collection 	= await GP.deleteCollection(ctx.params.collection);
+	ctx.body = collection;
+})
 
 router.put('/api/v2/collections/:collection/schema', async function (ctx) {
 	const schema = await GP.createSchema(ctx.params.collection);

@@ -1,5 +1,6 @@
 const constants = require("../../config/const.js");
 var schema 		= require('./../new_schema.js');
+var path 		= require("path");
 
 // TODO: rewrite this: https://stackoverflow.com/questions/33599688/how-to-use-es8-async-await-with-streams
 
@@ -24,7 +25,7 @@ exports.read = async function (node) {
 	var connection_string = global.db_string;
 	var db_string = "mongodb://" + connection_string;
 	
-	var file = node.source.params.filename;
+	var file = path.join(node.source.project_dir, 'uploads', node.source.params.filename);
 	let reader = MARC.stream(fs.createReadStream(file),'Iso2709');
 	//let writable = MARC.stream(process.stdout, 'mij');
 	
