@@ -1,4 +1,5 @@
 var requestPromise 	= require('request-promise-native');
+var path 			= require('path');
 var debug 			= require('debug')('GLAMpipe:node');
 const constants 	= require("../../config/const.js");
 
@@ -24,17 +25,17 @@ exports.sendJSON = async function (node) {
 
 exports.getAndSaveFile = async function(node) {
 	// download file
-	console.log(node.sandbox.core.options)
 	try {
 		var result = await requestPromise(node.sandbox.core.options);
-		console.log(result.statusCode)
 	} catch(e) {
-		console.log(e.message)
+		console.log(e)
 		throw("Fetch failed")
 	}
 	// save to node directory
-	const fs = require("fs");
-	fs.writeFileSync(node.sandbox.core.filename, result, 'utf-8')
+	const fs = require("fs-extra");
+	var file = path.join(node.source.project_dir, "uploads", node.sandbox.core.filename);
+	debug("writing file " + file)
+	await fs.writeFile(file, result, 'utf-8')
 }
 
 

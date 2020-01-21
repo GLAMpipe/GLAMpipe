@@ -16,8 +16,8 @@ var lookupLoop 	= require("../app/core-lookup.js");
 var exportLoop 	= require("../app/core-export.js");
 var dbcore 		= require("../app/core-db.js");
 
-var path 					= require("path");
-var stringSimilarity 		= require("string-similarity");
+var path 				= require("path");
+var stringSimilarity 	= require("string-similarity");
 
 const GP 		= require("../config/const.js");
 
@@ -89,7 +89,7 @@ class Node {
 		this.source.project = project_id;
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
-		this.source.project_dir = path.join(global.config.projectsPath, project.dir, collection_name, this.source.type,  this.source.nodeid + "_" + project.node_count + 1 );
+		this.source.project_dir = path.join(global.config.projectsPath, project.dir, collection_name, this.source.type,  this.source.nodeid + "_" + (project.node_count + 1) );
 		console.log(this.source)
 		var result = await global.db.collection('gp_nodes').insert(this.source);
 		
@@ -107,13 +107,40 @@ class Node {
 	
 
 	async writeDir(project_id) {
-console.log(__dirname)
-		const fs = require('fs');
+		const fs = require('fs-extra');
 		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
 		if(project.dir) {
-			//var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
-			fs.mkdirSync(this.source.project_dir);
-			//await this.updateSourceKey('project_dir', dir);
+			try {
+				//var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
+				await fs.mkdir(this.source.project_dir);
+				await fs.mkdir(path.join(this.source.project_dir, 'uploads'));
+				await fs.mkdir(path.join(this.source.project_dir, 'public'));
+				for(var nodefile in this.source.scripts) {
+					var file = path.join(this.source.project_dir, nodefile) + '.js'
+					await fs.writeFile(file, this.source.scripts[nodefile]);
+				}
+				for(var uifile in this.source.views) {
+					var file = path.join(this.source.project_dir, uifile) + '.html'
+					await fs.writeFile(file, this.source.scripts[uifile]);
+				}
+				
+				var file = path.join(this.source.project_dir, 'params.json')
+				await fs.writeFile(file, JSON.stringify(this.source.params));
+				
+				var file = path.join(this.source.project_dir, 'settings.json')
+				await fs.writeFile(file, JSON.stringify(this.source.settings));
+				
+				// copy 'public' directory from node source to node's project directory (html + css + js)
+				try {
+					var source = path.join(this.source.source_dir, 'public');
+					var target = path.join(this.source.project_dir, 'public');
+					await fs.copy(source, target);
+				} catch(e) {
+					debug('Node has no public directory')
+				}
+			} catch(e) {
+				throw('Node directory creation failed! ' + e)
+			}
 		}
 	}
 
@@ -232,7 +259,7 @@ console.log(__dirname)
 	}
 
 	getFilesIndex(ctx) {
-		var source = path.join(this.source.project_dir, 'files', 'index.html')
+		var source = path.join(this.source.project_dir, 'public', 'index.html')
 		const fs = require('fs-extra');
 		const src = fs.createReadStream(source);
 		ctx.response.set("content-type", "text/html");
@@ -241,7 +268,7 @@ console.log(__dirname)
 
 	getFile(ctx) {
 		const fs = require('fs-extra');
-		var source = path.join(this.source.project_dir, 'files')
+		var source = path.join(this.source.project_dir, 'public')
 		if(ctx.params.dir === 'js') {
 			source = path.join(source, 'js', ctx.params.file);
 			ctx.response.set("content-type", "application/x-javascript");

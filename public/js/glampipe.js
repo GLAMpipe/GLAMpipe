@@ -484,8 +484,8 @@ var glamPipe = function () {
 				self.display = display;
 				self.collections = project.collections;
 				var col = new GLAMPipeCollection(self, project.collections[0], display);
-				self.currentCollection = col;
-				self.currentCollection.display.render(col);
+				self.display.render(col);
+				self.currentCollection = project.collections[0]
 
 
 				if(nodes) {
@@ -859,6 +859,8 @@ var glamPipe = function () {
 	this.prevCollection = function () {
 		if (self.currentCollectionSet != 0) {
 			self.currentCollectionSet--;
+			var col = new GLAMPipeCollection(self, self.collections[self.currentCollectionSet], self.display);
+			self.display.render(col)
 
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
@@ -879,7 +881,8 @@ var glamPipe = function () {
 
 		if (self.currentCollectionSet != self.collections.length -1) {
 			self.currentCollectionSet++;
-			console.log(self.currentCollectionSet)
+			var col = new GLAMPipeCollection(self, self.collections[self.currentCollectionSet], self.display);
+			self.display.render(col)
 
 			self.setCollectionCounter();
 			self.currentCollection = self.collections[self.currentCollectionSet];
