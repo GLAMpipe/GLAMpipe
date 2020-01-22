@@ -88,7 +88,7 @@ async function scriptLoop(node) {
 
 
 	try {
-		// check if run.js code is provided in settings
+		// check if process.js code is provided in settings
 		if(node.settings.js) {
 			var process = new vm.createScript(node.settings.js);
 			node.scripts.process = process;
@@ -132,8 +132,8 @@ async function scriptLoop(node) {
 				var w = await bulk.execute();
 				console.log(w)
 				bulk = global.db[node.collection].initializeUnorderedBulkOp();
-				if(process.send)
-					process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
+				//if(process.send)
+					//process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
 			}
 		}	
 		

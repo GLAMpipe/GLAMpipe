@@ -301,7 +301,7 @@ var glamPipeNode = function (node, gp, display) {
 			else
 				$(".node-description-value").val("");
 
-			var collection = gp.currentCollection.name;
+			var collection = gp.currentCollection;
 
 			// fetch fields
 			$.getJSON(self.baseAPI + "/collections/" + collection.name + "/fields", function(data) {
@@ -316,9 +316,9 @@ var glamPipeNode = function (node, gp, display) {
 				}
 
 				// execute node's settings.js if exists
-				if(self.source.scripts.settings) {
-					if(!self.source.settings) self.source.settings = {};
-					var settingsScript = new Function('node', self.source.scripts.settings);
+				if(self.source.scripts.ui_settings) {
+					if(!self.source.settings) self.source.ui_settings = {};
+					var settingsScript = new Function('node', self.source.scripts.ui_settings);
 					settingsScript(self.source);
 				}
 

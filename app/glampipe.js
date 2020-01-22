@@ -295,7 +295,7 @@ class GLAMpipe {
 						if (await nodeStats.isDirectory()) {
 							var nodeFiles = await fs.readdir(nodeDirPath);
 							// read only if description.json exists
-							if(nodeFiles.includes('description.json')) {
+							if(nodeFiles.includes('description.json') && nodeFiles.includes('process.js')) {
 								var content = await fs.readFile(path.join(nodeDirPath, "description.json"), 'utf-8');
 								var node = JSON.parse(content);
 								if(node.core) { // require new GP-node format

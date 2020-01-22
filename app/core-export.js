@@ -47,7 +47,7 @@ async function fileLoop(node, core) {
 	var fs = require('fs');
 	var path = require('path');
 	var csvWriter 	= require('csv-write-stream');
-	var filePath = path.join(node.source.project_dir, node.source.params.required_file);
+	var filePath = path.join(node.source.project_dir, 'files', node.source.params.required_file);
 	var writer = csvWriter({separator:node.settings.sep, headers: node.sandbox.core.options.csvheaders});
 	writer.pipe(fs.createWriteStream(filePath));
 	const cursor = global.db[node.collection].findAsCursor({});	

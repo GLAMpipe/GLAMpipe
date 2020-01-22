@@ -18,7 +18,7 @@ exports.create = async function(collection_name, project) {
 	// cleanup and generate collection name
 	var mongo_name = collection_name.replace(/[^a-z0-9-]/g,"");
 	mongo_name = project.dir + "_c" + project.collection_count + "_" + collection_name;  // unique name for collection
-	await global.db['gp_projects'].update({_id:mongoist.ObjectId(project._id)}, {$inc: { 'collection_count': 1}, $addToSet: {collections: {name:mongo_name, title:collection_name }} })
+	await global.db['gp_projects'].update({_id:project._id}, {$inc: { 'collection_count': 1}, $addToSet: {collections: {name:mongo_name, title:collection_name }} })
 
 	await global.db.createCollection(mongo_name);
 	// write collection directory under project directory
@@ -41,7 +41,7 @@ exports.removeFromProject = async function(collection_name) {
 	var project = await exports.getProject(collection_name);
 	// remove collection from project data
 	await global.db['gp_projects'].update(
-		{_id:mongoist.ObjectId(project._id)}, 
+		{_id:project._id}, 
 		{'$pull': 
 			{'collections': {'name':collection_name}}
 		}

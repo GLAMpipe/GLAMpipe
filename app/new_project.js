@@ -6,7 +6,6 @@ var error 		= require('debug')('ERROR');
 var Collection 	= require('./new_collection.js');
 var Node 		= require('./new_node.js');
 const GP 		= require("../config/const.js");
-const mongoist  = require('mongoist');
 
 
 
@@ -29,6 +28,7 @@ exports.create = async function(title) {
 		dir = "p" + meta.project_count + "_" + dir;
 		
 		var project = {
+			"_id": dir,
 			"title": title,
 			"dir": dir,
 			"collection_count": 0,
@@ -58,7 +58,7 @@ exports.remove = async function (doc_id) {
 
 	debug("deleting project ", doc_id);
 
-	var project = await global.db.collection('gp_projects').findOne({_id: mongoist.ObjectId(doc_id)});
+	var project = await global.db.collection('gp_projects').findOne({_id: doc_id});
 	if(!project) {
 		error("Project " + doc_id + " not found")
 		throw("Project not found!")
@@ -86,7 +86,7 @@ exports.remove = async function (doc_id) {
 	}
 
 	try {
-		await global.db.collection('gp_projects').remove({_id: mongoist.ObjectId(doc_id)});
+		await global.db.collection('gp_projects').remove({_id: doc_id});
 	} catch(e) {
 		error(e)
 		throw("Could not delete project " + doc_id)
@@ -106,27 +106,13 @@ exports.getProjects = async function() {
 		'owner': 1
 	  }).sort({'_id': -1}).toArray();
 
-/*
-     { $match: {
-		_id: mongoist.ObjectId(doc_id)
-		}
-	},
-	{	$lookup:
-        {
-           from: "gp_nodes",
-           localField: "_id",
-           foreignField: "project",
-           as: "nodes"
-        }
-    }
- * */
 }
 
 
 exports.getProject = async function(project_id) {
 
 	try {
-		var p = await global.db.collection('gp_projects').findOne({_id: mongoist.ObjectId(project_id)});
+		var p = await global.db.collection('gp_projects').findOne({_id: project_id});
 		var nodes = await global.db.collection('gp_nodes').find({project: project_id});
 		p.nodes = nodes;
 		return p;

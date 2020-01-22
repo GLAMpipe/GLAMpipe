@@ -25,7 +25,7 @@ exports.read = async function (node) {
 	var connection_string = global.db_string;
 	var db_string = "mongodb://" + connection_string;
 	
-	var file = path.join(node.source.project_dir, 'uploads', node.source.params.filename);
+	var file = path.join(node.source.project_dir, 'files', node.source.params.filename);
 	let reader = MARC.stream(fs.createReadStream(file),'Iso2709');
 	//let writable = MARC.stream(process.stdout, 'mij');
 	

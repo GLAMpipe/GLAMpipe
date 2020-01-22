@@ -33,7 +33,7 @@ exports.getAndSaveFile = async function(node) {
 	}
 	// save to node directory
 	const fs = require("fs-extra");
-	var file = path.join(node.source.project_dir, "uploads", node.sandbox.core.filename);
+	var file = path.join(node.source.project_dir, "files", node.sandbox.core.filename);
 	debug("writing file " + file)
 	await fs.writeFile(file, result, 'utf-8')
 }

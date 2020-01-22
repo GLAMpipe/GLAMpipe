@@ -89,7 +89,7 @@ app.use(async (ctx, next) => {
 
 })
 
-router.get('/projects/:id', function(ctx) {
+router.get('/project/:id', function(ctx) {
 	return serve(ctx, 'project.html', { root: __dirname + '/public' });
 })
 
@@ -157,6 +157,12 @@ router.delete('/api/v2/projects/:id', async function (ctx) {
  * 							FILES
  * ***********************************************************************
 */
+
+router.get('/api/v2/nodes/:id/files/:file', async function (ctx) {
+	var node = await GP.getNode(ctx.params.id);
+	await node.getFile(ctx, ctx.params.file);
+	
+});
 
 
 /* ***********************************************************************
@@ -426,12 +432,12 @@ router.put('/api/v2/proxy/', function (ctx) {
 
 router.get('/views/:node/:dir/:file', async function (ctx) {
 	var node = await GP.getNode(ctx.params.node);
-	node.getFile(ctx);
+	node.getPublicFile(ctx);
 });
 
 router.get('/views/:node', async function (ctx) {
 	var node = await GP.getNode(ctx.params.node);
-	node.getFilesIndex(ctx);
+	node.getPublicIndex(ctx);
 });
 
 

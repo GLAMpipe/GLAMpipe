@@ -72,7 +72,7 @@ class Node {
 	
 	async add2Project(project_id, collection_name) {
 		// check that project exists
-		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
+		var project = await global.db.collection('gp_projects').findOne({"_id": project_id});
 		if(!project) throw("Project does not exist!")
 		
 		// check if collection exists
@@ -95,7 +95,7 @@ class Node {
 		
 		// increase node counter for node directory naming
 		await global.db.collection("gp_projects").update(
-			{_id:mongoist.ObjectId(project_id)}, 
+			{_id:project_id}, 
 			{$inc: {'node_count':1}
 		});	
 
@@ -108,12 +108,12 @@ class Node {
 
 	async writeDir(project_id) {
 		const fs = require('fs-extra');
-		var project = await global.db.collection('gp_projects').findOne({"_id": mongoist.ObjectId(project_id)});
+		var project = await global.db.collection('gp_projects').findOne({"_id": project_id});
 		if(project.dir) {
 			try {
 				//var dir = path.join(global.config.projectsPath, project.dir, this.source.type,  this.source.nodeid + "_" + project.node_count );
 				await fs.mkdir(this.source.project_dir);
-				await fs.mkdir(path.join(this.source.project_dir, 'uploads'));
+				await fs.mkdir(path.join(this.source.project_dir, 'files'));
 				await fs.mkdir(path.join(this.source.project_dir, 'public'));
 				for(var nodefile in this.source.scripts) {
 					var file = path.join(this.source.project_dir, nodefile) + '.js'
@@ -187,7 +187,7 @@ class Node {
 		var fsp = require('fs').promises;
 		var self = this;
 		
-		try { await fsp.mkdir(path.join(this.source.project_dir, "uploads")) } catch(e) { debug("upload dir exists" ) }
+		try { await fsp.mkdir(path.join(this.source.project_dir, "files")) } catch(e) { debug("'files' dir exists" ) }
 
 		const file = ctx.request.files.file;
 
@@ -199,7 +199,7 @@ class Node {
 		var s = String(today.getSeconds()).padStart(2, '0'); 
 		var ms = String(today.getMilliseconds()); 
 		var filename = today.getUTCFullYear() + '-' + mm + '-' + d + '-' + h + ':' + m + ':' + s  +'_' + ms + path.extname(file.name)
-		var filepath = path.join(this.source.project_dir, 'uploads', filename)
+		var filepath = path.join(this.source.project_dir, 'files', filename)
 		
 		const reader = fs.createReadStream(file.path);
 		const stream = fs.createWriteStream(filepath);
@@ -224,10 +224,6 @@ class Node {
 
 
 		return end;
-	
-
-		//try { await fs.mkdir(path.join("uploads")) } catch(e) { debug("upload dir exists" ) }
-		//console.log(this.source.project_dir)
 	} 
 
 	setParams(params) {
@@ -258,7 +254,7 @@ class Node {
 		this.source[key] = value;
 	}
 
-	getFilesIndex(ctx) {
+	getPublicIndex(ctx) {
 		var source = path.join(this.source.project_dir, 'public', 'index.html')
 		const fs = require('fs-extra');
 		const src = fs.createReadStream(source);
@@ -266,7 +262,7 @@ class Node {
 		ctx.body = src;
 	}
 
-	getFile(ctx) {
+	getPublicFile(ctx) {
 		const fs = require('fs-extra');
 		var source = path.join(this.source.project_dir, 'public')
 		if(ctx.params.dir === 'js') {
@@ -281,6 +277,14 @@ class Node {
 		}
 
 		const src = fs.createReadStream(source);
+		ctx.body = src;
+	}
+
+	getFile(ctx, file) {
+		var source = path.join(this.source.project_dir, 'files', file)
+		const fs = require('fs-extra');
+		const src = fs.createReadStream(source);
+		ctx.response.set("content-type", "text/html");
 		ctx.body = src;
 	}
 
@@ -307,6 +311,18 @@ class Node {
 			return;
 		
 		await this.updateSourceKey('settings', settings_copy);
+		
+		// write to file
+		var fs = require("fs-extra")
+		var file = path.join(this.source.project_dir, 'settings.json')
+		await fs.writeFile(file, JSON.stringify(settings_copy, null, 4));
+		
+		// save the script of script node
+		if(this.source.nodeid === 'process_script' && settings.js) {
+			var js = path.join(this.source.project_dir, 'process.js')
+			await fs.writeFile(js, settings.js);
+			console.log("saving process.js")
+		}
 
 	}
 	

@@ -33,7 +33,7 @@ var glamPipe = function () {
 
 			for(var i = 0; i< data.length; i++) {
 				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
-				listOption += "<a href='" + self.uiPath + "projects/" + data[i]._id + "'>\n";
+				listOption += "<a href='" + self.uiPath + "project/" + data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
 				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
@@ -114,9 +114,9 @@ var glamPipe = function () {
 				html += "</td>";
 
 				if(projects[i].hidden === true)
-					html += "<td><div><a href='projects/" + projects[i]._id + "'> "+ projects[i].title + "</a> (hidden)</div></td>";
+					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a> (hidden)</div></td>";
 				else
-					html += "<td><div><a href='projects/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
+					html += "<td><div><a href='project/" + projects[i]._id + "'> "+ projects[i].title + "</a></div></td>";
 
 				html += "<td>";
 				if(projects[i].nodes) {
@@ -181,7 +181,7 @@ var glamPipe = function () {
 
 	this.genProjectRow = function(project) {
 			var html = "<tr>";
-			html += "<td><div><a href='projects/" + project._id + "'> "+ project.title + "</a></div></td>";
+			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
 
 			html += "<td>";
 			if(project.nodes) {
@@ -351,7 +351,7 @@ var glamPipe = function () {
 		post(self.baseAPI + "/projects", data, function(data) {
 			if(!data.error) {
 				console.log('created project', data.project);
-				window.location.href = self.uiPath + "projects/" + data._id;
+				window.location.href = self.uiPath + "project/" + data._id;
 
 			} else {
 				alert(data.error);

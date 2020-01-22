@@ -20,7 +20,7 @@ exports.read = async function (node) {
 	query[constants.source] = node.uuid;
 	await global.db[node.collection].remove(query);
 
-	var file = path.join(node.source.project_dir, "uploads", node.source.params.filename);
+	var file = path.join(node.source.project_dir, "files", node.source.params.filename);
 	var connection_string = global.db_string;
 	var db_string = "mongodb://" + connection_string;
 	
