@@ -5,12 +5,12 @@ exports.createView = async function (node) {
 	const fs = require("fs-extra");
 	const path = require("path");
 	var source = path.join(node.source.source_dir, 'files');
-	var target = path.join(node.source.project_dir, 'files');
+	var target = path.join(node.source.project_dir, 'public');
 	
 	// copy 'files' directory from node source to node's project directory (html + css + js)
-	await fs.copy(source, target);
+	//await fs.copy(source, target);
 	
-	var html = await fs.readFile(path.join(node.source.source_dir, 'files', 'index.html'), 'utf-8')
+	var html = await fs.readFile(path.join(node.source.source_dir, 'public', 'index.html'), 'utf-8')
 	html = prepareHTML(html, node)
 	await fs.writeFile(path.join(target, 'index.html'), html)
 	
