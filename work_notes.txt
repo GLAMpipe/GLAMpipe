@@ -33,6 +33,8 @@ TODO:
 - shibboleth
 - devmode
 
+- re-generate schema should refresh keys
+- facet UI should warn about '|' in data values
 
 DONE:
 - PDF core
@@ -45,9 +47,6 @@ DONE:
 - csv core OK
 - node dirs
 
-TO BE FIXED:
-- re-generate schema should refresh keys
-- facet UI should warn about '|' in data values
 
 FIXED:
 - OK node settings are not remembered 

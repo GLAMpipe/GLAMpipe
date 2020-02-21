@@ -90,8 +90,15 @@ class Node {
 		this.source.collection = collection_name;
 		this.source._id = mongoist.ObjectId();
 		this.source.project_dir = path.join(global.config.projectsPath, project.dir, collection_name, this.source.type,  this.source.nodeid + "_" + (project.node_count + 1) );
+		// set out_field to schema
+		if(this.source.params.out_field) { 
+			var out_field = {}
+			out_field[this.source.params.out_field] = []
+			this.source.schema = out_field;
+		}
 		console.log(this.source)
 		var result = await global.db.collection('gp_nodes').insert(this.source);
+
 		
 		// increase node counter for node directory naming
 		await global.db.collection("gp_projects").update(

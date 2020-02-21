@@ -786,13 +786,6 @@ var glamPipe = function () {
 
 				html += self.renderNodes(collection,["source"]);
 
-
-				html += "  <div class='sectiontitleblock'>"
-				html += "	<div><span class='title sectiontitle'>View the data</span> <a class='add-node' data-type='view' title='Add new view node' href='addnode.html'>Add</a></div>"
-				html += "  </div><div class='holder params'></div>"
-
-				html += self.renderNodes(collection, ["view"]);
-
 				html += "  <div class='sectiontitleblock'>"
 				html += "	<div><span class='title sectiontitle'>Process the data</span> <a class='add-node' data-type='process' title='Add new processing node' href='addnode.html'>Add</a></div>"
 				html += "  </div><div class='holder params'></div>"
@@ -806,6 +799,11 @@ var glamPipe = function () {
 				html += self.renderNodes(collection, ["export"]);
 
 
+				html += "  <div class='sectiontitleblock'>"
+				html += "	<div><span class='title sectiontitle'>View the data</span> <a class='add-node' data-type='view' title='Add new view node' href='addnode.html'>Add</a></div>"
+				html += "  </div><div class='holder params'></div>"
+
+				html += self.renderNodes(collection, ["view"]);
 
 			}
 			html += "</collectionset>"

@@ -112,7 +112,8 @@ async function scriptLoop(node) {
 			node.sandbox.context.vars.count = counter;
 			
 			node.scripts.process.runInContext(node.sandbox);
-			if(counter === 1) await node.updateSourceKey("schema", node.sandbox.out.setter);
+			// first setter is added to schema
+			if(counter === 1 && node.sandbox.out.setter) await node.updateSourceKey("schema", node.sandbox.out.setter);
 
 			// if out.value is set, then we write to the field defined in settings.out_field
 			var update = {}

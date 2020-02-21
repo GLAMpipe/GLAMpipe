@@ -63,7 +63,7 @@ var dataTable = function () {
 	this.render = function (node) {
 
 		self.node = node;
-		node.loadCollectionKeys(function() {
+		//node.loadCollectionKeys(function() {
 			self.keys.all_keys = self.node.data.keys;
 
 			node.loadCollectionData(self.params, function() {
@@ -72,7 +72,7 @@ var dataTable = function () {
 				self.renderCollectionCount();
 				self.setEventListeners();
 			});
-		});
+		//});
 
 	}
 
@@ -178,13 +178,13 @@ var dataTable = function () {
 				if(field.includes(s) && !field.includes("_lang")) {
 					f.push(field)
 				}
-			} 
+			}
 		}
 		return f;
 	}
 
 	this.getVisibleFields = function (config) {
-		
+
 		self.keys.visible_keys = self.node.data.visible_keys;
 
 		if(self.keys.visible_keys == null) {
@@ -196,7 +196,7 @@ var dataTable = function () {
 			} else {
 				var suggestions = self.checkSuggestionFields(self.keys.all_keys);
 				self.keys.visible_keys = suggestions;
-				
+
 				if(suggestions.length === 0) {
 					var keys = self.keys.all_keys.slice(0,5);
 					var c = self.keys.all_keys.filter(function(item) {
@@ -206,10 +206,10 @@ var dataTable = function () {
 				}
 
 			}
-				
+
 		}
 		return self.keys.visible_keys;
-		
+
 		//// if node has input/output field, then use them as visible fields
 		//if(config) {
 			//var keys = config.input_keys.concat(config.output_keys);
@@ -424,7 +424,7 @@ var dataTable = function () {
 					html += "<div class='error'>["+index+"] " + data + "</div>";
 				else
 					html += "<div class='error'>" + data + "</div>";
-			
+
 
 			// render strings
 			} else  {
@@ -800,7 +800,7 @@ var dataTable = function () {
 	this.getKeysHTML = async function (event) {
 		var result = await $.getJSON(self.node.baseAPI + "/collections/" + self.node.gp.currentCollection.name + "/fields");
 		var visible_keys = self.getVisibleFields();
-		
+
 		var html = "<div class='button unselect_all'>Deselect all</div> <div class='button toggle_all'>Invert selection</div> | <a id='re-read-fields' class='ibutton'>re-generate schema</a>";
 		html += "<hr/><div class='flex visible-keys'>";
 		if(result.keys) {
