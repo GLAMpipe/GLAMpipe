@@ -50,7 +50,7 @@ var glamPipe = function () {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
-			html = "<table><thead><tr><th>title</th><th>imports from</th><th>collections</th><th>owners</th><th>exports to</th><th>action</th></tr></thead>";
+			html = "<table><thead><tr><th>title</th><th>description</th><th>imports from</th><th>collections</th><th>owners</th><th>action</th></tr></thead>";
 
 			for(var i = 0; i< data.length; i++) {
 				html += self.genProjectRow(data[i]);
@@ -182,7 +182,7 @@ var glamPipe = function () {
 	this.genProjectRow = function(project) {
 			var html = "<tr>";
 			html += "<td><div><a href='project/" + project._id + "'> "+ project.title + "</a></div></td>";
-
+			html += "<td>" + project.description + "</td>";
 			html += "<td>";
 			if(project.nodes) {
 				project.nodes.forEach(function(node) {
@@ -193,12 +193,9 @@ var glamPipe = function () {
 			html += "</td><td>";
 
 			// COLLECTIONS
-			if(project.nodes) {
-				project.nodes.forEach(function(node) {
-					if(node.type === "collection")
-						html += "<div>" + node.params.title + "</div>";
-				})
-			}
+			project.collections.forEach(function(collection) {
+				html += "<div>" + collection.title + "</div>";
+			})
 
 			html += "</td><td><div>" + project.owner + "</div></td>";
 
@@ -212,15 +209,15 @@ var glamPipe = function () {
 			//}
 			//html += "</div></td>";
 
-			html += "<td>";
-			if(project.nodes) {
+			//html += "<td>";
+			//if(project.nodes) {
 
-				project.nodes.forEach(function(node) {
-					if(node.type === "export")
-						html += "<div>" + node.title + "</div>";
-				})
-			}
-			html += "</td>";
+				//project.nodes.forEach(function(node) {
+					//if(node.type === "export")
+						//html += "<div>" + node.title + "</div>";
+				//})
+			//}
+			//html += "</td>";
 
 			// actions
 			html += "<td><a data-id='" + project._id + "' class='ibutton copy'>copy</a> | <a data-id='" + project._id + "' class='delete'>delete</a></td>";

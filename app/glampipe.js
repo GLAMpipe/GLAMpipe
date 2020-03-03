@@ -162,6 +162,10 @@ class GLAMpipe {
 		return await project.getProject(project_id);
 	}
 
+	async editProject(project_id, body) {
+		return await project.editProject(project_id, body);
+	}
+
 	async deleteProject(project_id) {
 		return await project.remove(project_id);
 	}

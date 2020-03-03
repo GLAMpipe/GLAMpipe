@@ -30,6 +30,7 @@ exports.create = async function(title) {
 		var project = {
 			"_id": dir,
 			"title": title,
+			"description": "",
 			"dir": dir,
 			"collection_count": 0,
 			"node_count":0,
@@ -96,15 +97,7 @@ exports.remove = async function (doc_id) {
 
 exports.getProjects = async function() {
 
-	return await global.db.collection('gp_projects').findAsCursor({}, {
-		'title': 1, 
-		'collections': 1, 
-		'nodes.nodeid': 1,
-		'nodes.params': 1,
-		'nodes.type': 1,
-		'nodes.title': 1,
-		'owner': 1
-	  }).sort({'_id': -1}).toArray();
+	return await global.db.collection('gp_projects').findAsCursor({}, {}).sort({'_id': -1}).toArray();
 
 }
 
@@ -117,12 +110,32 @@ exports.getProject = async function(project_id) {
 		p.nodes = nodes;
 		return p;
 	} catch(e) {
-		throw("Could not load project "+ doc_id)
+		throw("Could not load project "+ project_id)
 	}
-
-
-
 }
+
+
+exports.editProject = async function(project_id, body) {
+	const allowed = ['title', 'description']; // only these fields are editable
+	var edit = {}
+	for(var key in body) {
+		if(allowed.includes(key) && typeof body[key] == "string") {
+			edit[key] = body[key];
+		}
+	}
+	
+	if(Object.keys(edit).length) {
+		try {
+			var p = await global.db.collection('gp_projects').update({_id: project_id}, {$set: edit});
+			return p;
+		} catch(e) {
+			throw("Could not edit project "+ project_id)
+		}
+	} else {
+		throw("Editing project field failed! " + JSON.stringify(body))
+	}
+}
+
 
 exports.getProjectByCollection = async function(collection_name) {
 

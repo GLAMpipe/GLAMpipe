@@ -1,7 +1,7 @@
 .*
 glampipe-data/*
 glampipe
-config/config.js
+config/config.json
 node_modules
 logs
 nodes

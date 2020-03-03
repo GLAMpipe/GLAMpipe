@@ -147,6 +147,11 @@ router.post('/api/v2/projects', async function (ctx) {
 	ctx.body = project;
 });
 
+router.put('/api/v2/projects/:id', async function (ctx) {
+	const result = await GP.editProject(ctx.params.id, ctx.request.body);
+	ctx.body = result;
+});
+
 router.delete('/api/v2/projects/:id', async function (ctx) {
 	const project = await GP.deleteProject(ctx.params.id);
 	ctx.body = project;
