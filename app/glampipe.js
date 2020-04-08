@@ -207,12 +207,12 @@ class GLAMpipe {
 				await this.startNodeFarm(node_id, settings, node)
 			else {
 				if(doc_id) settings["doc_id"] = doc_id; 
-				await node.run({settings:settings, ws:this.io.sockets});
+				var result = await node.run({settings:settings, ws:this.io.sockets});
+				if(doc_id) return result;
 			}
 			
 		} catch(e) {
-			console.log(e)
-			error("Node start failed! " + e);
+			delete global.register[node_id]; // remove from register
 			throw(e);
 		}
 	}

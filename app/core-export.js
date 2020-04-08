@@ -10,10 +10,11 @@ exports.export = {
 	'web': {
 		'JSON': async function(node) {
 			try {
-				await jarLogin(node);
+				//await jarLogin(node);
 				await exportLoop(web.sendJSON, node);
 			} catch(e) {
 				error(e)
+				throw(e)
 			}
 		}
 	},
@@ -27,10 +28,11 @@ exports.export = {
 
 
 async function exportLoop(core, node) {
-
+	
 	// if there is a doc already, then this is single run
 	if(node.sandbox.context.doc) {
 		await doCore(core, node)
+		
 
 	// otherwise loop through all documents
 	} else {
@@ -62,16 +64,22 @@ async function fileLoop(node, core) {
 
 
 async function doCore(core, node) {
-	await core(node);
-	node.scripts.process.runInContext(node.sandbox);
-	await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
-		'$set': node.sandbox.out.setter
-	});
+	try {
+		await core(node);
+		node.scripts.process.runInContext(node.sandbox);
+		await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
+			'$set': node.sandbox.out.setter
+		});		
+
+	} catch(e) {
+		throw(e)
+	}
 }
 
 
 
 async function jarLogin(node) {
+	
 	if(node.scripts.login) {
 		node.scripts.login.runInContext(node.sandbox);
 		debug("Logging in: " + node.sandbox.core.login.url)
@@ -83,6 +91,8 @@ async function jarLogin(node) {
 			debug("ERROR: " + e.message)
 			throw("Login error")
 		}
+	} else {
+		return true;
 	}
 }
 

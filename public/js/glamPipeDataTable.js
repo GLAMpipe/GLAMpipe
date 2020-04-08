@@ -63,7 +63,7 @@ var dataTable = function () {
 	this.render = function (node) {
 
 		self.node = node;
-		//node.loadCollectionKeys(function() {
+		node.loadCollectionKeys(function() {
 			self.keys.all_keys = self.node.data.keys;
 
 			node.loadCollectionData(self.params, function() {
@@ -72,7 +72,7 @@ var dataTable = function () {
 				self.renderCollectionCount();
 				self.setEventListeners();
 			});
-		//});
+		});
 
 	}
 
@@ -171,95 +171,60 @@ var dataTable = function () {
 		return html;
 	}
 
+
+
 	this.checkSuggestionFields = function(fields) {
 		var f = [];
-		for(var field of fields) {
-			for(var s of self.suggestionKeys) {
+		var count = 0;
+
+
+		for(var s of self.suggestionKeys) {
+			for(var field of fields) {
 				if(field.includes(s) && !field.includes("_lang")) {
 					f.push(field)
+					count++;
 				}
 			}
 		}
+
+		if(count > 4) f = f.slice(0,5)
 		return f;
 	}
 
+
+
 	this.getVisibleFields = function (config) {
+		
+		var keys = [];
 
-		self.keys.visible_keys = self.node.data.visible_keys;
-
-		if(self.keys.visible_keys == null) {
-
-			// if there are no visible keys, then try default keys
-			if(self.node.source && self.node.source.views.default_keys) {
-				self.keys.visible_keys = self.node.source.views.default_keys;
-			// if there are no default keys, then visible keys are first 5 keys
-			} else {
-				var suggestions = self.checkSuggestionFields(self.keys.all_keys);
-				self.keys.visible_keys = suggestions;
-
-				if(suggestions.length === 0) {
-					var keys = self.keys.all_keys.slice(0,5);
-					var c = self.keys.all_keys.filter(function(item) {
-						return self.hiddenKeys.indexOf(item) === -1;
-					});
-					self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
-				}
-
+		if(self.node) {
+			// settings input keys (starts with 'inkey_')
+			for(var setting in self.node.source.settings) {
+				if(self.node.source.settings[setting] && setting.includes('inkey_')) keys.push(self.node.source.settings[setting])
+			}
+			// parameter in keys (starts with 'in_'
+			for(var par in self.node.source.params) {
+				if(par.includes('in_')) keys.push(self.node.source.params[par])
+			}
+			// parameter out keys (starts with 'out_'
+			for(var par in self.node.source.params) {
+				if(par.includes('out_')) keys.push(self.node.source.params[par])
 			}
 
+			if(self.keys.visible_keys && Array.isArray(self.keys.visible_keys)) {
+				keys  = keys.concat(self.keys.visible_keys)
+				keys = keys.filter((item, pos) => keys.indexOf(item) === pos) // remove duplicates
+			}
 		}
-		return self.keys.visible_keys;
+		
+		console.log(keys)
+		console.log(self.keys.visible_keys)
+		if(self.keys.visible_keys.length == 0 && keys.length == 0) {
+			keys = self.checkSuggestionFields(self.node.data.keys)
+			
+		}
 
-		//// if node has input/output field, then use them as visible fields
-		//if(config) {
-			//var keys = config.input_keys.concat(config.output_keys);
-			//keys.unshift("action","row");
-
-			//if(self.keys.visible_keys == null) {
-				//self.keys.visible_keys = keys;
-				//return keys;
-			//} else {
-				//// if visible fields are set by the user, make sure that in/out keys
-				//// are included as first items in array
-
-				//var c = self.keys.visible_keys.filter(function(item) {
-					//return keys.indexOf(item) === -1;
-				//});
-
-				//self.keys.visible_keys = keys.concat(c);
-				//return self.keys.visible_keys;
-			//}
-		//}
-
-		//if(!self.keys.visible_keys && !self.keys.all_keys) return [];
-		//// otherwise let the user decide what to see
-		//if(self.keys.visible_keys == null) {
-
-			//// if there are no visible keys, then try default keys
-			//if(self.node.source && self.node.source.views.default_keys) {
-				//self.keys.visible_keys = self.node.source.views.default_keys;
-
-			//// if there are no default keys, then visible keys are first 5 keys
-			//} else {
-				//var keys = self.keys.all_keys.slice(0,5);
-				//var c = self.keys.all_keys.filter(function(item) {
-					//return self.hiddenKeys.indexOf(item) === -1;
-				//});
-				//self.keys.visible_keys = c.slice(0, self.initialVisibleKeysLength);
-			//}
-		//}
-
-
-
-		// add "row"
-		if(self.keys.visible_keys.indexOf("row") === -1)
-			self.keys.visible_keys.splice(0, 0, "row");
-
-
-		if(self.keys.visible_keys.indexOf("action") === -1)
-			self.keys.visible_keys.splice(0, 0, "action");
-
-		return self.keys.visible_keys;
+		return keys;
 
 	}
 
@@ -287,7 +252,7 @@ var dataTable = function () {
 
 		} else {
 			html = "<table id='data' class='documents'><thead><tr>";
-
+			if(self.isSingleRunVisible()) 	html += "<td><div>action</div></td>";
 			// RENDER KEYS
 			for (var i = 0; i < visible_keys.length; i++) {
 				html += "<td><div>" +  visible_keys[i] + "</div></td>";
@@ -311,7 +276,13 @@ var dataTable = function () {
 		return self.params.skip_value + index + 1;
 	}
 
-
+	this.isSingleRunVisible = function() {
+		if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	this.renderDataTable = function (config) {
 
@@ -324,6 +295,11 @@ var dataTable = function () {
 
 		for(var j = 0; j < self.node.data.docs.length; j++) {
 			html += "<tr>";
+			// add single run button 
+			if(self.isSingleRunVisible()) {
+				html += "<td><a href='#' data-id='" + self.node.data.docs[j]._id + "' class='run_single ibutton'>Run for this</a>";
+			}
+			
 			for(var k = 0; k < visible_keys.length; k++) {
 				html += self.renderCell(visible_keys[k], j, self.node.data.docs[j], config)
 			}
@@ -345,29 +321,6 @@ var dataTable = function () {
 		if(data._mp_manual && data._mp_manual.includes(key_name))
 			manual_edit = "manual-edit";
 
-		// "action" column
-		if(key_name == "action") { // "action" is not an actual key
-
-			if(self.node.source.type !== "collection" && self.node.source.type !== "source"  && self.node.source.type !== "view") {
-				html += "<td><a href='#' data-id='" + data._id + "' class='run_single ibutton'>Run for this</a>";
-
-				// if node has action_view.js, then let that append html to "action" cell
-				if(self.node.source.scripts.action_view) {
-					render = new Function('node', 'doc', self.node.source.scripts.action_view);
-					html += render(self.node, data) + "</td>";
-				}
-				html += "</td>";
-			} else if(self.editMode)
-				html += "<td><a href='#' class='delete' data-id='"+data._id+"'>delete</a></td>";
-			else
-				html += "<td></td>";
-
-
-
-		} else if(key_name == "row") { // "row" is not an actual key
-			html = "<td>" + self.getRowIndex(key_index) + "</td>";
-
-		} else {
 
 			if(config && config.input_keys.indexOf(key_name) !== -1)
 				html += "<td class='input'></div>" +  self.renderCellContent(data[key_name], null, manual_edit, key_name)  + "</td>";
@@ -376,7 +329,6 @@ var dataTable = function () {
 			else
 				html += "<td></div>" + self.renderCellContent(data[key_name], null, manual_edit, key_name) + "</td>";
 
-		}
 		return html;
 	}
 
@@ -822,10 +774,11 @@ var dataTable = function () {
 		obj.toggleClass("good");
 		var key = obj.data("name");
 
-		if(obj.hasClass("good"))
+		if(obj.hasClass("good")) {
 			self.keys.visible_keys.push(key);
-		else
+		} else {
 			self.keys.visible_keys.splice(self.keys.visible_keys.indexOf(key), 1);
+		}
 	}
 
 	this.collectVisibleFiels = function () {

@@ -1,6 +1,7 @@
 var requestPromise 	= require('request-promise-native');
 var path 			= require('path');
 var debug 			= require('debug')('GLAMpipe:node');
+var error 			= require('debug')('ERROR');
 const constants 	= require("../../config/const.js");
 
 exports.sendJSON = async function (node) {
@@ -8,7 +9,13 @@ exports.sendJSON = async function (node) {
 	console.log("calling core")
 
 	// OPTIONS.JS - give input to core (core.options)
-	node.scripts.options.runInContext(node.sandbox);
+	try {
+		node.scripts.options.runInContext(node.sandbox);
+	} catch(e) {
+		//error(e)
+		throw(e)
+	}
+	
 	node.sandbox.core.options.resolveWithFullResponse = true;
 	setAcceptHeaders(node, "application/json")
 	
@@ -17,8 +24,14 @@ exports.sendJSON = async function (node) {
 		node.sandbox.core.options.jar = node.sandbox.core.login.jar;
 	}
 	
-	var result = await requestPromise(node.sandbox.core.options);
-	node.sandbox.core.data = result;
+	try {
+		debug(node.sandbox.core.options)
+		var result = await requestPromise(node.sandbox.core.options);
+		debug(result)
+		node.sandbox.core.data = result;
+	} catch(e) {
+		throw(e);
+	}
 }
 
 

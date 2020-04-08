@@ -317,7 +317,7 @@ var glamPipeNode = function (node, gp, display) {
 
 				// execute node's settings.js if exists
 				if(self.source.scripts.ui_settings) {
-					if(!self.source.settings) self.source.ui_settings = {};
+					if(!self.source.settings) self.source.settings = {};
 					var settingsScript = new Function('node', self.source.scripts.ui_settings);
 					settingsScript(self.source);
 				}

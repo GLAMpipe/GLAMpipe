@@ -6,6 +6,7 @@ const json			= require('koa-json')
 const cors			= require('koa-cors')
 const path			= require('path');
 var debugRouter		= require('debug')('ROUTER');
+var debug 			= require('debug')('GLAMpipe');
 var GLAMpipe		= require('./app/glampipe.js');
 var shibboleth		= require('./app/shibboleth.js');
 var collection		= require('./app/new_collection.js');
@@ -41,7 +42,7 @@ app.use(async function handleError(context, next) {
 			console.log('ERROR: ' + error);
 			context.body = {'error':error};
 		}
-		console.log(error.stack);
+		debug(error.stack);
 		
 		
 	}

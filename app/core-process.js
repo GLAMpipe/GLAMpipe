@@ -10,7 +10,7 @@ exports.process = {
 
 	'PDF': {
 		'totext': async function(node) {
-			await coreLoop(node, pdf.toText_test);
+			await fileLoop(node, pdf.toText_test);
 		}
 	},
 	
@@ -24,7 +24,7 @@ exports.process = {
 
 
 // loop through documents
-async function coreLoop(node, core) {
+async function fileLoop(node, core) {
 	const fs = require("fs-extra");
 
 	var bulk = global.db[node.collection].initializeOrderedBulkOp();
@@ -98,7 +98,7 @@ async function scriptLoop(node) {
 		var offset = node.options.offset || 0; 
 		var limit = node.options.limit || 0; 
 		var doc_id = node.settings.doc_id || ''; 
-		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)};
+		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)}; // single run
 		
 		node.sandbox.context.total = await global.db[node.collection].count({});
 		var bulk = global.db[node.collection].initializeUnorderedBulkOp();
