@@ -298,6 +298,36 @@ router.post('/api/v2/nodes/:id/upload', async function(ctx, next) {
 //});
 
 
+
+
+/* ***********************************************************************
+ * 							PIPES
+ * ***********************************************************************
+*/
+
+
+router.put('/api/v2/pipes', async function(ctx) {
+	
+	var pipe = await GP.createPipe(ctx.request.query.name);
+	ctx.body = pipe;
+})
+
+router.post('/api/v2/pipes/:name', async function(ctx) {
+	
+	var pipe = await GP.addNodes2Pipe(ctx.params.name, ctx.body);
+	ctx.body = pipe;
+})
+
+router.get('/api/v2/pipes/:name', async function(ctx) {
+	var pipe = await GP.getPipe(ctx.params.name, ctx.body);
+	ctx.body = pipe;
+})
+
+router.get('/api/v2/pipes', async function(ctx) {
+	var pipes = await GP.getPipes();
+	ctx.body = pipes;
+})
+
 /* ***********************************************************************
  * 							NODE EDITING
  * ***********************************************************************
@@ -420,7 +450,9 @@ router.post('/api/v2/cron/node/:id', async function (ctx) {
 */
 
 router.get('/api/v2/proxy/', async function (ctx) {
-	ctx.body = await proxy.proxyJSON(ctx);
+	
+	var res = await proxy.proxyJSON(ctx);
+	ctx.body = res;
 });
 
 router.post('/api/v2/proxy/', function (ctx) {

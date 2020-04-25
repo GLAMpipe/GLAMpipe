@@ -435,6 +435,46 @@ class GLAMpipe {
 		return template;
 	}
 
+
+/* ***********************************************************************
+ * 							PIPES
+ * ***********************************************************************
+*/
+
+
+	async createPipe(name) {
+		// check that id is not used
+		if(name) {
+			var doc = await db.collection('gp_pipes').findOne({'name': name});
+			if(doc) {
+				throw("Pipe called " + name + " exists")
+			} else {
+				if(!doc) await db.collection("gp_pipes").insert({"name":name, nodes: []});
+			}
+			return name;
+		} else {
+			throw("You must give pipe name as url parameters (?name=your_pipe_name )")
+		}
+		
+	}
+
+
+	async addNodes2Pipe(name, node_arr) {
+		try {
+			await db.collection("gp_pipes").update({"name":name}, {$set: {nodes: node_arr}});
+			return db.collection('gp_pipes').findOne({'name': name});
+		} catch(e) {
+			throw("Pipe update failed: " + e)
+		}
+	}
+	
+	async getPipe(name) {
+		return db.collection('gp_pipes').findOne({'name': name});
+	}
+	
+	async getPipes() {
+		return db.collection('gp_pipes').find({});
+	}
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************

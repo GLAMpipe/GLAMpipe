@@ -1,3 +1,51 @@
+TODO:
+FIX DSpace web source (login, options must be called properly)
+- single run
+- WEB export core
+
+- re-generate schema should refresh keys
+- 
+- node run register /stop functionality / force
+- mark fields that node produces, also out.setter
+- remove node dir on node remove
+
+
+- File downloads
+- CLD core
+- user auth
+
+- custom node functionality
+- forked node functionality
+- allow labeling of collections
+
+- shibboleth
+- devmode
+
+
+- facet UI should warn about '|' in data values
+
+DONE:
+- PDF core
+- script node
+- allow labeling of nodes
+- facet and search queries
+- facet view
+- add "views" section to UI
+- finalize socket.io communication (messages must include project and node uuids) OK
+- csv core OK
+- node dirs
+
+
+FIXED:
+- OK node settings are not remembered 
+
+
+/pipe
+collection of nodes, that are executed one after one. Nodes do not have to be from same collection or even project.
+- title
+- id
+- nodes
+Settings with underscore are lifted to UI (are not stored in settings)
 
 What is GLAMpipe?
 High Level Data Processing and Storage API - with a GUI
@@ -16,40 +64,7 @@ worker-farm -> huge performance boost!
 - makes communication a little bit more complex. -> Generic process counter is needed, child processes are aware only on they part
 
 
-TODO:
-- node run register /stop functionality / force
-- mark fields that node produces, also out.setter
-- remove node dir on node remove
 
-- WEB export core
-- File downloads
-- CLD core
-- user auth
-
-- custom node functionality
-- forked node functionality
-- allow labeling of collections
-
-- shibboleth
-- devmode
-
-- re-generate schema should refresh keys
-- facet UI should warn about '|' in data values
-
-DONE:
-- PDF core
-- script node
-- allow labeling of nodes
-- facet and search queries
-- facet view
-- add "views" section to UI
-- finalize socket.io communication (messages must include project and node uuids) OK
-- csv core OK
-- node dirs
-
-
-FIXED:
-- OK node settings are not remembered 
 
 
 
