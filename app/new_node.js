@@ -127,14 +127,16 @@ class Node {
 				}
 				for(var uifile in this.source.views) {
 					var file = path.join(this.source.project_dir, uifile) + '.html'
-					await fs.writeFile(file, this.source.scripts[uifile]);
+					await fs.writeFile(file, this.source.views[uifile]);
 				}
 				
 				var file = path.join(this.source.project_dir, 'params.json')
 				await fs.writeFile(file, JSON.stringify(this.source.params));
 				
-				var file = path.join(this.source.project_dir, 'settings.json')
-				await fs.writeFile(file, JSON.stringify(this.source.settings));
+				if(this.source.settings) {
+					var file = path.join(this.source.project_dir, 'settings.json')
+					await fs.writeFile(file, JSON.stringify(this.source.settings));
+				}
 				
 				// copy 'public' directory from node source to node's project directory (html + css + js)
 				try {
@@ -262,6 +264,7 @@ class Node {
 
 	getPublicIndex(ctx) {
 		var source = path.join(this.source.project_dir, 'public', 'index.html')
+		console.log(source)
 		const fs = require('fs-extra');
 		const src = fs.createReadStream(source);
 		ctx.response.set("content-type", "text/html");

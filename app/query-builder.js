@@ -5,10 +5,19 @@ var exports 	= module.exports = {};
 
 exports.search = function (params) {
 
-	var skipped = ["mongoquery", "keys", "nokeys", "skip", "limit", "sort", "reverse", "op"]; 	// skip search options
-	//var operators = exports.operators(req);					// field spesific operators (e.g. "&op=dc_type:or")
+	var skipped = ["mongoquery", "keys", "nokeys", "skip", "limit", "sort", "reverse", "op", "rev_op"]; 	// skip search options
+	var operators = exports.operators(params);					// field spesific operators (e.g. "&op=dc_type:or")
 	//var query = exports.filters(req, operators, skipped);
 	//var query = exports.createSearchQuery(params, skipped);
+	
+	// remove reserved keys from query
+	var cleanParams = {}
+	for(var p in params) {
+		if(!skipped.includes(p)) { 
+			cleanParams[p] = params[p];
+		}
+	}
+	
 	var query = {}
 	if(params.mongoquery) {
 		try {
@@ -17,9 +26,8 @@ exports.search = function (params) {
 			throw(new Error('Query is invalid. It must be a JSON'))
 		}
 	} else {
-		query = exports.createSearchQuery(params, skipped);
+		query = exports.createSearchQuery(cleanParams, operators);
 	}
-
 
 	var limit = parseInt(params.limit);
 	if (limit < 0 || isNaN(limit))
@@ -125,55 +133,82 @@ exports.filters = function (req, operators, skip, as_array) {
 }
 
 
-exports.operators = function (req) {
+exports.operators = function (params) {
 	var operators = {};
-	if(req.query.op && Array.isArray(req.query.op)) {
-		req.query.op.forEach(function(op) {
-			var splitted = op.split(":");
-			if(splitted.length === 2) {
-				if(splitted[1] === "or") 
-					operators[splitted[0]] = "$in";
-				else if(splitted[1] === "and") 
-					operators[splitted[0]] = "$all";
+	if(params.op) {
+		if(Array.isArray(params.op)) {
+			for(var op of params.op) {
+				split(op)
 			}
-		})
-	} 
-	//console.log("OPERATORS:\n" + util.inspect(operators, false, 4, true));
+		} else {
+			split(params.op)
+		}
+	}
+	
+	function split(op) {
+		var splitted = op.split(":");
+		if(splitted.length === 2) {
+			if(splitted[1] === "or") 
+				operators[splitted[0]] = "$in";
+			else if(splitted[1] === "and") 
+				operators[splitted[0]] = "$all";
+			else if(splitted[1] === "not") 
+				operators[splitted[0]] = "$not";
+		}
+	}
+	console.log("OPERATORS:\n" + util.inspect(operators, false, 4, true));
 	return operators;
 }
 
-exports.createSearchQuery = function(params, skip) {
+exports.opParam = function(value) {
+	var splitted = value.split(":");
+	if(splitted.length === 2 && splitted[0] === 'regex') {
+		return {$regex: splitted[1]}
+	} else {
+		return value;
+	}
+}
+
+exports.createSearchQuery = function(params, operators) {
+	console.log("createsearchquery")
+	console.log(Object.keys(params))
+	console.log(params)
+
+	if(Object.keys(params).length == 0) return {};
+
 	
 	var query = {};
-	var query_fields = [];
-	var query_values = [];
-	
-	// all arrays are search terms
-	for(var param in params) {
-		if(!skip.includes(param)) {
-			console.log(param)
-			var splitted = params[param].split('|')
-			if(splitted.length > 1) {
-				var ands = [];
-				for(var i = 0; i < splitted.length; i++) {
-					var search = {};
-					search[param] = {$regex:splitted[i]};
-					//search[param] = {$regex:splitted[i], $options: 'i'};
-					//search[param] = splitted[i];
-					if(splitted[i]) {
-						ands.push(search);
-					}
+	for(param in params) {
+		console.log(param)
+		if(Array.isArray(params[param])) {
+		// create an AND query if there are several query fields
+			var ands = [];
+			if(operators[param]) {
+				for(var value of params[param]) {
+					ands.push(exports.opParam(decodeURIComponent(value)))
 				}
-				query.$and = ands;			
+				query[param] = {};
+				query[param][operators[param]] = ands;
 			} else {
-				if(splitted[0]) {
-					query[param] =  {$regex:splitted[0]};
-					//query[param] =  {$regex:splitted[0], $options: 'i'};
-					//query[param] =  splitted[0];
+				for(var value of params[param]) {
+					var search = {};
+					search[param] = value;
+					ands.push(search);
 				}
+				query.$and = ands;
+			}
+			
+		// otherwise create query for one field
+		} else {
+			if(operators[param] && operators[param] === '$not') {
+				if(params[param] === '*') query[param] =  {$not:{$regex: '\S'}}; // match any non whitespace character
+				else query[param] =  {$ne: exports.opParam(decodeURIComponent(params[param]))};
+			} else {
+				if(params[param] === '*') query[param] =  {$regex: '\S'}; // match any non whitespace character
+				else query[param] =  exports.opParam(decodeURIComponent(params[param]));
 			}
 		}
 	}
-
+console.log(query)
 	return query;
 }

@@ -83,10 +83,19 @@ exports.getDocs = async function(collection_name, query) {
 	var search = buildquery.search(query);
 	debug(JSON.stringify(search))
 
-	return await global.db[collection_name].findAsCursor(
+	var total = await global.db[collection_name].findAsCursor(
+		search.query, 
+		search.keys
+	  ).count();
+
+	var result = {total: total, data: []}
+
+	result.data = await global.db[collection_name].findAsCursor(
 		search.query, 
 		search.keys
 	  ).sort(search.sort).skip(search.skip).limit(search.limit).toArray();
+	  
+	return result;
 	
 }
 

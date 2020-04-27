@@ -72,6 +72,9 @@
     "worker-farm": "^1.7.0",
     "xml-formatter": "^1.1.0"
   },
+  "nodemonConfig": {
+    "ignore": ["glampipe-data"]
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",

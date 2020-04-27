@@ -285,7 +285,6 @@ router.post('/api/v2/nodes/:id/settings', async function (ctx) {
 // upload file
 router.post('/api/v2/nodes/:id/upload', async function(ctx, next) {
 
-	var fs = require("fs")
 	var node = await GP.getNode(ctx.params.id);
 	var upload = await node.upload(ctx)
 	ctx.body = upload;
@@ -355,7 +354,7 @@ router.put('/api/v2/nodes/:id/scripts/:script', async function (ctx) {
 
 router.get('/api/v2/collections/:collection/docs', async function (ctx) {
 	var docs = await collection.getDocs(ctx.params.collection, ctx.request.query);
-	ctx.body = {"data": docs};
+	ctx.body = docs;
 });
 
 router.post('/api/v2/collections/:collection/docs', async function (ctx) {
