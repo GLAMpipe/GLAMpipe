@@ -908,6 +908,9 @@ var glamPipe = function () {
 
 	this.chooseCollection = function(index) {
 		self.currentCollectionSet = parseInt(index)
+		var col = new GLAMPipeCollection(self, self.collections[self.currentCollectionSet], self.display);
+		self.display.render(col)
+			
 		self.setCollectionCounter();
 		self.currentCollection = self.collections[self.currentCollectionSet];
 		self.pickedCollectionId = self.currentCollection.name;

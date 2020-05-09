@@ -20,6 +20,9 @@ exports.export = {
 	},
 	'file': {
 		'csv': async function(node) {
+			await CSVfileLoop(node);
+		},
+		'JSON': async function(node) {
 			await fileLoop(node);
 		}
 	}
@@ -46,6 +49,23 @@ async function exportLoop(core, node) {
 
 
 async function fileLoop(node, core) {
+	var fs = require('fs');
+	var path = require('path');
+	if(!node.source.settings.required_file || node.source.settings.required_file == '') throw("File name missing!")
+	var filePath = path.join(node.source.project_dir, 'files', node.source.settings.required_file);
+	const file = fs.createWriteStream(filePath);
+	const cursor = global.db[node.collection].findAsCursor({});	
+	while(await cursor.hasNext()) {
+		node.sandbox.context.doc = await cursor.next();
+		node.scripts.process.runInContext(node.sandbox);
+		file.write(node.sandbox.out.value);
+	}	
+	file.end();
+}
+
+
+
+async function CSVfileLoop(node, core) {
 	var fs = require('fs');
 	var path = require('path');
 	var csvWriter 	= require('csv-write-stream');

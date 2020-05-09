@@ -215,14 +215,17 @@ var dataTable = function () {
 				keys  = keys.concat(self.keys.visible_keys)
 				keys = keys.filter((item, pos) => keys.indexOf(item) === pos) // remove duplicates
 			}
+			
+			if(keys.length == 0) {
+				keys = self.node.data.keys.slice(2,5)
+			}
 		}
 		
-		console.log(keys)
-		console.log(self.keys.visible_keys)
+
 		if(self.keys.visible_keys.length == 0 && keys.length == 0) {
 			keys = self.checkSuggestionFields(self.node.data.keys)
-			
 		}
+	
 
 		return keys;
 
