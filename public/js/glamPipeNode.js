@@ -178,6 +178,7 @@ var glamPipeNode = function (node, gp, display) {
 
 
 	this.openRender = function() {
+		$("data-workspace projectsettings").hide();
 		$(".node").removeClass("current");
 		$(".node[data-id='" + self.source._id + "']").addClass("current");
 		if(self.source.type == "collection") {

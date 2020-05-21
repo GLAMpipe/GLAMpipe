@@ -181,7 +181,7 @@ class Node {
 		}
 		
 		// update schema
-		//await schema.createSchema(this.collection);
+		await schema.createSchema(this.collection);
 
 		// remove node from project
 		var res = await global.db.collection("gp_nodes").remove({_id:mongoist.ObjectId(this.source._id)});

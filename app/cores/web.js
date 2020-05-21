@@ -2,6 +2,7 @@ var requestPromise 	= require('request-promise-native');
 var path 			= require('path');
 var debug 			= require('debug')('GLAMpipe:node');
 var error 			= require('debug')('ERROR');
+var schema 			= require('./../new_schema.js');
 const constants 	= require("../../config/const.js");
 
 exports.sendJSON = async function (node) {
@@ -109,6 +110,7 @@ exports.getJSON = async function (node) {
 			await global.db[node.collection].insert(node.sandbox.out.value);
 		}
 	}
+	await schema.createSchema(node.collection);
 	node.scripts.finish.runInContext(node.sandbox);
 
 }
