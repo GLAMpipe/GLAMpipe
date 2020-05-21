@@ -44,8 +44,9 @@ exports.read = async function (node) {
 	var parser = parse(settings)
 	
 	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
-	var options = { db: db_string, collection: node.collection }
-	var streamToMongo = require('stream-to-mongo')(options);
+	var options = { dbURL: db_string, collection: node.collection }
+	var streamToMongoDB = require('stream-to-mongo-db').streamToMongoDB;
+	const mongoStream = streamToMongoDB(options);
 
 	parser.on('data', function(c){
 		count++;
@@ -72,7 +73,7 @@ exports.read = async function (node) {
 
 	// promise	
 	var end = new Promise(function(resolve, reject) {
-		streamToMongo.on('finish', () => {
+		mongoStream.on('finish', () => {
 			node.scripts.finish.runInContext(node.sandbox);
 			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
@@ -80,7 +81,7 @@ exports.read = async function (node) {
 		parser.on('error', reject); 
 	});
 
-	input.pipe(parser).pipe(transformer).pipe(streamToMongo);
+	input.pipe(parser).pipe(transformer).pipe(mongoStream);
 
 	return end;
 	
