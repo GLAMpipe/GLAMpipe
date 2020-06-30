@@ -16,7 +16,7 @@
     "csv-write-stream": "^2.0.0",
     "encoding": "^0.1.12",
     "express": "^4.13.4",
-    "express-jwt": "^5.3.0",
+    "express-jwt": "^6.0.0",
     "express-session": "^1.15.0",
     "file-type": "^5.2.0",
     "flat": "^2.0.0",
