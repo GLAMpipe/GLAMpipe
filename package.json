@@ -42,7 +42,7 @@
     "requestretry": "^1.12.2",
     "rimraf": "^2.6.1",
     "sha1": "^1.1.1",
-    "socket.io": "^1.4.5",
+    "socket.io": "^2.4.0",
     "socket.io-client": "^1.5.1",
     "stream-splitter": "^0.3.2",
     "stream-to-mongo": "^0.1.5",
