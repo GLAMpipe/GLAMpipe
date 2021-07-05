@@ -29,7 +29,7 @@ var glamPipeNode = function (node, gp, display) {
 		console.log("RUNNING node with settings: ", self.source.settings);
 		// TÄHÄN busy
 		$("[data-id='"+self.source._id+"']").addClass("busy");
-	
+
 		post(self.baseAPI + "/nodes/" + self.source._id + "/start", self.source.settings, function(data) {
 			console.log(data);
 			if(data.error) {
@@ -309,7 +309,7 @@ var glamPipeNode = function (node, gp, display) {
 				if(data.error)
 					alert(data.error);
 				var options = [];
-				
+
 				if(data.keys) {
 					for(var i = 0; i < data.keys.length; i++) {
 						options.push("<option>" + data.keys[i] + "</option>");
@@ -383,7 +383,7 @@ var glamPipeNode = function (node, gp, display) {
 			}
 		}
 		// script node is a special case with its editor
-		if(self.source.nodeid == "process_script" && typeof(editor) !== 'undefined' && data.settings['js']) editor.setValue(data.settings['js']);		
+		if(self.source.nodeid.includes('script') && typeof(editor) !== 'undefined' && data.settings['js']) editor.setValue(data.settings['js']);
 	}
 
 
@@ -447,7 +447,7 @@ var glamPipeNode = function (node, gp, display) {
 		});
 
 		// script node requires sepcial handling
-		if(self.source.nodeid == "process_script" && editor) settings['js'] = editor.getValue();
+		if(self.source.nodeid.includes("script") && editor) settings['js'] = editor.getValue();
 
 		// finally read the node description
 		var desc = $(".node-description-value").val();

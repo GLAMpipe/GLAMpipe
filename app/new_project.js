@@ -1,4 +1,3 @@
-var async 		= require('async');
 var path 		= require('path');
 var debug 		= require('debug')('GLAMpipe');
 var error 		= require('debug')('ERROR');
@@ -12,38 +11,44 @@ const GP 		= require("../config/const.js");
 
 
 // create project
-exports.create = async function(title) {
+exports.create = async function(title, description) {
 
-	debug("creating project", title);
+	debug("creating project", title, description);
 	var title_dir = cleanDirName(title);
 	if(!title_dir) return Promise.reject("Empty project name!")
-	
+
 	try {
 		// update project count and create project. Project count is *permanent* counter
 		var incr = await global.db.collection('gp_settings').update({}, {$inc: { project_count: 1} });
 		var meta = await global.db.collection('gp_settings').findOne({});
-		
+
 		var dir = title_dir.substring(0,60).toLowerCase(); // limit 60 chars
 		dir = dir.replace(/ /g,"_");
 		dir = "p" + meta.project_count + "_" + dir;
-		
+
+		var today = new Date()
+		var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()
+		var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds()
+
 		var project = {
 			"_id": dir,
 			"title": title,
-			"description": "",
+			"created": date + ' ' + time,
+			"description": description,
 			"dir": dir,
 			"collection_count": 0,
 			"node_count":0,
+			"star": "zzz",
 			"schemas": [],
-			"owner": [] 
+			"owner": []
 		};
-		
+
 		var result = await global.db.collection('gp_projects').insert(project);
-		
+
 		// create project directories
 		var projectPath = path.join(global.config.projectsPath, dir)
 		await createProjectDir(projectPath);
-		
+
 		return result;
 
 	} catch(e) {
@@ -78,7 +83,7 @@ exports.remove = async function (doc_id) {
 	}
 
 	// remove project directory
-	try {		
+	try {
 		await deleteProjectDir(project);
 	} catch(e) {
 		error("could not delete project directory!" + project.dir);
@@ -116,14 +121,14 @@ exports.getProject = async function(project_id) {
 
 
 exports.editProject = async function(project_id, body) {
-	const allowed = ['title', 'description']; // only these fields are editable
+	const allowed = ['title', 'description', 'star']; // only these fields are editable
 	var edit = {}
 	for(var key in body) {
 		if(allowed.includes(key) && typeof body[key] == "string") {
 			edit[key] = body[key];
 		}
 	}
-	
+
 	if(Object.keys(edit).length) {
 		try {
 			var p = await global.db.collection('gp_projects').update({_id: project_id}, {$set: edit});
@@ -159,7 +164,7 @@ exports.addCollection = async function(collection_name) {
 function cleanDirName(title, project_count) {
 	var clean_dir = title.toLowerCase();
 	clean_dir = clean_dir.replace(/[^a-z0-9- ]/g,"");
-	clean_dir = clean_dir.replace(/[ ]/g,"_");	
+	clean_dir = clean_dir.replace(/[ ]/g,"_");
 	return clean_dir;
 }
 
@@ -172,17 +177,17 @@ function createProjectDir(dir) {
 			if(err) {
 				if(err.code === "EEXIST") reject()
 				else reject(err)
-			} 
+			}
 			else resolve()
 		})
-	})	
+	})
 }
 
 
 
 async function deleteProjectDir(project) {
 
-	var rmrf = require("rmrf");	
+	var rmrf = require("rmrf");
 	let project_path = path.join(global.config.dataPath, "projects", project.dir);
 	if(project_path && project_path.includes(global.config.dataPath)) {
 		debug("removing " + project_path);
@@ -193,7 +198,7 @@ async function deleteProjectDir(project) {
 
 
 function createProjectSubDirs(projectPath) {
-	var dirs = ["source", "process", "export", "view"]; // these dirs are created for every project	
+	var dirs = ["source", "process", "export", "view"]; // these dirs are created for every project
 	for(var i = 0; i < dirs.length; i++) {
 		createProjectDir(path.join(projectPath, dirs[i]));
 	}

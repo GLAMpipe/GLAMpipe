@@ -11,7 +11,7 @@ var GLAMpipe		= require('./app/glampipe.js');
 var shibboleth		= require('./app/shibboleth.js');
 var collection		= require('./app/new_collection.js');
 var proxy			= require('./app/proxy.js');
- 
+
 var app				= new Koa();
 var router			= new Router();
 var GP 				= new GLAMpipe();
@@ -20,7 +20,7 @@ global.register = {};
 
 //Set up body parsing middleware
 app.use(bodyParser({
-   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},   
+   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},
    multipart: true,
    urlencoded: true
 }));
@@ -43,8 +43,8 @@ app.use(async function handleError(context, next) {
 			context.body = {'error':error};
 		}
 		debug(error.stack);
-		
-		
+
+
 	}
 });
 
@@ -63,7 +63,7 @@ app.use(async (ctx, next) => {
 	if ('/' == ctx.path) return serve(ctx, 'index.html', { root: __dirname + '/public' });
 	else await next();
 })
-	
+
 // auth
 app.use(async (ctx, next) => {
 	if(global.config.authentication === "shibboleth") {
@@ -73,7 +73,7 @@ app.use(async (ctx, next) => {
 			ctx.status = 401;
 			ctx.body = {'error': ''};
 		}
-		
+
 	} else if(global.config.authentication === "shibboleth") {
 			if(ctx.get(global.config.shibboleth.headerId)) {
 				var shib_user = ctx.get(global.config.shibboleth.headerId);
@@ -126,6 +126,13 @@ router.get('/api/v2/status', function (ctx) {
 	ctx.body = {"status":"ok"};
 });
 
+router.get('/api/v2/user', async function (ctx) {
+	ctx.body = await GP.getCurrentUser();
+});
+
+router.put('/api/v2/user/fields', async function (ctx) {
+	ctx.body = await GP.setUserCollectionFields(ctx.request.body.collection, ctx.request.body.fields);
+});
 
 /* ***********************************************************************
  * 							PROJECTS
@@ -133,7 +140,7 @@ router.get('/api/v2/status', function (ctx) {
 */
 
 router.get('/api/v2/projects', async function (ctx, next) {
-	ctx.body = await GP.getProjects();
+	ctx.body = await collection.getDocs('gp_projects', ctx.request.query);
 });
 
 
@@ -143,8 +150,8 @@ router.get('/api/v2/projects/:id', async function (ctx) {
 });
 
 router.post('/api/v2/projects', async function (ctx) {
-	var project = await GP.createEmptyProject(ctx.request.body.title);
-	var collection = await GP.createCollection("mydata", project._id);
+	var project = await GP.createEmptyProject(ctx.request.body.title, ctx.request.body.description);
+	var collection = await GP.createCollection(ctx.request.body.collection, project._id);
 	ctx.body = project;
 });
 
@@ -167,7 +174,7 @@ router.delete('/api/v2/projects/:id', async function (ctx) {
 router.get('/api/v2/nodes/:id/files/:file', async function (ctx) {
 	var node = await GP.getNode(ctx.params.id);
 	await node.getFile(ctx, ctx.params.file);
-	
+
 });
 
 
@@ -186,7 +193,7 @@ router.get('/api/v2/repository/nodes/:nodeid', async function (ctx) {
 
 // list of nodes available
 router.get('/api/v2/repository/nodes', async function (ctx) {
-	ctx.body = await GP.getDocs('gp_repository', {});
+	ctx.body = await GP.getDocs('gp_repository', ctx.request.query);
 });
 
 router.get('/api/v2/options', async function (ctx) {
@@ -212,8 +219,6 @@ router.get('/api/v2/repository/reload', async function (ctx) {
  * ***********************************************************************
 */
 
-
-// get by label or UUID
 router.get('/api/v2/register', async function (ctx) {
 	ctx.body = global.register;
 });
@@ -232,8 +237,8 @@ router.get('/api/v2/nodes/:id', async function (ctx) {
 });
 
 // create
-router.post('/api/v2/nodes/:id', async function (ctx) {
-	var node = await GP.createNode(ctx.params.id, ctx.request.body.params, ctx.request.body.collection, ctx.request.body.project);
+router.post('/api/v2/nodes', async function (ctx) {
+	var node = await GP.createNode(ctx.request.body.nodeid, ctx.request.body.params, ctx.request.body.collection, ctx.request.body.project);
 	ctx.body = node;
 });
 
@@ -306,13 +311,13 @@ router.post('/api/v2/nodes/:id/upload', async function(ctx, next) {
 
 
 router.put('/api/v2/pipes', async function(ctx) {
-	
+
 	var pipe = await GP.createPipe(ctx.request.query.name);
 	ctx.body = pipe;
 })
 
 router.post('/api/v2/pipes/:name', async function(ctx) {
-	
+
 	var pipe = await GP.addNodes2Pipe(ctx.params.name, ctx.body);
 	ctx.body = pipe;
 })
@@ -379,12 +384,12 @@ router.delete('/api/v2/collections/:collection/docs/:id', async function (ctx) {
 
 router.get('/api/v2/collections/:collection/fields', async function (ctx) {
 	const schema = await GP.getSchema(ctx.params.collection);
-	if(schema) ctx.body = schema; else ctx.body = {}; 
+	if(schema) ctx.body = schema; else ctx.body = {};
 });
 
 router.get('/api/v2/collections/:collection/schema', async function (ctx) {
 	const schema = await GP.getSchema(ctx.params.collection);
-	if(schema) ctx.body = schema; else ctx.body = {}; 
+	if(schema) ctx.body = schema; else ctx.body = {};
 });
 
 router.get('/api/v2/collections/:collection/count', async function (ctx) {
@@ -408,7 +413,7 @@ router.get('/api/v2/collections', async function (ctx) {
 })
 
 router.post('/api/v2/collections', async function (ctx) {
-	var collection 	= await GP.createCollection(ctx.request.body.title, ctx.request.query.project);
+	var collection 	= await GP.createCollection(ctx.request.body.title, ctx.request.body.project);
 	ctx.body = collection;
 })
 
@@ -419,7 +424,7 @@ router.delete('/api/v2/collections/:collection', async function (ctx) {
 
 router.put('/api/v2/collections/:collection/schema', async function (ctx) {
 	const schema = await GP.createSchema(ctx.params.collection);
-	if(schema) ctx.body = schema; else ctx.body = {}; 
+	if(schema) ctx.body = schema; else ctx.body = {};
 });
 
 /* ***********************************************************************
@@ -448,8 +453,8 @@ router.post('/api/v2/cron/node/:id', async function (ctx) {
  * ***********************************************************************
 */
 
-router.get('/api/v2/proxy/', async function (ctx) {
-	
+router.get('/api/v2/proxy', async function (ctx) {
+
 	var res = await proxy.proxyJSON(ctx);
 	ctx.body = res;
 });
@@ -503,9 +508,7 @@ GP.init(server).then(function() {
 	.use(router.allowedMethods());
 
 	server.listen(global.config.port);
-	
+
 }).catch(function(e) {
 	console.log(e)
 });
-
-

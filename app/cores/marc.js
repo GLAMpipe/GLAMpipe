@@ -7,7 +7,7 @@ var path 		= require("path");
 exports.read = async function (node) {
 
 	var fs = require('fs');
-	var MARC = require('marcjs');
+	const { Marc } = require('marcjs');
 	var transform = require('stream-transform');
 	var count = 0;
 
@@ -17,22 +17,25 @@ exports.read = async function (node) {
 	}
 
 	// remove previous entries by this node
-	var query = {}; 
+	var query = {};
 	query[constants.source] = node.uuid;
 	await global.db[node.collection].remove(query);
 
 	//var file = path.join(global.config.dataPath, "tmp", node.params.filename);
 	var connection_string = global.db_string;
 	var db_string = "mongodb://" + connection_string;
-	
+
 	var file = path.join(node.source.project_dir, 'files', node.source.params.filename);
-	let reader = MARC.stream(fs.createReadStream(file),'Iso2709');
+	let reader = Marc.stream(fs.createReadStream(file), 'Iso2709');
+	//let reader = MARC.stream(fs.createReadStream(file),'Iso2709');
 	//let writable = MARC.stream(process.stdout, 'mij');
-	
+
 
 	//var input = fs.createReadStream(file, {encoding: node.settings.encoding});
-	var options = { db: db_string, collection: node.collection }
-	var streamToMongo = require('stream-to-mongo')(options);
+	var options = { dbURL: db_string, collection: node.collection }
+	var streamToMongoDB = require('stream-to-mongo-db').streamToMongoDB;
+	const streamToMongo = streamToMongoDB(options);
+	//var streamToMongo = require('stream-to-mongo-db')(options);
 
 	reader.on('data', function(c){
 		count++;
@@ -53,23 +56,23 @@ exports.read = async function (node) {
 		//console.log(record.as('mij'))
 		var r = JSON.parse(record.as('mij'));
 		r[constants.source] = node.uuid; // mark source node uuid to records
-		return r; 
+		return r;
 	});
 
 
 
-	// promise	
+	// promise
 	var end = new Promise(function(resolve, reject) {
 		streamToMongo.on('finish', () => {
 			node.scripts.finish.runInContext(node.sandbox);
 			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
 		})
-		//parser.on('error', reject); 
+		//parser.on('error', reject);
 	});
 
 	reader.pipe(transformer).pipe(streamToMongo)
 
 	return end;
-	
+
 }

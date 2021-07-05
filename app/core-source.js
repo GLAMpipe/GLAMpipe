@@ -23,10 +23,11 @@ exports.source = {
 		},
 
 		"CSV": async function(node) {
-			// init.js 
+			// init.js
 			debug(node.sandbox.core.options)
 			try {
 				await web.getAndSaveFile(node)
+				debug("CSV fetched");
 				// parse csv
 				node.source.params.filename = node.sandbox.core.filename;
 				debug("entering csv.read");
@@ -34,10 +35,11 @@ exports.source = {
 				debug("Done csv.read");
 			} catch(e) {
 				console.log("web csv failed")
+				node.sandbox.out.say('error', 'Import failed ' + e)
 			}
 		},
 		"form": async function(node) {
-			// init.js 
+			// init.js
 			debug(node.sandbox.core.options)
 			try {
 				await form.create(node);
@@ -81,7 +83,3 @@ exports.source = {
 		}
 	}
 }
-
-
-
-

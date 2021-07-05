@@ -27,15 +27,15 @@ var glamPipe = function () {
 	// MAIN PAGE (projects)
 	this.getProjectTitles = function (div) {
 
-		$.getJSON(self.baseAPI + "/projects/titles", function(data) {
+		$.getJSON(self.baseAPI + "/projects", function(data) {
 			$(div).empty();
-			data.sort(compare);
+			//data.sort(compare);
 
-			for(var i = 0; i< data.length; i++) {
-				var listOption = "<div data-id=" + data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
-				listOption += "<a href='" + self.uiPath + "project/" + data[i]._id + "'>\n";
+			for(var i = 0; i< data.data.length; i++) {
+				var listOption = "<div data-id=" + data.data[i]._id + " class='del wikiglyph wikiglyph-cross icon boxicon' aria-hidden='true'></div>";
+				listOption += "<a href='" + self.uiPath + "project/" + data.data[i]._id + "'>\n";
 				listOption += "<div class='listoption'>\n";
-				listOption += "<p class='listtitle'>" + data[i].title + "</p>\n";
+				listOption += "<p class='listtitle'>" + dat.data[i].title + "</p>\n";
 				//listOption += "<p class='listtext'>" + data[i].description + "</p>\n";
 				listOption += "</div></a>\n";
 				$(div).append(listOption);
@@ -46,14 +46,14 @@ var glamPipe = function () {
 	this.getProjects= function (div) {
 
 		$(".settingstitle").text("All projects");
-		$.getJSON(self.baseAPI + "/projects", function(data) {
+		$.getJSON(self.baseAPI + "/projects?limit=100&sort=created&reverse=1", function(data) {
 			self.projects = data;
 			$(div).empty();
 			//data.sort(compare);
 			html = "<table><thead><tr><th>title</th><th>description</th><th>imports from</th><th>collections</th><th>owners</th><th>action</th></tr></thead>";
 
-			for(var i = 0; i< data.length; i++) {
-				html += self.genProjectRow(data[i]);
+			for(var i = 0; i< data.data.length; i++) {
+				html += self.genProjectRow(data.data[i]);
 
 			}
 			$(div).append("</tr>" + html + "</table>");
@@ -476,7 +476,7 @@ var glamPipe = function () {
 
 			if(typeof project !== "undefined") {
 				var nodes = project.nodes;
-				
+
 				var display = new dataTable(); // default data renderer
 				self.display = display;
 				self.collections = project.collections;
@@ -497,7 +497,7 @@ var glamPipe = function () {
 				self.setCollectionCounter();
 				self.renderBreadCrumb();
 				self.renderCollectionSet(cb);
-				
+
 			}
 		})
 	}
@@ -505,7 +505,7 @@ var glamPipe = function () {
 
 	this.getCollectionFromURL = function() {
 		const urlParams = new URLSearchParams(window.location.search);
-		var c = urlParams.get('collection'); 
+		var c = urlParams.get('collection');
 		var index = 0;
 		for(var col of self.collections) {
 			if(col.name === c) {
@@ -753,7 +753,7 @@ var glamPipe = function () {
 
 	// renders node boxes sorted by types (source, process etc.)
 	this.renderCollectionSet = function (cb) {
-		
+
 		if(!self.currentCollection) {
 			console.log("no current collection")
 			$("pipe .collection").empty().append("<a class='add-collection' title='Add new collection' href='#'> Add Collection</a>");
@@ -910,7 +910,7 @@ var glamPipe = function () {
 		self.currentCollectionSet = parseInt(index)
 		var col = new GLAMPipeCollection(self, self.collections[self.currentCollectionSet], self.display);
 		self.display.render(col)
-			
+
 		self.setCollectionCounter();
 		self.currentCollection = self.collections[self.currentCollectionSet];
 		self.pickedCollectionId = self.currentCollection.name;
@@ -1140,14 +1140,14 @@ var glamPipe = function () {
 				//}
 			//}
 	   //});
-		
+
 		var data= {}
 		data.params = params;
 		data.params.filename = data.filename;
 		data.params.mimetype = data.mimetype;
 		data.project = self.currentProject;
 		data.collection = self.currentCollection.name;
-					
+
 		post(self.baseAPI + "/nodes/" + node.nodeid, data, function(nodedata) {
 			console.log('created upload node');
 			$.ajax({
@@ -1161,7 +1161,7 @@ var glamPipe = function () {
 				headers: {"Authorization": "Bearer " + localStorage.getItem("token")},
 				success: function(nodedata) {self.loadProject();}
 			})
-			
+
 		});
 
 	}

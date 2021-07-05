@@ -27,19 +27,19 @@ const GP 		= require("../config/const.js");
  * - settings {}
  * - source {}
  * - sandbox {}
- 
+
  * - out
- 
+
  * - project
  * - collection
  * - _id
- * 
+ *
  */
 
 
 class Node {
 	constructor() {
-		
+
 	}
 
 	async loadFromRepository(nodeid) {
@@ -52,29 +52,38 @@ class Node {
 	}
 
 
-	async loadFromProject(id) {
-		
+	async loadFromProject(id, allow_devmode) {
+
 		try {
 			var node = await global.db.collection("gp_nodes").findOne({"_id": mongoist.ObjectId(id)});
+			if(global.config.devmode && allow_devmode) {
+				var source = await global.db.collection("gp_repository").findOne({"nodeid": node.nodeid});
+				source.settings = node.settings
+				source.params = node.params
+				source.project_dir = node.project_dir
+				source.project = node.project
+				source.collection = node.collection
+				source.type = node.type
+			}
+
 		} catch(e) {
 			throw(new Error('GLAMpipe node not found: ' + id))
 		}
-		
-		this.source = node;
+
+		if(source) this.source = source;
+		else this.source = node
 		this.uuid = id;
 		this.collection = node.collection;
 		this.project = node.project;
-		//this.project_obj = project;
-		//this.project_dir = project.dir;
 
 	}
 
-	
+
 	async add2Project(project_id, collection_name) {
 		// check that project exists
 		var project = await global.db.collection('gp_projects').findOne({"_id": project_id});
 		if(!project) throw("Project does not exist!")
-		
+
 		// check if collection exists
 		var collections = await global.db.getCollectionNames();
 		if(!collections.includes(collection_name)) {
@@ -92,7 +101,7 @@ class Node {
 		this.source.project_dir = path.join(global.config.projectsPath, project.dir, collection_name, this.source.type,  this.source.nodeid + "_" + (project.node_count + 1) );
 		// set out_field to schema
 		this.source.schema = {};
-		for(var key in this.source.params) {			
+		for(var key in this.source.params) {
 			if(/^out_/.test(key)) this.source.schema[this.source.params[key]] = [];
 		}
 
@@ -101,16 +110,16 @@ class Node {
 
 		// increase node counter for node directory naming
 		await global.db.collection("gp_projects").update(
-			{_id:project_id}, 
+			{_id:project_id},
 			{$inc: {'node_count':1}
-		});	
+		});
 
 		// these are just shorthands
 		this.collection = collection_name;
 		this.project = project_id;
 		this.uuid = this.source._id;
 	}
-	
+
 
 	async writeDir(project_id) {
 		const fs = require('fs-extra');
@@ -129,15 +138,15 @@ class Node {
 					var file = path.join(this.source.project_dir, uifile) + '.html'
 					await fs.writeFile(file, this.source.views[uifile]);
 				}
-				
+
 				var file = path.join(this.source.project_dir, 'params.json')
 				await fs.writeFile(file, JSON.stringify(this.source.params));
-				
+
 				if(this.source.settings) {
 					var file = path.join(this.source.project_dir, 'settings.json')
 					await fs.writeFile(file, JSON.stringify(this.source.settings));
 				}
-				
+
 				// copy 'public' directory from node source to node's project directory (html + css + js)
 				try {
 					var source = path.join(this.source.source_dir, 'public');
@@ -155,14 +164,14 @@ class Node {
 
 
 	async removeFromProject() {
-		
+
 		// remove records that were created by source node
 		if(this.source.type == 'source') {
 			var query = {};
 			query[GP.source] = this.uuid;
 			await global.db.collection(this.collection).remove(query);
 		}
-		
+
 		// remove out_ fields created by node
 		if(this.source.type != 'source') {
 			var del_keys = {};
@@ -179,7 +188,7 @@ class Node {
 				await global.db.collection(this.collection).update({}, query, {'multi': true});
 			}
 		}
-		
+
 		// update schema
 		await schema.createSchema(this.collection);
 
@@ -190,25 +199,25 @@ class Node {
 
 
 	async upload(ctx) {
-		
+
 		var fs = require('fs');
 		var fsp = require('fs').promises;
 		var self = this;
-		
+
 		try { await fsp.mkdir(path.join(this.source.project_dir, "files")) } catch(e) { debug("'files' dir exists" ) }
 
 		const file = ctx.request.files.file;
 
 		var today = new Date(Date.now());
-		var mm = String(today.getMonth() + 1).padStart(2, '0'); 
-		var d = String(today.getDate()).padStart(2, '0'); 
-		var h = String(today.getHours()); 
-		var m = String(today.getMinutes()).padStart(2, '0'); 
-		var s = String(today.getSeconds()).padStart(2, '0'); 
-		var ms = String(today.getMilliseconds()); 
+		var mm = String(today.getMonth() + 1).padStart(2, '0');
+		var d = String(today.getDate()).padStart(2, '0');
+		var h = String(today.getHours());
+		var m = String(today.getMinutes()).padStart(2, '0');
+		var s = String(today.getSeconds()).padStart(2, '0');
+		var ms = String(today.getMilliseconds());
 		var filename = today.getUTCFullYear() + '-' + mm + '-' + d + '-' + h + ':' + m + ':' + s  +'_' + ms + path.extname(file.name)
 		var filepath = path.join(this.source.project_dir, 'files', filename)
-		
+
 		const reader = fs.createReadStream(file.path);
 		const stream = fs.createWriteStream(filepath);
 		reader.pipe(stream);
@@ -218,7 +227,7 @@ class Node {
 			console.log(e.message);
 		})
 
-		// promise	
+		// promise
 		var end = new Promise(function(resolve, reject) {
 			stream.on('finish', async () => {
 				console.log(self.source.params.file)
@@ -227,21 +236,21 @@ class Node {
 				await self.updateSourceKey('params', self.source.params);
 				resolve();
 			})
-			stream.on('error', reject); 
+			stream.on('error', reject);
 		});
 
 
 		return end;
-	} 
+	}
 
 	setParams(params) {
 		if(this.source) {
-			this.source.params = params; 
+			this.source.params = params;
 			if(!params) this.source.params = {};
 		} else {
 			throw("Cannot set params!")
 		}
-		
+
 	}
 
 	async setDescription(body) {
@@ -298,10 +307,10 @@ class Node {
 	}
 
 	async saveSettings(settings) {
-		
+
 		// we make copy of settings that is saved to db so that we can remove fields starting with underscore (passwds etc.)
 		// from it without affecting settings that are used by node
-        var settings_copy = Object.assign({}, settings); 	
+        var settings_copy = Object.assign({}, settings);
 
 		// we do not save passwords, user names or api keys
 		if(settings_copy) {
@@ -318,14 +327,14 @@ class Node {
 
 		if(!settings_copy)
 			return;
-		
+
 		await this.updateSourceKey('settings', settings_copy);
-		
+
 		// write to file
 		var fs = require("fs-extra")
 		var file = path.join(this.source.project_dir, 'settings.json')
 		await fs.writeFile(file, JSON.stringify(settings_copy, null, 4));
-		
+
 		// save the script of script node
 		if(this.source.nodeid === 'process_script' && settings.js) {
 			var js = path.join(this.source.project_dir, 'process.js')
@@ -334,24 +343,24 @@ class Node {
 		}
 
 	}
-	
+
 	getOptions(req) {
-	
+
 		return global.db.collection("gp_node_options").findOne({"nodeid": req.params.nodeid});
 
 	}
-	
-	
+
+
 	async run(options) {
 		if(!this.source.core) throw("Node's description.json does not have 'core' property!")
 		debug("node type: " + this.source.type)
 		debug("node core: " + this.source.core)
 		debug(options.settings)
-		this.settings = options.settings;	
+		this.settings = options.settings;
 		this.options = options;
-		
+
 		await this.saveSettings(options.settings);
-		
+
 		// create context for GP node
 		var sandbox = createSandbox(this.source);
 		sandbox.context = {};
@@ -359,34 +368,36 @@ class Node {
 		sandbox.context.node.settings = options.settings;
 		sandbox.context.node.uuid = this.uuid;
 		sandbox.context.vars = {counter:0};
+		sandbox.context.startTime = process.hrtime()
+		console.log(sandbox.context.startTime)
 
 		this.sandbox = sandbox;
 		this.scripts = {};
-		
+
 		// socket.io
 		if(options.ws) {
 			sandbox.out.say = function(ch, msg) {
 				options.ws.emit(ch, {
-					'msg':msg, 
+					'msg':msg,
 					'project': sandbox.context.node.project,
 					'node_uuid': sandbox.context.node.uuid,
 				})
-				
+
 				// if we are ready, then remove node from register
 				if(ch === 'finish') {
 					if(global.register[sandbox.context.node.uuid])
 						delete global.register[sandbox.context.node.uuid];
 				}
 			};
-		} 
-		
+		}
+
 		// init node scripts
 		this.scripts.init 		= CreateScriptVM(this.source, sandbox, "init");
 		this.scripts.login 		= CreateScriptVM(this.source, sandbox, "login");
 		this.scripts.options 	= CreateScriptVM(this.source, sandbox, "options");
 		this.scripts.process 	= CreateScriptVM(this.source, sandbox, "process");
 		this.scripts.finish 	= CreateScriptVM(this.source, sandbox, "finish");
-			
+
 		if(this.scripts.init) {
 			try {
 				this.scripts.init.runInContext(sandbox);
@@ -395,7 +406,7 @@ class Node {
 				throw(new Error('Init script error ' + e ))
 			}
 		}
-		
+
 		// if there is a doc_id in settings, then fetch that document and attach to node
 		if(this.settings.doc_id) {
 			var doc = await global.db[this.collection].findOne({_id:mongoist.ObjectId(this.settings.doc_id)});
@@ -405,17 +416,21 @@ class Node {
 				throw("Document not found: " + this.settings.doc_id)
 			}
 		}
-		
+
 		var core = this.source.core.split(".");
 		switch(this.source.type) {
 
 			case "source":
-			
-				// example core: web.get.JSON 
-				await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
+
+				// example core: web.get.JSON
+				try {
+					await importLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				} catch(e) {
+					this.sandbox.out.say("error", "Error in import: " + e.message);
+				}
 				//await schema.createSchema(this.collection);
 				break;
-				
+
 			case "process":
 				switch(this.source.subtype) {
 					case "lookups":
@@ -423,14 +438,16 @@ class Node {
 							await lookupLoop[ core[0] ][ core[1] ][ core[2] ](this);
 						} catch(e) {
 							console.log(e.message)
+							this.sandbox.out.say("error", "Error in lookup: " + e.message);
 						}
 						break;
-						
+
 					case "collection":
 						try {
 							await dbcore[ core[0] ][ core[1] ][ core[2] ](this);
 						} catch(e) {
 							console.log(e.message)
+							this.sandbox.out.say("error", "Error: " + e.message);
 						}
 						break;
 
@@ -439,17 +456,27 @@ class Node {
 							await processLoop[ core[0] ][ core[1] ][ core[2] ](this);
 						} catch(e) {
 							console.log(e.message)
+							this.sandbox.out.say("error", "Error: " + e.message);
 						}
 					break;
 				}
 				break;
 
 			case "export":
-				await exportLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				try {
+					await exportLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				} catch(e) {
+					this.sandbox.out.say("error", "Error in export: " + e.message);
+				}
 				break;
-				
+
 			case "view":
-				await viewLoop[ core[0] ][ core[1] ][ core[2] ](this);
+				try {
+					await viewLoop[ core[0] ][ core[1] ][ core[2] ](this);
+
+				} catch(e) {
+					this.sandbox.out.say("error", "Error in view creation: " + e.message);
+				}
 				break;
 
 		}
@@ -467,7 +494,7 @@ module.exports = Node ;
 
 
 function CreateScriptVM(node, sandbox, scriptName) {
-		
+
 	// create scripts (this will catch syntax errors)
 	try {
 		var scriptVM = new vm.createScript(node.scripts[scriptName]);
@@ -479,7 +506,7 @@ function CreateScriptVM(node, sandbox, scriptName) {
 		//sandbox.out.say("error", "Slap the node writer!");
 	}
 	return scriptVM;
-	
+
 }
 
 
@@ -489,7 +516,7 @@ function CreateScriptVM(node, sandbox, scriptName) {
 function createSandbox(node) {
 
 	var xmlparser = require('fast-xml-parser');
-	
+
 	// context for node scripts
 	var sandbox = {
 		context: {
@@ -524,7 +551,7 @@ function createSandbox(node) {
 	}
 	return vm.createContext(sandbox);
 
-	
+
 }
 
 

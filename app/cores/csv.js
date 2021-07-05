@@ -16,33 +16,33 @@ exports.read = async function (node) {
 	}
 
 	// remove previous entries by this node
-	var query = {}; 
+	var query = {};
 	query[constants.source] = node.uuid;
 	await global.db[node.collection].remove(query);
 
 	var file = path.join(node.source.project_dir, "files", node.source.params.filename);
 	var connection_string = global.db_string;
 	var db_string = "mongodb://" + connection_string;
-	
+
 	//var file = node.source.params.filename;
 	var columns = null;
 	var count = 0;
-	if(node.settings.columns === "true")
+	if(node.settings.columns === true)
 		columns = true;
-		
+
 	var settings = {
-		delimiter: node.settings.separator, 
-		columns:columns, 
+		delimiter: node.settings.separator,
+		columns:columns,
 		relax: true,
 		trim: true, // this could be optional
 		skip_empty_lines:true
-	} 
-	
-	if(node.settings.tabs === "true")
+	}
+
+	if(node.settings.tabs === true)
 		settings.delimiter = "\t";
 
 	var parser = parse(settings)
-	
+
 	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
 	var options = { dbURL: db_string, collection: node.collection }
 	var streamToMongoDB = require('stream-to-mongo-db').streamToMongoDB;
@@ -71,18 +71,18 @@ exports.read = async function (node) {
 		return node.sandbox.out.value;
 	})
 
-	// promise	
+	// promise
 	var end = new Promise(function(resolve, reject) {
 		mongoStream.on('finish', () => {
 			node.scripts.finish.runInContext(node.sandbox);
 			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
 		})
-		parser.on('error', reject); 
+		parser.on('error', reject);
 	});
 
 	input.pipe(parser).pipe(transformer).pipe(mongoStream);
 
 	return end;
-	
+
 }

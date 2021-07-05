@@ -32,7 +32,7 @@ exports.create = async function(collection_name, project) {
 	
 	await schema.init(mongo_name);
 	
-	return collection_name;
+	return mongo_name;
 
 }
 
@@ -87,7 +87,10 @@ exports.getDocs = async function(collection_name, query) {
 		search.query, 
 		search.keys
 	  ).count();
-
+	
+	debug('query total: ' + total)
+	if(search.skip > total) search.skip = 0
+	
 	var result = {total: total, data: []}
 
 	result.data = await global.db[collection_name].findAsCursor(

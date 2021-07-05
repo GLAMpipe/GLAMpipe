@@ -9,15 +9,15 @@ exports.search = function (params) {
 	var operators = exports.operators(params);					// field spesific operators (e.g. "&op=dc_type:or")
 	//var query = exports.filters(req, operators, skipped);
 	//var query = exports.createSearchQuery(params, skipped);
-	
+
 	// remove reserved keys from query
 	var cleanParams = {}
 	for(var p in params) {
-		if(!skipped.includes(p)) { 
+		if(!skipped.includes(p)) {
 			cleanParams[p] = params[p];
 		}
 	}
-	
+
 	var query = {}
 	if(params.mongoquery) {
 		try {
@@ -59,7 +59,7 @@ exports.search = function (params) {
 	if(!isNaN(r) && r == 1)  // reverse if reverse is 1
 		reverse = -1;
 
-	
+
 	sort = {};
 	if(typeof params.sort === 'undefined' || params.sort == "") { // by default sort by _id (mongoid)
 		sort._id = reverse;
@@ -80,7 +80,7 @@ exports.search = function (params) {
 	}
 
 	debug(util.inspect(search, false, 4, true));
-	
+
 	return search;
 }
 
@@ -144,19 +144,19 @@ exports.operators = function (params) {
 			split(params.op)
 		}
 	}
-	
+
 	function split(op) {
 		var splitted = op.split(":");
 		if(splitted.length === 2) {
-			if(splitted[1] === "or") 
+			if(splitted[1] === "or")
 				operators[splitted[0]] = "$in";
-			else if(splitted[1] === "and") 
+			else if(splitted[1] === "and")
 				operators[splitted[0]] = "$all";
-			else if(splitted[1] === "not") 
+			else if(splitted[1] === "not")
 				operators[splitted[0]] = "$not";
 		}
 	}
-	console.log("OPERATORS:\n" + util.inspect(operators, false, 4, true));
+	//console.log("OPERATORS:\n" + util.inspect(operators, false, 4, true));
 	return operators;
 }
 
@@ -170,16 +170,15 @@ exports.opParam = function(value) {
 }
 
 exports.createSearchQuery = function(params, operators) {
-	console.log("createsearchquery")
-	console.log(Object.keys(params))
-	console.log(params)
+	//console.log("createsearchquery")
+	//console.log(Object.keys(params))
+	//console.log(params)
 
 	if(Object.keys(params).length == 0) return {};
 
-	
+
 	var query = {};
 	for(param in params) {
-		console.log(param)
 		if(Array.isArray(params[param])) {
 		// create an AND query if there are several query fields
 			var ands = [];
@@ -197,7 +196,7 @@ exports.createSearchQuery = function(params, operators) {
 				}
 				query.$and = ands;
 			}
-			
+
 		// otherwise create query for one field
 		} else {
 			if(operators[param] && operators[param] === '$not') {
@@ -209,6 +208,8 @@ exports.createSearchQuery = function(params, operators) {
 			}
 		}
 	}
-console.log(query)
+	debug('*** query:')
+	debug(query)
+	debug('query ends ***')
 	return query;
 }

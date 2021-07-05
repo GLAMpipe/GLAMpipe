@@ -1,0 +1,1 @@
+out.say('finish', 'Got content from Finna! (' + context.var.total_count +')' ); 

@@ -822,7 +822,7 @@ var dataTable = function () {
 		self.params.search_value.keys.push(field);
 		self.params.search_value.values.push(value);
 		this.params.skip_value = 0; // reset offset
-		self.render()
+		self.render(self.node)
 	}
 
 	this.removeFilter = function (event) {
@@ -830,7 +830,7 @@ var dataTable = function () {
 		self.params.search_value.keys.splice(index,1);
 		self.params.search_value.values.splice(index,1);
 		this.params.skip_value = 0; // reset offset
-		self.render();
+		self.render(self.node);
 	}
 
 

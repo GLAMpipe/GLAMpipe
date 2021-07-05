@@ -1,7 +1,11 @@
 var GLAMpipe = require('../app/glampipe.js');
 
 var GP = new GLAMpipe();
-FINNAImport();
+(async () => {
+	await GP.init()
+	FINNAImport();
+})()
+
 
 async function FINNAImport() {
 	
@@ -22,7 +26,12 @@ async function FINNAImport() {
 		]
 	}
 	
-	var project = await GP.createProject(FinnaProject);
+	var project = await GP.createEmptyProject("Muumit testissä 2");
+	var collection = await GP.createCollection("mydata", project._id);
+	console.log(project)
+	console.log(collection)
+	var node = await GP.createNode("source_web_finna", {}, collection.id, project._id);
+
 	GP.closeDB();
 }
 	

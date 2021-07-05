@@ -11,7 +11,7 @@ exports.init = async function (collection_name) {
 	var schema = {collection: collection_name, keys:[]}
 	await global.db["gp_schemas"].insert(schema);
 	console.log("SCHEMA: schema created for "+collection_name);
-	
+
 }
 
 
@@ -24,22 +24,22 @@ exports.init = async function (collection_name) {
 exports.createSchema = async function (collection_name) {
 
 	var keys = [];
-    const cursor = global.db[collection_name].findAsCursor({});	
-    
+    const cursor = global.db[collection_name].findAsCursor({});
+
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		for (key in doc) {
 			if(keys.indexOf(key) < 0) {
 				keys.push(key);
 			}
-		}  
-	}	
+		}
+	}
 
 	keys = keys.sort();
 	var schema = {collection: collection_name, keys:keys}
 	await save(collection_name, schema);
 	console.log("SCHEMA: schema created for "+collection_name+ " (" + keys.length + " keys)");
-	
+
 }
 
 /**
@@ -47,11 +47,11 @@ exports.createSchema = async function (collection_name) {
  */
 
 exports.update = async function(collection_name, doc) {
-	
+
 	var keys = [];
 	for (key in doc) {
 		keys.push(key);
-	} 
+	}
 	await global.db["gp_schemas"].update({collection: collection_name}, {$addToSet: {keys: {$each: keys}}});
 }
 
@@ -69,13 +69,14 @@ exports.getSchema = async function (collection_name) {
 			}
 		}
 	}
+	schema.keys.sort()
 	return schema;
 }
 
 
 
 exports.removeKeysFromSchema = function(collectionName, keys, cb) {
-	
+
 	// TODO: tee tämä
 	var query = {};
 	query["$unset"] = keys;
@@ -91,13 +92,8 @@ exports.removeKeysFromSchema = function(collectionName, keys, cb) {
 
 
 async function save(collection_name, schema) {
-	
+
 	await global.db["gp_schemas"].remove({'collection': collection_name});
 	await global.db["gp_schemas"].insert(schema);
 
 }
-
-
-
-
-

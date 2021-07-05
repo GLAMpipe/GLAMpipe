@@ -4,6 +4,13 @@ var GLAMpipe = require('../app/glampipe.js');
 
 var GP = new GLAMpipe();
 
+(async () => {
+	await GP.init()
+	//FINNAImport();
+	DSpaceImport2()
+})()
+
+
 FINNAImport();
 //DSpaceImport2();
 //Projects();
@@ -59,7 +66,7 @@ async function DSpaceImport2() {
 	var collection 	= await GP.createCollectionNode(collection_title, project);
 	var importNode 	= await GP.createNode("source_web_dspace", import_params, collection.collection, project);
 	
-	await importNode.run(settings);
+	//await importNode.run(settings);
 	
 	GP.closeDB();
 }

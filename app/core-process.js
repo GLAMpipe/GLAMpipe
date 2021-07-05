@@ -13,7 +13,7 @@ exports.process = {
 			await fileLoop(node, pdf.toText_test);
 		}
 	},
-	
+
 	'sync': {
 		'script': async function(node) {
 			await scriptLoop(node);
@@ -29,17 +29,17 @@ async function fileLoop(node, core) {
 
 	var bulk = global.db[node.collection].initializeOrderedBulkOp();
 
-    const cursor = global.db[node.collection].findAsCursor({});	
+    const cursor = global.db[node.collection].findAsCursor({});
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
-	  
+
 		node.sandbox.context.doc = doc;
 		node.sandbox.core.data = [];
 
 		// run.js: pitää asettaa setter!!!
 		// OPTIONS - give input to core (core.files)
 		node.scripts.options.runInContext(node.sandbox);
-		
+
 		// CALL CORE - if there are several files, then call core once for every row
 		if(Array.isArray(node.sandbox.core.files)) {
 			for(var file of node.sandbox.core.files) {
@@ -53,32 +53,32 @@ async function fileLoop(node, core) {
 						console.log('Processing DONE!')
 						console.log('core_result: ' +core_result)
 						node.sandbox.core.data.push(core_result);
-							
+
 					} catch(e) {
 						//console.log('ERROR in PDF processing')
 						console.log(e.message)
 						if(e.message)
-							node.sandbox.core.data.push({'error': e.message});	
+							node.sandbox.core.data.push({'error': e.message});
 						else
-							node.sandbox.core.data.push({'error': e});	
-						
+							node.sandbox.core.data.push({'error': e});
+
 					}
 
 			}
 		} else {
 			var core_result = await core(node);
 			node.sandbox.core.data = core_result;
-		}	
+		}
 
 		node.scripts.process.runInContext(node.sandbox);
 		bulk.find({ '_id': doc._id }).updateOne({
 			'$set': node.sandbox.out.setter
 		});
-	}	
-	
+	}
+
 	// make changes to database
 	await bulk.execute();
-	
+
 	// notify that we are finished
 	//node.sandbox.out.say('finish', 'Done');
 }
@@ -95,22 +95,22 @@ async function scriptLoop(node) {
 		}
 
 		var query = {};
-		var offset = node.options.offset || 0; 
-		var limit = node.options.limit || 0; 
-		var doc_id = node.settings.doc_id || ''; 
+		var offset = node.options.offset || 0;
+		var limit = node.options.limit || 0;
+		var doc_id = node.settings.doc_id || '';
 		if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)}; // single run
-		
+
 		node.sandbox.context.total = await global.db[node.collection].count({});
 		var bulk = global.db[node.collection].initializeUnorderedBulkOp();
-		const cursor = global.db[node.collection].findAsCursor(query).skip(offset).limit(limit);	
+		const cursor = global.db[node.collection].findAsCursor(query).skip(offset).limit(limit);
 		var counter = 0;
 		while(await cursor.hasNext()) {
-	
+
 			var doc = await cursor.next();
 			counter++;
 			node.sandbox.context.doc = doc;
 			node.sandbox.context.vars.count = counter;
-			
+
 			node.scripts.process.runInContext(node.sandbox);
 			// first setter is added to schema
 			if(counter === 1 && node.sandbox.out.setter) await node.updateSourceKey("schema", node.sandbox.out.setter);
@@ -121,14 +121,14 @@ async function scriptLoop(node) {
 				update = node.sandbox.out.setter;
 			} else if(typeof node.sandbox.out.value !== "undefined") {
 				update[node.source.params.out_field] = node.sandbox.out.value;
-			} 
-			
+			}
+
 			// TODO: decide what should be saved if out is not set?
-			
+
 			await bulk.find({ '_id': doc._id }).updateOne({
 				'$set': update
 			});
-			
+
 			if (counter % 1000 == 0 ) {
 				var w = await bulk.execute();
 				console.log(w)
@@ -136,17 +136,17 @@ async function scriptLoop(node) {
 				//if(process.send)
 					//process.send({node_uuid:node.uuid, project:node.project,total:node.sandbox.context.total,counter:1000});
 			}
-		}	
-		
+		}
+
 		// execute remainig changes to database
 		var b = await bulk.execute();
 		console.log(b)
 	} catch (e) {
-		node.sandbox.out.say("finish", "Error in Script node: 'run' script: " + e.name +" " + e.message);
+		node.sandbox.out.say("error", "Error in Script node: 'run' script: " + e.name +" " + e.message);
 		console.log(e.stack);
 		throw(new Error("Error in Script node: 'run' script: " + e.name +" " + e.message))
-		
-	}	
+
+	}
 	// notify that we are finished
 	node.sandbox.out.say('finish', 'Done');
 }
@@ -157,7 +157,7 @@ async function scriptLoop(node) {
 function runNodeScriptInContext (script, node, sandbox) {
 	try {
 		vm.runInNewContext(node.scripts[script], sandbox);
-		
+
 	} catch (e) {
 		if (e instanceof SyntaxError) {
 			console.log("Syntax error in node.scripts."+script+"!", e);

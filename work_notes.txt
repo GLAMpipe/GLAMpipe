@@ -1,7 +1,14 @@
-TODO:
-FIX DSpace web source (login, options must be called properly)
+
+FIX 
+- DSpace web source (login, options must be called properly)
 - single run
 - WEB export core
+- MARCjs won't compile on nodejs 12
+- remove request module OK
+
+TODO:
+- source node suggested keys shoudl be default keys (like Finna node)
+- save visible keys to node settings
 
 - re-generate schema should refresh keys
 - 
@@ -21,8 +28,6 @@ FIX DSpace web source (login, options must be called properly)
 - shibboleth
 - devmode
 
-
-- facet UI should warn about '|' in data values
 
 DONE:
 - PDF core
