@@ -55,7 +55,7 @@
     "winston-daily-rotate-file": "^1.7.2",
     "xml-formatter": "^1.0.1",
     "xml2json": "^0.11.0",
-    "xmldom": "^0.1.27",
+    "xmldom": "^0.6.0",
     "xpath": "0.0.24"
   },
   "devDependencies": {
