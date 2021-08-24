@@ -14,10 +14,15 @@ exports.search = function (params) {
 	var cleanParams = {}
 	for(var p in params) {
 		if(!skipped.includes(p)) {
-			cleanParams[p] = params[p];
+			if(Array.isArray(params[p])) {
+				var p_clean = p.replace(/\[\]$/,'')
+				cleanParams[p_clean] = params[p]
+			} else {
+				cleanParams[p] = params[p];
+			}
 		}
 	}
-
+console.log(cleanParams)
 	var query = {}
 	if(params.mongoquery) {
 		try {
@@ -162,7 +167,7 @@ exports.operators = function (params) {
 
 exports.opParam = function(value) {
 	var splitted = value.split(":");
-	if(splitted.length === 2 && splitted[0] === 'regex') {
+	if(splitted.length === 2 && splitted[0] === '_regex_') {
 		return {$regex: splitted[1]}
 	} else {
 		return value;
@@ -200,10 +205,10 @@ exports.createSearchQuery = function(params, operators) {
 		// otherwise create query for one field
 		} else {
 			if(operators[param] && operators[param] === '$not') {
-				if(params[param] === '*') query[param] =  {$not:{$regex: '\S'}}; // match any non whitespace character
+				if(params[param] === '*') query[param] =  {$not:{$regex: '/S'}}; // match any non whitespace character
 				else query[param] =  {$ne: exports.opParam(decodeURIComponent(params[param]))};
 			} else {
-				if(params[param] === '*') query[param] =  {$regex: '\S'}; // match any non whitespace character
+				if(params[param] === '*') query[param] =  {$regex: '/S'}; // match any non whitespace character
 				else query[param] =  exports.opParam(decodeURIComponent(params[param]));
 			}
 		}

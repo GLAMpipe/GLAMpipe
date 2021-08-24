@@ -1,9 +1,13 @@
 var debug 			= require('debug')('GLAMpipe');
 var error 			= require('debug')('ERROR');
 var axios 			= require('axios');
+const axiosCookieJarSupport = require('axios-cookiejar-support').default
+const tough			= require('tough-cookie');
 const vm 		= require("vm");
 var web 			= require('./cores/web.js');
 const GP 			= require("../config/const.js");
+
+axiosCookieJarSupport(axios);
 
 var exports 	= module.exports = {};
 
@@ -11,7 +15,14 @@ exports.export = {
 	'web': {
 		'JSON': async function(node) {
 			try {
-				//await jarLogin(node);
+				await exportLoop(web.sendJSON, node);
+			} catch(e) {
+				error(e)
+				throw(e)
+			}
+		},
+		'request': async function(node) {
+			try {
 				await exportLoop(web.sendJSON, node);
 			} catch(e) {
 				error(e)
@@ -33,6 +44,23 @@ exports.export = {
 
 async function exportLoop(core, node) {
 
+	// login once for export
+	const cookieJar = new tough.CookieJar();
+	if(node.sandbox.core.login) {
+		try {
+			node.sandbox.core.login.jar = cookieJar
+			node.sandbox.core.login.withCredentials = true
+			debug("Logging in: " + node.sandbox.core.login.url)
+			var login = await axios(node.sandbox.core.login);
+			debug(login.status)
+		} catch(e) {
+			debug(e)
+		}
+
+	} else {
+		debug('No credentials given, no login')
+	}
+
 	// if there is a doc already, then this is single run
 	if(node.sandbox.context.doc) {
 		await doCore(core, node)
@@ -47,6 +75,28 @@ async function exportLoop(core, node) {
 		}
 	}
 }
+
+async function doCore(core, node) {
+	try {
+		await core(node);
+		node.scripts.process.runInContext(node.sandbox);
+		if(node.sandbox.out.setter) {
+			await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
+				'$set': node.sandbox.out.setter
+			});
+		} else if(node.source.params.out_field) {
+			var update = {}
+			update[node.source.params.out_field] = node.sandbox.out.value
+			console.log(update)
+			await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
+				'$set': update
+			});
+		}
+	} catch(e) {
+		throw(e)
+	}
+}
+
 
 
 async function fileLoop(node, core) {
@@ -89,7 +139,7 @@ async function CSVfileLoop(node, core) {
 	var fs = require('fs');
 	var path = require('path');
 	var csvWriter 	= require('csv-write-stream');
-	var filePath = path.join(node.source.project_dir, 'files', node.source.params.required_file);
+	var filePath = path.join(node.source.project_dir, 'files', node.settings.required_file);
 	var writer = csvWriter({separator:node.settings.sep, headers: node.sandbox.core.options.csvheaders});
 	console.log('csvheaders')
 	console.log(node.sandbox.core.options)
@@ -102,19 +152,4 @@ async function CSVfileLoop(node, core) {
 		writer.write(node.sandbox.out.value);
 	}
 	writer.end();
-}
-
-
-
-async function doCore(core, node) {
-	try {
-		await core(node);
-		node.scripts.process.runInContext(node.sandbox);
-		await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
-			'$set': node.sandbox.out.setter
-		});
-
-	} catch(e) {
-		throw(e)
-	}
 }

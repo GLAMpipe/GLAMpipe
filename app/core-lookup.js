@@ -11,7 +11,7 @@ exports.lookup = {
 		'mongoquery': async function(node) {
 			await queryLoop(node, mongo.query);
 		},
-		
+
 		'field_array': async function(node) {
 			// get all lookup keys and values to be copied based on query created by init.js
 			var collection = node.sandbox.context.node.params.required_source_collection;
@@ -20,13 +20,20 @@ exports.lookup = {
 		}
 	},
 	'web': {
-		'JSON': async function(node) {			
+		'JSON': async function(node) {
 			try {
 				await web.lookupJSON(node)
 			} catch(e) {
 				console.log(e);
 			}
-		}
+		},
+		'head': async function(node) {
+			try {
+				await web.lookupJSON(node)
+			} catch(e) {
+				console.log(e);
+			}
+		},
 	}
 }
 
@@ -35,7 +42,7 @@ exports.lookup = {
 async function queryLoop(node, core) {
 
 	//var bulk = global.db[node.collection].initializeOrderedBulkOp();
-    const cursor = global.db[node.collection].findAsCursor({});	
+    const cursor = global.db[node.collection].findAsCursor({});
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;
@@ -52,13 +59,13 @@ async function queryLoop(node, core) {
 		node.scripts.process.runInContext(node.sandbox);
 		console.log("setter")
 		console.log(node.sandbox.out.setter)
-		
+
 		if(node.sandbox.out.setter) {
 			await global.db[node.collection].update({ '_id': doc._id }, {
 				'$set': node.sandbox.out.setter
 			});
 		}
-	}	
+	}
 	// make changes to database
 	//await bulk.execute();
 }

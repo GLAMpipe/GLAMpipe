@@ -50,7 +50,10 @@ exports.read = async function (node) {
 
 	parser.on('data', function(c){
 		count++;
-		if(!(count % 1000)) console.log("CSV PARSER: " + count)
+		if(!(count % 1000)) {
+			console.log("CSV PARSER: " + count)
+			node.sandbox.out.say("progress", count + 'items processed');
+		}
 	});
 
 	parser.on('finish', function(){

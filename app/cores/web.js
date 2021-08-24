@@ -1,10 +1,14 @@
 var axios 			= require('axios');
+const axiosCookieJarSupport = require('axios-cookiejar-support').default
+const tough			= require('tough-cookie');
 var path 			= require('path');
 var mongoist 		= require("mongoist")
 var debug 			= require('debug')('GLAMpipe:node');
 var error 			= require('debug')('ERROR');
 var schema 			= require('./../new_schema.js');
 const constants 	= require("../../config/const.js");
+
+axiosCookieJarSupport(axios);
 
 exports.sendJSON = async function (node) {
 
@@ -18,18 +22,16 @@ exports.sendJSON = async function (node) {
 		throw(e)
 	}
 
-	node.sandbox.core.options.resolveWithFullResponse = true;
 	setAcceptHeaders(node, "application/json")
 
-	// attach jar if there is one from login.js
-	if(node.sandbox.core.login && node.sandbox.core.login.jar) {
-		node.sandbox.core.options.jar = node.sandbox.core.login.jar;
-	}
-
+	// actual request
 	try {
+		node.sandbox.core.options.withCredentials = true
+		node.sandbox.core.options.jar = node.sandbox.core.login.jar
 		debug(node.sandbox.core.options)
 		var result = await axios(node.sandbox.core.options);
 		debug(result.data)
+		node.sandbox.core.response = result
 		node.sandbox.core.data = result.data;
 	} catch(e) {
 		throw(e);
@@ -53,12 +55,12 @@ exports.getAndSaveFile = async function(node) {
 	await fs.writeFile(file, result.data, 'utf-8')
 }
 
-
-
 exports.getJSON = async function (node) {
 
+	const cookieJar = new tough.CookieJar();
 	if(node.sandbox.core.login) {
-		node.sandbox.core.login.jar = true;
+		node.sandbox.core.login.jar = cookieJar
+		node.sandbox.core.login.withCredentials = true
 		debug("Logging in: " + node.sandbox.core.login.url)
 		await axios(node.sandbox.core.login);
 	} else {
@@ -81,6 +83,8 @@ exports.getJSON = async function (node) {
 
 		console.log(node.sandbox.core.options)
 		try {
+			node.sandbox.core.options.withCredentials = true
+			node.sandbox.core.options.jar = cookieJar
 			var result = await axios(node.sandbox.core.options);
 			node.sandbox.core.response = result;
 			node.sandbox.core.data = result.data;
@@ -119,10 +123,20 @@ exports.getJSON = async function (node) {
 
 exports.lookupJSON = async function (node) {
 
+	const cookieJar = new tough.CookieJar();
 	if(node.sandbox.core.login) {
-		node.sandbox.core.login.jar = true;
-		debug("Logging in: " + node.sandbox.core.login.url)
-		await axios(node.sandbox.core.login);
+		node.sandbox.core.login.jar = cookieJar
+		node.sandbox.core.login.withCredentials = true
+		delete(node.sandbox.core.login.headers)
+		node.sandbox.core.login.data = node.sandbox.core.login.body
+		delete(node.sandbox.core.login.body)
+		debug("Logging in: " + JSON.stringify(node.sandbox.core.login,null,2))
+		try {
+			await axios(node.sandbox.core.login);
+			console.log(cookieJar)
+		} catch(e) {
+			throw('Login failed ' + e)
+		}
 	} else {
 		debug('No credentials given, no login')
 	}
@@ -149,7 +163,7 @@ exports.lookupJSON = async function (node) {
 		// OPTIONS.JS - create options for web request
 		node.scripts.options.runInContext(node.sandbox);
 
-		// CALL CORE - if there are several options, then make request for every rowc
+		// CALL CORE - if there are several options, then make request for every row
 		var t = process.hrtime()
 		t = t[0] - node.sandbox.context.startTime[0]
 		node.sandbox.out.say('progress','processing ' + count + ' time:' + t + ' seconds')
@@ -173,8 +187,8 @@ exports.lookupJSON = async function (node) {
 			node.sandbox.core.response = results;
 		} else {
 			debug("LOOKUP REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
-			node.sandbox.core.options.resolveWithFullResponse = true;
-			node.sandbox.core.options.jar = true;
+			node.sandbox.core.options.withCredentials = true;
+			node.sandbox.core.options.jar = cookieJar;
 			try {
 				var result = await axios(node.sandbox.core.options)
 				node.sandbox.core.response = result

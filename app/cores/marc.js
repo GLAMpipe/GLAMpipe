@@ -34,27 +34,30 @@ exports.read = async function (node) {
 	//var input = fs.createReadStream(file, {encoding: node.settings.encoding});
 	var options = { dbURL: db_string, collection: node.collection }
 	var streamToMongoDB = require('stream-to-mongo-db').streamToMongoDB;
-	const streamToMongo = streamToMongoDB(options);
+	const streamToMongo = streamToMongoDB(options)
 	//var streamToMongo = require('stream-to-mongo-db')(options);
 
 	reader.on('data', function(c){
 		count++;
-		if(count % 100 === 0) console.log("MARC PARSER: " + count)
+		if(count % 100 === 0) {
+			console.log("MARC PARSER: " + count)
+			node.sandbox.out.say("progress", count + " items parsed!")
+		}
 	});
 
 	reader.on('end', function(){
-		console.log("MARC PARSER: " + count + " items parsed!");
+		console.log("MARC PARSER: " + count + " items parsed!")
 	})
 
 	reader.on('error', function(e){
-		console.log(e.message);
-		node.sandbox.out.say("error", e.message);
+		console.log(e.message)
+		node.sandbox.out.say("error", e.message)
 	})
 
 	// transform to MARC-in-JSON
 	var transformer = transform(function(record){
 		//console.log(record.as('mij'))
-		var r = JSON.parse(record.as('mij'));
+		var r = JSON.parse(record.as('mij'))
 		r[constants.source] = node.uuid; // mark source node uuid to records
 		return r;
 	});
@@ -64,7 +67,7 @@ exports.read = async function (node) {
 	// promise
 	var end = new Promise(function(resolve, reject) {
 		streamToMongo.on('finish', () => {
-			node.scripts.finish.runInContext(node.sandbox);
+			//node.scripts.finish.runInContext(node.sandbox);
 			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
 		})

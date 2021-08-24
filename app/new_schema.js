@@ -69,6 +69,7 @@ exports.getSchema = async function (collection_name) {
 			}
 		}
 	}
+	schema.keys = [...new Set(schema.keys)];
 	schema.keys.sort()
 	return schema;
 }

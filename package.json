@@ -6,6 +6,7 @@
   "dependencies": {
     "ansicolors": "^0.3.2",
     "axios": "^0.21.1",
+    "axios-cookiejar-support": "^1.0.1",
     "cld": "^2.7.0",
     "csv-parse": "^4.15.3",
     "csv-write-stream": "^2.0.0",
@@ -41,7 +42,8 @@
     "stream-to-mongo-db": "^1.6.0",
     "stream-transform": "^2.1.0",
     "string-similarity": "^4.0.4",
-    "validator": "^13.5.2",
+    "tough-cookie": "^4.0.0",
+    "validator": "^13.6.0",
     "worker-farm": "^1.7.0"
   },
   "nodemonConfig": {

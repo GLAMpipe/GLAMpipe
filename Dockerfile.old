@@ -1,5 +1,5 @@
-FROM node:lts-alpine
-#RUN apt-get update && apt-get install -y vim build-essential imagemagick ghostscript poppler-utils
+FROM node:10.18-buster
+RUN apt-get update && apt-get install -y vim build-essential imagemagick ghostscript poppler-utils 
 
 # Install app dependencies
 COPY package.json /tmp

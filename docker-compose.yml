@@ -4,19 +4,22 @@ version: '2'
 services:
   glampipe:
     build: .
-    image: artturimatias/glampipe
+    image: artturimatias/glampipe:21.06
+    container_name: glampipe
     networks:
      - gp
     ports:
      - "3000:3000"
-    command: node glampipe.js
+    command: node index.js
     environment:
      - DOCKER=1
     volumes:
      - glampipe-data:/glampipe-data
+    depends_on:
+      - "glampipe_mongo"
 
   glampipe_mongo:
-    image: mongo:3.6
+    image: mongo:4.2
     container_name: glampipe_mongo
     networks:
     - gp

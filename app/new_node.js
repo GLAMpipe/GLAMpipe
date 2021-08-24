@@ -283,6 +283,7 @@ class Node {
 	getPublicFile(ctx) {
 		const fs = require('fs-extra');
 		var source = path.join(this.source.project_dir, 'public')
+		console.log(source)
 		if(ctx.params.dir === 'js') {
 			source = path.join(source, 'js', ctx.params.file);
 			ctx.response.set("content-type", "application/x-javascript");
@@ -515,7 +516,8 @@ function CreateScriptVM(node, sandbox, scriptName) {
 
 function createSandbox(node) {
 
-	var xmlparser = require('fast-xml-parser');
+	var xmlparser = require('fast-xml-parser')
+	var validator = require('validator')
 
 	// context for node scripts
 	var sandbox = {
@@ -536,6 +538,7 @@ function createSandbox(node) {
 		funcs: {
 			xmlparser: {'xml2json': function(p, options) {return xmlparser.parse(p, options)}},
 			path: path,
+			validator: validator,
 			stringSimilarity: stringSimilarity
 		},
 		out: {
@@ -543,7 +546,7 @@ function createSandbox(node) {
 			value:"",
 			setter:null,
 			error: null,
-			say: function(ch, msg) {console.log('say: ' + msg)},
+			//say: function(ch, msg) {console.log('say: ' + msg)},
 			console:console,
 			error_marker: 'AAAA_error:'
 		}

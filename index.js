@@ -152,6 +152,7 @@ router.get('/api/v2/projects/:id', async function (ctx) {
 router.post('/api/v2/projects', async function (ctx) {
 	var project = await GP.createEmptyProject(ctx.request.body.title, ctx.request.body.description);
 	var collection = await GP.createCollection(ctx.request.body.collection, project._id);
+	project.collection = collection
 	ctx.body = project;
 });
 
