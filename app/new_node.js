@@ -105,7 +105,6 @@ class Node {
 			if(/^out_/.test(key)) this.source.schema[this.source.params[key]] = [];
 		}
 
-		console.log(this.source)
 		var result = await global.db.collection('gp_nodes').insert(this.source);
 
 		// increase node counter for node directory naming
@@ -176,7 +175,6 @@ class Node {
 		if(this.source.type != 'source') {
 			var del_keys = {};
 			for(var key in this.source.params) {
-				console.log(key)
 				if(/^out_/.test(key) && this.source.params[key] && this.source.params[key] !== "") {
 					del_keys[this.source.params[key]] = "";
 				}
@@ -184,7 +182,6 @@ class Node {
 			if(Object.keys(del_keys).length !== 0) {
 				var query = {};
 				query["$unset"] = del_keys;
-				console.log(query)
 				await global.db.collection(this.collection).update({}, query, {'multi': true});
 			}
 		}
@@ -273,7 +270,6 @@ class Node {
 
 	getPublicIndex(ctx) {
 		var source = path.join(this.source.project_dir, 'public', 'index.html')
-		console.log(source)
 		const fs = require('fs-extra');
 		const src = fs.createReadStream(source);
 		ctx.response.set("content-type", "text/html");
@@ -283,7 +279,6 @@ class Node {
 	getPublicFile(ctx) {
 		const fs = require('fs-extra');
 		var source = path.join(this.source.project_dir, 'public')
-		console.log(source)
 		if(ctx.params.dir === 'js') {
 			source = path.join(source, 'js', ctx.params.file);
 			ctx.response.set("content-type", "application/x-javascript");
@@ -340,7 +335,6 @@ class Node {
 		if(this.source.nodeid === 'process_script' && settings.js) {
 			var js = path.join(this.source.project_dir, 'process.js')
 			await fs.writeFile(js, settings.js);
-			console.log("saving process.js")
 		}
 
 	}
@@ -405,16 +399,6 @@ class Node {
 			} catch(e) {
 				error(e)
 				throw(new Error('Init script error ' + e ))
-			}
-		}
-
-		// if there is a doc_id in settings, then fetch that document and attach to node
-		if(this.settings.doc_id) {
-			var doc = await global.db[this.collection].findOne({_id:mongoist.ObjectId(this.settings.doc_id)});
-			if(doc) {
-				this.sandbox.context.doc = doc;
-			} else {
-				throw("Document not found: " + this.settings.doc_id)
 			}
 		}
 

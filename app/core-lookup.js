@@ -1,4 +1,5 @@
 const vm 		= require("vm");
+var mongoist 	= require("mongoist")
 var mongo 		= require('./cores/mongo.js');
 var web 		= require('./cores/web.js');
 const GP 		= require("../config/const.js");
@@ -41,8 +42,10 @@ exports.lookup = {
 // loop through documents
 async function queryLoop(node, core) {
 
-	//var bulk = global.db[node.collection].initializeOrderedBulkOp();
-    const cursor = global.db[node.collection].findAsCursor({});
+	var query = {}
+	var doc_id = node.settings.doc_id || '';
+	if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)}; // single run
+    const cursor = global.db[node.collection].findAsCursor(query);
 	while(await cursor.hasNext()) {
 		var doc = await cursor.next();
 		node.sandbox.context.doc = doc;

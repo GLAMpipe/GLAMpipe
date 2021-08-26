@@ -353,6 +353,11 @@ router.put('/api/v2/nodes/:id/scripts/:script', async function (ctx) {
 	ctx.body = result;
 });
 
+router.put('/api/v2/nodes/:id/scripts/:script/revert', async function (ctx) {
+	var result = await GP.revertNodeScript(ctx.params.id, ctx.params.script);
+	ctx.body = result;
+});
+
 /* ***********************************************************************
  * 							DATA
  * ***********************************************************************

@@ -6,7 +6,7 @@
 	"nodePath": "nodes",
 	"dataPath": "",
 	"public": true,
-	"devmode": true,
+	"devmode": false,
 	"GP":"__gp",
 
 	"proxy": {

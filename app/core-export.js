@@ -1,9 +1,10 @@
 var debug 			= require('debug')('GLAMpipe');
 var error 			= require('debug')('ERROR');
 var axios 			= require('axios');
+var mongoist 		= require("mongoist")
 const axiosCookieJarSupport = require('axios-cookiejar-support').default
 const tough			= require('tough-cookie');
-const vm 		= require("vm");
+const vm 			= require("vm");
 var web 			= require('./cores/web.js');
 const GP 			= require("../config/const.js");
 
@@ -61,18 +62,14 @@ async function exportLoop(core, node) {
 		debug('No credentials given, no login')
 	}
 
-	// if there is a doc already, then this is single run
-	if(node.sandbox.context.doc) {
-		await doCore(core, node)
+	var query = {}
+	var doc_id = node.settings.doc_id || '';
+	if(doc_id) query = {"_id": mongoist.ObjectId(doc_id)}; // single run
 
-
-	// otherwise loop through all documents
-	} else {
-		const cursor = global.db[node.collection].findAsCursor({});
-		while(await cursor.hasNext()) {
-			node.sandbox.context.doc = await cursor.next();
-			await doCore(core, node);
-		}
+	const cursor = global.db[node.collection].findAsCursor(query);
+	while(await cursor.hasNext()) {
+		node.sandbox.context.doc = await cursor.next();
+		await doCore(core, node);
 	}
 }
 

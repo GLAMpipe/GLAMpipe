@@ -23,8 +23,8 @@ var workers 		= null;
 
 class GLAMpipe {
 	constructor(config) {
-		console.log('pam')
-		}
+		console.log('GLAMpipe constructor called...')
+	}
 
 
 	async loadConfig(config) {
@@ -451,6 +451,35 @@ class GLAMpipe {
 	}
 
 
+	async editNodeScript(node_uuid, scriptname, script) {
+		try {
+			var update = {}
+			update['scripts.' + scriptname] = script.js
+			collection.updateDoc('gp_nodes', node_uuid, update)
+		} catch(e) {
+			throw('Script editing failed')
+		}
+	}
+
+	async revertNodeScript(node_uuid, scriptname) {
+
+		try {
+			var current = await this.getDocByQuery('gp_nodes', {'_id': mongoist.ObjectId(node_uuid)});
+			var node = new Node();
+			await node.loadFromRepository(current.nodeid);
+			if(node.source.scripts[scriptname]) {
+				await this.editNodeScript(node_uuid, scriptname, {js:node.source.scripts[scriptname]})
+				return node.source.scripts[scriptname]
+			} else {
+				error(`Could not find node ${current.nodeid}`)
+				throw('Revert failed!')
+			}
+		} catch(e) {
+			error(`Reverting script ${scriptname} failed!`, e);
+			throw(e);
+		}
+	}
+
 	async getNodeSettingsTemplate(nodeid) {
 		var xml2json = require("fast-xml-parser")
 		var node = await this.getDocByQuery('gp_repository', {'nodeid': nodeid});
@@ -463,14 +492,6 @@ class GLAMpipe {
 			createSettingsTemplate(setting, "textarea", template)
 		}
 		return template;
-	}
-
-	async editNodeScript(node_uuid, scriptname, script) {
-		try {
-			collection.updateDoc('gp_nodes', node_uuid, {"scripts.process":"out.value='koira'"})
-		} catch(e) {
-			throw('Script editing failed')
-		}
 	}
 
 /* ***********************************************************************
