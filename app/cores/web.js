@@ -38,7 +38,37 @@ exports.sendJSON = async function (node) {
 	}
 }
 
+exports.uploadFile = async function (node) {
+	const fs = require("fs")
+	const FormData = require('form-data');
 
+	var f = node.settings.in_file
+	var fileStream = fs.createReadStream('/home/arihayri/Documents/Cybertext/cybertext.hum.jyu.fi/pdf/' + node.sandbox.core.upload);
+	const form = new FormData();
+
+	form.append('largeFile', fileStream);
+	node.sandbox.core.options.data = form
+	//node.sandbox.core.options.contentType = 'multipart/form-data'
+	node.sandbox.core.options.config = { headers: form.getHeaders() };
+	node.sandbox.core.options.processData = false
+
+	// pass cookies if needed
+	if(node.sandbox.core.login.jar) {
+		node.sandbox.core.options.jar = node.sandbox.core.login.jar
+		node.sandbox.core.options.withCredentials = true
+	}
+	//const contentLength = await formData.getLength();
+
+	try {
+		//node.sandbox.core.options.headers = form.getHeaders()
+		var result = await axios(node.sandbox.core.options)
+		console.log('upload done')
+		console.log(result.status)
+	} catch(e) {
+		console.log('not working')
+		console.log(e)
+	}
+}
 
 exports.getAndSaveFile = async function(node) {
 	// download file
@@ -56,16 +86,6 @@ exports.getAndSaveFile = async function(node) {
 }
 
 exports.getJSON = async function (node) {
-
-	const cookieJar = new tough.CookieJar();
-	if(node.sandbox.core.login) {
-		node.sandbox.core.login.jar = cookieJar
-		node.sandbox.core.login.withCredentials = true
-		debug("Logging in: " + node.sandbox.core.login.url)
-		await axios(node.sandbox.core.login);
-	} else {
-		debug('No credentials given, no login')
-	}
 
 	debug("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
 	// remove previous entries by this node

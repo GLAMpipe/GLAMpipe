@@ -28,11 +28,11 @@ start_mongo:
 stop_mongo:
 	docker stop glampipe_mongo
 
-build_glampipe:
+build:
 	docker build -t artturimatias/glampipe_rw .
 
 
-start_glampipe:
+start:
 	docker run -it --rm --network=glampipe_net --name glampipe_rw \
 		-v $(VOLUME):/glampipe-data \
 		--mount type=bind,source="$(PWD)"/nodes,target=/src/app/nodes \

@@ -10,14 +10,14 @@ exports.lookup = {
 
 	'collection': {
 		'mongoquery': async function(node) {
-			await queryLoop(node, mongo.query);
+			await documentLoop(node, mongo.query);
 		},
 
 		'field_array': async function(node) {
 			// get all lookup keys and values to be copied based on query created by init.js
 			var collection = node.sandbox.context.node.params.required_source_collection;
 			node.sandbox.core.data = await global.db[collection].find(node.sandbox.core.options.query, node.sandbox.core.options.options);
-			await queryLoop(node)
+			await documentLoop(node)
 		}
 	},
 	'web': {
@@ -40,7 +40,7 @@ exports.lookup = {
 
 
 // loop through documents
-async function queryLoop(node, core) {
+async function documentLoop(node, core) {
 
 	var query = {}
 	var doc_id = node.settings.doc_id || '';

@@ -68,6 +68,19 @@ exports.source = {
 		}
 	},
 
+
+// DIRECTORY
+	"directory": {
+		"scan": async function(node) {
+			try {
+				var directory = require('./cores/directory.js');
+				await directory.scan(node)
+			} catch(e) {
+				console.log(e);
+			}
+		}
+	},
+
 // COLLECTION
 	"collection": {
 		"select": async function(node) {

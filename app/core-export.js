@@ -16,7 +16,7 @@ exports.export = {
 	'web': {
 		'JSON': async function(node) {
 			try {
-				await exportLoop(web.sendJSON, node);
+				await documentLoop(web.sendJSON, node);
 			} catch(e) {
 				error(e)
 				throw(e)
@@ -24,7 +24,15 @@ exports.export = {
 		},
 		'request': async function(node) {
 			try {
-				await exportLoop(web.sendJSON, node);
+				await documentLoop(web.sendJSON, node);
+			} catch(e) {
+				error(e)
+				throw(e)
+			}
+		},
+		'upload': async function(node) {
+			try {
+				await documentLoop(web.uploadFile, node);
 			} catch(e) {
 				error(e)
 				throw(e)
@@ -43,7 +51,7 @@ exports.export = {
 
 
 
-async function exportLoop(core, node) {
+async function documentLoop(core, node) {
 
 	// login once for export
 	const cookieJar = new tough.CookieJar();
@@ -57,7 +65,6 @@ async function exportLoop(core, node) {
 		} catch(e) {
 			debug(e)
 		}
-
 	} else {
 		debug('No credentials given, no login')
 	}
@@ -69,14 +76,22 @@ async function exportLoop(core, node) {
 	const cursor = global.db[node.collection].findAsCursor(query);
 	while(await cursor.hasNext()) {
 		node.sandbox.context.doc = await cursor.next();
-		await doCore(core, node);
+		console.log('Doing core..')
+		try {
+			await doCore(core, node);
+		} catch(e) {
+			console.log(e)
+		}
 	}
 }
 
 async function doCore(core, node) {
 	try {
+		// OPTIONS.JS - create options for web request
+		if (node.scripts.options) node.scripts.options.runInContext(node.sandbox);
 		await core(node);
 		node.scripts.process.runInContext(node.sandbox);
+
 		if(node.sandbox.out.setter) {
 			await global.db[node.collection].update({ '_id': node.sandbox.context.doc._id },{
 				'$set': node.sandbox.out.setter

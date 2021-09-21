@@ -2,7 +2,7 @@ const util 		= require('util');
 var pdfUtil		= require('pdf-to-text');
 
 exports.toText_test = async function (node, file) {
-	
+
 	const fs = require("fs-extra");
 	const path = require("path");
 
@@ -21,3 +21,10 @@ exports.toText_test = async function (node, file) {
 	});
 }
 
+exports.ocr = async function (node, file) {
+	console.log('pdf.ocr')
+}
+
+exports.toImages = async function (node, file) {
+	console.log('pdf.toImages')
+}
