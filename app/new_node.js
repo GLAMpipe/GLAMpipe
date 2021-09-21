@@ -327,9 +327,13 @@ class Node {
 		await this.updateSourceKey('settings', settings_copy);
 
 		// write to file
-		var fs = require("fs-extra")
-		var file = path.join(this.source.project_dir, 'settings.json')
-		await fs.writeFile(file, JSON.stringify(settings_copy, null, 4));
+		try {
+			var fs = require("fs-extra")
+			var file = path.join(this.source.project_dir, 'settings.json')
+			await fs.writeFile(file, JSON.stringify(settings_copy, null, 4));
+		} catch(e) {
+			console.log('settings.json not written ' + e)
+		}
 
 		// save the script of script node
 		if(this.source.nodeid === 'process_script' && settings.js) {

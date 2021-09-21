@@ -33,12 +33,12 @@ build:
 
 
 start:
-	docker run -it --rm --network=glampipe_net --name glampipe_rw \
-		-v $(VOLUME):/glampipe-data \
+	docker run -d --network=glampipe_net --name glampipe_rw \
 		--mount type=bind,source="$(PWD)"/nodes,target=/src/app/nodes \
-		-p 3333:3333 \
+		--mount type=bind,source="$(PWD)"/glampipe-data,target=/glampipe-data \
+		-p 3000:3000 \
 		-e DOCKER=1 \
-		 artturimatias/glampipe_rw 
+		 artturimatias/glampipe_rw
 
 start_glampipe_dev:
 	docker run -it --rm --network=glampipe_net --name glampipe_rw \

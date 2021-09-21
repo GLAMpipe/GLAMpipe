@@ -1,11 +1,25 @@
+# Build image
 FROM node:lts-alpine
 
-WORKDIR /src/app
 
-# Bundle app source
-COPY ./node_modules ./node_modules/
-COPY . /src/app/
+# Create app directory
+WORKDIR /usr/src/app/
 
+# Copy package.json and shrinkwrap if present
+COPY *.json ./
 
-EXPOSE 3000
+# Add packages needed to build native dependencies
+RUN apk add --no-cache \
+    git \
+    python \
+    py-pip \
+    build-base \
+    libc6-compat
+
+# Install modules
+RUN npm install --quiet
+
+# Copy over the application code so we can run lint, tests, etc.
+COPY . ./
+
 CMD [ "node", "index.js" ]
