@@ -1,7 +1,6 @@
 
 IMAGES := $(shell docker images -f "dangling=true" -q)
 CONTAINERS := $(shell docker ps -a -q -f status=exited)
-VOLUME := glampipe-data-rw
 
 
 clean:
@@ -11,16 +10,8 @@ clean:
 create_network:
 	docker network create --driver bridge glampipe_net
 
-create_volume:
-	docker volume create glampipe-data-rw
-
 build_mongo:
-	docker run -d --network=glampipe_net --name=glampipe_mongo mongo:3.6
-
-start:
-	docker start glampipe_mongo
-	timeout 5
-	make start_glampipe
+	docker run -d --network=glampipe_net -v mongo-data:/data/db --name=glampipe_mongo mongo:4.2
 
 start_mongo:
 	docker start glampipe_mongo
@@ -29,26 +20,23 @@ stop_mongo:
 	docker stop glampipe_mongo
 
 build:
-	docker build -t artturimatias/glampipe_rw .
-
+	docker build -t artturimatias/glampipe .
 
 start:
-	docker run -d --network=glampipe_net --name glampipe_rw \
+	docker run -d --network=glampipe_net --name glampipe \
 		--mount type=bind,source="$(PWD)"/nodes,target=/src/app/nodes \
-		--mount type=bind,source="$(PWD)"/glampipe-data,target=/glampipe-data \
+		--mount type=bind,source="$(PWD)"/glampipe-data,target=/src/app/glampipe-data \
 		-p 3000:3000 \
 		-e DOCKER=1 \
-		 artturimatias/glampipe_rw
+		 artturimatias/glampipe
 
-start_glampipe_dev:
-	docker run -it --rm --network=glampipe_net --name glampipe_rw \
-		-v $(DVOLUME):/glampipe-data \
-		--mount type=bind,source="$(PWD)"/nodes,target=/src/app/nodes \
-		-p 3333:3333 \
-		-e DOCKER=1 \
-		 artturimatias/glampipe_rw:dev bash
+stop:
+	docker stop glampipe
 
+restart:
+	docker stop glampipe
+	docker rm glampipe
+	$(MAKE) start
 
-
-
-.PHONY: clean build_mongo start_mongo build_glampipe start_glampipe
+bash:
+	docker exec -it glampipe /bin/sh

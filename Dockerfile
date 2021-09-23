@@ -1,14 +1,6 @@
 # Build image
 FROM node:lts-alpine
 
-
-# Create app directory
-WORKDIR /usr/src/app/
-
-# Copy package.json and shrinkwrap if present
-COPY *.json ./
-
-# Add packages needed to build native dependencies
 RUN apk add --no-cache \
     git \
     python \
@@ -16,10 +8,12 @@ RUN apk add --no-cache \
     build-base \
     libc6-compat
 
-# Install modules
-RUN npm install --quiet
-
-# Copy over the application code so we can run lint, tests, etc.
-COPY . ./
+RUN mkdir -p /src/app
+RUN chown node:node /src/app
+USER node
+WORKDIR /src/app/
+COPY --chown=node *.json ./
+RUN npm install
+COPY --chown=node . ./
 
 CMD [ "node", "index.js" ]

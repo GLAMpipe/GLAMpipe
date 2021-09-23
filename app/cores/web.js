@@ -88,6 +88,7 @@ exports.getAndSaveFile = async function(node) {
 exports.getJSON = async function (node) {
 
 	debug("REQUEST:", node.sandbox.core.options.method + " -> " + node.sandbox.core.options.url);
+	const cookieJar = new tough.CookieJar();
 	// remove previous entries by this node
 	var query = {};
 	query[constants.source] = node.uuid;

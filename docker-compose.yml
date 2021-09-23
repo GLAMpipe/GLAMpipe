@@ -4,7 +4,7 @@ version: '2'
 services:
   glampipe:
     build: .
-    image: artturimatias/glampipe:21.06
+    image: artturimatias/glampipe:latest
     container_name: glampipe
     networks:
      - gp
@@ -14,13 +14,16 @@ services:
     environment:
      - DOCKER=1
     volumes:
-     - glampipe-data:/glampipe-data
+     - ./glampipe-data:/urs/app/glampipe-data
+     - ./nodes:/urs/app/nodes
     depends_on:
       - "glampipe_mongo"
 
   glampipe_mongo:
     image: mongo:4.2
     container_name: glampipe_mongo
+    volumes:
+     - mongo-data:/data/db
     networks:
     - gp
 
@@ -29,4 +32,4 @@ networks:
     driver: bridge
 
 volumes:
-  glampipe-data:
+    mongo-data:
