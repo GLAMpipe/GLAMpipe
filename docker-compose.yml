@@ -14,8 +14,8 @@ services:
     environment:
      - DOCKER=1
     volumes:
-     - ./glampipe-data:/urs/app/glampipe-data
-     - ./nodes:/urs/app/nodes
+     - ./glampipe-data:/src/app/glampipe-data
+     - ./nodes:/src/app/nodes
     depends_on:
       - "glampipe_mongo"
 
