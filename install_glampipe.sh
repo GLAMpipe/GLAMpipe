@@ -1,5 +1,5 @@
 #!/bin/sh
-DIR="/glampipe-data"
+DIR="/data"
 DATA_DIR=$PWD$DIR
 MONGO_VERSION=3.6
 DOCKERHUB="glampipe/glampipe:latest"
@@ -20,12 +20,12 @@ fi
 
 echo "Creating data volume..."
 
-if docker volume ls|grep -wq 'glampipe-data'
+if docker volume ls|grep -wq 'data'
 	then
 		echo "Data volume exists, good..."
 	else
 		echo "Creating data volume..."
-		docker volume create glampipe-data
+		docker volume create data
 fi
 
 echo "Setting up Mongo database..."
@@ -54,10 +54,10 @@ if docker ps|grep -wq 'glampipe'
 		echo "GLAMpipe is running... I'll re-create the container"
 		docker stop glampipe
 		docker rm glampipe
-		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 $DOCKERHUB bash -c 'node glampipe'
+		docker run -d --network=glampipe_net --name glampipe -v data:/data -p 3000:3000 -e DOCKER=1 $DOCKERHUB bash -c 'node glampipe'
 		docker logs -f glampipe
 	else
 		docker rm glampipe
-		docker run -d --network=glampipe_net --name glampipe -v glampipe-data:/glampipe-data -p 3000:3000 -e DOCKER=1 $DOCKERHUB bash -c 'node glampipe'
+		docker run -d --network=glampipe_net --name glampipe -v data:/data -p 3000:3000 -e DOCKER=1 $DOCKERHUB bash -c 'node glampipe'
 		docker logs -f glampipe
 fi

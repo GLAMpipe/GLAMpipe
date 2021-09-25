@@ -33,7 +33,7 @@ class GLAMpipe {
 			var content = await fs.readFile("config/config.json", 'utf-8');
 			var json = JSON.parse(content);
 			global.config = json;
-			global.config.dataPath = path.join(json.dataPath, "glampipe-data");
+			global.config.dataPath = path.join(json.dataPath, "data");
 			global.config.projectsPath = path.join(json.dataPath, "projects");
 			global.config.file = "config.js (your local settings)";
 			console.log(global.config.database)
@@ -43,7 +43,7 @@ class GLAMpipe {
 				var content = await fs.readFile("config/config.json.example", 'utf-8');
 				var json = JSON.parse(content);
 				global.config = json;
-				global.config.dataPath = path.join(json.dataPath, "glampipe-data");
+				global.config.dataPath = path.join(json.dataPath, "data");
 				global.config.projectsPath = path.join(json.dataPath, "projects");
 				global.config.file = "config.js.example (default settings)";
 
@@ -63,11 +63,11 @@ class GLAMpipe {
 		global.db = mongo.init(global.config.database)
 
 		// create data directory structure
-		try{ await fs.mkdir("glampipe-data") } catch(e) { debug("glampipe-data exists" ) }
-		try{ await fs.mkdir("glampipe-data/projects") } catch(e) { debug("glampipe-data exists/projects" ) }
-		try{ await fs.mkdir("glampipe-data/logs") } catch(e) { debug("glampipe-data exists/logs" ) }
-		try{ await fs.mkdir("glampipe-data/tmp") } catch(e) { debug("glampipe-data exists/tmp" ) }
-		try{ await fs.mkdir("glampipe-data/uploads") } catch(e) { debug("glampipe-data exists/uploads" ) }
+		try{ await fs.mkdir("data") } catch(e) { debug("data exists" ) }
+		try{ await fs.mkdir("data/projects") } catch(e) { debug("data exists/projects" ) }
+		try{ await fs.mkdir("data/logs") } catch(e) { debug("data exists/logs" ) }
+		try{ await fs.mkdir("data/tmp") } catch(e) { debug("data exists/tmp" ) }
+		try{ await fs.mkdir("data/uploads") } catch(e) { debug("data exists/uploads" ) }
 
 		// load nodes from files
 		await this.loadNodes();

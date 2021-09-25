@@ -20,7 +20,7 @@ global.register = {};
 
 //Set up body parsing middleware
 app.use(bodyParser({
-   formidable:{uploadDir: './glampipe-data/uploads', maxFileSize: 20000 * 1024 * 1024},
+   formidable:{uploadDir: './data/uploads', maxFileSize: 20000 * 1024 * 1024},
    multipart: true,
    urlencoded: true
 }));

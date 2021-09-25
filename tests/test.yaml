@@ -6,7 +6,7 @@
         - group: "config"
         - url: "/api/v2/config"
         - validators:
-                - compare: {jsonpath_mini: "dataPath", comparator: "eq", expected: 'glampipe-data'}
+                - compare: {jsonpath_mini: "dataPath", comparator: "eq", expected: 'data'}
 
 - test:
         - name: "Project creation"

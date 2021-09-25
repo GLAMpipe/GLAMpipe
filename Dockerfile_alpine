@@ -13,8 +13,8 @@ COPY . /src/app/
 
 # set permissions
 RUN chown -R glampipe:glampipe /src/app && \
-    mkdir /glampipe-data && \
-    chown -R glampipe:glampipe /glampipe-data
+    mkdir /data && \
+    chown -R glampipe:glampipe /data
 
 # change user
 USER glampipe

@@ -25,7 +25,7 @@ build:
 start:
 	docker run -d --network=glampipe_net --name glampipe \
 		--mount type=bind,source="$(PWD)"/nodes,target=/src/app/nodes \
-		--mount type=bind,source="$(PWD)"/glampipe-data,target=/src/app/glampipe-data \
+		--mount type=bind,source="$(PWD)"/data,target=/src/app/data \
 		-p 3000:3000 \
 		-e DOCKER=1 \
 		 artturimatias/glampipe
