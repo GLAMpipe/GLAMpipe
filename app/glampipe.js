@@ -36,7 +36,6 @@ class GLAMpipe {
 			global.config.dataPath = path.join(json.dataPath, "data");
 			global.config.projectsPath = path.join(json.dataPath, "projects");
 			global.config.file = "config.js (your local settings)";
-			console.log(global.config.database)
 
 		} catch(e) {
 			try {

@@ -22,7 +22,7 @@ exports.search = function (params) {
 			}
 		}
 	}
-console.log(cleanParams)
+
 	var query = {}
 	if(params.mongoquery) {
 		try {
