@@ -1,5 +1,4 @@
 .*
-glampipe-data/*
 glampipe
 config/config.json
 node_modules
