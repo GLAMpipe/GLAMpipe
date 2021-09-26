@@ -512,6 +512,7 @@ GP.init(server).then(function() {
 	app
 	.use(router.routes())
 	.use(router.allowedMethods());
+	server.listen(global.config.port);
 	console.log('\n*********************************************')
 	console.log(`Using database: ${global.config.database}`)
 	console.log(`GLAMpipe on address: http://localhost:${global.config.port}`)
