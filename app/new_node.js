@@ -134,10 +134,11 @@ class Node {
 					await fs.writeFile(file, this.source.scripts[nodefile]);
 				}
 				for(var uifile in this.source.views) {
-					var file = path.join(this.source.project_dir, uifile) + '.html'
-					await fs.writeFile(file, this.source.views[uifile]);
+					if(['params', 'settings'].includes(uifile)) {
+						var file = path.join(this.source.project_dir, uifile) + '.html'
+						await fs.writeFile(file, this.source.views[uifile]);
+					}
 				}
-
 				var file = path.join(this.source.project_dir, 'params.json')
 				await fs.writeFile(file, JSON.stringify(this.source.params));
 
