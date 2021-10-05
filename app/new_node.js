@@ -338,8 +338,12 @@ class Node {
 
 		// save the script of script node
 		if(this.source.nodeid === 'process_script' && settings.js) {
-			var js = path.join(this.source.project_dir, 'process.js')
-			await fs.writeFile(js, settings.js);
+			try {
+				var js = path.join(this.source.project_dir, 'process.js')
+				await fs.writeFile(js, settings.js);
+			} catch(e) {
+				console.log('process.js not written ' + e)
+			}
 		}
 
 	}
