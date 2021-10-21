@@ -225,7 +225,12 @@ exports.lookupJSON = async function (node) {
 
 		// write outcome
 		var setter = {}
-		setter[node.source.params.out_field] = node.sandbox.out.value;
+		if(node.sandbox.out.setter) {
+			setter = node.sandbox.out.setter
+		} else {
+			if(node.source.params.out_field)
+				setter[node.source.params.out_field] = node.sandbox.out.value;
+		}
 		debug(setter)
 		await global.db[node.collection].update({ '_id': doc._id }, {
 			'$set': setter
