@@ -478,14 +478,9 @@ router.put('/api/v2/proxy/', function (ctx) {
  * ***********************************************************************
 */
 
-router.get('/views/:node/:dir/:file', async function (ctx) {
+router.get('/api/v2/nodes/:node/:dir/:file', async function (ctx) {
 	var node = await GP.getNode(ctx.params.node);
 	node.getPublicFile(ctx);
-});
-
-router.get('/views/:node', async function (ctx) {
-	var node = await GP.getNode(ctx.params.node);
-	node.getPublicIndex(ctx);
 });
 
 
