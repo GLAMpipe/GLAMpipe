@@ -20,11 +20,3 @@ exports.toText_test = async function (node, file) {
 		});
 	});
 }
-
-exports.ocr = async function (node, file) {
-	console.log('pdf.ocr')
-}
-
-exports.toImages = async function (node, file) {
-	console.log('pdf.toImages')
-}

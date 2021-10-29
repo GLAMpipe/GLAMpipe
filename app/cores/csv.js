@@ -44,9 +44,12 @@ exports.read = async function (node) {
 	var parser = parse(settings)
 
 	var input = fs.createReadStream(file, {encoding: node.settings.encoding});
-	var options = { dbURL: db_string, collection: node.collection }
+	var options = { dbURL: db_string, collection: node.collection , batchSize:100}
+	if(node.settings.sample && parseInt(node.settings.sample) > 0) options.batchSize = 1
 	var streamToMongoDB = require('stream-to-mongo-db').streamToMongoDB;
 	const mongoStream = streamToMongoDB(options);
+
+	var parser_count = 0
 
 	parser.on('data', function(c){
 		count++;
@@ -56,22 +59,24 @@ exports.read = async function (node) {
 		}
 	});
 
-	parser.on('finish', function(){
-		console.log("CSV PARSER: " + count + " items parsed!");
-	})
-
 	parser.on('error', function(e){
 		console.log(e.message);
 		node.sandbox.out.say("error", e.message);
 	})
 
 	var transformer = transform(function(record){
-		node.sandbox.context.data = record;
+		//node.sandbox.context.data = record;
+		node.sandbox.context.data = record
 		node.scripts.process.runInContext(node.sandbox)
 		if(node.sandbox.out.value) {
 			node.sandbox.out.value[constants.source] = node.uuid; // mark source node uuid to records
 		}
+		console.log(node.sandbox.out.value)
 		return node.sandbox.out.value;
+	})
+
+	transformer.on('finish', function(){
+		console.log("CSV PARSER: " + count + " items parsed!");
 	})
 
 	// promise
@@ -81,6 +86,24 @@ exports.read = async function (node) {
 			schema.createSchema(node.collection);  // we don't wait schema creation
 			resolve();
 		})
+		/*
+		mongoStream.on('close', () => {
+			console.log('mongostream CLOSE');
+			input.destroy()
+			node.scripts.finish.runInContext(node.sandbox);
+			schema.createSchema(node.collection);  // we don't wait schema creation
+			input.destroy()
+			resolve();
+		})
+
+		parser.on('close', function(e){
+			console.log('parser CLOSE');
+			mongoStream.destroy()
+		})
+		transformer.on('close', function(e){
+			console.log('Transformer CLOSE');
+			parser.destroy()
+		})*/
 		parser.on('error', reject);
 	});
 

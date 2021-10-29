@@ -85,12 +85,13 @@ exports.source = {
 	"collection": {
 		"select": async function(node) {
 			try {
-				await collection.copyToCollection();
+				var collection = require('./cores/collection.js');
+				await collection.selectToCollection(node);
 			} catch(e) {
 				console.log(e)
 			}
 			console.log(node.settings)
-			console.log(node.source.params.source_collection)
+			console.log(node.source.params.required_source_collection)
 			//var r = await db[node.source.params.source_collection].find();
 			//console.log(r)
 		}
