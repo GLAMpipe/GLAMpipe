@@ -10,7 +10,6 @@ exports.init = async function (collection_name) {
 
 	var schema = {collection: collection_name, keys:[]}
 	await global.db["gp_schemas"].insert(schema);
-	console.log("SCHEMA: schema created for "+collection_name);
 
 }
 

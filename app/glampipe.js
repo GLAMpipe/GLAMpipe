@@ -554,7 +554,6 @@ class GLAMpipe {
 		return await collection.getDoc(collection_name, id);
 	}
 
-
 	async getDocCount(collection_name, query) {
 		return await collection.getCount(collection_name, query);
 	}
