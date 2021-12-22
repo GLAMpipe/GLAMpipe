@@ -578,6 +578,70 @@ class GLAMpipe {
 
 	async getCollectionNodes(collection_name) {
 		var nodes = await db.collection("gp_nodes").find({'collection': collection_name});
+		// dynamically create "input" and "output" fields data
+		for(var node of nodes) {
+			node.output = []
+			node.input = []
+			if(node.params.out_field) node.output = [node.params.out_field]
+			if(node.params.in_field) node.input = [node.params.in_field]
+			// search fields stath start wiht "in_" from settings
+			if(node.settings) {
+				for(var key of Object.keys(node.settings)) {
+					if(key.startsWith('in_')) node.input.push(node.settings[key])
+				}
+				if(node.settings.js) {
+					var regex = /context\.doc\[['|"](.*?)['|"]/gm
+					let m
+					var lines = node.settings.js.split('\n')
+					for(var str of lines) {
+						while ((m = regex.exec(str)) !== null) {
+						    // This is necessary to avoid infinite loops with zero-width matches
+						    if (m.index === regex.lastIndex) {
+						        regex.lastIndex++;
+						    }
+							console.log(m.length)
+							console.log(m[1])
+							if(m.length == 2) node.input.push(m[1])
+
+						}
+						//console.log('line:' + m)
+						//console.log('match:' + match)
+					}
+				}
+			}
+		}
+
+		for(var n of nodes) {
+			if(!n.settings) n.settings = {}
+			if(!n.settings.last_run) n.settings.last_run = 0 // make sure that nodes have settings and last_run set
+		}
+
+		// sort by last_run, latest run LAST
+		nodes  = nodes.sort((a, b) => {
+			if(!a.settings && !b.settings) return 0
+			if(!a.settings) return -1
+			if(!b.settings) return -1
+			if ( a.settings.last_run < b.settings.last_run ){
+				return -1;
+			}
+			if ( a.settings.last_run > b.settings.last_run ){
+				return 1;
+			}
+			return 0;
+		});
+
+		// check validness
+		var inputs2 = []
+		var nodes2 = nodes.map((x) => x);
+		for(var n of nodes) {
+			for(var field of n.input) {
+				for(var n2 of nodes2) {
+					if(n2.output.includes(field)) n.error = 'old input'
+				}
+			}
+			nodes2.shift()
+		}
+
 		return nodes;
 	}
 

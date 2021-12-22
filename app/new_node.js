@@ -289,7 +289,7 @@ class Node {
 		} else if(ctx.params.dir === 'fonts') {
 			source = path.join(source, 'fonts', ctx.params.file);
 			ctx.response.set("content-type", "application/octet-stream");
-		} 
+		}
 
 		const src = fs.createReadStream(source);
 		ctx.body = src;
@@ -325,6 +325,7 @@ class Node {
 		if(!settings_copy)
 			return;
 
+		settings_copy.last_run = Date.now()
 		await this.updateSourceKey('settings', settings_copy);
 
 		// write to file
