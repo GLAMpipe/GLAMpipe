@@ -6,12 +6,15 @@ var GP = new GLAMpipe();
 
 (async () => {
 	await GP.init()
-	//FINNAImport();
-	DSpaceImport2()
+	//await FINNAImport();
+	//DSpaceImport2()
+	var project = await GP.createEmptyProject('GP-Library test');
+	var collection 	= await GP.createCollection('My Data', project._id);
+	GP.closeDB();
 })()
 
 
-FINNAImport();
+//FINNAImport();
 //DSpaceImport2();
 //Projects();
 
@@ -20,7 +23,7 @@ FINNAImport();
 
 
 async function FINNAImport() {
-	
+
 	var FinnaProject = {
 		project_title: "Finna import",
 		collection_title: "my finna",
@@ -37,37 +40,37 @@ async function FINNAImport() {
 			}
 		]
 	}
-	
+
 	var project = await GP.createProject(FinnaProject);
-	
+
 	GP.closeDB();
 
 
 }
-	
-	
+
+
 async function DSpaceImport2() {
-	
+
 	var project_title = "eka testi";
 	var collection_title = "my collection";
 	var import_params = {'required_dspace_url': "https://jyx-beta.jyu.fi/rest"}
-	var settings = {		
+	var settings = {
 		'query_field[]': '',
 		'query_op[]': 'equals',
-		'query_val[]': '', 
+		'query_val[]': '',
 		'mode': 'clear',
 		'update_key': 'uuid',
 		'limit': '',
 		'query': '?collSel[]=5789e99c-23ee-4bb1-bf29-8bdaef9a250a&expand=parentCollection,metadata,bitstreams'
-	}	
-	
-	
+	}
+
+
 	var project 	= await GP.createEmptyProject(project_title);
 	var collection 	= await GP.createCollectionNode(collection_title, project);
 	var importNode 	= await GP.createNode("source_web_dspace", import_params, collection.collection, project);
-	
+
 	//await importNode.run(settings);
-	
+
 	GP.closeDB();
 }
 
@@ -78,7 +81,7 @@ async function Projects() {
 	var projects = await GP.getProjects();
 	console.log(projects);
 	GP.closeDB();
-	
+
 }
 
 
@@ -95,20 +98,20 @@ async function DSpaceImport() {
 		var import_params = {'required_dspace_url': "https://jyx-beta.jyu.fi/rest"}
 		var importNode = await createNode("source_web_dspace", import_params, collection_name, p);
 
-		var settings = {		
+		var settings = {
 			'query_field[]': '',
 			'query_op[]': 'equals',
-			'query_val[]': '', 
+			'query_val[]': '',
 			'mode': 'clear',
 			'update_key': 'uuid',
 			'limit': '',
 			'query': '?collSel[]=5789e99c-23ee-4bb1-bf29-8bdaef9a250a&expand=parentCollection,metadata,bitstreams'
 		}
 		await importNode.run(settings);
-		
+
 	} catch(e) {
 		console.log(e);
-	} 
+	}
 }
 
 
@@ -136,32 +139,32 @@ async function createNode(nodeid, params, collection, project) {
 
 			var node = new Node();
 			await node.loadFromRepository(nodeid);
-			
+
 			//importNode.setCollection(collectionname);
 			await node.setParams(params)
 			await node.add2Project(project._id, collection);
 			return node;
-	
+
 }
 
 async function importData(collectionName) {
-	
+
 		//console.log('reading stats')
 		//var stats = await collection.stats();
 		//console.log('*********************')
 		//console.log(stats);
-		
+
 		// collection node
 		try {
 			var collectionNode = new Node();
 			await collectionNode.loadFromRepository("collection_basic");
 			await collectionNode.setParams({"title": "My collection"})
 			await collectionNode.add2Project(p._id, collectionname);
-			
+
 			var collection = db.collection(collectionname);
 			//await collection.insert({'field1': 'testi1','author': 'Matti Kyllönen'});
-			
-			
+
+
 			console.log("inserting data...");
 			//for(var i = 0; i < 500 ; i++) {
 				//console.log()
@@ -173,45 +176,45 @@ async function importData(collectionName) {
 			// DSpace import node
 			var importNode = new Node();
 			await importNode.loadFromRepository("source_web_dspace");
-			
+
 			//importNode.setCollection(collectionname);
 			await importNode.setParams({'required_dspace_url': "https://jyx-beta.jyu.fi/rest"})
 			await importNode.add2Project(p._id, collectionname);
 
-			var settings = {		
+			var settings = {
 				'query_field[]': '',
 				'query_op[]': 'equals',
-				'query_val[]': '', 
+				'query_val[]': '',
 				'mode': 'clear',
 				'update_key': 'uuid',
 				'limit': '',
 				'query': '?collSel[]=5789e99c-23ee-4bb1-bf29-8bdaef9a250a&expand=parentCollection,metadata,bitstreams'
 			}
 			await importNode.run(settings);
-		
-		
+
+
 		/*
 			// replace node
 			var replaceNode = new Node();
 			await replaceNode.loadFromRepository("process_field_replace");
-			
+
 			//replaceNode.setCollection(collectionname);
 			await replaceNode.setParams({"in_field": "author", "out_field": "replaced"})
 			await replaceNode.add2Project(p._id, collectionname);
-			
+
 			var settings = {"search": ['0'], "replace": ["koira"]}
 			await replaceNode.run(settings);
 			*/
 			//replaceNode.setParams();
 			//console.log(replaceNode.getParams());
 			//replaceNode.setSettings();
-			
+
 			//await project.remove(p._id)
 
 		} catch(e) {
 			console.log(e)
 		}
-	
+
 }
 
 
@@ -227,9 +230,6 @@ function promise_test() {
 	return new Promise(function (resolve, reject) {
 		collection.find({}, function (err, result) {
 			resolve();
-		}); 
+		});
 	})
 }
-
-
-
