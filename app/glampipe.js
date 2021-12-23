@@ -607,17 +607,15 @@ class GLAMpipe {
 							if(m.length == 2) node.input.push(m[1])
 
 						}
-						//console.log('line:' + m)
-						//console.log('match:' + match)
 					}
 				}
 			}
 		}
 
-		for(var n of nodes) {
-			if(!n.settings) n.settings = {}
-			if(!n.settings.last_run) n.settings.last_run = 0 // make sure that nodes have settings and last_run set
-		}
+	//	for(var n of nodes) {
+	//		if(!n.settings) n.settings = {}
+	//		if(!n.settings.last_run) n.settings.last_run = 1 // make sure that nodes have settings and last_run set
+	//	}
 
 		// sort by last_run, latest run LAST
 		nodes  = nodes.sort((a, b) => {
