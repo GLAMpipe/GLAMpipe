@@ -78,6 +78,22 @@ class Node {
 
 	}
 
+	async checkOutputFields(params, collection_name) {
+		var col_schema = await schema.getSchema(collection_name)
+		for(var field in params) {
+			if(field.startsWith('out_') && col_schema.keys.includes(params[field]))
+			 	throw(`Field "${params[field]}" exists`)
+			if(field.startsWith('out_') && params[field] == '')
+				 throw(`Output field must have value`)
+		}
+	}
+
+	async checkInputFields(params) {
+		for(var field in params) {
+			if(field.startsWith('in_') && params[field] == '')
+				 throw(`Input field must have value`)
+		}
+	}
 
 	async add2Project(project_id, collection_name) {
 		// check that project exists

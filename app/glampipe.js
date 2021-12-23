@@ -36,6 +36,7 @@ class GLAMpipe {
 			global.config.dataPath = path.join(json.dataPath, "data");
 			global.config.projectsPath = path.join(json.dataPath, "projects");
 			global.config.file = "config.js (your local settings)";
+			global.config.version = version.version
 
 		} catch(e) {
 			try {
@@ -398,6 +399,8 @@ class GLAMpipe {
 				project_id = project_id.toString()
 			}
 			var node = new Node();
+			await node.checkOutputFields(params, collection_name)
+			await node.checkInputFields(params)
 			await node.loadFromRepository(nodeid);
 			await node.setParams(params);
 			await node.add2Project(project_id, collection_name);
