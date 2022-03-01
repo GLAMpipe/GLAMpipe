@@ -35,7 +35,7 @@
     "pdf-to-text": "0.0.7",
     "read-chunk": "^2.0.0",
     "recursive-readdir": "^2.2.2",
-    "requestretry": "^1.13.0",
+    "requestretry": "^7.0.0",
     "rmrf": "^2.0.4",
     "socket.io": "^2.4.1",
     "stream-splitter": "^0.3.2",
