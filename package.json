@@ -13,7 +13,7 @@
     "debug": "^4.3.2",
     "encoding": "^0.1.13",
     "fast-xml-parser": "^3.19.0",
-    "file-type": "^15.0.0",
+    "file-type": "^16.5.4",
     "fs-extra": "^9.1.0",
     "fs-sync": "^1.0.6",
     "he": "^1.2.0",
