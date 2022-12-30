@@ -55,7 +55,7 @@
     "chai": "^3.5.0",
     "chai-http": "^4.3.0",
     "eval": "^0.1.6",
-    "mocha": "^7.2.0"
+    "mocha": "^10.2.0"
   },
   "scripts": {
     "start": "node glampipe.js",
