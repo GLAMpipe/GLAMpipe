@@ -1,3 +1,6 @@
+***This repository is not maintained anymore.***
+If you are searching tools for data cleaning, try OpenRefine.
+
 # GLAMpipe
 Visual tool for viewing, editing, downloading and uploading of GLAM-based data. 
 
